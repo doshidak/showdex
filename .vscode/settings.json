@@ -1,0 +1,25 @@
+{
+  "editor.tabSize": 2,
+
+  "emmet.showExpandedAbbreviation": "never",
+
+  "eslint.debug": false,
+  "eslint.packageManager": "yarn",
+
+  "explorer.incrementalNaming": "smart",
+
+  "git.allowForcePush": true,
+  "git.autoStash": true,
+
+  "files.associations": { ".env": "dotenv" },
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+
+  "javascript.preferences.quoteStyle": "single",
+  "javascript.validate.enable": false,
+
+  "js/ts.implicitProjectConfig.checkJs": true,
+
+  "typescript.preferences.quoteStyle": "single",
+}

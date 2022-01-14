@@ -1,0 +1,10 @@
+{
+  "recommendations": {
+    "clinyong.vscode-css-modules",
+    "dbaeumer.vscode-eslint",
+    "gencer.html-slim-scss-css-class-completion",
+    "knisterpeter.vscode-commitizen",
+    "mikestead.dotenv",
+    "mrmlnc.vscode-scss",
+  },
+}
