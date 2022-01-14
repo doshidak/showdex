@@ -1,0 +1,32 @@
+{
+  "name": "showdex",
+  "version": "0.1.0",
+  "description": "Pokémon Showdown Chrome extension to help you drop them dracos",
+  "author": "Keith Choison <keith.c@live.co.kr>",
+  "repository": "git@github.com:doshidak/showdex.git",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=14.17.0",
+    "yarn": ">=1.22.0"
+  },
+  "scripts": {
+    "commit": "node ./node_modules/cz-customizable/standalone.js",
+    "cm": "yarn commit",
+    "cz": "yarn commit"
+  },
+  "config": {
+    "cz-customizable": {
+      "config": ".cz-config.js"
+    },
+    "ghooks": {
+      "commit-msg": "npx cz-customizable-ghooks $2"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "cz-customizable": "^6.3.0",
+    "cz-customizable-ghooks": "^2.0.0",
+    "ghooks": "^2.0.4"
+  }
+}
