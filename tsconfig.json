@@ -14,7 +14,7 @@
     "moduleResolution": "Node",
     "noEmit": true,
     "paths": {
-      "@showdex/*": ["src/*"],
+      "@showdex/*": ["./src/*"],
     },
     "removeComments": true,
     "resolveJsonModule": true,
@@ -34,5 +34,6 @@
     "cache",
     "dist",
     "node_modules",
+    "scripts",
   ],
 }
