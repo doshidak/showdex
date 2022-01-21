@@ -9,6 +9,22 @@
  */
 
 declare namespace Showdown {
+  type BattleSubscriptionState =
+    | 'playing'
+    | 'paused'
+    | 'turn'
+    | 'atqueueend'
+    | 'callback'
+    | 'ended'
+    | 'error';
+
+  type BattleGameType =
+    | 'singles'
+    | 'doubles'
+    | 'triples'
+    | 'multi'
+    | 'freeforall';
+
   interface Battle {
     scene: BattleSceneStub;
 
@@ -52,7 +68,7 @@ declare namespace Showdown {
      */
     activeMoveIsSpread?: string;
 
-    subscription?: (state: 'playing' | 'paused' | 'turn' | 'atqueueend' | 'callback' | 'ended' | 'error') => void;
+    subscription?: (state: BattleSubscriptionState) => void;
 
     /**
      * @default false
@@ -185,7 +201,7 @@ declare namespace Showdown {
     /**
      * @default Dex
      */
-    dex: ModdedDex;
+    dex: Dex;
 
     /**
      * @default 0
@@ -205,7 +221,7 @@ declare namespace Showdown {
     /**
      * @default 'singles'
      */
-    gameType: 'singles' | 'doubles' | 'triples' | 'multi' | 'freeforall';
+    gameType: BattleGameType;
 
     /**
      * @default false
@@ -274,6 +290,10 @@ declare namespace Showdown {
      */
     paused: boolean;
 
+    // Showdex custom injected properties
+    prevSubscription?: Battle['subscription'];
+    subscriptionDirty?: boolean;
+
     (options?: {
       $frame?: JQuery<HTMLElement>;
       $logFrame?: JQuery<HTMLElement>;
@@ -283,7 +303,7 @@ declare namespace Showdown {
       isReplay?: boolean;
       debug?: boolean;
       subscription?: Battle['subscription'];
-    }): this;
+    }): Battle;
 
     subscribe(listener: Battle['subscription']): void;
 
@@ -359,12 +379,12 @@ declare namespace Showdown {
     runMinor<
       TArgs extends Args,
       TKwArgs extends KwArgs,
-      >(args: TArgs, kwArgs: TKwArgs, nextArgs?: Args, nextKwargs?: TKwArgs): void;
+    >(args: TArgs, kwArgs: TKwArgs, nextArgs?: Args, nextKwargs?: TKwArgs): void;
 
     runMajor<
       TArgs extends Args,
       TKwArgs extends KwArgs,
-      >(args: TArgs, kwArgs: TKwArgs, preempt?: boolean): void;
+    >(args: TArgs, kwArgs: TKwArgs, preempt?: boolean): void;
 
     run(str: string, preempt?: boolean): void;
 

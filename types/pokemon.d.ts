@@ -26,10 +26,12 @@ declare namespace Showdown {
   type HPColor = 'r' | 'y' | 'g';
 
   type PokemonStatus =
-    | StatusName
+    // | StatusName
+    | 'brn'
+    | 'par'
+    | 'slp'
     | 'tox'
-    | '???'
-    | '';
+    | '???';
 
   type PokemonRole =
     | 'Physical'
@@ -257,7 +259,7 @@ declare namespace Showdown {
     /**
      * @default ''
      */
-    status: PokemonStatus;
+    status: PokemonStatus | '';
 
     /**
      * @default 0
