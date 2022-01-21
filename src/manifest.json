@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+
+  "name": "Showdex",
+  "version": "<-- auto-filled; do not edit -->",
+  "description": "<-- auto-filled; do not edit -->",
+
+  "permissions": [
+    "activeTab"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["https://play.pokemonshowdown.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "matches": ["https://play.pokemonshowdown.com/*"],
+      "resources": [
+        "main.js"
+      ]
+    }
+  ],
+
+  "icons": {
+    "16": "showdex-16.png",
+    "24": "showdex-24.png",
+    "32": "showdex-32.png",
+    "48": "showdex-48.png",
+    "128": "showdex-128.png"
+  },
+
+  "action": {
+    "default_title": "Showdex",
+    "default_icon": {
+      "16": "showdex-16.png",
+      "24": "showdex-24.png",
+      "32": "showdex-32.png",
+      "48": "showdex-48.png",
+      "128": "showdex-128.png"
+    }
+  }
+}
