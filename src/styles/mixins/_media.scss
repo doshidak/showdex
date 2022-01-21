@@ -1,0 +1,52 @@
+////
+/// @group media
+/// @author Keith Choison
+////
+
+@mixin for-min-width($width) {
+  @media screen and (min-width: $width) {
+    @content;
+  }
+}
+
+@mixin for-max-width($width) {
+  @media screen and (max-width: $width) {
+    @content;
+  }
+}
+
+@mixin for-bounded-width($min-width, $max-width) {
+  @media screen and (min-width: $min-width) and (max-width: $max-width) {
+    @content;
+  }
+}
+
+@mixin for-min-height($height) {
+  @media screen and (min-height: $height) {
+    @content;
+  }
+}
+
+@mixin for-max-height($height) {
+  @media screen and (max-height: $height) {
+    @content;
+  }
+}
+
+@mixin for-bounded-height($min-height, $max-height) {
+  @media screen and (min-height: $min-height) and (max-height: $max-height) {
+    @content;
+  }
+}
+
+@mixin for-min-size($width, $height) {
+  @media screen and (min-width: $width) and (min-height: $height) {
+    @content;
+  }
+}
+
+@mixin for-max-size($width, $height) {
+  @media screen and (max-width: $width) and (max-height: $height) {
+    @content;
+  }
+}

@@ -1,0 +1,46 @@
+////
+/// @group list
+/// @author Keith Choison
+////
+
+@use 'sass:list';
+
+////
+/// Reverses a list.
+/// @author Hugo Giraudel
+/// @access public
+/// @param {list} $list
+/// @param {bool} $recursive [false] - If true, any nested lists will also be reversed.
+/// @return {list} The reversed list.
+////
+@function reverse($list, $recursive: false) {
+  $result: ();
+
+  @for $i from length($list) * -1 through -1 {
+    @if type-of(nth($list, abs($i))) == list and $recursive {
+      $result: append($result, reverse(nth($list, abs($i)), $recursive));
+    } @else {
+      $result: append($result, nth($list, abs($i)));
+    }
+  }
+
+  @return $result;
+}
+
+////
+/// Determines if a value is in a list.
+/// @access public
+/// @param {list} $list
+/// @param {*} $value
+/// @return {bool} Returns true if `$value` is a member of `$list`.
+////
+@function includes($list, $value) {
+  @if not $list or type-of($list) != list or not $value {
+    @return false;
+  }
+
+  // NOTE: Sass indices are 1-indexed (i.e., starts with 1 instead of 0)
+  $index: list.index($list, $value);
+
+  @return type-of($index) == number and $index > 0;
+}

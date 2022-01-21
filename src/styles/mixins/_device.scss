@@ -1,0 +1,83 @@
+////
+/// @group device
+/// @author Keith Choison
+////
+
+@use 'config/breakpoints';
+@use 'media';
+
+// generic devices
+
+@mixin for-mobile-small($width: breakpoints.$mobile-small) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+@mixin for-mobile($width: breakpoints.$mobile) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+@mixin for-tablet($width: breakpoints.$tablet) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+@mixin for-tablet-lg($width: breakpoints.$tablet-lg) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+@mixin for-laptop($width: breakpoints.$laptop) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+@mixin for-laptop-lg($width: breakpoints.$laptop-lg) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+@mixin for-desktop($width: breakpoints.$desktop) {
+  @include media.for-max-width($width) {
+    @content;
+  }
+}
+
+// specific devices
+
+@mixin for-iphone-se { // + iPhone 5 & iPod Touch
+  @include media.for-max-size($width: 325px, $height: 575px) {
+    @content;
+  }
+}
+
+@mixin for-iphone-8 { // + iPhone 6 & iPhone 7
+  @include media.for-max-size($width: 380px, $height: 675px) {
+    @content;
+  }
+}
+
+@mixin for-iphone-8p { // + iPhone 6+ & iPhone 7+
+  @include media.for-max-size($width: 420px, $height: 745px) {
+    @content;
+  }
+}
+
+@mixin for-iphone-x {
+  @include media.for-max-size($width: 380px, $height: 800px) {
+    @content;
+  }
+}
+
+@mixin for-ipad-pro {
+  @media screen and (max-width: breakpoints.$laptop) and (min-height: breakpoints.$tablet-lg) {
+    @content;
+  }
+}

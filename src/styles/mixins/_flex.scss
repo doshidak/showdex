@@ -1,0 +1,76 @@
+////
+/// @group flex
+/// @author Keith Choison
+////
+
+@mixin -flex($direction: null, $justify: null, $align: null, $inline: false) {
+  display: if($inline, inline-flex, flex);
+
+  @if $direction and $direction != row {
+    flex-direction: $direction;
+  }
+
+  @if $justify and $justify != flex-start {
+    justify-content: $justify;
+  }
+
+  @if $align and $align != stretch {
+    align-items: $align;
+  }
+
+  @if $inline {
+    vertical-align: middle;
+  }
+}
+
+// rows
+
+@mixin row($justify: null, $align: null, $inline: false) {
+  @include -flex(row, $justify, $align, $inline);
+}
+
+@mixin row-start($inline: false) {
+  @include row(flex-start, center, $inline);
+}
+
+@mixin row-center($inline: false) {
+  @include row(center, center, $inline);
+}
+
+@mixin row-end($inline: false) {
+  @include row(flex-end, center, $inline);
+}
+
+@mixin row-between($inline: false) {
+  @include row(space-between, center, $inline);
+}
+
+@mixin row-around($inline: false) {
+  @include row(space-around, center, $inline);
+}
+
+// columns
+
+@mixin column($justify: null, $align: null, $inline: false) {
+  @include -flex(column, $justify, $align, $inline);
+}
+
+@mixin column-start($inline: false) {
+  @include column(flex-start, center, $inline);
+}
+
+@mixin column-center($inline: false) {
+  @include column(center, center, $inline);
+}
+
+@mixin column-end($inline: false) {
+  @include column(flex-end, center, $inline);
+}
+
+@mixin column-between($inline: false) {
+  @include column(space-between, center, $inline);
+}
+
+@mixin column-around($inline: false) {
+  @include column(space-around, center, $inline);
+}

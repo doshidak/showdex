@@ -1,0 +1,128 @@
+////
+/// @group position
+/// @author Keith Choison
+////
+
+@use 'sass:meta';
+
+@mixin -position($position: null, $top: null, $right: null, $bottom: null, $left: null) {
+  @if $position {
+    position: $position;
+  }
+
+  @if $top {
+    top: $top;
+  }
+
+  @if $right {
+    right: $right;
+  }
+
+  @if $bottom {
+    bottom: $bottom;
+  }
+
+  @if $left {
+    left: $left;
+  }
+}
+
+// translate
+
+@mixin translate($x: null, $y: null) {
+  @if meta.type-of($x) == 'number' or meta.type-of($y) == 'number' {
+    @if $x and $x != 0 and $y and $y != 0 {
+      transform: translate($x, $y);
+    } @else if $x and $x != 0 {
+      transform: translateX($x);
+    } @else if $y and $y != 0 {
+      transform: translateY($y);
+    }
+  }
+}
+
+// absolute
+
+@mixin absolute($top: null, $right: null, $bottom: null, $left: null) {
+  @include -position(absolute, $top, $right, $bottom, $left);
+}
+
+@mixin absolute-fill($top: 0, $right: 0, $bottom: 0, $left: 0) {
+  @include absolute($top, $right, $bottom, $left);
+}
+
+@mixin absolute-axis($vertical, $horizontal) {
+  @include absolute($vertical, $horizontal, $vertical, $horizontal);
+}
+
+@mixin absolute-square($margin) {
+  @include absolute($margin, $margin, $margin, $margin);
+}
+
+@mixin absolute-anchor($x: null, $y: null, $x-prop: left, $y-prop: top) {
+  $translate-x: if($x, -$x, null);
+  $translate-y: if($y, -$y, null);
+
+  @if $translate-x and unit($translate-x) != '%' { // e.g., px
+    $translate-x: 0;
+  }
+
+  @if $translate-y and unit($translate-y) != '%' {
+    $translate-y: 0;
+  }
+
+  @include absolute(
+    $top: if($y-prop == top, $y, null),
+    $right: if($x-prop == right, $x, null),
+    $bottom: if($y-prop == bottom, $y, null),
+    $left: if($x-prop == left, $x, null),
+  );
+  @include translate($translate-x, $translate-y);
+}
+
+@mixin absolute-center($top: 50%, $left: 50%) {
+  @include absolute-anchor($x: $left, $y: $top);
+}
+
+// fixed
+
+@mixin fixed($top: null, $right: null, $bottom: null, $left: null) {
+  @include -position(fixed, $top, $right, $bottom, $left);
+}
+
+@mixin fixed-fill($top: 0, $right: 0, $bottom: 0, $left: 0) {
+  @include fixed($top, $right, $bottom, $left);
+}
+
+@mixin fixed-axis($vertical, $horizontal) {
+  @include fixed($vertical, $horizontal, $vertical, $horizontal);
+}
+
+@mixin fixed-square($margin) {
+  @include fixed($margin, $margin, $margin, $margin);
+}
+
+@mixin fixed-anchor($x: null, $y: null, $x-prop: left, $y-prop: top) {
+  $translate-x: if($x, -$x, null);
+  $translate-y: if($y, -$y, null);
+
+  @if $translate-x and unit($translate-x) != '%' {
+    $translate-x: 0;
+  }
+
+  @if $translate-y and unit($translate-y) != '%' {
+    $translate-y: 0;
+  }
+
+  @include fixed(
+    $top: if($y-prop == top, $y, null),
+    $right: if($x-prop == right, $x, null),
+    $bottom: if($y-prop == bottom, $y, null),
+    $left: if($x-prop == left, $x, null),
+  );
+  @include translate($translate-x, $translate-y);
+}
+
+@mixin fixed-center($top: 50%, $left: 50%) {
+  @include fixed-anchor($x: $left, $y: $top);
+}

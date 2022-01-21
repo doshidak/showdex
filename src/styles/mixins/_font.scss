@@ -1,0 +1,29 @@
+////
+/// @group font
+/// @author Keith Choison
+////
+
+@use 'sass:meta';
+@use 'sass:map';
+
+@mixin apply($font, $overrides: null) {
+  $props: (
+    'font-family',
+    'font-stretch',
+    'font-weight',
+  );
+
+  @each $prop in $props {
+    $value: map.get($font, $prop);
+
+    @if meta.type-of($overrides) == map and map.has-key($overrides, $prop) {
+      $value: map.get($overrides, $prop);
+    }
+
+    @if $value {
+      #{$prop}: $value;
+    } @else {
+      @warn 'Font prop `#{$prop}` was ignored because no value was set.';
+    }
+  }
+}

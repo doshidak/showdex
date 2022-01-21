@@ -1,0 +1,82 @@
+////
+/// @group color
+/// @author Keith Choison
+////
+
+@use 'sass:color';
+@use 'sass:math';
+@use 'sass:list';
+
+////
+/// Slightly lighten a color.
+/// @access public
+/// @param {color} $color - Color to tint.
+/// @param {number} $percentage - Percentage of `$color` in returned color.
+/// @return {color}
+////
+@function tint($color, $percentage) {
+  @if not $percentage or $percentage <= 0 {
+    @return $color;
+  }
+
+  @return mix(white, $color, $percentage);
+}
+
+////
+/// Slightly darken a color.
+/// @access public
+/// @param {color} $color - Color to shade.
+/// @param {number} $percentage - Percentage of `$color` in returned color.
+/// @return {color}
+////
+@function shade($color, $percentage) {
+  @if not $percentage or $percentage <= 0 {
+    @return $color;
+  }
+
+  @return mix(black, $color, $percentage);
+}
+
+////
+/// Sets the alpha (opacity) of a color.
+/// @access public
+/// @param {color} $color
+/// @param {number} $alpha
+/// @return {color}
+////
+@function alpha($color, $alpha: 0) {
+  @if not $alpha or $alpha >= 1 {
+    @return $color;
+  }
+
+  @return transparentize($color, math.clamp(0, 1 - $alpha, 1));
+}
+
+////
+/// Returns the color variant by modifying the color's saturation and lightness.
+/// @access public
+/// @param {color} $base - Color to modify.
+/// @param {number} $saturation [-5%] - Percentage of color saturation adjustment.
+/// @param {number} $lightness [10%] - Percentage of color lightness adjustment.
+/// @return {color}
+////
+@function variant($base, $saturation: -5%, $lightness: 10%) {
+  $s-amount: $saturation;
+  $l-amount: $lightness;
+
+  @if not unitless($s-amount) and unit($s-amount) == '%' {
+    @if $s-amount < -100% or $s-amount > 100% {
+      $s-sign: math.div($s-amount, $s-amount);
+      $s-amount: $s-sign * 100%;
+    }
+  }
+
+  @if not unitless($l-amount) and unit($l-amount) == '%' {
+    @if $l-amount < -100% or $l-amount > 100% {
+      $l-sign: math.div($l-amount, $l-amount);
+      $l-amount: $l-sign * 100%;
+    }
+  }
+
+  @return color.adjust($base, $saturation: $s-amount, $lightness: $l-amount);
+}
