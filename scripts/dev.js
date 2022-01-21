@@ -21,17 +21,20 @@ const hostname = process.env.DEV_HOSTNAME;
 const port = process.env.DEV_PORT;
 const hot = process.env.DEV_HMR_ENABLED === 'true';
 
-if ('hmrExclude' in (config.chromeExtension || {}) && Array.isArray(config.chromeExtension.hmrExclude)) {
-  const { hmrExclude } = config.chromeExtension;
+const hasExclusions = 'hmrExclude' in (config.chromeExtension || {});
 
-  hmrExclude.filter((key) => !hmrExclude.includes(key)).forEach((key) => {
-    config.entry[key] = [
-      'webpack/hot/dev-server',
-      `webpack-dev-server/client?hostname=${hostname}&port=${port}&hot=${hot}`,
-      ...config.entry[key],
-    ];
-  });
+Object.keys(config.entry).forEach((key) => {
+  if (hasExclusions && config.chromeExtension.hmrExclude.includes(key)) {
+    return;
+  }
 
+  config.entry[key] = [
+    'webpack/hot/dev-server',
+    `webpack-dev-server/client?hostname=${hostname}&port=${port}&hot=${hot}&protocol=ws`,
+  ].concat(config.entry[key]);
+});
+
+if (hasExclusions) {
   delete config.chromeExtension;
 }
 
@@ -66,4 +69,15 @@ if ('accept' in (module.hot || {}) && typeof module.hot.accept === 'function') {
   module.hot.accept();
 }
 
-(async () => { await server.start(); })();
+(async () => {
+  console.log(
+    'Starting',
+    process.env.npm_package_name,
+    `v${process.env.npm_package_version}`,
+    'development server...',
+  );
+
+  await server.start();
+
+  console.log('Development server started at', `${hostname}:${port}`);
+})();
