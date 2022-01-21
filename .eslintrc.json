@@ -46,6 +46,7 @@
   },
 
   "rules": {
+    "@typescript-eslint/lines-between-class-members": 0,
     "@typescript-eslint/naming-convention": [
       "error",
       {
@@ -65,8 +66,11 @@
         "trailingUnderscore": "allowSingleOrDouble"
       }
     ],
+    "@typescript-eslint/no-unused-vars": 1,
     "camelcase": 0,
     "consistent-return": 0,
+    "function-call-argument-newline": 0,
+    "function-paren-newline": 0,
     "guard-for-in": 0,
     "import/default": 0,
     "import/named": 0,
@@ -100,6 +104,12 @@
     "prefer-template": 0,
     "quotes": 0,
     "react/forbid-foreign-prop-types": 0,
+    "react/function-component-definition": [
+      2,
+      {
+        "namedComponents": "arrow-function"
+      }
+    ],
     "react/jsx-no-duplicate-props": [
       2,
       {
