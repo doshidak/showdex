@@ -25,26 +25,49 @@ const env = Object.entries({
 });
 
 const entry = {
-  main: path.join(__dirname, 'src/index.js'),
-  content: path.join(__dirname, 'src/content.js'),
-  background: path.join(__dirname, 'src/background.js'),
+  main: path.join(__dirname, 'src/main.ts'),
+  content: path.join(__dirname, 'src/content.ts'),
+  background: path.join(__dirname, 'src/background.ts'),
   // devtools: path.join(__dirname, 'src/devtools.js'),
   // panel: path.join(__dirname, 'src/panel.js'),
 };
 
 const output = {
-  path: path.join(__dirname, 'build'),
-  filename: '[name].bundle.js',
+  path: path.join(__dirname, isDevelopment ? 'build' : 'dist'),
+  filename: '[name].js',
   clean: true, // clean output.path dir before emitting files
   publicPath: '/',
 };
 
 const moduleRules = [{
-  test: /\.(?:css|scss)$/i,
+  test: /\.s?css$/i,
   use: [
     'style-loader',
-    'css-loader',
-    { loader: 'sass-loader', options: { sourceMap: true } },
+    {
+      loader: 'css-loader',
+      options: {
+        sourceMap: true,
+        modules: {
+          localIdentName: '[name]-[local]--[hash:base64:5]',
+        },
+      },
+    },
+    {
+      loader: 'postcss-loader',
+      options: {
+        sourceMap: true,
+        postcssOptions: {
+          path: path.join(__dirname, 'postcss.config.js'),
+        },
+      },
+    },
+    {
+      loader: 'sass-loader',
+      options: {
+        sourceMap: true,
+        sassOptions: { includePaths: [path.join(__dirname, 'src/styles')] },
+      },
+    },
   ],
 }, {
   test: /\.(?:jpe?g|jpf|png|gifv?|webp|svg|eot|otf|ttf|woff2?)$/i,
@@ -58,8 +81,8 @@ const moduleRules = [{
 }, {
   test: /\.(?:jsx?|tsx?)$/i,
   use: [
-    'source-map-loader',
     'babel-loader',
+    'source-map-loader',
   ],
   exclude: /node_modules/,
 }];
@@ -67,6 +90,7 @@ const moduleRules = [{
 const resolve = {
   alias: {
     'react-dom': '@hot-loader/react-dom',
+    '@showdex': path.join(__dirname, 'src'),
   },
 
   extensions: [
@@ -87,7 +111,7 @@ const copyPatterns = [{
     description: process.env.npm_package_description,
   })),
 }, {
-  from: 'src/assets/*',
+  from: 'src/assets/**/*',
   to: '[name][ext]',
   filter: (path) => moduleRules[1].test.test(path),
 }];
@@ -114,7 +138,9 @@ const config = {
   },
 };
 
-if (!isDevelopment) {
+if (isDevelopment) {
+  config.devtool = 'cheap-module-source-map';
+} else {
   config.optimization = {
     minimize: true,
     minimizer: [new TerserPlugin({ extractComments: false })],
