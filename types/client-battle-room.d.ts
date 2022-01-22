@@ -48,6 +48,8 @@ declare class BattleRoom implements Showdown.ClientRoom {
   public $options: JQuery<HTMLDivElement>;
   public $userList: JQuery<HTMLDivElement>;
 
+  public tooltips: Showdown.BattleTooltips;
+
   public notificationClass = '';
   public notifications = {};
   public subtleNotification = false;

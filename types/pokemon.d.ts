@@ -28,6 +28,7 @@ declare namespace Showdown {
   type PokemonStatus =
     // | StatusName
     | 'brn'
+    | 'frz'
     | 'par'
     | 'slp'
     | 'tox'
@@ -254,7 +255,7 @@ declare namespace Showdown {
     /**
      * @default {}
      */
-    boosts: { [stat: keyof PokemonStats]: number; };
+    boosts: { [stat in keyof PokemonStats]: number; };
 
     /**
      * @default ''

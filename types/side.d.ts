@@ -22,7 +22,7 @@ declare namespace Showdown {
      */
     id: string;
 
-    sideid: string;
+    sideid: SideID;
     n: number;
     isFar: boolean;
     foe?: Side;
@@ -79,7 +79,7 @@ declare namespace Showdown {
     sideConditions: {
       [id: string]: [
         effectName: string,
-        levels: string,
+        levels: number,
         minDuration: number,
         maxDuration: number,
       ];

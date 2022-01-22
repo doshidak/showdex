@@ -11,7 +11,7 @@
 declare namespace Showdown {
   interface BattleRequestSideInfo {
     name: string;
-    id: 'p1' | 'p2' | 'p3' | 'p4';
+    id: SideID;
     pokemon: ServerPokemon[];
   }
 
