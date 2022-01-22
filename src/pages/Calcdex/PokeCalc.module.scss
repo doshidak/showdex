@@ -1,0 +1,100 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.row {
+  @include flex.row-between;
+}
+
+.hpBar {
+  position: relative;
+  display: inline-block;
+  width: 100px;
+  height: 3px;
+  border-radius: 15px;
+  background-color: color.alpha(colors.$white, 0.15);
+  pointer-events: none;
+
+  .valueBar {
+    @include position.absolute($top: 0, $bottom: 0, $left: 0);
+    display: inline-block;
+    width: 100%;
+    background-color: colors.$blue;
+    border-radius: 15px;
+    @include transition.apply(width, background-color);
+
+    &.red {
+      background-color: colors.$red;
+    }
+
+    &.yellow {
+      background-color: #FF8F00;
+    }
+
+    &.green {
+      background-color: colors.$green;
+    }
+  }
+}
+
+.section {
+  @include spacing.padding($top: 15px);
+}
+
+.small {
+  font-size: 8px;
+}
+
+.statLabel {
+  color: color.alpha(colors.$white, 0.5);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.tableGrid {
+  display: grid;
+  align-items: center;
+}
+
+.tableItem {
+  grid-area: span 1 / span 1;
+  text-align: center;
+  @include transition.apply(color);
+
+  &.left {
+    text-align: left;
+  }
+
+  &.right {
+    text-align: right;
+  }
+
+  &.positive {
+    color: colors.$green;
+  }
+
+  &.negative {
+    color: colors.$red;
+  }
+}
+
+.tableGrid.movesTable {
+  grid-template-columns: minmax(150px, 1.25fr) 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 5px;
+}
+
+.tableGrid.statsTable {
+  grid-template-columns: 1.25fr repeat(6, 1fr);
+  column-gap: 25px;
+  // row-gap: 3px;
+}
+
+/// @todo used by StageCalc.tsx -- refactor the tableGrid stuff into components
+.tableGrid.stageTable {
+  grid-template-columns: 1.25fr 1fr 1fr 1.25fr;
+  column-gap: 15px;
+}

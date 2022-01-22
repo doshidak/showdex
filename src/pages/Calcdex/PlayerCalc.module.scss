@@ -1,0 +1,61 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  width: 100%;
+}
+
+.playerBar {
+  @include flex.row-between;
+  width: 100%;
+}
+
+.username {
+  color: color.alpha(colors.$white, 0.75);
+}
+
+.teamList {
+  @include flex.row($justify: flex-end);
+}
+
+.teamList .picon {
+  position: relative;
+  align-self: center;
+  opacity: 0.5;
+  @include transition.apply(opacity, filter);
+
+  &.active {
+    opacity: 1;
+  }
+
+  &.fainted {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+
+  &:not(:last-of-type) {
+    @include spacing.margin($right: 5px);
+  }
+
+  &::before {
+    content: '';
+    @include position.absolute-anchor($x: -2px, $y: -6px);
+    width: 45px;
+    height: 45px;
+    background-color: color.alpha(color.tint(colors.$blue, 50%), 0.95);
+    border-radius: 45px;
+    mask: radial-gradient(circle, transparent 5%, red);
+    transform: scale(0);
+    @include transition.apply(transform);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  &.active::before {
+    transform: scale(1);
+  }
+}
