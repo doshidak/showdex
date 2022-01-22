@@ -1,0 +1,36 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/spacing';
+
+$status-unknown-color: #424242;
+$status-colors: (
+  brn: #D1A42B,
+  frz: #73CACA,
+  par: #7C317C,
+  slp: #584578,
+  tox: #7C317C,
+);
+
+$label-opacity: 0.75;
+$background-opacity: 0.3;
+
+.container {
+  display: inline-block;
+  width: 24px;
+  @include spacing.padding-xy($y: 1px);
+  font-size: 8px;
+  color: color.alpha(colors.$white, $label-opacity);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
+  background-color: color.alpha($status-unknown-color, $background-opacity);
+  border-radius: 5px;
+  user-select: none;
+  pointer-events: none;
+
+  @each $status, $color in $status-colors {
+    &.#{$status} {
+      background-color: color.alpha($color, $background-opacity);
+    }
+  }
+}

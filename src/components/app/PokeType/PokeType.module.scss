@@ -1,0 +1,49 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/spacing';
+
+$type-unknown-color: #424242;
+$type-colors: (
+  normal: #90905D,
+  fighting: #81201B,
+  flying: #8563EA,
+  poison: #7C317C,
+  ground: #D1A42B,
+  rock: #917E2C,
+  bug: #808D18,
+  ghost: #584578,
+  steel: #9999BC,
+  fire: #DD6510,
+  water: #3A6EEB,
+  grass: #549B31,
+  electric: darken(#FDD835, 15%),
+  psychic: darken(#F62765, 10%),
+  ice: darken(#73CACA, 10%),
+  dragon: #4D09F4,
+  dark: #41332A,
+  fairy: #E76D88,
+);
+
+$label-opacity: 0.75;
+$background-opacity: 0.3;
+
+.container {
+  display: inline-block;
+  width: 36px;
+  @include spacing.padding-xy($y: 1px);
+  font-size: 8px;
+  color: color.alpha(colors.$white, $label-opacity);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
+  background-color: color.alpha($type-unknown-color, $background-opacity);
+  border-radius: 5px;
+  user-select: none;
+  pointer-events: none;
+
+  @each $type, $color in $type-colors {
+    &.#{$type} {
+      background-color: color.alpha($color, $background-opacity);
+    }
+  }
+}
