@@ -14,6 +14,7 @@ const env = Object.entries({
   PACKAGE_NAME: process.env.npm_package_name,
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_URL: process.env.npm_package_homepage,
+  PACKAGE_BUILD_DATE: Date.now(),
 }).reduce((prev, [key, value]) => {
   if (key) {
     prev[`process.env.${key}`] = JSON.stringify(value || '');
@@ -48,7 +49,8 @@ const moduleRules = [{
       options: {
         sourceMap: true,
         modules: {
-          localIdentName: '[name]-[local]--[hash:base64:5]',
+          auto: true, // only files ending in .module.s?css will be treated as CSS modules
+          localIdentName: '[name]-[local]--[hash:base64:5]', // e.g., 'Caldex-module-content--mvN2w'
         },
       },
     },
@@ -57,6 +59,7 @@ const moduleRules = [{
       options: {
         sourceMap: true,
         postcssOptions: {
+          // autoprefixer so we don't ever need to specify CSS prefixes like `-moz-` and `-webkit-`
           path: path.join(__dirname, 'postcss.config.js'),
         },
       },
@@ -65,7 +68,10 @@ const moduleRules = [{
       loader: 'sass-loader',
       options: {
         sourceMap: true,
-        sassOptions: { includePaths: [path.join(__dirname, 'src/styles')] },
+        sassOptions: {
+          // allows for `@use 'mixins/flex';` instead of `@use '../../../styles/mixins/flex';`
+          includePaths: [path.join(__dirname, 'src/styles')],
+        },
       },
     },
   ],
@@ -133,6 +139,7 @@ const config = {
   chromeExtension: {
     hmrExclude: [
       'content',
+      'background',
       // 'devtools',
     ],
   },
