@@ -1,0 +1,350 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$padding-x: 5px;
+$padding-y: 2px;
+
+$background-color: colors.$transparent;
+$background-color-hover: color.alpha(colors.$white, 0.05);
+$background-color-active: color.alpha(colors.$white, 0.1);
+
+$border-radius: 5px;
+
+$value-font-size: 10px;
+$value-color: color.alpha(colors.$white, 0.85);
+$value-color-hover: color.tint(colors.$blue, 15%);
+$value-color-active: colors.$white;
+
+$multi-value-padding-x: 2px;
+$multi-value-padding-y: 1px;
+$multi-value-border-color: color.alpha(colors.$white, 0.15);
+
+$placeholder-color: color.alpha(colors.$white, 0.3);
+$placeholder-color-hover: $value-color-hover;
+$placeholder-color-active: color.alpha(colors.$white, 0.5);
+
+$icon-size: 10px; // used for the close and chevron icons
+$icon-color: color.alpha(colors.$white, 0.3);
+$icon-color-hover: color.alpha(colors.$white, 0.95);
+
+$indicator-separator-width: 1px;
+$indicator-separator-margin-x: 3px;
+// $indicator-separator-color: color.alpha(colors.$white, 0.075);
+$indicator-separator-color: colors.$transparent;
+
+$menu-gutter: 1px;
+$menu-background-color: color.alpha(colors.$black, 0.95);
+$menu-border-color: color.alpha(colors.$white, 0.15);
+
+$option-padding-x: 3px;
+$option-padding-y: 2px;
+$option-color: colors.$white;
+$option-background-color: colors.$transparent;
+$option-background-color-hover: color.alpha(colors.$white, 0.15);
+$option-background-color-focused: color.alpha(colors.$blue, 0.25);
+$option-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
+$option-background-color-selected: color.alpha(colors.$blue, 0.75);
+$option-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
+
+$notice-padding-x: $option-padding-x;
+$notice-padding-y: $option-padding-y;
+$notice-color: color.alpha(colors.$white, 0.5);
+
+.container {
+  position: relative;
+  @include flex.row;
+  background-color: $background-color;
+  border-radius: $border-radius;
+  @include transition.apply(background-color);
+
+  &:hover {
+    background-color: $background-color-hover;
+  }
+
+  &.active {
+    background-color: $background-color-active;
+  }
+
+  &.rtl {
+    direction: rtl;
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+// SelectControl
+
+.control {
+  position: relative;
+  @include flex.row-between;
+  // flex-wrap: wrap;
+  // width: 100%;
+  @include spacing.padding-xy($padding-x, $padding-y);
+  outline: none;
+
+  i:global(.fa) {
+    font-size: $icon-size;
+  }
+}
+
+// SelectValueContainer
+
+.valueContainer {
+  position: relative;
+  @include flex.row($align: center);
+  flex: 1;
+  flex-wrap: wrap;
+  color: $value-color;
+  @include transition.apply(color);
+  cursor: text;
+}
+
+.value {
+  position: relative;
+  // width: 100%;
+
+  // &.single {
+  //   width: 100%;
+  // }
+
+  &.multi {
+    @include flex.row;
+    flex-wrap: wrap;
+  }
+}
+
+// SelectPlaceholder
+
+.placeholder {
+  @include position.absolute-anchor($y: 50%);
+  font-size: $value-font-size;
+  color: $placeholder-color;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  @include transition.apply(color);
+  user-select: none;
+  pointer-events: none;
+
+  .container:not(.active):hover & {
+    color: $placeholder-color-hover;
+  }
+
+  .focused & {
+    color: $placeholder-color-active;
+  }
+}
+
+// SelectInput
+
+.inputContainer {
+  display: inline-grid;
+  // grid-template-columns: 0 max-content;
+  grid-template-columns: 0 1fr;
+  // flex: 1 1 auto;
+
+  &::after {
+    content: attr(data-value) ' ';
+    grid-area: 1 / 2;
+    min-width: 2px;
+    @include spacing.margin-none;
+    @include spacing.padding-none;
+    border: none;
+    outline: none;
+    white-space: nowrap;
+    visibility: hidden;
+  }
+
+  &.disabled {
+    visibility: hidden;
+  }
+}
+
+.input {
+  grid-area: 1 / 2;
+  // width: 100%;
+  min-width: 2px;
+  @include spacing.margin-none;
+  @include spacing.padding-none;
+  @include font.apply(fonts.$mono);
+  font-size: $value-font-size;
+  color: $value-color;
+  background: none;
+  border: none;
+  outline: none;
+  opacity: 1;
+
+  &.hidden {
+    opacity: 0;
+  }
+}
+
+// SelectSingleValue
+
+.singleValue {
+  @include position.absolute-anchor($y: 50%);
+  max-width: 98%;
+  font-size: $value-font-size;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  @include transition.apply(color);
+}
+
+// SelectMultiValue
+
+.mutliValue {
+  @include flex.row-center;
+  @include spacing.margin-xy($multi-value-padding-x, $multi-value-padding-y);
+  font-size: $value-font-size - ($multi-value-padding-y * 2);
+  border: 1px solid $multi-value-border-color;
+}
+
+.valueLabel {
+  @include spacing.padding-xy($multi-value-padding-x, $multi-value-padding-y);
+  font-size: $value-font-size - ($multi-value-padding-y * 2);
+  white-space: nowrap;
+  overflow: hidden;
+
+  &.crop {
+    text-overflow: ellipsis;
+  }
+}
+
+.remove {
+  @include flex.row-center;
+  @include spacing.padding($right: $multi-value-padding-x);
+  color: $icon-color;
+  @include transition.apply(color);
+  cursor: pointer;
+
+  &:hover {
+    color: $icon-color-hover;
+  }
+}
+
+// SelectIndicatorsContainer
+
+.indicatorsContainer {
+  @include flex.row($align: center);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.indicator {
+  display: flex;
+  color: $icon-color;
+  @include transition.apply(color);
+  cursor: pointer;
+
+  &:hover {
+    color: $icon-color-hover;
+  }
+}
+
+// SelectDropdownIndicator
+
+.dropdownIndicator i {
+  @include transition.apply(transform);
+
+  .menuOpen & {
+    transform: rotate(-180deg);
+  }
+}
+
+// SelectIndicatorSeparator
+
+.indicatorSeparator {
+  align-self: stretch;
+  width: $indicator-separator-width;
+  @include spacing.margin-xy($indicator-separator-margin-x);
+  background: $indicator-separator-color;
+}
+
+// SelectMenu
+
+.menu {
+  position: absolute;
+  width: 100%;
+  @include spacing.margin-xy(0, $menu-gutter);
+  border-radius: $border-radius;
+  background-color: $menu-background-color;
+  border: 1px solid $menu-border-color;
+  overflow: hidden;
+  z-index: 1;
+
+  &.placementTop {
+    bottom: 100%;
+  }
+
+  &.placementBottom {
+    top: 100%;
+  }
+}
+
+// SelectMenuList
+
+.menuList {
+  position: relative;
+  overflow-y: auto;
+}
+
+// SelectOption
+
+.option {
+  width: 100%;
+  @include spacing.padding-xy($option-padding-x, $option-padding-y);
+  font-size: $value-font-size;
+  color: $option-color;
+  background-color: $option-background-color;
+  @include transition.apply(background-color);
+  user-select: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $option-background-color-hover;
+  }
+
+  &.focused {
+    background-color: $option-background-color-focused;
+
+    &:hover {
+      background-color: $option-background-color-focused-hover;
+    }
+  }
+
+  &.selected {
+    background-color: $option-background-color-selected;
+
+    &:hover {
+      background-color: $option-background-color-selected-hover;
+    }
+  }
+
+  &:first-of-type {
+    border-radius: $border-radius $border-radius 0 0;
+  }
+
+  &:last-of-type {
+    border-radius: 0 0 $border-radius $border-radius;
+  }
+}
+
+// SelectNotice
+
+.notice {
+  @include spacing.padding-xy($notice-padding-x, $notice-padding-y);
+  font-size: $value-font-size;
+  color: $notice-color;
+  text-align: center;
+  user-select: none;
+}
