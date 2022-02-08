@@ -2,12 +2,13 @@ export const upsizeArray = <T = unknown>(
   array: T[],
   size: number,
   fill?: T,
+  slice?: boolean,
 ): T[] => {
   if (Array.isArray(array) && array.length >= size) {
-    return array;
+    return slice && array.length > size ? array.slice(0, size) : array;
   }
 
-  const upsized = array || [];
+  const upsized = $.extend(true, <T[]> [], array).filter(Boolean);
   const upsizeCount = Math.max(size - upsized.length, 0);
 
   if (upsizeCount > 0) {
