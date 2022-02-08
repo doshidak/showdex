@@ -29,7 +29,7 @@ declare namespace Showdown {
 
     readonly num: number;
     readonly types: ReadonlyArray<TypeName>;
-    readonly abilities: ReadonlyArray<{ 0: string; 1?: string; H?: string; S?: string; }>;
+    readonly abilities: Readonly<{ 0: string; 1?: string; H?: string; S?: string; }>;
     readonly baseStats: Readonly<{ [stat in StatName]: number; }>;
     readonly weightkg: number;
 

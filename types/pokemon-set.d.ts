@@ -19,7 +19,7 @@ declare namespace Showdown {
      */
     name?: string;
 
-    species: string;
+    species?: string;
 
     /**
      * Defaults to no item.
@@ -31,7 +31,7 @@ declare namespace Showdown {
      */
     ability?: string;
 
-    moves: string[];
+    moves?: string[];
 
     /**
      * Defaults to no nature (error in Gen 3+).
@@ -44,10 +44,10 @@ declare namespace Showdown {
     gender?: string;
 
     /** Defaults to flat `252`s (`200`s/`0`s in Let's Go) (error in Gen 3+). */
-    evs?: StatsTable;
+    evs?: Partial<StatsTable>;
 
     /** Defaults to whatever makes sense - flat `31`s unless you have Gyro Ball, etc. */
-    ivs?: StatsTable;
+    ivs?: Partial<StatsTable>;
 
     /** Defaults as you'd expect (`100` normally, `50` in VGC-likes, `5` in LC). */
     level?: number;

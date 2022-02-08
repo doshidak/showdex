@@ -54,6 +54,104 @@ declare namespace Showdown {
     | 'physicalBulk'
     | 'specialBulk';
 
+  type PokemonNature =
+    | 'Adamant'
+    | 'Bashful'
+    | 'Bold'
+    | 'Brave'
+    | 'Calm'
+    | 'Careful'
+    | 'Docile'
+    | 'Gentle'
+    | 'Hardy'
+    | 'Hasty'
+    | 'Impish'
+    | 'Jolly'
+    | 'Lax'
+    | 'Lonely'
+    | 'Mild'
+    | 'Modest'
+    | 'Naive'
+    | 'Naughty'
+    | 'Quiet'
+    | 'Quirky'
+    | 'Rash'
+    | 'Relaxed'
+    | 'Sassy'
+    | 'Serious'
+    | 'Timid';
+
+  /**
+   * Adapted from `copyVolatileFrom()` in `js/battle.js` (lines 432, 2418 & 2788) of `smogon/pokemon-showdown-client`.
+   */
+  type PokemonVolatile =
+    | 'airballoon'
+    | 'aquaring'
+    | 'attract'
+    | 'autotomize'
+    | 'bide'
+    | 'confusion'
+    | 'curse'
+    | 'disable'
+    | 'dynamax'
+    | 'embargo'
+    | 'encore'
+    | 'focusenergy'
+    | 'foresight'
+    | 'formechange'
+    | 'gmaxchistrike'
+    | 'healblock'
+    | 'imprison'
+    | 'laserfocus'
+    | 'leechseed'
+    | 'magnetrise'
+    | 'mimic'
+    | 'miracleeye'
+    | 'nightmare'
+    | 'perish0'
+    | 'perish1'
+    | 'perish2'
+    | 'perish3'
+    | 'perishsong'
+    | 'powertrick'
+    | 'smackdown'
+    | 'stockpile'
+    | 'stockpile1'
+    | 'stockpile2'
+    | 'stockpile3'
+    | 'substitute'
+    | 'taunt'
+    | 'telekinesis'
+    | 'torment'
+    | 'transform'
+    | 'typeadd'
+    | 'typechange'
+    | 'yawn';
+
+  /**
+   * Adapted from `getTypes()` in `js/battle.js` (line 482, 1545 & 2669) of `smogon/pokemon-showdown-client`.
+   */
+  type PokemonTurnStatus =
+    | 'beakblast'
+    | 'craftyshield'
+    | 'destinybond'
+    | 'endure'
+    | 'focuspunch'
+    | 'grudge'
+    | 'helpinghand'
+    | 'matblock'
+    | 'protect'
+    | 'quickguard'
+    | 'roost'
+    | 'shelltrap'
+    | 'wideguard';
+
+  /**
+   * Adapted from `runMinor()` in `js/battle.js` (line 2029) of `smogon/pokemon-showdown-client`.
+   */
+  type PokemonMoveStatus =
+    | 'mustrecharge';
+
   interface PokemonAbilityData {
     ability: string;
     baseAbility: string;
@@ -80,7 +178,7 @@ declare namespace Showdown {
   }
 
   type PokemonStats = { [K in StatNameNoHp]: number; };
-  type StatsTable = { [K in StatName]: number; };
+  type StatsTable = { [K in StatName]?: number; };
 
   interface ServerPokemon extends PokemonDetails, PokemonHealth {
     condition: string;
@@ -255,7 +353,7 @@ declare namespace Showdown {
     /**
      * @default {}
      */
-    boosts: { [stat in keyof PokemonStats]: number; };
+    boosts: { [stat in StatNameNoHp]?: number; };
 
     /**
      * @default ''
@@ -270,17 +368,17 @@ declare namespace Showdown {
     /**
      * @default {}
      */
-    volatiles: { [effectid: string]: EffectState; };
+    volatiles: { [effectid?: PokemonVolatile | string]: EffectState; };
 
     /**
      * @default {}
      */
-    turnstatuses: { [effectid: string]: EffectState; };
+    turnstatuses: { [effectid?: PokemonTurnStatus | string]: EffectState; };
 
     /**
      * @default {}
      */
-    movestatuses: { [effectid: string]: EffectState; };
+    movestatuses: { [effectid?: PokemonMoveStatus | string]: EffectState; };
 
     /**
      * @default ''

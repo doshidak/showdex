@@ -291,8 +291,10 @@ declare namespace Showdown {
     paused: boolean;
 
     // Showdex custom injected properties
+    calcdexRoom?: HtmlRoom;
     prevSubscription?: Battle['subscription'];
     subscriptionDirty?: boolean;
+    nonce?: string;
 
     (options?: {
       $frame?: JQuery<HTMLElement>;

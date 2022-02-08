@@ -9,6 +9,30 @@
  */
 
 declare namespace Showdown {
+  /**
+   * Adapted from `addSideCondition()` in `js/battle.js` (line 667) of `smogon/pokemon-showdown-client`.
+   */
+  type SideConditionName =
+    | 'auroraveil'
+    | 'firepledge'
+    | 'gmaxcannonade'
+    | 'gmaxsteelsurge'
+    | 'gmaxvinelash'
+    | 'gmaxvolcalith'
+    | 'gmaxwildfire'
+    | 'grasspledge'
+    | 'lightscreen'
+    | 'luckychant'
+    | 'mist'
+    | 'reflect'
+    | 'safeguard'
+    | 'spikes'
+    | 'stealthrock'
+    | 'stickyweb'
+    | 'tailwind'
+    | 'toxicspikes'
+    | 'waterpledge';
+
   interface Side {
     battle: Battle;
 
@@ -77,7 +101,7 @@ declare namespace Showdown {
      * `[effectName, levels, minDuration, maxDuration]`
      */
     sideConditions: {
-      [id: string]: [
+      [name?: SideConditionName | string]: [
         effectName: string,
         levels: number,
         minDuration: number,
