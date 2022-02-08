@@ -14,6 +14,7 @@ module.exports = {
   ],
 
   scopes: [
+    { name: 'types' },
     { name: 'calcdex' },
     { name: 'typedex' },
     { name: 'typetip' },
@@ -36,4 +37,3 @@ module.exports = {
   skipQuestions: ['breaking', 'footer'],
   subjectLimit: 50,
 };
-
