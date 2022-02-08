@@ -5,7 +5,7 @@ import styles from './Picon.module.scss';
 interface PiconProps {
   className?: string;
   style?: React.CSSProperties;
-  pokemon?: Parameters<Showdown.Dex['getPokemonIcon']>[0];
+  pokemon?: Partial<Showdown.Pokemon> | string;
   facingLeft?: boolean;
 }
 
@@ -22,20 +22,34 @@ export const Picon = ({
     return null;
   }
 
-  let iconCss = (Dex.getPokemonIcon(pokemon, facingLeft) || '').split(';');
+  let [iconCss] = pokemon ? (Dex.getPokemonIcon(pokemon, facingLeft) || '').split(';') : [];
 
-  if (!iconCss.length) {
-    iconCss = Dex.getPokemonIcon('pokeball-none', facingLeft).split(';');
+  if (!iconCss) {
+    iconCss = Dex.getPokemonIcon('pokeball-none', facingLeft).split(';')?.[0];
   }
 
-  if (iconCss[0].startsWith(iconCssPrefix)) {
-    iconCss[0] = iconCss[0].slice(iconCssPrefix.length);
+  if (iconCss?.startsWith?.(iconCssPrefix)) {
+    iconCss = iconCss.slice(iconCssPrefix.length);
+  }
+
+  let itemIconCss = typeof pokemon !== 'string' && pokemon?.item ? Dex.getItemIcon(pokemon.item) : null;
+
+  if (itemIconCss?.startsWith?.(iconCssPrefix)) {
+    itemIconCss = itemIconCss.slice(iconCssPrefix.length);
   }
 
   return (
     <div
       className={cx(styles.container, className)}
-      style={{ ...style, background: iconCss[0] }}
-    />
+      style={{ ...style, background: iconCss }}
+    >
+      {
+        !!itemIconCss &&
+        <div
+          className={styles.itemIcon}
+          style={{ background: itemIconCss }}
+        />
+      }
+    </div>
   );
 };

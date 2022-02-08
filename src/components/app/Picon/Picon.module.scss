@@ -1,5 +1,17 @@
+@use 'mixins/position';
+
 .container {
+  position: relative;
   width: 40px;
   height: 30px;
   image-rendering: pixelated;
+}
+
+.itemIcon {
+  @include position.absolute-anchor($x: -12%, $y: -17%, $x-prop: right, $y-prop: bottom);
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  opacity: 0.75;
+  transform: scale(0.75);
 }
