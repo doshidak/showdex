@@ -5,7 +5,8 @@ import styles from './PokeStatus.module.scss';
 export interface PokeStatusProps {
   className?: string;
   style?: React.CSSProperties;
-  status?: Showdown.PokemonStatus;
+  status?: Showdown.PokemonStatus | '';
+  fainted?: boolean;
 }
 
 const abbrevs: Record<Showdown.PokemonStatus, string> = {
@@ -21,15 +22,17 @@ export const PokeStatus = ({
   className,
   style,
   status,
-}: PokeStatusProps): JSX.Element => (Object.keys(abbrevs).includes(status) ? (
+  fainted,
+}: PokeStatusProps): JSX.Element => (fainted || Object.keys(abbrevs).includes(status) ? (
   <span
     className={cx(
       styles.container,
-      styles[status],
+      !fainted && styles[status],
+      fainted && styles.fnt,
       className,
     )}
     style={style}
   >
-    {abbrevs[status]}
+    {fainted ? 'KIL' : abbrevs[status]}
   </span>
 ) : null);
