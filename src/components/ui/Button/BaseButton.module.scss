@@ -1,0 +1,27 @@
+@use 'config/fonts';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+
+button.container {
+  @include flex.row-center($inline: true);
+}
+
+div.container {
+  @include flex.row-center;
+}
+
+.container {
+  @include spacing.padding-none;
+  @include font.apply(fonts.$mono);
+  background: none;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  touch-action: none;
+
+  &.disabled {
+    pointer-events: none;
+  }
+}
