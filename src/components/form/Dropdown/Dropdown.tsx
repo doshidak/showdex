@@ -14,6 +14,8 @@ import { SelectClearIndicator } from './SelectClearIndicator';
 import { SelectContainer } from './SelectContainer';
 import { SelectControl } from './SelectControl';
 import { SelectDropdownIndicator } from './SelectDropdownIndicator';
+import { SelectGroup } from './SelectGroup';
+import { SelectGroupHeading } from './SelectGroupHeading';
 import { SelectIndicatorsContainer } from './SelectIndicatorsContainer';
 import { SelectIndicatorSeparator } from './SelectIndicatorSeparator';
 import { SelectInput } from './SelectInput';
@@ -35,6 +37,7 @@ export type DropdownValue = DropdownSingleValue | DropdownMultiValue;
 export interface DropdownOption {
   label?: string;
   value?: DropdownSingleValue;
+  options?: DropdownOption[];
 }
 
 export type DropdownFieldSingleInput = FieldInputProps<DropdownSingleValue, HTMLInputElement>;
@@ -105,9 +108,11 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
       return setValueOption(null);
     }
 
+    const flatOptions = options.flatMap((option) => (option?.options ? option.options : option));
+
     let val = multi ?
-      options.filter((o) => (input as DropdownFieldMultiInput).value?.includes?.(o?.value)) :
-      options.find((o) => o?.value === (input as DropdownFieldSingleInput).value);
+      flatOptions.filter((o) => (input as DropdownFieldMultiInput).value?.includes?.(o?.value)) :
+      flatOptions.find((o) => o?.value === (input as DropdownFieldSingleInput).value);
 
     if (!val && input?.value && creatable) {
       const newValue = Array.isArray(input.value) ? input.value[0] : input.value;
@@ -161,6 +166,8 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
         ClearIndicator: SelectClearIndicator,
         Control: SelectControl,
         DropdownIndicator: SelectDropdownIndicator,
+        Group: SelectGroup,
+        GroupHeading: SelectGroupHeading,
         IndicatorsContainer: SelectIndicatorsContainer,
         IndicatorSeparator: SelectIndicatorSeparator,
         Input: SelectInput,

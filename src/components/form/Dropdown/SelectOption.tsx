@@ -23,6 +23,7 @@ export const SelectOption = <
     ref={innerRef}
     className={cx(
       styles.option,
+      styles.optionItem,
       isFocused && styles.focused,
       isSelected && styles.selected,
       isDisabled && styles.disabled,

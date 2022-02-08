@@ -56,6 +56,15 @@ $notice-padding-x: $option-padding-x;
 $notice-padding-y: $option-padding-y;
 $notice-color: color.alpha(colors.$white, 0.5);
 
+$group-padding-x: 1px;
+
+$group-heading-padding-x: $option-padding-x;
+$group-heading-padding-y: $option-padding-y;
+$group-heading-font-size: 8px;
+$group-heading-color: color.alpha(colors.$white, 0.5);
+
+// SelectContainer
+
 .container {
   position: relative;
   @include flex.row;
@@ -186,6 +195,24 @@ $notice-color: color.alpha(colors.$white, 0.5);
   &.hidden {
     opacity: 0;
   }
+}
+
+// SelectGroup
+
+.group {
+  @include spacing.padding-xy($x: $group-padding-x);
+}
+
+// SelectGroupHeading
+
+.groupHeading {
+  display: block;
+  @include spacing.padding-xy($x: $group-heading-padding-x, $y: $group-heading-padding-y);
+  font-size: $group-heading-font-size;
+  color: $group-heading-color;
+  text-transform: uppercase;
+  user-select: none;
+  cursor: default;
 }
 
 // SelectSingleValue
@@ -329,12 +356,14 @@ $notice-color: color.alpha(colors.$white, 0.5);
       background-color: $option-background-color-selected-hover;
     }
   }
+}
 
-  &:first-of-type {
+.optionItem {
+  &:first-child {
     border-radius: $border-radius $border-radius 0 0;
   }
 
-  &:last-of-type {
+  &:last-child {
     border-radius: 0 0 $border-radius $border-radius;
   }
 }
