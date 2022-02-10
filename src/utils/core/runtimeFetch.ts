@@ -25,7 +25,9 @@ export const runtimeFetch = async <T = unknown>(url?: RequestInfo, options?: Req
   const extensionId = getExtensionId();
 
   l.debug(
-    'runtimeFetch() -> fetch(url:', url, ', options:', options, ')',
+    'runtimeFetch() -> await fetch()',
+    '\n', 'url', url,
+    '\n', 'options', options,
     '\n', 'extensionId', extensionId,
   );
 
@@ -46,7 +48,9 @@ export const runtimeFetch = async <T = unknown>(url?: RequestInfo, options?: Req
       options,
     }, (response) => {
       l.debug(
-        'runtimeFetch() <- fetch(url:', url, ', options:', options, ')',
+        'runtimeFetch() <- await fetch()',
+        '\n', 'url', url,
+        '\n', 'options', options,
         '\n', 'extensionId', extensionId,
         '\n', (response instanceof Error ? 'error' : 'response'), response,
       );
