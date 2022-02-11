@@ -8,7 +8,7 @@
 }
 
 .itemIcon {
-  @include position.absolute-anchor($x: -12%, $y: -17%, $x-prop: right, $y-prop: bottom);
+  @include position.absolute-anchor($x: -7%, $y: -17%, $x-prop: right, $y-prop: bottom);
   width: 24px;
   height: 24px;
   image-rendering: pixelated;
