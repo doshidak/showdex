@@ -12,7 +12,7 @@ declare namespace Showdown {
   /**
    * `[id, element?, ...misc]`
    */
-  type EffectState = [id: string, ...unknown];
+  type EffectState = [id: string, ...string[]];
 
   /**
    * `[name, minTimeLeft, maxTimeLeft]`
