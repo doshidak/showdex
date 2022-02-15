@@ -1,4 +1,4 @@
-export const NATURE_BOOSTS: Record<Showdown.PokemonNature, [up?: Showdown.StatName, down?: Showdown.StatName]> = {
+export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.StatName, down?: Showdown.StatName]> = {
   Adamant: ['atk', 'spa'],
   Bashful: [],
   Bold: ['def', 'spd'],
@@ -26,4 +26,4 @@ export const NATURE_BOOSTS: Record<Showdown.PokemonNature, [up?: Showdown.StatNa
   Timid: ['spe', 'atk'],
 };
 
-export const NATURES = <Showdown.PokemonNature[]> Object.keys(NATURE_BOOSTS);
+export const PokemonNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts);
