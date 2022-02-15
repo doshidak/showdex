@@ -123,8 +123,12 @@ export const useThunkyReducer = <
 
   const thunkyDispatch: ThunkyReducerDispatch<R> = (action) => {
     if (typeof action === 'function') {
+      // l.debug('thunkyDispatch() -> action(dispatch, getState)');
+
       return (<ThunkyReducerAction<R>> action)(dispatch, () => state);
     }
+
+    // l.debug('thunkyDispatch() -> dispatch(action)');
 
     dispatch(action);
   };
