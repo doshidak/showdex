@@ -14,7 +14,10 @@ module.exports = {
   ],
 
   scopes: [
+    { name: 'consts'},
+    { name: 'styles' },
     { name: 'types' },
+    { name: 'utils' },
     { name: 'calcdex' },
     { name: 'typedex' },
     { name: 'typetip' },
