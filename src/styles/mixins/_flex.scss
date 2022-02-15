@@ -18,9 +18,9 @@
     align-items: $align;
   }
 
-  @if $inline {
-    vertical-align: middle;
-  }
+  // @if $inline {
+  //   vertical-align: middle;
+  // }
 }
 
 // rows
