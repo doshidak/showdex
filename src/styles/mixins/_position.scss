@@ -55,6 +55,11 @@
   @include absolute($vertical, $horizontal, $vertical, $horizontal);
 }
 
+/// @alias absolute-axis
+@mixin absolute-xy($x, $y) {
+  @include absolute-axis($vertical: $y, $horizontal: $x);
+}
+
 @mixin absolute-square($margin) {
   @include absolute($margin, $margin, $margin, $margin);
 }
@@ -96,6 +101,11 @@
 
 @mixin fixed-axis($vertical, $horizontal) {
   @include fixed($vertical, $horizontal, $vertical, $horizontal);
+}
+
+/// @alias fixed-axis
+@mixin fixed-xy($x, $y) {
+  @include fixed-axis($vertical: $y, $horizontal: $x);
 }
 
 @mixin fixed-square($margin) {
