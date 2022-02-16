@@ -33,6 +33,6 @@ export const PokeStatus = ({
     )}
     style={style}
   >
-    {fainted ? 'KIL' : abbrevs[status]}
+    {fainted ? 'RIP' : abbrevs[status]}
   </span>
 ) : null);
