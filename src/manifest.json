@@ -9,6 +9,14 @@
     "activeTab"
   ],
 
+  "host_permissions": [
+    "https://data.pkmn.cc/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
   "content_scripts": [
     {
       "matches": ["https://play.pokemonshowdown.com/*"],
@@ -42,5 +50,12 @@
       "48": "showdex-48.png",
       "128": "showdex-128.png"
     }
+  },
+
+  "externally_connectable": {
+    "ids": ["*"],
+    "matches": [
+      "https://play.pokemonshowdown.com/*"
+    ]
   }
 }

@@ -1,5 +1,8 @@
 import { bootstrap as bootstrapCalcdex } from '@showdex/pages';
+import { logger } from '@showdex/utils/debug';
 import '@showdex/styles/global.scss';
+
+const l = logger('main');
 
 const bootstrappers: ((roomId?: string) => void)[] = [
   bootstrapCalcdex,
@@ -9,10 +12,10 @@ const bootstrappers: ((roomId?: string) => void)[] = [
 const { receive } = app || {};
 
 if (typeof receive !== 'function') {
-  console.log('main script may have executed too fast lmao');
+  l.warn('main script may have executed too fast lmao');
 }
 
-console.log('injecting into app.receive()...');
+l.debug('hooking into the Showdown client\'s app.receive()...');
 
 app.receive = (data: string) => {
   const receivedRoom = data?.startsWith?.('>');
@@ -21,7 +24,11 @@ app.receive = (data: string) => {
     const roomId = data.slice(1, data.indexOf('\n') - 1);
     const room = app.rooms[roomId];
 
-    console.log('received socket event for roomId', roomId, room);
+    l.debug(
+      'receive() event for roomId', roomId,
+      '\n', 'room', room,
+      '\n', 'data', data,
+    );
 
     // call each bootstrapper
     bootstrappers.forEach((bootstrapper) => bootstrapper(roomId));
@@ -31,4 +38,4 @@ app.receive = (data: string) => {
   receive.call(app, data);
 };
 
-console.log('completed main script execution!');
+l.info('completed main script execution!');
