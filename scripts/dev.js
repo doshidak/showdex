@@ -1,6 +1,7 @@
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 
+// const fs = require('fs-extra');
 const path = require('path');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
