@@ -15,47 +15,95 @@
 }
 
 .username {
+  max-width: 78px;
   color: color.alpha(colors.$white, 0.75);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .teamList {
   @include flex.row($justify: flex-end);
 }
 
-.teamList .picon {
+.piconButton {
   position: relative;
   align-self: center;
-  opacity: 0.5;
-  @include transition.apply(opacity, filter);
 
-  &.active {
-    opacity: 1;
+  &::before {
+    content: '';
+    @include position.absolute-anchor($x: -3px, $y: -6px);
+    width: 45px;
+    height: 45px;
+    // background-color: color.alpha(colors.$white, 0.3);
+    background-color: colors.$transparent;
+    // border: 3px solid colors.$transparent;
+    border-radius: 45px;
+    // mask: radial-gradient(circle, transparent 5%, red);
+    // transform: scale(0);
+    // opacity: 0;
+    // @include transition.apply(background-color, border-color, opacity);
+    @include transition.apply(background-color);
+    // z-index: -1;
+    pointer-events: none;
   }
 
-  &.fainted {
-    opacity: 0.3;
-    filter: grayscale(1);
+  // &:not(.selected):not(.active):hover::before {
+  &:hover::before {
+    background-color: color.alpha(colors.$white, 0.3);
+    // transform: scale(0.9);
+    // opacity: 0.3;
   }
+
+  // &:not(.selected).active::before {
+  //   background-color: colors.$transparent;
+  //   border-color: color.tint(colors.$red, 15%);
+  //   opacity: 0.3;
+  // }
+
+  // &.selected::before {
+  //   background-color: color.tint(colors.$blue, 15%);
+  //   border-color: color.tint(colors.$blue, 15%);
+  //   // transform: scale(1);
+  //   opacity: 0.5;
+  // }
 
   &:not(:last-of-type) {
     @include spacing.margin($right: 5px);
   }
+}
 
-  &::before {
-    content: '';
-    @include position.absolute-anchor($x: -2px, $y: -6px);
-    width: 45px;
-    height: 45px;
-    background-color: color.alpha(color.tint(colors.$blue, 50%), 0.95);
-    border-radius: 45px;
-    mask: radial-gradient(circle, transparent 5%, red);
-    transform: scale(0);
-    @include transition.apply(transform);
-    z-index: -1;
-    pointer-events: none;
+.picon {
+  // opacity: 0.5;
+  @include transition.apply(opacity, filter);
+
+  // .active &, .selected & {
+  //   opacity: 1;
+  // }
+
+  .fainted & {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+}
+
+.background {
+  // @include position.absolute-anchor($x: -3px, $y: -6px);
+  @include position.absolute-anchor($x: 0px, $y: -3px);
+  width: 39px;
+  height: 39px;
+  border: 2px solid colors.$transparent;
+  border-radius: 45px;
+  @include transition.apply(border-color);
+  // z-index: -1;
+  // user-select: none;
+  pointer-events: none;
+
+  .active & {
+    border-color: color.alpha(color.tint(colors.$red, 15%), 0.15);
   }
 
-  &.active::before {
-    transform: scale(1);
+  .selected & {
+    border-color: color.alpha(color.tint(colors.$blue, 20%), 0.75);
   }
 }

@@ -12,7 +12,7 @@
 .hpBar {
   position: relative;
   display: inline-block;
-  width: 100px;
+  width: 85px;
   height: 3px;
   border-radius: 15px;
   background-color: color.alpha(colors.$white, 0.15);
@@ -38,6 +38,15 @@
       background-color: colors.$green;
     }
   }
+}
+
+.pokemonName {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 66px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .section {
@@ -88,9 +97,13 @@
 }
 
 .tableGrid.statsTable {
-  grid-template-columns: 1.25fr repeat(6, 1fr);
-  column-gap: 25px;
+  grid-template-columns: minmax(30px, 1.25fr) repeat(6, minmax(45px, 1fr));
+  column-gap: 7px;
   // row-gap: 3px;
+
+  .stageValue {
+    @include flex.row-center;
+  }
 }
 
 /// @todo used by StageCalc.tsx -- refactor the tableGrid stuff into components

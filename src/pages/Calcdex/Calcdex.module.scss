@@ -8,7 +8,8 @@
 .container {
   @include position.absolute-fill;
   color: colors.$white;
-  overflow: hidden auto;
+  // overflow: hidden auto;
+  overflow: hidden;
 
   &::before {
     content: '';
@@ -20,11 +21,12 @@
 }
 
 .content {
+  @include position.absolute-fill;
   // max-height: 100%;
   @include spacing.padding-all(15px);
   @include font.apply(fonts.$mono);
   font-size: 10px;
-  // overflow: hidden auto;
+  overflow: hidden auto;
 
   hr {
     width: 100%;
