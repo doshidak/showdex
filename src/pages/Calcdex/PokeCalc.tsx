@@ -278,13 +278,13 @@ export const PokeCalc = ({
             //   value: ability,
             // }))}
             options={[!!playerPokemon?.altAbilities?.length && {
-              label: 'Alternatives',
+              label: 'Pool',
               options: playerPokemon.altAbilities.map((ability) => ({
                 label: ability,
                 value: ability,
               })),
             }, !!playerPokemon?.abilities?.length && {
-              label: 'Possible',
+              label: 'Other',
               options: playerPokemon.abilities
                 .filter((a) => !!a && (!playerPokemon.altAbilities.length || !playerPokemon.altAbilities.includes(a)))
                 .map((ability) => ({ label: ability, value: ability })),
@@ -376,7 +376,7 @@ export const PokeCalc = ({
             //   value: item?.name,
             // }))}
             options={[!!playerPokemon?.altItems?.length && {
-              label: 'Alternatives',
+              label: 'Pool',
               options: playerPokemon.altItems.map((item) => ({
                 label: item,
                 value: item,
@@ -519,12 +519,7 @@ export const PokeCalc = ({
                     name: `PokeCalc-Move:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${i}`,
                     value: playerPokemon?.moves?.[i],
                     onChange: (newMove: MoveName) => {
-                      l.debug('newMove for', playerPokemon?.ident, 'at index', i, newMove);
-
-                      // const moves = upsizeArray([
-                      //   ...(pokemon?.moves || [] as string[]),
-                      //   // ...(firstSet?.moves || [] as string[]),
-                      // ], 4, null, true);
+                      // l.debug('newMove for', playerPokemon?.ident, 'at index', i, newMove);
 
                       const moves = playerPokemon?.moves || [] as MoveName[];
 
@@ -542,12 +537,11 @@ export const PokeCalc = ({
                       });
                     },
                   }}
-                  // options={possibleMoves?.map?.((m) => ({ label: m, value: m })) || []}
                   options={[!!playerPokemon?.moveState?.revealed.length && {
                     label: 'Revealed',
                     options: playerPokemon.moveState.revealed.map((name) => ({ label: name, value: name })),
                   }, !!playerPokemon?.altMoves?.length && {
-                    label: 'Alternatives',
+                    label: 'Pool',
                     options: playerPokemon.altMoves
                       .filter((n) => !!n && (!playerPokemon.moveState?.revealed?.length || !playerPokemon.moveState.revealed.includes(n)))
                       .map((name) => ({ label: name, value: name })),
