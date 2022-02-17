@@ -165,6 +165,10 @@ export const usePresetCache = (): PresetCacheHookInterface => {
             ability: preset?.abilities?.[0],
             altAbilities: preset?.abilities,
 
+            // seems that all Pokemon have the Hardy nature
+            // (according to https://calc.pokemonshowdown.com/randoms.html)
+            nature: 'Hardy',
+
             item: preset?.items?.[0],
             altItems: preset?.items,
 
@@ -180,7 +184,8 @@ export const usePresetCache = (): PresetCacheHookInterface => {
               spe: preset?.ivs?.spe ?? 31,
             },
 
-            // all EVs default to 84, according to https://calc.pokemonshowdown.com/randoms.html
+            // all EVs default to 84
+            // (according to https://calc.pokemonshowdown.com/randoms.html)
             evs: {
               hp: preset?.evs?.hp ?? 84,
               atk: preset?.evs?.atk ?? 84,
