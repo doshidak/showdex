@@ -1,7 +1,7 @@
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 
-// const fs = require('fs-extra');
+const fs = require('fs-extra');
 const path = require('path');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
@@ -43,34 +43,42 @@ if (hot) {
   config.plugins.push(new webpack.HotModuleReplacementPlugin());
 }
 
-const server = new WebpackDevServer({
-  host: hostname,
-  port,
-
-  devMiddleware: {
-    publicPath: `http://${hostname}:${port}/`,
-    writeToDisk: true,
-  },
-
-  allowedHosts: 'all',
-  client: false,
-  https: false,
-  hot: false,
-
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-  },
-
-  static: {
-    directory: path.join(__dirname, '../build'),
-  },
-}, webpack(config));
-
-if ('accept' in (module.hot || {}) && typeof module.hot.accept === 'function') {
-  module.hot.accept();
-}
-
 (async () => {
+  // yeet the `build` dir, if it exists
+  const buildDirPath = path.join(__dirname, '../build');
+  const buildDirExists = await fs.pathExists(buildDirPath);
+
+  if (buildDirExists) {
+    await fs.remove(buildDirPath);
+  }
+
+  const server = new WebpackDevServer({
+    host: hostname,
+    port,
+
+    devMiddleware: {
+      publicPath: `http://${hostname}:${port}/`,
+      writeToDisk: true,
+    },
+
+    allowedHosts: 'all',
+    client: false,
+    https: false,
+    hot: false,
+
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+
+    static: {
+      directory: path.join(__dirname, '../build'),
+    },
+  }, webpack(config));
+
+  if ('accept' in (module.hot || {}) && typeof module.hot.accept === 'function') {
+    module.hot.accept();
+  }
+
   console.log(
     'Starting',
     process.env.npm_package_name,
