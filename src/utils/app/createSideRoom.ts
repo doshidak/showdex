@@ -1,9 +1,20 @@
+import { logger } from '@showdex/utils/debug';
+
 const minWidth = 320;
 const maxWidth = 1024;
 
-export const createSideRoom = (id: string, title: string, focus?: boolean): HtmlRoom => {
+const l = logger('createSideRoom');
+
+export const createSideRoom = (
+  id: string,
+  title: string,
+  focus?: boolean,
+): HtmlRoom => {
   if (typeof app?._addRoom !== 'function') {
-    console.error('cannot make side room since app._addRoom() is currently unavailable');
+    l.error(
+      'cannot make side room since app._addRoom() is currently unavailable',
+      '\n', 'typeof app._addRoom', typeof app?._addRoom,
+    );
 
     return;
   }
@@ -13,16 +24,16 @@ export const createSideRoom = (id: string, title: string, focus?: boolean): Html
   if (id in app.rooms) {
     room = <HtmlRoom> app.rooms[id];
 
-    console.log('found existing side room with matching roomId', id);
+    l.debug('found existing side room with matching roomId', id);
   } else {
     room = app._addRoom<HtmlRoom>(id, 'html', true, title);
     app.sideRoomList.push(app.roomList.pop());
 
-    console.log('created side room with roomId', room.id, 'and roomType', room.type);
+    l.info('created side room with roomId', room.id, 'and roomType', room.type);
   }
 
   if (!room?.el) {
-    console.error('couldn\'t find or make the side room for roomId', id);
+    l.error('couldn\'t find or make the side room for roomId', id);
 
     return;
   }
