@@ -108,7 +108,11 @@ export const usePresetCache = (): PresetCacheHookInterface => {
       return;
     }
 
-    const url = `${process.env.SMOGON_PRESETS_URL}/${genName}.json`;
+    const baseUrl = isRandom ?
+      process.env.SMOGON_RANDOM_PRESETS_URL :
+      process.env.SMOGON_PRESETS_URL;
+
+    const url = `${baseUrl}/${genName}.json`;
 
     l.debug(
       'fetch() -> await runtimeFetch()',
@@ -157,12 +161,16 @@ export const usePresetCache = (): PresetCacheHookInterface => {
             name: 'Randoms',
             species: forme, // purposefully not sanitized
             level: preset?.level,
+
             ability: preset?.abilities?.[0],
             altAbilities: preset?.abilities,
+
             item: preset?.items?.[0],
             altItems: preset?.items,
+
             moves: preset?.moves?.slice?.(0, 4),
             altMoves: preset?.moves,
+
             ivs: {
               hp: preset?.ivs?.hp ?? 31,
               atk: preset?.ivs?.atk ?? 31,
@@ -171,7 +179,16 @@ export const usePresetCache = (): PresetCacheHookInterface => {
               spd: preset?.ivs?.spd ?? 31,
               spe: preset?.ivs?.spe ?? 31,
             },
-            evs: preset?.evs,
+
+            // all EVs default to 84, according to https://calc.pokemonshowdown.com/randoms.html
+            evs: {
+              hp: preset?.evs?.hp ?? 84,
+              atk: preset?.evs?.atk ?? 84,
+              def: preset?.evs?.def ?? 84,
+              spa: preset?.evs?.spa ?? 84,
+              spd: preset?.evs?.spd ?? 84,
+              spe: preset?.evs?.spe ?? 84,
+            },
           };
 
           calcdexPreset.calcdexId = calcPresetCalcdexId(calcdexPreset);
@@ -196,13 +213,18 @@ export const usePresetCache = (): PresetCacheHookInterface => {
               const calcdexPreset: CalcdexPokemonPreset = {
                 name: `${formatLabel} ${presetName}`, // e.g., 'OU Defensive Pivot'
                 species: forme, // purposefully not sanitized
+
                 ability: Array.isArray(preset?.ability) ? preset.ability[0] : preset?.ability,
                 altAbilities: Array.isArray(preset?.ability) ? preset.ability : [preset?.ability].filter(Boolean),
+
                 nature: Array.isArray(preset?.nature) ? preset.nature[0] : preset?.nature,
+
                 item: Array.isArray(preset?.item) ? preset.item[0] : preset?.item,
                 altItems: Array.isArray(preset?.item) ? preset.item : [preset?.item].filter(Boolean),
+
                 moves: preset?.moves?.map?.((move) => (Array.isArray(move) ? move[0] : move)) ?? [],
                 altMoves: altMoves.filter((m, i) => !altMoves.includes(m, i + 1)), // remove duplicate moves
+
                 ivs: {
                   hp: preset?.ivs?.hp ?? 31,
                   atk: preset?.ivs?.atk ?? 31,
@@ -211,6 +233,7 @@ export const usePresetCache = (): PresetCacheHookInterface => {
                   spd: preset?.ivs?.spd ?? 31,
                   spe: preset?.ivs?.spe ?? 31,
                 },
+
                 evs: preset?.evs,
               };
 
