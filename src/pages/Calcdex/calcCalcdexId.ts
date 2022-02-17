@@ -51,28 +51,8 @@ export const calcPokemonCalcdexId = (
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   ident: pokemon?.ident,
   name: pokemon?.name,
-  // speciesForme: pokemon?.speciesForme,
-  // hp: pokemon?.hp?.toString(),
-  // maxhp: pokemon?.maxhp?.toString(),
   level: pokemon?.level?.toString(),
   gender: pokemon?.gender,
-  // ability: pokemon?.ability,
-  // baseAbility: pokemon?.baseAbility || pokemon?.ability,
-  // item: pokemon?.item,
-  // itemEffect: pokemon?.itemEffect,
-  // prevItem: pokemon?.prevItem,
-  // prevItemEffect: pokemon?.prevItemEffect,
-  // boosts: calcCalcdexId<Partial<Showdown.Pokemon['boosts']>>(pokemon?.boosts),
-  // status: pokemon?.status,
-  // statusStage: pokemon?.statusStage?.toString(),
-  // volatiles: calcCalcdexId<Partial<Showdown.Pokemon['volatiles']>>(pokemon?.volatiles),
-  // moveTrack: calcCalcdexId<Partial<Record<string, number>>>(pokemon?.moveTrack?.reduce((prev, track) => {
-  //   if (track?.[0] && !(track[0] in prev)) {
-  //     prev[track[0]] = track[1]; // eslint-disable-line prefer-destructuring
-  //   }
-  //
-  //   return prev;
-  // }, <Partial<Record<string, number>>>{})),
 });
 
 export const calcSideCalcdexId = (
@@ -82,10 +62,6 @@ export const calcSideCalcdexId = (
   sideid: side?.sideid,
   name: side?.name,
   rating: side?.rating,
-  // totalPokemon: side?.totalPokemon?.toString(),
-  // active: side?.active?.map((mon) => calcPokemonCalcdexId(mon)).join('|'),
-  // pokemon: side?.pokemon?.map((mon) => calcPokemonCalcdexId(mon)).join('|'),
-  // sideConditions: Object.keys(side?.sideConditions || {}).join('|'),
 });
 
 export const calcBattleCalcdexId = (
@@ -101,8 +77,4 @@ export const calcBattleCalcdexId = (
   p2: calcSideCalcdexId(battle?.p2),
   p3: calcSideCalcdexId(battle?.p3),
   p4: calcSideCalcdexId(battle?.p4),
-  // currentStep: battle?.currentStep?.toString(),
-  // stepQueue: Array.isArray(battle?.stepQueue) && battle.stepQueue.length ?
-  //   uuidv5(battle.stepQueue.join('|'), process.env.UUID_NAMESPACE || NIL_UUID) :
-  //   null,
 });

@@ -5,15 +5,9 @@ import type {
   GenerationNum,
   ItemName,
   MoveName,
-  // PokemonSet,
 } from '@pkmn/data';
-// import type { DeepPartial } from '@pkmn/smogon';
 import type { State as SmogonState } from '@smogon/calc';
-import type {
-  // ThunkyReducerAction,
-  // ThunkyReducerActionator,
-  ThunkyReducerDispatch,
-} from '@showdex/utils/hooks';
+import type { ThunkyReducerDispatch } from '@showdex/utils/hooks';
 import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPokemonIdent } from './detectPokemonIdent';
@@ -455,7 +449,6 @@ export type CalcdexReducerActionType =
   | '@/:init'
   | '@/:put'
   | '@field/:put'
-  // | '@field/:sync'
   | '@p1/:init'
   | '@p1/:put'
   | '@p1/activeIndex:put'
@@ -494,7 +487,6 @@ export const CalcdexInitialState: CalcdexReducerState = {
     activeIndex: -1,
     selectionIndex: 0,
     pokemon: [],
-    // side: sanitizePlayerSide(null),
   },
 
   p2: {
@@ -502,7 +494,6 @@ export const CalcdexInitialState: CalcdexReducerState = {
     activeIndex: -1,
     selectionIndex: 0,
     pokemon: [],
-    // side: sanitizePlayerSide(null),
   },
 };
 
@@ -603,35 +594,6 @@ export const CalcdexReducer: CalcdexReducerInstance = (
         field: updatedField,
       };
     }
-
-    // case '@field/:sync': {
-    //   const battle = <Showdown.Battle> (action.payload || {});
-    //
-    //   if (!battle?.gameType) {
-    //     l.warn(
-    //       action.type,
-    //       '\n', 'received an invalid battle object', battle,
-    //       '\n', 'battle', battle,
-    //     );
-    //
-    //     return state;
-    //   }
-    //
-    //   const { activeIndex: attackerIndex } = state.p1;
-    //   const { activeIndex: defenderIndex } = state.p2;
-    //
-    //   const updatedField = sanitizeField(battle, attackerIndex, defenderIndex);
-    //
-    //   l.debug(
-    //     action.type,
-    //     '\n', 'updating field to', updatedField,
-    //   );
-    //
-    //   return {
-    //     ...state,
-    //     field: updatedField,
-    //   };
-    // }
 
     case '@p1/:init':
     case '@p2/:init': {
@@ -807,8 +769,9 @@ export const CalcdexReducer: CalcdexReducerInstance = (
         return state;
       }
 
-      const { pokemon: updatedPokemon } = <CalcdexPlayer> state[playerKey];
-      // const updatedPokemon = [...((<CalcdexPlayer> state[playerKey]).pokemon || [])];
+      const {
+        pokemon: updatedPokemon,
+      } = <CalcdexPlayer> state[playerKey];
 
       if (!Array.isArray(updatedPokemon)) {
         l.warn(
@@ -836,44 +799,20 @@ export const CalcdexReducer: CalcdexReducerInstance = (
         return state;
       }
 
-      // const [syncedPokemon, didChange] = syncPokemonStats(updatedPokemon[index], pokemon);
-
-      // if (!didChange) {
-      //   l.debug(
-      //     action.type,
-      //     '\n', 'pokemon', ident, 'for the player', playerKey, 'did not change',
-      //     '\n', 'syncedPokemon', syncedPokemon,
-      //     '\n', `state.${playerKey}.pokemon`, updatedPokemon,
-      //   );
-      //
-      //   return state;
-      // }
-
       // `syncPokemon()` will assign a calcdexId and recalculate the calcdexNonce
       const shouldSync = action.type.endsWith(':sync');
 
       const syncedPokemon = shouldSync ? syncPokemon(updatedPokemon[index], pokemon) : <CalcdexPokemon> {
         ...updatedPokemon[index],
         ...pokemon,
-        // calculatedStats: {
-        //   ...updatedPokemon[index].calculatedStats,
-        //   ...pokemon.calculatedStats,
-        // },
+
         dirtyBoosts: {
           ...updatedPokemon[index].dirtyBoosts,
           ...pokemon?.dirtyBoosts,
         },
       };
 
-      // const syncedPokemon = shouldSync ?
-      //   syncPokemon(updatedPokemon[index], pokemon) :
-      //   $.extend(true, {}, updatedPokemon[index], pokemon);
-
       if (!shouldSync) {
-        // yeah, using $.extend() seems to not update `dirtyBoosts` if its values are `undefined`
-        // (e.g., `{ atk: undefined }` will be ignored if something like `{ atk: 2 }` was stored)
-        // syncedPokemon.dirtyBoosts = pokemon.dirtyBoosts;
-
         if (!syncedPokemon.calcdexId) {
           syncedPokemon.calcdexId = calcPokemonCalcdexId(syncedPokemon);
         }

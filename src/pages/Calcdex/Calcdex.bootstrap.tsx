@@ -1,14 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-// import { Smogon } from '@pkmn/smogon';
-// import { v4 as uuidv4 } from 'uuid';
 import { createSideRoom, getActiveBattle } from '@showdex/utils/app';
-// import { runtimeFetch } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { calcBattleCalcdexNonce } from './calcCalcdexNonce';
 import { Calcdex } from './Calcdex';
-
-// const smogon = new Smogon(runtimeFetch);
 
 const l = logger('Calcdex.bootstrap');
 
@@ -62,76 +57,76 @@ export const bootstrap = (roomId?: string): void => {
 
   if (!subscriptionDirty) {
     l.debug(
-      'battle object\'s subscription isn\'t dirtied yet;',
-      'about to inject some real filth into battle.subscribe()...',
+      'battle\'s subscription isn\'t dirty yet!',
+      '\n', 'about to inject some real filth into battle.subscribe()...',
+      '\n', 'subscriptionDirty', subscriptionDirty,
     );
 
-    /**
-     * @todo possible `battle` object bug, causing minor desync issues, primarily visual.
-     *
-     * the `Calcdex` component doesn't seem to update despite the `subscription` being called.
-     * sometimes, it receives NO updates from the `battle` prop, other times, it ignores the update
-     * due to the same `battle.nonce` value
-     * (which is fine, cause otherwise, it may infinitely render in a loop).
-     *
-     * unsure if the `battle` inside the `subscribe()` function is the same `battle` object
-     * from when subscribe() was injected (prior to battle.subscriptionDirty being `true`),
-     * or the actual current `battle` object.
-     *
-     * (but we are retrieving the current `battle` object via `getActiveBattle()`,
-     * which does retrieve `battle` from `app.curRoom`.)
-     *
-     * if `battle` is a reference to itself (i.e., an object pointer),
-     * we should be good, theoretically, since there's only 1 actual `battle` object in memory.
-     *
-     * alternatively, any references to `battle` inside the `subscription` function
-     * can refer to the `battle` object inside `app.curRoom`, which may or may not be up-to-date.
-     */
     battle.subscribe((state) => {
-      l.debug('battle.subscribe() was called with state:', state);
+      l.debug(
+        'battle.subscribe()',
+        '\n', 'state', state,
+      );
 
       if (state === 'paused') {
-        l.debug('subscription ignored cause the battle is paused or, probs more likely, ended');
+        l.debug(
+          'battle.subscribe()',
+          '\n', 'subscription ignored cause the battle is paused or, probs more likely, ended',
+        );
 
         return;
       }
 
       if (typeof prevSubscription === 'function') {
-        l.debug('calling the original battle.subscribe() function...');
+        l.debug(
+          'battle.subscribe()',
+          '\n', 'calling the original battle.subscribe() function...',
+        );
+
         prevSubscription(state);
       }
 
-      // const calcdexRoom = createSideRoom('view-calcdex', 'Calcdex', true);
       const activeBattle = getActiveBattle();
 
       if (!activeBattle) {
-        l.warn('no active battle found; ignoring Calcdex bootstrap...');
+        l.warn(
+          'battle.subscribe()',
+          '\n', 'no active battle found; ignoring Calcdex bootstrap...',
+        );
 
         return;
       }
 
       if (!activeBattle.calcdexRoom) {
-        l.debug('creating a side-room for Calcdex since battle.calcdexRoom is falsy...');
-        activeBattle.calcdexRoom = createSideRoom(`view-calcdex-${roomId}`, 'Calcdex', true);
+        const calcdexRoomId = `view-calcdex-${roomId}`;
+
+        l.debug(
+          'battle.subscribe() -> createSideRoom()',
+          '\n', 'creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
+          '\n', 'id', calcdexRoomId,
+          '\n', 'title', 'Calcdex',
+        );
+
+        activeBattle.calcdexRoom = createSideRoom(
+          calcdexRoomId,
+          'Calcdex',
+          true,
+        );
       }
 
-      // activeBattle.nonce = uuidv4();
       activeBattle.nonce = calcBattleCalcdexNonce(activeBattle);
 
-      l.debug('ReactDOM.render()\'ing Calcdex with battle nonce', activeBattle.nonce);
+      l.debug(
+        'battle.subscribe() -> ReactDOM.render()',
+        '\n', 'rendering Calcdex with battle nonce', activeBattle.nonce,
+      );
 
       ReactDOM.render((
         <Calcdex
-          // battle={battle}
-          // battle={(app.curRoom as BattleRoom).battle}
           battle={activeBattle}
-          // tooltips={(app.curRoom as BattleRoom).tooltips}
           tooltips={tooltips}
-          // smogon={smogon}
         />
       ), battle.calcdexRoom.el);
-
-      // ReactDOM.render(<Calcdex />, battle.calcdexRoom.el);
     });
 
     battle.subscriptionDirty = true;

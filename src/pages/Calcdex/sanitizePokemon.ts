@@ -1,22 +1,16 @@
-// import { v4 as uuidv4 } from 'uuid';
-// import { upsizeArray } from '@showdex/utils/core';
-// import { logger } from '@showdex/utils/debug';
-// import type { AbilityName, ItemName } from '@pkmn/dex';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
-// const l = logger('Calcdex/sanitizePokemon');
-
-export const sanitizePokemon = (pokemon: Partial<Showdown.Pokemon & CalcdexPokemon>): CalcdexPokemon => {
+export const sanitizePokemon = (
+  pokemon: Partial<Showdown.Pokemon & CalcdexPokemon>,
+): CalcdexPokemon => {
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: pokemon?.calcdexId,
-    // calcdexId: uuidv4(),
     calcdexNonce: pokemon?.calcdexNonce,
 
-    // slot: pokemon?.slot || -1,
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
     speciesForme: sanitizeSpeciesForme(pokemon?.volatiles?.formechange?.[1] ?? pokemon?.speciesForme),
@@ -35,8 +29,6 @@ export const sanitizePokemon = (pokemon: Partial<Showdown.Pokemon & CalcdexPokem
     altAbilities: pokemon?.altAbilities ?? [],
 
     item: pokemon?.item,
-    // dirtyItem: pokemon?.dirtyItem ?? false,
-    // dirtyItem: false,
     dirtyItem: pokemon?.dirtyItem ?? null,
     altItems: pokemon?.altItems ?? [],
     itemEffect: pokemon?.itemEffect,
@@ -44,7 +36,6 @@ export const sanitizePokemon = (pokemon: Partial<Showdown.Pokemon & CalcdexPokem
     prevItemEffect: pokemon?.prevItemEffect,
 
     nature: pokemon?.nature,
-    // natures: pokemon?.natures ?? [], // now using `PokemonNatures` from `@showdex/consts`
 
     ivs: {
       hp: pokemon?.ivs?.hp ?? 31,
@@ -94,11 +85,9 @@ export const sanitizePokemon = (pokemon: Partial<Showdown.Pokemon & CalcdexPokem
     maxhp: pokemon?.maxhp || 1,
     fainted: pokemon?.fainted || !pokemon?.hp,
 
-    // moves: upsizeArray(pokemon?.moves, 4, null, true),
     moves: pokemon?.moves || [],
     altMoves: pokemon?.altMoves || [],
     lastMove: pokemon?.lastMove,
-    // moveTrack: [...(pokemon?.moveTrack || [] as [moveName: MoveName, ppUsed: number][])],
     moveTrack: pokemon?.moveTrack || [],
     moveState: {
       revealed: pokemon?.moveState?.revealed ?? [],

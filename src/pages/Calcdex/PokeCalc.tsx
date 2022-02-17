@@ -1,12 +1,8 @@
 import * as React from 'react';
-// import { Field, Form, FormSpy } from 'react-final-form';
-// import { Dex as PkmnDex } from '@pkmn/dex';
-// import { Generations } from '@pkmn/data';
 import {
   calculate,
   Field as SmogonField,
   Move as SmogonMove,
-  // Pokemon as SmogonPokemon,
 } from '@smogon/calc';
 import cx from 'classnames';
 import { Picon, PokeStatus, PokeType } from '@showdex/components/app';
@@ -18,21 +14,16 @@ import {
   PokemonNatures,
   PokemonStatNames,
 } from '@showdex/consts';
-// import { getSetsForFormat } from '@showdex/utils/calc';
-// import { upsizeArray } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type {
   AbilityName,
   Generation,
   GenerationNum,
-  // ID as PkmnID,
   ItemName,
-  // ModdedDex,
   MoveName,
 } from '@pkmn/data';
-// import type { Smogon } from '@pkmn/smogon';
-// import type { State as SmogonState } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPokemon } from './CalcdexReducer';
+import { calcPokemonHp } from './calcPokemonHp';
 import { createSmogonPokemon } from './createSmogonPokemon';
 import { formatStatBoost } from './formatStatBoost';
 import styles from './PokeCalc.module.scss';
@@ -40,341 +31,31 @@ import styles from './PokeCalc.module.scss';
 interface PokeCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  // pokemon: CalcdexPokemon;
-  // vsPokemon?: CalcdexPokemon;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
-  // tooltips?: Showdown.BattleTooltips;
-  // smogon?: Smogon;
   field?: CalcdexBattleField;
-  // format?: string;
   gen?: GenerationNum;
   dex?: Generation;
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
 }
-
-// we're using the `Dex` from `window.Dex` that the Showdown client uses
-// const gens = new Generations(($.extend(true, PkmnDex, Dex) as unknown) as ModdedDex);
-// const gens = new Generations(PkmnDex);
 
 const l = logger('Calcdex/PokeCalc');
 
 export const PokeCalc = ({
   className,
   style,
-  // pokemon,
-  // vsPokemon,
   playerPokemon,
   opponentPokemon,
-  // tooltips,
-  // smogon,
   field,
-  // format,
   gen = 8,
   dex,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
-  // const [battleNonce, setBattleNonce] = React.useState<string>(null);
-  //
-  // React.useEffect(() => {
-  //   if (battle?.nonce && battle.nonce !== battleNonce) {
-  //     setBattleNonce(battle.nonce);
-  //   }
-  // }, [
-  //   battle,
-  //   battleNonce,
-  // ]);
-
-  // const dex = gens.get(gen);
-
-  // const species = playerPokemon?.speciesForme ? Dex?.species?.get?.(playerPokemon.speciesForme) : null;
-
-  // const {
-  //   abilities,
-  //   baseStats,
-  // } = species || {};
-
   const pokemonInvalid = !playerPokemon?.speciesForme;
 
-  // const possibleNatures = Array.from(dex?.natures || []).map((nature) => nature?.name).filter(Boolean);
-  // const possibleAbilities = Object.values(abilities || {}) as AbilityName[];
-  // const [possibleMoves, setPossibleMoves] = React.useState<string[]>([]);
-
-  // build the possible list of moves for the current pokemon
-  /** @todo make this into a hook */
-  // const [prevIdent, setPrevIdent] = React.useState<string>(null);
-  // const [moveState, setMoveState] = React.useState<PokeCalcMoveState>({
-  //   // ident: pokemon?.ident,
-  //   revealed: [],
-  //   learnset: [],
-  //   other: [],
-  // });
-
-  // React.useEffect(() => void (async () => {
-  //   if (!pokemon?.speciesForme) {
-  //     l.debug('ignoring moveState update due to unknown pokemon.speciesForme', pokemon);
-  //
-  //     return;
-  //   }
-  //
-  //   // if (prevIdent === pokemon?.ident) {
-  //   //   l.debug('ignoring moveState update due to identical pokemon.ident', pokemon);
-  //   //
-  //   //   return;
-  //   // }
-  //
-  //   // if (moveState.revealed.length || moveState.learnset.length || moveState.other.length) {
-  //   //   l.debug('ignoring moveState update due to already populated moveState', moveState);
-  //   //
-  //   //   return;
-  //   // }
-  //
-  //   // const newMoveState: PokeCalcMoveState = {
-  //   //   revealed: [],
-  //   //   learnset: [],
-  //   //   other: [],
-  //   // };
-  //
-  //   let didChange = false;
-  //
-  //   // build `revealed`, if any moves are revealed
-  //   if (pokemon.moveTrack?.length) {
-  //     pokemon.moveState.revealed = pokemon.moveTrack
-  //       .map((track) => track?.[0]?.replace?.(/^\*/, '') as MoveName)
-  //       // .filter((name) => !!name && !pokemon?.moves?.includes(name))
-  //       .filter(Boolean)
-  //       .sort();
-  //
-  //     if (!didChange) {
-  //       didChange = true;
-  //     }
-  //   }
-  //
-  //   // if (!newMoveState.revealed.length) {
-  //   //   delete newMoveState.revealed;
-  //   // }
-  //
-  //   // build `learnsets`, given they're available in the client app
-  //   if (typeof dex?.learnsets?.learnable === 'function' && !pokemon.moveState?.learnset?.length) {
-  //     const learnset = await dex.learnsets.learnable(pokemon.speciesForme);
-  //
-  //     pokemon.moveState.learnset = Object.keys(learnset || {})
-  //       .map((moveid) => dex.moves.get(moveid)?.name)
-  //       .filter((name) => !!name && !pokemon.moveState?.revealed?.includes(name))
-  //       .sort();
-  //
-  //     if (!didChange) {
-  //       didChange = true;
-  //     }
-  //   }
-  //
-  //   // if (!newMoveState.learnset.length) {
-  //   //   delete newMoveState.learnset;
-  //   // }
-  //
-  //   // build `other`, only if we have no `learnsets` or the `format` has something to do with hacks
-  //   if ((Array.isArray(pokemon.moveState?.learnset) && !pokemon.moveState.learnset.length) || /anythinggoes|hackmons/i.test(format)) {
-  //     pokemon.moveState.other = Object.values(BattleMovedex || {} as typeof BattleMovedex)
-  //       .map((move) => move?.name as MoveName)
-  //       .filter((name) => !!name && !pokemon.moveState?.learnset?.includes(name));
-  //     // .sort();
-  //
-  //     if (!didChange) {
-  //       didChange = true;
-  //     }
-  //   }
-  //
-  //   // if (!newMoveState.other.length) {
-  //   //   delete newMoveState.other;
-  //   // }
-  //
-  //   if (didChange) {
-  //     l.debug('moveState for', pokemon.ident, 'updating to', pokemon.moveState);
-  //
-  //     // setPrevIdent(pokemon.ident);
-  //     // setMoveState(newMoveState);
-  //     onPokemonChange?.(pokemon);
-  //   }
-  // })(), [
-  //   dex,
-  //   // prevIdent,
-  //   format,
-  //   pokemon,
-  //   pokemon?.ident,
-  //   pokemon?.speciesForme,
-  //   pokemon?.moveTrack,
-  //   pokemon?.moveState,
-  //   onPokemonChange,
-  // ]);
-
-  // React.useEffect(() => void (async () => {
-  //   if (!pokemon?.speciesForme || typeof dex?.learnsets?.learnable !== 'function') {
-  //     return;
-  //   }
-  //
-  //   /** @todo hmm... yes, this is quite disgusting lmaoo */
-  //   const revealed = pokemon?.moveTrack
-  //     ?.map?.((track) => track?.[0]?.replace?.(/\*/g, '') as MoveName)
-  //     .filter((name) => !!name && !pokemon?.moves?.includes(name))
-  //     .sort();
-  //
-  //   const learnset = await dex.learnsets.learnable(pokemon.speciesForme);
-  //   const moveNames = Object.keys(learnset || {})
-  //     .map((moveid) => dex.moves.get(moveid)?.name)
-  //     .filter((name) => !!name && !revealed?.includes?.(name))
-  //     .sort();
-  //
-  //   // just in case, providing all other moves as well, even if illegal lmao
-  //   const allOtherMoves = Object.values(BattleMovedex || {} as typeof BattleMovedex)
-  //     .map((move) => move?.name?.replace?.(/\*/g, '') as MoveName)
-  //     .filter((name) => !!name && !moveNames.includes(name) && !revealed?.includes?.(name))
-  //     .sort();
-  //
-  //   const moves = allOtherMoves.length ? moveNames.concat(allOtherMoves) : moveNames;
-  //
-  //   if (revealed?.length) {
-  //     moves.unshift(...revealed);
-  //   }
-  //
-  //   // setPossibleMoves(moveNames);
-  //   setPossibleMoves(moves);
-  // })(), [
-  //   dex,
-  //   pokemon,
-  // ]);
-
-  // download the available sets for the current format & pokemon
-  // const [prevPresetIdent, setPrevPresetIdent] = React.useState<string>(null);
-  // const [presets, setPresets] = React.useState<Showdown.PokemonSet[]>([]);
-
-  // React.useEffect(() => void (async () => {
-  //   if (!pokemon?.speciesForme || typeof smogon?.sets !== 'function') {
-  //     return;
-  //   }
-  //
-  //   // if (prevPresetIdent === pokemon?.ident) {
-  //   //   return;
-  //   // }
-  //
-  //   /** @todo support random battles via @pkmn/randbats */
-  //   const newPresets = await smogon.sets(
-  //     dex,
-  //     pokemon.speciesForme,
-  //     !format?.includes?.('random') ? format as PkmnID : null,
-  //   );
-  //
-  //   if (JSON.stringify(presets.map((p) => p?.name)) !== JSON.stringify(newPresets.map((p) => p?.name))) { // kekw
-  //     l.debug('newPresets for', pokemon.speciesForme, 'via smogon.sets()', newPresets);
-  //
-  //     // setPrevPresetIdent(pokemon.ident);
-  //     setPresets(newPresets as Showdown.PokemonSet[]);
-  //
-  //     // check if there's no preset for the current pokemon
-  //     if (!pokemon.preset && pokemon.autoPreset) {
-  //       const [firstPreset] = newPresets;
-  //
-  //       if (!firstPreset?.name) {
-  //         return;
-  //       }
-  //
-  //       l.debug('auto-setting preset for', pokemon.ident, 'to', firstPreset.name);
-  //
-  //       onPokemonChange?.({
-  //         ...pokemon,
-  //         preset: firstPreset.name,
-  //         nature: firstPreset.nature as Showdown.PokemonNature || pokemon.nature,
-  //         ability: firstPreset.ability || pokemon.ability,
-  //         item: firstPreset.item || pokemon.item,
-  //         dirtyItem: !!firstPreset.item,
-  //         ivs: firstPreset.ivs || pokemon.ivs,
-  //         evs: firstPreset.evs || pokemon.evs,
-  //         moves: firstPreset.moves || pokemon.moves,
-  //       });
-  //     }
-  //   }
-  // })(), [
-  //   dex,
-  //   // prevPresetIdent,
-  //   presets,
-  //   smogon,
-  //   format,
-  //   pokemon,
-  //   // pokemon?.ident,
-  //   // pokemon?.speciesForme,
-  //   // pokemon?.preset,
-  //   onPokemonChange,
-  // ]);
-
-  // const parsedFormat = format?.replace?.('randombattle', '');
-  // const parsedFormat = `gen${gen}`;
-  // const sets = pokemon?.speciesForme && parsedFormat ? getSetsForFormat(parsedFormat)?.[pokemon.speciesForme] || {} : {};
-  // const possibleSets = Object.keys(sets);
-
-  // const [firstSetName] = possibleSetNames;
-  // const firstSet = sets[firstSetKey];
-
-  // const possibleNature = pokemon?.nature || firstSet?.nature;
-
-  // const boostedStats: Partial<Record<Showdown.StatName, number>> = PokemonStatNames.reduce((prev, stat) => {
-  //   prev[stat] = dex.stats.calc(
-  //     stat,
-  //     baseStats?.[stat] || 0,
-  //     pokemon?.ivs?.[stat] || 31,
-  //     pokemon?.evs?.[stat] || 0,
-  //     pokemon?.level || 100,
-  //     pokemon?.nature ? dex?.natures?.get?.(pokemon?.nature) : undefined,
-  //   );
-  //
-  //   // re-calculate any boosted stat
-  //   if (stat in (pokemon?.boosts || {})) {
-  //     const stage = (pokemon.boosts[stat] as number) || 0;
-  //
-  //     if (stage) {
-  //       const clampedStage = Math.min(Math.max(stage, -6), 6); // -6 <= stage <= 6
-  //       // const multiplier = clampedStage < 0 ? (2 / (2 + Math.abs(clampedStage))) : ((2 + clampedStage) / 2);
-  //       const multiplier = ((Math.abs(clampedStage) + 2) / 2) ** (clampedStage < 0 ? -1 : 1);
-  //
-  //       prev[stat] *= multiplier;
-  //     }
-  //   }
-  //
-  //   return prev;
-  // }, <CalcdexPokemon['calculatedStats']> {});
-
-  /** @todo refactor into useCalcdex (and remove `tooltips` dependency on PokeCalc) */
-  // const types = playerPokemon?.ident ? tooltips?.getPokemonTypes?.((playerPokemon as unknown) as Showdown.Pokemon) : null;
-
-  const currentHp = (playerPokemon?.hp || 0) / (playerPokemon?.maxhp || 1);
-
-  // const calcPlayerPokemon = !pokemonInvalid && gen ? new SmogonPokemon(
-  //   gen,
-  //   playerPokemon.speciesForme,
-  //   {
-  //     ...playerPokemon,
-  //     item: playerPokemon?.dirtyItem || playerPokemon?.item,
-  //   } as SmogonState.Pokemon,
-  // ) : null;
-
-  // if (calcPlayerPokemon) {
-  //   calcPlayerPokemon.originalCurHP = currentHp * playerPokemon.calculatedStats.hp;
-  // }
+  const currentHp = calcPokemonHp(playerPokemon);
 
   const smogonPlayerPokemon = createSmogonPokemon(gen, playerPokemon);
-
-  // const currentOpponentHp = (opponentPokemon?.hp || 0) / (opponentPokemon?.maxhp || 1);
-  // const calcOpponentPokemon = opponentPokemon?.speciesForme && gen ? new SmogonPokemon(
-  //   gen,
-  //   opponentPokemon.speciesForme,
-  //   {
-  //     ...opponentPokemon,
-  //     item: opponentPokemon?.dirtyItem || playerPokemon?.item,
-  //   } as SmogonState.Pokemon,
-  // ) : null;
-
-  // if (calcOpponentPokemon) {
-  //   calcOpponentPokemon.originalCurHP = currentOpponentHp * opponentPokemon.calculatedStats.hp;
-  // }
-
   const smogonOpponentPokemon = createSmogonPokemon(gen, opponentPokemon);
   const smogonField = field?.gameType ? new SmogonField(field) : null;
 
@@ -405,8 +86,7 @@ export const PokeCalc = ({
               <>
                 {' '}
                 <span style={{ opacity: 0.5 }}>
-                  {/* {playerPokemon?.level ? ` Lv.${playerPokemon.level}` : null} */}
-                  Lv.{playerPokemon.level}
+                  L{playerPokemon.level}
                 </span>
               </>
             }

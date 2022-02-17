@@ -1,7 +1,9 @@
 // import type { CalcdexPokemon } from './CalcdexReducer';
 import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
-export const detectPokemonIdent = (pokemon: Partial<Showdown.Pokemon>): string => sanitizeSpeciesForme(
+export const detectPokemonIdent = (
+  pokemon: Partial<Showdown.Pokemon>,
+): string => sanitizeSpeciesForme(
   [
     pokemon?.ident?.split?.(':')[0]
       || pokemon?.side?.sideid,

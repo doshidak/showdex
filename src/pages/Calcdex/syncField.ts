@@ -1,5 +1,4 @@
 import { logger } from '@showdex/utils/debug';
-// import type { State } from '@smogon/calc';
 import type { CalcdexBattleField } from './CalcdexReducer';
 import { sanitizeField } from './sanitizeField';
 
@@ -58,7 +57,6 @@ export const syncField = (
       /** @warning Not really type `string`, but was forcibly casted to keep TypeScript happy lol. */
       const value = <string> (<Record<keyof CalcdexBattleField, unknown>> updatedField?.[sideKey])?.[key];
 
-      // if (!value && !['string', 'number', 'boolean'].includes(typeof value)) {
       if (value === null || value === undefined) {
         return;
       }

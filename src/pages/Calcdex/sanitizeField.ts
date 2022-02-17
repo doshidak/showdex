@@ -24,7 +24,11 @@ const pseudoWeatherMoveDict: Record<string, CalcdexBattleField['terrain']> = {
   psychicterrain: 'Psychic',
 };
 
-export const sanitizeField = (battle: Partial<Showdown.Battle>, attackerIndex = 0, defenderIndex = 0): CalcdexBattleField => {
+export const sanitizeField = (
+  battle: Partial<Showdown.Battle>,
+  attackerIndex = 0,
+  defenderIndex = 0,
+): CalcdexBattleField => {
   const {
     gameType,
     p1,
@@ -33,7 +37,10 @@ export const sanitizeField = (battle: Partial<Showdown.Battle>, attackerIndex = 
     weather,
   } = battle || {};
 
-  const pseudoWeatherMoveNames = pseudoWeather?.map?.((weatherState) => weatherState?.[0]).filter(Boolean);
+  const pseudoWeatherMoveNames = pseudoWeather
+    ?.map?.((weatherState) => weatherState?.[0])
+    .filter(Boolean);
+
   const pseudoWeatherName = pseudoWeatherMoveNames?.[0];
 
   return {

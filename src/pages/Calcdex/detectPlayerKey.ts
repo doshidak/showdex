@@ -10,10 +10,5 @@ export const detectPlayerKeyFromPokemon = (
     return <CalcdexPlayerKey> ident.slice(0, ident.indexOf(':'));
   }
 
-  // actually, detectPokemonId() already detects for this in order to build the SideID in the ident string
-  // if (pokemon?.side?.sideid) {
-  //   return pokemon.side.sideid;
-  // }
-
   return null;
 };

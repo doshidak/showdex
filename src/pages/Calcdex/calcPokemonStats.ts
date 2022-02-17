@@ -2,7 +2,6 @@ import { PokemonStatNames } from '@showdex/consts';
 import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon } from './CalcdexReducer';
-// import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
 const l = logger('Calcdex/calcPokemonStats');
@@ -78,26 +77,12 @@ export const calcPokemonStats = (
     spe: pokemon?.evs?.spe ?? 0,
   };
 
-  // for `dirtyBoosts`, remove any stats w/ falsy values (e.g., 0, null, undefined).
-  // `dirtyBoosts` stats w/ falsy values should fallback to their corresponding stats' values in `boosts`.
-  // const dirtyBoosts: CalcdexPokemon['dirtyBoosts'] = {
-  //   ...pokemon?.dirtyBoosts,
-  // };
-
-  // Object.entries(dirtyBoosts).filter(([, value]) => !value).forEach(([key]) => {
-  //   delete dirtyBoosts[key];
-  // });
-
-  // rebuild the Pokemon's boosts that incorporates values from both their actual `boosts` and
-  // `dirtyBoosts` (boost values set by the user and not by the game)
   const boosts: CalcdexPokemon['boosts'] = {
     atk: (pokemon?.dirtyBoosts?.atk ?? pokemon?.boosts?.atk) || 0,
     def: (pokemon?.dirtyBoosts?.def ?? pokemon?.boosts?.def) || 0,
     spa: (pokemon?.dirtyBoosts?.spa ?? pokemon?.boosts?.spa) || 0,
     spd: (pokemon?.dirtyBoosts?.spd ?? pokemon?.boosts?.spd) || 0,
     spe: (pokemon?.dirtyBoosts?.spe ?? pokemon?.boosts?.spe) || 0,
-    // ...pokemon?.boosts,
-    // ...dirtyBoosts,
   };
 
   const calculatedStats: CalcdexPokemon['calculatedStats'] = PokemonStatNames.reduce((prev, stat) => {

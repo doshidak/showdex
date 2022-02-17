@@ -1,4 +1,4 @@
-import type { CalcdexPokemon } from './Calcdex';
+import type { CalcdexPokemon } from './CalcdexReducer';
 
 export const mapServerPokemon = (serverPokemon: Showdown.ServerPokemon[]) => ((pokemon: CalcdexPokemon): CalcdexPokemon => {
   if (!serverPokemon?.length) {

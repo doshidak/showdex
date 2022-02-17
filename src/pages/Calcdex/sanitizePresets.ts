@@ -6,7 +6,10 @@ import { calcPresetCalcdexId } from './calcCalcdexId';
 
 const l = logger('Calcdex/sanitizePresets');
 
-export const sanitizePresets = (smogonPresets: DeepPartial<PokemonSet>[]): CalcdexPokemonPreset[] => {
+/** @deprecated Use `usePresetCache()` instead. */
+export const sanitizePresets = (
+  smogonPresets: DeepPartial<PokemonSet>[],
+): CalcdexPokemonPreset[] => {
   if (!Array.isArray(smogonPresets)) {
     return [];
   }

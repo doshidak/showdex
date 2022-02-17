@@ -1,6 +1,9 @@
 import type { CalcdexPlayerSide } from './CalcdexReducer';
 
-export const sanitizePlayerSide = (player: Showdown.Side, activeIndex = 0): CalcdexPlayerSide => {
+export const sanitizePlayerSide = (
+  player: Showdown.Side,
+  activeIndex = 0,
+): CalcdexPlayerSide => {
   const sideConditionNames = Object.keys(player?.sideConditions || {}) as Showdown.SideConditionName[];
   const volatileNames = Object.keys(player?.active?.[activeIndex]?.volatiles || {}) as Showdown.PokemonVolatile[];
   const turnStatusNames = Object.keys(player?.active?.[activeIndex]?.turnstatuses || {}) as Showdown.PokemonTurnStatus[];

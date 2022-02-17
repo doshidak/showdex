@@ -1,9 +1,7 @@
 import { PokemonNatures } from '@showdex/consts';
 import { logger } from '@showdex/utils/debug';
 import type { AbilityName, Generation as PkmnGeneration } from '@pkmn/data';
-// import type { Smogon as PkmnSmogon } from '@pkmn/smogon';
 import type {
-  // BindThunkyActionators,
   ThunkyReducerAction,
   ThunkyReducerActionator,
   ThunkyReducerActionatorMap,
@@ -40,7 +38,6 @@ export interface CalcdexReducerActionatorMap extends ThunkyReducerActionatorMap<
     dex: PkmnGeneration,
     tooltips: Showdown.BattleTooltips,
     cache: PresetCacheHookInterface,
-    // smogon: PkmnSmogon,
     pokemon: Partial<CalcdexPokemon>,
     format?: string,
   ], Promise<void>>;
@@ -71,14 +68,11 @@ export interface CalcdexReducerActionatorMap extends ThunkyReducerActionatorMap<
   ]>;
 }
 
-// export type CalcdexReducerBindedActionatorMap = BindThunkyActionators<CalcdexReducerInstance, CalcdexReducerActionatorMap>;
-
 const l = logger('Calcdex/CalcdexReducerActionators');
 
 export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
   dex,
   tooltips,
-  // smogon,
   cache,
   pokemon,
   format,
@@ -114,7 +108,9 @@ export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
   }
 
   const state = getState();
-  const existingPokemon = state[playerKey].pokemon?.find((p) => detectPokemonIdent(p) === ident);
+
+  const existingPokemon = state[playerKey].pokemon
+    ?.find((p) => detectPokemonIdent(p) === ident);
 
   if (existingPokemon) {
     l.warn(
@@ -165,26 +161,6 @@ export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
       );
     }
   }
-
-  // if (dex?.natures) {
-  //   newPokemon.natures = Array.from(dex.natures)
-  //     .map((nature) => nature?.name)
-  //     .filter(Boolean);
-  //
-  //   if (newPokemon.natures?.length && !newPokemon.nature) {
-  //     const [firstNature] = newPokemon.natures;
-  //
-  //     newPokemon.nature = firstNature;
-  //   }
-  //
-  //   l.debug(
-  //     'addPokemon() <- dex.natures',
-  //     '\n', 'possible natures for', ident, 'set to', newPokemon.natures,
-  //     '\n', 'newPokemon', newPokemon,
-  //   );
-  // }
-
-  // newPokemon.natures = PokemonNatures;
 
   if (!newPokemon.nature) {
     [newPokemon.nature] = PokemonNatures;
@@ -274,21 +250,6 @@ export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
     '\n', 'format', format,
   );
 
-  // if ('speciesForme' in presetPokemon) {
-  //   delete presetPokemon.speciesForme;
-  // }
-
-  // l.debug(
-  //   'addPokemon() -> async () -> dispatch()',
-  //   '\n', 'type', `@${playerKey}/pokemon:put`,
-  //   '\n', 'payload', presetPokemon,
-  // );
-
-  // dispatch({
-  //   type: `@${playerKey}/pokemon:put`,
-  //   payload: presetPokemon,
-  // });
-
   // l.debug(
   //   'addPokemon() -> calcPokemonStats()',
   //   '\n', 'newPokemon', newPokemon,
@@ -346,7 +307,6 @@ export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
   }
 
   const updatedPokemon = <Partial<CalcdexPokemon>> { ...pokemon };
-  // const updatedPokemon = $.extend(true, {}, pokemon);
 
   if (typeof tooltips?.getPokemonTypes === 'function') {
     const types = tooltips.getPokemonTypes(<Showdown.Pokemon> <unknown> updatedPokemon);
@@ -382,8 +342,6 @@ export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
     '\n', 'playerKey', playerKey,
   );
 
-  // updatedPokemon.calcdexId = calcPokemonCalcdexId(updatedPokemon);
-
   l.debug(
     'updatePokemon() -> dispatch()',
     '\n', 'type', `@${playerKey}/pokemon:${shouldSync ? 'sync' : 'put'}`,
@@ -394,10 +352,6 @@ export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
 
   dispatch({
     type: `@${playerKey}/pokemon:${shouldSync ? 'sync' : 'put'}`,
-    // payload: <CalcdexPokemon> {
-    //   ...pokemon,
-    //   calculatedStats: calculateStats(pokemon),
-    // },
     payload: updatedPokemon,
   });
 };

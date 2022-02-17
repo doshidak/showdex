@@ -16,7 +16,9 @@ export const fetchPokemonMovesets = async (
 
   const newPokemon: Partial<CalcdexPokemon> = {
     moveState: {
-      revealed: pokemon.moveTrack?.map?.((m) => m?.[0]).filter(Boolean) ?? pokemon.moveState?.revealed ?? [],
+      revealed: pokemon.moveTrack?.map?.((m) => m?.[0]).filter(Boolean)
+        ?? pokemon.moveState?.revealed
+        ?? [],
       learnset: pokemon.moveState?.learnset ?? [],
       other: pokemon.moveState?.other ?? [],
     },
