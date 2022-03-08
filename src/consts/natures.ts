@@ -1,7 +1,7 @@
 export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.StatName, down?: Showdown.StatName]> = {
   Adamant: ['atk', 'spa'],
   Bashful: [],
-  Bold: ['def', 'spd'],
+  Bold: ['def', 'atk'],
   Brave: ['atk', 'spe'],
   Calm: ['spd', 'atk'],
   Careful: ['spd', 'spa'],
@@ -11,7 +11,7 @@ export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.
   Hasty: ['spe', 'def'],
   Impish: ['def', 'spa'],
   Jolly: ['spe', 'spa'],
-  Lax: ['def', 'spe'],
+  Lax: ['def', 'spd'],
   Lonely: ['atk', 'def'],
   Mild: ['spa', 'def'],
   Modest: ['spa', 'atk'],
@@ -27,3 +27,6 @@ export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.
 };
 
 export const PokemonNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts);
+
+export const PokemonBoostedNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts)
+  .filter((nature) => PokemonNatureBoosts[<Showdown.PokemonNature> nature].length);
