@@ -96,7 +96,7 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   position: relative;
   @include flex.row-between;
   // flex-wrap: wrap;
-  // width: 100%;
+  width: 100%;
   @include spacing.padding-xy($padding-x, $padding-y);
   outline: none;
 
