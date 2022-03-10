@@ -21,7 +21,7 @@ app.receive = (data: string) => {
   const receivedRoom = data?.startsWith?.('>');
 
   if (receivedRoom) {
-    const roomId = data.slice(1, data.indexOf('\n') - 1);
+    const roomId = data.slice(1, data.indexOf('\n'));
     const room = app.rooms[roomId];
 
     l.debug(
