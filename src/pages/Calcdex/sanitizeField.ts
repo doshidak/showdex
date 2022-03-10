@@ -41,7 +41,9 @@ export const sanitizeField = (
     ?.map?.((weatherState) => weatherState?.[0])
     .filter(Boolean);
 
-  const pseudoWeatherName = pseudoWeatherMoveNames?.[0];
+  const pseudoWeatherName = pseudoWeatherMoveNames?.[0]
+    ?.toLowerCase?.()
+    .replace(/[^a-z]/g, '');
 
   return {
     gameType: gameType === 'doubles' ? 'Doubles' : 'Singles',
