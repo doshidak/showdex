@@ -33,7 +33,7 @@ export const fetchPokemonPresets = async (
     newPokemon.autoPreset = !!newPresets?.length;
 
     if (newPresets?.length) {
-      newPokemon.presets = newPresets;
+      newPokemon.presets.push(...newPresets);
 
       if (pokemon.autoPreset) {
         const [firstPreset] = newPokemon.presets;

@@ -58,6 +58,15 @@ export const calcPokemonStats = (
     spe: pokemon?.baseStats?.spe ?? species?.baseStats?.spe ?? 0,
   };
 
+  // const baseStats: CalcdexPokemon['baseStats'] = {
+  //   hp: species?.baseStats?.hp ?? 0,
+  //   atk: species?.baseStats?.atk ?? 0,
+  //   def: species?.baseStats?.def ?? 0,
+  //   spa: species?.baseStats?.spa ?? 0,
+  //   spd: species?.baseStats?.spd ?? 0,
+  //   spe: species?.baseStats?.spe ?? 0,
+  // };
+
   // do the same thing for the Pokemon's IVs and EVs
   const ivs: CalcdexPokemon['ivs'] = {
     hp: pokemon?.ivs?.hp ?? 31,

@@ -6,6 +6,7 @@ import type { Generation, GenerationNum } from '@pkmn/data';
 import type {
   CalcdexBattleField,
   CalcdexPlayer,
+  CalcdexPlayerKey,
   CalcdexPokemon,
 } from './CalcdexReducer';
 import { PokeCalc } from './PokeCalc';
@@ -14,6 +15,8 @@ import styles from './PlayerCalc.module.scss';
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
+  format?: string;
+  playerKey?: CalcdexPlayerKey;
   player: CalcdexPlayer;
   opponent: CalcdexPlayer;
   field?: CalcdexBattleField;
@@ -27,12 +30,14 @@ interface PlayerCalcProps {
 export const PlayerCalc = ({
   className,
   style,
+  format,
+  playerKey = 'p1',
   player,
   opponent,
   field,
   gen,
   dex,
-  defaultName = 'p1',
+  defaultName = '--',
   onPokemonChange,
   onIndexSelect,
 }: PlayerCalcProps): JSX.Element => {
@@ -108,17 +113,13 @@ export const PlayerCalc = ({
 
       <PokeCalc
         style={{ paddingTop: 15 }}
-        // pokemon={selected}
-        // vsPokemon={vsPokemon}
+        format={format}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
-        // tooltips={tooltips}
-        // format={format}
-        // smogon={smogon}
         field={{
           ...field,
-          attackerSide: playerSideId === 'p1' ? field?.attackerSide : field?.defenderSide,
-          defenderSide: playerSideId === 'p1' ? field?.defenderSide : field?.attackerSide,
+          attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
+          defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
         gen={gen}
         dex={dex}

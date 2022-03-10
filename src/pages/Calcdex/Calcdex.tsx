@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { logger, printBuildInfo } from '@showdex/utils/debug';
+import { detectPlayerKeyFromBattle } from './detectPlayerKey';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -39,26 +40,42 @@ export const Calcdex = ({
   const {
     gen,
     field,
+    format,
     p1,
     p2,
   } = state;
 
+  const playerKey = detectPlayerKeyFromBattle(battle);
+
+  const player = playerKey === 'p1' ? p1 : p2;
+  const opponent = playerKey === 'p1' ? p2 : p1;
+
   return (
-    <div className={cx('showdex-module', styles.container)}>
+    <div
+      className={cx(
+        'showdex-module',
+        styles.container,
+      )}
+    >
       <div className={styles.content}>
         <div className={styles.buildInfo}>
           {printBuildInfo()}
         </div>
 
         <PlayerCalc
-          player={p1}
-          opponent={p2}
+          format={format}
+          playerKey={playerKey}
+          player={player}
+          opponent={opponent}
           field={field}
           gen={gen}
           dex={dex}
-          defaultName="Player 1"
+          defaultName="Player"
           onPokemonChange={updatePokemon}
-          onIndexSelect={(index) => setSelectionIndex('p1', index)}
+          onIndexSelect={(index) => setSelectionIndex(
+            playerKey,
+            index,
+          )}
         />
 
         <FieldCalc
@@ -69,14 +86,19 @@ export const Calcdex = ({
 
         <PlayerCalc
           style={{ marginTop: 30 }}
-          player={p2}
-          opponent={p1}
+          format={format}
+          playerKey={playerKey}
+          player={opponent}
+          opponent={player}
           field={field}
           gen={gen}
           dex={dex}
-          defaultName="Player 2"
+          defaultName="Opponent"
           onPokemonChange={updatePokemon}
-          onIndexSelect={(index) => setSelectionIndex('p2', index)}
+          onIndexSelect={(index) => setSelectionIndex(
+            playerKey === 'p1' ? 'p2' : 'p1',
+            index,
+          )}
         />
       </div>
     </div>

@@ -16,7 +16,9 @@ import type {
 } from './CalcdexReducer';
 import { CalcdexInitialState, CalcdexReducer } from './CalcdexReducer';
 import { CalcdexReducerActionators } from './CalcdexReducerActionators';
+import { detectPlayerKeyFromBattle } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
+import { syncServerPokemon } from './syncServerPokemon';
 import { usePresetCache } from './usePresetCache';
 
 export interface CalcdexHookProps {
@@ -133,7 +135,10 @@ export const useCalcdex = ({
 
     (['battleId', 'gen', 'format'] as (keyof CalcdexReducerState)[]).forEach((key) => {
       const currentValue = state[key];
-      const value = key === 'format' ? format : battle[(key === 'battleId' ? 'id' : key) as 'id' | 'gen'];
+
+      const value = key === 'format' ?
+        format :
+        battle[(key === 'battleId' ? 'id' : key) as 'id' | 'gen'];
 
       // l.debug('current battleKey', key, 'value', value);
 
@@ -192,7 +197,9 @@ export const useCalcdex = ({
         await presetCache.fetch(format);
       }
 
-      (['p1', 'p2'] as CalcdexPlayerKey[]).forEach((playerKey) => {
+      const isRandom = format.includes('random');
+
+      (<CalcdexPlayerKey[]> ['p1', 'p2']).forEach((playerKey) => {
         const player = battle?.[playerKey];
 
         if (!player?.sideid) {
@@ -227,13 +234,47 @@ export const useCalcdex = ({
           },
         });
 
+        // find out which side myPokemon belongs to
+        const myPokemonSide = detectPlayerKeyFromBattle(battle);
+        const isPlayerSide = playerKey === myPokemonSide;
+
+        const pokemonSource = isPlayerSide && isRandom ?
+          battle.myPokemon?.map?.((myMon) => {
+            const ident = detectPokemonIdent(<Showdown.Pokemon> <unknown> myMon);
+            const correspondingMon = player.pokemon
+              .find((pkmn) => detectPokemonIdent(pkmn) === ident);
+
+            if (!correspondingMon) {
+              return <Showdown.Pokemon> <unknown> {
+                ...myMon,
+                ident,
+              };
+            }
+
+            return <Showdown.Pokemon> <unknown> {
+              ...correspondingMon,
+              ...myMon,
+              ident,
+            };
+          }) ?? [] :
+          player.pokemon;
+
+        l.debug(
+          'React.useEffect() <- detectPlayerKeyFromBattle()',
+          '\n', 'myPokemonSide', myPokemonSide,
+          '\n', 'isPlayerSide?', isPlayerSide,
+          '\n', 'pokemonSource', pokemonSource,
+          '\n', 'battle', battle,
+        );
+
         // update each player's pokemon
         const { pokemon: pokemonState } = state[playerKey];
 
         // also find the activeIndex while we're at it
         const activeIdent = detectPokemonIdent(player.active?.[0]);
 
-        player.pokemon.forEach((mon, i) => void (async () => {
+        // player.pokemon.forEach((mon, i) => void (async () => {
+        pokemonSource.forEach((mon, i) => void (async () => {
           const ident = detectPokemonIdent(mon);
 
           if (!ident) {
@@ -254,7 +295,7 @@ export const useCalcdex = ({
               'React.useEffect() <- pokemonState.findIndex()',
               '\n', 'could not find Pokemon with ident', ident, 'at current index', i,
               '\n', 'index', index,
-              '\n', 'pokemonState[', i, ']', pokemonState[i],
+              '\n', 'pokemonState[', index, ']', pokemonState[index],
               '\n', 'pokemonState', pokemonState,
               '\n', 'pokemonState idents', pokemonState.map((p) => detectPokemonIdent(p)),
               '\n', 'mon', mon,
@@ -264,12 +305,47 @@ export const useCalcdex = ({
             return;
           }
 
+          // if the current player is `p1`, check for a corresponding `myPokemon`, if available
+          const serverPokemon = myPokemonSide && playerKey === myPokemonSide ?
+            battle.myPokemon?.find((p) => {
+              const pIdent = detectPokemonIdent(<Showdown.Pokemon> <unknown> p);
+              const didMatch = pIdent === ident;
+
+              // l.debug(
+              //   'serverPokemon',
+              //   '\n', 'pIdent', pIdent, 'ident', ident, '?', didMatch,
+              //   '\n', 'myPokemonSide', myPokemonSide, 'playerKey', playerKey,
+              // );
+
+              return didMatch;
+            }) :
+            null;
+
+          // l.debug(
+          //   'myPokemonSide', myPokemonSide, 'playerKey', playerKey,
+          //   '\n', 'serverPokemon', serverPokemon,
+          // );
+
+          // const newPokemon: CalcdexPokemon = {
+          //   ...mon,
+          //   ...(<Showdown.Pokemon & CalcdexPokemon> <unknown> serverPokemon),
+          // };
+
+          let newPokemon: CalcdexPokemon = {
+            ...(<CalcdexPokemon> <unknown> mon),
+          };
+
+          if (serverPokemon || isRandom) {
+            newPokemon = syncServerPokemon(dex, presetCache, format, newPokemon, serverPokemon);
+            // newPokemon.serverSourced = true;
+          }
+
           // found the pokemon, so update it
           if (index > -1) {
             l.debug(
               'React.useEffect() -> updatePokemon()',
-              '\n', 'syncing pokemon', ident, 'with mutation', mon,
-              '\n', `state.${playerKey}.pokemon[`, i, ']', pokemonState[i],
+              '\n', 'syncing pokemon', ident, 'with mutation', newPokemon,
+              '\n', `state.${playerKey}.pokemon[`, index, ']', pokemonState[index],
               '\n', 'i', i, 'index', index,
             );
 
@@ -278,23 +354,10 @@ export const useCalcdex = ({
             }
 
             // update the mon at the current index (via the `sync` action instead of `put`)
-            updatePokemon(dex, tooltips, <CalcdexPokemon> (<unknown> mon), true);
+            // updatePokemon(dex, tooltips, <CalcdexPokemon> (<unknown> mon), true);
+            updatePokemon(dex, tooltips, newPokemon, !serverPokemon);
 
             return;
-          }
-
-          // if the current player is `p1`, check for a corresponding `myPokemon`, if available
-          const serverPokemon = playerKey === 'p1' ?
-            battle.myPokemon?.find((p) => p?.ident === ident) :
-            null;
-
-          const newPokemon: CalcdexPokemon = {
-            ...mon,
-            ...(<Showdown.Pokemon & CalcdexPokemon> (<unknown> serverPokemon)),
-          };
-
-          if (serverPokemon) {
-            newPokemon.serverSourced = true;
           }
 
           l.debug(

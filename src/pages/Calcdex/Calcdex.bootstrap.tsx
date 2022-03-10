@@ -1,35 +1,44 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { createSideRoom, getActiveBattle } from '@showdex/utils/app';
+import {
+  createSideRoom,
+  // getActiveBattle,
+  getBattleRoom,
+} from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
 import { calcBattleCalcdexNonce } from './calcCalcdexNonce';
 import { Calcdex } from './Calcdex';
 
 const l = logger('Calcdex.bootstrap');
 
-export const bootstrap = (roomId?: string): void => {
+export const bootstrap = (roomid?: string): void => {
   l.debug(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
   );
 
-  if (!roomId?.startsWith?.('battle-')) {
+  if (!roomid?.startsWith?.('battle-')) {
     l.debug(
-      'Calcdex bootstrap request was ignored for roomId', roomId,
+      'Calcdex bootstrap request was ignored for roomid', roomid,
       'since it\'s not a BattleRoom',
     );
 
     return;
   }
 
+  // const {
+  //   battle,
+  //   tooltips,
+  // } = app.curRoom as BattleRoom;
+
   const {
     battle,
     tooltips,
-  } = app.curRoom as BattleRoom;
+  } = getBattleRoom(roomid);
 
   if (!battle?.id) {
     l.debug(
-      'Calcdex bootstrap request was ignored for roomId', roomId,
+      'Calcdex bootstrap request was ignored for roomid', roomid,
       'since no proper battle object exists within the current BattleRoom',
     );
 
@@ -51,10 +60,6 @@ export const bootstrap = (roomId?: string): void => {
     subscriptionDirty,
   } = battle || { subscription: null };
 
-  if (typeof subscription === 'function') {
-    battle.prevSubscription = subscription;
-  }
-
   if (!subscriptionDirty) {
     l.debug(
       'battle\'s subscription isn\'t dirty yet!',
@@ -62,11 +67,28 @@ export const bootstrap = (roomId?: string): void => {
       '\n', 'subscriptionDirty', subscriptionDirty,
     );
 
+    if (typeof subscription === 'function' && typeof prevSubscription !== 'function') {
+      l.debug('remapping original subscription() function to prevSubscription()');
+
+      battle.prevSubscription = subscription.bind(battle) as typeof subscription;
+    }
+
+    // note: battle.subscribe() internally sets its `subscription` property to the `listener` arg
+    // (in js/battle.js) battle.subscribe = function (listener) { this.subscription = listener; };
     battle.subscribe((state) => {
       l.debug(
         'battle.subscribe()',
         '\n', 'state', state,
       );
+
+      if (typeof battle.prevSubscription === 'function') {
+        l.debug(
+          'battle.subscribe()',
+          '\n', 'calling the original battle.subscribe() function...',
+        );
+
+        battle.prevSubscription(state);
+      }
 
       if (state === 'paused') {
         l.debug(
@@ -77,16 +99,14 @@ export const bootstrap = (roomId?: string): void => {
         return;
       }
 
-      if (typeof prevSubscription === 'function') {
-        l.debug(
-          'battle.subscribe()',
-          '\n', 'calling the original battle.subscribe() function...',
-        );
+      // const activeBattle = getActiveBattle();
+      const { battle: activeBattle } = getBattleRoom(roomid);
 
-        prevSubscription(state);
-      }
-
-      const activeBattle = getActiveBattle();
+      l.debug(
+        'battle.subscribe() <- getBattleRoom()',
+        '\n', 'roomid', roomid,
+        '\n', 'activeBattle', activeBattle,
+      );
 
       if (!activeBattle) {
         l.warn(
@@ -98,7 +118,7 @@ export const bootstrap = (roomId?: string): void => {
       }
 
       if (!activeBattle.calcdexRoom) {
-        const calcdexRoomId = `view-calcdex-${roomId}`;
+        const calcdexRoomId = `view-calcdex-${roomid}`;
 
         l.debug(
           'battle.subscribe() -> createSideRoom()',

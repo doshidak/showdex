@@ -2,7 +2,8 @@ import type { CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPokemonIdent } from './detectPokemonIdent';
-import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
+import { detectSpeciesForme } from './detectSpeciesForme';
+// import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
 export const sanitizePokemon = (
   pokemon: Partial<Showdown.Pokemon & CalcdexPokemon>,
@@ -13,7 +14,8 @@ export const sanitizePokemon = (
 
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
-    speciesForme: sanitizeSpeciesForme(pokemon?.volatiles?.formechange?.[1] ?? pokemon?.speciesForme),
+    // speciesForme: sanitizeSpeciesForme(pokemon?.volatiles?.formechange?.[1] ?? pokemon?.speciesForme),
+    speciesForme: detectSpeciesForme(pokemon),
 
     name: pokemon?.name,
     details: pokemon?.details,

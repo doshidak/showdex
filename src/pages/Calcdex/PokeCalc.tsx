@@ -31,6 +31,7 @@ import styles from './PokeCalc.module.scss';
 interface PokeCalcProps {
   className?: string;
   style?: React.CSSProperties;
+  format?: string;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
@@ -44,6 +45,7 @@ const l = logger('Calcdex/PokeCalc');
 export const PokeCalc = ({
   className,
   style,
+  format,
   playerPokemon,
   opponentPokemon,
   field,
@@ -51,6 +53,7 @@ export const PokeCalc = ({
   dex,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
+  const isRandom = format?.includes?.('random');
   const pokemonInvalid = !playerPokemon?.speciesForme;
 
   const currentHp = calcPokemonHp(playerPokemon);
@@ -310,6 +313,9 @@ export const PokeCalc = ({
                 ident: playerPokemon?.ident,
                 // speciesForme: playerPokemon?.speciesForme,
                 nature,
+                ivs: playerPokemon?.ivs,
+                evs: playerPokemon?.evs,
+                boosts: playerPokemon?.boosts,
               }),
             }}
             options={PokemonNatures.map((nature) => ({
@@ -348,6 +354,10 @@ export const PokeCalc = ({
                     ident: playerPokemon?.ident,
                     // speciesForme: playerPokemon?.speciesForme,
                     dirtyItem: null,
+                    nature: playerPokemon?.nature,
+                    ivs: playerPokemon?.ivs,
+                    evs: playerPokemon?.evs,
+                    boosts: playerPokemon?.boosts,
                   })}
                 />
               </>
@@ -369,6 +379,10 @@ export const PokeCalc = ({
                 // item,
                 // dirtyItem: true,
                 dirtyItem: item ?? ('' as ItemName),
+                nature: playerPokemon?.nature,
+                ivs: playerPokemon?.ivs,
+                evs: playerPokemon?.evs,
+                boosts: playerPokemon?.boosts,
               }),
             }}
             // options={Object.values(BattleItems).map((item) => ({
@@ -444,6 +458,10 @@ export const PokeCalc = ({
               ident: playerPokemon?.ident,
               // speciesForme: playerPokemon?.speciesForme,
               criticalHit: !playerPokemon?.criticalHit,
+              nature: playerPokemon?.nature,
+              ivs: playerPokemon?.ivs,
+              evs: playerPokemon?.evs,
+              boosts: playerPokemon?.boosts,
             })}
           />
         </div>
@@ -475,12 +493,14 @@ export const PokeCalc = ({
             calculate(gen, smogonPlayerPokemon, smogonOpponentPokemon, calculatorMove, smogonField) :
             null;
 
-          l.debug(
-            'calculate()', smogonPlayerPokemon?.name, 'vs', smogonOpponentPokemon?.name,
-            '\n', 'moveName', moveName,
-            '\n', 'move', calculatorMove,
-            '\n', 'result', result,
-          );
+          if (smogonPlayerPokemon?.name || smogonOpponentPokemon?.name) {
+            l.debug(
+              'calculate()', smogonPlayerPokemon?.name, 'vs', smogonOpponentPokemon?.name,
+              '\n', 'moveName', moveName,
+              '\n', 'move', calculatorMove,
+              '\n', 'result', result,
+            );
+          }
 
           const resultKoChance = result?.damage ? result.kochance() : null;
           const resultDesc = result?.damage ? result?.desc() : null;
@@ -568,16 +588,12 @@ export const PokeCalc = ({
                 {
                   showMoveStats &&
                   <div style={{ padding: '0 5px' }}>
-                    {
+                    {/*
                       !!move?.type &&
                       <span className={styles.small}>
-                        {/* <span className={styles.statLabel}>
-                          TYPE{' '}
-                        </span> */}
-                        {/* [{typeAbbrevs[move?.type] || '???'}] */}
                         <PokeType type={move.type} />
                       </span>
-                    }
+                    */}
 
                     <span className={styles.small}>
                       <span className={styles.statLabel}>
@@ -763,10 +779,13 @@ export const PokeCalc = ({
                     calcdexId: playerPokemon?.calcdexId,
                     ident: playerPokemon?.ident,
                     // speciesForme: playerPokemon?.speciesForme,
+                    nature: playerPokemon?.nature,
                     ivs: {
                       ...playerPokemon?.ivs,
                       [stat]: nextValue,
                     },
+                    evs: playerPokemon?.evs,
+                    boosts: playerPokemon?.boosts,
                   });
                 }}
               />
@@ -796,17 +815,20 @@ export const PokeCalc = ({
                   }
 
                   if (currentValue === 252) {
-                    nextValue = 4;
+                    nextValue = isRandom ? 84 : 4;
                   }
 
                   onPokemonChange?.({
                     calcdexId: playerPokemon?.calcdexId,
                     ident: playerPokemon?.ident,
                     // speciesForme: playerPokemon?.speciesForme,
+                    nature: playerPokemon?.nature,
+                    ivs: playerPokemon?.ivs,
                     evs: {
                       ...playerPokemon?.evs,
                       [stat]: nextValue,
                     },
+                    boosts: playerPokemon?.boosts,
                   });
                 }}
               />
@@ -917,6 +939,10 @@ export const PokeCalc = ({
                   //   ...playerPokemon?.boosts,
                   //   [stat]: Math.max((playerPokemon?.boosts?.[stat] || 0) - 1, -6),
                   // },
+                  nature: playerPokemon?.nature,
+                  ivs: playerPokemon?.ivs,
+                  evs: playerPokemon?.evs,
+                  boosts: playerPokemon?.boosts,
                   dirtyBoosts: {
                     ...playerPokemon?.dirtyBoosts,
                     // [stat]: true,
@@ -946,6 +972,10 @@ export const PokeCalc = ({
                   //   ...playerPokemon?.boosts,
                   //   [stat]: 0,
                   // },
+                  nature: playerPokemon?.nature,
+                  ivs: playerPokemon?.ivs,
+                  evs: playerPokemon?.evs,
+                  boosts: playerPokemon?.boosts,
                   dirtyBoosts: {
                     ...playerPokemon?.dirtyBoosts,
                     [stat]: undefined, // resets the boost, which a re-render will re-sync w/ the battle state
@@ -966,6 +996,10 @@ export const PokeCalc = ({
                   //   ...playerPokemon?.boosts,
                   //   [stat]: Math.min((playerPokemon?.boosts?.[stat] || 0) + 1, 6),
                   // },
+                  nature: playerPokemon?.nature,
+                  ivs: playerPokemon?.ivs,
+                  evs: playerPokemon?.evs,
+                  boosts: playerPokemon?.boosts,
                   dirtyBoosts: {
                     ...playerPokemon?.dirtyBoosts,
                     // [stat]: true,
