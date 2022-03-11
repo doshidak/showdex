@@ -1,0 +1,35 @@
+@use 'config/fonts';
+@use 'mixins/font';
+@use 'mixins/spacing';
+
+$label-font-size: 10px;
+$input-font-size: 10px;
+
+.label {
+  font-size: $label-font-size;
+}
+
+.input {
+  @include spacing.margin-none;
+  @include spacing.padding-none;
+  background: none;
+  border: none;
+  outline: none;
+
+  &, &::placeholder {
+    @include font.apply(fonts.$mono);
+    font-size: $input-font-size;
+  }
+
+  &::placeholder {
+    opacity: 1; // overrides lowered opacity value on Firefox default UA stylesheet
+    user-select: none;
+  }
+
+  // &.monospace {
+  //   &, &::placeholder {
+  //     @include font.apply(fonts.$mono);
+  //     font-size: $monospace-font-size;
+  //   }
+  // }
+}
