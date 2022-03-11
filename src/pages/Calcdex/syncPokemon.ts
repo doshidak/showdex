@@ -99,13 +99,13 @@ export const syncPokemon = (
     let value = mutations?.[key];
 
     switch (key) {
-      case 'nature': { // could be from a ServerPokemon
-        if (!value) {
-          return;
-        }
-
-        break;
-      }
+      // case 'nature': { // could be from a ServerPokemon
+      //   if (!value) {
+      //     return;
+      //   }
+      //
+      //   break;
+      // }
 
       case 'speciesForme': {
         if (mutations?.volatiles?.formechange?.[1]) {

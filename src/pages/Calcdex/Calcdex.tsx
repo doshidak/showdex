@@ -38,6 +38,7 @@ export const Calcdex = ({
   );
 
   const {
+    battleId,
     gen,
     field,
     format,
@@ -80,6 +81,7 @@ export const Calcdex = ({
 
         <FieldCalc
           style={{ marginTop: 30 }}
+          battleId={battleId}
           field={field}
           onFieldChange={updateField}
         />

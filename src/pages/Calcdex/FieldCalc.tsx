@@ -1,12 +1,15 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { Dropdown } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
+import { TerrainNames, WeatherNames } from '@showdex/consts';
 import type { CalcdexBattleField } from './CalcdexReducer';
 import styles from './PokeCalc.module.scss';
 
 interface FieldCalcProps {
   className?: string;
   style?: React.CSSProperties;
+  battleId?: string;
   field?: CalcdexBattleField;
   onFieldChange?: (field: Partial<CalcdexBattleField>) => void;
 }
@@ -14,6 +17,7 @@ interface FieldCalcProps {
 export const FieldCalc = ({
   className,
   style,
+  battleId,
   field,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
@@ -60,7 +64,6 @@ export const FieldCalc = ({
             labelStyle={attackerSide?.isReflect ? undefined : { color: '#FFFFFF' }}
             label="Reflect"
             onPress={() => onFieldChange?.({
-              // ...field,
               attackerSide: {
                 ...attackerSide,
                 isReflect: !attackerSide?.isReflect,
@@ -81,20 +84,58 @@ export const FieldCalc = ({
           />
         </div>
 
-        <div className={styles.tableItem}>
+        {/* <div className={styles.tableItem}>
           {weather || (
             <span style={{ opacity: 0.5 }}>
               --
             </span>
           )}
-        </div>
+        </div> */}
 
         <div className={styles.tableItem}>
+          <Dropdown
+            aria-label="Field Weather"
+            hint="None"
+            input={{
+              name: `FieldCalc:Weather:${battleId || '???'}`,
+              value: weather,
+              onChange: (updatedWeather: CalcdexBattleField['weather']) => onFieldChange?.({
+                weather: updatedWeather,
+              }),
+            }}
+            options={WeatherNames.map((weatherName) => ({
+              label: weatherName,
+              value: weatherName,
+            }))}
+            noOptionsMessage="No Weather"
+          />
+        </div>
+
+        {/* <div className={styles.tableItem}>
           {terrain || (
             <span style={{ opacity: 0.5 }}>
               --
             </span>
           )}
+        </div> */}
+
+        <div className={styles.tableItem}>
+          <Dropdown
+            aria-label="Field Terrain"
+            hint="None"
+            input={{
+              name: `FieldCalc:Terrain:${battleId || '???'}`,
+              value: terrain,
+              onChange: (updatedTerrain: CalcdexBattleField['terrain']) => onFieldChange?.({
+                terrain: updatedTerrain,
+              }),
+            }}
+            options={TerrainNames.map((terrainName) => ({
+              label: terrainName,
+              value: terrainName,
+            }))}
+            noOptionsMessage="No Terrain"
+          />
         </div>
 
         <div className={cx(styles.tableItem, styles.right)}>

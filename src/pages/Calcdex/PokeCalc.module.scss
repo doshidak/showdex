@@ -108,6 +108,6 @@
 
 /// @todo used by StageCalc.tsx -- refactor the tableGrid stuff into components
 .tableGrid.stageTable {
-  grid-template-columns: 1.25fr 1fr 1fr 1.25fr;
+  grid-template-columns: 1fr 1.25fr 1.25fr 1fr;
   column-gap: 15px;
 }
