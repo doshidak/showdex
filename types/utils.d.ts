@@ -11,6 +11,26 @@
 declare type Modify<T, R> = Omit<T, keyof R> & R;
 
 /**
+ * Construct a type with all properties of `T`, including any sub-properties, as partials.
+ *
+ * @example
+ * type Sosig = {
+ *   saturation: {
+ *     fatness: number;
+ *     color: number;
+ *   };
+ *   gain: number;
+ * };
+ * type SosigPartial = Partial<Sosig>;
+ * // -> { saturation?: { fatness: number; color: number; }; gain?: number; }
+ * type SosigDeepPartial = DeepPartial<Sosig>;
+ * // -> { saturation?: { fatness?: number; color?: number; }; gain?: number; }
+ */
+declare type DeepPartial<T> = T extends object ? {
+  [P in keyof T]?: T[P] extends string | number | boolean | symbol | Array ? T[P] : DeepPartial<T[P]>;
+} : T;
+
+/**
  * Construct a literal type with the keys of the indexable type `T` whose types extend the literal type `K`.
  *
  * @example
