@@ -1,0 +1,96 @@
+@use 'config/colors';
+@use 'functions/color';
+// @use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$padding-x: 5px;
+$padding-y: 1px;
+
+$input-font-size: 10px;
+$input-color: color.tint(colors.$blue, 15%);
+$input-color-hover: color.shade(colors.$blue, 15%);
+$input-color-active: color.tint(colors.$blue, 30%);
+
+$placeholder-color: color.alpha(colors.$white, 0.3);
+
+$background-color: colors.$transparent;
+$background-color-hover: color.alpha(colors.$white, 0.05);
+$background-color-active: color.alpha(colors.$black, 0.3);
+
+$border-radius: 15px;
+
+.container {
+  position: relative;
+  // @include flex.row-center;
+  background-color: $background-color;
+  border-radius: $border-radius;
+  @include transition.apply(background-color);
+
+  &:not(.absoluteHover) {
+    @include spacing.padding-xy($padding-x, $padding-y);
+
+    &:hover {
+      background-color: $background-color-hover;
+    }
+
+    &.active {
+      background-color: $background-color-active;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+.absoluteHover {
+  &::before {
+    content: '';
+    @include position.absolute-xy(-$padding-x, -$padding-y);
+    background-color: $background-color;
+    border-radius: $border-radius;
+    @include transition.apply(background-color);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &:hover::before {
+    background-color: $background-color-hover;
+  }
+
+  &.active::before {
+    background-color: $background-color-active;
+  }
+}
+
+.input {
+  width: 100%;
+  color: $input-color;
+  text-align: center;
+  @include transition.apply(color);
+
+  .container:hover & {
+    color: $input-color-hover;
+  }
+
+  .container.active & {
+    color: $input-color-active;
+  }
+
+  &::placeholder {
+    font-size: $input-font-size;
+    color: $placeholder-color;
+  }
+
+  // hide the number stepper arrows
+  -moz-appearance: textfield; // Firefox
+
+  &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { // Webkit
+    @include spacing.margin-none;
+    -webkit-appearance: none;
+  }
+}
