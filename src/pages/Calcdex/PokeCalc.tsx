@@ -6,7 +6,7 @@ import {
 } from '@smogon/calc';
 import cx from 'classnames';
 import { Picon, PokeStatus, PokeType } from '@showdex/components/app';
-import { Dropdown } from '@showdex/components/form';
+import { Dropdown, ValueField } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
 import {
   PokemonBoostNames,
@@ -24,6 +24,7 @@ import type {
 } from '@pkmn/data';
 import type { CalcdexBattleField, CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonHp } from './calcPokemonHp';
+import { calcPokemonStats } from './calcPokemonStats';
 import { createSmogonPokemon } from './createSmogonPokemon';
 import { formatStatBoost } from './formatStatBoost';
 import styles from './PokeCalc.module.scss';
@@ -31,7 +32,7 @@ import styles from './PokeCalc.module.scss';
 interface PokeCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  format?: string;
+  // format?: string;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
@@ -45,7 +46,7 @@ const l = logger('Calcdex/PokeCalc');
 export const PokeCalc = ({
   className,
   style,
-  format,
+  // format,
   playerPokemon,
   opponentPokemon,
   field,
@@ -53,14 +54,46 @@ export const PokeCalc = ({
   dex,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
-  const isRandom = format?.includes?.('random');
-  const pokemonInvalid = !playerPokemon?.speciesForme;
+  // const isRandom = format?.includes?.('random');
 
+  const pokemonKey = playerPokemon?.calcdexId || playerPokemon?.ident || '???';
   const currentHp = calcPokemonHp(playerPokemon);
 
   const smogonPlayerPokemon = createSmogonPokemon(gen, playerPokemon);
   const smogonOpponentPokemon = createSmogonPokemon(gen, opponentPokemon);
   const smogonField = field?.gameType ? new SmogonField(field) : null;
+
+  const calculatedStats = React.useMemo(
+    () => (playerPokemon?.calcdexId ? calcPokemonStats(dex, playerPokemon) : null),
+    [dex, playerPokemon],
+  );
+
+  const handlePokemonChange = (
+    mutation: DeepPartial<CalcdexPokemon>,
+  ) => onPokemonChange?.({
+    ...mutation,
+
+    calcdexId: playerPokemon?.calcdexId,
+    ident: playerPokemon?.ident,
+    boosts: playerPokemon?.boosts,
+
+    nature: mutation?.nature ?? playerPokemon?.nature,
+
+    ivs: {
+      ...playerPokemon?.ivs,
+      ...mutation?.ivs,
+    },
+
+    evs: {
+      ...playerPokemon?.evs,
+      ...mutation?.evs,
+    },
+
+    dirtyBoosts: {
+      ...playerPokemon?.dirtyBoosts,
+      ...mutation?.dirtyBoosts,
+    },
+  });
 
   return (
     <div
@@ -79,77 +112,79 @@ export const PokeCalc = ({
         </div>
 
         <div style={{ flex: 1.25 }}>
-          <span className={styles.pokemonName}>
-            {playerPokemon?.name || '???'}
-          </span>
+          <div style={{ marginBottom: 2 }}>
+            <span className={styles.pokemonName}>
+              {playerPokemon?.name || '--'}
+            </span>
 
-          <span className={styles.small}>
-            {
-              (typeof playerPokemon?.level === 'number' && playerPokemon.level !== 100) &&
-              <>
-                {' '}
-                <span style={{ opacity: 0.5 }}>
-                  L{playerPokemon.level}
-                </span>
-              </>
-            }
+            <span className={styles.small}>
+              {
+                (typeof playerPokemon?.level === 'number' && playerPokemon.level !== 100) &&
+                <>
+                  {' '}
+                  <span style={{ opacity: 0.5 }}>
+                    L{playerPokemon.level}
+                  </span>
+                </>
+              }
 
-            {
-              !!playerPokemon?.types?.length &&
-              <>
-                {' '}
-                {playerPokemon.types.map((type, i) => (
-                  <PokeType
-                    key={`PokeCalc-PokeType:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${type}`}
-                    style={playerPokemon.types.length > 1 && i === 0 ? { marginRight: 2 } : null}
-                    type={type}
-                  />
-                ))}
-              </>
-            }
-          </span>
+              {
+                !!playerPokemon?.types?.length &&
+                <>
+                  {' '}
+                  {playerPokemon.types.map((type, i) => (
+                    <PokeType
+                      key={`PokeCalc:PokeType:${pokemonKey}:${type}`}
+                      style={playerPokemon.types.length > 1 && i === 0 ? { marginRight: 2 } : null}
+                      type={type}
+                    />
+                  ))}
+                </>
+              }
+            </span>
+          </div>
 
-          <br />
+          <div>
+            <span className={styles.statLabel}>
+              HP
+            </span>
+            {' '}
 
-          <span className={styles.statLabel}>
-            HP
-          </span>
-          {' '}
-
-          <span
-            className={styles.hpBar}
-            style={{ marginBottom: 2 }}
-          >
             <span
-              className={cx(
-                styles.valueBar,
-                // pokemon?.hpcolor === 'g' && styles.green,
-                // pokemon?.hpcolor === 'y' && styles.yellow,
-                // pokemon?.hpcolor === 'r' && styles.red,
-              )}
-              style={{ width: `${(currentHp * 100).toFixed(3)}%` }}
-            />
-          </span>
-
-          {
-            !!currentHp &&
-            <>
-              {' '}
-              {`${(currentHp * 100).toFixed(0)}%`}
-            </>
-          }
-
-          {
-            (!!playerPokemon?.status || playerPokemon?.fainted || !currentHp) &&
-            <>
-              {' '}
-              <PokeStatus
-                // status={values.status}
-                status={playerPokemon?.status}
-                fainted={playerPokemon?.fainted || !currentHp}
+              className={styles.hpBar}
+              style={{ marginBottom: 2 }}
+            >
+              <span
+                className={cx(
+                  styles.valueBar,
+                  // pokemon?.hpcolor === 'g' && styles.green,
+                  // pokemon?.hpcolor === 'y' && styles.yellow,
+                  // pokemon?.hpcolor === 'r' && styles.red,
+                )}
+                style={{ width: `${(currentHp * 100).toFixed(3)}%` }}
               />
-            </>
-          }
+            </span>
+
+            {
+              !!currentHp &&
+              <>
+                {' '}
+                {`${(currentHp * 100).toFixed(0)}%`}
+              </>
+            }
+
+            {
+              (!!playerPokemon?.status || playerPokemon?.fainted || !currentHp) &&
+              <>
+                {' '}
+                <PokeStatus
+                  // status={values.status}
+                  status={playerPokemon?.status}
+                  fainted={playerPokemon?.fainted || !currentHp}
+                />
+              </>
+            }
+          </div>
         </div>
 
         <div style={{ flex: 1 }}>
@@ -180,10 +215,7 @@ export const PokeCalc = ({
               label="Auto"
               absoluteHover
               disabled={!playerPokemon?.presets?.length}
-              onPress={() => onPokemonChange?.({
-                calcdexId: playerPokemon?.calcdexId,
-                ident: playerPokemon?.ident,
-                // speciesForme: playerPokemon?.speciesForme,
+              onPress={() => handlePokemonChange({
                 autoPreset: !playerPokemon?.autoPreset,
               })}
             />
@@ -193,31 +225,27 @@ export const PokeCalc = ({
             aria-label="Pokemon Set"
             hint="None"
             input={{
-              name: `PokeCalc-Preset:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}`,
+              name: `PokeCalc:Preset:${pokemonKey}`,
               value: playerPokemon?.preset,
               onChange: (calcdexId: string) => {
-                const preset = playerPokemon.presets.find((p) => p?.calcdexId === calcdexId);
+                const preset = playerPokemon.presets
+                  .find((p) => p?.calcdexId === calcdexId);
 
-                if (!preset?.name) {
+                if (!preset) {
                   return;
                 }
 
-                onPokemonChange?.({
-                  calcdexId: playerPokemon?.calcdexId,
-                  ident: playerPokemon?.ident,
-                  // speciesForme: playerPokemon?.speciesForme,
-                  ivs: preset.ivs || playerPokemon?.ivs,
-                  evs: preset.evs || playerPokemon?.evs,
-                  moves: preset.moves || playerPokemon?.moves,
-                  altMoves: preset.altMoves || playerPokemon?.altMoves,
-                  nature: preset.nature || playerPokemon?.nature,
-                  dirtyAbility: preset.ability || playerPokemon?.ability,
-                  altAbilities: preset.altAbilities || playerPokemon?.altAbilities,
-                  // item: preset.item || playerPokemon?.item,
-                  // dirtyItem: !!playerPokemon.item,
-                  dirtyItem: preset.item || playerPokemon?.item,
-                  altItems: preset.altItems || playerPokemon?.altItems,
+                handlePokemonChange({
                   preset: calcdexId,
+                  ivs: preset.ivs,
+                  evs: preset.evs,
+                  moves: preset.moves,
+                  altMoves: preset.altMoves,
+                  nature: preset.nature,
+                  dirtyAbility: preset.ability,
+                  altAbilities: preset.altAbilities,
+                  altItems: preset.altItems,
+                  dirtyItem: preset.item,
                 });
               },
             }}
@@ -227,7 +255,7 @@ export const PokeCalc = ({
             }))}
             noOptionsMessage="No Sets"
             clearable={false}
-            disabled={pokemonInvalid || !playerPokemon?.presets?.length}
+            disabled={!playerPokemon?.speciesForme || !playerPokemon?.presets?.length}
           />
         </div>
       </div>
@@ -250,36 +278,24 @@ export const PokeCalc = ({
                   labelStyle={{ textTransform: 'uppercase' }}
                   label="Reset"
                   absoluteHover
-                  onPress={() => onPokemonChange?.({
-                    calcdexId: playerPokemon?.calcdexId,
-                    ident: playerPokemon?.ident,
-                    // speciesForme: playerPokemon?.speciesForme,
+                  onPress={() => handlePokemonChange({
                     dirtyAbility: null,
                   })}
                 />
               </>
             }
           </div>
-          {/* <br /> */}
-          {/* {pokemon?.ability || pokemon?.baseAbility || possibleAbilities.join(' / ') || '???'} */}
+
           <Dropdown
             aria-label="Ability"
             hint="???"
             input={{
-              name: `PokeCalc-Ability:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}`,
+              name: `PokeCalc:Ability:${pokemonKey}`,
               value: playerPokemon?.dirtyAbility ?? playerPokemon?.ability,
-              onChange: (ability: AbilityName) => onPokemonChange?.({
-                calcdexId: playerPokemon?.calcdexId,
-                ident: playerPokemon?.ident,
-                // speciesForme: playerPokemon?.speciesForme,
-                // ability,
+              onChange: (ability: AbilityName) => handlePokemonChange({
                 dirtyAbility: ability,
               }),
             }}
-            // options={playerPokemon?.abilities?.map((ability) => ({
-            //   label: ability,
-            //   value: ability,
-            // }))}
             options={[!!playerPokemon?.altAbilities?.length && {
               label: 'Pool',
               options: playerPokemon.altAbilities.map((ability) => ({
@@ -287,14 +303,14 @@ export const PokeCalc = ({
                 value: ability,
               })),
             }, !!playerPokemon?.abilities?.length && {
-              label: 'Other',
+              label: 'Other', /** @todo not saying 'All' since this isn't AAA (almost any ability) */
               options: playerPokemon.abilities
                 .filter((a) => !!a && (!playerPokemon.altAbilities.length || !playerPokemon.altAbilities.includes(a)))
                 .map((ability) => ({ label: ability, value: ability })),
             }].filter(Boolean)}
             noOptionsMessage="No Abilities"
             clearable={false}
-            disabled={pokemonInvalid}
+            disabled={!playerPokemon?.speciesForme}
           />
         </div>
 
@@ -302,28 +318,23 @@ export const PokeCalc = ({
           <div className={styles.statLabel}>
             Nature
           </div>
+
           <Dropdown
             aria-label="Nature"
             hint="???"
             input={{
-              name: `PokeCalc-Nature:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}`,
+              name: `PokeCalc:Nature:${pokemonKey}`,
               value: playerPokemon?.nature,
-              onChange: (nature: Showdown.PokemonNature) => onPokemonChange?.({
-                calcdexId: playerPokemon?.calcdexId,
-                ident: playerPokemon?.ident,
-                // speciesForme: playerPokemon?.speciesForme,
+              onChange: (nature: Showdown.PokemonNature) => handlePokemonChange({
                 nature,
-                ivs: playerPokemon?.ivs,
-                evs: playerPokemon?.evs,
-                boosts: playerPokemon?.boosts,
               }),
             }}
             options={PokemonNatures.map((nature) => ({
               label: [
                 nature,
                 PokemonNatureBoosts[nature]?.length && ' (',
-                PokemonNatureBoosts[nature]?.[0] && `${PokemonNatureBoosts[nature][0].toUpperCase()}+ `,
-                PokemonNatureBoosts[nature]?.[1] && `${PokemonNatureBoosts[nature][1].toUpperCase()}-`,
+                PokemonNatureBoosts[nature]?.[0] && `+${PokemonNatureBoosts[nature][0].toUpperCase()}`,
+                PokemonNatureBoosts[nature]?.[1] && ` -${PokemonNatureBoosts[nature][1].toUpperCase()}`,
                 PokemonNatureBoosts[nature]?.length && ')',
               ].filter(Boolean).join(''),
               value: nature,
@@ -331,7 +342,7 @@ export const PokeCalc = ({
             noOptionsMessage="No Natures"
             clearable={false}
             // hideSelections
-            disabled={pokemonInvalid}
+            disabled={!playerPokemon?.speciesForme}
           />
         </div>
 
@@ -349,46 +360,24 @@ export const PokeCalc = ({
                   labelStyle={{ textTransform: 'uppercase' }}
                   label="Reset"
                   absoluteHover
-                  onPress={() => onPokemonChange?.({
-                    calcdexId: playerPokemon?.calcdexId,
-                    ident: playerPokemon?.ident,
-                    // speciesForme: playerPokemon?.speciesForme,
+                  onPress={() => handlePokemonChange({
                     dirtyItem: null,
-                    nature: playerPokemon?.nature,
-                    ivs: playerPokemon?.ivs,
-                    evs: playerPokemon?.evs,
-                    boosts: playerPokemon?.boosts,
                   })}
                 />
               </>
             }
           </div>
-          {/* <br /> */}
-          {/* {pokemon?.item || (pokemon?.prevItem ? 'None' : '???')} */}
+
           <Dropdown
             aria-label="Item"
-            // hint={playerPokemon?.prevItem ? 'None' : '???'}
             hint="None"
             input={{
-              name: `PokeCalc-Item:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}`,
+              name: `PokeCalc:Item:${pokemonKey}`,
               value: playerPokemon?.dirtyItem ?? playerPokemon?.item,
-              onChange: (item: ItemName) => onPokemonChange?.({
-                calcdexId: playerPokemon?.calcdexId,
-                ident: playerPokemon?.ident,
-                // speciesForme: playerPokemon?.speciesForme,
-                // item,
-                // dirtyItem: true,
+              onChange: (item: ItemName) => handlePokemonChange({
                 dirtyItem: item ?? ('' as ItemName),
-                nature: playerPokemon?.nature,
-                ivs: playerPokemon?.ivs,
-                evs: playerPokemon?.evs,
-                boosts: playerPokemon?.boosts,
               }),
             }}
-            // options={Object.values(BattleItems).map((item) => ({
-            //   label: item?.name,
-            //   value: item?.name,
-            // }))}
             options={[!!playerPokemon?.altItems?.length && {
               label: 'Pool',
               options: playerPokemon.altItems.map((item) => ({
@@ -402,7 +391,7 @@ export const PokeCalc = ({
                 .map((item) => ({ label: item.name, value: item.name })),
             }].filter(Boolean)}
             noOptionsMessage="No Items"
-            disabled={pokemonInvalid}
+            disabled={!playerPokemon?.speciesForme}
           />
 
           {
@@ -422,14 +411,6 @@ export const PokeCalc = ({
             </div>
           }
         </div>
-
-        {/* <div style={{ flex: 1.25 }}>
-          <span className={styles.statLabel}>
-            Opposing Screens
-          </span>
-          <br />
-          &lt;- @TODO -&gt;
-        </div> */}
       </div>
 
       {/* Move List */}
@@ -437,9 +418,11 @@ export const PokeCalc = ({
         <div className={cx(styles.tableItem, styles.left, styles.statLabel)}>
           Moves
         </div>
+
         {/* <div className={cx(styles.tableItem, styles.statLabel)}>
           BP
         </div> */}
+
         <div className={cx(styles.tableItem, styles.statLabel)}>
           DMG
           {' '}
@@ -452,19 +435,13 @@ export const PokeCalc = ({
             }}
             label="Crit"
             absoluteHover
-            disabled={pokemonInvalid}
-            onPress={() => onPokemonChange?.({
-              calcdexId: playerPokemon?.calcdexId,
-              ident: playerPokemon?.ident,
-              // speciesForme: playerPokemon?.speciesForme,
+            disabled={!playerPokemon?.speciesForme}
+            onPress={() => handlePokemonChange({
               criticalHit: !playerPokemon?.criticalHit,
-              nature: playerPokemon?.nature,
-              ivs: playerPokemon?.ivs,
-              evs: playerPokemon?.evs,
-              boosts: playerPokemon?.boosts,
             })}
           />
         </div>
+
         <div className={cx(styles.tableItem, styles.statLabel)}>
           KO
         </div>
@@ -489,6 +466,10 @@ export const PokeCalc = ({
             calculatorMove.isCrit = true;
           }
 
+          /**
+           * @todo refactor this into a memoized callback via React.useCallback()
+           * this should NOT be inside the map()'s callback lmao
+           */
           const result = smogonPlayerPokemon?.nature && smogonOpponentPokemon?.nature && calculatorMove && gen ?
             calculate(gen, smogonPlayerPokemon, smogonOpponentPokemon, calculatorMove, smogonField) :
             null;
@@ -529,14 +510,14 @@ export const PokeCalc = ({
 
           return (
             <React.Fragment
-              key={`PokeCalc:MoveTrack-${playerPokemon?.calcdexId || playerPokemon?.name || '???'}:${moveName || '???'}:${i}`}
+              key={`PokeCalc:MoveTrack:${playerPokemon?.calcdexId || playerPokemon?.name || '???'}:${moveName || '???'}:${i}`}
             >
               <div className={cx(styles.tableItem, styles.left)}>
                 <Dropdown
-                  aria-label={`Move ${i + 1} for ${playerPokemon?.name || '???'}`}
+                  aria-label={`Move Slot ${i + 1} for ${playerPokemon?.name || '???'}`}
                   hint="--"
                   input={{
-                    name: `PokeCalc-Move:${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${i}`,
+                    name: `PokeCalc:MoveTrack:Move:${pokemonKey}:${i}`,
                     value: playerPokemon?.moves?.[i],
                     onChange: (newMove: MoveName) => {
                       // l.debug('newMove for', playerPokemon?.ident, 'at index', i, newMove);
@@ -549,10 +530,7 @@ export const PokeCalc = ({
 
                       moves[i] = newMove;
 
-                      onPokemonChange?.({
-                        calcdexId: playerPokemon?.calcdexId,
-                        ident: playerPokemon?.ident,
-                        // speciesForme: playerPokemon?.speciesForme,
+                      handlePokemonChange({
                         moves,
                       });
                     },
@@ -573,17 +551,8 @@ export const PokeCalc = ({
                     options: playerPokemon.moveState.other.map((name) => ({ label: name, value: name })),
                   }].filter(Boolean)}
                   noOptionsMessage="No Moves Found"
-                  disabled={pokemonInvalid}
+                  disabled={!playerPokemon?.speciesForme}
                 />
-
-                {/* {moveName || '???'} */}
-                {/*
-                  (!!moveid && activePokemon.lastMove === move?.id) &&
-                  <span className={cx(styles.statLabel, styles.small)}>
-                    {' '}Last
-                  </span>
-                */}
-                {/* <br /> */}
 
                 {
                   showMoveStats &&
@@ -692,7 +661,7 @@ export const PokeCalc = ({
                 style={!result?.damage ? { opacity: 0.5 } : null}
               >
                 {/* XXX.X% &ndash; XXX.X% */}
-                {result?.damage ? /\(([\d.]+\s-\s[\d.]+%)\)/.exec(resultDesc)?.[1] || '???' : '--'}
+                {result?.damage ? /\(([\d.]+\s-\s[\d.]+%)\)/.exec(resultDesc)?.[1] || '???' : ''}
               </div>
 
               <div
@@ -700,6 +669,7 @@ export const PokeCalc = ({
                 style={!result?.damage && !resultKoChance?.chance && !resultKoChance?.n ? { opacity: 0.3 } : null}
               >
                 {/* XXX% XHKO */}
+
                 {/* {result?.damage && resultKoChance?.chance && resultKoChance.chance !== 1 ? `${(resultKoChance.chance * 100).toFixed(1)}% ` : null} */}
                 {
                   (!!result?.damage && !!resultKoChance?.chance && resultKoChance.chance !== 1) &&
@@ -710,7 +680,7 @@ export const PokeCalc = ({
                   </>
                 }
                 {!!result?.damage && !!resultKoChance?.n && `${resultKoChance.n}HKO`}
-                {!result?.damage && (!resultKoChance?.chance || resultKoChance.chance === 1) && !resultKoChance?.n && '--'}
+                {/* {!result?.damage && (!resultKoChance?.chance || resultKoChance.chance === 1) && !resultKoChance?.n && '--'} */}
               </div>
             </React.Fragment>
           );
@@ -720,32 +690,14 @@ export const PokeCalc = ({
           <div className={cx(styles.tableItem, styles.statLabel)} />
           {PokemonStatNames.map((stat) => (
             <div
-              key={`PokeCalc:StatLabel-${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${stat}`}
+              key={`PokeCalc:StatLabel:${pokemonKey}:${stat}`}
               className={cx(styles.tableItem, styles.statLabel)}
             >
-              {stat}
               {!!playerPokemon?.nature && PokemonNatureBoosts[playerPokemon.nature][0] === stat && '+'}
               {!!playerPokemon?.nature && PokemonNatureBoosts[playerPokemon.nature][1] === stat && '-'}
+              {stat}
             </div>
           ))}
-          {/* <div className={cx(styles.tableItem, styles.statLabel)}>
-            HP
-          </div>
-          <div className={cx(styles.tableItem, styles.statLabel)}>
-            ATK
-          </div>
-          <div className={cx(styles.tableItem, styles.statLabel)}>
-            DEF
-          </div>
-          <div className={cx(styles.tableItem, styles.statLabel)}>
-            SPA
-          </div>
-          <div className={cx(styles.tableItem, styles.statLabel)}>
-            SPD
-          </div>
-          <div className={cx(styles.tableItem, styles.statLabel)}>
-            SPE
-          </div> */}
 
           <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
             IV
@@ -753,12 +705,14 @@ export const PokeCalc = ({
               S
             </span>
           </div>
+
           {PokemonStatNames.map((stat) => (
             <div
-              key={`PokeCalc:Ivs-${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${stat}`}
+              key={`PokeCalc:Ivs:${pokemonKey}:${stat}`}
               className={cx(styles.tableItem)}
+              style={{ display: 'flex', justifyContent: 'center' }}
             >
-              <Button
+              {/* <Button
                 style={{ color: 'inherit' }}
                 labelStyle={{ color: 'inherit' }}
                 label={(playerPokemon?.ivs?.[stat] || 0).toFixed(0)}
@@ -775,19 +729,31 @@ export const PokeCalc = ({
                     nextValue = 1;
                   }
 
-                  onPokemonChange?.({
-                    calcdexId: playerPokemon?.calcdexId,
-                    ident: playerPokemon?.ident,
-                    // speciesForme: playerPokemon?.speciesForme,
-                    nature: playerPokemon?.nature,
+                  handlePokemonChange({
                     ivs: {
-                      ...playerPokemon?.ivs,
                       [stat]: nextValue,
                     },
-                    evs: playerPokemon?.evs,
-                    boosts: playerPokemon?.boosts,
                   });
                 }}
+              /> */}
+
+              <ValueField
+                style={{ maxWidth: 30 }}
+                label={`${stat} IVs`}
+                hint={playerPokemon?.ivs?.[stat]?.toString?.() || '31'}
+                min={0}
+                max={31}
+                step={1}
+                input={{
+                  value: playerPokemon?.ivs?.[stat] || 0,
+                  onChange: (value: number) => handlePokemonChange({
+                    ivs: {
+                      [stat]: value,
+                    },
+                  }),
+                }}
+                hideLabel
+                absoluteHover
               />
             </div>
           ))}
@@ -798,12 +764,14 @@ export const PokeCalc = ({
               S
             </span>
           </div>
+
           {PokemonStatNames.map((stat) => (
             <div
-              key={`PokeCalc:Evs-${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${stat}`}
+              key={`PokeCalc:Evs:${pokemonKey}:${stat}`}
               className={cx(styles.tableItem)}
+              style={{ display: 'flex', justifyContent: 'center' }}
             >
-              <Button
+              {/* <Button
                 label={(playerPokemon?.evs?.[stat] || 0).toFixed(0)}
                 absoluteHover
                 onPress={() => {
@@ -818,112 +786,59 @@ export const PokeCalc = ({
                     nextValue = isRandom ? 84 : 4;
                   }
 
-                  onPokemonChange?.({
-                    calcdexId: playerPokemon?.calcdexId,
-                    ident: playerPokemon?.ident,
-                    // speciesForme: playerPokemon?.speciesForme,
-                    nature: playerPokemon?.nature,
-                    ivs: playerPokemon?.ivs,
+                  handlePokemonChange({
                     evs: {
-                      ...playerPokemon?.evs,
                       [stat]: nextValue,
                     },
-                    boosts: playerPokemon?.boosts,
                   });
                 }}
+              /> */}
+
+              <ValueField
+                style={{ maxWidth: 30 }}
+                label={`${stat} EVs`}
+                hint={playerPokemon?.evs?.[stat]?.toString?.() || '252'}
+                min={0}
+                max={252}
+                step={4}
+                input={{
+                  value: playerPokemon?.evs?.[stat] || 0,
+                  onChange: (value: number) => handlePokemonChange({
+                    evs: {
+                      [stat]: value,
+                    },
+                  }),
+                }}
+                hideLabel
+                absoluteHover
               />
             </div>
           ))}
 
           <div className={cx(styles.tableItem)} />
+
           {PokemonStatNames.map((stat) => (
             <div
-              key={`PokeCalc:Boosts-${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${stat}`}
+              key={`PokeCalc:Boosts:${pokemonKey}:${stat}`}
               className={cx(
                 styles.tableItem,
                 stat !== 'hp' && (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) > 0 && styles.positive,
                 stat !== 'hp' && (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) < 0 && styles.negative,
               )}
             >
-              {formatStatBoost(playerPokemon?.calculatedStats?.[stat]) || '???'}
+              {/* {formatStatBoost(playerPokemon?.calculatedStats?.[stat]) || '???'} */}
+              {formatStatBoost(calculatedStats?.[stat]) || '???'}
             </div>
           ))}
-          {/* <div className={cx(styles.tableItem)}>
-            {formatStatBoost(playerPokemon?.calculatedStats?.hp) || '???'}
-          </div>
-          <div
-            className={cx(
-              styles.tableItem,
-              (playerPokemon?.boosts?.atk || 0) > 0 && styles.positive,
-              (playerPokemon?.boosts?.atk || 0) < 0 && styles.negative,
-            )}
-          >
-            {formatStatBoost(playerPokemon?.calculatedStats?.atk) || '???'}
-          </div>
-          <div
-            className={cx(
-              styles.tableItem,
-              (playerPokemon?.boosts?.def || 0) > 0 && styles.positive,
-              (playerPokemon?.boosts?.def || 0) < 0 && styles.negative,
-            )}
-          >
-            {formatStatBoost(playerPokemon?.calculatedStats?.def) || '???'}
-          </div>
-          <div
-            className={cx(
-              styles.tableItem,
-              (playerPokemon?.boosts?.spa || 0) > 0 && styles.positive,
-              (playerPokemon?.boosts?.spa || 0) < 0 && styles.negative,
-            )}
-          >
-            {formatStatBoost(playerPokemon?.calculatedStats?.spa) || '???'}
-          </div>
-          <div
-            className={cx(
-              styles.tableItem,
-              (playerPokemon?.boosts?.spd || 0) > 0 && styles.positive,
-              (playerPokemon?.boosts?.spd || 0) < 0 && styles.negative,
-            )}
-          >
-            {formatStatBoost(playerPokemon?.calculatedStats?.spd) || '???'}
-          </div>
-          <div
-            className={cx(
-              styles.tableItem,
-              (playerPokemon?.boosts?.spe || 0) > 0 && styles.positive,
-              (playerPokemon?.boosts?.spe || 0) < 0 && styles.negative,
-            )}
-          >
-            {formatStatBoost(playerPokemon?.calculatedStats?.spe) || '???'}
-          </div> */}
 
           <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
             STAGE
           </div>
+
           <div className={cx(styles.tableItem)} />
-          {/* <div className={cx(styles.tableItem)}>
-            {(pokemon?.boosts?.atk || 0) > 0 && '+'}
-            {pokemon?.boosts?.atk || 0}
-          </div>
-          <div className={cx(styles.tableItem)}>
-            {(pokemon?.boosts?.def || 0) > 0 && '+'}
-            {pokemon?.boosts?.def || 0}
-          </div>
-          <div className={cx(styles.tableItem)}>
-            {(pokemon?.boosts?.spa || 0) > 0 && '+'}
-            {pokemon?.boosts?.spa || 0}
-          </div>
-          <div className={cx(styles.tableItem)}>
-            {(pokemon?.boosts?.spd || 0) > 0 && '+'}
-            {pokemon?.boosts?.spd || 0}
-          </div>
-          <div className={cx(styles.tableItem)}>
-            {(pokemon?.boosts?.spe || 0) > 0 && '+'}
-            {pokemon?.boosts?.spe || 0}
-          </div> */}
           {PokemonBoostNames.map((stat) => (
             <div
-              key={`PokeCalc:StageBoost-${playerPokemon?.calcdexId || playerPokemon?.ident || '???'}:${stat}`}
+              key={`PokeCalc:StageBoost:${pokemonKey}:${stat}`}
               className={cx(styles.tableItem, styles.stageValue)}
             >
               <Button
@@ -931,22 +846,12 @@ export const PokeCalc = ({
                 labelStyle={{ color: '#FFFFFF' }}
                 label="-"
                 disabled={(playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) <= -6}
-                onPress={() => onPokemonChange?.({
-                  calcdexId: playerPokemon?.calcdexId,
-                  ident: playerPokemon?.ident,
-                  // speciesForme: playerPokemon?.speciesForme,
-                  // boosts: {
-                  //   ...playerPokemon?.boosts,
-                  //   [stat]: Math.max((playerPokemon?.boosts?.[stat] || 0) - 1, -6),
-                  // },
-                  nature: playerPokemon?.nature,
-                  ivs: playerPokemon?.ivs,
-                  evs: playerPokemon?.evs,
-                  boosts: playerPokemon?.boosts,
+                onPress={() => handlePokemonChange({
                   dirtyBoosts: {
-                    ...playerPokemon?.dirtyBoosts,
-                    // [stat]: true,
-                    [stat]: Math.max((playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) - 1, -6),
+                    [stat]: Math.max(
+                      (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) - 1,
+                      -6,
+                    ),
                   },
                 })}
               />
@@ -964,20 +869,8 @@ export const PokeCalc = ({
                 ].filter(Boolean).join('')}
                 absoluteHover
                 disabled={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number'}
-                onPress={() => onPokemonChange?.({
-                  calcdexId: playerPokemon?.calcdexId,
-                  ident: playerPokemon?.ident,
-                  // speciesForme: playerPokemon?.speciesForme,
-                  // boosts: {
-                  //   ...playerPokemon?.boosts,
-                  //   [stat]: 0,
-                  // },
-                  nature: playerPokemon?.nature,
-                  ivs: playerPokemon?.ivs,
-                  evs: playerPokemon?.evs,
-                  boosts: playerPokemon?.boosts,
+                onPress={() => handlePokemonChange({
                   dirtyBoosts: {
-                    ...playerPokemon?.dirtyBoosts,
                     [stat]: undefined, // resets the boost, which a re-render will re-sync w/ the battle state
                   },
                 })}
@@ -988,22 +881,12 @@ export const PokeCalc = ({
                 labelStyle={{ color: '#FFFFFF' }}
                 label="+"
                 disabled={(playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) >= 6}
-                onPress={() => onPokemonChange?.({
-                  calcdexId: playerPokemon?.calcdexId,
-                  ident: playerPokemon?.ident,
-                  // speciesForme: playerPokemon?.speciesForme,
-                  // boosts: {
-                  //   ...playerPokemon?.boosts,
-                  //   [stat]: Math.min((playerPokemon?.boosts?.[stat] || 0) + 1, 6),
-                  // },
-                  nature: playerPokemon?.nature,
-                  ivs: playerPokemon?.ivs,
-                  evs: playerPokemon?.evs,
-                  boosts: playerPokemon?.boosts,
+                onPress={() => handlePokemonChange({
                   dirtyBoosts: {
-                    ...playerPokemon?.dirtyBoosts,
-                    // [stat]: true,
-                    [stat]: Math.min((playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) + 1, 6),
+                    [stat]: Math.min(
+                      (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) + 1,
+                      6,
+                    ),
                   },
                 })}
               />
