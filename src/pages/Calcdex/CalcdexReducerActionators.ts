@@ -15,7 +15,7 @@ import type {
 import type { PresetCacheHookInterface } from './usePresetCache';
 import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
-import { calcPokemonStats } from './calcPokemonStats';
+// import { calcPokemonStats } from './calcPokemonStats';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
@@ -288,7 +288,7 @@ export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
 };
 
 export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
-  dex,
+  _dex, /** @todo refactor this out since it's no longer being used */
   tooltips,
   pokemon,
   shouldSync,
@@ -325,22 +325,23 @@ export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
     }
   }
 
-  l.debug(
-    'updatePokemon() -> calcPokemonStats()',
-    '\n', 'updatedPokemon', updatedPokemon,
-    '\n', 'ident', ident,
-    '\n', 'playerKey', playerKey,
-  );
+  // l.debug(
+  //   'updatePokemon() -> calcPokemonStats()',
+  //   '\n', 'updatedPokemon', updatedPokemon,
+  //   '\n', 'ident', ident,
+  //   '\n', 'playerKey', playerKey,
+  // );
 
-  updatedPokemon.calculatedStats = calcPokemonStats(dex, updatedPokemon);
+  // update (2022/03/10): calculatedStats is now being calculated (and memoized) on the fly in PokeCalc
+  // updatedPokemon.calculatedStats = calcPokemonStats(dex, updatedPokemon);
 
-  l.debug(
-    'updatePokemon() <- calcPokemonStats()',
-    '\n', 'calculatedStats', updatedPokemon.calculatedStats,
-    '\n', 'updatedPokemon', updatedPokemon,
-    '\n', 'ident', ident,
-    '\n', 'playerKey', playerKey,
-  );
+  // l.debug(
+  //   'updatePokemon() <- calcPokemonStats()',
+  //   '\n', 'calculatedStats', updatedPokemon.calculatedStats,
+  //   '\n', 'updatedPokemon', updatedPokemon,
+  //   '\n', 'ident', ident,
+  //   '\n', 'playerKey', playerKey,
+  // );
 
   l.debug(
     'updatePokemon() -> dispatch()',

@@ -329,7 +329,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @default {}
    * @since 0.1.0
    */
-  dirtyBoosts?: Record<Showdown.StatNameNoHp, number>;
+  dirtyBoosts?: Partial<Record<Showdown.StatNameNoHp, number>>;
 
   /**
    * Base stats of the Pokemon based on its species.

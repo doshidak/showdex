@@ -41,7 +41,7 @@ export const Calcdex = ({
     battleId,
     gen,
     field,
-    format,
+    // format,
     p1,
     p2,
   } = state;
@@ -64,7 +64,7 @@ export const Calcdex = ({
         </div>
 
         <PlayerCalc
-          format={format}
+          // format={format}
           playerKey={playerKey}
           player={player}
           opponent={opponent}
@@ -88,7 +88,7 @@ export const Calcdex = ({
 
         <PlayerCalc
           style={{ marginTop: 30 }}
-          format={format}
+          // format={format}
           playerKey={playerKey}
           player={opponent}
           opponent={player}

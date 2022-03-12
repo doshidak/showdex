@@ -316,7 +316,24 @@ export const usePresetCache = (): PresetCacheHookInterface => {
       return [];
     }
 
+    const formatLabel = format in FormatLabels ?
+      FormatLabels[format] :
+      format?.toUpperCase?.();
+
     const presets = presetCache[genName][sanitizedSpeciesForme];
+
+    // put the presets in the current tier first, then the rest
+    presets.sort((a, b) => {
+      if (a.name.startsWith(formatLabel)) {
+        return -1;
+      }
+
+      if (b.name.startsWith(formatLabel)) {
+        return 1;
+      }
+
+      return 0;
+    });
 
     l.debug(
       'found cached presets for Pokemon', sanitizedSpeciesForme,

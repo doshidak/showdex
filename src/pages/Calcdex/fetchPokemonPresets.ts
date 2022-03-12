@@ -2,14 +2,14 @@ import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import type { PresetCacheHookInterface } from './usePresetCache';
-import { calcPokemonStats } from './calcPokemonStats';
+// import { calcPokemonStats } from './calcPokemonStats';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
 const l = logger('Calcdex/fetchPokemonPresets');
 
 export const fetchPokemonPresets = async (
-  dex: Generation,
+  _dex: Generation, /** @todo refactor this out since it's no longer being used */
   cache: PresetCacheHookInterface,
   pokemon: Partial<CalcdexPokemon>,
   format: string,
@@ -18,7 +18,7 @@ export const fetchPokemonPresets = async (
   const speciesForme = detectSpeciesForme(pokemon);
 
   const newPokemon: Partial<CalcdexPokemon> = {
-    speciesForme, // required for calcPokemonStats()
+    // speciesForme, // required for calcPokemonStats()
 
     altAbilities: pokemon?.altAbilities ?? [],
     altItems: pokemon?.altItems ?? [],
@@ -85,21 +85,22 @@ export const fetchPokemonPresets = async (
     }
   }
 
-  l.debug(
-    'fetchPokemonPresets() -> calcPokemonStats()',
-    '\n', 'newPokemon', newPokemon,
-    '\n', 'ident', ident,
-  );
+  // l.debug(
+  //   'fetchPokemonPresets() -> calcPokemonStats()',
+  //   '\n', 'newPokemon', newPokemon,
+  //   '\n', 'ident', ident,
+  // );
 
   // calculate the stats based on what we know atm
-  newPokemon.calculatedStats = calcPokemonStats(dex, newPokemon);
+  // update (2022/03/10): calculatedStats is now being calculated (and memoized) on the fly in PokeCalc
+  // newPokemon.calculatedStats = calcPokemonStats(dex, newPokemon);
 
-  l.debug(
-    'fetchPokemonPresets() <- calcPokemonStats()',
-    '\n', 'calculatedStats', newPokemon.calculatedStats,
-    '\n', 'newPokemon', newPokemon,
-    '\n', 'ident', ident,
-  );
+  // l.debug(
+  //   'fetchPokemonPresets() <- calcPokemonStats()',
+  //   '\n', 'calculatedStats', newPokemon.calculatedStats,
+  //   '\n', 'newPokemon', newPokemon,
+  //   '\n', 'ident', ident,
+  // );
 
   l.debug(
     'fetchPokemonPresets() -> return newPokemon',

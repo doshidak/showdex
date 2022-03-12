@@ -4,7 +4,7 @@ import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from './CalcdexReducer';
 import type { PresetCacheHookInterface } from './usePresetCache';
 import { calcPresetCalcdexId } from './calcCalcdexId';
-import { calcPokemonStats } from './calcPokemonStats';
+// import { calcPokemonStats } from './calcPokemonStats';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
@@ -333,7 +333,8 @@ export const syncServerPokemon = (
   syncedPokemon.preset = serverPreset.calcdexId;
   syncedPokemon.autoPreset = true;
 
-  syncedPokemon.calculatedStats = calcPokemonStats(dex, syncedPokemon);
+  // update (2022/03/10): calculatedStats is now being calculated (and memoized) on the fly in PokeCalc
+  // syncedPokemon.calculatedStats = calcPokemonStats(dex, syncedPokemon);
 
   // l.debug(
   //   'return syncedPokemon',

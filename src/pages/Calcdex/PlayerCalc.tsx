@@ -15,7 +15,7 @@ import styles from './PlayerCalc.module.scss';
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  format?: string;
+  // format?: string;
   playerKey?: CalcdexPlayerKey;
   player: CalcdexPlayer;
   opponent: CalcdexPlayer;
@@ -30,7 +30,7 @@ interface PlayerCalcProps {
 export const PlayerCalc = ({
   className,
   style,
-  format,
+  // format,
   playerKey = 'p1',
   player,
   opponent,
@@ -113,7 +113,7 @@ export const PlayerCalc = ({
 
       <PokeCalc
         style={{ paddingTop: 15 }}
-        format={format}
+        // format={format}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={{

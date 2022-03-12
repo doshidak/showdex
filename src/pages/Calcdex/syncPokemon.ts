@@ -88,7 +88,7 @@ export const syncPokemon = (
     'turnstatuses',
     'boosts',
     // 'dirtyBoosts',
-    // 'calculatedStats',
+    'calculatedStats', // this is updated before dispatching in useCalcdex
     // 'preset',
     // 'presets',
     // 'autoPreset',
@@ -99,13 +99,14 @@ export const syncPokemon = (
     let value = mutations?.[key];
 
     switch (key) {
-      // case 'nature': { // could be from a ServerPokemon
-      //   if (!value) {
-      //     return;
-      //   }
-      //
-      //   break;
-      // }
+      case 'ability':
+      case 'nature': {
+        if (!value) {
+          return;
+        }
+
+        break;
+      }
 
       case 'speciesForme': {
         if (mutations?.volatiles?.formechange?.[1]) {
