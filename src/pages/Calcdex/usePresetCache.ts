@@ -121,15 +121,18 @@ export const usePresetCache = (): PresetCacheHookInterface => {
 
     setLoading(true);
 
+    let downloadedData = {};
+
     const response = await runtimeFetch(url);
-    const data = await response.json();
+    // const data = await response.json();
+    downloadedData = await response.json();
 
     l.debug(
       'fetch() <- await runtimeFetch()',
-      '\n', 'data', data,
+      '\n', 'downloadedData', downloadedData,
     );
 
-    if (!Object.keys(data || {}).length) {
+    if (!Object.keys(downloadedData || {}).length) {
       l.warn(
         'o snap! no presets bruh',
         '\n', 'isRandom?', isRandom,
@@ -140,13 +143,61 @@ export const usePresetCache = (): PresetCacheHookInterface => {
       return;
     }
 
+    // gen8bdsp* is a format that requires some additional sets from gen4
+    // (otherwise, some Pokemon [like Breloom] won't have any sets since they doesn't exist in gen8)
+    if (!isRandom && format.startsWith('gen8bdsp')) {
+      const gen4Url = `${baseUrl}/gen4.json`;
+
+      l.debug(
+        'fetch() -> await runtimeFetch()',
+        '\n', 'downloading additional presets from gen4 since format is gen8bdsp* (not random)',
+        '\n', 'gen4Url', gen4Url,
+        '\n', 'format', format,
+      );
+
+      const gen4Response = await runtimeFetch(gen4Url);
+      const gen4Data = await gen4Response.json();
+
+      l.debug(
+        'fetch() <- await runtimeFetch()',
+        '\n', 'gen4Data', gen4Data,
+      );
+
+      // inject the presets into what already have; otherwise, we'll overwrite existing ones!
+      Object.entries(gen4Data).forEach(([forme, formats]) => {
+        if (!(forme in downloadedData)) {
+          downloadedData[forme] = <Record<string, unknown>> formats;
+
+          return;
+        }
+
+        Object.entries(<Record<string, Record<string, unknown>>> formats).forEach(([currentFormat, presets]) => {
+          if (!(currentFormat in downloadedData[forme])) {
+            (<Record<string, Record<string, unknown>>> downloadedData[forme])[currentFormat] = presets;
+
+            return;
+          }
+
+          (<Record<string, Record<string, unknown>>> downloadedData[forme])[currentFormat] = {
+            ...(<Record<string, Record<string, unknown>>> downloadedData[forme])[currentFormat],
+            ...presets,
+          };
+        });
+      });
+
+      l.debug(
+        'post gen4Data injection into downloadedData',
+        '\n', 'downloadedData', downloadedData,
+      );
+    }
+
     setPresetCache((prevPresetCache) => {
       // every format will be under `gen<#>`, except for randoms
       if (!(genName in prevPresetCache)) {
         prevPresetCache[genName] = {};
       }
 
-      Object.entries(data).forEach(([forme, value]) => {
+      Object.entries(downloadedData).forEach(([forme, value]) => {
         const sanitizedForme = sanitizeSpeciesForme(forme);
 
         if (!Array.isArray(prevPresetCache[genName][sanitizedForme])) {
