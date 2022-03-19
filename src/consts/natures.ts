@@ -30,3 +30,38 @@ export const PokemonNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatu
 
 export const PokemonBoostedNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts)
   .filter((nature) => PokemonNatureBoosts[<Showdown.PokemonNature> nature].length);
+
+/**
+* These are used by the nature/EV/IV finding algorithm,
+* based on the Pokemon's final calculated stats.
+*
+* * Ordering of each nature is intentional,
+*   from common natures to more obscure ones.
+* * Any nature that does not boost any stat is ignored,
+*   except for Hardy (since it's used in randoms), which is last.
+*
+* @since 0.1.0
+*/
+export const PokemonCommonNatures: Showdown.NatureName[] = [
+  'Adamant',
+  'Modest',
+  'Jolly',
+  'Timid',
+  'Bold',
+  'Brave',
+  'Calm',
+  'Careful',
+  'Gentle',
+  'Hasty',
+  'Impish',
+  'Lax',
+  'Lonely',
+  'Mild',
+  'Naive',
+  'Naughty',
+  'Quiet',
+  'Rash',
+  'Relaxed',
+  'Sassy',
+  'Hardy',
+];

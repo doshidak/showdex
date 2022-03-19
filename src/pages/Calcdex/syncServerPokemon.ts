@@ -1,4 +1,4 @@
-import { PokemonStatNames } from '@showdex/consts';
+import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts';
 import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from './CalcdexReducer';
@@ -9,39 +9,6 @@ import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
 const l = logger('Calcdex/syncServerPokemon');
-
-/**
- * These are used by the nature/EV/IV finding algorithm,
- * based on the Pokemon's final calculated stats.
- *
- * * Ordering of each nature is intentional,
- *   from common natures to more obscure ones.
- * * Any nature that does not boost any stat is ignored,
- *   except for Hardy (since it's used in randoms), which is last.
- */
-const natures: Showdown.NatureName[] = [
-  'Adamant',
-  'Modest',
-  'Jolly',
-  'Timid',
-  'Bold',
-  'Brave',
-  'Calm',
-  'Careful',
-  'Gentle',
-  'Hasty',
-  'Impish',
-  'Lax',
-  'Lonely',
-  'Mild',
-  'Naive',
-  'Naughty',
-  'Quiet',
-  'Rash',
-  'Relaxed',
-  'Sassy',
-  'Hardy',
-];
 
 export const syncServerPokemon = (
   dex: Generation,
@@ -179,7 +146,7 @@ export const syncServerPokemon = (
     }
   } else {
     // low-key terrible cause of the O(n^4) complexity (from this alone), but w/e
-    for (const natureName of natures) {
+    for (const natureName of PokemonCommonNatures) {
       const nature = dex.natures.get(natureName);
 
       // l.debug('trying nature', nature.name, 'for Pokemon', syncedPokemon.ident);
