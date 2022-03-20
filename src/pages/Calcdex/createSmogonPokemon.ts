@@ -1,8 +1,10 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { logger } from '@showdex/utils/debug';
+import type { Generation } from '@pkmn/data';
 import type { GenerationNum, State as SmogonState } from '@smogon/calc';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonHp } from './calcPokemonHp';
+import { calcPokemonStats } from './calcPokemonStats';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
@@ -10,6 +12,7 @@ const l = logger('Calcdex/createSmogonPokemon');
 
 export const createSmogonPokemon = (
   gen: GenerationNum,
+  dex: Generation,
   pokemon: CalcdexPokemon,
 ): SmogonPokemon => {
   if (typeof gen !== 'number' || gen < 1) {
@@ -81,9 +84,11 @@ export const createSmogonPokemon = (
   };
 
   // calculate the Pokemon's current HP
-  if (typeof pokemon?.calculatedStats?.hp === 'number') {
+  const calculatedStats = calcPokemonStats(dex, pokemon);
+
+  if (typeof calculatedStats?.hp === 'number') {
     const currentHp = calcPokemonHp(pokemon);
-    const { hp: hpStat } = pokemon.calculatedStats;
+    const { hp: hpStat } = calculatedStats;
 
     // if the Pokemon fainted, assume it has full HP as to not break the damage calc
     options.curHP = (currentHp || 1) * hpStat;
