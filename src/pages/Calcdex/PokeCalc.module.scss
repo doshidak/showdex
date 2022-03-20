@@ -61,6 +61,14 @@
   color: color.alpha(colors.$white, 0.5);
   text-transform: uppercase;
   user-select: none;
+
+  &.up {
+    color: color.alpha(colors.$red, 0.75);
+  }
+
+  &.down {
+    color: color.alpha(colors.$blue, 0.75);
+  }
 }
 
 .tableGrid {

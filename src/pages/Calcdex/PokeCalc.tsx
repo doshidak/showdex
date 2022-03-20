@@ -1,9 +1,4 @@
 import * as React from 'react';
-import {
-  calculate,
-  Field as SmogonField,
-  Move as SmogonMove,
-} from '@smogon/calc';
 import cx from 'classnames';
 import { Picon, PokeStatus, PokeType } from '@showdex/components/app';
 import { Dropdown, ValueField } from '@showdex/components/form';
@@ -14,7 +9,7 @@ import {
   PokemonNatures,
   PokemonStatNames,
 } from '@showdex/consts';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import type {
   AbilityName,
   Generation,
@@ -25,8 +20,11 @@ import type {
 import type { CalcdexBattleField, CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonHp } from './calcPokemonHp';
 import { calcPokemonStats } from './calcPokemonStats';
+import { createSmogonField } from './createSmogonField';
+import { createSmogonMove } from './createSmogonMove';
 import { createSmogonPokemon } from './createSmogonPokemon';
 import { formatStatBoost } from './formatStatBoost';
+import { useSmogonMatchup } from './useSmogonMatchup';
 import styles from './PokeCalc.module.scss';
 
 interface PokeCalcProps {
@@ -41,7 +39,7 @@ interface PokeCalcProps {
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
 }
 
-const l = logger('Calcdex/PokeCalc');
+// const l = logger('Calcdex/PokeCalc');
 
 export const PokeCalc = ({
   className,
@@ -59,9 +57,16 @@ export const PokeCalc = ({
   const pokemonKey = playerPokemon?.calcdexId || playerPokemon?.ident || '???';
   const currentHp = calcPokemonHp(playerPokemon);
 
-  const smogonPlayerPokemon = createSmogonPokemon(gen, playerPokemon);
-  const smogonOpponentPokemon = createSmogonPokemon(gen, opponentPokemon);
-  const smogonField = field?.gameType ? new SmogonField(field) : null;
+  const smogonPlayerPokemon = createSmogonPokemon(gen, dex, playerPokemon);
+  const smogonOpponentPokemon = createSmogonPokemon(gen, dex, opponentPokemon);
+  const smogonField = createSmogonField(field);
+
+  const calculateMatchup = useSmogonMatchup(
+    gen,
+    smogonPlayerPokemon,
+    smogonOpponentPokemon,
+    smogonField,
+  );
 
   const calculatedStats = React.useMemo(
     () => (playerPokemon?.calcdexId ? calcPokemonStats(dex, playerPokemon) : null),
@@ -146,9 +151,8 @@ export const PokeCalc = ({
 
           <div>
             <span className={styles.statLabel}>
-              HP
+              HP{' '}
             </span>
-            {' '}
 
             <span
               className={styles.hpBar}
@@ -167,10 +171,10 @@ export const PokeCalc = ({
 
             {
               !!currentHp &&
-              <>
+              <span style={{ userSelect: 'none' }}>
                 {' '}
                 {`${(currentHp * 100).toFixed(0)}%`}
-              </>
+              </span>
             }
 
             {
@@ -453,38 +457,46 @@ export const PokeCalc = ({
           // const actualMoveId = pokemon?.moveTrack?.[i]?.[0];
 
           // const move = moveid ? Dex?.moves?.get?.(moveid) : null;
-          const move = moveid ? dex?.moves?.get?.(moveid) : null;
+          // const move = moveid ? dex?.moves?.get?.(moveid) : null;
+
           const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
-          const moveName = transformed ? moveid.substring(1) : moveid;
+          const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
 
           // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
           // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
-          const calculatorMove = moveid && moveName && gen ? new SmogonMove(gen, moveName) : null;
+          // const calculatorMove = moveid && moveName && gen ? new SmogonMove(gen, moveName) : null;
+          const calculatorMove = createSmogonMove(
+            gen,
+            moveName,
+            playerPokemon?.criticalHit,
+          );
 
-          if (calculatorMove && playerPokemon?.criticalHit) {
-            calculatorMove.isCrit = true;
-          }
+          // if (calculatorMove && playerPokemon?.criticalHit) {
+          //   calculatorMove.isCrit = true;
+          // }
 
           /**
            * @todo refactor this into a memoized callback via React.useCallback()
            * this should NOT be inside the map()'s callback lmao
            */
-          const result = smogonPlayerPokemon?.nature && smogonOpponentPokemon?.nature && calculatorMove && gen ?
-            calculate(gen, smogonPlayerPokemon, smogonOpponentPokemon, calculatorMove, smogonField) :
-            null;
+          // const result = smogonPlayerPokemon?.nature && smogonOpponentPokemon?.nature && calculatorMove && gen ?
+          //   calculate(gen, smogonPlayerPokemon, smogonOpponentPokemon, calculatorMove, smogonField) :
+          //   null;
 
-          if (smogonPlayerPokemon?.name || smogonOpponentPokemon?.name) {
-            l.debug(
-              'calculate()', smogonPlayerPokemon?.name, 'vs', smogonOpponentPokemon?.name,
-              '\n', 'moveName', moveName,
-              '\n', 'move', calculatorMove,
-              '\n', 'result', result,
-            );
-          }
+          const result = calculateMatchup(calculatorMove);
 
-          const resultKoChance = result?.damage ? result.kochance() : null;
-          const resultDesc = result?.damage ? result?.desc() : null;
+          // if (smogonPlayerPokemon?.name || smogonOpponentPokemon?.name) {
+          //   l.debug(
+          //     'calculate()', smogonPlayerPokemon?.name, 'vs', smogonOpponentPokemon?.name,
+          //     '\n', 'moveName', moveName,
+          //     '\n', 'move', calculatorMove,
+          //     '\n', 'result', result,
+          //   );
+          // }
+
+          // const resultKoChance = result?.damage ? result.kochance() : null;
+          // const resultDesc = result?.damage ? result?.desc() : null;
 
           // l.debug(
           //   'calculator result for move', moveName,
@@ -493,20 +505,11 @@ export const PokeCalc = ({
           //   '\n', 'desc', result?.desc(),
           // );
 
-          const showAccuracy = typeof move?.accuracy !== 'boolean' &&
-            (move?.accuracy || -1) > 0 &&
-            move.accuracy !== 100;
+          // const showAccuracy = typeof move?.accuracy !== 'boolean' &&
+          //   (move?.accuracy || -1) > 0 &&
+          //   move.accuracy !== 100;
 
-          // const showActualMove = !!actualMoveId && !pokemon?.moves?.includes?.(actualMoveId);
-
-          // const showMoveStats = showAccuracy || !!move?.priority || showActualMove;
-          // const showMoveStats = !!move?.type || !!move?.basePower || showAccuracy || !!move?.priority;
-          const showMoveStats = !!move?.type;
-
-          // l.debug(
-          //   'moveid', moveid, 'moveName', moveName,
-          //   '\n', 'actualMoveId:', actualMoveId, 'showActualMove?', showActualMove,
-          // );
+          // const showMoveStats = !!move?.type;
 
           return (
             <React.Fragment
@@ -554,7 +557,7 @@ export const PokeCalc = ({
                   disabled={!playerPokemon?.speciesForme}
                 />
 
-                {
+                {/*
                   showMoveStats &&
                   <div style={{ padding: '0 5px' }}>
                     {/*
@@ -562,7 +565,7 @@ export const PokeCalc = ({
                       <span className={styles.small}>
                         <PokeType type={move.type} />
                       </span>
-                    */}
+                    *\/}
 
                     <span className={styles.small}>
                       <span className={styles.statLabel}>
@@ -576,7 +579,7 @@ export const PokeCalc = ({
                         {' '}PP{' '}
                       </span>
                       {remainingPp}/{maxPp}
-                    </span> */}
+                    </span> *\/}
 
                     {/*
                       (!!moveid && !!move?.category) &&
@@ -586,7 +589,7 @@ export const PokeCalc = ({
                         </span>
                         {move.basePower || null}
                       </span>
-                    */}
+                    *\/}
 
                     {
                       showAccuracy &&
@@ -634,9 +637,9 @@ export const PokeCalc = ({
                           )}
                         </Field>
                       </span>
-                    */}
+                    *\/}
                   </div>
-                }
+                */}
               </div>
 
               {/* <div className={cx(styles.tableItem)}>
@@ -658,29 +661,33 @@ export const PokeCalc = ({
 
               <div
                 className={cx(styles.tableItem)}
-                style={!result?.damage ? { opacity: 0.5 } : null}
+                style={!result?.damageRange ? { opacity: 0.5 } : null}
               >
                 {/* XXX.X% &ndash; XXX.X% */}
-                {result?.damage ? /\(([\d.]+\s-\s[\d.]+%)\)/.exec(resultDesc)?.[1] || '???' : ''}
+                {/* {result?.damage ? /\(([\d.]+\s-\s[\d.]+%)\)/.exec(resultDesc)?.[1] || '???' : ''} */}
+                {result?.damageRange}
               </div>
 
               <div
                 className={cx(styles.tableItem)}
-                style={!result?.damage && !resultKoChance?.chance && !resultKoChance?.n ? { opacity: 0.3 } : null}
+                style={{
+                  ...(!result?.koChance ? { opacity: 0.3 } : null),
+                  ...(result?.koColor ? { color: result.koColor } : null),
+                }}
               >
                 {/* XXX% XHKO */}
 
                 {/* {result?.damage && resultKoChance?.chance && resultKoChance.chance !== 1 ? `${(resultKoChance.chance * 100).toFixed(1)}% ` : null} */}
-                {
+                {/* {
                   (!!result?.damage && !!resultKoChance?.chance && resultKoChance.chance !== 1) &&
                   <>
                     {(resultKoChance.chance * 100).toFixed(1)}%
-                    {/* <br /> */}
                     {' '}
                   </>
-                }
-                {!!result?.damage && !!resultKoChance?.n && `${resultKoChance.n}HKO`}
+                } */}
+                {/* {!!result?.damage && !!resultKoChance?.n && `${resultKoChance.n}HKO`} */}
                 {/* {!result?.damage && (!resultKoChance?.chance || resultKoChance.chance === 1) && !resultKoChance?.n && '--'} */}
+                {result?.koChance}
               </div>
             </React.Fragment>
           );
@@ -688,16 +695,27 @@ export const PokeCalc = ({
 
         <div className={cx(styles.tableGrid, styles.statsTable, styles.section)}>
           <div className={cx(styles.tableItem, styles.statLabel)} />
-          {PokemonStatNames.map((stat) => (
-            <div
-              key={`PokeCalc:StatLabel:${pokemonKey}:${stat}`}
-              className={cx(styles.tableItem, styles.statLabel)}
-            >
-              {!!playerPokemon?.nature && PokemonNatureBoosts[playerPokemon.nature][0] === stat && '+'}
-              {!!playerPokemon?.nature && PokemonNatureBoosts[playerPokemon.nature][1] === stat && '-'}
-              {stat}
-            </div>
-          ))}
+
+          {PokemonStatNames.map((stat) => {
+            const boostUp = PokemonNatureBoosts[playerPokemon?.nature]?.[0] === stat;
+            const boostDown = PokemonNatureBoosts[playerPokemon?.nature]?.[1] === stat;
+
+            return (
+              <div
+                key={`PokeCalc:StatLabel:${pokemonKey}:${stat}`}
+                className={cx(
+                  styles.tableItem,
+                  styles.statLabel,
+                  boostUp && styles.up,
+                  boostDown && styles.down,
+                )}
+              >
+                {boostUp && '+'}
+                {boostDown && '-'}
+                {stat}
+              </div>
+            );
+          })}
 
           <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
             IV
