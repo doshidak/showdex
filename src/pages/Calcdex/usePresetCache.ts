@@ -367,19 +367,23 @@ export const usePresetCache = (): PresetCacheHookInterface => {
       return [];
     }
 
-    const formatLabel = format in FormatLabels ?
-      FormatLabels[format] :
-      format?.toUpperCase?.();
+    const baseGen = `gen${detectGenFromFormat(format)}`;
+    const genlessFormat = format.replace(baseGen, '');
 
-    const presets = presetCache[genName][sanitizedSpeciesForme];
+    const formatLabel = genlessFormat in FormatLabels ?
+      FormatLabels[genlessFormat] :
+      genlessFormat.toUpperCase();
 
     // put the presets in the current tier first, then the rest
-    presets.sort((a, b) => {
-      if (a.name.startsWith(formatLabel)) {
+    const presets = presetCache[genName][sanitizedSpeciesForme].sort((a, b) => {
+      // prevents something like 'OU-2X' being sorted before 'OU'
+      const formatSearchString = `${formatLabel} `;
+
+      if (a.name.startsWith(formatSearchString)) {
         return -1;
       }
 
-      if (b.name.startsWith(formatLabel)) {
+      if (b.name.startsWith(formatSearchString)) {
         return 1;
       }
 
