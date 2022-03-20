@@ -113,14 +113,14 @@ injectables.forEach(({
   destination.appendChild(source);
 });
 
-window.addEventListener('message', (e) => {
-  try {
-    chrome.runtime.sendMessage({ type: e.type });
-  } catch (error) {
-    if (__DEV__) {
-      l.error(error);
-    }
-  }
-});
+// window.addEventListener('message', (e) => {
+//   try {
+//     chrome.runtime.sendMessage({ type: e.type });
+//   } catch (error) {
+//     if (__DEV__) {
+//       l.error(error);
+//     }
+//   }
+// });
 
 // export {};
