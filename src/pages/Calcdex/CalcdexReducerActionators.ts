@@ -66,6 +66,11 @@ export interface CalcdexReducerActionatorMap extends ThunkyReducerActionatorMap<
     playerKey: CalcdexPlayerKey,
     selectionIndex: number,
   ]>;
+
+  setAutoSelect: CalcdexReducerActionator<[
+    playerKey: CalcdexPlayerKey,
+    autoSelect: boolean,
+  ]>;
 }
 
 const l = logger('Calcdex/CalcdexReducerActionators');
@@ -454,6 +459,22 @@ export const setSelectionIndex: CalcdexReducerActionatorMap['setSelectionIndex']
   });
 };
 
+export const setAutoSelect: CalcdexReducerActionatorMap['setAutoSelect'] = (
+  playerKey,
+  autoSelect,
+) => (dispatch) => {
+  l.debug(
+    'setAutoSelect() -> dispatch()',
+    '\n', 'type', `@${playerKey}/autoSelect:put`,
+    '\n', 'payload', autoSelect,
+  );
+
+  dispatch({
+    type: `@${playerKey}/autoSelect:put`,
+    payload: autoSelect,
+  });
+};
+
 export const CalcdexReducerActionators: CalcdexReducerActionatorMap = {
   addPokemon,
   updatePokemon,
@@ -461,4 +482,5 @@ export const CalcdexReducerActionators: CalcdexReducerActionatorMap = {
   syncBattleField,
   setActiveIndex,
   setSelectionIndex,
+  setAutoSelect,
 };

@@ -14,7 +14,7 @@
   &::before {
     content: '';
     @include position.absolute-fill;
-    background-color: color.alpha(colors.$black, 0.4);
+    background-color: color.alpha(colors.$black, 0.5);
     pointer-events: none;
     z-index: -1;
   }
@@ -49,4 +49,12 @@
   // background-color: color.alpha(colors.$black, 0.15);
   user-select: none;
   pointer-events: none;
+}
+
+.fieldCalc {
+  @include spacing.margin($top: 30px);
+}
+
+.opponentCalc {
+  @include spacing.margin($top: 30px);
 }

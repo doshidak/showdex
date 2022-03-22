@@ -108,7 +108,7 @@ export const PokeCalc = ({
       <div className={styles.row}>
         <div style={{ flex: '0 0 40px', transform: 'translateY(-2px)' }}>
           <Picon
-            style={{ transform: 'scaleX(-1)' }}
+            style={playerPokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...playerPokemon,
               item: playerPokemon?.dirtyItem || playerPokemon?.item,
@@ -135,7 +135,7 @@ export const PokeCalc = ({
 
               {
                 !!playerPokemon?.types?.length &&
-                <>
+                <span style={{ userSelect: 'none' }}>
                   {' '}
                   {playerPokemon.types.map((type, i) => (
                     <PokeType
@@ -144,7 +144,7 @@ export const PokeCalc = ({
                       type={type}
                     />
                   ))}
-                </>
+                </span>
               }
             </span>
           </div>
@@ -179,14 +179,14 @@ export const PokeCalc = ({
 
             {
               (!!playerPokemon?.status || playerPokemon?.fainted || !currentHp) &&
-              <>
+              <span style={{ userSelect: 'none' }}>
                 {' '}
                 <PokeStatus
                   // status={values.status}
                   status={playerPokemon?.status}
                   fainted={playerPokemon?.fainted || !currentHp}
                 />
-              </>
+              </span>
             }
           </div>
         </div>
@@ -418,7 +418,13 @@ export const PokeCalc = ({
       </div>
 
       {/* Move List */}
-      <div className={cx(styles.tableGrid, styles.movesTable, styles.section)}>
+      <div
+        className={cx(
+          styles.tableGrid,
+          styles.movesTable,
+          styles.section,
+        )}
+      >
         <div className={cx(styles.tableItem, styles.left, styles.statLabel)}>
           Moves
         </div>
@@ -692,226 +698,225 @@ export const PokeCalc = ({
             </React.Fragment>
           );
         })}
+      </div>
 
-        <div className={cx(styles.tableGrid, styles.statsTable, styles.section)}>
-          <div className={cx(styles.tableItem, styles.statLabel)} />
+      <div className={cx(styles.tableGrid, styles.statsTable, styles.section)}>
+        <div className={cx(styles.tableItem, styles.statLabel)} />
 
-          {PokemonStatNames.map((stat) => {
-            const boostUp = PokemonNatureBoosts[playerPokemon?.nature]?.[0] === stat;
-            const boostDown = PokemonNatureBoosts[playerPokemon?.nature]?.[1] === stat;
+        {PokemonStatNames.map((stat) => {
+          const boostUp = PokemonNatureBoosts[playerPokemon?.nature]?.[0] === stat;
+          const boostDown = PokemonNatureBoosts[playerPokemon?.nature]?.[1] === stat;
 
-            return (
-              <div
-                key={`PokeCalc:StatLabel:${pokemonKey}:${stat}`}
-                className={cx(
-                  styles.tableItem,
-                  styles.statLabel,
-                  boostUp && styles.up,
-                  boostDown && styles.down,
-                )}
-              >
-                {boostUp && '+'}
-                {boostDown && '-'}
-                {stat}
-              </div>
-            );
-          })}
-
-          <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
-            IV
-            <span className={styles.small}>
-              S
-            </span>
-          </div>
-
-          {PokemonStatNames.map((stat) => (
+          return (
             <div
-              key={`PokeCalc:Ivs:${pokemonKey}:${stat}`}
-              className={cx(styles.tableItem)}
-              style={{ display: 'flex', justifyContent: 'center' }}
-            >
-              {/* <Button
-                style={{ color: 'inherit' }}
-                labelStyle={{ color: 'inherit' }}
-                label={(playerPokemon?.ivs?.[stat] || 0).toFixed(0)}
-                absoluteHover
-                onPress={() => {
-                  const currentValue = playerPokemon?.ivs?.[stat] || 0;
-                  let nextValue = 0;
-
-                  if (currentValue === 0) {
-                    nextValue = 31;
-                  }
-
-                  if (currentValue === 31) {
-                    nextValue = 1;
-                  }
-
-                  handlePokemonChange({
-                    ivs: {
-                      [stat]: nextValue,
-                    },
-                  });
-                }}
-              /> */}
-
-              <ValueField
-                style={{ maxWidth: 30 }}
-                label={`${stat} IVs`}
-                hint={playerPokemon?.ivs?.[stat]?.toString?.() || '31'}
-                min={0}
-                max={31}
-                step={1}
-                input={{
-                  value: playerPokemon?.ivs?.[stat] || 0,
-                  onChange: (value: number) => handlePokemonChange({
-                    ivs: {
-                      [stat]: value,
-                    },
-                  }),
-                }}
-                hideLabel
-                absoluteHover
-              />
-            </div>
-          ))}
-
-          <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
-            EV
-            <span className={styles.small}>
-              S
-            </span>
-          </div>
-
-          {PokemonStatNames.map((stat) => (
-            <div
-              key={`PokeCalc:Evs:${pokemonKey}:${stat}`}
-              className={cx(styles.tableItem)}
-              style={{ display: 'flex', justifyContent: 'center' }}
-            >
-              {/* <Button
-                label={(playerPokemon?.evs?.[stat] || 0).toFixed(0)}
-                absoluteHover
-                onPress={() => {
-                  const currentValue = playerPokemon?.evs?.[stat] || 0;
-                  let nextValue = 0;
-
-                  if (currentValue === 0) {
-                    nextValue = 252;
-                  }
-
-                  if (currentValue === 252) {
-                    nextValue = isRandom ? 84 : 4;
-                  }
-
-                  handlePokemonChange({
-                    evs: {
-                      [stat]: nextValue,
-                    },
-                  });
-                }}
-              /> */}
-
-              <ValueField
-                style={{ maxWidth: 30 }}
-                label={`${stat} EVs`}
-                hint={playerPokemon?.evs?.[stat]?.toString?.() || '252'}
-                min={0}
-                max={252}
-                step={4}
-                input={{
-                  value: playerPokemon?.evs?.[stat] || 0,
-                  onChange: (value: number) => handlePokemonChange({
-                    evs: {
-                      [stat]: value,
-                    },
-                  }),
-                }}
-                hideLabel
-                absoluteHover
-              />
-            </div>
-          ))}
-
-          <div className={cx(styles.tableItem)} />
-
-          {PokemonStatNames.map((stat) => (
-            <div
-              key={`PokeCalc:Boosts:${pokemonKey}:${stat}`}
+              key={`PokeCalc:StatLabel:${pokemonKey}:${stat}`}
               className={cx(
                 styles.tableItem,
-                stat !== 'hp' && (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) > 0 && styles.positive,
-                stat !== 'hp' && (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) < 0 && styles.negative,
+                styles.statLabel,
+                boostUp && styles.up,
+                boostDown && styles.down,
               )}
             >
-              {/* {formatStatBoost(playerPokemon?.calculatedStats?.[stat]) || '???'} */}
-              {formatStatBoost(calculatedStats?.[stat]) || '???'}
+              {boostUp && '+'}
+              {boostDown && '-'}
+              {stat}
             </div>
-          ))}
+          );
+        })}
 
-          <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
-            STAGE
-          </div>
-
-          <div className={cx(styles.tableItem)} />
-          {PokemonBoostNames.map((stat) => (
-            <div
-              key={`PokeCalc:StageBoost:${pokemonKey}:${stat}`}
-              className={cx(styles.tableItem, styles.stageValue)}
-            >
-              <Button
-                style={{ marginRight: 3 }}
-                labelStyle={{ color: '#FFFFFF' }}
-                label="-"
-                disabled={(playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) <= -6}
-                onPress={() => handlePokemonChange({
-                  dirtyBoosts: {
-                    [stat]: Math.max(
-                      (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) - 1,
-                      -6,
-                    ),
-                  },
-                })}
-              />
-
-              {/* {(pokemon?.boosts?.[stat] || 0) > 0 && '+'}
-              {typeof pokemon?.boosts?.[stat] === 'number' ? pokemon.boosts[stat] : 'X'} */}
-
-              <Button
-                style={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number' ? { color: 'inherit' } : undefined}
-                labelStyle={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number' ? { color: 'inherit' } : undefined}
-                // label={getStatBoostLabel(pokemon, stat)}
-                label={[
-                  (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) > 0 && '+',
-                  (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat])?.toString() || 'X',
-                ].filter(Boolean).join('')}
-                absoluteHover
-                disabled={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number'}
-                onPress={() => handlePokemonChange({
-                  dirtyBoosts: {
-                    [stat]: undefined, // resets the boost, which a re-render will re-sync w/ the battle state
-                  },
-                })}
-              />
-
-              <Button
-                style={{ marginLeft: 3 }}
-                labelStyle={{ color: '#FFFFFF' }}
-                label="+"
-                disabled={(playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) >= 6}
-                onPress={() => handlePokemonChange({
-                  dirtyBoosts: {
-                    [stat]: Math.min(
-                      (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) + 1,
-                      6,
-                    ),
-                  },
-                })}
-              />
-            </div>
-          ))}
+        <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
+          IV
+          <span className={styles.small}>
+            S
+          </span>
         </div>
 
+        {PokemonStatNames.map((stat) => (
+          <div
+            key={`PokeCalc:Ivs:${pokemonKey}:${stat}`}
+            className={cx(styles.tableItem)}
+            style={{ display: 'flex', justifyContent: 'center' }}
+          >
+            {/* <Button
+              style={{ color: 'inherit' }}
+              labelStyle={{ color: 'inherit' }}
+              label={(playerPokemon?.ivs?.[stat] || 0).toFixed(0)}
+              absoluteHover
+              onPress={() => {
+                const currentValue = playerPokemon?.ivs?.[stat] || 0;
+                let nextValue = 0;
+
+                if (currentValue === 0) {
+                  nextValue = 31;
+                }
+
+                if (currentValue === 31) {
+                  nextValue = 1;
+                }
+
+                handlePokemonChange({
+                  ivs: {
+                    [stat]: nextValue,
+                  },
+                });
+              }}
+            /> */}
+
+            <ValueField
+              style={{ maxWidth: 30 }}
+              label={`${stat} IVs`}
+              hint={playerPokemon?.ivs?.[stat]?.toString?.() || '31'}
+              min={0}
+              max={31}
+              step={1}
+              input={{
+                value: playerPokemon?.ivs?.[stat] || 0,
+                onChange: (value: number) => handlePokemonChange({
+                  ivs: {
+                    [stat]: value,
+                  },
+                }),
+              }}
+              hideLabel
+              absoluteHover
+            />
+          </div>
+        ))}
+
+        <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
+          EV
+          <span className={styles.small}>
+            S
+          </span>
+        </div>
+
+        {PokemonStatNames.map((stat) => (
+          <div
+            key={`PokeCalc:Evs:${pokemonKey}:${stat}`}
+            className={cx(styles.tableItem)}
+            style={{ display: 'flex', justifyContent: 'center' }}
+          >
+            {/* <Button
+              label={(playerPokemon?.evs?.[stat] || 0).toFixed(0)}
+              absoluteHover
+              onPress={() => {
+                const currentValue = playerPokemon?.evs?.[stat] || 0;
+                let nextValue = 0;
+
+                if (currentValue === 0) {
+                  nextValue = 252;
+                }
+
+                if (currentValue === 252) {
+                  nextValue = isRandom ? 84 : 4;
+                }
+
+                handlePokemonChange({
+                  evs: {
+                    [stat]: nextValue,
+                  },
+                });
+              }}
+            /> */}
+
+            <ValueField
+              style={{ maxWidth: 30 }}
+              label={`${stat} EVs`}
+              hint={playerPokemon?.evs?.[stat]?.toString?.() || '252'}
+              min={0}
+              max={252}
+              step={4}
+              input={{
+                value: playerPokemon?.evs?.[stat] || 0,
+                onChange: (value: number) => handlePokemonChange({
+                  evs: {
+                    [stat]: value,
+                  },
+                }),
+              }}
+              hideLabel
+              absoluteHover
+            />
+          </div>
+        ))}
+
+        <div className={cx(styles.tableItem)} />
+
+        {PokemonStatNames.map((stat) => (
+          <div
+            key={`PokeCalc:Boosts:${pokemonKey}:${stat}`}
+            className={cx(
+              styles.tableItem,
+              stat !== 'hp' && (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) > 0 && styles.positive,
+              stat !== 'hp' && (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) < 0 && styles.negative,
+            )}
+          >
+            {/* {formatStatBoost(playerPokemon?.calculatedStats?.[stat]) || '???'} */}
+            {formatStatBoost(calculatedStats?.[stat]) || '???'}
+          </div>
+        ))}
+
+        <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
+          STAGE
+        </div>
+
+        <div className={cx(styles.tableItem)} />
+        {PokemonBoostNames.map((stat) => (
+          <div
+            key={`PokeCalc:StageBoost:${pokemonKey}:${stat}`}
+            className={cx(styles.tableItem, styles.stageValue)}
+          >
+            <Button
+              style={{ marginRight: 3 }}
+              labelStyle={{ color: '#FFFFFF' }}
+              label="-"
+              disabled={(playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) <= -6}
+              onPress={() => handlePokemonChange({
+                dirtyBoosts: {
+                  [stat]: Math.max(
+                    (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) - 1,
+                    -6,
+                  ),
+                },
+              })}
+            />
+
+            {/* {(pokemon?.boosts?.[stat] || 0) > 0 && '+'}
+            {typeof pokemon?.boosts?.[stat] === 'number' ? pokemon.boosts[stat] : 'X'} */}
+
+            <Button
+              style={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number' ? { color: 'inherit' } : undefined}
+              labelStyle={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number' ? { color: 'inherit' } : undefined}
+              // label={getStatBoostLabel(pokemon, stat)}
+              label={[
+                (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) > 0 && '+',
+                (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat])?.toString() || 'X',
+              ].filter(Boolean).join('')}
+              absoluteHover
+              disabled={typeof playerPokemon?.dirtyBoosts?.[stat] !== 'number'}
+              onPress={() => handlePokemonChange({
+                dirtyBoosts: {
+                  [stat]: undefined, // resets the boost, which a re-render will re-sync w/ the battle state
+                },
+              })}
+            />
+
+            <Button
+              style={{ marginLeft: 3 }}
+              labelStyle={{ color: '#FFFFFF' }}
+              label="+"
+              disabled={(playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) >= 6}
+              onPress={() => handlePokemonChange({
+                dirtyBoosts: {
+                  [stat]: Math.min(
+                    (playerPokemon?.dirtyBoosts?.[stat] ?? playerPokemon?.boosts?.[stat] ?? 0) + 1,
+                    6,
+                  ),
+                },
+              })}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

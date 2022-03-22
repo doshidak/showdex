@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { Picon } from '@showdex/components/app';
-import { BaseButton } from '@showdex/components/ui';
+import { BaseButton, Button } from '@showdex/components/ui';
 import type { Generation, GenerationNum } from '@pkmn/data';
 import type {
   CalcdexBattleField,
@@ -25,6 +25,7 @@ interface PlayerCalcProps {
   defaultName?: string;
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
   onIndexSelect?: (index: number) => void;
+  onAutoSelectChange?: (autoSelect: boolean) => void;
 }
 
 export const PlayerCalc = ({
@@ -40,6 +41,7 @@ export const PlayerCalc = ({
   defaultName = '--',
   onPokemonChange,
   onIndexSelect,
+  onAutoSelectChange,
 }: PlayerCalcProps): JSX.Element => {
   const {
     sideid: playerSideId,
@@ -48,6 +50,7 @@ export const PlayerCalc = ({
     pokemon,
     activeIndex,
     selectionIndex: playerIndex,
+    autoSelect,
   } = player || {};
 
   const {
@@ -66,19 +69,47 @@ export const PlayerCalc = ({
       style={style}
     >
       <div className={styles.playerBar}>
-        <div className={styles.username}>
-          {name || defaultName}
+        <div className={styles.playerInfo}>
+          <div className={styles.username}>
+            {name || defaultName}
 
-          {
-            !!rating &&
-            <>
-              <br />
+            {/*
+              !!rating &&
+              <>
+                <br />
+                <span style={{ fontSize: 8, opacity: 0.5 }}>
+                  ELO{' '}
+                  {rating}
+                </span>
+              </>
+            */}
+          </div>
+
+          <div>
+            <Button
+              labelStyle={{
+                fontSize: 8,
+                color: autoSelect ? undefined : '#FFFFFF',
+                textTransform: 'uppercase',
+              }}
+              label="Auto"
+              absoluteHover
+              disabled={!pokemon?.length}
+              onPress={() => onAutoSelectChange?.(!autoSelect)}
+            />
+
+            {
+              !!rating &&
               <span style={{ fontSize: 8, opacity: 0.5 }}>
-                ELO{' '}
+                <span style={{ userSelect: 'none' }}>
+                  {' '}&bull;{' '}
+                  ELO{' '}
+                </span>
+
                 {rating}
               </span>
-            </>
-          }
+            }
+          </div>
         </div>
 
         <div className={styles.teamList}>
@@ -95,13 +126,17 @@ export const PlayerCalc = ({
                   (mon?.fainted || !mon?.hp) && styles.fainted,
                 )}
                 aria-label={`Select ${mon?.name || mon?.speciesForme || mon?.ident}`}
-                hoverScale={1.175}
+                // hoverScale={1.175}
+                hoverScale={1.1}
                 disabled={!mon}
                 onPress={() => onIndexSelect?.(i)}
               >
                 <Picon
                   className={styles.picon}
-                  pokemon={mon || 'pokeball-none'}
+                  pokemon={mon ? {
+                    ...mon,
+                    item: mon?.dirtyItem ?? mon?.item,
+                  } : 'pokeball-none'}
                 />
 
                 <div className={styles.background} />
@@ -112,7 +147,8 @@ export const PlayerCalc = ({
       </div>
 
       <PokeCalc
-        style={{ paddingTop: 15 }}
+        className={styles.pokeCalc}
+        // style={{ paddingTop: 15 }}
         // format={format}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}

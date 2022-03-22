@@ -25,6 +25,7 @@ export const Calcdex = ({
     updateField,
     // setActiveIndex,
     setSelectionIndex,
+    setAutoSelect,
   } = useCalcdex({
     battle,
     tooltips,
@@ -47,6 +48,7 @@ export const Calcdex = ({
   } = state;
 
   const playerKey = detectPlayerKeyFromBattle(battle);
+  const opponentKey = playerKey === 'p1' ? 'p2' : 'p1';
 
   const player = playerKey === 'p1' ? p1 : p2;
   const opponent = playerKey === 'p1' ? p2 : p1;
@@ -77,17 +79,23 @@ export const Calcdex = ({
             playerKey,
             index,
           )}
+          onAutoSelectChange={(autoSelect) => setAutoSelect(
+            playerKey,
+            autoSelect,
+          )}
         />
 
         <FieldCalc
-          style={{ marginTop: 30 }}
+          className={styles.fieldCalc}
+          // style={{ marginTop: 30 }}
           battleId={battleId}
           field={field}
           onFieldChange={updateField}
         />
 
         <PlayerCalc
-          style={{ marginTop: 30 }}
+          className={styles.opponentCalc}
+          // style={{ marginTop: 30 }}
           // format={format}
           playerKey={playerKey}
           player={opponent}
@@ -98,8 +106,12 @@ export const Calcdex = ({
           defaultName="Opponent"
           onPokemonChange={updatePokemon}
           onIndexSelect={(index) => setSelectionIndex(
-            playerKey === 'p1' ? 'p2' : 'p1',
+            opponentKey,
             index,
+          )}
+          onAutoSelectChange={(autoSelect) => setAutoSelect(
+            opponentKey,
+            autoSelect,
           )}
         />
       </div>

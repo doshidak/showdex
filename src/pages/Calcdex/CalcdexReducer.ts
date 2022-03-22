@@ -424,6 +424,15 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   calcdexNonce?: string;
   activeIndex?: number;
   selectionIndex?: number;
+
+  /**
+   * Whether `selectionIndex` should automatically update whenever `activeIndex` updates.
+   *
+   * @default true
+   * @since 0.1.2
+   */
+  autoSelect?: boolean;
+
   pokemon?: CalcdexPokemon[];
 }
 
@@ -453,6 +462,7 @@ export type CalcdexReducerActionType =
   | '@p1/:put'
   | '@p1/activeIndex:put'
   | '@p1/selectionIndex:put'
+  | '@p1/autoSelect:put'
   | '@p1/pokemon:post'
   | '@p1/pokemon:put'
   | '@p1/pokemon:delete'
@@ -462,6 +472,7 @@ export type CalcdexReducerActionType =
   | '@p2/:put'
   | '@p2/activeIndex:put'
   | '@p2/selectionIndex:put'
+  | '@p2/autoSelect:put'
   | '@p2/pokemon:post'
   | '@p2/pokemon:put'
   | '@p2/pokemon:delete'
@@ -486,6 +497,7 @@ export const CalcdexInitialState: CalcdexReducerState = {
     sideid: 'p1',
     activeIndex: -1,
     selectionIndex: 0,
+    autoSelect: true,
     pokemon: [],
   },
 
@@ -493,6 +505,7 @@ export const CalcdexInitialState: CalcdexReducerState = {
     sideid: 'p2',
     activeIndex: -1,
     selectionIndex: 0,
+    autoSelect: true,
     pokemon: [],
   },
 };
@@ -643,6 +656,14 @@ export const CalcdexReducer: CalcdexReducerInstance = (
       const playerKey = getPlayerKeyFromActionType(action.type);
       const selectionIndex = <number> action.payload;
 
+      // if the user manually changes selectionIndex while autoSelect is enabled, then disable it
+      // const { activeIndex = -1 } = <CalcdexPlayer> state[playerKey];
+      // let { autoSelect } = <CalcdexPlayer> state[playerKey];
+      //
+      // if (autoSelect && activeIndex > -1 && activeIndex !== selectionIndex) {
+      //   autoSelect = false;
+      // }
+
       l.debug(
         action.type,
         '\n', 'setting selectionIndex of player', playerKey, 'to', selectionIndex,
@@ -653,6 +674,26 @@ export const CalcdexReducer: CalcdexReducerInstance = (
         [playerKey]: {
           ...(<CalcdexPlayer> state[playerKey]),
           selectionIndex: typeof selectionIndex === 'number' && selectionIndex > -1 ? selectionIndex : (<CalcdexPlayer> state[playerKey]).selectionIndex,
+          // autoSelect,
+        },
+      };
+    }
+
+    case '@p1/autoSelect:put':
+    case '@p2/autoSelect:put': {
+      const playerKey = getPlayerKeyFromActionType(action.type);
+      const autoSelect = <boolean> action.payload;
+
+      l.debug(
+        action.type,
+        '\n', 'setting autoSelect of player', playerKey, 'to', autoSelect,
+      );
+
+      return {
+        ...state,
+        [playerKey]: {
+          ...(<CalcdexPlayer> state[playerKey]),
+          autoSelect,
         },
       };
     }

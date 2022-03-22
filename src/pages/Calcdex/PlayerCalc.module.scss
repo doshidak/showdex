@@ -16,7 +16,7 @@
 
 .username {
   max-width: 78px;
-  color: color.alpha(colors.$white, 0.75);
+  color: color.alpha(colors.$white, 0.5);
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -29,12 +29,16 @@
 .piconButton {
   position: relative;
   align-self: center;
+  width: 40px; // should equal the width of Picon
+  height: 40px; // should equal the height of Picon
 
   &::before {
     content: '';
-    @include position.absolute-anchor($x: -3px, $y: -6px);
-    width: 45px;
-    height: 45px;
+    // @include position.absolute-anchor($x: -3px, $y: -6px);
+    // @include position.absolute-anchor($x: -1px, $y: -4px);
+    @include position.absolute-fill;
+    // width: 41px;
+    // height: 41px;
     // background-color: color.alpha(colors.$white, 0.3);
     background-color: colors.$transparent;
     // border: 3px solid colors.$transparent;
@@ -50,7 +54,7 @@
 
   // &:not(.selected):not(.active):hover::before {
   &:hover::before {
-    background-color: color.alpha(colors.$white, 0.3);
+    background-color: color.alpha(colors.$white, 0.15);
     // transform: scale(0.9);
     // opacity: 0.3;
   }
@@ -76,6 +80,7 @@
 .picon {
   // opacity: 0.5;
   @include transition.apply(opacity, filter);
+  z-index: 1;
 
   // .active &, .selected & {
   //   opacity: 1;
@@ -89,21 +94,28 @@
 
 .background {
   // @include position.absolute-anchor($x: -3px, $y: -6px);
-  @include position.absolute-anchor($x: 0px, $y: -3px);
+  // @include position.absolute-anchor($x: 0px, $y: -3px);
+  @include position.absolute-center;
   width: 39px;
   height: 39px;
   border: 2px solid colors.$transparent;
   border-radius: 45px;
-  @include transition.apply(border-color);
+  @include transition.apply(background-color, border-color);
   // z-index: -1;
   // user-select: none;
   pointer-events: none;
 
   .active & {
-    border-color: color.alpha(color.tint(colors.$red, 15%), 0.15);
+    // border-color: color.alpha(color.tint(colors.$red, 15%), 0.15);
+    background-color: color.alpha(colors.$blue, 0.25);
   }
 
   .selected & {
-    border-color: color.alpha(color.tint(colors.$blue, 20%), 0.75);
+    border-color: color.alpha(colors.$blue, 0.75);
   }
+}
+
+.pokeCalc {
+  @include spacing.padding($top: 15px);
+  // z-index: 1;
 }

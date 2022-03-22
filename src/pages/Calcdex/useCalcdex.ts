@@ -37,6 +37,7 @@ export interface CalcdexHookInterface {
   updateField: (field: Partial<CalcdexBattleField>) => void;
   setActiveIndex: (playerKey: CalcdexPlayerKey, activeIndex: number) => void;
   setSelectionIndex: (playerKey: CalcdexPlayerKey, selectionIndex: number) => void;
+  setAutoSelect: (playerKey: CalcdexPlayerKey, autoSwitch: boolean) => void;
 }
 
 const l = logger('Calcdex/useCalcdex');
@@ -74,6 +75,7 @@ export const useCalcdex = ({
     syncBattleField,
     setActiveIndex,
     setSelectionIndex,
+    setAutoSelect,
   } = useThunkyBindedActionators<CalcdexReducerInstance, typeof CalcdexReducerActionators>(
     CalcdexReducerActionators,
     dispatch,
@@ -268,7 +270,10 @@ export const useCalcdex = ({
         );
 
         // update each player's pokemon
-        const { pokemon: pokemonState } = state[playerKey];
+        const {
+          autoSelect,
+          pokemon: pokemonState,
+        } = state[playerKey];
 
         // also find the activeIndex while we're at it
         const activeIdent = detectPokemonIdent(player.active?.[0]);
@@ -351,6 +356,10 @@ export const useCalcdex = ({
 
             if (activeIdent === ident) {
               setActiveIndex(playerKey, index);
+
+              if (autoSelect) {
+                setSelectionIndex(playerKey, index);
+              }
             }
 
             // update the mon at the current index (via the `sync` action instead of `put`)
@@ -417,6 +426,7 @@ export const useCalcdex = ({
     presetCache,
     prevNonce,
     setActiveIndex,
+    setSelectionIndex,
     // smogon,
     state,
     syncBattleField,
@@ -434,5 +444,6 @@ export const useCalcdex = ({
     updateField,
     setActiveIndex,
     setSelectionIndex,
+    setAutoSelect,
   };
 };
