@@ -3,6 +3,7 @@ import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
+// import { detectToggledAbility } from './detectToggledAbility';
 // import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
 export const sanitizePokemon = (
@@ -26,6 +27,7 @@ export const sanitizePokemon = (
 
     ability: pokemon?.ability,
     dirtyAbility: pokemon?.dirtyAbility ?? null,
+    abilityToggled: pokemon?.abilityToggled ?? false,
     baseAbility: pokemon?.baseAbility,
     abilities: pokemon?.abilities ?? [],
     altAbilities: pokemon?.altAbilities ?? [],

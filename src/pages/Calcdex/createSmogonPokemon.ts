@@ -1,4 +1,5 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
+import { PokemonToggleAbilities } from '@showdex/consts';
 import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum, State as SmogonState } from '@smogon/calc';
@@ -54,9 +55,21 @@ export const createSmogonPokemon = (
     return null;
   }
 
+  // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
+  // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
+  // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
+  let ability = pokemon?.dirtyAbility ?? pokemon?.ability;
+  const hasMultiscale = ability?.toLowerCase?.() === 'multiscale';
+  const toggleAbility = !hasMultiscale && PokemonToggleAbilities.includes(ability);
+
+  if (hasMultiscale && !pokemon?.abilityToggled) {
+    ability = null;
+  }
+
   const options: ConstructorParameters<typeof SmogonPokemon>[2] = {
     ...(<SmogonState.Pokemon> pokemon),
-    ability: pokemon?.dirtyAbility ?? pokemon?.ability,
+    ability,
+    abilityOn: toggleAbility ? pokemon?.abilityToggled : undefined,
     item: pokemon?.dirtyItem ?? pokemon?.item,
     ivs: {
       hp: pokemon?.ivs?.hp ?? 31,

@@ -14,6 +14,7 @@ export const calcPokemonCalcdexNonce = (
   gender: pokemon?.gender,
   ability: pokemon?.ability,
   dirtyAbility: pokemon?.dirtyAbility,
+  abilityToggled: pokemon?.abilityToggled?.toString(),
   baseAbility: pokemon?.baseAbility,
   altAbilities: pokemon?.altAbilities?.join('|'),
   nature: pokemon?.nature,

@@ -11,6 +11,7 @@ import type { ThunkyReducerDispatch } from '@showdex/utils/hooks';
 import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPokemonIdent } from './detectPokemonIdent';
+import { detectToggledAbility } from './detectToggledAbility';
 import { sanitizeField } from './sanitizeField';
 import { sanitizePlayerSide } from './sanitizePlayerSide';
 import { sanitizePokemon } from './sanitizePokemon';
@@ -201,6 +202,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   baseAbility?: AbilityName;
+
+  /**
+   * Some abilities are conditionally toggled, such as *Flash Fire*.
+   *
+   * * While we don't have to worry about those conditions,
+   *   we need to keep track of whether the ability is active.
+   * * If the ability is not in `PokemonToggleAbilities` in `consts`,
+   *   this value will always be `true`, despite the default value being `false`.
+   *
+   * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
+   * @default false
+   * @since 0.1.2
+   */
+  abilityToggled?: boolean;
 
   /**
    * Possible abilities of the Pokemon.
@@ -843,15 +858,24 @@ export const CalcdexReducer: CalcdexReducerInstance = (
       // `syncPokemon()` will assign a calcdexId and recalculate the calcdexNonce
       const shouldSync = action.type.endsWith(':sync');
 
-      const syncedPokemon = shouldSync ? syncPokemon(updatedPokemon[index], pokemon) : <CalcdexPokemon> {
-        ...updatedPokemon[index],
-        ...pokemon,
+      const syncedPokemon = shouldSync ?
+        syncPokemon(updatedPokemon[index], pokemon) : // @p#/pokemon:sync
+        <CalcdexPokemon> { // @p#/pokemon:put
+          ...updatedPokemon[index],
+          ...pokemon,
 
-        dirtyBoosts: {
-          ...updatedPokemon[index].dirtyBoosts,
-          ...pokemon?.dirtyBoosts,
-        },
-      };
+          // if abilityToggled exists in the payload, probably was user-invoked, so use that value
+          // (otherwise, automatically determine the value based on the Pokemon).
+          // omitting this check would prevent the user from manually toggling the ability.
+          abilityToggled: typeof pokemon?.abilityToggled === 'boolean' ?
+            pokemon.abilityToggled :
+            detectToggledAbility(pokemon),
+
+          dirtyBoosts: {
+            ...updatedPokemon[index].dirtyBoosts,
+            ...pokemon?.dirtyBoosts,
+          },
+        };
 
       if (!shouldSync) {
         if (!syncedPokemon.calcdexId) {

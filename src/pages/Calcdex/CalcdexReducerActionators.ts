@@ -247,6 +247,18 @@ export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
     });
   }
 
+  // if the Pokemon's revealed ability and/or item match their dirty counterparts (lol),
+  // clear the dirty values
+  if (newPokemon.ability === newPokemon.dirtyAbility) {
+    newPokemon.dirtyAbility = null;
+  }
+
+  // prevItem here accounts for knocked-off or consumed items
+  // (in which case `item` would be falsy, falling back to prevItem)
+  if ((newPokemon.item || newPokemon.prevItem) === newPokemon.dirtyItem) {
+    newPokemon.dirtyItem = null;
+  }
+
   l.debug(
     'addPokemon() <- await fetchPokemonPresets()',
     '\n', 'presetPokemon', presetPokemon,

@@ -9,6 +9,7 @@ import {
   PokemonNatureBoosts,
   // PokemonNatures,
   PokemonStatNames,
+  PokemonToggleAbilities,
 } from '@showdex/consts';
 // import { logger } from '@showdex/utils/debug';
 import type {
@@ -219,7 +220,8 @@ export const PokeCalc = ({
               }}
               label="Auto"
               absoluteHover
-              disabled={!playerPokemon?.presets?.length}
+              // disabled={!playerPokemon?.presets?.length}
+              disabled /** @todo remove this after implementing auto-presets */
               onPress={() => handlePokemonChange({
                 autoPreset: !playerPokemon?.autoPreset,
               })}
@@ -247,10 +249,10 @@ export const PokeCalc = ({
                   moves: preset.moves,
                   altMoves: preset.altMoves,
                   nature: preset.nature,
-                  dirtyAbility: preset.ability,
+                  dirtyAbility: playerPokemon.ability !== preset.ability ? preset.ability : null,
                   altAbilities: preset.altAbilities,
                   altItems: preset.altItems,
-                  dirtyItem: preset.item,
+                  dirtyItem: playerPokemon.item !== preset.item ? preset.item : null,
                 });
               },
             }}
@@ -272,6 +274,27 @@ export const PokeCalc = ({
         <div style={{ flex: 1, marginRight: 5 }}>
           <div className={styles.statLabel}>
             Ability
+
+            {
+              PokemonToggleAbilities.includes(playerPokemon?.dirtyAbility ?? playerPokemon?.ability) &&
+              <>
+                {' '}
+                <Button
+                  style={{ verticalAlign: 'middle', marginBottom: 1 }}
+                  labelClassName={cx(styles.small)}
+                  labelStyle={{
+                    color: playerPokemon.abilityToggled ? undefined : '#FFFFFF',
+                    textTransform: 'uppercase',
+                  }}
+                  label="Active"
+                  tooltip={`${playerPokemon.abilityToggled ? 'Deactivate' : 'Activate'} Ability`}
+                  absoluteHover
+                  onPress={() => handlePokemonChange({
+                    abilityToggled: !playerPokemon.abilityToggled,
+                  })}
+                />
+              </>
+            }
 
             {
               !!playerPokemon?.dirtyAbility &&
@@ -362,6 +385,7 @@ export const PokeCalc = ({
                   labelClassName={cx(styles.small)}
                   labelStyle={{ textTransform: 'uppercase' }}
                   label="Reset"
+                  tooltip="Reset to Actual Item"
                   absoluteHover
                   onPress={() => handlePokemonChange({
                     dirtyItem: null,
@@ -374,6 +398,26 @@ export const PokeCalc = ({
           <Dropdown
             aria-label="Item"
             hint="None"
+            tooltip={playerPokemon?.itemEffect || playerPokemon?.prevItem ? (
+              <div>
+                {
+                  !!playerPokemon?.itemEffect &&
+                  <div className={cx(styles.statLabel, styles.small)}>
+                    {playerPokemon.itemEffect}
+                  </div>
+                }
+                {
+                  !!playerPokemon?.prevItem &&
+                  <div className={styles.small}>
+                    <span className={styles.statLabel}>
+                      {playerPokemon.prevItemEffect || 'Prev'}
+                    </span>
+                    {playerPokemon.prevItemEffect?.length > 4 ? <br /> : ' '}
+                    {playerPokemon.prevItem}
+                  </div>
+                }
+              </div>
+            ) : null}
             input={{
               name: `PokeCalc:Item:${pokemonKey}`,
               value: playerPokemon?.dirtyItem ?? playerPokemon?.item,
@@ -397,13 +441,13 @@ export const PokeCalc = ({
             disabled={!playerPokemon?.speciesForme}
           />
 
-          {
+          {/*
             !!playerPokemon?.itemEffect &&
             <div className={cx(styles.statLabel, styles.small)}>
               {playerPokemon.itemEffect}
             </div>
-          }
-          {
+          */}
+          {/*
             !!playerPokemon?.prevItem &&
             <div className={styles.small}>
               <span className={styles.statLabel}>
@@ -412,7 +456,7 @@ export const PokeCalc = ({
               {playerPokemon.prevItemEffect?.length > 4 ? <br /> : ' '}
               {playerPokemon.prevItem}
             </div>
-          }
+          */}
         </div>
       </div>
 
@@ -443,6 +487,7 @@ export const PokeCalc = ({
               textTransform: 'uppercase',
             }}
             label="Crit"
+            tooltip={`${playerPokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
             absoluteHover
             disabled={!playerPokemon?.speciesForme}
             onPress={() => handlePokemonChange({
@@ -461,8 +506,7 @@ export const PokeCalc = ({
           const moveid = playerPokemon?.moves?.[i];
           // const actualMoveId = pokemon?.moveTrack?.[i]?.[0];
 
-          // const move = moveid ? Dex?.moves?.get?.(moveid) : null;
-          // const move = moveid ? dex?.moves?.get?.(moveid) : null;
+          const move = moveid ? Dex?.moves?.get?.(moveid) : null;
 
           const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
           const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
@@ -510,9 +554,9 @@ export const PokeCalc = ({
           //   '\n', 'desc', result?.desc(),
           // );
 
-          // const showAccuracy = typeof move?.accuracy !== 'boolean' &&
-          //   (move?.accuracy || -1) > 0 &&
-          //   move.accuracy !== 100;
+          const showAccuracy = typeof move?.accuracy !== 'boolean' &&
+            (move?.accuracy || -1) > 0 &&
+            move.accuracy !== 100;
 
           // const showMoveStats = !!move?.type;
 
@@ -524,12 +568,49 @@ export const PokeCalc = ({
                 <Dropdown
                   aria-label={`Move Slot ${i + 1} for ${playerPokemon?.name || '???'}`}
                   hint="--"
+                  tooltip={move?.type ? (
+                    <div>
+                      <span className={styles.small}>
+                        <PokeType type={move.type} />
+                      </span>
+
+                      {
+                        !!move.category &&
+                        <span className={styles.small}>
+                          <span className={styles.statLabel}>
+                            {' '}{move.category.slice(0, 4).toUpperCase()}{' '}
+                          </span>
+                          {move.basePower || null}
+                        </span>
+                      }
+
+                      {
+                        showAccuracy &&
+                        <span className={styles.small}>
+                          <span className={styles.statLabel}>
+                            {' '}ACC{' '}
+                          </span>
+                          {move.accuracy}%
+                        </span>
+                      }
+
+                      {
+                        !!move?.priority &&
+                        <span className={styles.small}>
+                          {' '}
+                          <span className={styles.statLabel}>
+                            PRI
+                          </span>
+                          {' '}
+                          {move.priority > 0 ? `+${move.priority}` : move.priority}
+                        </span>
+                      }
+                    </div>
+                  ) : null}
                   input={{
                     name: `PokeCalc:MoveTrack:Move:${pokemonKey}:${i}`,
                     value: playerPokemon?.moves?.[i],
                     onChange: (newMove: MoveName) => {
-                      // l.debug('newMove for', playerPokemon?.ident, 'at index', i, newMove);
-
                       const moves = playerPokemon?.moves || [] as MoveName[];
 
                       if (!Array.isArray(moves) || (moves?.[i] && moves[i] === newMove)) {
