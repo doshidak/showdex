@@ -2,6 +2,7 @@ import * as React from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
 import cx from 'classnames';
+import { Tooltip } from '@showdex/components/ui';
 import type { FieldInputProps, FieldRenderProps } from 'react-final-form';
 import type { SelectInstance } from 'react-select';
 import type {
@@ -50,6 +51,7 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   tabIndex?: number;
   'aria-label'?: string;
   hint?: string;
+  tooltip?: React.ReactNode;
   options?: DropdownOption[];
   components?: SelectProps['components'];
   loadingMessage?: string;
@@ -77,6 +79,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   tabIndex = 0,
   'aria-label': ariaLabel,
   hint,
+  tooltip,
   options,
   components,
   loadingMessage = 'Loading...',
@@ -97,10 +100,18 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   meta,
   disabled,
 }: DropdownProps, forwardedRef): JSX.Element => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<SelectInstance>(null);
   const Component = creatable ? Creatable as CreatableComponent : Select as SelectComponent;
 
-  React.useImperativeHandle(forwardedRef, () => ref.current, [ref]);
+  // see ValueField for an explanation as to why we track active internally, instead of using react-final-form
+  const [active, setActive] = React.useState<boolean>(false);
+
+  React.useImperativeHandle(
+    forwardedRef,
+    () => ref.current,
+    [ref],
+  );
 
   const [valueOption, setValueOption] = React.useState<DropdownOption | DropdownOption[]>(null);
 
@@ -145,66 +156,96 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   };
 
   return (
-    <Component
-      ref={ref}
-      instanceId={`Dropdown:${creatable ? 'Creatable' : 'Select'}-${input?.name || '???'}`}
-      classNamePrefix="select"
-      containerClassName={cx(
-        styles.container,
-        hasValue && styles.hasValue,
-        meta?.active && styles.active,
-        disabled && styles.disabled,
-        className,
-      )}
-      containerStyle={style}
-      aria-label={ariaLabel}
-      tabIndex={disabled ? -1 : tabIndex}
-      placeholder={hint}
-      options={options}
-      value={valueOption}
-      active={meta?.active}
-      components={{
-        ClearIndicator: SelectClearIndicator,
-        Control: SelectControl,
-        DropdownIndicator: SelectDropdownIndicator,
-        Group: SelectGroup,
-        GroupHeading: SelectGroupHeading,
-        IndicatorsContainer: SelectIndicatorsContainer,
-        IndicatorSeparator: SelectIndicatorSeparator,
-        Input: SelectInput,
-        LoadingMessage: SelectNotice,
-        Menu: SelectMenu,
-        MenuList: SelectMenuList,
-        MultiValue: SelectMultiValue,
-        MultiValueRemove: SelectMultiValueRemove,
-        Option: SelectOption,
-        NoOptionsMessage: SelectNotice,
-        Placeholder: SelectPlaceholder,
-        SingleValue: SelectSingleValue,
-        SelectContainer,
-        ValueContainer: SelectValueContainer,
-        ...components,
-      }}
-      loadingMessage={() => loadingMessage}
-      noOptionsMessage={() => noOptionsMessage}
-      autoFocus={autoFocus}
-      tabSelectsValue={false}
-      escapeClearsValue={clearable && clearOnEsc}
-      hideSelectedOptions={hideSelections}
-      minMenuHeight={minMenuHeight}
-      maxMenuHeight={maxMenuHeight}
-      openMenuOnClick={openMenuOnPress}
-      openMenuOnFocus={openMenuOnFocus}
-      closeMenuOnSelect={!multi}
-      isSearchable={searchable}
-      isClearable={clearable}
-      isMulti={multi}
-      isLoading={loading}
-      isDisabled={disabled}
-      onChange={handleChange}
-      onFocus={input?.onFocus}
-      onBlur={input?.onBlur}
-    />
+    <>
+      <div
+        ref={containerRef}
+        className={cx(styles.dropdownContainer)}
+      >
+        <Component
+          ref={ref}
+          instanceId={`Dropdown:${creatable ? 'Creatable' : 'Select'}-${input?.name || '???'}`}
+          classNamePrefix="select"
+          containerClassName={cx(
+            styles.container,
+            hasValue && styles.hasValue,
+            (meta?.active || active) && styles.active,
+            disabled && styles.disabled,
+            className,
+          )}
+          containerStyle={style}
+          aria-label={ariaLabel}
+          tabIndex={disabled ? -1 : tabIndex}
+          placeholder={hint}
+          options={options}
+          value={valueOption}
+          active={meta?.active || active}
+          components={{
+            ClearIndicator: SelectClearIndicator,
+            Control: SelectControl,
+            DropdownIndicator: SelectDropdownIndicator,
+            Group: SelectGroup,
+            GroupHeading: SelectGroupHeading,
+            IndicatorsContainer: SelectIndicatorsContainer,
+            IndicatorSeparator: SelectIndicatorSeparator,
+            Input: SelectInput,
+            LoadingMessage: SelectNotice,
+            Menu: SelectMenu,
+            MenuList: SelectMenuList,
+            MultiValue: SelectMultiValue,
+            MultiValueRemove: SelectMultiValueRemove,
+            Option: SelectOption,
+            NoOptionsMessage: SelectNotice,
+            Placeholder: SelectPlaceholder,
+            SingleValue: SelectSingleValue,
+            SelectContainer,
+            ValueContainer: SelectValueContainer,
+            ...components,
+          }}
+          loadingMessage={() => loadingMessage}
+          noOptionsMessage={() => noOptionsMessage}
+          autoFocus={autoFocus}
+          tabSelectsValue={false}
+          escapeClearsValue={clearable && clearOnEsc}
+          hideSelectedOptions={hideSelections}
+          minMenuHeight={minMenuHeight}
+          maxMenuHeight={maxMenuHeight}
+          openMenuOnClick={openMenuOnPress}
+          openMenuOnFocus={openMenuOnFocus}
+          closeMenuOnSelect={!multi}
+          isSearchable={searchable}
+          isClearable={clearable}
+          isMulti={multi}
+          isLoading={loading}
+          isDisabled={disabled}
+          onChange={handleChange}
+          onFocus={(e) => {
+            if (!meta) {
+              setActive(true);
+            }
+
+            input?.onFocus?.(e);
+          }}
+          onBlur={() => {
+            if (!meta) {
+              setActive(false);
+            }
+
+            input?.onBlur?.();
+          }}
+        />
+      </div>
+
+      <Tooltip
+        reference={containerRef.current}
+        content={tooltip}
+        // offset={[0, 15]}
+        // delay={[500, 1000]}
+        // trigger="mouseenter"
+        // touch="hold"
+        visible={(meta?.active || active) && !!tooltip}
+        disabled={!tooltip || disabled}
+      />
+    </>
   );
 });
 

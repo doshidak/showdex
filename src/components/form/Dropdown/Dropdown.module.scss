@@ -67,6 +67,10 @@ $group-heading-padding-y: $option-padding-y;
 $group-heading-font-size: 8px;
 $group-heading-color: color.alpha(colors.$white, 0.5);
 
+.dropdownContainer {
+  position: relative;
+}
+
 // SelectContainer
 
 .container {

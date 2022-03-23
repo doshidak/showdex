@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { Tooltip } from '@showdex/components/ui';
 import type { BaseButtonProps, ButtonElement, ButtonElementType } from './BaseButton';
 import { BaseButton } from './BaseButton';
 import styles from './Button.module.scss';
@@ -10,6 +11,7 @@ interface ButtonProps<
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
   label?: string;
+  tooltip?: React.ReactNode;
   absoluteHover?: boolean;
 }
 
@@ -23,30 +25,53 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   labelClassName,
   labelStyle,
   label,
+  tooltip,
   absoluteHover,
   disabled,
   ...props
-}: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => (
-  <BaseButton
-    ref={forwardedRef}
-    {...props}
-    className={cx(
-      styles.container,
-      absoluteHover && styles.absoluteHover,
-      disabled && styles.disabled,
-      className,
-    )}
-    aria-label={label}
-    disabled={disabled}
-  >
-    <label
-      className={cx(styles.label, labelClassName)}
-      style={labelStyle}
-    >
-      {label}
-    </label>
-  </BaseButton>
-));
+}: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
+  const ref = React.useRef<ButtonElement>(null);
+
+  React.useImperativeHandle(
+    forwardedRef,
+    () => ref.current,
+    [ref],
+  );
+
+  return (
+    <>
+      <BaseButton
+        ref={ref}
+        {...props}
+        className={cx(
+          styles.container,
+          absoluteHover && styles.absoluteHover,
+          disabled && styles.disabled,
+          className,
+        )}
+        aria-label={label}
+        disabled={disabled}
+      >
+        <label
+          className={cx(styles.label, labelClassName)}
+          style={labelStyle}
+        >
+          {label}
+        </label>
+      </BaseButton>
+
+      <Tooltip
+        reference={ref.current}
+        content={tooltip}
+        offset={[0, 10]}
+        delay={[1500, 500]}
+        trigger="mouseenter"
+        touch="hold"
+        disabled={!tooltip || disabled}
+      />
+    </>
+  );
+});
 
 /* eslint-enable react/prop-types */
 /* eslint-enable @typescript-eslint/indent */
