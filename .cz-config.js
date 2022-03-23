@@ -14,6 +14,7 @@ module.exports = {
   ],
 
   scopes: [
+    { name: 'assets' },
     { name: 'comps' },
     { name: 'consts' },
     { name: 'styles' },
@@ -22,6 +23,9 @@ module.exports = {
     { name: 'calcdex' },
     { name: 'typedex' },
     { name: 'typetip' },
+    { name: 'bg' }, // background script (src/background.ts)
+    { name: 'content' }, // content script (src/content.ts)
+    { name: 'main' }, // main script (src/main.ts)
   ],
 
   messages: {
