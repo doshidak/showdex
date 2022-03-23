@@ -93,6 +93,7 @@ export const PlayerCalc = ({
                 textTransform: 'uppercase',
               }}
               label="Auto"
+              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Active Pokémon`}
               absoluteHover
               disabled={!pokemon?.length}
               onPress={() => onAutoSelectChange?.(!autoSelect)}
