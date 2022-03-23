@@ -5,8 +5,9 @@ import { Dropdown, ValueField } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
 import {
   PokemonBoostNames,
+  PokemonCommonNatures,
   PokemonNatureBoosts,
-  PokemonNatures,
+  // PokemonNatures,
   PokemonStatNames,
 } from '@showdex/consts';
 // import { logger } from '@showdex/utils/debug';
@@ -333,14 +334,12 @@ export const PokeCalc = ({
                 nature,
               }),
             }}
-            options={PokemonNatures.map((nature) => ({
-              label: [
-                nature,
-                PokemonNatureBoosts[nature]?.length && ' (',
-                PokemonNatureBoosts[nature]?.[0] && `+${PokemonNatureBoosts[nature][0].toUpperCase()}`,
-                PokemonNatureBoosts[nature]?.[1] && ` -${PokemonNatureBoosts[nature][1].toUpperCase()}`,
-                PokemonNatureBoosts[nature]?.length && ')',
-              ].filter(Boolean).join(''),
+            options={PokemonCommonNatures.map((nature) => ({
+              label: nature,
+              subLabel: PokemonNatureBoosts[nature]?.length ? [
+                !!PokemonNatureBoosts[nature][0] && `+${PokemonNatureBoosts[nature][0].toUpperCase()}`,
+                !!PokemonNatureBoosts[nature][1] && `-${PokemonNatureBoosts[nature][1].toUpperCase()}`,
+              ].filter(Boolean).join(' ') : 'Neutral',
               value: nature,
             }))}
             noOptionsMessage="No Natures"
