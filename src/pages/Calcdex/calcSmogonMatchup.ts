@@ -67,7 +67,15 @@ const formatKoChance = (
   // no point in displaying a 100% chance to KO
   // (should be assumed that if there's no % displayed before the KO, it's 100%)
   if (typeof resultKoChance.chance === 'number' && resultKoChance.chance !== 1) {
-    output.unshift(`${(resultKoChance.chance * 100).toFixed(1)}%`);
+    // sometimes, we might see '0.0% 3HKO' or something along those lines...
+    // probably it's like 0.09%, but gets rounded down when we fix it to 1 decimal place
+    const chancePercentage = resultKoChance.chance * 100;
+    const decimalPlaces = ['0.0', '100.0'].includes(chancePercentage.toFixed(1)) ? 2 : 1;
+    const fixedChance = chancePercentage.toFixed(decimalPlaces);
+
+    if (fixedChance !== '0.0' && fixedChance !== '100.0') {
+      output.unshift(`${fixedChance}%`);
+    }
   }
 
   return output.join(' ');
