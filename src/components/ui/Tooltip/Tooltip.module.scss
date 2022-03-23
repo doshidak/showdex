@@ -1,0 +1,58 @@
+@use 'sass:math';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+
+$padding-x: 10px;
+$padding-y: 8px;
+$font-size: 8px;
+$font-color: colors.$white;
+$background-color: #212121;
+$border-radius: 12px;
+
+$arrow-size: 10px;
+$arrow-placements: (
+  top: bottom,
+  right: left,
+  bottom: top,
+  left: right,
+);
+
+.container {
+  @include spacing.padding-xy($x: $padding-x, $y: $padding-y);
+  @include font.apply(fonts.$mono);
+  font-size: $font-size;
+  color: $font-color;
+  background-color: $background-color;
+  border-radius: $border-radius;
+
+  @each $placement, $prop in $arrow-placements {
+    &[data-placement^='#{$placement}'] > .arrow {
+      #{$prop}: math.div($arrow-size, 2) * -1 + 1px;
+    }
+  }
+}
+
+@mixin arrow-styles {
+  @include position.absolute;
+  width: $arrow-size;
+  height: $arrow-size;
+  background: inherit;
+}
+
+.arrow {
+  @include arrow-styles;
+  visibility: hidden;
+
+  &::before {
+    content: '';
+    @include arrow-styles;
+    transform: rotate(45deg);
+    visibility: visible;
+    z-index: -1;
+  }
+}
