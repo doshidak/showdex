@@ -13,6 +13,7 @@ export const SelectOption = <
 >({
   innerRef,
   className,
+  data,
   isFocused,
   isSelected,
   isDisabled,
@@ -31,7 +32,21 @@ export const SelectOption = <
     )}
     {...innerProps}
   >
-    {children}
+    {
+      !!data?.label &&
+      <div className={styles.optionLabel}>
+        {data.label}
+      </div>
+    }
+
+    {
+      !!data?.subLabel &&
+      <div className={styles.optionSubLabel}>
+        {data.subLabel}
+      </div>
+    }
+
+    {!data?.label && !data?.subLabel && children}
   </div>
 );
 

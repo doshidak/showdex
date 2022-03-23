@@ -36,6 +36,7 @@ export type DropdownValue = DropdownSingleValue | DropdownMultiValue;
 
 export interface DropdownOption {
   label?: string;
+  subLabel?: React.ReactNode;
   value?: DropdownSingleValue;
   options?: DropdownOption[];
 }

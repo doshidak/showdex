@@ -41,6 +41,7 @@ $indicator-separator-color: colors.$transparent;
 $menu-gutter: 1px;
 $menu-background-color: color.alpha(colors.$black, 0.95);
 $menu-border-color: color.alpha(colors.$white, 0.15);
+$menu-z-index: 10;
 
 $option-padding-x: 3px;
 $option-padding-y: 2px;
@@ -51,6 +52,9 @@ $option-background-color-focused: color.alpha(colors.$blue, 0.25);
 $option-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
 $option-background-color-selected: color.alpha(colors.$blue, 0.75);
 $option-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
+
+$option-sub-label-font-size: 8px;
+$option-sub-label-color: color.alpha($option-color, 0.75);
 
 $notice-padding-x: $option-padding-x;
 $notice-padding-y: $option-padding-y;
@@ -307,7 +311,7 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   background-color: $menu-background-color;
   border: 1px solid $menu-border-color;
   overflow: hidden;
-  z-index: 1;
+  z-index: $menu-z-index;
 
   &.placementTop {
     bottom: 100%;
@@ -328,10 +332,10 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
 // SelectOption
 
 .option {
+  @include flex.column;
   width: 100%;
   @include spacing.padding-xy($option-padding-x, $option-padding-y);
   font-size: $value-font-size;
-  color: $option-color;
   background-color: $option-background-color;
   @include transition.apply(background-color);
   user-select: none;
@@ -356,6 +360,15 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
       background-color: $option-background-color-selected-hover;
     }
   }
+}
+
+.optionLabel {
+  color: $option-color;
+}
+
+.optionSubLabel {
+  font-size: $option-sub-label-font-size;
+  color: $option-sub-label-color;
 }
 
 .optionItem {
