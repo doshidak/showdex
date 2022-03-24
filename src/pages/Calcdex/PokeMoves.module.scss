@@ -1,0 +1,37 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/spacing';
+
+.container {
+  grid-template-columns: minmax(150px, 1.25fr) 1.15fr 1fr;
+  column-gap: 10px;
+  row-gap: 5px;
+  @include spacing.margin($top: 15px);
+  // @include spacing.padding-xy($x: 10px, $y: 8px);
+  // @include spacing.padding($top: 7px, $right: 10px, $bottom: 10px, $left: 10px);
+  @include spacing.padding-all(10px);
+  background-color: color.alpha(colors.$black, 0.6);
+  border-radius: 10px;
+  // box-shadow: 0 0 3px color.alpha(colors.$black, 0.15);
+}
+
+.label {
+  color: color.alpha(colors.$white, 0.5);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.critButton {
+  vertical-align: middle;
+  @include spacing.margin($bottom: 1px);
+
+  .critButtonLabel {
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+}
+
+.moveTooltip {
+  font-size: 8px;
+  user-select: none;
+}

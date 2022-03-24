@@ -14,6 +14,10 @@
   width: 100%;
 }
 
+.playerInfo {
+  @include flex.column;
+}
+
 .username {
   max-width: 78px;
   color: color.alpha(colors.$white, 0.5);

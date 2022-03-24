@@ -1,0 +1,63 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  grid-template-columns: minmax(35px, 1fr) repeat(6, minmax(45px, 1.25fr));
+  column-gap: 7px;
+  // row-gap: 3px;
+}
+
+.small {
+  font-size: 8px;
+}
+
+.statHeader {
+  @include transition.apply(color);
+
+  &.up {
+    color: color.alpha(colors.$red, 0.75);
+  }
+
+  &.down {
+    color: color.alpha(colors.$blue, 0.75);
+  }
+}
+
+.valueFieldContainer {
+  @include flex.row($justify: center);
+}
+
+.ivField {
+  max-width: 30px;
+}
+
+.evField {
+  max-width: 30px;
+}
+
+.statValue {
+  @include transition.apply(color);
+
+  &.positive {
+    color: colors.$green;
+  }
+
+  &.negative {
+    color: colors.$red;
+  }
+}
+
+.stageValue {
+  @include flex.row-center;
+}
+
+.boostButton {
+  @include spacing.margin-xy($x: 3px);
+}
+
+.boostModButtonLabel {
+  color: colors.$white;
+}

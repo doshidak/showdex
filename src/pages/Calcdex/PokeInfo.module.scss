@@ -1,0 +1,76 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/spacing';
+
+.container {
+  .row:not(:first-child) {
+    @include spacing.margin($top: 15px);
+  }
+}
+
+.row {
+  @include flex.row-between;
+
+  .rowItem {
+    flex: 1;
+    @include spacing.margin-xy($x: 5px);
+
+    &:first-child {
+      @include spacing.margin($left: 0);
+    }
+
+    &:last-child {
+      @include spacing.margin($right: 0);
+    }
+  }
+}
+
+.small {
+  font-size: 8px;
+}
+
+.label {
+  color: color.alpha(colors.$white, 0.5);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.piconContainer {
+  flex: 0 0 40px;
+  transform: translateY(-2px);
+}
+
+.infoContainer {
+  flex: 1.25;
+}
+
+.infoButton {
+  vertical-align: middle;
+
+  .infoButtonLabel {
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+}
+
+.hpBar {
+  @include spacing.margin($bottom: 2px);
+}
+
+.presetContainer {
+  flex: 1;
+}
+
+.autoPresetButton {
+  @include spacing.margin($bottom: 2px);
+}
+
+.abilityButton {
+  @include spacing.margin($bottom: 1px);
+}
+
+.itemTooltip {
+  font-size: 8px;
+  user-select: none;
+}
