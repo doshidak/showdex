@@ -1,0 +1,39 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/position';
+@use 'mixins/transition';
+
+$height: 3px;
+$border-radius: 15px;
+
+.container {
+  position: relative;
+  display: inline-block;
+  // width: 85px; // set via `width` prop
+  height: $height;
+  border-radius: $border-radius;
+  background-color: color.alpha(colors.$white, 0.15);
+  user-select: none;
+  pointer-events: none;
+}
+
+.value {
+  @include position.absolute($top: 0, $bottom: 0, $left: 0);
+  display: inline-block;
+  width: 100%;
+  background-color: colors.$blue;
+  border-radius: $border-radius;
+  @include transition.apply(width, background-color);
+
+  // &.red {
+  //   background-color: colors.$red;
+  // }
+
+  // &.yellow {
+  //   background-color: #FF8F00;
+  // }
+
+  // &.green {
+  //   background-color: colors.$green;
+  // }
+}
