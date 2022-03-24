@@ -1,10 +1,11 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { Dropdown } from '@showdex/components/form';
+import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
 import { TerrainNames, WeatherNames } from '@showdex/consts';
 import type { CalcdexBattleField } from './CalcdexReducer';
-import styles from './PokeCalc.module.scss';
+import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
   className?: string;
@@ -29,153 +30,142 @@ export const FieldCalc = ({
   } = field || {};
 
   return (
-    <div
-      className={cx(className)}
+    <TableGrid
+      className={cx(styles.container, className)}
       style={style}
     >
-      <div className={cx(styles.tableGrid, styles.stageTable)}>
-        <div className={cx(styles.tableItem, styles.statLabel, styles.left)}>
-          Your Screens
-        </div>
-        <div className={cx(styles.tableItem, styles.statLabel)}>
-          Weather
-        </div>
-        <div className={cx(styles.tableItem, styles.statLabel)}>
-          Terrain
-        </div>
-        <div className={cx(styles.tableItem, styles.statLabel, styles.right)}>
-          Their Screens
-        </div>
+      {/* table headers */}
+      <TableGridItem align="left" header>
+        Your Screens
+      </TableGridItem>
+      <TableGridItem header>
+        Weather
+      </TableGridItem>
+      <TableGridItem header>
+        Terrain
+      </TableGridItem>
+      <TableGridItem align="right" header>
+        Their Screens
+      </TableGridItem>
 
-        <div className={cx(styles.tableItem, styles.left)}>
-          <Button
-            labelStyle={attackerSide?.isLightScreen ? undefined : { color: '#FFFFFF' }}
-            label="Light"
-            onPress={() => onFieldChange?.({
-              attackerSide: {
-                ...attackerSide,
-                isLightScreen: !attackerSide?.isLightScreen,
-              },
-            })}
-          />
-          {' '}
+      {/* player's screens */}
+      <TableGridItem align="left">
+        <Button
+          labelStyle={attackerSide?.isLightScreen ? undefined : { color: '#FFFFFF' }}
+          label="Light"
+          onPress={() => onFieldChange?.({
+            attackerSide: {
+              ...attackerSide,
+              isLightScreen: !attackerSide?.isLightScreen,
+            },
+          })}
+        />
+        {' '}
 
-          <Button
-            labelStyle={attackerSide?.isReflect ? undefined : { color: '#FFFFFF' }}
-            label="Reflect"
-            onPress={() => onFieldChange?.({
-              attackerSide: {
-                ...attackerSide,
-                isReflect: !attackerSide?.isReflect,
-              },
-            })}
-          />
+        <Button
+          labelStyle={attackerSide?.isReflect ? undefined : { color: '#FFFFFF' }}
+          label="Reflect"
+          onPress={() => onFieldChange?.({
+            attackerSide: {
+              ...attackerSide,
+              isReflect: !attackerSide?.isReflect,
+            },
+          })}
+        />
 
-          {' '}
-          <Button
-            labelStyle={attackerSide?.isAuroraVeil ? undefined : { color: '#FFFFFF' }}
-            label="Aurora"
-            onPress={() => onFieldChange?.({
-              attackerSide: {
-                ...attackerSide,
-                isAuroraVeil: !attackerSide?.isAuroraVeil,
-              },
-            })}
-          />
-        </div>
+        {' '}
+        <Button
+          labelStyle={attackerSide?.isAuroraVeil ? undefined : { color: '#FFFFFF' }}
+          label="Aurora"
+          onPress={() => onFieldChange?.({
+            attackerSide: {
+              ...attackerSide,
+              isAuroraVeil: !attackerSide?.isAuroraVeil,
+            },
+          })}
+        />
+      </TableGridItem>
 
-        {/* <div className={styles.tableItem}>
-          {weather || (
-            <span style={{ opacity: 0.5 }}>
-              --
-            </span>
-          )}
-        </div> */}
+      {/* weather */}
+      <TableGridItem>
+        <Dropdown
+          style={{ textAlign: 'left' }}
+          aria-label="Field Weather"
+          hint="None"
+          input={{
+            name: `FieldCalc:Weather:${battleId || '???'}`,
+            value: weather,
+            onChange: (updatedWeather: CalcdexBattleField['weather']) => onFieldChange?.({
+              weather: updatedWeather,
+            }),
+          }}
+          options={WeatherNames.map((weatherName) => ({
+            label: weatherName,
+            value: weatherName,
+          }))}
+          noOptionsMessage="No Weather"
+        />
+      </TableGridItem>
 
-        <div className={styles.tableItem}>
-          <Dropdown
-            aria-label="Field Weather"
-            hint="None"
-            input={{
-              name: `FieldCalc:Weather:${battleId || '???'}`,
-              value: weather,
-              onChange: (updatedWeather: CalcdexBattleField['weather']) => onFieldChange?.({
-                weather: updatedWeather,
-              }),
-            }}
-            options={WeatherNames.map((weatherName) => ({
-              label: weatherName,
-              value: weatherName,
-            }))}
-            noOptionsMessage="No Weather"
-          />
-        </div>
+      {/* terrain */}
+      <TableGridItem>
+        <Dropdown
+          style={{ textAlign: 'left' }}
+          aria-label="Field Terrain"
+          hint="None"
+          input={{
+            name: `FieldCalc:Terrain:${battleId || '???'}`,
+            value: terrain,
+            onChange: (updatedTerrain: CalcdexBattleField['terrain']) => onFieldChange?.({
+              terrain: updatedTerrain,
+            }),
+          }}
+          options={TerrainNames.map((terrainName) => ({
+            label: terrainName,
+            value: terrainName,
+          }))}
+          noOptionsMessage="No Terrain"
+        />
+      </TableGridItem>
 
-        {/* <div className={styles.tableItem}>
-          {terrain || (
-            <span style={{ opacity: 0.5 }}>
-              --
-            </span>
-          )}
-        </div> */}
+      {/* opponent's screens */}
+      <TableGridItem align="right">
+        <Button
+          labelStyle={defenderSide?.isLightScreen ? undefined : { color: '#FFFFFF' }}
+          label="Light"
+          onPress={() => onFieldChange?.({
+            defenderSide: {
+              ...defenderSide,
+              isLightScreen: !defenderSide?.isLightScreen,
+            },
+          })}
+        />
 
-        <div className={styles.tableItem}>
-          <Dropdown
-            aria-label="Field Terrain"
-            hint="None"
-            input={{
-              name: `FieldCalc:Terrain:${battleId || '???'}`,
-              value: terrain,
-              onChange: (updatedTerrain: CalcdexBattleField['terrain']) => onFieldChange?.({
-                terrain: updatedTerrain,
-              }),
-            }}
-            options={TerrainNames.map((terrainName) => ({
-              label: terrainName,
-              value: terrainName,
-            }))}
-            noOptionsMessage="No Terrain"
-          />
-        </div>
+        {' '}
+        <Button
+          labelStyle={defenderSide?.isReflect ? undefined : { color: '#FFFFFF' }}
+          label="Reflect"
+          onPress={() => onFieldChange?.({
+            defenderSide: {
+              ...defenderSide,
+              isReflect: !defenderSide?.isReflect,
+            },
+          })}
+        />
 
-        <div className={cx(styles.tableItem, styles.right)}>
-          <Button
-            labelStyle={defenderSide?.isLightScreen ? undefined : { color: '#FFFFFF' }}
-            label="Light"
-            onPress={() => onFieldChange?.({
-              defenderSide: {
-                ...defenderSide,
-                isLightScreen: !defenderSide?.isLightScreen,
-              },
-            })}
-          />
-
-          {' '}
-          <Button
-            labelStyle={defenderSide?.isReflect ? undefined : { color: '#FFFFFF' }}
-            label="Reflect"
-            onPress={() => onFieldChange?.({
-              defenderSide: {
-                ...defenderSide,
-                isReflect: !defenderSide?.isReflect,
-              },
-            })}
-          />
-
-          {' '}
-          <Button
-            labelStyle={defenderSide?.isAuroraVeil ? undefined : { color: '#FFFFFF' }}
-            label="Aurora"
-            onPress={() => onFieldChange?.({
-              // ...field,
-              defenderSide: {
-                ...defenderSide,
-                isAuroraVeil: !defenderSide?.isAuroraVeil,
-              },
-            })}
-          />
-        </div>
-      </div>
-    </div>
+        {' '}
+        <Button
+          labelStyle={defenderSide?.isAuroraVeil ? undefined : { color: '#FFFFFF' }}
+          label="Aurora"
+          onPress={() => onFieldChange?.({
+            // ...field,
+            defenderSide: {
+              ...defenderSide,
+              isAuroraVeil: !defenderSide?.isAuroraVeil,
+            },
+          })}
+        />
+      </TableGridItem>
+    </TableGrid>
   );
 };
