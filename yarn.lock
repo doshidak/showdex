@@ -1453,11 +1453,6 @@
   dependencies:
     "@types/node" "^14.11.2"
 
-"@smogon/sets@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@smogon/sets/-/sets-2.0.0.tgz#63dbd6ba924cbc7fc887594f95856f684f0497cb"
-  integrity sha512-wsOGEx/divu+hU+idHh06bNERD94ZcDzHzJLXmBNkBAup8ayuscP48d13nN4zUli2/ab48bW5o9UI9tbuifV6Q==
-
 "@tippyjs/react@^4.2.6":
   version "4.2.6"
   resolved "https://registry.yarnpkg.com/@tippyjs/react/-/react-4.2.6.tgz#971677a599bf663f20bb1c60a62b9555b749cc71"

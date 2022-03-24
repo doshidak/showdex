@@ -48,7 +48,6 @@
     "@react-aria/visually-hidden": "^3.2.6",
     "@react-spring/web": "^9.4.4",
     "@smogon/calc": "^0.6.0",
-    "@smogon/sets": "^2.0.0",
     "@tippyjs/react": "^4.2.6",
     "@use-gesture/react": "^10.2.10",
     "chalk": "^5.0.1",
