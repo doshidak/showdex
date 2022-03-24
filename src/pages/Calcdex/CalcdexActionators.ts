@@ -28,13 +28,13 @@ export type CalcdexReducerAction<
   V extends void | Promise<void> = void,
 > = ThunkyReducerAction<CalcdexReducerInstance, V>;
 
-export type CalcdexReducerActionator<
+export type CalcdexActionator<
   A extends unknown[],
   V extends void | Promise<void> = void,
 > = ThunkyReducerActionator<CalcdexReducerInstance, (...args: A) => CalcdexReducerAction<V>>;
 
-export interface CalcdexReducerActionatorMap extends ThunkyReducerActionatorMap<CalcdexReducerInstance> {
-  addPokemon: CalcdexReducerActionator<[
+export interface CalcdexActionatorMap extends ThunkyReducerActionatorMap<CalcdexReducerInstance> {
+  addPokemon: CalcdexActionator<[
     dex: PkmnGeneration,
     tooltips: Showdown.BattleTooltips,
     cache: PresetCacheHookInterface,
@@ -42,40 +42,40 @@ export interface CalcdexReducerActionatorMap extends ThunkyReducerActionatorMap<
     format?: string,
   ], Promise<void>>;
 
-  updatePokemon: CalcdexReducerActionator<[
+  updatePokemon: CalcdexActionator<[
     dex: PkmnGeneration,
     tooltips: Showdown.BattleTooltips,
     pokemon: Partial<CalcdexPokemon>,
     shouldSync?: boolean,
   ]>;
 
-  updateField: CalcdexReducerActionator<[
+  updateField: CalcdexActionator<[
     field: Partial<CalcdexBattleField>,
   ]>;
 
-  syncBattleField: CalcdexReducerActionator<[
+  syncBattleField: CalcdexActionator<[
     battle: Showdown.Battle,
   ]>;
 
-  setActiveIndex: CalcdexReducerActionator<[
+  setActiveIndex: CalcdexActionator<[
     playerKey: CalcdexPlayerKey,
     activeIndex: number,
   ]>;
 
-  setSelectionIndex: CalcdexReducerActionator<[
+  setSelectionIndex: CalcdexActionator<[
     playerKey: CalcdexPlayerKey,
     selectionIndex: number,
   ]>;
 
-  setAutoSelect: CalcdexReducerActionator<[
+  setAutoSelect: CalcdexActionator<[
     playerKey: CalcdexPlayerKey,
     autoSelect: boolean,
   ]>;
 }
 
-const l = logger('Calcdex/CalcdexReducerActionators');
+const l = logger('Calcdex/CalcdexActionators');
 
-export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
+export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
   dex,
   tooltips,
   cache,
@@ -304,7 +304,7 @@ export const addPokemon: CalcdexReducerActionatorMap['addPokemon'] = (
   });
 };
 
-export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
+export const updatePokemon: CalcdexActionatorMap['updatePokemon'] = (
   _dex, /** @todo refactor this out since it's no longer being used */
   tooltips,
   pokemon,
@@ -374,7 +374,7 @@ export const updatePokemon: CalcdexReducerActionatorMap['updatePokemon'] = (
   });
 };
 
-export const updateField: CalcdexReducerActionatorMap['updateField'] = (
+export const updateField: CalcdexActionatorMap['updateField'] = (
   field,
 ) => (dispatch) => {
   l.debug(
@@ -389,7 +389,7 @@ export const updateField: CalcdexReducerActionatorMap['updateField'] = (
   });
 };
 
-export const syncBattleField: CalcdexReducerActionatorMap['syncBattleField'] = (
+export const syncBattleField: CalcdexActionatorMap['syncBattleField'] = (
   battle,
 ) => (dispatch, getState) => {
   const state = getState();
@@ -439,7 +439,7 @@ export const syncBattleField: CalcdexReducerActionatorMap['syncBattleField'] = (
   });
 };
 
-export const setActiveIndex: CalcdexReducerActionatorMap['setActiveIndex'] = (
+export const setActiveIndex: CalcdexActionatorMap['setActiveIndex'] = (
   playerKey,
   activeIndex,
 ) => (dispatch) => {
@@ -455,7 +455,7 @@ export const setActiveIndex: CalcdexReducerActionatorMap['setActiveIndex'] = (
   });
 };
 
-export const setSelectionIndex: CalcdexReducerActionatorMap['setSelectionIndex'] = (
+export const setSelectionIndex: CalcdexActionatorMap['setSelectionIndex'] = (
   playerKey,
   selectionIndex,
 ) => (dispatch) => {
@@ -471,7 +471,7 @@ export const setSelectionIndex: CalcdexReducerActionatorMap['setSelectionIndex']
   });
 };
 
-export const setAutoSelect: CalcdexReducerActionatorMap['setAutoSelect'] = (
+export const setAutoSelect: CalcdexActionatorMap['setAutoSelect'] = (
   playerKey,
   autoSelect,
 ) => (dispatch) => {
@@ -487,7 +487,7 @@ export const setAutoSelect: CalcdexReducerActionatorMap['setAutoSelect'] = (
   });
 };
 
-export const CalcdexReducerActionators: CalcdexReducerActionatorMap = {
+export const CalcdexActionators: CalcdexActionatorMap = {
   addPokemon,
   updatePokemon,
   updateField,

@@ -14,8 +14,8 @@ import type {
   CalcdexReducerInstance,
   CalcdexReducerState,
 } from './CalcdexReducer';
+import { CalcdexActionators } from './CalcdexActionators';
 import { CalcdexInitialState, CalcdexReducer } from './CalcdexReducer';
-import { CalcdexReducerActionators } from './CalcdexReducerActionators';
 import { detectPlayerKeyFromBattle } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { syncServerPokemon } from './syncServerPokemon';
@@ -76,8 +76,8 @@ export const useCalcdex = ({
     setActiveIndex,
     setSelectionIndex,
     setAutoSelect,
-  } = useThunkyBindedActionators<CalcdexReducerInstance, typeof CalcdexReducerActionators>(
-    CalcdexReducerActionators,
+  } = useThunkyBindedActionators<CalcdexReducerInstance, typeof CalcdexActionators>(
+    CalcdexActionators,
     dispatch,
   );
 
