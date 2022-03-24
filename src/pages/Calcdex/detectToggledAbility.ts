@@ -11,9 +11,9 @@ import { calcPokemonHp } from './calcPokemonHp';
  *   - Otherwise, its `ability` would still be `'Flash Fire'`, but `volatiles` would be an empty object, i.e., `{}`.
  * * Only exception is the *Multiscale* ability, which is only active when the Pokemon's HP is at 100%,
  *   similar to how the *Focus Sash* item works.
- *   - Pretty sure `calculate()` from `smogon/calc` doesn't care whether `abilityOn` (of `SmogonPokemon`)
+ *   - Pretty sure `calculate()` from `@smogon/calc` doesn't care whether `abilityOn` (of `SmogonPokemon`)
  *     is `true` or `false`, but we keep track of it for visual purposes.
- *     - (Side note: `SmogonPokemon` mentioned above is an alias of the `Pokemon` class from `smogon/calc`.)
+ *     - (Side note: `SmogonPokemon` mentioned above is an alias of the `Pokemon` class from `@smogon/calc`.)
  *   - Pokemon's HP value isn't currently editable, so there's no way to toggle *Multiscale* on/off
  *     (before the Pokemon takes any damage).
  *   - Additionally, if, say, Dragonite takes damage, this would return `false`, since its HP is no longer at 100%.
