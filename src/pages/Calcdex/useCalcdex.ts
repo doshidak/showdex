@@ -190,6 +190,17 @@ export const useCalcdex = ({
     // handle player updates
     void (async () => {
       if (!presetCache.available(format)) {
+        if (presetCache.loading) {
+          l.debug(
+            'React.useEffect() <- presetCache.loading',
+            '\n', 'presets are already downloading, so fetching will be ignored',
+            '\n', 'note that this round of rendering will be blocked until fetching is complete',
+            '\n', 'format', format,
+          );
+
+          return;
+        }
+
         l.debug(
           'React.useEffect() -> await presetCache.fetch()',
           '\n', 'fetching presets from Smogon since none are available',
