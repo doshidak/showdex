@@ -19,6 +19,7 @@ import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
+import { detectToggledAbility } from './detectToggledAbility';
 import { fetchPokemonMovesets } from './fetchPokemonMovesets';
 import { fetchPokemonPresets } from './fetchPokemonPresets';
 import { sanitizePokemon } from './sanitizePokemon';
@@ -245,6 +246,8 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
       newPokemon[key] = value;
     });
   }
+
+  newPokemon.abilityToggled = detectToggledAbility(newPokemon);
 
   // if the Pokemon's revealed ability and/or item match their dirty counterparts (lol),
   // clear the dirty values

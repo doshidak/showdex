@@ -16,6 +16,7 @@ import {
 import type { AbilityName, ItemName } from '@pkmn/data';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonHp } from './calcPokemonHp';
+import { detectToggledAbility } from './detectToggledAbility';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeInfoProps {
@@ -212,6 +213,7 @@ export const PokeInfo = ({
                   absoluteHover
                   onPress={() => onPokemonChange?.({
                     dirtyAbility: null,
+                    abilityToggled: detectToggledAbility(pokemon),
                   })}
                 />
               </>
@@ -226,6 +228,10 @@ export const PokeInfo = ({
               value: pokemon?.dirtyAbility ?? pokemon?.ability,
               onChange: (ability: AbilityName) => onPokemonChange?.({
                 dirtyAbility: ability,
+                abilityToggled: detectToggledAbility({
+                  ...pokemon,
+                  ability,
+                }),
               }),
             }}
             options={[!!pokemon?.altAbilities?.length && {
