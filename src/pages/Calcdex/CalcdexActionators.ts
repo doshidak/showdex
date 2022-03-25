@@ -43,7 +43,6 @@ export interface CalcdexActionatorMap extends ThunkyReducerActionatorMap<Calcdex
   ], Promise<void>>;
 
   updatePokemon: CalcdexActionator<[
-    dex: PkmnGeneration,
     tooltips: Showdown.BattleTooltips,
     pokemon: Partial<CalcdexPokemon>,
     shouldSync?: boolean,
@@ -305,7 +304,6 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
 };
 
 export const updatePokemon: CalcdexActionatorMap['updatePokemon'] = (
-  _dex, /** @todo refactor this out since it's no longer being used */
   tooltips,
   pokemon,
   shouldSync,
@@ -341,24 +339,6 @@ export const updatePokemon: CalcdexActionatorMap['updatePokemon'] = (
       );
     }
   }
-
-  // l.debug(
-  //   'updatePokemon() -> calcPokemonStats()',
-  //   '\n', 'updatedPokemon', updatedPokemon,
-  //   '\n', 'ident', ident,
-  //   '\n', 'playerKey', playerKey,
-  // );
-
-  // update (2022/03/10): calculatedStats is now being calculated (and memoized) on the fly in PokeCalc
-  // updatedPokemon.calculatedStats = calcPokemonStats(dex, updatedPokemon);
-
-  // l.debug(
-  //   'updatePokemon() <- calcPokemonStats()',
-  //   '\n', 'calculatedStats', updatedPokemon.calculatedStats,
-  //   '\n', 'updatedPokemon', updatedPokemon,
-  //   '\n', 'ident', ident,
-  //   '\n', 'playerKey', playerKey,
-  // );
 
   l.debug(
     'updatePokemon() -> dispatch()',

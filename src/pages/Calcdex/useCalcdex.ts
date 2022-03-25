@@ -362,9 +362,9 @@ export const useCalcdex = ({
               }
             }
 
-            // update the mon at the current index (via the `sync` action instead of `put`)
-            // updatePokemon(dex, tooltips, <CalcdexPokemon> (<unknown> mon), true);
-            updatePokemon(dex, tooltips, newPokemon, !serverPokemon);
+            // update the mon at the current index
+            // (`:put` is used when serverPokemon is available, otherwise `:sync`)
+            updatePokemon(tooltips, newPokemon, !serverPokemon);
 
             return;
           }
@@ -439,8 +439,8 @@ export const useCalcdex = ({
     state,
     // dispatch,
     addPokemon: (pokemon) => addPokemon(dex, tooltips, presetCache, pokemon, format),
-    updatePokemon: (pokemon) => updatePokemon(dex, tooltips, pokemon),
-    syncPokemon: (pokemon) => updatePokemon(dex, tooltips, pokemon, true),
+    updatePokemon: (pokemon) => updatePokemon(tooltips, pokemon),
+    syncPokemon: (pokemon) => updatePokemon(tooltips, pokemon, true),
     updateField,
     setActiveIndex,
     setSelectionIndex,
