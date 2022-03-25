@@ -48,6 +48,11 @@ export const calcPokemonStats = (
     dex.natures.get(pokemon.nature) :
     undefined;
 
+  // these are used for determining stat increases/decreases due to status conditions
+  const gen = dex.num;
+  const hasGuts = pokemon?.ability?.toLowerCase?.() === 'guts';
+  const hasQuickFeet = pokemon?.ability?.toLowerCase?.() === 'quick feet';
+
   // rebuild the Pokemon's base stats to make sure all values are available
   const baseStats: CalcdexPokemon['baseStats'] = {
     hp: pokemon?.baseStats?.hp ?? species?.baseStats?.hp ?? 0,
@@ -113,6 +118,53 @@ export const calcPokemonStats = (
         const multiplier = ((Math.abs(clampedStage) + 2) / 2) ** (clampedStage < 0 ? -1 : 1);
 
         prev[stat] *= multiplier;
+      }
+
+      // handle reductions due to abilities
+      if ('slowstart' in (pokemon?.volatiles || {}) && pokemon?.abilityToggled) {
+        // 50% ATK/SPE reduction due to "Slow Start"
+        if (['atk', 'spe'].includes(stat)) {
+          prev[stat] *= 0.5;
+        }
+      }
+
+      // handle boosts/reductions by the Pokemon's current status condition, if any
+      if (pokemon?.status) {
+        if (hasGuts) {
+          // 50% ATK boost w/ non-volatile status condition due to "Guts"
+          if (stat === 'atk') {
+            prev[stat] *= 1.5;
+          }
+        } else if (hasQuickFeet) {
+          // 50% SPE boost w/ non-volatile status condition due to "Quick Feet"
+          if (stat === 'spe') {
+            prev[stat] *= 1.5;
+          }
+        } else { // Pokemon does not have either "Guts" or "Quick Feet"
+          switch (pokemon.status) {
+            case 'brn': {
+              // 50% ATK reduction (all gens... probably)
+              if (stat === 'atk') {
+                prev[stat] *= 0.5;
+              }
+
+              break;
+            }
+
+            case 'par': {
+              // 25% SPE reduction if gen < 7 (i.e., gens 1 to 6), otherwise 50% SPE reduction
+              if (stat === 'spe') {
+                prev[stat] *= 1 - (gen < 7 ? 0.25 : 0.5);
+              }
+
+              break;
+            }
+
+            default: {
+              break;
+            }
+          }
+        }
       }
     }
 

@@ -20,6 +20,13 @@ export const detectStatBoostDelta = (
     return null;
   }
 
+  // check for boosts from abilities
+  if ('slowstart' in (pokemon?.volatiles || {}) && pokemon?.abilityToggled) {
+    if (['atk', 'spe'].includes(stat)) {
+      return 'negative';
+    }
+  }
+
   // check for status-dependent boosts from abilities
   const abilitySearchString = pokemon?.ability?.toLowerCase?.();
   const hasGuts = abilitySearchString === 'guts';
