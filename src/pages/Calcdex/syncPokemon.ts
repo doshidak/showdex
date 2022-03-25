@@ -3,6 +3,7 @@ import { logger } from '@showdex/utils/debug';
 import type { CalcdexMoveState, CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
+import { detectToggledAbility } from './detectToggledAbility';
 import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
 const l = logger('Calcdex/syncPokemon');
@@ -62,38 +63,23 @@ export const syncPokemon = (
   const newPokemon: CalcdexPokemon = { ...pokemon };
 
   ([
-    // 'serverSourced',
     'speciesForme',
     'hp',
     'maxhp',
     'status',
     'statusData',
-    // 'types',
     'ability',
     'baseAbility',
-    // 'abilities',
     'nature',
-    // 'natures',
     'item',
-    // 'dirtyItem',
     'itemEffect',
     'prevItem',
     'prevItemEffect',
-    // 'ivs',
-    // 'evs',
-    // 'moves',
     'moveTrack',
-    // 'moveState',
     'volatiles',
+    'abilityToggled', // should be after volatiles
     'turnstatuses',
     'boosts',
-    // 'dirtyBoosts',
-    'calculatedStats', // this is updated before dispatching in useCalcdex
-    // 'preset',
-    // 'presets',
-    // 'autoPreset',
-    // 'criticalHit',
-    // 'toxicCounter',
   ] as (keyof CalcdexPokemon)[]).forEach((key) => {
     const currentValue = newPokemon[key];
     let value = mutations?.[key];
@@ -103,6 +89,34 @@ export const syncPokemon = (
       case 'nature': {
         if (!value) {
           return;
+        }
+
+        break;
+      }
+
+      case 'item': {
+        // ignore any unrevealed item (resulting in a falsy value) that hasn't been knocked-off/consumed/etc.
+        // (this can be checked since when the item be consumed, prevItem would NOT be falsy)
+        if (!value && !mutations?.prevItem) {
+          return;
+        }
+
+        // clear the dirtyItem if it's what the Pokemon actually has
+        // (otherwise, if the item hasn't been revealed yet, `value` would be falsy,
+        // but that's ok cause we have dirtyItem, i.e., no worries about clearing the user's input)
+        if (value === mutations?.dirtyItem) {
+          mutations.dirtyItem = null;
+        }
+
+        break;
+      }
+
+      case 'prevItem': {
+        // check if the item was knocked-off and is the same as dirtyItem
+        // if so, clear the dirtyItem
+        // (note that `value` here is prevItem, NOT item!)
+        if (mutations?.prevItemEffect === 'knocked off' && value === mutations?.dirtyItem) {
+          mutations.dirtyItem = null;
         }
 
         break;
@@ -152,6 +166,12 @@ export const syncPokemon = (
         if (!Array.isArray(value) || !value.length) {
           value = currentValue;
         }
+
+        break;
+      }
+
+      case 'abilityToggled': {
+        value = detectToggledAbility(mutations);
 
         break;
       }
