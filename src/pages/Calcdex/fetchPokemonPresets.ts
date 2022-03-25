@@ -49,13 +49,25 @@ export const fetchPokemonPresets = async (
 
         if (firstPreset?.item) {
           // newPokemon.item = firstPreset.item;
-          newPokemon.dirtyItem = firstPreset.item;
+          // newPokemon.dirtyItem = firstPreset.item;
+
+          if (pokemon?.item && pokemon.item !== firstPreset.item) {
+            newPokemon.dirtyItem = firstPreset.item;
+          } else {
+            newPokemon.item = firstPreset.item;
+          }
+
           newPokemon.altItems = firstPreset.altItems;
         }
 
         if (firstPreset?.ability) {
-          // newPokemon.ability = firstPreset.ability;
-          newPokemon.dirtyAbility = firstPreset.ability;
+          // for these formats, probably not even a legal ability, so set it as the dirtyAbility
+          if (['AAA', 'AG', 'BHACK'].includes(firstPreset.name.split(' ')[0])) {
+            newPokemon.dirtyAbility = firstPreset.ability;
+          } else {
+            newPokemon.ability = firstPreset.ability;
+          }
+
           newPokemon.altAbilities = firstPreset.altAbilities;
         }
 
