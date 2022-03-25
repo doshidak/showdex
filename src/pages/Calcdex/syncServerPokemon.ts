@@ -1,4 +1,3 @@
-import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts';
 import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from './CalcdexReducer';
@@ -7,6 +6,7 @@ import { calcPresetCalcdexId } from './calcCalcdexId';
 // import { calcPokemonStats } from './calcPokemonStats';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
+import { guessServerSpread } from './guessServerSpread';
 
 const l = logger('Calcdex/syncServerPokemon');
 
@@ -67,43 +67,6 @@ export const syncServerPokemon = (
     return clientPokemon;
   }
 
-  const species = dex.species.get(syncedPokemon.speciesForme);
-
-  if (!species?.baseStats?.hp) {
-    l.debug(
-      'syncServerPokemon() <- dex.species.get()',
-      '\n', 'received no baseStats for the given speciesForme',
-      '\n', 'speciesForme', syncedPokemon.speciesForme,
-      '\n', 'species', species,
-      '\n', 'syncedPokemon', syncedPokemon,
-      '\n', 'clientPokemon', clientPokemon,
-      '\n', 'serverPokemon', serverPokemon,
-    );
-
-    return clientPokemon;
-  }
-
-  const baseStats: Showdown.StatsTable = {
-    ...species?.baseStats,
-  };
-
-  // since a ServerPokemon doesn't include the nature or EV/IV distribution,
-  // but rather, only the final calculated stats, we need to figure out what
-  // those original values were for the nature and EV/IVs.
-  const {
-    maxhp,
-    stats: serverStats,
-  } = serverPokemon;
-
-  const knownStats: Showdown.StatsTable = {
-    hp: maxhp,
-    atk: serverStats?.atk,
-    def: serverStats?.def,
-    spa: serverStats?.spa,
-    spd: serverStats?.spd,
-    spe: serverStats?.spe,
-  };
-
   // build a preset based on the serverPokemon's stats
   const serverPreset: CalcdexPokemonPreset = {
     name: isRandom ? 'Randoms' : 'Yours',
@@ -145,97 +108,11 @@ export const syncServerPokemon = (
       serverPreset.altMoves = randomPreset?.altMoves;
     }
   } else {
-    // low-key terrible cause of the O(n^4) complexity (from this alone), but w/e
-    for (const natureName of PokemonCommonNatures) {
-      const nature = dex.natures.get(natureName);
+    const guessedSpread = guessServerSpread(dex, syncedPokemon, serverPokemon);
 
-      // l.debug('trying nature', nature.name, 'for Pokemon', syncedPokemon.ident);
-
-      const calculatedStats: Showdown.StatsTable = {
-        hp: 0,
-        atk: 0,
-        def: 0,
-        spa: 0,
-        spd: 0,
-        spe: 0,
-      };
-
-      for (const stat of PokemonStatNames) {
-        if (typeof serverPreset.ivs[stat] === 'number' && typeof serverPreset.evs[stat] === 'number') {
-          break;
-        }
-
-        for (let iv = 31; iv >= 0; iv -= 31) { // try only 31 and 0 for IVs (who assigns any other IVs?)
-          for (let ev = 252; ev >= 0; ev -= 4) { // try 252 to 0 in multiples of 4
-            calculatedStats[stat] = dex.stats.calc(
-              stat,
-              baseStats[stat],
-              iv,
-              ev,
-              syncedPokemon.level,
-              nature,
-            );
-
-            // warning: if you don't filter this log, there will be lots of logs (and I mean A LOT)
-            // may crash your browser depending on your computer's specs. debug at your own risk!
-            // if (syncedPokemon.ident === 'p2: Clefable') {
-            //   l.debug(
-            //     'trying to find the spread for', syncedPokemon.ident, 'stat', stat,
-            //     '\n', 'calculatedStat', calculatedStats[stat], 'knownStat', knownStats[stat],
-            //     '\n', 'iv', iv, 'ev', ev,
-            //     '\n', 'nature', nature.name, '+', nature.plus, '-', nature.minus,
-            //   );
-            // }
-
-            if (calculatedStats[stat] === knownStats[stat]) {
-              l.debug(
-                'found matching combination for', syncedPokemon.ident, 'stat', stat,
-                '\n', 'calculatedStat', calculatedStats[stat], 'knownStat', knownStats[stat],
-                '\n', 'iv', iv, 'ev', ev,
-                '\n', 'nature', nature.name, '+', nature.plus, '-', nature.minus,
-              );
-
-              serverPreset.ivs[stat] = iv;
-              serverPreset.evs[stat] = ev;
-
-              break;
-            }
-
-            delete serverPreset.evs[stat];
-          }
-
-          if (calculatedStats[stat] === knownStats[stat]) {
-            break;
-          }
-        }
-      }
-
-      const sameStats = knownStats.hp === calculatedStats.hp &&
-        knownStats.atk === calculatedStats.atk &&
-        knownStats.def === calculatedStats.def &&
-        knownStats.spa === calculatedStats.spa &&
-        knownStats.spd === calculatedStats.spd &&
-        knownStats.spe === calculatedStats.spe;
-
-      const evsLegal = Object.values(serverPreset.evs)
-        .reduce((sum, ev) => sum + ev, 0) <= 508; // 252 + 252 + 4 = 508
-
-      if (sameStats && evsLegal) {
-        l.debug(
-          'found nature that matches all of the Pokemon\'s stats',
-          '\n', 'nature', nature.name,
-          '\n', 'calculatedStats', calculatedStats,
-          '\n', 'knownStats', knownStats,
-        );
-
-        serverPreset.nature = nature.name;
-
-        break;
-      } else {
-        serverPreset.ivs = {};
-        serverPreset.evs = {};
-      }
-    }
+    serverPreset.nature = guessedSpread?.nature;
+    serverPreset.ivs = { ...guessedSpread?.ivs };
+    serverPreset.evs = { ...guessedSpread?.evs };
   }
 
   if (serverPreset.nature) {
@@ -243,17 +120,11 @@ export const syncServerPokemon = (
   }
 
   if (Object.keys(serverPreset.ivs).length) {
-    syncedPokemon.ivs = {
-      // ...syncedPokemon.ivs,
-      ...serverPreset.ivs,
-    };
+    syncedPokemon.ivs = { ...serverPreset.ivs };
   }
 
   if (Object.keys(serverPreset.evs).length) {
-    syncedPokemon.evs = {
-      // ...syncedPokemon.evs,
-      ...serverPreset.evs,
-    };
+    syncedPokemon.evs = { ...serverPreset.evs };
   }
 
   const serverAbility = serverPokemon?.ability ?
@@ -261,8 +132,9 @@ export const syncServerPokemon = (
     null;
 
   if (serverAbility?.name) {
+    // since we know the actual ability, no need to set it as a dirtyAbility
     serverPreset.ability = serverAbility.name;
-    syncedPokemon.dirtyAbility = serverAbility.name;
+    syncedPokemon.ability = serverAbility.name;
   }
 
   const serverItem = serverPokemon?.item ?
@@ -270,8 +142,9 @@ export const syncServerPokemon = (
     null;
 
   if (serverItem?.name) {
+    // same goes for the item (as with the case of the ability); no need for dirtyItem
     serverPreset.item = serverItem.name;
-    syncedPokemon.dirtyItem = serverItem.name;
+    syncedPokemon.item = serverItem.name;
   }
 
   if (serverPokemon?.moves?.length) {
@@ -300,12 +173,12 @@ export const syncServerPokemon = (
   syncedPokemon.preset = serverPreset.calcdexId;
   syncedPokemon.autoPreset = true;
 
-  // update (2022/03/10): calculatedStats is now being calculated (and memoized) on the fly in PokeCalc
-  // syncedPokemon.calculatedStats = calcPokemonStats(dex, syncedPokemon);
-
   // l.debug(
-  //   'return syncedPokemon',
+  //   'syncServerPokemon() -> return syncedPokemon',
   //   '\n', 'syncedPokemon', syncedPokemon,
+  //   '\n', 'format', format,
+  //   '\n', 'clientPokemon', clientPokemon,
+  //   '\n', 'serverPokemon', serverPokemon,
   // );
 
   return syncedPokemon;
