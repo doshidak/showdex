@@ -9,29 +9,43 @@ $status-colors: (
   par: #DBCB37,
   slp: #304E7C,
   tox: #802480,
-  fnt: #5700F8,
+  fnt: #455A64,
 );
 
-$label-opacity: 0.75;
-$background-opacity: 0.3;
+$label-opacity-light: 1;
+$label-opacity-dark: 0.75;
+$background-opacity-light: 0.5;
+$background-opacity-dark: 0.3;
 
 .container {
   display: inline-block;
   width: 24px;
   @include spacing.padding-xy($y: 1px);
   font-size: 8px;
-  color: color.alpha(colors.$white, $label-opacity);
   text-align: center;
   text-transform: uppercase;
   text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
-  background-color: color.alpha($status-unknown-color, $background-opacity);
   border-radius: 5px;
   user-select: none;
   pointer-events: none;
 
+  &.light {
+    color: color.alpha(colors.$white, $label-opacity-light);
+    background-color: color.alpha($status-unknown-color, $background-opacity-light);
+  }
+
+  &.dark {
+    color: color.alpha(colors.$white, $label-opacity-dark);
+    background-color: color.alpha($status-unknown-color, $background-opacity-dark);
+  }
+
   @each $status, $color in $status-colors {
-    &.#{$status} {
-      background-color: color.alpha($color, $background-opacity);
+    &.light.#{$status} {
+      background-color: color.alpha($color, $background-opacity-light);
+    }
+
+    &.dark.#{$status} {
+      background-color: color.alpha($color, $background-opacity-dark);
     }
   }
 }

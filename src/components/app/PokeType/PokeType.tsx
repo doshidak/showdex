@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import styles from './PokeType.module.scss';
 
 export interface PokeTypeProps {
@@ -34,15 +35,20 @@ export const PokeType = ({
   className,
   style,
   type,
-}: PokeTypeProps): JSX.Element => (
-  <span
-    className={cx(
-      styles.container,
-      !!type && type !== '???' && styles[type.toLowerCase()],
-      className,
-    )}
-    style={style}
-  >
-    {abbrevs[type || '???']}
-  </span>
-);
+}: PokeTypeProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
+  return (
+    <span
+      className={cx(
+        styles.container,
+        !!colorScheme && styles[colorScheme],
+        !!type && type !== '???' && styles[`type-${type.toLowerCase()}`],
+        className,
+      )}
+      style={style}
+    >
+      {abbrevs[type || '???']}
+    </span>
+  );
+};

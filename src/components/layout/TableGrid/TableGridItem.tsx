@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import styles from './TableGrid.module.scss';
 
 export interface TableGridItemProps {
@@ -18,17 +19,22 @@ export const TableGridItem = ({
   header,
   small,
   children,
-}: TableGridItemProps): JSX.Element => (
-  <div
-    className={cx(
-      styles.item,
-      align !== 'center' && styles[align],
-      header && styles.header,
-      small && styles.small,
-      className,
-    )}
-    style={style}
-  >
-    {children}
-  </div>
-);
+}: TableGridItemProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
+  return (
+    <div
+      className={cx(
+        styles.item,
+        !!colorScheme && styles[colorScheme],
+        align !== 'center' && styles[align],
+        header && styles.header,
+        small && styles.small,
+        className,
+      )}
+      style={style}
+    >
+      {children}
+    </div>
+  );
+};

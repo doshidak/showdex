@@ -11,7 +11,8 @@ $padding-x: 10px;
 $padding-y: 8px;
 $font-size: 8px;
 $font-color: colors.$white;
-$background-color: #212121;
+$background-color-light: #616161;
+$background-color-dark: #212121;
 $border-radius: 12px;
 
 $arrow-size: 10px;
@@ -27,8 +28,15 @@ $arrow-placements: (
   @include font.apply(fonts.$mono);
   font-size: $font-size;
   color: $font-color;
-  background-color: $background-color;
   border-radius: $border-radius;
+
+  &.light {
+    background-color: $background-color-light;
+  }
+
+  &.dark {
+    background-color: $background-color-dark;
+  }
 
   @each $placement, $prop in $arrow-placements {
     &[data-placement^='#{$placement}'] > .arrow {

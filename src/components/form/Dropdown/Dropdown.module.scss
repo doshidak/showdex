@@ -10,82 +10,121 @@
 $padding-x: 5px;
 $padding-y: 2px;
 
-$background-color: colors.$transparent;
-$background-color-hover: color.alpha(colors.$white, 0.05);
-$background-color-active: color.alpha(colors.$white, 0.1);
+$background-color-light: colors.$transparent;
+$background-color-dark: colors.$transparent;
+$background-color-light-hover: color.alpha(colors.$black, 0.05);
+$background-color-dark-hover: color.alpha(colors.$white, 0.05);
+$background-color-light-active: color.alpha(colors.$black, 0.1);
+$background-color-dark-active: color.alpha(colors.$white, 0.1);
 
 $border-radius: 5px;
 
 $value-font-size: 10px;
-$value-color: color.alpha(colors.$white, 0.85);
-$value-color-hover: color.tint(colors.$blue, 15%);
-$value-color-active: colors.$white;
+$value-light-color: color.alpha(colors.$black, 0.85);
+$value-dark-color: color.alpha(colors.$white, 0.85);
+$value-light-color-hover: color.tint(colors.$blue, 15%);
+$value-dark-color-hover: $value-light-color-hover;
+$value-light-color-active: colors.$black;
+$value-dark-color-active: colors.$white;
 
 $multi-value-padding-x: 2px;
 $multi-value-padding-y: 1px;
-$multi-value-border-color: color.alpha(colors.$white, 0.15);
+$multi-value-light-border-color: color.alpha(colors.$black, 0.15);
+$multi-value-dark-border-color: color.alpha(colors.$white, 0.15);
 
-$placeholder-color: color.alpha(colors.$white, 0.3);
-$placeholder-color-hover: $value-color-hover;
-$placeholder-color-active: color.alpha(colors.$white, 0.5);
+$placeholder-light-color: color.alpha(colors.$black, 0.3);
+$placeholder-dark-color: color.alpha(colors.$white, 0.3);
+$placeholder-light-color-hover: $value-light-color-hover;
+$placeholder-dark-color-hover: $value-dark-color-hover;
+$placeholder-light-color-active: color.alpha(colors.$black, 0.5);
+$placeholder-dark-color-active: color.alpha(colors.$white, 0.5);
 
 $icon-size: 10px; // used for the close and chevron icons
-$icon-color: color.alpha(colors.$white, 0.3);
-$icon-color-hover: color.alpha(colors.$white, 0.95);
+$icon-light-color: color.alpha(colors.$black, 0.3);
+$icon-dark-color: color.alpha(colors.$white, 0.3);
+$icon-light-color-hover: color.alpha(colors.$black, 0.95);
+$icon-dark-color-hover: color.alpha(colors.$white, 0.95);
 
 $indicator-separator-width: 1px;
 $indicator-separator-margin-x: 3px;
-// $indicator-separator-color: color.alpha(colors.$white, 0.075);
-$indicator-separator-color: colors.$transparent;
+$indicator-separator-light-color: colors.$transparent;
+$indicator-separator-dark-color: colors.$transparent;
 
 $menu-gutter: 1px;
-$menu-background-color: color.alpha(colors.$black, 0.95);
-$menu-border-color: color.alpha(colors.$white, 0.15);
+$menu-light-background-color: color.alpha(colors.$white, 0.95);
+$menu-dark-background-color: color.alpha(colors.$black, 0.95);
+$menu-light-border-color: color.alpha(colors.$black, 0.15);
+$menu-dark-border-color: color.alpha(colors.$white, 0.15);
 $menu-z-index: 10;
 
 $option-padding-x: 3px;
 $option-padding-y: 2px;
-$option-color: colors.$white;
-$option-background-color: colors.$transparent;
-$option-background-color-hover: color.alpha(colors.$white, 0.15);
-$option-background-color-focused: color.alpha(colors.$blue, 0.25);
-$option-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
-$option-background-color-selected: color.alpha(colors.$blue, 0.75);
-$option-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
+$option-light-color: colors.$black;
+$option-dark-color: colors.$white;
+$option-light-background-color: colors.$transparent;
+$option-dark-background-color: colors.$transparent;
+$option-light-background-color-hover: color.alpha(colors.$black, 0.15);
+$option-dark-background-color-hover: color.alpha(colors.$white, 0.15);
+$option-light-background-color-focused: color.alpha(colors.$blue, 0.25);
+$option-dark-background-color-focused: color.alpha(colors.$blue, 0.25);
+$option-light-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
+$option-dark-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
+$option-light-background-color-selected: color.alpha(colors.$blue, 0.75);
+$option-dark-background-color-selected: color.alpha(colors.$blue, 0.75);
+$option-light-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
+$option-dark-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
 
 $option-sub-label-font-size: 8px;
-$option-sub-label-color: color.alpha($option-color, 0.75);
+$option-sub-label-light-color: color.alpha($option-light-color, 0.75);
+$option-sub-label-dark-color: color.alpha($option-dark-color, 0.75);
 
 $notice-padding-x: $option-padding-x;
 $notice-padding-y: $option-padding-y;
-$notice-color: color.alpha(colors.$white, 0.5);
+$notice-light-color: color.alpha(colors.$black, 0.5);
+$notice-dark-color: color.alpha(colors.$white, 0.5);
 
 $group-padding-x: 1px;
 
 $group-heading-padding-x: $option-padding-x;
 $group-heading-padding-y: $option-padding-y;
 $group-heading-font-size: 8px;
-$group-heading-color: color.alpha(colors.$white, 0.5);
+$group-heading-light-color: color.alpha(colors.$black, 0.5);
+$group-heading-dark-color: color.alpha(colors.$white, 0.5);
 
-.dropdownContainer {
+.container {
   position: relative;
 }
 
 // SelectContainer
 
-.container {
+.selectContainer {
   position: relative;
   @include flex.row;
-  background-color: $background-color;
   border-radius: $border-radius;
   @include transition.apply(background-color);
 
-  &:hover {
-    background-color: $background-color-hover;
+  .light & {
+    background-color: $background-color-light;
   }
 
-  &.active {
-    background-color: $background-color-active;
+  .dark & {
+    background-color: $background-color-dark;
+  }
+
+  .light &:hover {
+    background-color: $background-color-light-hover;
+  }
+
+  .dark &:hover {
+    background-color: $background-color-dark-hover;
+  }
+
+  .light &.active {
+    background-color: $background-color-light-active;
+  }
+
+  .dark &.active {
+    background-color: $background-color-dark-active;
   }
 
   &.rtl {
@@ -120,14 +159,20 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   @include flex.row($align: center);
   flex: 1;
   flex-wrap: wrap;
-  color: $value-color;
   @include transition.apply(color);
   cursor: text;
+
+  .light & {
+    color: $value-light-color;
+  }
+
+  .dark & {
+    color: $value-dark-color;
+  }
 }
 
 .value {
   position: relative;
-  // width: 100%;
 
   // &.single {
   //   width: 100%;
@@ -144,7 +189,6 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
 .placeholder {
   @include position.absolute-anchor($y: 50%);
   font-size: $value-font-size;
-  color: $placeholder-color;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -152,12 +196,28 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   user-select: none;
   pointer-events: none;
 
-  .container:not(.active):hover & {
-    color: $placeholder-color-hover;
+  .light & {
+    color: $placeholder-light-color;
   }
 
-  .focused & {
-    color: $placeholder-color-active;
+  .dark & {
+    color: $placeholder-dark-color;
+  }
+
+  .light .selectContainer:not(.active):hover & {
+    color: $placeholder-light-color-hover;
+  }
+
+  .dark .selectContainer:not(.active):hover & {
+    color: $placeholder-dark-color-hover;
+  }
+
+  .light .selectContainer.active & {
+    color: $placeholder-light-color-active;
+  }
+
+  .dark .selectContainer.active & {
+    color: $placeholder-dark-color-active;
   }
 }
 
@@ -194,11 +254,18 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   @include spacing.padding-none;
   @include font.apply(fonts.$mono);
   font-size: $value-font-size;
-  color: $value-color;
   background: none;
   border: none;
   outline: none;
   opacity: 1;
+
+  .light & {
+    color: $value-light-color;
+  }
+
+  .dark & {
+    color: $value-dark-color;
+  }
 
   &.hidden {
     opacity: 0;
@@ -217,10 +284,17 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   display: block;
   @include spacing.padding-xy($x: $group-heading-padding-x, $y: $group-heading-padding-y);
   font-size: $group-heading-font-size;
-  color: $group-heading-color;
   text-transform: uppercase;
   user-select: none;
   cursor: default;
+
+  .light & {
+    color: $group-heading-light-color;
+  }
+
+  .dark & {
+    color: $group-heading-dark-color;
+  }
 }
 
 // SelectSingleValue
@@ -241,7 +315,15 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   @include flex.row-center;
   @include spacing.margin-xy($multi-value-padding-x, $multi-value-padding-y);
   font-size: $value-font-size - ($multi-value-padding-y * 2);
-  border: 1px solid $multi-value-border-color;
+  border: 1px solid colors.$transparent;
+
+  .light & {
+    border-color: $multi-value-light-border-color;
+  }
+
+  .dark & {
+    border-color: $multi-value-dark-border-color;
+  }
 }
 
 .valueLabel {
@@ -258,12 +340,23 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
 .remove {
   @include flex.row-center;
   @include spacing.padding($right: $multi-value-padding-x);
-  color: $icon-color;
   @include transition.apply(color);
   cursor: pointer;
 
-  &:hover {
-    color: $icon-color-hover;
+  .light & {
+    color: $icon-light-color;
+  }
+
+  .dark & {
+    color: $icon-dark-color;
+  }
+
+  .light &:hover {
+    color: $icon-light-color-hover;
+  }
+
+  .dark &:hover {
+    color: $icon-dark-color-hover;
   }
 }
 
@@ -277,12 +370,23 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
 
 .indicator {
   display: flex;
-  color: $icon-color;
   @include transition.apply(color);
   cursor: pointer;
 
-  &:hover {
-    color: $icon-color-hover;
+  .light & {
+    color: $icon-light-color;
+  }
+
+  .dark & {
+    color: $icon-dark-color;
+  }
+
+  .light &:hover {
+    color: $icon-light-color-hover;
+  }
+
+  .dark &:hover {
+    color: $icon-dark-color-hover;
   }
 }
 
@@ -302,7 +406,14 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   align-self: stretch;
   width: $indicator-separator-width;
   @include spacing.margin-xy($indicator-separator-margin-x);
-  background: $indicator-separator-color;
+
+  .light & {
+    background: $indicator-separator-light-color;
+  }
+
+  .dark & {
+    background: $indicator-separator-dark-color;
+  }
 }
 
 // SelectMenu
@@ -312,10 +423,19 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   width: 100%;
   @include spacing.margin-xy(0, $menu-gutter);
   border-radius: $border-radius;
-  background-color: $menu-background-color;
-  border: 1px solid $menu-border-color;
+  border: 1px solid colors.$transparent;
   overflow: hidden;
   z-index: $menu-z-index;
+
+  .light & {
+    background-color: $menu-light-background-color;
+    border-color: $menu-light-border-color;
+  }
+
+  .dark & {
+    background-color: $menu-dark-background-color;
+    border-color: $menu-dark-border-color;
+  }
 
   &.placementTop {
     bottom: 100%;
@@ -340,39 +460,79 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
   width: 100%;
   @include spacing.padding-xy($option-padding-x, $option-padding-y);
   font-size: $value-font-size;
-  background-color: $option-background-color;
   @include transition.apply(background-color);
   user-select: none;
   cursor: pointer;
 
-  &:hover {
-    background-color: $option-background-color-hover;
+  .light & {
+    background-color: $option-light-background-color;
   }
 
-  &.focused {
-    background-color: $option-background-color-focused;
+  .dark & {
+    background-color: $option-dark-background-color;
+  }
+
+  .light &:hover {
+    background-color: $option-light-background-color-hover;
+  }
+
+  .dark &:hover {
+    background-color: $option-dark-background-color-hover;
+  }
+
+  .light &.focused {
+    background-color: $option-light-background-color-focused;
 
     &:hover {
-      background-color: $option-background-color-focused-hover;
+      background-color: $option-light-background-color-focused-hover;
     }
   }
 
-  &.selected {
-    background-color: $option-background-color-selected;
+  .dark &.focused {
+    background-color: $option-dark-background-color-focused;
 
     &:hover {
-      background-color: $option-background-color-selected-hover;
+      background-color: $option-dark-background-color-focused-hover;
+    }
+  }
+
+  .light &.selected {
+    background-color: $option-light-background-color-selected;
+
+    &:hover {
+      background-color: $option-light-background-color-selected-hover;
+    }
+  }
+
+  .dark &.selected {
+    background-color: $option-dark-background-color-selected;
+
+    &:hover {
+      background-color: $option-dark-background-color-selected-hover;
     }
   }
 }
 
 .optionLabel {
-  color: $option-color;
+  .light & {
+    color: $option-light-color;
+  }
+
+  .dark & {
+    color: $option-dark-color;
+  }
 }
 
 .optionSubLabel {
   font-size: $option-sub-label-font-size;
-  color: $option-sub-label-color;
+
+  .light & {
+    color: $option-sub-label-light-color;
+  }
+
+  .dark & {
+    color: $option-sub-label-dark-color;
+  }
 }
 
 .optionItem {
@@ -390,7 +550,14 @@ $group-heading-color: color.alpha(colors.$white, 0.5);
 .notice {
   @include spacing.padding-xy($notice-padding-x, $notice-padding-y);
   font-size: $value-font-size;
-  color: $notice-color;
   text-align: center;
   user-select: none;
+
+  .light & {
+    color: $notice-light-color;
+  }
+
+  .dark & {
+    color: $notice-dark-color;
+  }
 }

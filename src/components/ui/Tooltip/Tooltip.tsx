@@ -2,6 +2,7 @@ import * as React from 'react';
 import Tippy from '@tippyjs/react/headless';
 import { animated, useSpring } from '@react-spring/web';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import type { TippyProps } from '@tippyjs/react';
 import styles from './Tooltip.module.scss';
 
@@ -57,6 +58,8 @@ export const Tooltip = ({
   children,
   ...props
 }: TooltipProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   // animations (required for "headless" Tippy -- i.e., we're not using the default plug-n-play version)
   const [animationStyles, springApi] = useSpring(() => ({
     ...springProps.hide,
@@ -93,6 +96,7 @@ export const Tooltip = ({
         <animated.div
           className={cx(
             styles.container,
+            !!colorScheme && styles[colorScheme],
             className,
           )}
           style={{

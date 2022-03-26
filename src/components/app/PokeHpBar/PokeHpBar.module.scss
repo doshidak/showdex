@@ -12,9 +12,16 @@ $border-radius: 15px;
   // width: 85px; // set via `width` prop
   height: $height;
   border-radius: $border-radius;
-  background-color: color.alpha(colors.$white, 0.15);
   user-select: none;
   pointer-events: none;
+
+  &.light {
+    background-color: color.alpha(colors.$black, 0.15);
+  }
+
+  &.dark {
+    background-color: color.alpha(colors.$white, 0.15);
+  }
 }
 
 .value {

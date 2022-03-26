@@ -24,26 +24,40 @@ $type-colors: (
   fairy: #E76D88,
 );
 
-$label-opacity: 0.75;
-$background-opacity: 0.3;
+$label-light-opacity: 1;
+$label-dark-opacity: 0.75;
+$background-opacity-light: 0.5;
+$background-opacity-dark: 0.3;
 
 .container {
   display: inline-block;
   width: 36px;
   @include spacing.padding-xy($y: 1px);
   font-size: 8px;
-  color: color.alpha(colors.$white, $label-opacity);
   text-align: center;
   text-transform: uppercase;
   text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
-  background-color: color.alpha($type-unknown-color, $background-opacity);
   border-radius: 5px;
   user-select: none;
   pointer-events: none;
 
+  &.light {
+    color: color.alpha(colors.$white, $label-light-opacity);
+    background-color: color.alpha($type-unknown-color, $background-opacity-light);
+  }
+
+  &.dark {
+    color: color.alpha(colors.$white, $label-dark-opacity);
+    background-color: color.alpha($type-unknown-color, $background-opacity-dark);
+  }
+
   @each $type, $color in $type-colors {
-    &.#{$type} {
-      background-color: color.alpha($color, $background-opacity);
+    &.light.type-#{$type} {
+      background-color: color.alpha($color, $background-opacity-light);
+    }
+
+    &.dark.type-#{$type} {
+      background-color: color.alpha($color, $background-opacity-dark);
     }
   }
 }

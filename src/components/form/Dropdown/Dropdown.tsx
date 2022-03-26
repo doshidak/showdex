@@ -2,6 +2,7 @@ import * as React from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import { Tooltip } from '@showdex/components/ui';
 import type { FieldInputProps, FieldRenderProps } from 'react-final-form';
 import type { SelectInstance } from 'react-select';
@@ -102,6 +103,8 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
 }: DropdownProps, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<SelectInstance>(null);
+  const colorScheme = useColorScheme();
+
   const Component = creatable ? Creatable as CreatableComponent : Select as SelectComponent;
 
   // see ValueField for an explanation as to why we track active internally, instead of using react-final-form
@@ -159,14 +162,17 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
     <>
       <div
         ref={containerRef}
-        className={cx(styles.dropdownContainer)}
+        className={cx(
+          styles.container,
+          !!colorScheme && styles[colorScheme],
+        )}
       >
         <Component
           ref={ref}
           instanceId={`Dropdown:${creatable ? 'Creatable' : 'Select'}-${input?.name || '???'}`}
           classNamePrefix="select"
           containerClassName={cx(
-            styles.container,
+            styles.selectContainer,
             hasValue && styles.hasValue,
             (meta?.active || active) && styles.active,
             disabled && styles.disabled,

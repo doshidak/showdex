@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import { Tooltip } from '@showdex/components/ui';
 import type { BaseButtonProps, ButtonElement, ButtonElementType } from './BaseButton';
 import { BaseButton } from './BaseButton';
@@ -31,6 +32,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   ...props
 }: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
+  const colorScheme = useColorScheme();
 
   React.useImperativeHandle(
     forwardedRef,
@@ -45,6 +47,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         {...props}
         className={cx(
           styles.container,
+          !!colorScheme && styles[colorScheme],
           absoluteHover && styles.absoluteHover,
           disabled && styles.disabled,
           className,

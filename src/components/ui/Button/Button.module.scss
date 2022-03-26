@@ -7,33 +7,43 @@
 $padding-x: 5px;
 $padding-y: 1px;
 
-// $background-color: color.alpha(colors.$white, 0.5);
-$background-color: colors.$transparent;
-$background-color-hover: color.alpha(colors.$white, 0.05);
-$background-color-active: color.alpha(colors.$black, 0.3);
+$background-color-light: colors.$transparent;
+$background-color-dark: colors.$transparent;
+$background-color-light-hover: color.alpha(colors.$black, 0.05);
+$background-color-dark-hover: color.alpha(colors.$white, 0.05);
+$background-color-light-active: color.alpha(colors.$white, 0.3);
+$background-color-dark-active: color.alpha(colors.$black, 0.3);
 
-// $border-color: colors.$transparent;
-// $border-color-hover: color.alpha(colors.$black, 0.15);
-// $border-color-active: color.alpha(colors.$blue, 0.25);
 $border-radius: 15px;
 
 .container {
   position: relative;
-  // @include spacing.padding-xy($padding-x, $padding-y);
-  background-color: $background-color;
   border-radius: $border-radius;
-  // border: 2px solid $border-color;
   @include transition.apply(background-color);
 
+  &.light {
+    background-color: $background-color-light;
+  }
+
+  &.dark {
+    background-color: $background-color-dark;
+  }
+
   &:not(.absoluteHover) {
-    &:hover {
-      background-color: $background-color-hover;
-      // border-color: $border-color-hover;
+    &.light:hover {
+      background-color: $background-color-light-hover;
     }
 
-    &:active {
-      background-color: $background-color-active;
-      // border-color: $border-color-active;
+    &.dark:hover {
+      background-color: $background-color-dark-hover;
+    }
+
+    &.light:active {
+      background-color: $background-color-light-active;
+    }
+
+    &.dark:active {
+      background-color: $background-color-dark-active;
     }
   }
 
@@ -42,19 +52,34 @@ $border-radius: 15px;
     &::before {
       content: '';
       @include position.absolute-xy(-$padding-x, -$padding-y);
-      background-color: $background-color;
       border-radius: $border-radius;
       @include transition.apply(background-color);
       user-select: none;
       pointer-events: none;
     }
 
-    &:hover::before {
-      background-color: $background-color-hover;
+    &.light {
+      background-color: $background-color-light;
     }
 
-    &:active::before {
-      background-color: $background-color-active;
+    &.dark {
+      background-color: $background-color-dark;
+    }
+
+    &.light:hover::before {
+      background-color: $background-color-light-hover;
+    }
+
+    &.dark:hover::before {
+      background-color: $background-color-dark-hover;
+    }
+
+    &.light:active::before {
+      background-color: $background-color-light-active;
+    }
+
+    &.dark:active::before {
+      background-color: $background-color-light-active;
     }
   }
 
