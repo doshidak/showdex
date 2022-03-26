@@ -31,9 +31,16 @@
 }
 
 .label {
-  color: color.alpha(colors.$white, 0.5);
   text-transform: uppercase;
   user-select: none;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.5);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.5);
+  }
 }
 
 .piconContainer {

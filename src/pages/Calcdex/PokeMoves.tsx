@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokeType } from '@showdex/components/app';
+import { PokeType, useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
@@ -29,6 +29,8 @@ export const PokeMoves = ({
   calculateMatchup,
   onPokemonChange,
 }: PokeMovesProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   const gen = dex?.num ?? 8;
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
@@ -36,7 +38,11 @@ export const PokeMoves = ({
 
   return (
     <TableGrid
-      className={cx(styles.container, className)}
+      className={cx(
+        styles.container,
+        !!colorScheme && styles[colorScheme],
+        className,
+      )}
       style={style}
     >
       {/* table headers */}
@@ -46,11 +52,15 @@ export const PokeMoves = ({
 
       <TableGridItem header>
         DMG
+
         {' '}
         <Button
           className={styles.critButton}
-          labelClassName={styles.critButtonLabel}
-          labelStyle={pokemon?.criticalHit ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.critButtonLabel,
+            styles.toggleButtonLabel,
+            !pokemon?.criticalHit && styles.inactive,
+          )}
           label="Crit"
           tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
           absoluteHover

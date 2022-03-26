@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import { ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
@@ -30,6 +31,8 @@ export const PokeStats = ({
   pokemon,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
@@ -40,7 +43,11 @@ export const PokeStats = ({
 
   return (
     <TableGrid
-      className={cx(styles.container, className)}
+      className={cx(
+        styles.container,
+        !!colorScheme && styles[colorScheme],
+        className,
+      )}
       style={style}
     >
       {/* table headers (horizontal) */}

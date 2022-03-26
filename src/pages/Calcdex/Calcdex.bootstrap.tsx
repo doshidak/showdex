@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { ColorSchemeProvider } from '@showdex/components/app';
 import {
   createSideRoom,
   // getActiveBattle,
@@ -142,10 +143,12 @@ export const bootstrap = (roomid?: string): void => {
       );
 
       ReactDOM.render((
-        <Calcdex
-          battle={activeBattle}
-          tooltips={tooltips}
-        />
+        <ColorSchemeProvider>
+          <Calcdex
+            battle={activeBattle}
+            tooltips={tooltips}
+          />
+        </ColorSchemeProvider>
       ), battle.calcdexRoom.el);
     });
 

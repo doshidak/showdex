@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Picon } from '@showdex/components/app';
+import { Picon, useColorScheme } from '@showdex/components/app';
 import { BaseButton, Button } from '@showdex/components/ui';
 import type { Generation, GenerationNum } from '@pkmn/data';
 import type {
@@ -43,6 +43,8 @@ export const PlayerCalc = ({
   onIndexSelect,
   onAutoSelectChange,
 }: PlayerCalcProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   const {
     sideid: playerSideId,
     name,
@@ -65,7 +67,11 @@ export const PlayerCalc = ({
 
   return (
     <div
-      className={cx(styles.container, className)}
+      className={cx(
+        styles.container,
+        !!colorScheme && styles[colorScheme],
+        className,
+      )}
       style={style}
     >
       <div className={styles.playerBar}>

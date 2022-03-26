@@ -59,5 +59,11 @@
 }
 
 .boostModButtonLabel {
-  color: colors.$white;
+  .light & {
+    color: colors.$black;
+  }
+
+  .dark & {
+    color: colors.$white;
+  }
 }

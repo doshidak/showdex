@@ -5,6 +5,7 @@ import {
   PokeHpBar,
   PokeStatus,
   PokeType,
+  useColorScheme,
 } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
@@ -32,6 +33,8 @@ export const PokeInfo = ({
   pokemon,
   onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
@@ -39,7 +42,11 @@ export const PokeInfo = ({
 
   return (
     <div
-      className={cx(styles.container, className)}
+      className={cx(
+        styles.container,
+        !!colorScheme && styles[colorScheme],
+        className,
+      )}
       style={style}
     >
       <div className={styles.row}>

@@ -7,16 +7,29 @@
 
 .container {
   @include position.absolute-fill;
-  color: colors.$white;
-  // overflow: hidden auto;
   overflow: hidden;
+
+  &.light {
+    color: colors.$black;
+  }
+
+  &.dark {
+    color: colors.$white;
+  }
 
   &::before {
     content: '';
     @include position.absolute-fill;
-    background-color: color.alpha(colors.$black, 0.5);
     pointer-events: none;
     z-index: -1;
+  }
+
+  &.light::before {
+    background-color: color.alpha(colors.$white, 0.5);
+  }
+
+  &.dark::before {
+    background-color: color.alpha(colors.$black, 0.5);
   }
 }
 
@@ -34,10 +47,17 @@
     @include spacing.margin-xy($y: 5px);
     margin-block-start: 0;
     margin-block-end: 0;
-    background-color: color.alpha(colors.$white, 0.15);
     border: none;
     outline: none;
     user-select: none;
+  }
+
+  .light & hr {
+    background-color: color.alpha(colors.$black, 0.15);
+  }
+
+  .dark & hr {
+    background-color: color.alpha(colors.$white, 0.15);
   }
 }
 
@@ -45,10 +65,17 @@
   @include position.absolute-anchor($x: 0, $y: 0, $x-prop: right);
   // @include spacing.padding-all(3px);
   font-size: 6px;
-  color: color.alpha(colors.$white, 0.15);
   // background-color: color.alpha(colors.$black, 0.15);
   user-select: none;
   pointer-events: none;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.15);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.15);
+  }
 }
 
 .fieldCalc {

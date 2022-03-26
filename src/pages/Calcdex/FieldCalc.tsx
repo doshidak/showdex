@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
@@ -22,6 +23,8 @@ export const FieldCalc = ({
   field,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   const {
     weather,
     terrain,
@@ -31,7 +34,11 @@ export const FieldCalc = ({
 
   return (
     <TableGrid
-      className={cx(styles.container, className)}
+      className={cx(
+        styles.container,
+        !!colorScheme && styles[colorScheme],
+        className,
+      )}
       style={style}
     >
       {/* table headers */}
@@ -51,7 +58,10 @@ export const FieldCalc = ({
       {/* player's screens */}
       <TableGridItem align="left">
         <Button
-          labelStyle={attackerSide?.isLightScreen ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.toggleButtonLabel,
+            !attackerSide?.isLightScreen && styles.inactive,
+          )}
           label="Light"
           onPress={() => onFieldChange?.({
             attackerSide: {
@@ -63,7 +73,10 @@ export const FieldCalc = ({
         {' '}
 
         <Button
-          labelStyle={attackerSide?.isReflect ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.toggleButtonLabel,
+            !attackerSide?.isReflect && styles.inactive,
+          )}
           label="Reflect"
           onPress={() => onFieldChange?.({
             attackerSide: {
@@ -75,7 +88,10 @@ export const FieldCalc = ({
 
         {' '}
         <Button
-          labelStyle={attackerSide?.isAuroraVeil ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.toggleButtonLabel,
+            !attackerSide?.isAuroraVeil && styles.inactive,
+          )}
           label="Aurora"
           onPress={() => onFieldChange?.({
             attackerSide: {
@@ -131,7 +147,10 @@ export const FieldCalc = ({
       {/* opponent's screens */}
       <TableGridItem align="right">
         <Button
-          labelStyle={defenderSide?.isLightScreen ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.toggleButtonLabel,
+            !defenderSide?.isLightScreen && styles.inactive,
+          )}
           label="Light"
           onPress={() => onFieldChange?.({
             defenderSide: {
@@ -143,7 +162,10 @@ export const FieldCalc = ({
 
         {' '}
         <Button
-          labelStyle={defenderSide?.isReflect ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.toggleButtonLabel,
+            !defenderSide?.isReflect && styles.inactive,
+          )}
           label="Reflect"
           onPress={() => onFieldChange?.({
             defenderSide: {
@@ -155,7 +177,10 @@ export const FieldCalc = ({
 
         {' '}
         <Button
-          labelStyle={defenderSide?.isAuroraVeil ? undefined : { color: '#FFFFFF' }}
+          labelClassName={cx(
+            styles.toggleButtonLabel,
+            !defenderSide?.isAuroraVeil && styles.inactive,
+          )}
           label="Aurora"
           onPress={() => onFieldChange?.({
             // ...field,

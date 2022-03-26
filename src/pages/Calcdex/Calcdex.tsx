@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import { logger, printBuildInfo } from '@showdex/utils/debug';
 import { detectPlayerKeyFromBattle } from './detectPlayerKey';
 import { FieldCalc } from './FieldCalc';
@@ -31,11 +32,14 @@ export const Calcdex = ({
     tooltips,
   });
 
+  const colorScheme = useColorScheme();
+
   l.debug(
     'rendering...',
     '\n', 'p1.pokemon', battle?.p1?.pokemon,
     '\n', 'p2.pokemon', battle?.p2?.pokemon,
     '\n', 'state', state,
+    '\n', 'colorScheme', colorScheme,
   );
 
   const {
@@ -58,6 +62,7 @@ export const Calcdex = ({
       className={cx(
         'showdex-module',
         styles.container,
+        !!colorScheme && styles[colorScheme],
       )}
     >
       <div className={styles.content}>

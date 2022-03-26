@@ -7,18 +7,31 @@
   column-gap: 10px;
   row-gap: 5px;
   @include spacing.margin($top: 15px);
-  // @include spacing.padding-xy($x: 10px, $y: 8px);
-  // @include spacing.padding($top: 7px, $right: 10px, $bottom: 10px, $left: 10px);
   @include spacing.padding-all(10px);
-  background-color: color.alpha(colors.$black, 0.6);
   border-radius: 10px;
-  // box-shadow: 0 0 3px color.alpha(colors.$black, 0.15);
+
+  &.light {
+    background-color: color.alpha(colors.$white, 0.6);
+    box-shadow: 0 0 1px color.alpha(colors.$black, 0.15),
+      0 0 3px color.alpha(colors.$black, 0.15);
+  }
+
+  &.dark {
+    background-color: color.alpha(colors.$black, 0.6);
+  }
 }
 
 .label {
-  color: color.alpha(colors.$white, 0.5);
   text-transform: uppercase;
   user-select: none;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.5);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.5);
+  }
 }
 
 .critButton {
@@ -34,4 +47,14 @@
 .moveTooltip {
   font-size: 8px;
   user-select: none;
+}
+
+.toggleButtonLabel {
+  .light &.inactive {
+    color: colors.$black;
+  }
+
+  .dark &.inactive {
+    color: colors.$white;
+  }
 }

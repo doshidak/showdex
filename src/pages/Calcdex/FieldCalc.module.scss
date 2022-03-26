@@ -1,4 +1,16 @@
+@use 'config/colors';
+
 .container {
   grid-template-columns: 1fr 1.1fr 1.1fr 1fr;
   column-gap: 10px;
+}
+
+.toggleButtonLabel {
+  .light &.inactive {
+    color: colors.$black;
+  }
+
+  .dark &.inactive {
+    color: colors.$white;
+  }
 }

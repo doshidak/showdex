@@ -20,10 +20,17 @@
 
 .username {
   max-width: 78px;
-  color: color.alpha(colors.$white, 0.5);
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.5);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.5);
+  }
 }
 
 .teamList {
@@ -57,10 +64,17 @@
   }
 
   // &:not(.selected):not(.active):hover::before {
-  &:hover::before {
+  // &:hover::before {
+  //   // transform: scale(0.9);
+  //   // opacity: 0.3;
+  // }
+
+  .light &:hover::before {
+    background-color: color.alpha(colors.$black, 0.15);
+  }
+
+  .dark &:hover::before {
     background-color: color.alpha(colors.$white, 0.15);
-    // transform: scale(0.9);
-    // opacity: 0.3;
   }
 
   // &:not(.selected).active::before {
