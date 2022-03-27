@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import styles from './Picon.module.scss';
 
-interface PiconProps {
+export interface PiconProps {
   className?: string;
   style?: React.CSSProperties;
   pokemon?: Partial<Showdown.Pokemon> | string;
