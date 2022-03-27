@@ -14,8 +14,9 @@ const abbrevs: Record<Showdown.PokemonStatus, string> = {
   brn: 'BRN',
   frz: 'FRZ',
   par: 'PAR',
+  psn: 'PSN',
   slp: 'SLP',
-  tox: 'TOX',
+  tox: 'TOX', // badly poisoned
   '???': '???',
 };
 

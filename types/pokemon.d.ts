@@ -30,6 +30,7 @@ declare namespace Showdown {
     | 'brn'
     | 'frz'
     | 'par'
+    | 'psn'
     | 'slp'
     | 'tox'
     | '???';
