@@ -7,36 +7,54 @@
 
 $padding-x: 5px;
 $padding-y: 1px;
+$border-radius: 15px;
+
+$background-color-light: colors.$transparent;
+$background-color-dark: colors.$transparent;
+$background-color-light-hover: color.alpha(colors.$black, 0.05);
+$background-color-dark-hover: color.alpha(colors.$white, 0.05);
+$background-color-light-active: color.alpha(colors.$black, 0.1);
+$background-color-dark-active: color.alpha(colors.$white, 0.1);
 
 $input-font-size: 10px;
 $input-color: color.tint(colors.$blue, 15%);
-$input-color-hover: color.shade(colors.$blue, 15%);
-$input-color-active: color.tint(colors.$blue, 30%);
+$input-color-hover: colors.$blue;
+$input-color-active: color.shade(colors.$blue, 15%);
 
-$placeholder-color: color.alpha(colors.$white, 0.3);
-
-$background-color: colors.$transparent;
-$background-color-hover: color.alpha(colors.$white, 0.05);
-$background-color-active: color.alpha(colors.$black, 0.3);
-
-$border-radius: 15px;
+$placeholder-light-color: color.alpha(colors.$black, 0.3);
+$placeholder-dark-color: color.alpha(colors.$white, 0.3);
 
 .container {
   position: relative;
   // @include flex.row-center;
-  background-color: $background-color;
   border-radius: $border-radius;
-  @include transition.apply(background-color);
 
   &:not(.absoluteHover) {
     @include spacing.padding-xy($padding-x, $padding-y);
+    @include transition.apply(background-color);
 
-    &:hover {
-      background-color: $background-color-hover;
+    &.light {
+      background-color: $background-color-light;
     }
 
-    &.active {
-      background-color: $background-color-active;
+    &.dark {
+      background-color: $background-color-dark;
+    }
+
+    &.light:hover {
+      background-color: $background-color-light-hover;
+    }
+
+    &.dark:hover {
+      background-color: $background-color-dark-hover;
+    }
+
+    &.light.active {
+      background-color: $background-color-light-active;
+    }
+
+    &.dark.active {
+      background-color: $background-color-dark-active;
     }
   }
 
@@ -51,19 +69,34 @@ $border-radius: 15px;
   &::before {
     content: '';
     @include position.absolute-xy(-$padding-x, -$padding-y);
-    background-color: $background-color;
     border-radius: $border-radius;
     @include transition.apply(background-color);
     user-select: none;
     pointer-events: none;
   }
 
-  &:hover::before {
-    background-color: $background-color-hover;
+  &.light::before {
+    background-color: $background-color-light;
   }
 
-  &.active::before {
-    background-color: $background-color-active;
+  &.dark::before {
+    background-color: $background-color-dark;
+  }
+
+  &.light:hover::before {
+    background-color: $background-color-light-hover;
+  }
+
+  &.dark:hover::before {
+    background-color: $background-color-dark-hover;
+  }
+
+  &.light.active::before {
+    background-color: $background-color-light-active;
+  }
+
+  &.dark.active::before {
+    background-color: $background-color-dark-active;
   }
 }
 
@@ -83,7 +116,14 @@ $border-radius: 15px;
 
   &::placeholder {
     font-size: $input-font-size;
-    color: $placeholder-color;
+  }
+
+  .light &::placeholder {
+    color: $placeholder-light-color;
+  }
+
+  .dark &::placeholder {
+    color: $placeholder-dark-color;
   }
 
   // hide the number stepper arrows

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { useColorScheme } from '@showdex/components/app';
 import { BaseTextField } from '@showdex/components/form';
 import type { BaseTextFieldProps } from '@showdex/components/form';
 import styles from './ValueField.module.scss';
@@ -22,6 +23,8 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   disabled,
   ...props
 }: ValueFieldProps, forwardedRef): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   // although react-final-form has meta.active,
   // we're keeping track of the focus state ourselves in case we don't wrap this in a Field
   // (i.e., we're not using react-final-form, but rather, rendering ValueField directly)
@@ -34,6 +37,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     <div
       className={cx(
         styles.container,
+        !!colorScheme && styles[colorScheme],
         absoluteHover && styles.absoluteHover,
         active && styles.active,
         disabled && styles.disabled,
