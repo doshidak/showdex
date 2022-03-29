@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import {
-  Picon,
+  PiconButton,
   PokeHpBar,
   PokeStatus,
   PokeType,
@@ -14,7 +14,9 @@ import {
   PokemonNatureBoosts,
   PokemonToggleAbilities,
 } from '@showdex/consts';
+import { openSmogonUniversity } from '@showdex/utils/app';
 import type { AbilityName, ItemName } from '@pkmn/data';
+import type { GenerationNum } from '@pkmn/types';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import { calcPokemonHp } from './calcPokemonHp';
 import { detectToggledAbility } from './detectToggledAbility';
@@ -23,6 +25,8 @@ import styles from './PokeInfo.module.scss';
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
+  gen?: GenerationNum;
+  format?: string;
   pokemon: CalcdexPokemon;
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
 }
@@ -30,6 +34,8 @@ export interface PokeInfoProps {
 export const PokeInfo = ({
   className,
   style,
+  gen,
+  format,
   pokemon,
   onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
@@ -51,12 +57,20 @@ export const PokeInfo = ({
     >
       <div className={styles.row}>
         <div className={styles.piconContainer}>
-          <Picon
-            style={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
+          <PiconButton
+            piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
-              item: pokemon?.dirtyItem || pokemon?.item,
+              item: pokemon?.dirtyItem ?? pokemon?.item,
             }}
+            tooltip="Open Smogon Page"
+            disabled={!pokemon?.speciesForme}
+            onPress={() => openSmogonUniversity(
+              gen,
+              'pokemon',
+              pokemon?.speciesForme,
+              format,
+            )}
           />
         </div>
 
@@ -130,9 +144,15 @@ export const PokeInfo = ({
 
             {' '}
             <Button
-              className={cx(styles.infoButton, styles.autoPresetButton)}
-              labelClassName={styles.infoButtonLabel}
-              labelStyle={pokemon?.autoPreset ? undefined : { color: '#FFFFFF' }}
+              className={cx(
+                styles.infoButton,
+                styles.autoPresetButton,
+              )}
+              labelClassName={cx(
+                styles.infoButtonLabel,
+                styles.toggleButtonLabel,
+                !pokemon?.autoPreset && styles.inactive,
+              )}
               label="Auto"
               absoluteHover
               // disabled={!pokemon?.presets?.length}
@@ -167,8 +187,8 @@ export const PokeInfo = ({
                   dirtyAbility: pokemon.ability !== preset.ability ? preset.ability : null,
                   altAbilities: preset.altAbilities,
                   altItems: preset.altItems,
-                  item: !pokemon.item ? preset.item : pokemon.item,
-                  dirtyItem: pokemon.item && pokemon.item !== preset.item ? preset.item : null,
+                  item: !pokemon.item || pokemon.item === '(exists)' ? preset.item : pokemon.item,
+                  dirtyItem: pokemon.item && pokemon.item !== '(exists)' && pokemon.item !== preset.item ? preset.item : null,
                 });
               },
             }}
@@ -196,9 +216,15 @@ export const PokeInfo = ({
               <>
                 {' '}
                 <Button
-                  className={cx(styles.infoButton, styles.abilityButton)}
-                  labelClassName={styles.infoButtonLabel}
-                  labelStyle={pokemon.abilityToggled ? undefined : { color: '#FFFFFF' }}
+                  className={cx(
+                    styles.infoButton,
+                    styles.abilityButton,
+                  )}
+                  labelClassName={cx(
+                    styles.infoButtonLabel,
+                    styles.toggleButtonLabel,
+                    !pokemon.abilityToggled && styles.inactive,
+                  )}
                   label="Active"
                   tooltip={`${pokemon.abilityToggled ? 'Deactivate' : 'Activate'} Ability`}
                   absoluteHover
@@ -247,6 +273,9 @@ export const PokeInfo = ({
                 label: ability,
                 value: ability,
               })),
+            }, pokemon?.baseAbility === 'Trace' && pokemon.ability !== pokemon.baseAbility && {
+              label: 'Traced',
+              options: [{ label: pokemon.ability, value: pokemon.ability }],
             }, !!pokemon?.abilities?.length && {
               label: 'Other', /** @todo not saying 'All' since this isn't AAA (almost any ability) */
               options: pokemon.abilities

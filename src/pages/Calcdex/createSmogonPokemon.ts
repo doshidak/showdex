@@ -109,7 +109,7 @@ export const createSmogonPokemon = (
 
   const smogonPokemon = new SmogonPokemon(
     gen,
-    speciesForme,
+    speciesForme === 'Aegislash' ? 'Aegislash-Blade' : speciesForme, // this hurts my soul
     options,
   );
 

@@ -5,7 +5,7 @@
 
 .container {
   .row:not(:first-child) {
-    @include spacing.margin($top: 15px);
+    @include spacing.margin($top: 5px);
   }
 }
 
@@ -50,6 +50,16 @@
 
 .infoContainer {
   flex: 1.25;
+}
+
+.toggleButtonLabel {
+  .light &.inactive {
+    color: colors.$black;
+  }
+
+  .dark &.inactive {
+    color: colors.$white;
+  }
 }
 
 .infoButton {

@@ -1,6 +1,8 @@
 import * as React from 'react';
+import cx from 'classnames';
 // import { logger } from '@showdex/utils/debug';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type { Generation } from '@pkmn/data';
+import type { GenerationNum } from '@pkmn/types';
 import type { CalcdexBattleField, CalcdexPokemon } from './CalcdexReducer';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonPokemon } from './createSmogonPokemon';
@@ -13,12 +15,12 @@ import styles from './PokeCalc.module.scss';
 interface PokeCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  // format?: string;
+  dex?: Generation;
+  gen?: GenerationNum;
+  format?: string;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
-  gen?: GenerationNum;
-  dex?: Generation;
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
 }
 
@@ -27,12 +29,12 @@ interface PokeCalcProps {
 export const PokeCalc = ({
   className,
   style,
-  // format,
+  dex,
+  gen = 8,
+  format,
   playerPokemon,
   opponentPokemon,
   field,
-  gen = 8,
-  dex,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
   const smogonPlayerPokemon = createSmogonPokemon(gen, dex, playerPokemon);
@@ -80,6 +82,8 @@ export const PokeCalc = ({
     >
       {/* name, types, level, HP, status, set, ability, nature, item */}
       <PokeInfo
+        gen={gen}
+        format={format}
         pokemon={playerPokemon}
         onPokemonChange={handlePokemonChange}
       />
@@ -95,7 +99,7 @@ export const PokeCalc = ({
 
       {/* IVs, EVs, calculated stats, boosts */}
       <PokeStats
-        className={styles.section}
+        className={cx(styles.section, styles.stats)}
         dex={dex}
         pokemon={playerPokemon}
         onPokemonChange={handlePokemonChange}

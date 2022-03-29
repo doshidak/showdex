@@ -171,13 +171,13 @@ export const calcPokemonStats = (
     return prev;
   }, { ...initialStats });
 
-  l.debug(
-    'calcPokemonStats() -> return calculatedStats',
-    '\n', 'stats calculated for Pokemon', pokemon.ident || pokemon.speciesForme,
-    '\n', 'calculatedStats', calculatedStats,
-    '\n', 'pokemon', pokemon,
-    '\n', 'speciesForme', speciesForme,
-  );
+  // l.debug(
+  //   'calcPokemonStats() -> return calculatedStats',
+  //   '\n', 'stats calculated for Pokemon', pokemon.ident || pokemon.speciesForme,
+  //   '\n', 'calculatedStats', calculatedStats,
+  //   '\n', 'pokemon', pokemon,
+  //   '\n', 'speciesForme', speciesForme,
+  // );
 
   return calculatedStats;
 };

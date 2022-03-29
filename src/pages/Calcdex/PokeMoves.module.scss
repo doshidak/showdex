@@ -18,6 +18,7 @@
 
   &.dark {
     background-color: color.alpha(colors.$black, 0.6);
+    box-shadow: 0 0 1px color.alpha(colors.$white, 0.15);
   }
 }
 

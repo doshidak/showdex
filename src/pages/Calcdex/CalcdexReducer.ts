@@ -171,6 +171,13 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   serverSourced?: boolean;
 
   /**
+   * Unsanitized version of `speciesForme`, primarily used for determining Z/Max/G-Max moves.
+   *
+   * @since 0.1.2
+   */
+  rawSpeciesForme?: string;
+
+  /**
    * Current types of the Pokemon.
    *
    * * Could change depending on the Pokemon's ability, like *Protean*.

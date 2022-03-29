@@ -36,11 +36,11 @@ export const fetchPokemonMovesets = async (
   }
 
   if (typeof dex?.learnsets?.learnable === 'function') {
-    l.debug(
-      'fetchPokemonMovesets() -> await dex.learnsets.learnable()',
-      '\n', 'speciesForme', speciesForme,
-      '\n', 'ident', ident,
-    );
+    // l.debug(
+    //   'fetchPokemonMovesets() -> await dex.learnsets.learnable()',
+    //   '\n', 'speciesForme', speciesForme,
+    //   '\n', 'ident', ident,
+    // );
 
     const learnset = await dex.learnsets.learnable(speciesForme);
 
@@ -49,39 +49,39 @@ export const fetchPokemonMovesets = async (
       .filter((name) => !!name && !newPokemon.moveState.revealed.includes(name))
       .sort();
 
-    l.debug(
-      'fetchPokemonMovesets() <- await dex.learnsets.learnable()',
-      '\n', 'speciesForme', speciesForme,
-      '\n', 'learnset for', ident, 'set to', newPokemon.moveState.learnset,
-    );
+    // l.debug(
+    //   'fetchPokemonMovesets() <- await dex.learnsets.learnable()',
+    //   '\n', 'speciesForme', speciesForme,
+    //   '\n', 'learnset for', ident, 'set to', newPokemon.moveState.learnset,
+    // );
   }
 
   // build `other`, only if we have no `learnsets` or the `format` has something to do with hacks
   if (!newPokemon.moveState.learnset.length || (format && /anythinggoes|hackmons/i.test(format))) {
-    l.debug(
-      'fetchPokemonPresets() -> BattleMovedex',
-      '\n', 'building other movesets list from client BattleMovedex object',
-      '\n', 'moveState', newPokemon.moveState,
-      '\n', 'format', format,
-      '\n', 'ident', ident,
-    );
+    // l.debug(
+    //   'fetchPokemonPresets() -> BattleMovedex',
+    //   '\n', 'building other movesets list from client BattleMovedex object',
+    //   '\n', 'moveState', newPokemon.moveState,
+    //   '\n', 'format', format,
+    //   '\n', 'ident', ident,
+    // );
 
     newPokemon.moveState.other = Object.keys(BattleMovedex)
       .map((moveid) => dex.moves.get(moveid)?.name)
       .filter((name) => !!name && !newPokemon.moveState.revealed.includes(name) && !newPokemon.moveState.learnset?.includes?.(name))
       .sort();
 
-    l.debug(
-      'fetchPokemonMovesets() <- BattleMovedex',
-      '\n', 'newPokemon.moveState.other', newPokemon.moveState.other,
-      '\n', 'ident', ident,
-    );
+    // l.debug(
+    //   'fetchPokemonMovesets() <- BattleMovedex',
+    //   '\n', 'newPokemon.moveState.other', newPokemon.moveState.other,
+    //   '\n', 'ident', ident,
+    // );
   }
 
-  l.debug(
-    'fetchPokemonMovesets() -> return newPokemon',
-    '\n', 'newPokemon', newPokemon,
-  );
+  // l.debug(
+  //   'fetchPokemonMovesets() -> return newPokemon',
+  //   '\n', 'newPokemon', newPokemon,
+  // );
 
   return newPokemon;
 };

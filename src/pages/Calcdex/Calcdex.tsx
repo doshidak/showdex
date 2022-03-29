@@ -19,6 +19,8 @@ export const Calcdex = ({
   battle,
   tooltips,
 }: CalcdexProps): JSX.Element => {
+  const colorScheme = useColorScheme();
+
   const {
     dex,
     state,
@@ -32,8 +34,6 @@ export const Calcdex = ({
     tooltips,
   });
 
-  const colorScheme = useColorScheme();
-
   l.debug(
     'rendering...',
     '\n', 'p1.pokemon', battle?.p1?.pokemon,
@@ -46,7 +46,7 @@ export const Calcdex = ({
     battleId,
     gen,
     field,
-    // format,
+    format,
     p1,
     p2,
   } = state;
@@ -68,16 +68,18 @@ export const Calcdex = ({
       <div className={styles.content}>
         <div className={styles.buildInfo}>
           {printBuildInfo()}
+          <br />
+          by doshidak/sumfuk &amp; camdawgboi
         </div>
 
         <PlayerCalc
-          // format={format}
+          dex={dex}
+          gen={gen}
+          format={format}
           playerKey={playerKey}
           player={player}
           opponent={opponent}
           field={field}
-          gen={gen}
-          dex={dex}
           defaultName="Player"
           onPokemonChange={updatePokemon}
           onIndexSelect={(index) => setSelectionIndex(
@@ -92,7 +94,6 @@ export const Calcdex = ({
 
         <FieldCalc
           className={styles.fieldCalc}
-          // style={{ marginTop: 30 }}
           battleId={battleId}
           field={field}
           onFieldChange={updateField}
@@ -100,14 +101,13 @@ export const Calcdex = ({
 
         <PlayerCalc
           className={styles.opponentCalc}
-          // style={{ marginTop: 30 }}
-          // format={format}
+          dex={dex}
+          gen={gen}
+          format={format}
           playerKey={playerKey}
           player={opponent}
           opponent={player}
           field={field}
-          gen={gen}
-          dex={dex}
           defaultName="Opponent"
           onPokemonChange={updatePokemon}
           onIndexSelect={(index) => setSelectionIndex(

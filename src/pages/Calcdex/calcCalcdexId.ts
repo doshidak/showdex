@@ -50,7 +50,7 @@ export const calcPokemonCalcdexId = (
   pokemon: Partial<Showdown.Pokemon>,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   ident: pokemon?.ident,
-  name: pokemon?.name,
+  // name: pokemon?.name,
   level: pokemon?.level?.toString(),
   gender: pokemon?.gender,
 });

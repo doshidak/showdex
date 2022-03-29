@@ -36,7 +36,7 @@
 .content {
   @include position.absolute-fill;
   // max-height: 100%;
-  @include spacing.padding-all(15px);
+  @include spacing.padding-xy($x: 15px, $y: 10px);
   @include font.apply(fonts.$mono);
   font-size: 10px;
   overflow: hidden auto;
@@ -65,6 +65,7 @@
   @include position.absolute-anchor($x: 0, $y: 0, $x-prop: right);
   // @include spacing.padding-all(3px);
   font-size: 6px;
+  text-align: right;
   // background-color: color.alpha(colors.$black, 0.15);
   user-select: none;
   pointer-events: none;
@@ -79,9 +80,9 @@
 }
 
 .fieldCalc {
-  @include spacing.margin($top: 30px);
+  @include spacing.margin($top: 15px);
 }
 
 .opponentCalc {
-  @include spacing.margin($top: 30px);
+  @include spacing.margin($top: 15px);
 }

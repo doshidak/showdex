@@ -1,5 +1,5 @@
 import { calculate } from '@smogon/calc';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@pkmn/data';
 import type {
   Field as SmogonField,
@@ -119,7 +119,7 @@ const getKoColor = (
   return SmogonMatchupKoColors[koColorIndex];
 };
 
-const l = logger('Calcdex/calcSmogonMatchup');
+// const l = logger('Calcdex/calcSmogonMatchup');
 
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.
@@ -146,15 +146,15 @@ export const calcSmogonMatchup = (
     field,
   );
 
-  l.debug(
-    'calcSmogonMatchup() <- calculate()',
-    '\n', 'result', result,
-    '\n', 'gen', gen,
-    '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    '\n', 'playerMove', playerMove.name || '???', playerMove,
-    '\n', 'field', field,
-  );
+  // l.debug(
+  //   'calcSmogonMatchup() <- calculate()',
+  //   '\n', 'result', result,
+  //   '\n', 'gen', gen,
+  //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+  //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+  //   '\n', 'playerMove', playerMove.name || '???', playerMove,
+  //   '\n', 'field', field,
+  // );
 
   const matchup: CalcdexMatchupResult = {
     damageRange: formatDamageRange(result),
@@ -162,15 +162,15 @@ export const calcSmogonMatchup = (
     koColor: getKoColor(result),
   };
 
-  l.debug(
-    'calcSmogonMatchup() -> return CalcdexMatchupResult',
-    '\n', 'matchup', matchup,
-    '\n', 'gen', gen,
-    '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    '\n', 'playerMove', playerMove.name || '???', playerMove,
-    '\n', 'field', field,
-  );
+  // l.debug(
+  //   'calcSmogonMatchup() -> return CalcdexMatchupResult',
+  //   '\n', 'matchup', matchup,
+  //   '\n', 'gen', gen,
+  //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+  //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+  //   '\n', 'playerMove', playerMove.name || '???', playerMove,
+  //   '\n', 'field', field,
+  // );
 
   return matchup;
 };

@@ -16,7 +16,8 @@ export const sanitizePokemon = (
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
     // speciesForme: sanitizeSpeciesForme(pokemon?.volatiles?.formechange?.[1] ?? pokemon?.speciesForme),
-    speciesForme: detectSpeciesForme(pokemon),
+    // speciesForme: detectSpeciesForme(pokemon),
+    rawSpeciesForme: pokemon?.speciesForme,
 
     name: pokemon?.name,
     details: pokemon?.details,
@@ -91,6 +92,7 @@ export const sanitizePokemon = (
 
     moves: pokemon?.moves || [],
     altMoves: pokemon?.altMoves || [],
+    useUltimateMoves: pokemon?.useUltimateMoves ?? false,
     lastMove: pokemon?.lastMove,
     moveTrack: pokemon?.moveTrack || [],
     moveState: {
@@ -116,9 +118,11 @@ export const sanitizePokemon = (
     autoPreset: pokemon?.autoPreset ?? true,
   };
 
+  sanitizedPokemon.speciesForme = detectSpeciesForme(sanitizedPokemon);
+
   const calcdexId = calcPokemonCalcdexId(sanitizedPokemon);
 
-  if (!sanitizedPokemon?.calcdexId || sanitizedPokemon.calcdexId !== calcdexId) {
+  if (!sanitizedPokemon?.calcdexId) {
     sanitizedPokemon.calcdexId = calcdexId;
   }
 

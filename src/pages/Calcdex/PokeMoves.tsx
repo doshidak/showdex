@@ -147,7 +147,7 @@ export const PokeMoves = ({
                   name: `PokeMoves:MoveTrack:Move:${pokemonKey}:${i}`,
                   value: pokemon?.moves?.[i],
                   onChange: (newMove: MoveName) => {
-                    const moves = pokemon?.moves || [] as MoveName[];
+                    const moves = [...(pokemon?.moves || [] as MoveName[])];
 
                     if (!Array.isArray(moves) || (moves?.[i] && moves[i] === newMove)) {
                       return;

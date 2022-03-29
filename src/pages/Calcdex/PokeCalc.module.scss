@@ -1,5 +1,9 @@
 @use 'mixins/spacing';
 
 .section {
-  @include spacing.margin($top: 15px);
+  @include spacing.margin($top: 10px);
+}
+
+.stats {
+  @include spacing.margin($top: 13px);
 }

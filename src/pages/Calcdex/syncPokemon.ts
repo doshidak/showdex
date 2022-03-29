@@ -63,6 +63,7 @@ export const syncPokemon = (
   const newPokemon: CalcdexPokemon = { ...pokemon };
 
   ([
+    'name',
     'speciesForme',
     'hp',
     'maxhp',
@@ -81,8 +82,8 @@ export const syncPokemon = (
     'turnstatuses',
     'boosts',
   ] as (keyof CalcdexPokemon)[]).forEach((key) => {
-    const currentValue = newPokemon[key];
-    let value = mutations?.[key];
+    const currentValue = newPokemon[key]; // `newPokemon` is the final synced Pokemon that will be returned at the end
+    let value = mutations?.[key]; // `mutations` is what was changed and may not be a full Pokemon object
 
     switch (key) {
       case 'ability':
@@ -97,7 +98,7 @@ export const syncPokemon = (
       case 'item': {
         // ignore any unrevealed item (resulting in a falsy value) that hasn't been knocked-off/consumed/etc.
         // (this can be checked since when the item be consumed, prevItem would NOT be falsy)
-        if (!value && !mutations?.prevItem) {
+        if ((!value || value === '(exists)') && !mutations?.prevItem) {
           return;
         }
 
@@ -105,7 +106,7 @@ export const syncPokemon = (
         // (otherwise, if the item hasn't been revealed yet, `value` would be falsy,
         // but that's ok cause we have dirtyItem, i.e., no worries about clearing the user's input)
         if (value === mutations?.dirtyItem) {
-          mutations.dirtyItem = null;
+          newPokemon.dirtyItem = null;
         }
 
         break;
@@ -116,7 +117,7 @@ export const syncPokemon = (
         // if so, clear the dirtyItem
         // (note that `value` here is prevItem, NOT item!)
         if (mutations?.prevItemEffect === 'knocked off' && value === mutations?.dirtyItem) {
-          mutations.dirtyItem = null;
+          newPokemon.dirtyItem = null;
         }
 
         break;
@@ -128,6 +129,7 @@ export const syncPokemon = (
         }
 
         value = sanitizeSpeciesForme(<CalcdexPokemon['speciesForme']> value);
+        newPokemon.rawSpeciesForme = value;
 
         break;
       }

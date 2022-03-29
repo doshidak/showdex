@@ -142,14 +142,14 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
         [newPokemon.ability] = newPokemon.abilities;
       }
 
-      l.debug(
-        'addPokemon() <- dex.species.get().abilities',
-        '\n', 'newPokemon.ability', newPokemon.ability,
-        '\n', 'newPokemon.abilities', newPokemon.abilities,
-        '\n', 'speciesForme', pokemon.speciesForme,
-        '\n', 'ident', ident,
-        '\n', 'newPokemon', newPokemon,
-      );
+      // l.debug(
+      //   'addPokemon() <- dex.species.get().abilities',
+      //   '\n', 'newPokemon.ability', newPokemon.ability,
+      //   '\n', 'newPokemon.abilities', newPokemon.abilities,
+      //   '\n', 'speciesForme', pokemon.speciesForme,
+      //   '\n', 'ident', ident,
+      //   '\n', 'newPokemon', newPokemon,
+      // );
     }
 
     if (species?.baseStats) {
@@ -157,13 +157,13 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
         ...species.baseStats,
       };
 
-      l.debug(
-        'addPokemon() <- dex.species.get().baseStats',
-        '\n', 'newPokemon.baseStats', newPokemon.baseStats,
-        '\n', 'speciesForme', pokemon.speciesForme,
-        '\n', 'ident', ident,
-        '\n', 'newPokemon', newPokemon,
-      );
+      // l.debug(
+      //   'addPokemon() <- dex.species.get().baseStats',
+      //   '\n', 'newPokemon.baseStats', newPokemon.baseStats,
+      //   '\n', 'speciesForme', pokemon.speciesForme,
+      //   '\n', 'ident', ident,
+      //   '\n', 'newPokemon', newPokemon,
+      // );
     }
   }
 
@@ -171,63 +171,63 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
     [newPokemon.nature] = PokemonNatures;
   }
 
-  l.debug(
-    'addPokemon() <- @showdex/consts/PokemonNatures',
-    '\n', 'newPokemon.nature', newPokemon.nature,
-    '\n', 'newPokemon', newPokemon,
-  );
+  // l.debug(
+  //   'addPokemon() <- @showdex/consts/PokemonNatures',
+  //   '\n', 'newPokemon.nature', newPokemon.nature,
+  //   '\n', 'newPokemon', newPokemon,
+  // );
 
   if (typeof tooltips?.getPokemonTypes === 'function') {
     newPokemon.types = tooltips.getPokemonTypes(<Showdown.Pokemon> <unknown> newPokemon);
 
-    l.debug(
-      'addPokemon() <- tooltips.getPokemonTypes()',
-      '\n', 'types', newPokemon.types,
-      '\n', 'pokemon', newPokemon,
-      '\n', 'ident', ident,
-      '\n', 'speciesForme', speciesForme,
-      '\n', 'format', format,
-    );
+    // l.debug(
+    //   'addPokemon() <- tooltips.getPokemonTypes()',
+    //   '\n', 'types', newPokemon.types,
+    //   '\n', 'pokemon', newPokemon,
+    //   '\n', 'ident', ident,
+    //   '\n', 'speciesForme', speciesForme,
+    //   '\n', 'format', format,
+    // );
   }
 
-  l.debug(
-    'addPokemon() -> await fetchPokemonMovesets()',
-    '\n', 'newPokemon', 'newPokemon',
-    '\n', 'ident', ident,
-    '\n', 'speciesForme', speciesForme,
-    '\n', 'format', format,
-  );
+  // l.debug(
+  //   'addPokemon() -> await fetchPokemonMovesets()',
+  //   '\n', 'newPokemon', 'newPokemon',
+  //   '\n', 'ident', ident,
+  //   '\n', 'speciesForme', speciesForme,
+  //   '\n', 'format', format,
+  // );
 
   // grab the Pokemon's movesets
   const movesetPokemon = await fetchPokemonMovesets(dex, newPokemon, format);
 
-  l.debug(
-    'addPokemon() <- await fetchPokemonMovesets()',
-    '\n', 'movesetPokemon', movesetPokemon,
-    '\n', 'ident', ident,
-    '\n', 'speciesForme', speciesForme,
-    '\n', 'format', format,
-  );
+  // l.debug(
+  //   'addPokemon() <- await fetchPokemonMovesets()',
+  //   '\n', 'movesetPokemon', movesetPokemon,
+  //   '\n', 'ident', ident,
+  //   '\n', 'speciesForme', speciesForme,
+  //   '\n', 'format', format,
+  // );
 
   if (Array.isArray(movesetPokemon?.moveState?.learnset)) {
     newPokemon.moveState = movesetPokemon.moveState;
 
-    l.debug(
-      'setting newPokemon.moveState to', movesetPokemon.moveState,
-      '\n', 'newPokemon', newPokemon,
-      '\n', 'ident', ident,
-      '\n', 'speciesForme', speciesForme,
-      '\n', 'format', format,
-    );
+    // l.debug(
+    //   'setting newPokemon.moveState to', movesetPokemon.moveState,
+    //   '\n', 'newPokemon', newPokemon,
+    //   '\n', 'ident', ident,
+    //   '\n', 'speciesForme', speciesForme,
+    //   '\n', 'format', format,
+    // );
   }
 
   // grab the Pokemon's learnsets and Smogon presets (if available)
-  l.debug(
-    'addPokemon() -> await fetchPokemonPresets()',
-    '\n', 'newPokemon', newPokemon,
-    '\n', 'format', format,
-    '\n', 'ident', ident,
-  );
+  // l.debug(
+  //   'addPokemon() -> await fetchPokemonPresets()',
+  //   '\n', 'newPokemon', newPokemon,
+  //   '\n', 'format', format,
+  //   '\n', 'ident', ident,
+  // );
 
   /**
    * @note If you notice that `fetchPokemonPresets()` doesn't return from its `Promise`,
@@ -261,28 +261,12 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
     newPokemon.dirtyItem = null;
   }
 
-  l.debug(
-    'addPokemon() <- await fetchPokemonPresets()',
-    '\n', 'presetPokemon', presetPokemon,
-    '\n', 'newPokemon', newPokemon,
-    '\n', 'ident', ident,
-    '\n', 'format', format,
-  );
-
   // l.debug(
-  //   'addPokemon() -> calcPokemonStats()',
+  //   'addPokemon() <- await fetchPokemonPresets()',
+  //   '\n', 'presetPokemon', presetPokemon,
   //   '\n', 'newPokemon', newPokemon,
   //   '\n', 'ident', ident,
-  // );
-
-  // calculate the stats based on what we know atm
-  // newPokemon.calculatedStats = calcPokemonStats(dex, newPokemon);
-
-  // l.debug(
-  //   'addPokemon() <- calcPokemonStats()',
-  //   '\n', 'calculatedStats', newPokemon.calculatedStats,
-  //   '\n', 'newPokemon', newPokemon,
-  //   '\n', 'ident', ident,
+  //   '\n', 'format', format,
   // );
 
   const calcdexId = calcPokemonCalcdexId(newPokemon);

@@ -1,8 +1,10 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Picon, useColorScheme } from '@showdex/components/app';
-import { BaseButton, Button } from '@showdex/components/ui';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import { PiconButton, useColorScheme } from '@showdex/components/app';
+import { Button } from '@showdex/components/ui';
+import { openShowdownUser } from '@showdex/utils/app';
+import type { Generation } from '@pkmn/data';
+import type { GenerationNum } from '@pkmn/types';
 import type {
   CalcdexBattleField,
   CalcdexPlayer,
@@ -15,13 +17,13 @@ import styles from './PlayerCalc.module.scss';
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  // format?: string;
+  dex?: Generation;
+  gen?: GenerationNum;
+  format?: string;
   playerKey?: CalcdexPlayerKey;
   player: CalcdexPlayer;
   opponent: CalcdexPlayer;
   field?: CalcdexBattleField;
-  gen?: GenerationNum;
-  dex?: Generation;
   defaultName?: string;
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
   onIndexSelect?: (index: number) => void;
@@ -31,13 +33,13 @@ interface PlayerCalcProps {
 export const PlayerCalc = ({
   className,
   style,
-  // format,
+  dex,
+  gen,
+  format,
   playerKey = 'p1',
   player,
   opponent,
   field,
-  gen,
-  dex,
   defaultName = '--',
   onPokemonChange,
   onIndexSelect,
@@ -76,28 +78,26 @@ export const PlayerCalc = ({
     >
       <div className={styles.playerBar}>
         <div className={styles.playerInfo}>
-          <div className={styles.username}>
+          {/* <div className={styles.username}>
             {name || defaultName}
+          </div> */}
 
-            {/*
-              !!rating &&
-              <>
-                <br />
-                <span style={{ fontSize: 8, opacity: 0.5 }}>
-                  ELO{' '}
-                  {rating}
-                </span>
-              </>
-            */}
-          </div>
+          <Button
+            className={styles.usernameButton}
+            labelClassName={styles.usernameButtonLabel}
+            label={name || defaultName}
+            tooltip="Open User Profile"
+            absoluteHover
+            disabled={!name}
+            onPress={() => openShowdownUser(name)}
+          />
 
           <div>
             <Button
-              labelStyle={{
-                fontSize: 8,
-                color: autoSelect ? undefined : '#FFFFFF',
-                textTransform: 'uppercase',
-              }}
+              labelClassName={cx(
+                styles.toggleButtonLabel,
+                !autoSelect && styles.inactive,
+              )}
               label="Auto"
               tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Active Pokémon`}
               absoluteHover
@@ -124,30 +124,27 @@ export const PlayerCalc = ({
             const mon = pokemon?.[i];
 
             return (
-              <BaseButton
-                key={`Picon-${mon?.calcdexId || mon?.ident || defaultName}:${i}`}
+              <PiconButton
+                key={`PlayerCalc:Picon:${playerKey}:${mon?.calcdexId || mon?.ident || defaultName}:${i}`}
                 className={cx(
                   styles.piconButton,
                   !!activePokemon?.calcdexId && (activePokemon?.calcdexId === mon?.calcdexId) && styles.active,
                   !!playerPokemon?.calcdexId && (playerPokemon?.calcdexId === mon?.calcdexId) && styles.selected,
                   (mon?.fainted || !mon?.hp) && styles.fainted,
                 )}
+                piconClassName={styles.picon}
+                display="block"
                 aria-label={`Select ${mon?.name || mon?.speciesForme || mon?.ident}`}
-                // hoverScale={1.175}
-                hoverScale={1.1}
+                pokemon={mon ? {
+                  ...mon,
+                  item: mon?.dirtyItem ?? mon?.item,
+                } : 'pokeball-none'}
+                tooltip={mon?.speciesForme || mon?.name || mon?.ident} /** @todo make this more descriptive, like the left-half of PokeInfo */
                 disabled={!mon}
                 onPress={() => onIndexSelect?.(i)}
               >
-                <Picon
-                  className={styles.picon}
-                  pokemon={mon ? {
-                    ...mon,
-                    item: mon?.dirtyItem ?? mon?.item,
-                  } : 'pokeball-none'}
-                />
-
                 <div className={styles.background} />
-              </BaseButton>
+              </PiconButton>
             );
           })}
         </div>
@@ -155,8 +152,9 @@ export const PlayerCalc = ({
 
       <PokeCalc
         className={styles.pokeCalc}
-        // style={{ paddingTop: 15 }}
-        // format={format}
+        dex={dex}
+        gen={gen}
+        format={format}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={{
@@ -164,12 +162,8 @@ export const PlayerCalc = ({
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
           defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
-        gen={gen}
-        dex={dex}
         onPokemonChange={onPokemonChange}
       />
-
-      {/* <pre>active: {serializePokemon(active?.[0], true)}</pre> */}
     </div>
   );
 };

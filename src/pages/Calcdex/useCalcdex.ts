@@ -14,10 +14,12 @@ import type {
   CalcdexReducerInstance,
   CalcdexReducerState,
 } from './CalcdexReducer';
+import { calcPokemonCalcdexId } from './calcCalcdexId';
 import { CalcdexActionators } from './CalcdexActionators';
 import { CalcdexInitialState, CalcdexReducer } from './CalcdexReducer';
 import { detectPlayerKeyFromBattle } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
+// import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 import { syncServerPokemon } from './syncServerPokemon';
 import { usePresetCache } from './usePresetCache';
 
@@ -93,6 +95,21 @@ export const useCalcdex = ({
       '\n', 'battle', battle,
       '\n', 'state', state,
     );
+
+    if (!battle?.p1 && !battle?.p2 && !battle?.p3 && !battle?.p4) {
+      l.debug(
+        'React.useEffect()',
+        'ignoring battle update due to missing players... w0t',
+        '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
+        '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
+        '\n', 'battle.p3.pokemon', battle?.p3?.pokemon,
+        '\n', 'battle.p4.pokemon', battle?.p4?.pokemon,
+        '\n', 'battle', battle,
+        '\n', 'state', state,
+      );
+
+      return;
+    }
 
     if (!battle?.nonce) {
       // this means the passed-in `battle` object is not from the bootstrapper
@@ -272,13 +289,13 @@ export const useCalcdex = ({
           }) ?? [] :
           player.pokemon;
 
-        l.debug(
-          'React.useEffect() <- detectPlayerKeyFromBattle()',
-          '\n', 'myPokemonSide', myPokemonSide,
-          '\n', 'isPlayerSide?', isPlayerSide,
-          '\n', 'pokemonSource', pokemonSource,
-          '\n', 'battle', battle,
-        );
+        // l.debug(
+        //   'React.useEffect() <- detectPlayerKeyFromBattle()',
+        //   '\n', 'myPokemonSide', myPokemonSide,
+        //   '\n', 'isPlayerSide?', isPlayerSide,
+        //   '\n', 'pokemonSource', pokemonSource,
+        //   '\n', 'battle', battle,
+        // );
 
         // update each player's pokemon
         const {
@@ -288,15 +305,31 @@ export const useCalcdex = ({
 
         // also find the activeIndex while we're at it
         const activeIdent = detectPokemonIdent(player.active?.[0]);
+        const activeCalcdexId = calcPokemonCalcdexId({
+          ...player?.active?.[0],
+          ident: activeIdent,
+        });
 
-        // player.pokemon.forEach((mon, i) => void (async () => {
         pokemonSource.forEach((mon, i) => void (async () => {
+          // unfortunately, there's no true static ID for each Pokemon, so we have to do this weird workaround.
+          // since the calcdexId hash depends the `ident` in the Pokemon object, it's also pretty unreliable.
+          // detectPokemonIdent() attempts to rebuild a static `ident`, with some edge cases where it fails.
+          // why? sometimes `ident` will be falsy from the battle state;
+          // other times, it'll just be flat out wrong cause it doesn't include the Pokemon's specific form.
+          // (e.g., for 'p1: Landorus-Therian', `ident` will sometimes just say 'p1: Landorus', which causes the extension
+          // to spawn Satan himself... err, I mean, horribly, horribly break.)
+          // not to mention when people nickname their Pokemon... the server replaces the speciesForme in the `ident`.
+          // (e.g., if I name my Landorus-Therian 'Wacko', `ident` will read 'p1: Wacko', so imagine when the extension
+          // tries to find a 'p1: Landorus' that was sent from the server... hmm... yikes. [i.e., nothing updates!])
+          // (...don't even think about using `searchid`; it's just as falsy as `ident`... sadge)
           const ident = detectPokemonIdent(mon);
+          const calcdexId = calcPokemonCalcdexId({ ...mon, ident });
 
-          if (!ident) {
+          if (!calcdexId) {
             l.debug(
               'React.useEffect()',
-              'ignoring updates for pokemon of player', playerKey, 'due to invalid ident', ident,
+              'ignoring updates for pokemon of player', playerKey, 'due to invalid calcdexId', calcdexId,
+              '\n', 'ident', ident,
               '\n', 'mon', mon,
               '\n', `battle.${playerKey}.pokemon`, player.pokemon,
             );
@@ -304,16 +337,23 @@ export const useCalcdex = ({
             return;
           }
 
-          const index = pokemonState.findIndex((p) => detectPokemonIdent(p) === ident);
+          // const index = pokemonState.findIndex((p) => detectPokemonIdent(p) === ident);
+          const index = pokemonState
+            .findIndex((p) => (p?.calcdexId ?? calcPokemonCalcdexId(p)) === calcdexId);
 
           if (index < 0 && pokemonState.length >= 6) {
             l.warn(
               'React.useEffect() <- pokemonState.findIndex()',
-              '\n', 'could not find Pokemon with ident', ident, 'at current index', i,
+              '\n', 'could not find Pokemon with calcdexId', calcdexId, 'at current index', i,
               '\n', 'index', index,
-              '\n', 'pokemonState[', index, ']', pokemonState[index],
+              // '\n', 'pokemonState[', index, ']', pokemonState[index],
               '\n', 'pokemonState', pokemonState,
-              '\n', 'pokemonState idents', pokemonState.map((p) => detectPokemonIdent(p)),
+              // '\n', 'pokemonState idents', pokemonState.map((p) => detectPokemonIdent(p)),
+              '\n', 'pokemonState calcdexIds', pokemonState.map((p) => ({
+                ident: p?.ident,
+                calcdexId: p?.calcdexId ?? calcPokemonCalcdexId(p),
+              })),
+              '\n', 'ident', ident,
               '\n', 'mon', mon,
               '\n', `battle.${playerKey}.pokemon`, player.pokemon,
             );
@@ -324,8 +364,10 @@ export const useCalcdex = ({
           // if the current player is `p1`, check for a corresponding `myPokemon`, if available
           const serverPokemon = myPokemonSide && playerKey === myPokemonSide ?
             battle.myPokemon?.find((p) => {
-              const pIdent = detectPokemonIdent(<Showdown.Pokemon> <unknown> p);
-              const didMatch = pIdent === ident;
+              // const pIdent = detectPokemonIdent(<Showdown.Pokemon> <unknown> p)?.replace?.(/-Mega/gi, '');
+              const pCalcdexId = calcPokemonCalcdexId(<Showdown.Pokemon> <unknown> p);
+              // const didMatch = pIdent === ident;
+              const didMatch = pCalcdexId === calcdexId;
 
               // l.debug(
               //   'serverPokemon',
@@ -353,19 +395,18 @@ export const useCalcdex = ({
 
           if (serverPokemon || isRandom) {
             newPokemon = syncServerPokemon(dex, presetCache, format, newPokemon, serverPokemon);
-            // newPokemon.serverSourced = true;
           }
 
           // found the pokemon, so update it
           if (index > -1) {
             l.debug(
               'React.useEffect() -> updatePokemon()',
-              '\n', 'syncing pokemon', ident, 'with mutation', newPokemon,
+              '\n', 'syncing Pokemon', calcdexId, `(${mon?.ident})`, 'with mutation', newPokemon,
               '\n', `state.${playerKey}.pokemon[`, index, ']', pokemonState[index],
               '\n', 'i', i, 'index', index,
             );
 
-            if (activeIdent === ident) {
+            if (activeCalcdexId === calcdexId) {
               setActiveIndex(playerKey, index);
 
               if (autoSelect) {
@@ -402,21 +443,21 @@ export const useCalcdex = ({
             );
           }
 
-          l.debug(
-            'React.useEffect() <- await addPokemon()',
-            '\n', 'playerKey', playerKey,
-            '\n', 'i', i, 'index', index,
-            '\n', 'newPokemon', newPokemon,
-          );
+          // l.debug(
+          //   'React.useEffect() <- await addPokemon()',
+          //   '\n', 'playerKey', playerKey,
+          //   '\n', 'i', i, 'index', index,
+          //   '\n', 'newPokemon', newPokemon,
+          // );
         })());
       });
     })();
 
-    l.debug(
-      'React.useEffect() -> syncBattleField()',
-      '\n', 'battle', battle,
-      '\n', 'state', state,
-    );
+    // l.debug(
+    //   'React.useEffect() -> syncBattleField()',
+    //   '\n', 'battle', battle,
+    //   '\n', 'state', state,
+    // );
 
     // handle field changes
     syncBattleField(battle);

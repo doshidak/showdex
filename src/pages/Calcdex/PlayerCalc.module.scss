@@ -14,12 +14,17 @@
   width: 100%;
 }
 
-.playerInfo {
-  @include flex.column;
+// .playerInfo {
+//   @include flex.column;
+// }
+
+button.usernameButton {
+  justify-content: initial;
+  max-width: 78px;
 }
 
-.username {
-  max-width: 78px;
+.usernameButtonLabel {
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -33,62 +38,25 @@
   }
 }
 
+.toggleButtonLabel {
+  font-size: 8px;
+  text-transform: uppercase;
+
+  .light &.inactive {
+    color: colors.$black;
+  }
+
+  .dark &.inactive {
+    color: colors.$white;
+  }
+}
+
 .teamList {
   @include flex.row($justify: flex-end);
 }
 
 .piconButton {
-  position: relative;
   align-self: center;
-  width: 40px; // should equal the width of Picon
-  height: 40px; // should equal the height of Picon
-
-  &::before {
-    content: '';
-    // @include position.absolute-anchor($x: -3px, $y: -6px);
-    // @include position.absolute-anchor($x: -1px, $y: -4px);
-    @include position.absolute-fill;
-    // width: 41px;
-    // height: 41px;
-    // background-color: color.alpha(colors.$white, 0.3);
-    background-color: colors.$transparent;
-    // border: 3px solid colors.$transparent;
-    border-radius: 45px;
-    // mask: radial-gradient(circle, transparent 5%, red);
-    // transform: scale(0);
-    // opacity: 0;
-    // @include transition.apply(background-color, border-color, opacity);
-    @include transition.apply(background-color);
-    // z-index: -1;
-    pointer-events: none;
-  }
-
-  // &:not(.selected):not(.active):hover::before {
-  // &:hover::before {
-  //   // transform: scale(0.9);
-  //   // opacity: 0.3;
-  // }
-
-  .light &:hover::before {
-    background-color: color.alpha(colors.$black, 0.15);
-  }
-
-  .dark &:hover::before {
-    background-color: color.alpha(colors.$white, 0.15);
-  }
-
-  // &:not(.selected).active::before {
-  //   background-color: colors.$transparent;
-  //   border-color: color.tint(colors.$red, 15%);
-  //   opacity: 0.3;
-  // }
-
-  // &.selected::before {
-  //   background-color: color.tint(colors.$blue, 15%);
-  //   border-color: color.tint(colors.$blue, 15%);
-  //   // transform: scale(1);
-  //   opacity: 0.5;
-  // }
 
   &:not(:last-of-type) {
     @include spacing.margin($right: 5px);
@@ -96,13 +64,7 @@
 }
 
 .picon {
-  // opacity: 0.5;
   @include transition.apply(opacity, filter);
-  z-index: 1;
-
-  // .active &, .selected & {
-  //   opacity: 1;
-  // }
 
   .fainted & {
     opacity: 0.3;
@@ -134,6 +96,6 @@
 }
 
 .pokeCalc {
-  @include spacing.padding($top: 15px);
+  @include spacing.padding($top: 5px);
   // z-index: 1;
 }

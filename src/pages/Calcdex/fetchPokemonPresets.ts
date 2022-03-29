@@ -15,7 +15,7 @@ export const fetchPokemonPresets = async (
   format: string,
 ): Promise<Partial<CalcdexPokemon>> => {
   const ident = detectPokemonIdent(pokemon);
-  const speciesForme = detectSpeciesForme(pokemon);
+  const speciesForme = detectSpeciesForme(pokemon)?.replace?.(/-Mega/gi, '');
 
   const newPokemon: Partial<CalcdexPokemon> = {
     // speciesForme, // required for calcPokemonStats()
@@ -38,12 +38,12 @@ export const fetchPokemonPresets = async (
       if (pokemon.autoPreset) {
         const [firstPreset] = newPokemon.presets;
 
-        l.debug(
-          'auto-setting preset for Pokemon', ident, 'to', firstPreset?.name,
-          '\n', 'calcdexId', firstPreset?.calcdexId,
-          '\n', 'firstPreset', firstPreset,
-          '\n', 'newPokemon', newPokemon,
-        );
+        // l.debug(
+        //   'auto-setting preset for Pokemon', ident, 'to', firstPreset?.name,
+        //   '\n', 'calcdexId', firstPreset?.calcdexId,
+        //   '\n', 'firstPreset', firstPreset,
+        //   '\n', 'newPokemon', newPokemon,
+        // );
 
         newPokemon.preset = firstPreset?.calcdexId;
 
@@ -51,7 +51,7 @@ export const fetchPokemonPresets = async (
           // newPokemon.item = firstPreset.item;
           // newPokemon.dirtyItem = firstPreset.item;
 
-          if (pokemon?.item && pokemon.item !== firstPreset.item) {
+          if (pokemon?.item && pokemon.item !== '(exists)' && pokemon.item !== firstPreset.item) {
             newPokemon.dirtyItem = firstPreset.item;
           } else {
             newPokemon.item = firstPreset.item;
@@ -62,7 +62,7 @@ export const fetchPokemonPresets = async (
 
         if (firstPreset?.ability) {
           // for these formats, probably not even a legal ability, so set it as the dirtyAbility
-          if (['AAA', 'AG', 'BHACK'].includes(firstPreset.name.split(' ')[0])) {
+          if (['AAA', 'AG', 'BH'].includes(firstPreset.name.split(' ')[0])) {
             newPokemon.dirtyAbility = firstPreset.ability;
           } else {
             newPokemon.ability = firstPreset.ability;
@@ -88,11 +88,11 @@ export const fetchPokemonPresets = async (
           newPokemon.evs = { ...newPokemon.evs, ...firstPreset.evs };
         }
 
-        l.debug(
-          'auto-set complete for Pokemon', ident,
-          '\n', 'newPokemon.preset', newPokemon.preset,
-          '\n', 'newPokemon', newPokemon,
-        );
+        // l.debug(
+        //   'auto-set complete for Pokemon', ident,
+        //   '\n', 'newPokemon.preset', newPokemon.preset,
+        //   '\n', 'newPokemon', newPokemon,
+        // );
       }
     }
   }
@@ -114,11 +114,11 @@ export const fetchPokemonPresets = async (
   //   '\n', 'ident', ident,
   // );
 
-  l.debug(
-    'fetchPokemonPresets() -> return newPokemon',
-    '\n', 'newPokemon', newPokemon,
-    '\n', 'ident', ident,
-  );
+  // l.debug(
+  //   'fetchPokemonPresets() -> return newPokemon',
+  //   '\n', 'newPokemon', newPokemon,
+  //   '\n', 'ident', ident,
+  // );
 
   return newPokemon;
 };

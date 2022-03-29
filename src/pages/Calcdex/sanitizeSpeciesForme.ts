@@ -9,4 +9,7 @@
  */
 export const sanitizeSpeciesForme = (
   speciesForme: string,
-): string => speciesForme?.replace?.(/-(?:\*|Gmax)/gi, '');
+): string => speciesForme?.replace?.(
+  /-(?:\*|Rapid-Strike|Mega|Gmax)/gi,
+  '',
+);

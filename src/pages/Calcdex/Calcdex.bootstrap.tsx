@@ -153,7 +153,5 @@ export const bootstrap = (roomid?: string): void => {
     });
 
     battle.subscriptionDirty = true;
-  } else {
-    battle.subscription?.('callback');
   }
 };

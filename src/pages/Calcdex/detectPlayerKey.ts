@@ -17,11 +17,11 @@ export const detectPlayerKeyFromBattle = (
   battle: Showdown.Battle,
 ): CalcdexPlayerKey => {
   if (battle?.mySide?.sideid) {
-    console.log('battle.mySide.sideid', battle.mySide.sideid, '\n', 'mySide', {
-      sideid: battle.mySide.sideid,
-      name: battle.mySide.name,
-      myPokemon: battle.myPokemon,
-    });
+    // console.log('battle.mySide.sideid', battle.mySide.sideid, '\n', 'mySide', {
+    //   sideid: battle.mySide.sideid,
+    //   name: battle.mySide.name,
+    //   myPokemon: battle.myPokemon,
+    // });
 
     return <CalcdexPlayerKey> battle.mySide.sideid;
   }
