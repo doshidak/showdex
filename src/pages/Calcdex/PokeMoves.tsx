@@ -4,7 +4,9 @@ import { PokeType, useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
+import { getMaxMove, getZMove } from '@showdex/utils/app';
 import type { Generation, MoveName } from '@pkmn/data';
+import type { GenerationNum } from '@pkmn/types';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 import { createSmogonMove } from './createSmogonMove';
@@ -14,6 +16,7 @@ export interface PokeMovesProps {
   className?: string;
   style?: React.CSSProperties;
   dex: Generation;
+  gen: GenerationNum;
   pokemon: CalcdexPokemon;
   movesCount?: number;
   calculateMatchup: SmogonMatchupHookCalculator;
@@ -24,6 +27,7 @@ export const PokeMoves = ({
   className,
   style,
   dex,
+  gen,
   pokemon,
   movesCount = 4,
   calculateMatchup,
@@ -31,7 +35,7 @@ export const PokeMoves = ({
 }: PokeMovesProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const gen = dex?.num ?? 8;
+  // const gen = dex?.num; // this is undefined lmao
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
@@ -48,6 +52,27 @@ export const PokeMoves = ({
       {/* table headers */}
       <TableGridItem align="left" header>
         Moves
+
+        {
+          (gen === 7 || gen === 8) &&
+          <>
+            {' '}
+            <Button
+              className={styles.toggleButton}
+              labelClassName={cx(
+                styles.toggleButtonLabel,
+                !pokemon?.useUltimateMoves && styles.inactive,
+              )}
+              label={gen === 7 ? 'Z-PWR' : 'Max'}
+              tooltip={`${pokemon?.useUltimateMoves ? 'Deactivate' : 'Activate'} ${gen === 7 ? 'Z' : 'Max'} Moves`}
+              absoluteHover
+              disabled={!pokemon}
+              onPress={() => onPokemonChange?.({
+                useUltimateMoves: !pokemon?.useUltimateMoves,
+              })}
+            />
+          </>
+        }
       </TableGridItem>
 
       <TableGridItem header>
@@ -55,9 +80,8 @@ export const PokeMoves = ({
 
         {' '}
         <Button
-          className={styles.critButton}
+          className={styles.toggleButton}
           labelClassName={cx(
-            styles.critButtonLabel,
             styles.toggleButtonLabel,
             !pokemon?.criticalHit && styles.inactive,
           )}
@@ -83,18 +107,32 @@ export const PokeMoves = ({
         const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
         const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
 
+        // if (pokemon?.useUltimateMoves) {
+        //   const ultName = gen === 7 ?
+        //     getZMove(dex, moveName, pokemon?.dirtyItem ?? pokemon?.item) :
+        //     getMaxMove(dex, moveName, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
+        //
+        //   if (ultName) {
+        //     moveName = ultName;
+        //   }
+        // }
+
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
         const calculatorMove = createSmogonMove(
           gen,
+          pokemon,
           moveName,
-          pokemon?.criticalHit,
         );
 
         const result = calculateMatchup?.(calculatorMove);
 
-        const showAccuracy = typeof move?.accuracy !== 'boolean' &&
+        // Z/Max/G-Max moves bypass the original move's accuracy
+        // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
+        // after using moves like Fly, Dig, Phantom Force, etc.)
+        const showAccuracy = !pokemon?.useUltimateMoves &&
+          typeof move?.accuracy !== 'boolean' &&
           (move?.accuracy || -1) > 0 &&
           move.accuracy !== 100;
 
@@ -108,17 +146,17 @@ export const PokeMoves = ({
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for Pokemon ${friendlyPokemonName}`}
                 hint="--"
-                tooltip={move?.type ? (
+                tooltip={calculatorMove?.type ? (
                   <div className={styles.moveTooltip}>
-                    <PokeType type={move.type} />
+                    <PokeType type={calculatorMove.type} />
 
                     {
-                      !!move.category &&
+                      !!calculatorMove.category &&
                       <>
                         <span className={styles.label}>
-                          {' '}{move.category.slice(0, 4)}{' '}
+                          {' '}{calculatorMove.category.slice(0, 4)}{' '}
                         </span>
-                        {move.basePower || null}
+                        {calculatorMove?.bp || null}
                       </>
                     }
 
@@ -133,19 +171,19 @@ export const PokeMoves = ({
                     }
 
                     {
-                      !!move?.priority &&
+                      !!calculatorMove?.priority &&
                       <>
                         <span className={styles.label}>
                           {' '}PRI{' '}
                         </span>
-                        {move.priority > 0 ? `+${move.priority}` : move.priority}
+                        {calculatorMove.priority > 0 ? `+${calculatorMove.priority}` : calculatorMove.priority}
                       </>
                     }
                   </div>
                 ) : null}
                 input={{
                   name: `PokeMoves:MoveTrack:Move:${pokemonKey}:${i}`,
-                  value: pokemon?.moves?.[i],
+                  value: moveName,
                   onChange: (newMove: MoveName) => {
                     const moves = [...(pokemon?.moves || [] as MoveName[])];
 
@@ -160,7 +198,20 @@ export const PokeMoves = ({
                     });
                   },
                 }}
-                options={[!!pokemon?.moveState?.revealed.length && {
+                options={[pokemon?.useUltimateMoves && {
+                  label: gen === 7 ? 'Z' : 'Max',
+                  options: pokemon.moves.map((name) => {
+                    const ultName = gen === 7 ?
+                      getZMove(dex, name, pokemon?.dirtyItem ?? pokemon?.item) :
+                      getMaxMove(dex, name, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
+
+                    if (ultName) {
+                      return { label: ultName, value: name };
+                    }
+
+                    return null;
+                  }).filter(Boolean),
+                }, !!pokemon?.moveState?.revealed.length && {
                   label: 'Revealed',
                   options: pokemon.moveState.revealed.map((name) => ({ label: name, value: name })),
                 }, !!pokemon?.altMoves?.length && {
