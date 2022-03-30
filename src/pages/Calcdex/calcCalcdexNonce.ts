@@ -36,6 +36,7 @@ export const calcPokemonCalcdexNonce = (
   toxicCounter: pokemon?.toxicCounter?.toString(),
   moves: pokemon?.moves?.join('|'),
   altMoves: pokemon?.altMoves?.join('|'),
+  useUltimateMoves: pokemon?.useUltimateMoves?.toString(),
   moveTrack: calcCalcdexId<Partial<Record<string, number>>>(pokemon?.moveTrack?.reduce((prev, track) => {
     if (track?.[0] && !(track[0] in prev)) {
       prev[track[0]] = track[1]; // eslint-disable-line prefer-destructuring

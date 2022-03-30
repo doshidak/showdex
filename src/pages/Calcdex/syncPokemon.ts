@@ -65,6 +65,7 @@ export const syncPokemon = (
   ([
     'name',
     'speciesForme',
+    'rawSpeciesForme',
     'hp',
     'maxhp',
     'status',
@@ -129,7 +130,16 @@ export const syncPokemon = (
         }
 
         value = sanitizeSpeciesForme(<CalcdexPokemon['speciesForme']> value);
-        newPokemon.rawSpeciesForme = value;
+
+        break;
+      }
+
+      case 'rawSpeciesForme': {
+        value = mutations?.speciesForme ?? newPokemon?.rawSpeciesForme ?? newPokemon?.speciesForme;
+
+        if (!value) {
+          return;
+        }
 
         break;
       }

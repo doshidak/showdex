@@ -277,12 +277,12 @@ export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
 
   newPokemon.calcdexNonce = calcPokemonCalcdexNonce(newPokemon);
 
-  l.debug(
-    'addPokemon() -> dispatch()',
-    '\n', 'type', `@${playerKey}/pokemon:post`,
-    '\n', 'payload', newPokemon,
-    '\n', 'ident', ident,
-  );
+  // l.debug(
+  //   'addPokemon() -> dispatch()',
+  //   '\n', 'type', `@${playerKey}/pokemon:post`,
+  //   '\n', 'payload', newPokemon,
+  //   '\n', 'ident', ident,
+  // );
 
   dispatch({
     type: `@${playerKey}/pokemon:post`,
@@ -295,7 +295,7 @@ export const updatePokemon: CalcdexActionatorMap['updatePokemon'] = (
   pokemon,
   shouldSync,
 ) => (dispatch) => {
-  const ident = detectPokemonIdent(pokemon);
+  // const ident = detectPokemonIdent(pokemon);
   const playerKey = detectPlayerKeyFromPokemon(pokemon);
 
   if (!playerKey) {
@@ -316,24 +316,24 @@ export const updatePokemon: CalcdexActionatorMap['updatePokemon'] = (
     if (types?.length && types[0] !== '???' && JSON.stringify(updatedPokemon.types) !== JSON.stringify(types)) { // kekw
       updatedPokemon.types = types;
 
-      l.debug(
-        'updatePokemon() <- tooltips.getPokemonTypes()',
-        '\n', 'types', types,
-        '\n', 'updatedPokemon.types', updatedPokemon.types,
-        '\n', 'updatedPokemon', updatedPokemon,
-        '\n', 'ident', ident,
-        '\n', 'playerKey', playerKey,
-      );
+      // l.debug(
+      //   'updatePokemon() <- tooltips.getPokemonTypes()',
+      //   '\n', 'types', types,
+      //   '\n', 'updatedPokemon.types', updatedPokemon.types,
+      //   '\n', 'updatedPokemon', updatedPokemon,
+      //   '\n', 'ident', ident,
+      //   '\n', 'playerKey', playerKey,
+      // );
     }
   }
 
-  l.debug(
-    'updatePokemon() -> dispatch()',
-    '\n', 'type', `@${playerKey}/pokemon:${shouldSync ? 'sync' : 'put'}`,
-    '\n', 'payload', updatedPokemon,
-    '\n', 'ident', ident,
-    '\n', 'playerKey', playerKey,
-  );
+  // l.debug(
+  //   'updatePokemon() -> dispatch()',
+  //   '\n', 'type', `@${playerKey}/pokemon:${shouldSync ? 'sync' : 'put'}`,
+  //   '\n', 'payload', updatedPokemon,
+  //   '\n', 'ident', ident,
+  //   '\n', 'playerKey', playerKey,
+  // );
 
   dispatch({
     type: `@${playerKey}/pokemon:${shouldSync ? 'sync' : 'put'}`,
@@ -344,11 +344,11 @@ export const updatePokemon: CalcdexActionatorMap['updatePokemon'] = (
 export const updateField: CalcdexActionatorMap['updateField'] = (
   field,
 ) => (dispatch) => {
-  l.debug(
-    'updateField() -> dispatch()',
-    '\n', 'type', '@field/:put',
-    '\n', 'payload', field,
-  );
+  // l.debug(
+  //   'updateField() -> dispatch()',
+  //   '\n', 'type', '@field/:put',
+  //   '\n', 'payload', field,
+  // );
 
   dispatch({
     type: '@field/:put',
@@ -364,14 +364,14 @@ export const syncBattleField: CalcdexActionatorMap['syncBattleField'] = (
   const { activeIndex: attackerIndex } = state.p1;
   const { activeIndex: defenderIndex } = state.p2;
 
-  l.debug(
-    'syncBattleField() -> syncField()',
-    '\n', 'state.field', state.field,
-    '\n', 'attackerIndex', attackerIndex,
-    '\n', 'defenderIndex', defenderIndex,
-    '\n', 'battle', battle,
-    '\n', 'state', state,
-  );
+  // l.debug(
+  //   'syncBattleField() -> syncField()',
+  //   '\n', 'state.field', state.field,
+  //   '\n', 'attackerIndex', attackerIndex,
+  //   '\n', 'defenderIndex', defenderIndex,
+  //   '\n', 'battle', battle,
+  //   '\n', 'state', state,
+  // );
 
   const syncedField = syncField(
     state.field,
@@ -394,11 +394,11 @@ export const syncBattleField: CalcdexActionatorMap['syncBattleField'] = (
     return;
   }
 
-  l.debug(
-    'syncBattleField() -> dispatch()',
-    '\n', 'type', '@field/:put',
-    '\n', 'payload', syncedField,
-  );
+  // l.debug(
+  //   'syncBattleField() -> dispatch()',
+  //   '\n', 'type', '@field/:put',
+  //   '\n', 'payload', syncedField,
+  // );
 
   dispatch({
     type: '@field/:put',
@@ -410,11 +410,11 @@ export const setActiveIndex: CalcdexActionatorMap['setActiveIndex'] = (
   playerKey,
   activeIndex,
 ) => (dispatch) => {
-  l.debug(
-    'setActiveIndex() -> dispatch()',
-    '\n', 'type', `@${playerKey}/activeIndex:put`,
-    '\n', 'payload', activeIndex,
-  );
+  // l.debug(
+  //   'setActiveIndex() -> dispatch()',
+  //   '\n', 'type', `@${playerKey}/activeIndex:put`,
+  //   '\n', 'payload', activeIndex,
+  // );
 
   dispatch({
     type: `@${playerKey}/activeIndex:put`,
@@ -426,11 +426,11 @@ export const setSelectionIndex: CalcdexActionatorMap['setSelectionIndex'] = (
   playerKey,
   selectionIndex,
 ) => (dispatch) => {
-  l.debug(
-    'setSelectionIndex() -> dispatch()',
-    '\n', 'type', `@${playerKey}/selectionIndex:put`,
-    '\n', 'payload', selectionIndex,
-  );
+  // l.debug(
+  //   'setSelectionIndex() -> dispatch()',
+  //   '\n', 'type', `@${playerKey}/selectionIndex:put`,
+  //   '\n', 'payload', selectionIndex,
+  // );
 
   dispatch({
     type: `@${playerKey}/selectionIndex:put`,
@@ -442,11 +442,11 @@ export const setAutoSelect: CalcdexActionatorMap['setAutoSelect'] = (
   playerKey,
   autoSelect,
 ) => (dispatch) => {
-  l.debug(
-    'setAutoSelect() -> dispatch()',
-    '\n', 'type', `@${playerKey}/autoSelect:put`,
-    '\n', 'payload', autoSelect,
-  );
+  // l.debug(
+  //   'setAutoSelect() -> dispatch()',
+  //   '\n', 'type', `@${playerKey}/autoSelect:put`,
+  //   '\n', 'payload', autoSelect,
+  // );
 
   dispatch({
     type: `@${playerKey}/autoSelect:put`,

@@ -64,11 +64,15 @@ export const useCalcdex = ({
   const gen = battle?.gen as GenerationNum;
   const format = battle?.id?.split?.('-')?.[1];
 
+  const pkmnDex = gens.get(gen);
   // const dex = React.useMemo(() => (typeof gen === 'number' && gen > 0 ? gens.get(gen) : null), [gen]);
   const dex = React.useMemo(() => (typeof gen === 'number' && gen > 0 ? <Generation> <unknown> {
-    ...gens.get(gen),
-    species: Dex?.species || gens.get(gen).species,
-  } : null), [gen]);
+    ...pkmnDex,
+    species: (Dex ?? pkmnDex).species,
+  } : null), [
+    gen,
+    pkmnDex,
+  ]);
 
   const {
     addPokemon,

@@ -332,6 +332,15 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   altMoves?: MoveName[];
 
   /**
+   * Whether the Pokemon is using Z/Max/G-Max moves.
+   *
+   * * Using the term *ultimate* (thanks Blizzard/Riot lmaoo) to cover the nomenclature for both Z (gen 7) and Max/G-Max (gen 8) moves.
+   *
+   * @since 0.1.2
+   */
+  useUltimateMoves?: boolean;
+
+  /**
    * Moves revealed by the Pokemon to the opponent.
    *
    * @since 0.1.0

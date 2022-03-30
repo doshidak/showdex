@@ -4,7 +4,7 @@ import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 // import { detectToggledAbility } from './detectToggledAbility';
-// import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
+import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
 export const sanitizePokemon = (
   pokemon: Partial<Showdown.Pokemon & CalcdexPokemon>,
@@ -15,8 +15,9 @@ export const sanitizePokemon = (
 
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
-    // speciesForme: sanitizeSpeciesForme(pokemon?.volatiles?.formechange?.[1] ?? pokemon?.speciesForme),
-    // speciesForme: detectSpeciesForme(pokemon),
+    speciesForme: pokemon?.speciesForme ?
+      sanitizeSpeciesForme(pokemon.speciesForme) :
+      detectSpeciesForme(pokemon),
     rawSpeciesForme: pokemon?.speciesForme,
 
     name: pokemon?.name,
@@ -101,24 +102,12 @@ export const sanitizePokemon = (
       other: pokemon?.moveState?.other ?? [],
     },
 
-    // update (2022/03/10): calculatedStats is now being calculated (and memoized) on the fly in PokeCalc
-    // calculatedStats: {
-    //   hp: pokemon?.calculatedStats?.hp ?? 0,
-    //   atk: pokemon?.calculatedStats?.atk ?? 0,
-    //   def: pokemon?.calculatedStats?.def ?? 0,
-    //   spa: pokemon?.calculatedStats?.spa ?? 0,
-    //   spd: pokemon?.calculatedStats?.spd ?? 0,
-    //   spe: pokemon?.calculatedStats?.spe ?? 0,
-    // },
-
     criticalHit: pokemon?.criticalHit ?? false,
 
     preset: pokemon?.preset,
     presets: pokemon?.presets ?? [],
     autoPreset: pokemon?.autoPreset ?? true,
   };
-
-  sanitizedPokemon.speciesForme = detectSpeciesForme(sanitizedPokemon);
 
   const calcdexId = calcPokemonCalcdexId(sanitizedPokemon);
 
