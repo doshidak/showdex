@@ -32,7 +32,7 @@ export const detectStatBoostDelta = (
   const hasGuts = abilitySearchString === 'guts';
   const hasQuickFeet = abilitySearchString === 'quick feet';
 
-  if (pokemon?.status) {
+  if (pokemon?.status && pokemon.status !== '???') {
     if (hasGuts && stat === 'atk') {
       return 'positive';
     }
