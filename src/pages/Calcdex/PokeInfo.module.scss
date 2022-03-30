@@ -48,6 +48,15 @@
   transform: translateY(-2px);
 }
 
+.pokemonName {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 66px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 .infoContainer {
   flex: 1.25;
 }
