@@ -35,22 +35,20 @@
   }
 }
 
-.critButton {
-  vertical-align: middle;
-  @include spacing.margin($bottom: 1px);
-
-  .critButtonLabel {
-    font-size: 8px;
-    text-transform: uppercase;
-  }
-}
-
 .moveTooltip {
   font-size: 8px;
   user-select: none;
 }
 
+.toggleButton {
+  vertical-align: middle;
+  @include spacing.margin($bottom: 1px);
+}
+
 .toggleButtonLabel {
+  font-size: 8px;
+  text-transform: uppercase;
+
   .light &.inactive {
     color: colors.$black;
   }
