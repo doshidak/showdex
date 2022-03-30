@@ -30,7 +30,7 @@ export const PokeCalc = ({
   className,
   style,
   dex,
-  gen = 8,
+  gen,
   format,
   playerPokemon,
   opponentPokemon,
@@ -92,6 +92,7 @@ export const PokeCalc = ({
       <PokeMoves
         className={styles.section}
         dex={dex}
+        gen={gen}
         pokemon={playerPokemon}
         calculateMatchup={calculateMatchup}
         onPokemonChange={handlePokemonChange}
