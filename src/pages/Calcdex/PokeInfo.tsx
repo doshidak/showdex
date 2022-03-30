@@ -61,6 +61,7 @@ export const PokeInfo = ({
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
+              speciesForme: pokemon?.rawSpeciesForme ?? pokemon?.speciesForme,
               item: pokemon?.dirtyItem ?? pokemon?.item,
             }}
             tooltip="Open Smogon Page"
