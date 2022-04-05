@@ -74,7 +74,8 @@ const formatKoChance = (
     const fixedChance = chancePercentage.toFixed(decimalPlaces);
 
     if (fixedChance !== '0.0' && fixedChance !== '100.0') {
-      output.unshift(`${fixedChance}%`);
+      // also truncate any trailing zeroes, e.g., 75.0% -> 75%
+      output.unshift(`${fixedChance}%`.replace('.0%', '%'));
     }
   }
 
