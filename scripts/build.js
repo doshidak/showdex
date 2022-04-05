@@ -20,6 +20,6 @@ webpack(config, (err) => {
     console.error(err);
     process.exit(1);
   }
-});
 
-console.log('Build successful!');
+  console.log('Build successful!');
+});
