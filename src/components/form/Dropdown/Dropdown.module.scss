@@ -10,10 +10,10 @@
 $padding-x: 5px;
 $padding-y: 2px;
 
-$background-color-light: colors.$transparent;
-$background-color-dark: colors.$transparent;
+$background-color-light: color.alpha(colors.$white, 0.5);
+$background-color-dark: color.alpha(colors.$white, 0.05);
 $background-color-light-hover: color.alpha(colors.$black, 0.05);
-$background-color-dark-hover: color.alpha(colors.$white, 0.05);
+$background-color-dark-hover: color.alpha(colors.$white, 0.075);
 $background-color-light-active: color.alpha(colors.$black, 0.1);
 $background-color-dark-active: color.alpha(colors.$white, 0.1);
 
