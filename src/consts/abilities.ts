@@ -10,7 +10,7 @@ import type { AbilityName } from '@pkmn/data';
  */
 export const PokemonToggleAbilities: AbilityName[] = [
   <AbilityName> 'Flash Fire',
-  <AbilityName> 'Intimidate',
+  // <AbilityName> 'Intimidate', // applies the ATK reduction within `boosts`, so no need to "toggle" this
   <AbilityName> 'Minus',
   <AbilityName> 'Multiscale',
   <AbilityName> 'Plus',
