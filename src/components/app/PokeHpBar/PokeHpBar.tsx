@@ -20,7 +20,7 @@ export interface PokeHpBarProps {
   /**
    * Width of the HP bar, in *pixels*.
    *
-   * @default 85
+   * @default 100
    * @since 0.1.2
    */
   width?: number;
@@ -30,7 +30,7 @@ export const PokeHpBar = ({
   className,
   style,
   hp = 0,
-  width = 85,
+  width = 100,
 }: PokeHpBarProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
