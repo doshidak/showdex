@@ -343,7 +343,7 @@ export const useCalcdex = ({
 
           // const index = pokemonState.findIndex((p) => detectPokemonIdent(p) === ident);
           const index = pokemonState
-            .findIndex((p) => (p?.calcdexId ?? calcPokemonCalcdexId(p)) === calcdexId);
+            .findIndex((p) => (p?.calcdexId ?? calcPokemonCalcdexId({ ...p, ident: detectPokemonIdent(p) })) === calcdexId);
 
           if (index < 0 && pokemonState.length >= 6) {
             l.warn(
@@ -368,10 +368,10 @@ export const useCalcdex = ({
           // if the current player is `p1`, check for a corresponding `myPokemon`, if available
           const serverPokemon = myPokemonSide && playerKey === myPokemonSide ?
             battle.myPokemon?.find((p) => {
-              // const pIdent = detectPokemonIdent(<Showdown.Pokemon> <unknown> p)?.replace?.(/-Mega/gi, '');
-              const pCalcdexId = calcPokemonCalcdexId(<Showdown.Pokemon> <unknown> p);
-              // const didMatch = pIdent === ident;
-              const didMatch = pCalcdexId === calcdexId;
+              const pIdent = detectPokemonIdent(<Showdown.Pokemon> <unknown> p)?.replace?.(/-Mega/gi, '');
+              // const pCalcdexId = calcPokemonCalcdexId(<Showdown.Pokemon> <unknown> p);
+              const didMatch = pIdent === ident;
+              // const didMatch = pCalcdexId === calcdexId;
 
               // l.debug(
               //   'serverPokemon',
