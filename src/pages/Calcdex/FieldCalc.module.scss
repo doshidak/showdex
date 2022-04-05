@@ -1,8 +1,27 @@
 @use 'config/colors';
+@use 'functions/color';
+@use 'mixins/spacing';
 
 .container {
   grid-template-columns: 1fr 1.1fr 1.1fr 1fr;
   column-gap: 10px;
+}
+
+.label {
+  @include spacing.margin($bottom: 1px);
+}
+
+button.toggleButton {
+  @include spacing.margin-all(1px);
+  border-radius: 5px;
+
+  .light & {
+    background-color: color.alpha(colors.$white, 0.5);
+  }
+
+  .dark & {
+    background-color: color.alpha(colors.$white, 0.05);
+  }
 }
 
 .toggleButtonLabel {

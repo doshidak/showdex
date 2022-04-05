@@ -42,22 +42,37 @@ export const FieldCalc = ({
       style={style}
     >
       {/* table headers */}
-      <TableGridItem align="left" header>
+      <TableGridItem
+        className={styles.label}
+        align="left"
+        header
+      >
         Your Screens
       </TableGridItem>
-      <TableGridItem header>
+      <TableGridItem
+        className={styles.label}
+        header
+      >
         Weather
       </TableGridItem>
-      <TableGridItem header>
+      <TableGridItem
+        className={styles.label}
+        header
+      >
         Terrain
       </TableGridItem>
-      <TableGridItem align="right" header>
+      <TableGridItem
+        className={styles.label}
+        align="right"
+        header
+      >
         Their Screens
       </TableGridItem>
 
       {/* player's screens */}
       <TableGridItem align="left">
         <Button
+          className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
             !attackerSide?.isLightScreen && styles.inactive,
@@ -73,6 +88,7 @@ export const FieldCalc = ({
         {' '}
 
         <Button
+          className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
             !attackerSide?.isReflect && styles.inactive,
@@ -88,6 +104,7 @@ export const FieldCalc = ({
 
         {' '}
         <Button
+          className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
             !attackerSide?.isAuroraVeil && styles.inactive,
@@ -147,6 +164,7 @@ export const FieldCalc = ({
       {/* opponent's screens */}
       <TableGridItem align="right">
         <Button
+          className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
             !defenderSide?.isLightScreen && styles.inactive,
@@ -162,6 +180,7 @@ export const FieldCalc = ({
 
         {' '}
         <Button
+          className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
             !defenderSide?.isReflect && styles.inactive,
@@ -177,6 +196,7 @@ export const FieldCalc = ({
 
         {' '}
         <Button
+          className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
             !defenderSide?.isAuroraVeil && styles.inactive,

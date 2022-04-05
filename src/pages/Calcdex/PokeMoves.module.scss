@@ -1,5 +1,6 @@
 @use 'config/colors';
 @use 'functions/color';
+@use 'mixins/flex';
 @use 'mixins/spacing';
 
 .container {
@@ -17,9 +18,20 @@
   }
 
   &.dark {
-    background-color: color.alpha(colors.$black, 0.6);
-    box-shadow: 0 0 1px color.alpha(colors.$white, 0.15);
+    background-color: color.alpha(colors.$black, 0.75);
+    // box-shadow: 0 0 1px color.alpha(colors.$white, 0.15);
+    box-shadow: 0 0 1px color.alpha(colors.$black, 0.15),
+      0 0 5px color.alpha(colors.$black, 0.15);
   }
+}
+
+.movesHeader {
+  @include flex.row-start;
+  @include spacing.margin($left: 5px);
+}
+
+.dmgHeader {
+  @include flex.row-center;
 }
 
 .label {
@@ -27,11 +39,11 @@
   user-select: none;
 
   .light & {
-    color: color.alpha(colors.$black, 0.5);
+    color: color.alpha(colors.$black, 0.65);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.5);
+    color: color.alpha(colors.$white, 0.65);
   }
 }
 
@@ -40,9 +52,18 @@
   user-select: none;
 }
 
-.toggleButton {
-  vertical-align: middle;
-  @include spacing.margin($bottom: 1px);
+button.toggleButton {
+  // vertical-align: middle;
+  // @include spacing.margin($bottom: 1px);
+  @include spacing.margin($left: 5px);
+
+  .light & {
+    background-color: color.alpha(colors.$black, 0.075);
+  }
+
+  .dark & {
+    background-color: color.alpha(colors.$white, 0.05);
+  }
 }
 
 .toggleButtonLabel {

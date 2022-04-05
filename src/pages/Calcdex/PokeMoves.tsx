@@ -50,7 +50,11 @@ export const PokeMoves = ({
       style={style}
     >
       {/* table headers */}
-      <TableGridItem align="left" header>
+      <TableGridItem
+        className={styles.movesHeader}
+        align="left"
+        header
+      >
         Moves
 
         {
@@ -65,7 +69,7 @@ export const PokeMoves = ({
               )}
               label={gen === 7 ? 'Z-PWR' : 'Max'}
               tooltip={`${pokemon?.useUltimateMoves ? 'Deactivate' : 'Activate'} ${gen === 7 ? 'Z' : 'Max'} Moves`}
-              absoluteHover
+              // absoluteHover
               disabled={!pokemon}
               onPress={() => onPokemonChange?.({
                 useUltimateMoves: !pokemon?.useUltimateMoves,
@@ -75,7 +79,10 @@ export const PokeMoves = ({
         }
       </TableGridItem>
 
-      <TableGridItem header>
+      <TableGridItem
+        className={styles.dmgHeader}
+        header
+      >
         DMG
 
         {' '}
@@ -87,7 +94,7 @@ export const PokeMoves = ({
           )}
           label="Crit"
           tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
-          absoluteHover
+          // absoluteHover
           disabled={!pokemon?.speciesForme}
           onPress={() => onPokemonChange?.({
             criticalHit: !pokemon?.criticalHit,

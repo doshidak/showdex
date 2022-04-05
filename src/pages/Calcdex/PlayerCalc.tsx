@@ -122,10 +122,12 @@ export const PlayerCalc = ({
         <div className={styles.teamList}>
           {Array(6).fill(null).map((_, i) => {
             const mon = pokemon?.[i];
+            const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
+            const friendlyPokemonName = mon?.rawSpeciesForme || mon?.speciesForme || mon?.name || pokemonKey;
 
             return (
               <PiconButton
-                key={`PlayerCalc:Picon:${playerKey}:${mon?.calcdexId || mon?.ident || defaultName}:${i}`}
+                key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}:${i}`}
                 className={cx(
                   styles.piconButton,
                   !!activePokemon?.calcdexId && (activePokemon?.calcdexId === mon?.calcdexId) && styles.active,
@@ -134,12 +136,13 @@ export const PlayerCalc = ({
                 )}
                 piconClassName={styles.picon}
                 display="block"
-                aria-label={`Select ${mon?.name || mon?.speciesForme || mon?.ident}`}
+                aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
+                  speciesForme: mon?.rawSpeciesForme ?? mon?.speciesForme,
                   item: mon?.dirtyItem ?? mon?.item,
                 } : 'pokeball-none'}
-                tooltip={mon?.speciesForme || mon?.name || mon?.ident} /** @todo make this more descriptive, like the left-half of PokeInfo */
+                tooltip={friendlyPokemonName} /** @todo make this more descriptive, like the left-half of PokeInfo */
                 disabled={!mon}
                 onPress={() => onIndexSelect?.(i)}
               >

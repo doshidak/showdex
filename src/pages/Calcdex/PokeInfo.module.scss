@@ -34,12 +34,16 @@
   text-transform: uppercase;
   user-select: none;
 
+  &.dropdownLabel {
+    @include spacing.margin($bottom: 1px, $left: 5px);
+  }
+
   .light & {
-    color: color.alpha(colors.$black, 0.5);
+    color: color.alpha(colors.$black, 0.65);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.5);
+    color: color.alpha(colors.$white, 0.65);
   }
 }
 
@@ -55,6 +59,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.currentHp {
+  .light & {
+    color: color.alpha(colors.$black, 0.65);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.65);
+  }
 }
 
 .infoContainer {

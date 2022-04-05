@@ -76,7 +76,7 @@ export const PokeInfo = ({
         </div>
 
         <div className={styles.infoContainer}>
-          <div style={{ marginBottom: 2 }}>
+          <div style={{ marginBottom: 1 }}>
             <span className={styles.pokemonName}>
               {pokemon?.name || '--'}
             </span>
@@ -109,9 +109,9 @@ export const PokeInfo = ({
           </div>
 
           <div style={{ userSelect: 'none' }}>
-            <span className={styles.label}>
+            {/* <span className={styles.label}>
               HP{' '}
-            </span>
+            </span> */}
 
             <PokeHpBar
               className={styles.hpBar}
@@ -120,14 +120,14 @@ export const PokeInfo = ({
 
             {
               !!currentHp &&
-              <span>
+              <span className={styles.currentHp}>
                 {' '}
                 {`${(currentHp * 100).toFixed(0)}%`}
               </span>
             }
 
             {
-              (!!pokemon?.status || pokemon?.fainted || !currentHp) &&
+              (!!pokemon && (!!pokemon.status || pokemon.fainted || !currentHp)) &&
               <span>
                 {' '}
                 <PokeStatus
@@ -140,7 +140,7 @@ export const PokeInfo = ({
         </div>
 
         <div className={styles.presetContainer}>
-          <div className={styles.label}>
+          <div className={cx(styles.label, styles.dropdownLabel)}>
             Set
 
             {' '}
@@ -209,7 +209,7 @@ export const PokeInfo = ({
         style={{ alignItems: 'flex-start' }}
       >
         <div className={styles.rowItem}>
-          <div className={styles.label}>
+          <div className={cx(styles.label, styles.dropdownLabel)}>
             Ability
 
             {
@@ -290,7 +290,7 @@ export const PokeInfo = ({
         </div>
 
         <div className={styles.rowItem}>
-          <div className={styles.label}>
+          <div className={cx(styles.label, styles.dropdownLabel)}>
             Nature
           </div>
 
@@ -320,7 +320,7 @@ export const PokeInfo = ({
         </div>
 
         <div className={styles.rowItem}>
-          <div className={styles.label}>
+          <div className={cx(styles.label, styles.dropdownLabel)}>
             Item
 
             {
