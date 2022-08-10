@@ -19,11 +19,12 @@
   },
   "type": "module",
   "scripts": {
+    "patch-ghooks": "./scripts/patch-ghooks.sh",
     "commit": "./node_modules/cz-customizable/standalone.js",
     "cm": "yarn commit",
     "cz": "yarn commit",
-    "dev": "node --conditions=development --es-module-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
-    "build": "node --conditions=production --es-module-specifier-resolution=node -- ./scripts/build.js"
+    "dev": "node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "build": "node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
   },
   "config": {
     "cz-customizable": {
