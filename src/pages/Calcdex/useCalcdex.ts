@@ -42,7 +42,7 @@ export interface CalcdexHookInterface {
   setAutoSelect: (playerKey: CalcdexPlayerKey, autoSwitch: boolean) => void;
 }
 
-const l = logger('Calcdex/useCalcdex');
+const l = logger('@showdex/pages/Calcdex/useCalcdex');
 
 // we're using the `Dex` from `window.Dex` that the Showdown client uses
 // const gens = new Generations(($.extend(true, PkmnDex, Dex) as unknown) as ModdedDex);
@@ -236,6 +236,14 @@ export const useCalcdex = ({
       (<CalcdexPlayerKey[]> ['p1', 'p2']).forEach((playerKey) => {
         const player = battle?.[playerKey];
 
+        // l.debug(
+        //   'React.useEffect()',
+        //   'processing player', playerKey,
+        //   '\n', 'player', player,
+        //   '\n', 'battle', battle,
+        //   '\n', 'state', state,
+        // );
+
         if (!player?.sideid) {
           l.debug(
             'React.useEffect()',
@@ -270,13 +278,31 @@ export const useCalcdex = ({
 
         // find out which side myPokemon belongs to
         const myPokemonSide = detectPlayerKeyFromBattle(battle);
-        const isPlayerSide = playerKey === myPokemonSide;
+
+        const isPlayerSide = playerKey === myPokemonSide &&
+          Array.isArray(battle.myPokemon) &&
+          !!battle.myPokemon.length;
+
+        // l.debug(
+        //   'React.useEffect()',
+        //   '\n', 'playerKey', playerKey,
+        //   '\n', 'myPokemonSide', myPokemonSide,
+        //   '\n', 'isPlayerSide?', isPlayerSide,
+        //   '\n', 'isRandom?', isRandom,
+        // );
 
         const pokemonSource = isPlayerSide && isRandom ?
-          battle.myPokemon?.map?.((myMon) => {
+          battle.myPokemon.map((myMon) => {
             const ident = detectPokemonIdent(<Showdown.Pokemon> <unknown> myMon);
             const correspondingMon = player.pokemon
               .find((pkmn) => detectPokemonIdent(pkmn) === ident);
+
+            // l.debug(
+            //   'React.useEffect()',
+            //   'processing myPokemon', ident, 'for playerKey', playerKey,
+            //   '\n', 'myMon', myMon,
+            //   '\n', 'correspondingMon', correspondingMon,
+            // );
 
             if (!correspondingMon) {
               return <Showdown.Pokemon> <unknown> {
@@ -293,13 +319,16 @@ export const useCalcdex = ({
           }) ?? [] :
           player.pokemon;
 
-        // l.debug(
-        //   'React.useEffect() <- detectPlayerKeyFromBattle()',
-        //   '\n', 'myPokemonSide', myPokemonSide,
-        //   '\n', 'isPlayerSide?', isPlayerSide,
-        //   '\n', 'pokemonSource', pokemonSource,
-        //   '\n', 'battle', battle,
-        // );
+        l.debug(
+          'React.useEffect() <- detectPlayerKeyFromBattle()',
+          '\n', 'playerKey', playerKey,
+          '\n', 'isPlayerSide?', isPlayerSide,
+          '\n', 'isRandom?', isRandom,
+          '\n', 'myPokemonSide', myPokemonSide,
+          '\n', 'pokemonSource', pokemonSource,
+          '\n', 'battle', battle,
+          '\n', 'state', state,
+        );
 
         // update each player's pokemon
         const {
