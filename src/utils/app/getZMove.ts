@@ -23,7 +23,7 @@ const PokemonZMoveTypings: Record<Showdown.TypeName, MoveName> = {
   Fairy: <MoveName> 'Twinkle Tackle',
 };
 
-const l = logger('getZMove');
+const l = logger('@showdex/utils/app/getZMove');
 
 /**
  * Returns the corresponding Z move for a given move.

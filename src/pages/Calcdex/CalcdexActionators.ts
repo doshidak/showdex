@@ -73,7 +73,7 @@ export interface CalcdexActionatorMap extends ThunkyReducerActionatorMap<Calcdex
   ]>;
 }
 
-const l = logger('Calcdex/CalcdexActionators');
+const l = logger('@showdex/pages/Calcdex/CalcdexActionators');
 
 export const addPokemon: CalcdexActionatorMap['addPokemon'] = (
   dex,

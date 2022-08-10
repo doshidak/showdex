@@ -2,7 +2,7 @@ import { bootstrap as bootstrapCalcdex } from '@showdex/pages';
 import { logger } from '@showdex/utils/debug';
 import '@showdex/styles/global.scss';
 
-const l = logger('main');
+const l = logger('@showdex/main');
 
 const bootstrappers: ((roomId?: string) => void)[] = [
   bootstrapCalcdex,

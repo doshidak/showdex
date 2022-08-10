@@ -13,7 +13,7 @@ interface CalcdexProps {
   tooltips?: Showdown.BattleTooltips;
 }
 
-const l = logger('Calcdex');
+const l = logger('@showdex/pages/Calcdex/Calcdex');
 
 export const Calcdex = ({
   battle,

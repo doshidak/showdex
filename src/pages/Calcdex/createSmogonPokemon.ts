@@ -9,7 +9,7 @@ import { calcPokemonStats } from './calcPokemonStats';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
-const l = logger('Calcdex/createSmogonPokemon');
+const l = logger('@showdex/pages/Calcdex/createSmogonPokemon');
 
 export const createSmogonPokemon = (
   gen: GenerationNum,

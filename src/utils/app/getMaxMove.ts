@@ -23,7 +23,7 @@ const PokemonMaxMoveTypings: Record<Showdown.TypeName, MoveName> = {
   Dragon: <MoveName> 'Max Wyrmwind',
 };
 
-const l = logger('getMaxMove');
+const l = logger('@showdex/utils/app/getMaxMove');
 
 /**
  * Returns the corresponding Max/G-Max move for a given move.

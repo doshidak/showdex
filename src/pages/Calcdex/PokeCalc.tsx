@@ -24,7 +24,7 @@ interface PokeCalcProps {
   onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
 }
 
-// const l = logger('Calcdex/PokeCalc');
+// const l = logger('@showdex/pages/Calcdex/PokeCalc');
 
 export const PokeCalc = ({
   className,

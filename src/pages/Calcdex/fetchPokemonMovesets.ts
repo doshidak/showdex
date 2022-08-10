@@ -4,7 +4,7 @@ import type { CalcdexPokemon } from './CalcdexReducer';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
-const l = logger('Calcdex/fetchPokemonMovesets');
+const l = logger('@showdex/pages/Calcdex/fetchPokemonMovesets');
 
 export const fetchPokemonMovesets = async (
   dex: PkmnGeneration,

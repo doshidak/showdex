@@ -2,7 +2,7 @@ import { logger } from '@showdex/utils/debug';
 import type { CalcdexBattleField } from './CalcdexReducer';
 import { sanitizeField } from './sanitizeField';
 
-const l = logger('Calcdex/syncField');
+const l = logger('@showdex/pages/Calcdex/syncField');
 
 export const syncField = (
   field: CalcdexBattleField,

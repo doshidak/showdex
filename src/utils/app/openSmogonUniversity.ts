@@ -10,7 +10,7 @@ export type SmogonUniversityDexCategory =
   | 'types'
   | 'formats';
 
-const l = logger('SmogonUniversity');
+const l = logger('@showdex/utils/app/openSmogonUniversity');
 
 const SmogonUniversityGenSlugs: string[] = [
   null, // gen 0? kekw

@@ -3,7 +3,7 @@ import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from './CalcdexReducer';
 
-const l = logger('Calcdex/guessServerSpread');
+const l = logger('@showdex/pages/Calcdex/guessServerSpread');
 
 /**
  * Attempts to guess the spread (nature/EVs/IVs) of the passed-in `ServerPokemon`.

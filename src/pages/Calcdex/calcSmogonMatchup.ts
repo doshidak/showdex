@@ -120,7 +120,7 @@ const getKoColor = (
   return SmogonMatchupKoColors[koColorIndex];
 };
 
-// const l = logger('Calcdex/calcSmogonMatchup');
+// const l = logger('@showdex/pages/Calcdex/calcSmogonMatchup');
 
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.

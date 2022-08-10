@@ -6,7 +6,7 @@ import { calcPokemonCalcdexNonce } from './calcCalcdexNonce';
 import { detectToggledAbility } from './detectToggledAbility';
 import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
 
-const l = logger('Calcdex/syncPokemon');
+const l = logger('@showdex/pages/Calcdex/syncPokemon');
 
 export const syncPokemonBoosts = (
   pokemon: CalcdexPokemon,

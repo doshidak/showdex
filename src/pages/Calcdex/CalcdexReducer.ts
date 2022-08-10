@@ -541,7 +541,7 @@ export const CalcdexInitialState: CalcdexReducerState = {
   },
 };
 
-const l = logger('Calcdex/CalcdexReducer');
+const l = logger('@showdex/pages/Calcdex/CalcdexReducer');
 
 const getPlayerKeyFromActionType = (
   type: CalcdexReducerActionType,

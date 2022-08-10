@@ -8,7 +8,7 @@ interface ContentInjectable<T = unknown> {
   props?: Partial<T extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[T] : T>;
 }
 
-const l = logger('content');
+const l = logger('@showdex/content');
 
 const injectables: ContentInjectable<HTMLElement>[] = [
   // <ContentInjectable<HTMLMetaElement & { 'http-equiv'?: string; }>> {

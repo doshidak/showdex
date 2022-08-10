@@ -1,12 +1,12 @@
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import type { PresetCacheHookInterface } from './usePresetCache';
 // import { calcPokemonStats } from './calcPokemonStats';
-import { detectPokemonIdent } from './detectPokemonIdent';
+// import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
-const l = logger('Calcdex/fetchPokemonPresets');
+// const l = logger('@showdex/pages/Calcdex/fetchPokemonPresets');
 
 export const fetchPokemonPresets = async (
   _dex: Generation, /** @todo refactor this out since it's no longer being used */
@@ -14,7 +14,7 @@ export const fetchPokemonPresets = async (
   pokemon: Partial<CalcdexPokemon>,
   format: string,
 ): Promise<Partial<CalcdexPokemon>> => {
-  const ident = detectPokemonIdent(pokemon);
+  // const ident = detectPokemonIdent(pokemon);
   const speciesForme = detectSpeciesForme(pokemon)?.replace?.(/-Mega/gi, '');
 
   const newPokemon: Partial<CalcdexPokemon> = {

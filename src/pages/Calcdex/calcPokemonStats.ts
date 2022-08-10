@@ -4,7 +4,7 @@ import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon } from './CalcdexReducer';
 import { detectSpeciesForme } from './detectSpeciesForme';
 
-const l = logger('Calcdex/calcPokemonStats');
+const l = logger('@showdex/pages/Calcdex/calcPokemonStats');
 
 const initialStats: CalcdexPokemon['calculatedStats'] = {
   hp: 0,

@@ -8,7 +8,7 @@ import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { guessServerSpread } from './guessServerSpread';
 
-const l = logger('Calcdex/syncServerPokemon');
+const l = logger('@showdex/pages/Calcdex/syncServerPokemon');
 
 export const syncServerPokemon = (
   dex: Generation,

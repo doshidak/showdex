@@ -3,7 +3,7 @@ import { logger } from '@showdex/utils/debug';
 const minWidth = 320;
 const maxWidth = 1024;
 
-const l = logger('createSideRoom');
+const l = logger('@src/utils/app/createSideRoom');
 
 export const createSideRoom = (
   id: string,

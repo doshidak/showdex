@@ -19,7 +19,7 @@ interface RuntimeFetchResponse<T = unknown> {
   json: () => T;
 }
 
-const l = logger('runtimeFetch');
+const l = logger('@showdex/utils/core/runtimeFetch');
 
 export const runtimeFetch = async <T = unknown>(url?: RequestInfo, options?: RequestInit): Promise<RuntimeFetchResponse<T>> => {
   const extensionId = getExtensionId();
