@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom/client';
 import { ColorSchemeProvider } from '@showdex/components/app';
 import {
   createSideRoom,
@@ -10,7 +10,7 @@ import { logger } from '@showdex/utils/debug';
 import { calcBattleCalcdexNonce } from './calcCalcdexNonce';
 import { Calcdex } from './Calcdex';
 
-const l = logger('Calcdex.bootstrap');
+const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
 export const bootstrap = (roomid?: string): void => {
   l.debug(
@@ -133,23 +133,25 @@ export const bootstrap = (roomid?: string): void => {
           'Calcdex',
           true,
         );
+
+        activeBattle.reactCalcdexRoom = ReactDOM.createRoot(activeBattle.calcdexRoom.el);
       }
 
       activeBattle.nonce = calcBattleCalcdexNonce(activeBattle);
 
       l.debug(
-        'battle.subscribe() -> ReactDOM.render()',
+        'battle.subscribe() -> activeBattle.reactCalcdexRoom.render()',
         '\n', 'rendering Calcdex with battle nonce', activeBattle.nonce,
       );
 
-      ReactDOM.render((
+      activeBattle.reactCalcdexRoom.render((
         <ColorSchemeProvider>
           <Calcdex
             battle={activeBattle}
             tooltips={tooltips}
           />
         </ColorSchemeProvider>
-      ), battle.calcdexRoom.el);
+      ));
     });
 
     battle.subscriptionDirty = true;
