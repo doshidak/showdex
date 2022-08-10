@@ -4,9 +4,21 @@ import { paramCase } from 'change-case';
 import { HighIntensityAnsiColor, StandardAnsiColor } from '@showdex/consts';
 import type { AnsiColor } from '@showdex/consts';
 
-export type LoggerLevel = 'silly' | 'debug' | 'verbose' | 'info' | 'success' | 'warn' | 'error';
+export type LoggerLevel =
+  | 'silly'
+  | 'debug'
+  | 'verbose'
+  | 'info'
+  | 'success'
+  | 'warn'
+  | 'error';
+
 export type LoggerLogFunction = (...data: unknown[]) => void;
-export type LoggerLogFactory = (scope?: string, level?: LoggerLevel) => LoggerLogFunction;
+
+export type LoggerLogFactory = (
+  scope?: string,
+  level?: LoggerLevel,
+) => LoggerLogFunction;
 
 export type LoggerLevelConfig = {
   label: string;
@@ -15,12 +27,19 @@ export type LoggerLevelConfig = {
   print: LoggerLogFunction;
 };
 
-export type LoggerHtmlStyles = Record<string, string | number>;
-
 export type LoggerLevelConfigs = Record<LoggerLevel, LoggerLevelConfig>;
-export type LoggerLevelFunctions = Record<LoggerLevel, LoggerLogFunction>;
-export type LoggerLevelFactory = (scope?: string) => LoggerLevelFunctions;
-export type LoggerInstance = LoggerLevelFunctions & LoggerLevelFactory;
+
+export interface LoggerLevelFunctions extends Record<LoggerLevel, LoggerLogFunction> {
+  scope?: string;
+}
+
+export type LoggerLevelFactory = (
+  scope?: string,
+) => LoggerLevelFunctions;
+
+export type LoggerInstance = Omit<LoggerLevelFunctions, 'scope'> & LoggerLevelFactory;
+
+export type LoggerHtmlStyles = Record<string, string | number>;
 
 const __DEV__ = process.env.NODE_ENV === 'development';
 const isBrowser = typeof window === 'object';
@@ -37,46 +56,66 @@ const levels: LoggerLevelConfigs = {
     htmlColor: '#616161', // MD Gray 700
     print: console.log, // alias for `console.log` in node
   },
+
   debug: {
     label: 'DBUG',
     color: HighIntensityAnsiColor.Gray,
     htmlColor: '#616161', // MD Gray 700
     print: console.log,
   },
+
   verbose: {
     label: 'VERB',
     color: HighIntensityAnsiColor.BrightBlue,
     htmlColor: '#0288D1', // MD Light Blue 700
     print: console.info,
   },
+
   info: {
     label: 'INFO',
     color: StandardAnsiColor.Blue,
     htmlColor: '#1976D2', // MD Blue 700
     print: console.info,
   },
+
   success: {
     label: ' OK ',
     color: StandardAnsiColor.Green,
     htmlColor: '#388E3C', // MD Green 700
     print: console.log,
   },
+
   warn: {
-    label: 'WARN',
+    // label: 'WARN',
+    label: 'SHIT',
     color: StandardAnsiColor.Yellow,
     htmlColor: '#F57C00', // MD Orange 700
     print: console.warn,
   },
+
   error: {
-    label: 'ERR!',
+    // label: 'ERR!',
+    label: 'FUCK', // seems more appropriate
     color: StandardAnsiColor.Red,
     htmlColor: '#D32F2F', // MD Red 700
     print: console.error,
   },
 };
 
-const createTtyLevel: LoggerLogFactory = (scope, level = 'silly') => (...data) => {
-  const { label, color, print } = levels[level];
+const createTtyLevel: LoggerLogFactory = (
+  scope,
+  level = 'silly',
+) => (...data) => {
+  // don't emit silly- and debug-level logs if we're not in development mode
+  if (!__DEV__ && (level === 'silly' || level === 'debug')) {
+    return;
+  }
+
+  const {
+    label,
+    color,
+    print,
+  } = levels[level];
 
   const args = [
     timestamp(),
@@ -96,7 +135,9 @@ const createTtyLevel: LoggerLogFactory = (scope, level = 'silly') => (...data) =
   return print(...args);
 };
 
-const toInlineStyles = (styles: LoggerHtmlStyles) => Object.entries(styles).reduce((inline, entry) => {
+const toInlineStyles = (
+  styles: LoggerHtmlStyles,
+) => Object.entries(styles).reduce((inline, entry) => {
   const [property, value] = entry;
 
   if (!property || !value) {
@@ -113,8 +154,20 @@ const toInlineStyles = (styles: LoggerHtmlStyles) => Object.entries(styles).redu
   return inline + declaration;
 }, '');
 
-const createHtmlLevel: LoggerLogFactory = (scope, level = 'silly') => (...data) => {
-  const { label, htmlColor, print } = levels[level];
+const createHtmlLevel: LoggerLogFactory = (
+  scope,
+  level = 'silly',
+) => (...data) => {
+  // don't emit silly- and debug-level logs if we're not in development mode
+  if (!__DEV__ && (level === 'silly' || level === 'debug')) {
+    return;
+  }
+
+  const {
+    label,
+    htmlColor,
+    print,
+  } = levels[level];
 
   // makes the console logs in Chrome's DevTools look pretty (unsure about other browsers tho)
   const heading = [`%c${label}`];
@@ -123,7 +176,7 @@ const createHtmlLevel: LoggerLogFactory = (scope, level = 'silly') => (...data) 
     padding: '5px 10px',
     fontSize: 10,
     color: htmlColor,
-    backgroundColor: 'rgba(255, 255, 255, 0.025)',
+    backgroundColor: 'rgba(255, 255, 255, 0.015)',
     borderTopLeftRadius: 3,
     borderBottomLeftRadius: 3,
   }];
@@ -133,29 +186,48 @@ const createHtmlLevel: LoggerLogFactory = (scope, level = 'silly') => (...data) 
     headingStyles.push({
       padding: `${headingStyles[0].padding} ${String(headingStyles[0].padding).split(' ')[0]} 0`,
       fontSize: headingStyles[0].fontSize,
-      color: '#AB47BC', // MD Purple 400
+      // color: '#03A9F4', // MD Light Blue 500
+      color: '#9E9E9E', // MD Gray 500
       backgroundColor: headingStyles[0].backgroundColor,
       borderTopRightRadius: headingStyles[0].borderTopRightRadius,
       borderBottomRightRadius: headingStyles[0].borderBottomRightRadius,
     });
   }
 
+  // temporary workaround for source caller referring to this file
+  // (when not using setTimeout() to remove the source caller)
+  const stack = new Error().stack?.split('\n')[2]?.trim();
+
   // now we'll build out the print() arguments that are in a very particular order
   const args = [
     heading.join(''),
     ...headingStyles.map((styles) => toInlineStyles(styles)),
-    ...data,
   ];
+
+  if (stack) {
+    const stackStyles: LoggerHtmlStyles = {
+      padding: headingStyles[0].padding,
+      fontSize: headingStyles[0].fontSize,
+      color: '#9E9E9E', // MD Gray 500
+    };
+
+    args[0] += `\n%c${stack}\n`;
+    args.push(toInlineStyles(stackStyles));
+  }
 
   // setTimeout() gets rid of the source caller in the console (e.g., 'logger.ts:151')
   // (just fyi, this also defers the output since the callback is at the top of the stack, i.e., the logs may be delayed.)
   // return setTimeout(print.bind(console, ...args));
-  return print(...args);
+  return print(...args, ...data);
 };
 
-const createLevel: LoggerLogFactory = (scope, level = 'silly') => (isBrowser ? createHtmlLevel : createTtyLevel)(scope, level);
+const createLevel: LoggerLogFactory = (
+  scope,
+  level = 'silly',
+) => (isBrowser ? createHtmlLevel : createTtyLevel)(scope, level);
 
 export const logger: LoggerInstance = (scope): LoggerLevelFunctions => ({
+  scope,
   silly: createLevel(scope, 'silly'),
   debug: createLevel(scope, 'debug'),
   verbose: createLevel(scope, 'verbose'),
