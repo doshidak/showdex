@@ -1,12 +1,18 @@
-const path = require('path');
-const dotenv = require('dotenv');
-const webpack = require('webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import webpack from 'webpack';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const mode = isDevelopment ? 'development' : 'production';
+
+// __dirname is not available in ESModules lmao
+if (typeof __dirname !== 'string') {
+  global.__dirname = path.dirname(fileURLToPath(import.meta.url));
+}
 
 const env = Object.entries({
   ...dotenv.config({ path: path.join(__dirname, '.env') }).parsed,
@@ -60,7 +66,7 @@ const moduleRules = [{
         sourceMap: true,
         postcssOptions: {
           // autoprefixer so we don't ever need to specify CSS prefixes like `-moz-` and `-webkit-`
-          path: path.join(__dirname, 'postcss.config.js'),
+          path: path.join(__dirname, 'postcss.config.cjs'),
         },
       },
     },
@@ -95,7 +101,7 @@ const moduleRules = [{
 
 const resolve = {
   alias: {
-    'react-dom': '@hot-loader/react-dom',
+    // 'react-dom': '@hot-loader/react-dom',
     '@showdex': path.join(__dirname, 'src'),
   },
 
@@ -128,7 +134,7 @@ const plugins = [
   new CopyWebpackPlugin({ patterns: copyPatterns }),
 ];
 
-const config = {
+export const config = {
   mode,
   entry,
   output,
@@ -136,13 +142,13 @@ const config = {
   resolve,
   plugins,
 
-  chromeExtension: {
-    hmrExclude: [
-      'content',
-      'background',
-      // 'devtools',
-    ],
-  },
+  // chromeExtension: {
+  //   hmrExclude: [
+  //     'content',
+  //     'background',
+  //     // 'devtools',
+  //   ],
+  // },
 };
 
 if (isDevelopment) {
@@ -154,4 +160,4 @@ if (isDevelopment) {
   };
 }
 
-module.exports = config;
+export default config;

@@ -4,6 +4,8 @@
     [
       "@babel/preset-env",
       {
+        "debug": true,
+        "modules": false,
         "targets": {
           "node": "current"
         }
@@ -13,7 +15,6 @@
   ],
 
   "plugins": [
-    "@babel/plugin-transform-typescript",
-    "react-hot-loader/babel"
+    "@babel/plugin-transform-typescript"
   ]
 }

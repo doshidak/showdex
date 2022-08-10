@@ -292,6 +292,7 @@ declare namespace Showdown {
 
     // Showdex custom injected properties
     calcdexRoom?: HtmlRoom;
+    reactCalcdexRoom?: import('react-dom/client').Root;
     prevSubscription?: Battle['subscription'];
     subscriptionDirty?: boolean;
     nonce?: string;
