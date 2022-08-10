@@ -58,7 +58,7 @@ export interface PresetCacheHookInterface {
   purge: () => void;
 }
 
-const l = logger('Calcdex/usePresetCache');
+const l = logger('@showdex/pages/Calcdex/usePresetCache');
 
 export const usePresetCache = (): PresetCacheHookInterface => {
   const [presetCache, setPresetCache] = React.useState<PkmnSmogonPresetCache>({});
@@ -121,11 +121,11 @@ export const usePresetCache = (): PresetCacheHookInterface => {
 
     setLoading(true);
 
-    let downloadedData = {};
+    let downloadedData: Record<string, Record<string, Record<string, unknown>>> = {};
 
     const response = await runtimeFetch(url);
     // const data = await response.json();
-    downloadedData = await response.json();
+    downloadedData = <typeof downloadedData> await response.json();
 
     l.debug(
       'fetch() <- await runtimeFetch()',
@@ -164,22 +164,28 @@ export const usePresetCache = (): PresetCacheHookInterface => {
       );
 
       // inject the presets into what already have; otherwise, we'll overwrite existing ones!
-      Object.entries(gen4Data).forEach(([forme, formats]) => {
+      Object.entries(gen4Data).forEach(([
+        forme,
+        formats,
+      ]: [
+        forme: string,
+        formats: Record<string, Record<string, unknown>>,
+      ]) => {
         if (!(forme in downloadedData)) {
-          downloadedData[forme] = <Record<string, unknown>> formats;
+          downloadedData[forme] = formats;
 
           return;
         }
 
-        Object.entries(<Record<string, Record<string, unknown>>> formats).forEach(([currentFormat, presets]) => {
+        Object.entries(formats).forEach(([currentFormat, presets]) => {
           if (!(currentFormat in downloadedData[forme])) {
-            (<Record<string, Record<string, unknown>>> downloadedData[forme])[currentFormat] = presets;
+            downloadedData[forme][currentFormat] = presets;
 
             return;
           }
 
-          (<Record<string, Record<string, unknown>>> downloadedData[forme])[currentFormat] = {
-            ...(<Record<string, Record<string, unknown>>> downloadedData[forme])[currentFormat],
+          downloadedData[forme][currentFormat] = {
+            ...downloadedData[forme][currentFormat],
             ...presets,
           };
         });
@@ -191,136 +197,139 @@ export const usePresetCache = (): PresetCacheHookInterface => {
       );
     }
 
-    setPresetCache((prevPresetCache) => {
-      // every format will be under `gen<#>`, except for randoms
-      if (!(genName in prevPresetCache)) {
-        prevPresetCache[genName] = {};
-      }
-
-      Object.entries(downloadedData).forEach(([forme, value]) => {
-        const sanitizedForme = sanitizeSpeciesForme(forme);
-
-        if (!Array.isArray(prevPresetCache[genName][sanitizedForme])) {
-          prevPresetCache[genName][sanitizedForme] = [];
+    return new Promise((resolve) => {
+      setPresetCache((prevPresetCache) => {
+        // every format will be under `gen<#>`, except for randoms
+        if (!(genName in prevPresetCache)) {
+          prevPresetCache[genName] = {};
         }
 
-        if (isRandom) {
-          // literally redeclared just for TypeScript lmao
-          const preset = <PkmnSmogonRandomPreset> value;
+        Object.entries(downloadedData).forEach(([forme, value]) => {
+          const sanitizedForme = sanitizeSpeciesForme(forme);
 
-          const calcdexPreset: CalcdexPokemonPreset = {
-            name: 'Randoms',
-            species: forme, // purposefully not sanitized
-            level: preset?.level,
-
-            ability: preset?.abilities?.[0],
-            altAbilities: preset?.abilities,
-
-            // seems that all Pokemon have the Hardy nature
-            // (according to https://calc.pokemonshowdown.com/randoms.html)
-            nature: 'Hardy',
-
-            item: preset?.items?.[0],
-            altItems: preset?.items,
-
-            moves: preset?.moves?.slice?.(0, 4),
-            altMoves: preset?.moves,
-
-            ivs: {
-              hp: preset?.ivs?.hp ?? 31,
-              atk: preset?.ivs?.atk ?? 31,
-              def: preset?.ivs?.def ?? 31,
-              spa: preset?.ivs?.spa ?? 31,
-              spd: preset?.ivs?.spd ?? 31,
-              spe: preset?.ivs?.spe ?? 31,
-            },
-
-            // all EVs default to 84
-            // (according to https://calc.pokemonshowdown.com/randoms.html)
-            evs: {
-              hp: preset?.evs?.hp ?? 84,
-              atk: preset?.evs?.atk ?? 84,
-              def: preset?.evs?.def ?? 84,
-              spa: preset?.evs?.spa ?? 84,
-              spd: preset?.evs?.spd ?? 84,
-              spe: preset?.evs?.spe ?? 84,
-            },
-          };
-
-          calcdexPreset.calcdexId = calcPresetCalcdexId(calcdexPreset);
-
-          const index = prevPresetCache[genName][sanitizedForme]
-            .findIndex((p) => p.calcdexId === calcdexPreset.calcdexId);
-
-          if (index > -1) {
-            prevPresetCache[genName][sanitizedForme][index] = calcdexPreset;
-          } else {
-            prevPresetCache[genName][sanitizedForme].push(calcdexPreset);
+          if (!Array.isArray(prevPresetCache[genName][sanitizedForme])) {
+            prevPresetCache[genName][sanitizedForme] = [];
           }
-        } else {
-          Object.entries(<PkmnSmogonPresetFormats> value).forEach(([currentFormat, presets]) => {
-            Object.entries(presets).forEach(([presetName, preset]) => {
-              const formatLabel = currentFormat in FormatLabels ?
-                FormatLabels[currentFormat] :
-                currentFormat?.toUpperCase?.();
 
-              const altMoves = preset?.moves?.flatMap?.((move) => move) ?? [];
+          if (isRandom) {
+            // literally redeclared just for TypeScript lmao
+            const preset = <PkmnSmogonRandomPreset> <unknown> value;
 
-              const calcdexPreset: CalcdexPokemonPreset = {
-                name: `${formatLabel} ${presetName}`, // e.g., 'OU Defensive Pivot'
-                species: forme, // purposefully not sanitized
+            const calcdexPreset: CalcdexPokemonPreset = {
+              name: 'Randoms',
+              species: forme, // purposefully not sanitized
+              level: preset?.level,
 
-                ability: Array.isArray(preset?.ability) ? preset.ability[0] : preset?.ability,
-                altAbilities: Array.isArray(preset?.ability) ? preset.ability : [preset?.ability].filter(Boolean),
+              ability: preset?.abilities?.[0],
+              altAbilities: preset?.abilities,
 
-                nature: Array.isArray(preset?.nature) ? preset.nature[0] : preset?.nature,
+              // seems that all Pokemon have the Hardy nature
+              // (according to https://calc.pokemonshowdown.com/randoms.html)
+              nature: 'Hardy',
 
-                item: Array.isArray(preset?.item) ? preset.item[0] : preset?.item,
-                altItems: Array.isArray(preset?.item) ? preset.item : [preset?.item].filter(Boolean),
+              item: preset?.items?.[0],
+              altItems: preset?.items,
 
-                moves: preset?.moves?.map?.((move) => (Array.isArray(move) ? move[0] : move)) ?? [],
-                altMoves: altMoves.filter((m, i) => !altMoves.includes(m, i + 1)), // remove duplicate moves
+              moves: preset?.moves?.slice?.(0, 4),
+              altMoves: preset?.moves,
 
-                ivs: {
-                  hp: preset?.ivs?.hp ?? 31,
-                  atk: preset?.ivs?.atk ?? 31,
-                  def: preset?.ivs?.def ?? 31,
-                  spa: preset?.ivs?.spa ?? 31,
-                  spd: preset?.ivs?.spd ?? 31,
-                  spe: preset?.ivs?.spe ?? 31,
-                },
+              ivs: {
+                hp: preset?.ivs?.hp ?? 31,
+                atk: preset?.ivs?.atk ?? 31,
+                def: preset?.ivs?.def ?? 31,
+                spa: preset?.ivs?.spa ?? 31,
+                spd: preset?.ivs?.spd ?? 31,
+                spe: preset?.ivs?.spe ?? 31,
+              },
 
-                evs: preset?.evs,
-              };
+              // all EVs default to 84
+              // (according to https://calc.pokemonshowdown.com/randoms.html)
+              evs: {
+                hp: preset?.evs?.hp ?? 84,
+                atk: preset?.evs?.atk ?? 84,
+                def: preset?.evs?.def ?? 84,
+                spa: preset?.evs?.spa ?? 84,
+                spd: preset?.evs?.spd ?? 84,
+                spe: preset?.evs?.spe ?? 84,
+              },
+            };
 
-              calcdexPreset.calcdexId = calcPresetCalcdexId(calcdexPreset);
+            calcdexPreset.calcdexId = calcPresetCalcdexId(calcdexPreset);
 
-              const index = prevPresetCache[genName][sanitizedForme]
-                .findIndex((p) => p.calcdexId === calcdexPreset.calcdexId);
+            const index = prevPresetCache[genName][sanitizedForme]
+              .findIndex((p) => p.calcdexId === calcdexPreset.calcdexId);
 
-              if (index > -1) {
-                prevPresetCache[genName][sanitizedForme][index] = calcdexPreset;
-              } else {
-                prevPresetCache[genName][sanitizedForme].push(calcdexPreset);
-              }
+            if (index > -1) {
+              prevPresetCache[genName][sanitizedForme][index] = calcdexPreset;
+            } else {
+              prevPresetCache[genName][sanitizedForme].push(calcdexPreset);
+            }
+          } else {
+            Object.entries(<PkmnSmogonPresetFormats> value).forEach(([currentFormat, presets]) => {
+              Object.entries(presets).forEach(([presetName, preset]) => {
+                const formatLabel = currentFormat in FormatLabels ?
+                  FormatLabels[currentFormat] :
+                  currentFormat?.toUpperCase?.();
+
+                const altMoves = preset?.moves?.flatMap?.((move) => move) ?? [];
+
+                const calcdexPreset: CalcdexPokemonPreset = {
+                  name: `${formatLabel} ${presetName}`, // e.g., 'OU Defensive Pivot'
+                  species: forme, // purposefully not sanitized
+
+                  ability: Array.isArray(preset?.ability) ? preset.ability[0] : preset?.ability,
+                  altAbilities: Array.isArray(preset?.ability) ? preset.ability : [preset?.ability].filter(Boolean),
+
+                  nature: Array.isArray(preset?.nature) ? preset.nature[0] : preset?.nature,
+
+                  item: Array.isArray(preset?.item) ? preset.item[0] : preset?.item,
+                  altItems: Array.isArray(preset?.item) ? preset.item : [preset?.item].filter(Boolean),
+
+                  moves: preset?.moves?.map?.((move) => (Array.isArray(move) ? move[0] : move)) ?? [],
+                  altMoves: altMoves.filter((m, i) => !altMoves.includes(m, i + 1)), // remove duplicate moves
+
+                  ivs: {
+                    hp: preset?.ivs?.hp ?? 31,
+                    atk: preset?.ivs?.atk ?? 31,
+                    def: preset?.ivs?.def ?? 31,
+                    spa: preset?.ivs?.spa ?? 31,
+                    spd: preset?.ivs?.spd ?? 31,
+                    spe: preset?.ivs?.spe ?? 31,
+                  },
+
+                  evs: preset?.evs,
+                };
+
+                calcdexPreset.calcdexId = calcPresetCalcdexId(calcdexPreset);
+
+                const index = prevPresetCache[genName][sanitizedForme]
+                  .findIndex((p) => p.calcdexId === calcdexPreset.calcdexId);
+
+                if (index > -1) {
+                  prevPresetCache[genName][sanitizedForme][index] = calcdexPreset;
+                } else {
+                  prevPresetCache[genName][sanitizedForme].push(calcdexPreset);
+                }
+              });
             });
-          });
-        }
+          }
+        });
+
+        l.debug(
+          'fetch()',
+          '\n', 'finished processing and caching presets from Smogon',
+          '\n', 'presetCache[', genName, ']', prevPresetCache[genName],
+          '\n', 'presetCache', prevPresetCache,
+          '\n', 'isRandom?', isRandom,
+          '\n', 'genName', genName,
+          '\n', 'format', format,
+        );
+
+        setLoading(false);
+        resolve();
+
+        return prevPresetCache;
       });
-
-      l.debug(
-        'fetch()',
-        '\n', 'finished processing and caching presets from Smogon',
-        '\n', 'presetCache[', genName, ']', prevPresetCache[genName],
-        '\n', 'presetCache', prevPresetCache,
-        '\n', 'isRandom?', isRandom,
-        '\n', 'genName', genName,
-        '\n', 'format', format,
-      );
-
-      setLoading(false);
-
-      return prevPresetCache;
     });
   };
 
