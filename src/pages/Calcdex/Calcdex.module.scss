@@ -25,7 +25,7 @@
   }
 
   &.light::before {
-    background-color: color.alpha(colors.$white, 0.5);
+    background-color: color.alpha(colors.$white, 0.4);
   }
 
   &.dark::before {

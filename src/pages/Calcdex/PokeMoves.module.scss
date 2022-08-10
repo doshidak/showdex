@@ -13,15 +13,19 @@
 
   &.light {
     background-color: color.alpha(colors.$white, 0.6);
-    box-shadow: 0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 3px color.alpha(colors.$black, 0.15);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.15),
+      0 0 3px color.alpha(colors.$black, 0.15),
+    );
   }
 
   &.dark {
     background-color: color.alpha(colors.$black, 0.75);
     // box-shadow: 0 0 1px color.alpha(colors.$white, 0.15);
-    box-shadow: 0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 5px color.alpha(colors.$black, 0.15);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.15),
+      0 0 5px color.alpha(colors.$black, 0.15),
+    );
   }
 }
 
@@ -39,11 +43,11 @@
   user-select: none;
 
   .light & {
-    color: color.alpha(colors.$black, 0.65);
+    color: color.alpha(colors.$black, 0.75);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.65);
+    color: color.alpha(colors.$white, 0.75);
   }
 }
 

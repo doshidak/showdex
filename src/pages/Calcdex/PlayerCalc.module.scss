@@ -14,13 +14,15 @@
   width: 100%;
 }
 
-// .playerInfo {
-//   @include flex.column;
-// }
+.playerInfo {
+  // @include flex.column;
+  width: 100%;
+}
 
 button.usernameButton {
   justify-content: initial;
-  max-width: 78px;
+  // max-width: 78px;
+  max-width: 80%;
 }
 
 .usernameButtonLabel {
@@ -30,11 +32,11 @@ button.usernameButton {
   overflow: hidden;
 
   .light & {
-    color: color.alpha(colors.$black, 0.5);
+    color: color.alpha(colors.$black, 0.75);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.5);
+    color: color.alpha(colors.$white, 0.75);
   }
 }
 
