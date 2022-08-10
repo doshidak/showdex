@@ -32,7 +32,7 @@ export const detectPlayerKeyFromBattle = (
 
   const [firstPokemon] = <CalcdexPokemon[]> <unknown> battle.myPokemon;
 
-  console.log('firstPokemon', firstPokemon);
+  // console.log('firstPokemon', firstPokemon);
 
   return detectPlayerKeyFromPokemon(firstPokemon);
 };
