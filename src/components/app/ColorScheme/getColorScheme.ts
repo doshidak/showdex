@@ -11,8 +11,7 @@ export const getColorScheme = (): ColorScheme => {
       return schemeFromPrefs;
     }
 
-    case 'system':
-    default: {
+    case 'system': {
       // just an old habit working with SSR; doesn't hurt to check tho!
       if (typeof window === 'undefined') {
         return 'light';
@@ -21,6 +20,10 @@ export const getColorScheme = (): ColorScheme => {
       const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
       return darkMode ? 'dark' : 'light';
+    }
+
+    default: {
+      return 'light';
     }
   }
 };
