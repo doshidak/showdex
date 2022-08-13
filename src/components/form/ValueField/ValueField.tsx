@@ -33,6 +33,20 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   // this is only a visual value, so that we don't forcibly change the user's value as they're typing it
   const [inputValue, setInputValue] = React.useState<string>(input?.value?.toString());
 
+  React.useEffect(() => {
+    const value = input?.value?.toString();
+
+    if (active || !value || value === inputValue) {
+      return;
+    }
+
+    setInputValue(value);
+  }, [
+    active,
+    input?.value,
+    inputValue,
+  ]);
+
   return (
     <div
       className={cx(
