@@ -47,6 +47,15 @@
   }
 }
 
+.infoContainer {
+  flex: 1.25;
+}
+
+.firstLine {
+  max-width: 100%;
+  @include spacing.margin($bottom: 1px);
+}
+
 .piconContainer {
   flex: 0 0 40px;
   transform: translateY(-2px);
@@ -55,7 +64,7 @@
 .pokemonName {
   display: inline-block;
   vertical-align: top;
-  max-width: 66px;
+  max-width: 45%;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -69,10 +78,6 @@
   .dark & {
     color: color.alpha(colors.$white, 0.75);
   }
-}
-
-.infoContainer {
-  flex: 1.25;
 }
 
 .toggleButtonLabel {
@@ -92,6 +97,11 @@
     font-size: 8px;
     text-transform: uppercase;
   }
+}
+
+.secondLine {
+  min-height: 15px;
+  user-select: none;
 }
 
 .hpBar {
