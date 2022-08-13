@@ -1,5 +1,7 @@
 import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from './CalcdexReducer';
+import { env } from '@showdex/utils/core';
+import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export const serializePayload = <T>(payload: T): string => Object.entries(payload || {})
   .map(([key, value]) => `${key}:${value?.toString?.() ?? 'undefined'}`)
@@ -24,35 +26,49 @@ export const calcCalcdexId = <T>(payload: T): string => {
     return null;
   }
 
-  return uuidv5(serialized, process.env.UUID_NAMESPACE || NIL_UUID);
+  return uuidv5(serialized, env('uuid-namespace', NIL_UUID));
 };
 
 export const calcPresetCalcdexId = (
   preset: CalcdexPokemonPreset,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemonPreset, string>>>({
   name: preset?.name,
-  species: preset?.species,
-  level: preset?.level?.toString(),
-  shiny: preset?.shiny?.toString(),
-  ability: preset?.ability,
-  item: preset?.item,
-  moves: preset?.moves?.join(','),
-  nature: preset?.nature,
-  ivs: calcCalcdexId<Partial<Showdown.StatsTable>>(preset?.ivs),
-  evs: calcCalcdexId<Partial<Showdown.StatsTable>>(preset?.evs),
-  happiness: preset?.happiness?.toString(),
-  pokeball: preset?.pokeball,
-  hpType: preset?.hpType,
-  gigantamax: preset?.gigantamax?.toString(),
+  gen: String(preset?.gen),
+  format: preset?.format,
+  speciesForme: preset?.speciesForme,
+  level: String(preset?.level),
+  // shiny: String(preset?.shiny),
+  // ability: preset?.ability,
+  // altAbilities: preset?.altAbilities?.join(','),
+  // nature: preset?.nature,
+  // item: preset?.item,
+  // altItems: preset?.altItems?.join(','),
+  // moves: preset?.moves?.join(','),
+  // altMoves: preset?.moves?.join(','),
+  // ivs: calcCalcdexId<Showdown.StatsTable>(preset?.ivs),
+  // evs: calcCalcdexId<Showdown.StatsTable>(preset?.evs),
+  // happiness: String(preset?.happiness),
+  // pokeball: preset?.pokeball,
+  // hpType: preset?.hpType,
+  // gigantamax: String(preset?.gigantamax),
 });
 
 export const calcPokemonCalcdexId = (
-  pokemon: Partial<Showdown.Pokemon>,
+  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon & { slot: number; }> | DeepPartial<CalcdexPokemon> = {},
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
-  ident: pokemon?.ident,
-  // name: pokemon?.name,
-  level: pokemon?.level?.toString(),
+  // ident: pokemon?.ident,
+
+  name: [
+    detectPlayerKeyFromPokemon(pokemon),
+    // pokemon?.name?.replace(/-.+$/, ''), // 'Ho-Oh' -> 'Ho' ? LOL
+    'slot' in pokemon && typeof pokemon.slot === 'number' ?
+      String(pokemon.slot) :
+      pokemon?.speciesForme?.replace(/-.+$/, ''),
+  ].filter(Boolean).join(': '),
+
+  level: String(pokemon?.level),
   gender: pokemon?.gender,
+  // shiny: String(pokemon?.shiny), // bad idea, subject to change mid-battle
 });
 
 export const calcSideCalcdexId = (

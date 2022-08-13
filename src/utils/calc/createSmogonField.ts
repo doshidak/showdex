@@ -1,5 +1,5 @@
 import { Field as SmogonField } from '@smogon/calc';
-import type { CalcdexBattleField } from './CalcdexReducer';
+import type { CalcdexBattleField } from '@showdex/redux/store';
 
 export const createSmogonField = (
   field: CalcdexBattleField,

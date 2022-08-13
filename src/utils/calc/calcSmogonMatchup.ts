@@ -1,14 +1,27 @@
 import { calculate } from '@smogon/calc';
-// import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/data';
+import {
+  createSmogonField,
+  createSmogonMove,
+  createSmogonPokemon,
+} from '@showdex/utils/calc';
+import { logger } from '@showdex/utils/debug';
+import type { Generation, MoveName } from '@pkmn/data';
 import type {
-  Field as SmogonField,
+  // Field as SmogonField,
   Move as SmogonMove,
-  Pokemon as SmogonPokemon,
+  // Pokemon as SmogonPokemon,
   Result,
 } from '@smogon/calc';
+import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 
 export interface CalcdexMatchupResult {
+  /**
+   * Move that the calculator used to calculate the calculatable calculation.
+   *
+   * @since 0.1.3
+   */
+  move?: SmogonMove;
+
   /**
    * In the format `XXX.X% - XXX.X%`, where `X` are numbers.
    *
@@ -120,7 +133,7 @@ const getKoColor = (
   return SmogonMatchupKoColors[koColorIndex];
 };
 
-// const l = logger('@showdex/pages/Calcdex/calcSmogonMatchup');
+const l = logger('@showdex/utils/calc/calcSmogonMatchup');
 
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.
@@ -129,35 +142,53 @@ const getKoColor = (
  * @since 0.1.2
  */
 export const calcSmogonMatchup = (
-  gen: GenerationNum,
-  playerPokemon: SmogonPokemon,
-  opponentPokemon: SmogonPokemon,
-  playerMove: SmogonMove,
-  field?: SmogonField,
+  dex: Generation,
+  playerPokemon: CalcdexPokemon,
+  opponentPokemon: CalcdexPokemon,
+  playerMove: MoveName,
+  field?: CalcdexBattleField,
 ): CalcdexMatchupResult => {
-  if (!gen || !playerPokemon?.name || !opponentPokemon?.name || !playerMove?.name) {
+  if (!dex?.num || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
+    if (__DEV__ && playerMove) {
+      l.warn(
+        'Calculation ignored due to invalid arguments',
+        '\n', 'dex.num', dex?.num,
+        '\n', 'playerPokemon.speciesForme', playerPokemon?.speciesForme,
+        '\n', 'opponentPokemon.speciesForme', opponentPokemon?.speciesForme,
+        '\n', 'playerMove', playerMove,
+        '\n', 'field', field,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
+
     return null;
   }
 
+  const smogonPlayerPokemon = createSmogonPokemon(dex, playerPokemon);
+  const smogonPlayerPokemonMove = createSmogonMove(dex.num, playerPokemon, playerMove);
+  const smogonOpponentPokemon = createSmogonPokemon(dex, opponentPokemon);
+  const smogonField = createSmogonField(field);
+
   const result = calculate(
-    gen,
-    playerPokemon,
-    opponentPokemon,
-    playerMove,
-    field,
+    dex.num,
+    smogonPlayerPokemon,
+    smogonOpponentPokemon,
+    smogonPlayerPokemonMove,
+    smogonField,
   );
 
-  // l.debug(
-  //   'calcSmogonMatchup() <- calculate()',
-  //   '\n', 'result', result,
-  //   '\n', 'gen', gen,
-  //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-  //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-  //   '\n', 'playerMove', playerMove.name || '???', playerMove,
-  //   '\n', 'field', field,
-  // );
+  l.debug(
+    'calcSmogonMatchup() <- calculate()',
+    '\n', 'result', result,
+    '\n', 'dex.num', dex.num,
+    '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+    '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+    '\n', 'playerMove', playerMove || '???',
+    '\n', 'field', field,
+  );
 
   const matchup: CalcdexMatchupResult = {
+    move: smogonPlayerPokemonMove,
     damageRange: formatDamageRange(result),
     koChance: formatKoChance(result),
     koColor: getKoColor(result),

@@ -1,27 +1,25 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { PokemonToggleAbilities } from '@showdex/consts';
+import { detectPokemonIdent, detectSpeciesForme } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
-import type { GenerationNum, State as SmogonState } from '@smogon/calc';
-import type { CalcdexPokemon } from './CalcdexReducer';
+import type { State as SmogonState } from '@smogon/calc';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 import { calcPokemonStats } from './calcPokemonStats';
-import { detectPokemonIdent } from './detectPokemonIdent';
-import { detectSpeciesForme } from './detectSpeciesForme';
 
 const l = logger('@showdex/pages/Calcdex/createSmogonPokemon');
 
 export const createSmogonPokemon = (
-  gen: GenerationNum,
   dex: Generation,
   pokemon: CalcdexPokemon,
 ): SmogonPokemon => {
-  if (typeof gen !== 'number' || gen < 1) {
-    l.warn(
-      'received an invalid gen value',
-      '\n', 'gen', gen,
-      '\n', 'pokemon', pokemon,
-    );
+  if (typeof dex?.num !== 'number' || dex.num < 1) {
+    // l.warn(
+    //   'received an invalid gen value',
+    //   '\n', 'gen', gen,
+    //   '\n', 'pokemon', pokemon,
+    // );
 
     return null;
   }
@@ -29,13 +27,13 @@ export const createSmogonPokemon = (
   const ident = detectPokemonIdent(pokemon);
 
   if (!ident) {
-    l.debug(
-      'createSmogonPokemon() <- detectPokemonIdent()',
-      '\n', 'failed to detect Pokemon\'s ident',
-      '\n', 'ident', ident,
-      '\n', 'gen', gen,
-      '\n', 'pokemon', pokemon,
-    );
+    // l.debug(
+    //   'createSmogonPokemon() <- detectPokemonIdent()',
+    //   '\n', 'failed to detect Pokemon\'s ident',
+    //   '\n', 'ident', ident,
+    //   '\n', 'gen', gen,
+    //   '\n', 'pokemon', pokemon,
+    // );
 
     return null;
   }
@@ -48,7 +46,7 @@ export const createSmogonPokemon = (
       'createSmogonPokemon() <- detectSpeciesForme()',
       '\n', 'failed to detect speciesForme from Pokemon with ident', ident,
       '\n', 'speciesForme', speciesForme,
-      '\n', 'gen', gen,
+      '\n', 'gen', dex.num,
       '\n', 'pokemon', pokemon,
     );
 
@@ -108,7 +106,7 @@ export const createSmogonPokemon = (
   }
 
   const smogonPokemon = new SmogonPokemon(
-    gen,
+    dex.num,
     speciesForme === 'Aegislash' ? 'Aegislash-Blade' : speciesForme, // this hurts my soul
     options,
   );

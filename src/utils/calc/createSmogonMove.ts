@@ -1,18 +1,18 @@
 import { Move as SmogonMove } from '@smogon/calc';
 import type { GenerationNum, MoveName } from '@pkmn/data';
-import type { CalcdexPokemon } from './CalcdexReducer';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 
 export const createSmogonMove = (
   gen: GenerationNum,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
 ): SmogonMove => {
-  if (!gen || !pokemon?.rawSpeciesForme || !moveName) {
+  if (!gen || !pokemon?.speciesForme || !moveName) {
     return null;
   }
 
   const smogonMove = new SmogonMove(gen, moveName, {
-    species: pokemon?.rawSpeciesForme,
+    species: pokemon?.rawSpeciesForme || pokemon?.speciesForme,
     ability: pokemon?.dirtyAbility ?? pokemon?.ability,
     item: pokemon?.dirtyItem ?? pokemon?.item,
     useZ: gen === 7 && pokemon?.useUltimateMoves,

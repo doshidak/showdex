@@ -1,5 +1,6 @@
 import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
-import type { CalcdexPokemon } from './CalcdexReducer';
+import { env } from '@showdex/utils/core';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcCalcdexId } from './calcCalcdexId';
 
 export const calcPokemonCalcdexNonce = (
@@ -83,6 +84,6 @@ export const calcBattleCalcdexNonce = (
   p4: calcSideCalcdexNonce(battle?.p4),
   currentStep: battle?.currentStep?.toString(),
   stepQueue: Array.isArray(battle?.stepQueue) && battle.stepQueue.length ?
-    uuidv5(battle.stepQueue.join('|'), process.env.UUID_NAMESPACE || NIL_UUID) :
+    uuidv5(battle.stepQueue.join('|'), env('uuid-namespace', NIL_UUID)) :
     null,
 });

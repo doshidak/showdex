@@ -1,8 +1,9 @@
 import { PokemonStatNames } from '@showdex/consts';
+import { detectSpeciesForme } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
-import type { CalcdexPokemon } from './CalcdexReducer';
-import { detectSpeciesForme } from './detectSpeciesForme';
+import type { CalcdexPokemon } from '@showdex/redux/store';
+import { calcPokemonHp } from './calcPokemonHp';
 
 const l = logger('@showdex/pages/Calcdex/calcPokemonStats');
 
@@ -15,9 +16,20 @@ const initialStats: CalcdexPokemon['calculatedStats'] = {
   spe: 0,
 };
 
+/**
+ * @todo Flower Gift abililty (factor in dmax).
+ * @todo Fur Coat ability.
+ * @todo Choice Band/Scarf/Specs (factor in dmax).
+ * @todo Gorilla Tactics ability (factor in dmax).
+ * @todo Grass Pelt ability.
+ * @todo Huge Power ability.
+ * @todo Hustle ability.
+ * @todo Marvel Scale ability.
+ * @since 0.1.0
+ */
 export const calcPokemonStats = (
   dex: Generation,
-  pokemon: Partial<CalcdexPokemon>,
+  pokemon: DeepPartial<CalcdexPokemon>,
 ): CalcdexPokemon['calculatedStats'] => {
   if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
     l.warn(
@@ -52,6 +64,7 @@ export const calcPokemonStats = (
   const gen = dex.num;
   const hasGuts = pokemon?.ability?.toLowerCase?.() === 'guts';
   const hasQuickFeet = pokemon?.ability?.toLowerCase?.() === 'quick feet';
+  const hasDefeatist = pokemon?.ability?.toLowerCase() === 'defeatist';
 
   // rebuild the Pokemon's base stats to make sure all values are available
   const baseStats: CalcdexPokemon['baseStats'] = {
@@ -109,6 +122,11 @@ export const calcPokemonStats = (
       nature,
     );
 
+    // if the Pokemon is Zygarde-Complete, double its HP
+    if (speciesForme === 'Zygarde-Complete' && stat === 'hp') {
+      prev[stat] *= 2;
+    }
+
     // re-calculate any boosted stat (except for HP, obviously)
     if (stat !== 'hp' && stat in boosts) {
       const stage = boosts[stat];
@@ -124,6 +142,15 @@ export const calcPokemonStats = (
       if ('slowstart' in (pokemon?.volatiles || {}) && pokemon?.abilityToggled) {
         // 50% ATK/SPE reduction due to "Slow Start"
         if (['atk', 'spe'].includes(stat)) {
+          prev[stat] *= 0.5;
+        }
+      }
+
+      // handle boosts/reductions by the Pokemon's current HP
+      const hp = calcPokemonHp(pokemon);
+
+      if (hasDefeatist && hp <= 0.5) {
+        if (['atk', 'spa'].includes(stat)) {
           prev[stat] *= 0.5;
         }
       }
