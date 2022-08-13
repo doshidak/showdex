@@ -1,15 +1,16 @@
 import * as React from 'react';
-import type { GenerationNum } from '@pkmn/data';
-import type {
-  Field as SmogonField,
-  Move as SmogonMove,
-  Pokemon as SmogonPokemon,
-} from '@smogon/calc';
-import type { CalcdexMatchupResult } from './calcSmogonMatchup';
-import { calcSmogonMatchup } from './calcSmogonMatchup';
+import { calcSmogonMatchup } from '@showdex/utils/calc';
+import type { Generation, MoveName } from '@pkmn/data';
+// import type {
+//   Field as SmogonField,
+//   Move as SmogonMove,
+//   // Pokemon as SmogonPokemon,
+// } from '@smogon/calc';
+import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexMatchupResult } from '@showdex/utils/calc';
 
 export type SmogonMatchupHookCalculator = (
-  playerMove: SmogonMove,
+  playerMove: MoveName,
 ) => CalcdexMatchupResult;
 
 /**
@@ -20,20 +21,20 @@ export type SmogonMatchupHookCalculator = (
  * @since 0.1.2
  */
 export const useSmogonMatchup = (
-  gen: GenerationNum,
-  playerPokemon: SmogonPokemon,
-  opponentPokemon: SmogonPokemon,
-  field?: SmogonField,
+  dex: Generation,
+  playerPokemon: CalcdexPokemon,
+  opponentPokemon: CalcdexPokemon,
+  field?: CalcdexBattleField,
 ): SmogonMatchupHookCalculator => React.useCallback<SmogonMatchupHookCalculator>((
   playerMove,
 ) => calcSmogonMatchup(
-  gen,
+  dex,
   playerPokemon,
   opponentPokemon,
   playerMove,
   field,
 ), [
-  gen,
+  dex,
   playerPokemon,
   opponentPokemon,
   field,
