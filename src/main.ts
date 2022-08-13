@@ -1,12 +1,16 @@
 import { bootstrap as bootstrapCalcdex } from '@showdex/pages';
+import { createStore } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
+import type { RootStore } from '@showdex/redux/store';
 import '@showdex/styles/global.scss';
 
 const l = logger('@showdex/main');
 
-const bootstrappers: ((roomId?: string) => void)[] = [
+const bootstrappers: ((store: RootStore, roomId?: string) => void)[] = [
   bootstrapCalcdex,
 ];
+
+const store = createStore();
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { receive } = app || {};
@@ -31,7 +35,7 @@ app.receive = (data: string) => {
     );
 
     // call each bootstrapper
-    bootstrappers.forEach((bootstrapper) => bootstrapper(roomId));
+    bootstrappers.forEach((bootstrapper) => bootstrapper(store, roomId));
   }
 
   // call the original function
