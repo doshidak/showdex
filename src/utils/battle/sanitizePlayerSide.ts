@@ -1,4 +1,4 @@
-import type { CalcdexPlayerSide } from './CalcdexReducer';
+import type { CalcdexPlayerSide } from '@showdex/redux/store';
 
 export const sanitizePlayerSide = (
   player: Showdown.Side,

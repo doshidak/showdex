@@ -1,8 +1,8 @@
 import { logger } from '@showdex/utils/debug';
-import type { CalcdexBattleField } from './CalcdexReducer';
+import type { CalcdexBattleField } from '@showdex/redux/store';
 import { sanitizeField } from './sanitizeField';
 
-const l = logger('@showdex/pages/Calcdex/syncField');
+const l = logger('@showdex/utils/battle/syncField');
 
 export const syncField = (
   field: CalcdexBattleField,
@@ -76,7 +76,7 @@ export const syncField = (
   });
 
   if (!didChange) {
-    return null;
+    return field;
   }
 
   return newField;

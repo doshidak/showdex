@@ -1,5 +1,5 @@
 import { PseudoWeatherMap, WeatherMap } from '@showdex/consts';
-import type { CalcdexBattleField } from './CalcdexReducer';
+import type { CalcdexBattleField } from '@showdex/redux/store';
 import { sanitizePlayerSide } from './sanitizePlayerSide';
 
 export const sanitizeField = (
