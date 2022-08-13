@@ -17,6 +17,7 @@ module.exports = {
     { name: 'assets' },
     { name: 'comps' },
     { name: 'consts' },
+    { name: 'redux' },
     { name: 'styles' },
     { name: 'types' },
     { name: 'utils' },
