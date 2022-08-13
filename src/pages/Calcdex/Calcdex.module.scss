@@ -25,11 +25,11 @@
   }
 
   &.light::before {
-    background-color: color.alpha(colors.$white, 0.4);
+    background-color: color.alpha(colors.$showdown-background-light, 0.4);
   }
 
   &.dark::before {
-    background-color: color.alpha(colors.$black, 0.5);
+    background-color: color.alpha(colors.$showdown-background-dark, 0.6);
   }
 }
 
