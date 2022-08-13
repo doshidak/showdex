@@ -1,4 +1,4 @@
-type ColorScheme =
+export type ColorScheme =
   | 'light'
   | 'dark';
 
