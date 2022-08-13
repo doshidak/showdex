@@ -10,7 +10,7 @@
   ],
 
   "host_permissions": [
-    "https://data.pkmn.cc/*"
+    "https://pkmn.github.io/*"
   ],
 
   "background": {
