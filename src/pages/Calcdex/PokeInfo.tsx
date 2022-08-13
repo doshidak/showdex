@@ -10,16 +10,18 @@ import {
 import { Dropdown } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
 import {
+  FormatLabels,
   PokemonCommonNatures,
   PokemonNatureBoosts,
   PokemonToggleAbilities,
 } from '@showdex/consts';
 import { openSmogonUniversity } from '@showdex/utils/app';
+import { detectToggledAbility } from '@showdex/utils/battle';
+import { calcPokemonHp } from '@showdex/utils/calc';
 import type { AbilityName, ItemName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexPokemon } from './CalcdexReducer';
-import { calcPokemonHp } from './calcPokemonHp';
-import { detectToggledAbility } from './detectToggledAbility';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeInfoProps {
@@ -28,7 +30,7 @@ export interface PokeInfoProps {
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeInfo = ({
@@ -40,6 +42,99 @@ export const PokeInfo = ({
   onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
   const colorScheme = useColorScheme();
+
+  const find = usePresets({
+    format,
+  });
+
+  const downloadedSets = React.useMemo(
+    () => (pokemon?.speciesForme ? find(pokemon.speciesForme, true) : []),
+    [find, pokemon],
+  );
+
+  const presets = React.useMemo(() => [
+    ...(pokemon?.presets || []),
+    ...downloadedSets,
+  ], [
+    downloadedSets,
+    pokemon?.presets,
+  ]);
+
+  const presetOptions = presets.reduce<({ label: string; options: ({ label: string; value: string; })[]; })[]>((options, preset) => {
+    const genlessFormat = preset.format.replace(`gen${gen}`, '');
+    const groupLabel = FormatLabels?.[genlessFormat] || genlessFormat;
+    const group = options.find((option) => option.label === groupLabel);
+
+    const option = {
+      label: preset.name,
+      value: preset.calcdexId,
+    };
+
+    if (!group) {
+      options.push({
+        label: groupLabel,
+        options: [option],
+      });
+    } else {
+      group.options.push(option);
+    }
+
+    return options;
+  }, []);
+
+  const applyPreset = React.useCallback((preset: CalcdexPokemonPreset) => {
+    const mutation: DeepPartial<CalcdexPokemon> = {
+      preset: preset.calcdexId,
+      moves: preset.moves,
+      altMoves: preset.altMoves,
+      nature: preset.nature,
+      dirtyAbility: pokemon.ability !== preset.ability ? preset.ability : null,
+      item: !pokemon.item || pokemon.item === '(exists)' ? preset.item : pokemon.item,
+      dirtyItem: pokemon.item && pokemon.item !== '(exists)' && pokemon.item !== preset.item ? preset.item : null,
+      ivs: { ...preset.ivs },
+      evs: { // not specifying the 0's may cause any unspecified EVs to remain!
+        hp: preset.evs?.hp || 0,
+        atk: preset.evs?.atk || 0,
+        def: preset.evs?.def || 0,
+        spa: preset.evs?.spa || 0,
+        spd: preset.evs?.spd || 0,
+        spe: preset.evs?.spe || 0,
+      },
+    };
+
+    if (Array.isArray(preset.altAbilities)) {
+      mutation.altAbilities = [...preset.altAbilities];
+    }
+
+    if (Array.isArray(preset.altItems)) {
+      mutation.altItems = [...preset.altItems];
+    }
+
+    if (preset.format?.includes('random')) {
+      mutation.ability = preset.ability;
+      mutation.dirtyAbility = null;
+
+      mutation.item = preset.item;
+      mutation.dirtyItem = null;
+    }
+
+    onPokemonChange?.(mutation);
+  }, [
+    onPokemonChange,
+    pokemon,
+  ]);
+
+  React.useEffect(() => {
+    if (!pokemon?.calcdexId || !pokemon.autoPreset || pokemon.preset || !presets.length) {
+      return;
+    }
+
+    applyPreset(presets[0]);
+  }, [
+    applyPreset,
+    pokemon,
+    presets,
+  ]);
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
@@ -76,7 +171,7 @@ export const PokeInfo = ({
         </div>
 
         <div className={styles.infoContainer}>
-          <div style={{ marginBottom: 1 }}>
+          <div className={styles.firstLine}>
             <span className={styles.pokemonName}>
               {pokemon?.name || '--'}
             </span>
@@ -108,7 +203,7 @@ export const PokeInfo = ({
             </span>
           </div>
 
-          <div style={{ userSelect: 'none' }}>
+          <div className={styles.secondLine}>
             {/* <span className={styles.label}>
               HP{' '}
             </span> */}
@@ -171,35 +266,23 @@ export const PokeInfo = ({
               name: `PokeInfo:Preset:${pokemonKey}`,
               value: pokemon?.preset,
               onChange: (calcdexId: string) => {
-                const preset = pokemon.presets
-                  .find((p) => p?.calcdexId === calcdexId);
+                const preset = presets.find((p) => p?.calcdexId === calcdexId);
 
                 if (!preset) {
                   return;
                 }
 
-                onPokemonChange?.({
-                  preset: calcdexId,
-                  ivs: preset.ivs,
-                  evs: preset.evs,
-                  moves: preset.moves,
-                  altMoves: preset.altMoves,
-                  nature: preset.nature,
-                  dirtyAbility: pokemon.ability !== preset.ability ? preset.ability : null,
-                  altAbilities: preset.altAbilities,
-                  altItems: preset.altItems,
-                  item: !pokemon.item || pokemon.item === '(exists)' ? preset.item : pokemon.item,
-                  dirtyItem: pokemon.item && pokemon.item !== '(exists)' && pokemon.item !== preset.item ? preset.item : null,
-                });
+                applyPreset(preset);
               },
             }}
-            options={pokemon?.presets?.filter((p) => p?.calcdexId).map((p) => ({
-              label: p?.name,
-              value: p?.calcdexId,
-            }))}
+            // options={presets.filter((p) => p?.calcdexId).map((p) => ({
+            //   label: p.name,
+            //   value: p.calcdexId,
+            // }))}
+            options={presetOptions}
             noOptionsMessage="No Sets"
             clearable={false}
-            disabled={!pokemon?.speciesForme || !pokemon?.presets?.length}
+            disabled={!pokemon?.speciesForme || !presets.length}
           />
         </div>
       </div>
