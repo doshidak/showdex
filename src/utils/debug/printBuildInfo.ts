@@ -1,6 +1,8 @@
+import { env } from '@showdex/utils/core';
+
 export const printBuildInfo = (): string => (
-  process.env.PACKAGE_NAME +
-  `-v${process.env.PACKAGE_VERSION}` +
-  `-b${process.env.PACKAGE_BUILD_DATE}` +
+  env('package-name') +
+  `-v${env('package-version')}` +
+  `-b${env('package-build-date')}` +
   `${__DEV__ ? '-dev' : ''}`
 );
