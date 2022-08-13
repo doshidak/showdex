@@ -1,3 +1,4 @@
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 
 /**
@@ -48,7 +49,7 @@ export const openShowdownUser = (
   }
 
   const windowUrl = [
-    process.env.SHOWDOWN_USERS_URL,
+    env('showdown-users-url'),
     name,
   ].filter(Boolean).join('/');
 

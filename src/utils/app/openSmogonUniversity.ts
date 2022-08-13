@@ -1,4 +1,5 @@
 import slugify from 'slugify';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@pkmn/types';
 
@@ -150,7 +151,7 @@ export const openSmogonUniversity = (
   }
 
   const windowUrl = [
-    process.env.SMOGON_UNIVERSITY_DEX_URL,
+    env('smogon-university-dex-url'),
     genSlug,
     category,
     slugifiedName,
