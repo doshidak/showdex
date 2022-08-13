@@ -9,11 +9,10 @@ import {
   PokemonNatureBoosts,
   PokemonStatNames,
 } from '@showdex/consts';
+import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
+import { calcPokemonStats } from '@showdex/utils/calc';
 import type { Generation } from '@pkmn/data';
-import type { CalcdexPokemon } from './CalcdexReducer';
-import { calcPokemonStats } from './calcPokemonStats';
-import { detectStatBoostDelta } from './detectStatBoostDelta';
-import { formatStatBoost } from './formatStatBoost';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
@@ -21,7 +20,7 @@ export interface PokeStatsProps {
   style?: React.CSSProperties;
   dex: Generation;
   pokemon: CalcdexPokemon;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeStats = ({

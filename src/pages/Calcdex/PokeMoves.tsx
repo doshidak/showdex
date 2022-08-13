@@ -4,12 +4,11 @@ import { PokeType, useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
-import { getMaxMove, getZMove } from '@showdex/utils/app';
+import { getMaxMove, getZMove } from '@showdex/utils/battle';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexPokemon } from './CalcdexReducer';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
-import { createSmogonMove } from './createSmogonMove';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMovesProps {
@@ -20,7 +19,7 @@ export interface PokeMovesProps {
   pokemon: CalcdexPokemon;
   movesCount?: number;
   calculateMatchup: SmogonMatchupHookCalculator;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeMoves = ({
@@ -103,7 +102,7 @@ export const PokeMoves = ({
       </TableGridItem>
 
       <TableGridItem header>
-        %KO
+        KO %
       </TableGridItem>
 
       {/* (actual) moves */}
@@ -127,13 +126,12 @@ export const PokeMoves = ({
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
-        const calculatorMove = createSmogonMove(
-          gen,
-          pokemon,
-          moveName,
-        );
-
-        const result = calculateMatchup?.(calculatorMove);
+        const {
+          move: calculatorMove,
+          damageRange,
+          koChance,
+          koColor,
+        } = calculateMatchup?.(moveName) || {};
 
         // Z/Max/G-Max moves bypass the original move's accuracy
         // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
@@ -239,20 +237,20 @@ export const PokeMoves = ({
             </TableGridItem>
 
             <TableGridItem
-              style={!result?.damageRange ? { opacity: 0.5 } : undefined}
+              style={!damageRange ? { opacity: 0.5 } : undefined}
             >
               {/* XXX.X% &ndash; XXX.X% */}
-              {result?.damageRange}
+              {damageRange}
             </TableGridItem>
 
             <TableGridItem
               style={{
-                ...(!result?.koChance ? { opacity: 0.3 } : null),
-                ...(result?.koColor ? { color: result.koColor } : null),
+                ...(!koChance ? { opacity: 0.3 } : null),
+                ...(koColor ? { color: koColor } : null),
               }}
             >
               {/* XXX% XHKO */}
-              {result?.koChance}
+              {koChance}
             </TableGridItem>
           </React.Fragment>
         );

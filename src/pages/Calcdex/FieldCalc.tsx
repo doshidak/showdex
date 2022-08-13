@@ -5,7 +5,7 @@ import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
 import { TerrainNames, WeatherNames } from '@showdex/consts';
-import type { CalcdexBattleField } from './CalcdexReducer';
+import type { CalcdexBattleField } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
@@ -13,7 +13,7 @@ interface FieldCalcProps {
   style?: React.CSSProperties;
   battleId?: string;
   field?: CalcdexBattleField;
-  onFieldChange?: (field: Partial<CalcdexBattleField>) => void;
+  onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
 }
 
 export const FieldCalc = ({

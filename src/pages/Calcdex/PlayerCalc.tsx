@@ -10,7 +10,7 @@ import type {
   CalcdexPlayer,
   CalcdexPlayerKey,
   CalcdexPokemon,
-} from './CalcdexReducer';
+} from '@showdex/redux/store';
 import { PokeCalc } from './PokeCalc';
 import styles from './PlayerCalc.module.scss';
 
@@ -25,7 +25,7 @@ interface PlayerCalcProps {
   opponent: CalcdexPlayer;
   field?: CalcdexBattleField;
   defaultName?: string;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   onIndexSelect?: (index: number) => void;
   onAutoSelectChange?: (autoSelect: boolean) => void;
 }
@@ -99,7 +99,7 @@ export const PlayerCalc = ({
                 !autoSelect && styles.inactive,
               )}
               label="Auto"
-              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Active Pokémon`}
+              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pokémon`}
               absoluteHover
               disabled={!pokemon?.length}
               onPress={() => onAutoSelectChange?.(!autoSelect)}
@@ -110,10 +110,10 @@ export const PlayerCalc = ({
               <span style={{ fontSize: 8, opacity: 0.5 }}>
                 <span style={{ userSelect: 'none' }}>
                   {' '}&bull;{' '}
-                  ELO{' '}
+                  {rating}{' '}
                 </span>
 
-                {rating}
+                ELO
               </span>
             }
           </div>
@@ -165,7 +165,7 @@ export const PlayerCalc = ({
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
           defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
-        onPokemonChange={onPokemonChange}
+        onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
       />
     </div>
   );

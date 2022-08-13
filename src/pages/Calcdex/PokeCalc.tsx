@@ -3,9 +3,7 @@ import cx from 'classnames';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexBattleField, CalcdexPokemon } from './CalcdexReducer';
-import { createSmogonField } from './createSmogonField';
-import { createSmogonPokemon } from './createSmogonPokemon';
+import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
 import { PokeStats } from './PokeStats';
@@ -21,7 +19,7 @@ interface PokeCalcProps {
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 // const l = logger('@showdex/pages/Calcdex/PokeCalc');
@@ -37,43 +35,61 @@ export const PokeCalc = ({
   field,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
-  const smogonPlayerPokemon = createSmogonPokemon(gen, dex, playerPokemon);
-  const smogonOpponentPokemon = createSmogonPokemon(gen, dex, opponentPokemon);
-  const smogonField = createSmogonField(field);
-
   const calculateMatchup = useSmogonMatchup(
-    gen,
-    smogonPlayerPokemon,
-    smogonOpponentPokemon,
-    smogonField,
+    dex,
+    playerPokemon,
+    opponentPokemon,
+    field,
   );
 
   const handlePokemonChange = (
     mutation: DeepPartial<CalcdexPokemon>,
-  ) => onPokemonChange?.({
-    ...mutation,
+  ) => {
+    const payload: DeepPartial<CalcdexPokemon> = {
+      ...mutation,
 
-    calcdexId: playerPokemon?.calcdexId,
-    ident: playerPokemon?.ident,
-    boosts: playerPokemon?.boosts,
+      calcdexId: playerPokemon?.calcdexId,
+      // ident: playerPokemon?.ident,
+      // boosts: playerPokemon?.boosts,
 
-    nature: mutation?.nature ?? playerPokemon?.nature,
+      // nature: mutation?.nature ?? playerPokemon?.nature,
 
-    ivs: {
-      ...playerPokemon?.ivs,
-      ...mutation?.ivs,
-    },
+      ivs: {
+        ...playerPokemon?.ivs,
+        ...mutation?.ivs,
+      },
 
-    evs: {
-      ...playerPokemon?.evs,
-      ...mutation?.evs,
-    },
+      evs: {
+        ...playerPokemon?.evs,
+        ...mutation?.evs,
+      },
 
-    dirtyBoosts: {
-      ...playerPokemon?.dirtyBoosts,
-      ...mutation?.dirtyBoosts,
-    },
-  });
+      dirtyBoosts: {
+        ...playerPokemon?.dirtyBoosts,
+        ...mutation?.dirtyBoosts,
+      },
+    };
+
+    // clear any dirtyBoosts that match the current boosts
+    Object.entries(playerPokemon.boosts).forEach(([
+      stat,
+      boost,
+    ]: [
+      stat: Showdown.StatNameNoHp,
+      boost: number,
+    ]) => {
+      const dirtyBoost = payload.dirtyBoosts[stat];
+
+      const validBoost = typeof boost === 'number';
+      const validDirtyBoost = typeof dirtyBoost === 'number';
+
+      if (validBoost && validDirtyBoost && dirtyBoost === boost) {
+        payload.dirtyBoosts[stat] = undefined;
+      }
+    });
+
+    onPokemonChange?.(payload);
+  };
 
   return (
     <div
