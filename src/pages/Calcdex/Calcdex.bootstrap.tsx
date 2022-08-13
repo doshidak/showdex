@@ -1,18 +1,20 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ColorSchemeProvider } from '@showdex/components/app';
 import {
   createSideRoom,
   // getActiveBattle,
   getBattleRoom,
 } from '@showdex/utils/app';
+import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
-import { calcBattleCalcdexNonce } from './calcCalcdexNonce';
+import type { RootStore } from '@showdex/redux/store';
 import { Calcdex } from './Calcdex';
 
 const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
-export const bootstrap = (roomid?: string): void => {
+export const bootstrap = (store: RootStore, roomid?: string): void => {
   l.debug(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
@@ -34,7 +36,7 @@ export const bootstrap = (roomid?: string): void => {
 
   const {
     battle,
-    tooltips,
+    // tooltips,
   } = getBattleRoom(roomid);
 
   if (!battle?.id) {
@@ -142,15 +144,18 @@ export const bootstrap = (roomid?: string): void => {
       l.debug(
         'battle.subscribe() -> activeBattle.reactCalcdexRoom.render()',
         '\n', 'rendering Calcdex with battle nonce', activeBattle.nonce,
+        '\n', 'store.getState()', store.getState(),
       );
 
       activeBattle.reactCalcdexRoom.render((
-        <ColorSchemeProvider>
-          <Calcdex
-            battle={activeBattle}
-            tooltips={tooltips}
-          />
-        </ColorSchemeProvider>
+        <ReduxProvider store={store}>
+          <ColorSchemeProvider>
+            <Calcdex
+              battle={activeBattle}
+              // tooltips={tooltips}
+            />
+          </ColorSchemeProvider>
+        </ReduxProvider>
       ));
     });
 
