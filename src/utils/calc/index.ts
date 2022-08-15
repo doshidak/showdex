@@ -1,5 +1,6 @@
 export * from './calcCalcdexId';
 export * from './calcCalcdexNonce';
+export * from './calcPokemonFinalStats';
 export * from './calcPokemonHp';
 export * from './calcPokemonStats';
 export * from './calcSmogonMatchup';
