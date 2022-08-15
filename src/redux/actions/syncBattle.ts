@@ -148,17 +148,17 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // preserve the initial ordering of myPokemon since it's subject to change its indices
       // (battle state may move the most recent active Pokemon to the front of the array)
       if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
-        playerState.pokemonOrder = myPokemon.map((p) => p.searchid);
+        playerState.pokemonOrder = myPokemon.map((p) => p.ident);
       }
 
       // reconstruct a full list of the current player's Pokemon, whether revealed or not
       // (but if we don't have the relevant info [i.e., !isMyPokemonSide], then just access the player's `pokemon`)
-      const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((searchid) => {
-        const serverPokemon = myPokemon.find((p) => p.searchid === searchid);
+      const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((ident) => {
+        const serverPokemon = myPokemon.find((p) => p.ident === ident);
 
-        // try to find a matching clientPokemon that has already been revealed using the searchid,
+        // try to find a matching clientPokemon that has already been revealed using the ident,
         // which is seemingly consistent between the player's `pokemon` (Pokemon[]) and `myPokemon` (ServerPokemon[])
-        const clientPokemonIndex = player.pokemon.findIndex((p) => p.searchid === serverPokemon.searchid);
+        const clientPokemonIndex = player.pokemon.findIndex((p) => p.ident === serverPokemon.ident);
 
         if (clientPokemonIndex > -1) {
           return player.pokemon[clientPokemonIndex];
@@ -200,7 +200,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         const serverPokemon = isMyPokemonSide ?
           // myPokemon.find((p, j) => calcPokemonCalcdexId({ ...p, slot: j }) === clientPokemonId) :
-          myPokemon.find((p) => p.searchid === clientPokemon.searchid) :
+          myPokemon.find((p) => p.ident === clientPokemon.ident) :
           null;
 
         const matchedPokemonIndex = playerState.pokemon.findIndex((p) => p.calcdexId === clientPokemonId);
@@ -303,10 +303,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // update activeIndex (and selectionIndex if autoSelect is enabled)
-      // (hopefully the `searchid` exists here!)
-      const activeIndex = player.active?.[0]?.searchid ?
+      // (hopefully the `ident` exists here!)
+      const activeIndex = player.active?.[0]?.ident ?
         // playerPokemon.findIndex((p) => p === player.active[0]) :
-        playerPokemon.findIndex((p) => p.searchid === player.active[0].searchid) :
+        playerPokemon.findIndex((p) => p.ident === player.active[0].ident) :
         -1;
 
       if (activeIndex > -1) {
