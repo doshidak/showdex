@@ -12,7 +12,11 @@ import type {
   // Pokemon as SmogonPokemon,
   Result,
 } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
+import type {
+  CalcdexBattleField,
+  CalcdexPlayerKey,
+  CalcdexPokemon,
+} from '@showdex/redux/store';
 
 export interface CalcdexMatchupResult {
   /**
@@ -146,6 +150,7 @@ export const calcSmogonMatchup = (
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerMove: MoveName,
+  playerKey?: CalcdexPlayerKey,
   field?: CalcdexBattleField,
 ): CalcdexMatchupResult => {
   if (!dex?.num || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
@@ -164,27 +169,25 @@ export const calcSmogonMatchup = (
     return null;
   }
 
-  const smogonPlayerPokemon = createSmogonPokemon(dex, playerPokemon);
-  const smogonPlayerPokemonMove = createSmogonMove(dex.num, playerPokemon, playerMove);
+  const smogonPlayerPokemon = createSmogonPokemon(dex, playerPokemon, playerMove);
+  const smogonPlayerPokemonMove = createSmogonMove(dex, playerPokemon, playerMove);
   const smogonOpponentPokemon = createSmogonPokemon(dex, opponentPokemon);
-  const smogonField = createSmogonField(field);
+
+  const attackerSide = playerKey === 'p1' ? field?.attackerSide : field?.defenderSide;
+  const defenderSide = playerKey === 'p1' ? field?.defenderSide : field?.attackerSide;
+
+  const smogonField = createSmogonField({
+    ...field,
+    attackerSide,
+    defenderSide,
+  });
 
   const result = calculate(
-    dex.num,
+    dex,
     smogonPlayerPokemon,
     smogonOpponentPokemon,
     smogonPlayerPokemonMove,
     smogonField,
-  );
-
-  l.debug(
-    'calcSmogonMatchup() <- calculate()',
-    '\n', 'result', result,
-    '\n', 'dex.num', dex.num,
-    '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    '\n', 'playerMove', playerMove || '???',
-    '\n', 'field', field,
   );
 
   const matchup: CalcdexMatchupResult = {
@@ -194,15 +197,15 @@ export const calcSmogonMatchup = (
     koColor: getKoColor(result),
   };
 
-  // l.debug(
-  //   'calcSmogonMatchup() -> return CalcdexMatchupResult',
-  //   '\n', 'matchup', matchup,
-  //   '\n', 'gen', gen,
-  //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-  //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-  //   '\n', 'playerMove', playerMove.name || '???', playerMove,
-  //   '\n', 'field', field,
-  // );
+  l.debug(
+    'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
+    '\n', 'dex.num', dex.num,
+    '\n', 'matchup', matchup,
+    '\n', 'result', result,
+    '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+    '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+    '\n', 'field', field,
+  );
 
   return matchup;
 };
