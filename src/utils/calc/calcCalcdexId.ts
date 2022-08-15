@@ -66,8 +66,8 @@ export const calcPokemonCalcdexId = (
       pokemon?.speciesForme?.replace(/-.+$/, ''),
   ].filter(Boolean).join(': '),
 
-  level: String(pokemon?.level),
-  gender: pokemon?.gender,
+  level: String(pokemon?.level ?? 100),
+  gender: pokemon?.gender || 'N', // seems like 'N'-gendered Pokemon occasionally report back with an empty string
   // shiny: String(pokemon?.shiny), // bad idea, subject to change mid-battle
 });
 
