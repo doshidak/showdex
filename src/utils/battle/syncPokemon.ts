@@ -1,5 +1,5 @@
 import { PokemonBoostNames } from '@showdex/consts';
-import { calcPresetCalcdexId, guessServerSpread } from '@showdex/utils/calc';
+import { calcPokemonStats, calcPresetCalcdexId, guessServerSpread } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
 import type {
   // AbilityName,
@@ -296,6 +296,12 @@ export const syncPokemon = (
       newPokemon.moves = [...serverPreset.moves];
     }
 
+    // calculate the stats with the EVs/IVs from the server preset
+    // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
+    if (typeof dex?.stats?.calc === 'function') {
+      newPokemon.calculatedStats = calcPokemonStats(dex, newPokemon);
+    }
+
     serverPreset.calcdexId = calcPresetCalcdexId(serverPreset);
 
     const serverPresetIndex = newPokemon.presets.findIndex((p) => p.calcdexId === serverPreset.calcdexId);
@@ -318,7 +324,7 @@ export const syncPokemon = (
   //   newPokemon.calcdexId = calcdexId;
   // }
 
-  newPokemon.calcdexNonce = sanitizedPokemon.calcdexNonce;
+  // newPokemon.calcdexNonce = sanitizedPokemon.calcdexNonce;
 
   return newPokemon;
 };
