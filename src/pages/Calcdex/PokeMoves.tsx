@@ -108,10 +108,11 @@ export const PokeMoves = ({
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
         const moveid = pokemon?.moves?.[i];
-        const move = moveid ? dex?.moves?.get?.(moveid) : null;
 
         const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
         const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
+
+        const move = moveid ? dex?.moves?.get?.(moveName) : null;
 
         // if (pokemon?.useUltimateMoves) {
         //   const ultName = gen === 7 ?
@@ -196,7 +197,7 @@ export const PokeMoves = ({
                       return;
                     }
 
-                    moves[i] = newMove;
+                    moves[i] = newMove.replace('*', '') as MoveName;
 
                     onPokemonChange?.({
                       moves,
@@ -211,25 +212,40 @@ export const PokeMoves = ({
                       getMaxMove(dex, name, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
 
                     if (ultName) {
-                      return { label: ultName, value: name };
+                      return {
+                        label: ultName,
+                        value: name,
+                      };
                     }
 
                     return null;
                   }).filter(Boolean),
                 }, !!pokemon?.moveState?.revealed.length && {
                   label: 'Revealed',
-                  options: pokemon.moveState.revealed.map((name) => ({ label: name, value: name })),
+                  options: pokemon.moveState.revealed.map((name) => ({
+                    label: name.replace('*', '') as MoveName,
+                    value: name.replace('*', '') as MoveName,
+                  })),
                 }, !!pokemon?.altMoves?.length && {
                   label: 'Pool',
                   options: pokemon.altMoves
                     .filter((n) => !!n && (!pokemon.moveState?.revealed?.length || !pokemon.moveState.revealed.includes(n)))
-                    .map((name) => ({ label: name, value: name })),
+                    .map((name) => ({
+                      label: name,
+                      value: name,
+                    })),
                 }, !!pokemon?.moveState?.learnset.length && {
                   label: 'Learnset',
-                  options: pokemon.moveState.learnset.map((name) => ({ label: name, value: name })),
+                  options: pokemon.moveState.learnset.map((name) => ({
+                    label: name as MoveName,
+                    value: name as MoveName,
+                  })),
                 }, !!pokemon?.moveState?.other.length && {
                   label: 'All',
-                  options: pokemon.moveState.other.map((name) => ({ label: name, value: name })),
+                  options: pokemon.moveState.other.map((name) => ({
+                    label: name as MoveName,
+                    value: name as MoveName,
+                  })),
                 }].filter(Boolean)}
                 noOptionsMessage="No Moves Found"
                 disabled={!pokemon?.speciesForme}
