@@ -14,51 +14,55 @@ export type PokemonStatBoostDelta =
  */
 export const detectStatBoostDelta = (
   pokemon: CalcdexPokemon,
+  finalStats: Showdown.StatsTable,
   stat: Showdown.StatName,
 ): PokemonStatBoostDelta => {
-  if (stat === 'hp') {
-    return null;
-  }
+  // if (stat === 'hp') {
+  //   return null;
+  // }
 
   // check for boosts from abilities
-  if ('slowstart' in (pokemon?.volatiles || {}) && pokemon?.abilityToggled) {
-    if (['atk', 'spe'].includes(stat)) {
-      return 'negative';
-    }
-  }
+  // if ('slowstart' in (pokemon?.volatiles || {}) && pokemon?.abilityToggled) {
+  //   if (['atk', 'spe'].includes(stat)) {
+  //     return 'negative';
+  //   }
+  // }
 
   // check for status-dependent boosts from abilities
-  const abilitySearchString = pokemon?.ability?.toLowerCase?.();
-  const hasGuts = abilitySearchString === 'guts';
-  const hasQuickFeet = abilitySearchString === 'quick feet';
+  // const abilitySearchString = pokemon?.ability?.toLowerCase?.();
+  // const hasGuts = abilitySearchString === 'guts';
+  // const hasQuickFeet = abilitySearchString === 'quick feet';
 
-  if (pokemon?.status && pokemon.status !== '???') {
-    if (hasGuts && stat === 'atk') {
-      return 'positive';
-    }
+  // if (pokemon?.status && pokemon.status !== '???') {
+  //   if (hasGuts && stat === 'atk') {
+  //     return 'positive';
+  //   }
+  //
+  //   if (hasQuickFeet && stat === 'spe') {
+  //     return 'positive';
+  //   }
+  //
+  //   // may be problematic since we're not using the Pokemon's base stats,
+  //   // but oh well, this ok for now lmaoo
+  //   if (pokemon.status === 'brn' && stat === 'atk') {
+  //     return 'negative';
+  //   }
+  //
+  //   if (pokemon.status === 'par' && stat === 'spe') {
+  //     return 'negative';
+  //   }
+  // }
 
-    if (hasQuickFeet && stat === 'spe') {
-      return 'positive';
-    }
+  // const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
 
-    // may be problematic since we're not using the Pokemon's base stats,
-    // but oh well, this ok for now lmaoo
-    if (pokemon.status === 'brn' && stat === 'atk') {
-      return 'negative';
-    }
+  const calculatedStat = pokemon?.calculatedStats?.[stat] ?? 0;
+  const finalStat = finalStats?.[stat] ?? 0;
 
-    if (pokemon.status === 'par' && stat === 'spe') {
-      return 'negative';
-    }
-  }
-
-  const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
-
-  if (boost > 0) {
+  if (finalStat > calculatedStat) {
     return 'positive';
   }
 
-  if (boost < 0) {
+  if (finalStat < calculatedStat) {
     return 'negative';
   }
 
