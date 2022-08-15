@@ -30,11 +30,14 @@ export const guessServerSpread = (
   knownNature?: NatureName,
 ): Partial<CalcdexPokemonPreset> => {
   if (!pokemon?.speciesForme) {
-    l.warn(
-      'received an invalid Pokemon without a speciesForme',
-      '\n', 'pokemon', pokemon,
-      '\n', 'serverPokemon', serverPokemon,
-    );
+    if (__DEV__) {
+      l.warn(
+        'Received an invalid Pokemon without a speciesForme',
+        '\n', 'pokemon', pokemon,
+        '\n', 'serverPokemon', serverPokemon,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
 
     return null;
   }
@@ -42,15 +45,16 @@ export const guessServerSpread = (
   const species = dex.species.get(pokemon.speciesForme);
 
   if (typeof species?.baseStats?.hp !== 'number') {
-    l.warn(
-      'guessServerSpread() <- dex.species.get()',
-      '\n', 'received no baseStats for the given speciesForme',
-      '\n', 'speciesForme', pokemon.speciesForme,
-      '\n', 'species', species,
-      '\n', 'dex', dex,
-      '\n', 'pokemon', pokemon,
-      '\n', 'serverPokemon', serverPokemon,
-    );
+    if (__DEV__) {
+      l.warn(
+        '\n', 'Received no baseStats for the given speciesForme', pokemon.speciesForme,
+        '\n', 'species', species,
+        '\n', 'dex', dex,
+        '\n', 'pokemon', pokemon,
+        '\n', 'serverPokemon', serverPokemon,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
 
     return null;
   }
@@ -111,7 +115,7 @@ export const guessServerSpread = (
 
       // don't say I didn't warn ya!
       for (let iv = 31; iv >= 0; iv -= 31) { // try only 31 and 0 for IVs (who assigns any other IVs?)
-        for (let ev = 252; ev >= 0; ev -= 4) { // try 252 to 0 in multiples of 4
+        for (let ev = 0; ev <= 252; ev += 4) { // try 252 to 0 in multiples of 4
           calculatedStats[stat] = dex.stats.calc(
             stat,
             baseStats[stat],
@@ -123,9 +127,9 @@ export const guessServerSpread = (
 
           // warning: if you don't filter this log, there will be lots of logs (and I mean A LOT)
           // may crash your browser depending on your computer's specs. debug at your own risk!
-          // if (pokemon.ident.endsWith('Clefable')) {
+          // if (pokemon.ident.includes('Kyurem')) {
           //   l.debug(
-          //     'trying to find the spread for', pokemon.ident, 'stat', stat,
+          //     'Trying to find the spread for', pokemon.ident, 'stat', stat,
           //     '\n', 'calculatedStat', calculatedStats[stat], 'knownStat', knownStats[stat],
           //     '\n', 'iv', iv, 'ev', ev,
           //     '\n', 'nature', nature.name, '+', nature.plus, '-', nature.minus,
@@ -135,12 +139,14 @@ export const guessServerSpread = (
           if (calculatedStats[stat] === knownStats[stat]) {
             // this one isn't too bad to print, but will still cause a considerable slowdown
             // (you should only uncomment the debug log if shit is really hitting the fan)
-            // l.debug(
-            //   'found matching combination for', pokemon.ident, 'stat', stat,
-            //   '\n', 'calculatedStat', calculatedStats[stat], 'knownStat', knownStats[stat],
-            //   '\n', 'iv', iv, 'ev', ev,
-            //   '\n', 'nature', nature.name, '+', nature.plus, '-', nature.minus,
-            // );
+            // if (pokemon.ident.includes('Lilligant')) {
+            //   l.debug(
+            //     'Found matching combination for', pokemon.ident, 'stat', stat,
+            //     '\n', 'calculatedStat', calculatedStats[stat], 'knownStat', knownStats[stat],
+            //     '\n', 'iv', iv, 'ev', ev,
+            //     '\n', 'nature', nature.name, '+', nature.plus, '-', nature.minus,
+            //   );
+            // }
 
             guessedSpread.ivs[stat] = iv;
             guessedSpread.evs[stat] = ev;
@@ -170,7 +176,7 @@ export const guessServerSpread = (
 
     if (sameStats && evsLegal) {
       // l.debug(
-      //   'found nature that matches all of the stats for Pokemon', pokemon.ident,
+      //   'Found nature that matches all of the stats for Pokemon', pokemon.ident,
       //   '\n', 'nature', nature.name,
       //   '\n', 'calculatedStats', calculatedStats,
       //   '\n', 'knownStats', knownStats,
@@ -190,8 +196,7 @@ export const guessServerSpread = (
   }
 
   l.debug(
-    'guessServerSpread() -> return guessedSpread',
-    '\n', 'returning the best guess of the spread for Pokemon', pokemon.ident,
+    '\n', 'Returning the best guess of the spread for Pokemon', pokemon.ident,
     '\n', 'guessedSpread', guessedSpread,
     '\n', 'dex', dex,
     '\n', 'pokemon', pokemon,
