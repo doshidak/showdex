@@ -17,9 +17,13 @@ import {
 } from '@showdex/consts';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import { detectToggledAbility } from '@showdex/utils/battle';
-import { calcPokemonHp } from '@showdex/utils/calc';
-import type { AbilityName, ItemName } from '@pkmn/data';
-import type { GenerationNum } from '@pkmn/types';
+import { calcPokemonHp, calcPokemonStats } from '@showdex/utils/calc';
+import type {
+  AbilityName,
+  Generation,
+  GenerationNum,
+  ItemName,
+} from '@pkmn/data';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
@@ -27,6 +31,7 @@ import styles from './PokeInfo.module.scss';
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
+  dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
@@ -36,6 +41,7 @@ export interface PokeInfoProps {
 export const PokeInfo = ({
   className,
   style,
+  dex,
   gen,
   format,
   pokemon,
@@ -118,8 +124,17 @@ export const PokeInfo = ({
       mutation.dirtyItem = null;
     }
 
+    // calculate the stats with the EVs/IVs
+    if (typeof dex?.stats?.calc === 'function') {
+      mutation.calculatedStats = calcPokemonStats(dex, {
+        ...pokemon,
+        ...mutation,
+      });
+    }
+
     onPokemonChange?.(mutation);
   }, [
+    dex,
     onPokemonChange,
     pokemon,
   ]);
@@ -156,7 +171,7 @@ export const PokeInfo = ({
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
-              speciesForme: pokemon?.rawSpeciesForme ?? pokemon?.speciesForme,
+              speciesForme: pokemon?.speciesForme || pokemon?.rawSpeciesForme,
               item: pokemon?.dirtyItem ?? pokemon?.item,
             }}
             tooltip="Open Smogon Page"
@@ -465,7 +480,7 @@ export const PokeInfo = ({
             }, !!BattleItems && {
               label: 'All',
               options: Object.values(BattleItems)
-                .filter((i) => i?.name && (!pokemon?.altItems?.length || !pokemon.altItems.includes(i.name as ItemName)))
+                .filter((i) => i?.name && (gen === 7 || (!i.megaStone && !i.zMove)) && (!pokemon?.altItems?.length || !pokemon.altItems.includes(i.name as ItemName)))
                 .map((item) => ({ label: item.name, value: item.name })),
             }].filter(Boolean)}
             noOptionsMessage="No Items"
