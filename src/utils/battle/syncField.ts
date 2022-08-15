@@ -27,17 +27,17 @@ export const syncField = (
   const updatedField = sanitizeField(battle, attackerIndex, defenderIndex);
 
   const fieldSideKeys = <(keyof CalcdexBattleField)[]> ['attackerSide', 'defenderSide'];
-  const fieldRemainingKeys = (<(keyof CalcdexBattleField)[]>Object.keys(updatedField || {}))
+  const fieldRemainingKeys = (<(keyof CalcdexBattleField)[]> Object.keys(updatedField || {}))
     .filter((key) => !fieldSideKeys.includes(key));
 
-  let didChange = false;
+  // let didChange = false;
 
   fieldRemainingKeys.forEach((key) => {
     const value = updatedField?.[key];
 
-    if (!value && !['string', 'number', 'boolean'].includes(typeof value)) {
-      return;
-    }
+    // if (!value && !['string', 'number', 'boolean'].includes(typeof value)) {
+    //   return;
+    // }
 
     const originalValue = field?.[key];
 
@@ -47,9 +47,9 @@ export const syncField = (
 
     (<Record<keyof CalcdexBattleField, unknown>> newField)[key] = value;
 
-    if (!didChange) {
-      didChange = true;
-    }
+    // if (!didChange) {
+    //   didChange = true;
+    // }
   });
 
   fieldSideKeys.forEach((sideKey) => {
@@ -69,15 +69,15 @@ export const syncField = (
 
       (<Record<keyof CalcdexBattleField, unknown>> newField[sideKey])[key] = value;
 
-      if (!didChange) {
-        didChange = true;
-      }
+      // if (!didChange) {
+      //   didChange = true;
+      // }
     });
   });
 
-  if (!didChange) {
-    return field;
-  }
+  // if (!didChange) {
+  //   return field;
+  // }
 
   return newField;
 };
