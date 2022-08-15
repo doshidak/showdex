@@ -15,6 +15,7 @@
 }
 
 .statHeader {
+  font-weight: 500;
   @include transition.apply(color);
 
   &.up {
