@@ -36,10 +36,10 @@ export const Calcdex = ({
 
   l.debug(
     'rendering...',
+    '\n', 'colorScheme', colorScheme,
     '\n', 'p1.pokemon', battle?.p1?.pokemon,
     '\n', 'p2.pokemon', battle?.p2?.pokemon,
     '\n', 'state', state,
-    '\n', 'colorScheme', colorScheme,
   );
 
   const {
@@ -56,9 +56,13 @@ export const Calcdex = ({
   const opponentKey = playerKey.current === 'p1' ? 'p2' : 'p1';
 
   React.useEffect(() => {
+    if (playerKey.current) {
+      return;
+    }
+
     const detectedKey = detectPlayerKeyFromBattle(battle);
 
-    if (!playerKey.current && detectedKey) {
+    if (detectedKey) {
       playerKey.current = detectedKey;
     }
   }, [
@@ -110,6 +114,7 @@ export const Calcdex = ({
         <FieldCalc
           className={styles.fieldCalc}
           battleId={battleId}
+          playerKey={playerKey.current}
           field={field}
           onFieldChange={updateField}
         />
