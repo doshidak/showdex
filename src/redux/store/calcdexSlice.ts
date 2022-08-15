@@ -407,6 +407,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Calculated stats of the Pokemon based on its current properties.
    *
+   * * This does not factor in items, abilities, or field conditions.
+   *
    * @default
    * ```ts
    * { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
@@ -528,6 +530,10 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    * Keeps track of the ordering of the Pokemon.
    *
    * * Each element should be some unique identifier for the Pokemon that's hopefully somewhat consistent.
+   *   - Wouldn't recommend using `searchid` as it includes the `speciesForme`, subject to change.
+   *   - For instance, `searchid` may read `'p1: Zygarde|Zygarde'`, but later read `'p1: Zygarde|Zygarde-Complete'`,
+   *     which obviously doesn't qualify as "consistent."
+   *   - `ident` seems to be the most viable property here.
    * * Typically should only be used for ordering `myPokemon` on initialization.
    *   - Array ordering of `myPokemon` switches to place the last-switched in Pokemon first.
    *   - Since `calcdexId` internally uses the `slot` value, this re-ordering mechanic produces inconsistent IDs.
