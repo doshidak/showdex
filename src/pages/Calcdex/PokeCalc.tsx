@@ -3,7 +3,7 @@ import cx from 'classnames';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
 import { PokeStats } from './PokeStats';
@@ -16,9 +16,11 @@ interface PokeCalcProps {
   dex?: Generation;
   gen?: GenerationNum;
   format?: string;
+  playerKey?: CalcdexPlayerKey;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
+  side?: 'attacker' | 'defender';
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -30,15 +32,18 @@ export const PokeCalc = ({
   dex,
   gen,
   format,
+  playerKey,
   playerPokemon,
   opponentPokemon,
   field,
+  side,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
   const calculateMatchup = useSmogonMatchup(
     dex,
     playerPokemon,
     opponentPokemon,
+    playerKey,
     field,
   );
 
@@ -98,6 +103,7 @@ export const PokeCalc = ({
     >
       {/* name, types, level, HP, status, set, ability, nature, item */}
       <PokeInfo
+        dex={dex}
         gen={gen}
         format={format}
         pokemon={playerPokemon}
@@ -119,6 +125,8 @@ export const PokeCalc = ({
         className={cx(styles.section, styles.stats)}
         dex={dex}
         pokemon={playerPokemon}
+        field={field}
+        side={side}
         onPokemonChange={handlePokemonChange}
       />
     </div>

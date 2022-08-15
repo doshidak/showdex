@@ -10,9 +10,9 @@ import {
   PokemonStatNames,
 } from '@showdex/consts';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
-import { calcPokemonStats } from '@showdex/utils/calc';
+import { calcPokemonFinalStats } from '@showdex/utils/calc';
 import type { Generation } from '@pkmn/data';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
@@ -20,6 +20,8 @@ export interface PokeStatsProps {
   style?: React.CSSProperties;
   dex: Generation;
   pokemon: CalcdexPokemon;
+  field?: CalcdexBattleField;
+  side?: 'attacker' | 'defender';
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -28,6 +30,8 @@ export const PokeStats = ({
   style,
   dex,
   pokemon,
+  field,
+  side,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
   const colorScheme = useColorScheme();
@@ -35,9 +39,9 @@ export const PokeStats = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const calculatedStats = React.useMemo(
-    () => (pokemon?.calcdexId ? calcPokemonStats(dex, pokemon) : null),
-    [dex, pokemon],
+  const finalStats = React.useMemo(
+    () => (pokemon?.calcdexId ? calcPokemonFinalStats(dex, pokemon, field, side) : null),
+    [dex, pokemon, field, side],
   );
 
   return (
@@ -149,9 +153,9 @@ export const PokeStats = ({
       <TableGridItem align="right" header />
 
       {PokemonStatNames.map((stat) => {
-        const calculatedStat = calculatedStats?.[stat] || 0;
+        const calculatedStat = finalStats?.[stat] || 0;
         const formattedStat = formatStatBoost(calculatedStat) || '???';
-        const boostDelta = detectStatBoostDelta(pokemon, stat);
+        const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
 
         return (
           <TableGridItem

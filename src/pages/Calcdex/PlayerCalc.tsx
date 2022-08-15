@@ -3,6 +3,7 @@ import cx from 'classnames';
 import { PiconButton, useColorScheme } from '@showdex/components/app';
 import { Button } from '@showdex/components/ui';
 import { openShowdownUser } from '@showdex/utils/app';
+import { env } from '@showdex/utils/core';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
 import type {
@@ -120,8 +121,9 @@ export const PlayerCalc = ({
         </div>
 
         <div className={styles.teamList}>
-          {Array(6).fill(null).map((_, i) => {
+          {Array(env.int('calcdex-player-max-pokemon', 6)).fill(null).map((_, i) => {
             const mon = pokemon?.[i];
+
             const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
             const friendlyPokemonName = mon?.rawSpeciesForme || mon?.speciesForme || mon?.name || pokemonKey;
 
@@ -139,7 +141,7 @@ export const PlayerCalc = ({
                 aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
-                  speciesForme: mon?.rawSpeciesForme ?? mon?.speciesForme,
+                  speciesForme: mon?.speciesForme || mon?.rawSpeciesForme,
                   item: mon?.dirtyItem ?? mon?.item,
                 } : 'pokeball-none'}
                 tooltip={friendlyPokemonName} /** @todo make this more descriptive, like the left-half of PokeInfo */
@@ -158,6 +160,7 @@ export const PlayerCalc = ({
         dex={dex}
         gen={gen}
         format={format}
+        playerKey={playerKey}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={{
@@ -165,6 +168,7 @@ export const PlayerCalc = ({
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
           defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
+        side={playerSideId === playerKey ? 'attacker' : 'defender'}
         onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
       />
     </div>
