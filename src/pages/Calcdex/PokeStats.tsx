@@ -100,6 +100,8 @@ export const PokeStats = ({
               min={0}
               max={31}
               step={1}
+              shiftStep={5}
+              loop
               input={{
                 value: iv,
                 onChange: (value: number) => onPokemonChange?.({
@@ -136,6 +138,8 @@ export const PokeStats = ({
               min={0}
               max={252}
               step={4}
+              shiftStep={16}
+              loop
               input={{
                 value: ev,
                 onChange: (value: number) => onPokemonChange?.({
