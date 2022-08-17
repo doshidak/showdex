@@ -98,7 +98,18 @@ export const sanitizePokemon = (
       toxicTurns: pokemon?.statusData?.toxicTurns || 0,
     },
 
-    volatiles: pokemon?.volatiles,
+    // only deep-copy non-object volatiles
+    // (particularly Ditto's `transformed` volatile, which references an existing Pokemon object as its value)
+    volatiles: Object.entries(pokemon?.volatiles || {}).reduce((volatiles, [id, volatile]) => {
+      const [, value] = volatile || [];
+
+      if (!value?.[1] || ['string', 'number'].includes(typeof value[1])) {
+        volatiles[id] = <typeof volatile> JSON.parse(JSON.stringify(volatile));
+      }
+
+      return volatiles;
+    }, {}),
+
     turnstatuses: pokemon?.turnstatuses,
     toxicCounter: pokemon?.statusData?.toxicTurns,
 
@@ -155,14 +166,6 @@ export const sanitizePokemon = (
       }
     }
   }
-
-  // remove any non-string volatiles
-  // (particularly Ditto's `transformed` volatile, which references an existing Pokemon object as its value)
-  Object.entries(sanitizedPokemon.volatiles || {}).forEach(([key, value]) => {
-    if (!['string', 'number'].includes(typeof value)) {
-      delete sanitizedPokemon.volatiles[key];
-    }
-  });
 
   if (!sanitizedPokemon?.calcdexId) {
     sanitizedPokemon.calcdexId = calcPokemonCalcdexId(sanitizedPokemon);
