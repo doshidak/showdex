@@ -63,6 +63,7 @@
     "react-dom": "^18.2.0",
     "react-final-form": "^6.5.9",
     "react-hot-loader": "^4.13.0",
+    "react-hotkeys-hook": "^3.4.7",
     "react-redux": "^8.0.2",
     "react-select": "^5.4.0",
     "remove": "^0.1.5",
