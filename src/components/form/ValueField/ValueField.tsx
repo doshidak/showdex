@@ -11,6 +11,18 @@ export interface ValueFieldProps extends BaseTextFieldProps<number> {
   style?: React.CSSProperties;
 
   /**
+   * Fallback value for when the input is blurred with an empty string.
+   *
+   * * Also used as the fallback value for the internal `inputValue` state,
+   *   should `input.value` be falsy upon initial mount.
+   * * If not provided (default), the input value will be set to the last valid value,
+   *   which is stored in the `input.value` prop.
+   *
+   * @since 0.1.3
+   */
+  fallbackValue?: number;
+
+  /**
    * Kinda like the native `step` prop, but for when the user is holding down the `SHIFT` key.
    *
    * * If unspecified (default), this behavior will be disabled.
@@ -49,6 +61,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   className,
   style,
   inputClassName,
+  fallbackValue,
   min,
   max,
   step = 1,
@@ -75,7 +88,10 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   const [active, setActive] = React.useState<boolean>(false);
 
   // this is only a visual value, so that we don't forcibly change the user's value as they're typing it
-  const [inputValue, setInputValue] = React.useState<string>(input?.value?.toString());
+  const [inputValue, setInputValue] = React.useState<string>(
+    input?.value?.toString()
+      || fallbackValue?.toString(),
+  );
 
   // type number fields don't do a good job preventing users from typing in non-numeric characters
   // (like '.' and 'e') nor does it enforce the `min` and `max` values if typed in manually.
@@ -111,15 +127,15 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     let numValue = Number(strValue) || 0;
 
     if (typeof min === 'number') {
-      numValue = loop && typeof max === 'number' && max > min && numValue < min ?
-        max :
-        Math.max(min, numValue);
+      numValue = loop && typeof max === 'number' && max > min && numValue < min
+        ? max
+        : Math.max(min, numValue);
     }
 
     if (typeof max === 'number') {
-      numValue = loop && typeof min === 'number' && min < max && numValue > max ?
-        min :
-        Math.min(numValue, max);
+      numValue = loop && typeof min === 'number' && min < max && numValue > max
+        ? min
+        : Math.min(numValue, max);
     }
 
     // finally, update the visual value and let final-form know
@@ -133,7 +149,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   ]);
 
   const handleBlur = React.useCallback((e?: React.FocusEvent<HTMLInputElement>) => {
-    const strValue = e?.target?.value?.toString();
+    const strValue = (e?.target?.value || fallbackValue)?.toString();
 
     if (typeof strValue === 'string' && strValue !== inputValue) {
       handleChange(strValue);
@@ -142,6 +158,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     setActive(false);
     input?.onBlur?.(e);
   }, [
+    fallbackValue,
     handleChange,
     input,
     inputValue,
@@ -154,12 +171,10 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     typeof shiftStep === 'number' && 'shift+up',
     typeof step === 'number' && 'down',
     typeof shiftStep === 'number' && 'shift+down',
-    // 'esc', // doesn't work for some reason sadge :c
+    'esc',
     'enter',
   ].filter(Boolean).join(', '), (_, handler) => {
     const currentValue = Number(input?.value ?? inputValue) || 0;
-
-    console.log('useHotkeys handler.key', handler.key);
 
     switch (handler.key) {
       case 'up': {
@@ -186,7 +201,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
         break;
       }
 
-      // case 'esc':
+      case 'esc':
       case 'enter': {
         // this will also invoke handleBlur() since the input's onBlur() will fire
         inputRef.current?.blur?.();
@@ -200,8 +215,9 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     }
   }, {
     enabled: !disabled,
-    enableOnTags: ['INPUT'],
+    enableOnTags: active ? ['INPUT'] : undefined,
   }, [
+    active,
     input?.value,
     inputValue,
     step,
