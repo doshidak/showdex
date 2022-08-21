@@ -125,7 +125,7 @@ export const PlayerCalc = ({
             const mon = pokemon?.[i];
 
             const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
-            const friendlyPokemonName = mon?.rawSpeciesForme || mon?.speciesForme || mon?.name || pokemonKey;
+            const friendlyPokemonName = mon?.speciesForme || mon?.name || pokemonKey;
 
             return (
               <PiconButton
@@ -141,7 +141,7 @@ export const PlayerCalc = ({
                 aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
-                  speciesForme: mon?.speciesForme || mon?.rawSpeciesForme,
+                  speciesForme: mon?.speciesForme,
                   item: mon?.dirtyItem ?? mon?.item,
                 } : 'pokeball-none'}
                 tooltip={friendlyPokemonName} /** @todo make this more descriptive, like the left-half of PokeInfo */
@@ -168,7 +168,6 @@ export const PlayerCalc = ({
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
           defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
-        side={playerSideId === playerKey ? 'attacker' : 'defender'}
         onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
       />
     </div>
