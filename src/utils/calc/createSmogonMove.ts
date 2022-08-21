@@ -12,7 +12,7 @@ export const createSmogonMove = (
   }
 
   const smogonMove = new SmogonMove(dex, moveName, {
-    species: pokemon?.rawSpeciesForme || pokemon?.speciesForme,
+    species: pokemon?.speciesForme,
     ability: pokemon?.dirtyAbility ?? pokemon?.ability,
     item: pokemon?.dirtyItem ?? pokemon?.item,
     useZ: dex.num === 7 && pokemon?.useUltimateMoves,
