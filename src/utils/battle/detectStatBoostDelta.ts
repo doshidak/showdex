@@ -7,8 +7,9 @@ export type PokemonStatBoostDelta =
 /**
  * Determines the direction of the delta of the Pokemon's stat boost.
  *
- * * In other words, checks whether the Pokemon's current stats are higher or lower than its base stats.
- * * In cases where it's neither (i.e., no boosts were applied to the passed-in `stat`), `null` will be returned.
+ * * In other words, checks whether the Pokemon's ~~current~~ final stats are higher or lower than its ~~base~~ spread stats.
+ * * In cases where it's neither (i.e., spread stat and final stat are equal), `null` will be returned.
+ * * Typically used for applying styling to the UI to indicate a boosted or reduced stat value.
  *
  * @since 0.1.2
  */
@@ -55,14 +56,14 @@ export const detectStatBoostDelta = (
 
   // const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
 
-  const calculatedStat = pokemon?.calculatedStats?.[stat] ?? 0;
+  const spreadStat = pokemon?.spreadStats?.[stat] ?? 0;
   const finalStat = finalStats?.[stat] ?? 0;
 
-  if (finalStat > calculatedStat) {
+  if (finalStat > spreadStat) {
     return 'positive';
   }
 
-  if (finalStat < calculatedStat) {
+  if (finalStat < spreadStat) {
     return 'negative';
   }
 
