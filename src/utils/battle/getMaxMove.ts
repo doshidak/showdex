@@ -29,8 +29,6 @@ const l = logger('@showdex/utils/app/getMaxMove');
  * Returns the corresponding Max/G-Max move for a given move.
  *
  * * This requires the `'-Gmax'` suffix in the passed-in `speciesForme` to distinguish between Max and G-Max moves!
- *   - i.e., do not sanitize via `sanitizeSpeciesForme()` for the `speciesForme` argument.
- *     * If the Pokemon is a `CalcdexPokemon`, use the `rawSpeciesForme` over `speciesForme` instead.
  *   - e.g., `'Alcremie-Gmax'` should be passed in for the `speciesForme` argument, not just `'Alcremie'`.
  *
  * @see https://github.com/smogon/damage-calc/blob/bdf9e8c39fec7670ed0ce64e1fb58d1a4dc83b73/calc/src/move.ts#L242
