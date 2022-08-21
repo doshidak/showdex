@@ -1,68 +1,21 @@
 import { PokemonBoostNames } from '@showdex/consts';
-import { calcPokemonStats, calcPresetCalcdexId, guessServerSpread } from '@showdex/utils/calc';
-import { logger } from '@showdex/utils/debug';
+import {
+  calcPokemonSpreadStats,
+  calcPresetCalcdexId,
+  guessServerSpread,
+} from '@showdex/utils/calc';
+import { env } from '@showdex/utils/core';
+// import { logger } from '@showdex/utils/debug';
+import type { Generation, GenerationNum } from '@pkmn/data';
 import type {
-  // AbilityName,
-  Generation,
-  // ItemName,
-  // MoveName,
-} from '@pkmn/data';
-import type {
-  CalcdexMoveState,
+  // CalcdexMoveState,
   CalcdexPokemon,
   CalcdexPokemonPreset,
 } from '@showdex/redux/store';
-import { sanitizePokemon } from './sanitizePokemon';
+import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
+import { detectToggledAbility } from './detectToggledAbility';
 
-const l = logger('@showdex/utils/battle/syncPokemon');
-
-export const syncPokemonBoosts = (
-  pokemon: CalcdexPokemon,
-  clientPokemon: DeepPartial<Showdown.Pokemon>,
-): CalcdexPokemon['boosts'] => {
-  const newPokemon: CalcdexPokemon = { ...pokemon };
-
-  l.debug(
-    'syncPokemonBoosts()',
-    '\n', 'pokemon', pokemon,
-    '\n', 'clientPokemon', clientPokemon,
-  );
-
-  const boosts = PokemonBoostNames.reduce((prev, stat) => {
-    const currentValue = prev[stat];
-    const value = clientPokemon?.boosts?.[stat] || 0;
-
-    // l.debug(
-    //   'syncPokemonBoosts()',
-    //   '\n', 'comparing stat', stat, 'currentValue', currentValue, 'with value', value,
-    //   '\n', 'newPokemon', newPokemon?.ident, newPokemon,
-    // );
-
-    // l.debug(pokemon.ident, 'comparing value', value, 'and currentValue', currentValue, 'for stat', stat);
-
-    if (value === currentValue) {
-      return prev;
-    }
-
-    prev[stat] = value;
-
-    return prev;
-  }, <CalcdexPokemon['boosts']> {
-    atk: newPokemon?.boosts?.atk || 0,
-    def: newPokemon?.boosts?.def || 0,
-    spa: newPokemon?.boosts?.spa || 0,
-    spd: newPokemon?.boosts?.spd || 0,
-    spe: newPokemon?.boosts?.spe || 0,
-  });
-
-  l.debug(
-    'syncPokemonBoosts() -> return boosts',
-    '\n', 'boosts', boosts,
-    '\n', 'newPokemon', newPokemon?.ident, newPokemon,
-  );
-
-  return boosts;
-};
+// const l = logger('@showdex/utils/battle/syncPokemon');
 
 export const syncPokemon = (
   pokemon: CalcdexPokemon,
@@ -71,45 +24,60 @@ export const syncPokemon = (
   dex?: Generation,
   format?: string,
 ): CalcdexPokemon => {
-  const newPokemon: CalcdexPokemon = { ...pokemon };
+  // final synced Pokemon that will be returned at the end
+  const syncedPokemon = structuredClone(pokemon) || {};
 
-  (<(keyof Showdown.Pokemon)[]> [
+  // you should not be looping through any special CalcdexPokemon-specific properties here!
+  (<(keyof NonFunctionProperties<Showdown.Pokemon>)[]> [
     'name',
-    'speciesForme',
-    // 'rawSpeciesForme',
     'hp',
     'maxhp',
     'status',
     'statusData',
     'ability',
     'baseAbility',
-    // 'nature',
     'item',
     'itemEffect',
     'prevItem',
     'prevItemEffect',
     'moveTrack',
     'volatiles',
-    // 'abilityToggled', // should be after volatiles
     'turnstatuses',
     'boosts',
   ]).forEach((key) => {
-    const currentValue = newPokemon[<keyof CalcdexPokemon> key]; // `newPokemon` is the final synced Pokemon that will be returned at the end
-    let value = clientPokemon?.[key]; // `clientPokemon` is what was changed and may not be a full Pokemon object
+    const prevValue = syncedPokemon[<keyof CalcdexPokemon> key];
+    let value = clientPokemon?.[key];
 
     if (value === undefined) {
       return;
     }
 
     switch (key) {
+      case 'hp':
+      case 'maxhp': {
+        // note: returning at any point here will skip syncing the `value` from the
+        // Showdown.Pokemon (i.e., clientPokemon) to the CalcdexPokemon (i.e., syncedPokemon)
+        // (but only for the current `key` of the iteration, of course)
+        if (typeof serverPokemon?.hp === 'number' && typeof serverPokemon.maxhp === 'number') {
+          return;
+        }
+
+        // note: breaking will continue the sync operation
+        // (which in this case, if a serverPokemon wasn't provided, we'll use the hp/maxhp from the clientPokemon)
+        break;
+      }
+
       case 'ability': {
         if (!value) {
           return;
         }
 
-        if (value === newPokemon.dirtyAbility) {
-          newPokemon.dirtyAbility = null;
+        if (value === syncedPokemon.dirtyAbility) {
+          syncedPokemon.dirtyAbility = null;
         }
+
+        // update the abilityToggled state (always false if not applicable)
+        syncedPokemon.abilityToggled = detectToggledAbility(clientPokemon);
 
         break;
       }
@@ -124,8 +92,8 @@ export const syncPokemon = (
         // clear the dirtyItem if it's what the Pokemon actually has
         // (otherwise, if the item hasn't been revealed yet, `value` would be falsy,
         // but that's ok cause we have dirtyItem, i.e., no worries about clearing the user's input)
-        if (value === newPokemon.dirtyItem) {
-          newPokemon.dirtyItem = null;
+        if (value === syncedPokemon.dirtyItem) {
+          syncedPokemon.dirtyItem = null;
         }
 
         break;
@@ -135,42 +103,38 @@ export const syncPokemon = (
         // check if the item was knocked-off and is the same as dirtyItem
         // if so, clear the dirtyItem
         // (note that `value` here is prevItem, NOT item!)
-        if (clientPokemon?.prevItemEffect === 'knocked off' && value === newPokemon.dirtyItem) {
-          newPokemon.dirtyItem = null;
+        if (clientPokemon?.prevItemEffect === 'knocked off' && value === syncedPokemon.dirtyItem) {
+          syncedPokemon.dirtyItem = null;
         }
 
         break;
       }
-
-      case 'speciesForme': {
-        if (clientPokemon?.volatiles?.formechange?.[1]) {
-          [, value] = clientPokemon.volatiles.formechange;
-        }
-
-        /** @todo */
-        // value = sanitizeSpeciesForme(<CalcdexPokemon['speciesForme']> value);
-
-        break;
-      }
-
-      // case 'rawSpeciesForme': {
-      //   value = clientPokemon?.speciesForme ?? newPokemon?.rawSpeciesForme ?? newPokemon?.speciesForme;
-      //
-      //   if (!value) {
-      //     return;
-      //   }
-      //
-      //   break;
-      // }
 
       case 'boosts': {
-        value = syncPokemonBoosts(newPokemon, clientPokemon);
+        value = PokemonBoostNames.reduce<Showdown.StatsTable>((prev, stat) => {
+          const prevBoost = prev[stat];
+          const boost = clientPokemon?.boosts?.[stat] || 0;
+
+          if (boost !== prevBoost) {
+            prev[stat] = boost;
+          }
+
+          return prev;
+        }, {
+          atk: syncedPokemon.boosts?.atk || 0,
+          def: syncedPokemon.boosts?.def || 0,
+          spa: syncedPokemon.boosts?.spa || 0,
+          spd: syncedPokemon.boosts?.spd || 0,
+          spe: syncedPokemon.boosts?.spe || 0,
+        });
 
         break;
       }
 
       case 'moves': {
-        if (!(<CalcdexPokemon['moves']> value)?.length) {
+        const moves = <CalcdexPokemon['moves']> value;
+
+        if (!moves?.length) {
           return;
         }
 
@@ -178,71 +142,72 @@ export const syncPokemon = (
       }
 
       case 'moveTrack': {
-        // l.debug('clientPokemon.moveTrack', clientPokemon?.moveTrack);
+        const moveTrack = <Showdown.Pokemon['moveTrack']> value;
 
-        if (clientPokemon?.moveTrack?.length) {
-          newPokemon.moveState = <CalcdexMoveState> {
-            ...newPokemon.moveState,
-            revealed: clientPokemon.moveTrack.map((track) => track?.[0]),
+        if (moveTrack?.length) {
+          syncedPokemon.moveState = {
+            ...syncedPokemon.moveState,
+
+            // filter out any Z/Max moves from the revealed list
+            revealed: moveTrack.map((track) => track?.[0]).filter((m) => {
+              const move = dex?.moves?.get?.(m);
+
+              return !!move?.name && !move?.isZ && !move?.isMax;
+            }),
           };
 
-          // l.debug('value of type CalcdexMoveState set to', newPokemon.moveState);
+          // l.debug('value of type CalcdexMoveState set to', syncedPokemon.moveState);
         }
 
         break;
       }
 
-      // case 'presets': {
-      //   if (!Array.isArray(value) || !value.length) {
-      //     value = currentValue;
-      //   }
-      //
-      //   break;
-      // }
+      case 'volatiles': {
+        const volatiles = <Showdown.Pokemon['volatiles']> value;
 
-      // case 'abilityToggled': {
-      //   value = detectToggledAbility(clientPokemon);
-      //
-      //   break;
-      // }
+        // sync Pokemon's dynamax state
+        syncedPokemon.useUltimateMoves = 'dynamax' in volatiles;
 
-      default: break;
+        /**
+         * @todo handle Ditto transformations here
+         */
+
+        // sanitizing to make sure a transformed ditto/mew doesn't crash the extension lol
+        value = sanitizePokemonVolatiles(clientPokemon);
+
+        break;
+      }
+
+      default: {
+        break;
+      }
     }
 
-    /** @todo this line breaks when Ditto transforms since `volatiles.transformed[1]` is `Showdown.Pokemon` (NOT `string`) */
-    if (JSON.stringify(value) === JSON.stringify(currentValue)) { // kekw
+    if (JSON.stringify(value) === JSON.stringify(prevValue)) { // kekw
       return;
     }
 
-    /** @see https://github.com/microsoft/TypeScript/issues/31663#issuecomment-518603958 */
-    (newPokemon as Record<keyof CalcdexPokemon, unknown>)[key] = <typeof value> JSON.parse(JSON.stringify(value));
+    syncedPokemon[key] = structuredClone(value);
   });
-
-  // only using sanitizePokemon() to get some values back
-  const sanitizedPokemon = sanitizePokemon(newPokemon);
-
-  // update some info if the Pokemon's speciesForme changed
-  // (since moveState requires async, we update that in syncBattle())
-  if (pokemon.speciesForme !== newPokemon.speciesForme) {
-    newPokemon.baseStats = { ...sanitizedPokemon.baseStats };
-    newPokemon.types = sanitizedPokemon.types;
-    newPokemon.ability = sanitizedPokemon.ability;
-    newPokemon.dirtyAbility = null;
-    newPokemon.abilities = sanitizedPokemon.abilities;
-  }
-
-  newPokemon.abilityToggled = sanitizedPokemon.abilityToggled;
 
   // fill in some additional fields if the serverPokemon was provided
   if (serverPokemon) {
-    newPokemon.serverSourced = true;
+    // should always be the case, idk why it shouldn't be (but you know we gotta check)
+    if (typeof serverPokemon.hp === 'number' && typeof serverPokemon.maxhp === 'number') {
+      // serverSourced is used primarily as a flag to distinguish `hp` as the actual value or as a percentage
+      // (but since this conditional should always succeed in theory, should be ok to use to distinguish other properties)
+      syncedPokemon.serverSourced = true;
+
+      syncedPokemon.hp = serverPokemon.hp;
+      syncedPokemon.maxhp = serverPokemon.maxhp;
+    }
 
     if (serverPokemon.ability) {
       const dexAbility = dex.abilities.get(serverPokemon.ability);
 
       if (dexAbility?.name) {
-        newPokemon.ability = dexAbility.name;
-        newPokemon.dirtyAbility = null;
+        syncedPokemon.ability = dexAbility.name;
+        syncedPokemon.dirtyAbility = null;
       }
     }
 
@@ -250,34 +215,42 @@ export const syncPokemon = (
       const dexItem = dex.items.get(serverPokemon.item);
 
       if (dexItem?.name) {
-        newPokemon.item = dexItem.name;
-        newPokemon.dirtyItem = null;
+        syncedPokemon.item = dexItem.name;
+        syncedPokemon.dirtyItem = null;
       }
     }
 
-    // build a preset around the serverPokemon
+    // copy the server stats for more accurate final stats calculations
+    syncedPokemon.serverStats = {
+      hp: serverPokemon.maxhp,
+      ...serverPokemon.stats,
+    };
+
+    // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
+    // (note that this function doesn't pull from syncedPokemon.serverStats, but rather serverPokemon.stats)
     const guessedSpread = guessServerSpread(
       dex,
-      newPokemon,
-      serverPokemon,
+      syncedPokemon,
+      // serverPokemon, // since we have serverStats now, no need for this lol
       format?.includes('random') ? 'Hardy' : undefined,
     );
 
+    // build a preset around the serverPokemon
     const serverPreset: CalcdexPokemonPreset = {
       name: 'Yours',
-      gen: dex.num,
+      gen: dex.num || <GenerationNum> env.int('calcdex-default-gen'),
       format,
-      speciesForme: newPokemon.speciesForme || serverPokemon.speciesForme,
-      level: newPokemon.level || serverPokemon.level,
-      gender: newPokemon.gender || serverPokemon.gender || null,
-      ability: newPokemon.ability,
-      item: newPokemon.item,
+      speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
+      level: syncedPokemon.level || serverPokemon.level,
+      gender: syncedPokemon.gender || serverPokemon.gender || null,
+      ability: syncedPokemon.ability,
+      item: syncedPokemon.item,
       ...guessedSpread,
     };
 
-    newPokemon.nature = serverPreset.nature;
-    newPokemon.ivs = { ...serverPreset.ivs };
-    newPokemon.evs = { ...serverPreset.evs };
+    syncedPokemon.nature = serverPreset.nature;
+    syncedPokemon.ivs = { ...serverPreset.ivs };
+    syncedPokemon.evs = { ...serverPreset.evs };
 
     // need to do some special processing for moves
     // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
@@ -293,38 +266,55 @@ export const syncPokemon = (
         return dexMove.name;
       }).filter(Boolean);
 
-      newPokemon.moves = [...serverPreset.moves];
+      syncedPokemon.moves = [...serverPreset.moves];
     }
 
     // calculate the stats with the EVs/IVs from the server preset
     // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
     if (typeof dex?.stats?.calc === 'function') {
-      newPokemon.calculatedStats = calcPokemonStats(dex, newPokemon);
+      syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
     }
 
     serverPreset.calcdexId = calcPresetCalcdexId(serverPreset);
 
-    const serverPresetIndex = newPokemon.presets.findIndex((p) => p.calcdexId === serverPreset.calcdexId);
+    const serverPresetIndex = syncedPokemon.presets
+      .findIndex((p) => p.calcdexId === serverPreset.calcdexId);
 
     if (serverPresetIndex > -1) {
-      newPokemon.presets[serverPresetIndex] = serverPreset;
+      syncedPokemon.presets[serverPresetIndex] = serverPreset;
     } else {
-      newPokemon.presets.unshift(serverPreset);
+      syncedPokemon.presets.unshift(serverPreset);
     }
 
     // disabling autoPreset since we already set the preset here
     // (also tells PokeInfo not to apply the first preset)
-    newPokemon.preset = serverPreset.calcdexId;
-    newPokemon.autoPreset = false;
+    syncedPokemon.preset = serverPreset.calcdexId;
+    syncedPokemon.autoPreset = false;
   }
 
-  // const calcdexId = calcPokemonCalcdexId(newPokemon);
+  // only using sanitizePokemon() to get some values back
+  const sanitizedPokemon = sanitizePokemon(syncedPokemon);
 
-  // if (!newPokemon?.calcdexId || newPokemon.calcdexId !== calcdexId) {
-  //   newPokemon.calcdexId = calcdexId;
+  // update some info if the Pokemon's speciesForme changed
+  // (since moveState requires async, we update that in syncBattle())
+  // if (pokemon.speciesForme !== syncedPokemon.speciesForme) {
+  //   syncedPokemon.baseStats = { ...sanitizedPokemon.baseStats };
+  //   syncedPokemon.types = sanitizedPokemon.types;
+  //   syncedPokemon.ability = sanitizedPokemon.ability;
+  //   syncedPokemon.dirtyAbility = null;
+  //   syncedPokemon.abilities = sanitizedPokemon.abilities;
   // }
 
-  // newPokemon.calcdexNonce = sanitizedPokemon.calcdexNonce;
+  syncedPokemon.abilityToggleable = sanitizedPokemon.abilityToggleable;
+  syncedPokemon.abilityToggled = sanitizedPokemon.abilityToggled;
 
-  return newPokemon;
+  // const calcdexId = calcPokemonCalcdexId(syncedPokemon);
+
+  // if (!syncedPokemon?.calcdexId || syncedPokemon.calcdexId !== calcdexId) {
+  //   syncedPokemon.calcdexId = calcdexId;
+  // }
+
+  // syncedPokemon.calcdexNonce = sanitizedPokemon.calcdexNonce;
+
+  return syncedPokemon;
 };
