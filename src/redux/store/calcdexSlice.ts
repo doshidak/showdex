@@ -179,13 +179,16 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Whether the Pokemon object originates from the client or server.
    *
-   * * If the type if `Showdown.Pokemon`, then the Pokemon is *probably* from the client.
-   * * If the type is `Showdown.ServerPokemon`, then the Pokemon is from the server (duh).
-   * * ~~Used to determine which fields to overwrite when syncing.~~
-   *   - (See deprecation notice below.)
+   * * Used to determine whether the Pokemon's `hp` is a percentage or not.
+   *   - If it's a percentage (`false`), then we'll need to calculate it from the `maxhp`,
+   *     which may also need to be calculated.
+   * * `ServerPokemon` provides the actual values for `hp` and `maxhp`,
+   *   while (client) `Pokemon` only provides a value range of `[0, 100]`, both inclusive.
+   *   - Using the `ServerPokemon` allows for more accurate calculations,
+   *     so if it's available, we'll use it.
+   * * This is primarily used in the `createSmogonPokemon()` utility.
    *
    * @default false
-   * @deprecated As of v0.1.3, although assigned, don't think this is used anymore.
    * @since 0.1.0
    */
   serverSourced?: boolean;
@@ -193,6 +196,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Unsanitized version of `speciesForme`, primarily used for determining Z/Max/G-Max moves.
    *
+   * @deprecated As of v0.1.3, since we no longer need to sanitize the `speciesForme`,
+   *   this is no longer needed.
    * @since 0.1.2
    */
   rawSpeciesForme?: string;
@@ -231,10 +236,28 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   baseAbility?: AbilityName;
 
   /**
+   * Whether the current `ability`/`dirtyAbility` is toggleable.
+   *
+   * * & the dev award for the best variable names goes to...
+   * * Used for showing the ability toggle button in `PokeInfo`.
+   * * Should be determined by whether the ability is in the list of `PokemonToggleAbilities`.
+   *   - Special handling is required for the *Multiscale* ability,
+   *     in which this value should be `false` if the Pokemon's HP is not 100%.
+   *
+   * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
+   * @default false
+   * @since 0.1.3
+   */
+  abilityToggleable?: boolean;
+
+  /**
    * Some abilities are conditionally toggled, such as *Flash Fire*.
    *
    * * While we don't have to worry about those conditions,
    *   we need to keep track of whether the ability is active.
+   * * Allows toggling by the user, but will sync with the battle state as the turn ends.
+   * * Internally, this value depends on `abilityToggleable`.
+   *   - See `detectToggledAbility()` for implementation details.
    * * If the ability is not in `PokemonToggleAbilities` in `consts`,
    *   this value will always be `true`, despite the default value being `false`.
    *
@@ -341,7 +364,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * Typically contains moves set via user input or Smogon sets.
    * * Should not be synced with the current `app.curRoom.battle` state.
    *   - Unless the originating Pokemon object is a `Showdown.ServerPokemon`.
-   *   - In that instance, `serverSourced` should be `true`.
+   *   - ~~In that instance, `serverSourced` should be `true`.~~
+   *   - Update (v0.1.3): `serverSourced` was unused, so it's now deprecated.
    *
    * @since 0.1.0
    */
@@ -363,6 +387,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * Whether the Pokemon is using Z/Max/G-Max moves.
    *
    * * Using the term *ultimate* (thanks Blizzard/Riot lmaoo) to cover the nomenclature for both Z (gen 7) and Max/G-Max (gen 8) moves.
+   *   - Future me found the word I was looking for: *gen-agnostic*.
+   *   - ... like in the sense of *platform-agnostic*.
    *
    * @since 0.1.2
    */
@@ -385,13 +411,16 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Keeps track of user-modified boosts as to not modify the actual boosts from the `battle` state.
    *
+   * * Values for each stat (except for HP) are stored as boost **stages**, not as boost multipliers.
+   *   - In other words, values should range `[-6, 6]`, both inclusive.
+   *
    * @default
    * ```ts
    * {}
    * ```
    * @since 0.1.0
    */
-  dirtyBoosts?: Partial<Record<Showdown.StatNameNoHp, number>>;
+  dirtyBoosts?: Omit<Showdown.StatsTable, 'hp'>;
 
   /**
    * Base stats of the Pokemon based on its species.
@@ -402,12 +431,41 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * ```
    * @since 0.1.0
    */
-  baseStats?: Partial<Showdown.StatsTable>;
+  baseStats?: Showdown.StatsTable;
 
   /**
-   * Calculated stats of the Pokemon based on its current properties.
+   * Server-reported stats of the Pokemon.
+   *
+   * * Only provided if the Pokemon belongs to the player.
+   *   - Spectators won't receive this information (they only receive client `Showdown.Pokemon` objects).
+   * * HP value is derived from the `maxhp` of the `Showdown.ServerPokemon` object.
+   * * EVs/IVs/nature are factored in, but not items or abilities.
+   *   - Server doesn't report the actual EVs/IVs/nature, so we get to figure them out ourselves!
+   *
+   * @default
+   * ```ts
+   * {}
+   * ```
+   * @since 0.1.3
+   */
+  serverStats?: Showdown.StatsTable;
+
+  /**
+   * Calculated stats of the Pokemon after its EV/IV/nature spread is applied.
    *
    * * This does not factor in items, abilities, or field conditions.
+   *   - Final stats are not stored here since it requires additional information
+   *     from field conditions and potentially other ally and opponent Pokemon.
+   *   - See `calcPokemonFinalStats()` for more information.
+   * * As of v0.1.3, value is set in `syncPokemon()` when `serverPokemon` is provided and
+   *   in `applyPreset()` of `PokeInfo` when a `preset` is applied.
+   *   - Additionally, this has been renamed from `calculatedStats` (pre-v1.0.3) to
+   *     `spreadStats` to avoid confusion between this and existing stat properties.
+   *   - Furthermore, `guessServerSpread()` internally uses a local `calculatedStats` object
+   *     that's unrelated to this one, adding to the confusion.
+   * * Since the user is free to change the EVs/IVs/nature, this value should not be synced with
+   *   the provided `stats` in the corresponding `ServerPokemon`, if applicable.
+   *   - Server-reported `stats` should be synced with the `serverStats` instead.
    *
    * @default
    * ```ts
@@ -415,7 +473,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * ```
    * @since 0.1.0
    */
-  calculatedStats?: Partial<Showdown.StatsTable>;
+  spreadStats?: Showdown.StatsTable;
 
   /**
    * Whether to calculate move damages as critical hits.
@@ -560,8 +618,65 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   pokemon?: CalcdexPokemon[];
 }
 
-export type CalcdexPlayerSide = SmogonState.Side;
-export type CalcdexBattleField = SmogonState.Field;
+/**
+ * Think someone at `@smogon/calc` forgot to include these additional field conditions
+ * in the `State.Field` (but it exists in the `Field` class... huh).
+ *
+ * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
+ * * Checking the source code for the `Field` class (see link below),
+ *   the constructor accepts these missing properties.
+ *
+ * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
+ * @since 0.1.3
+ */
+export interface CalcdexBattleField extends SmogonState.Field {
+  isMagicRoom?: boolean;
+  isWonderRoom?: boolean;
+  isAuraBreak?: boolean;
+  isFairyAura?: boolean;
+  isDarkAura?: boolean;
+  attackerSide: CalcdexPlayerSide;
+  defenderSide: CalcdexPlayerSide;
+}
+
+/**
+ * As is the case with `CalcdexBattleField`, this adds the missing properties that exist
+ * in `Side`, but not `State.Side`.
+ *
+ * * Additional properties that will be unused by the `Side` constructor are included
+ *   as they may be used in Pokemon stat calculations.
+ *
+ * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L84-L102
+ * @since 0.1.3
+ */
+export interface CalcdexPlayerSide extends SmogonState.Side {
+  isProtected?: boolean;
+  isSeeded?: boolean;
+  isFriendGuard?: boolean;
+  isBattery?: boolean;
+  isPowerSpot?: boolean;
+
+  /**
+   * Not used by the calc, but recorded for Pokemon stat calculations.
+   *
+   * @since 0.1.3
+   */
+  isFirePledge?: boolean;
+
+  /**
+   * Not used by the calc, but recorded for Pokemon stat calculations.
+   *
+   * @since 0.1.3
+   */
+  isGrassPledge?: boolean;
+
+  /**
+   * Not used by the calc, but recorded for Pokemon stat calculations.
+   *
+   * @since 0.1.3
+   */
+  isWaterPledge?: boolean;
+}
 
 /**
  * Key of a given player.
