@@ -35,6 +35,14 @@
   max-width: 30px;
 }
 
+.evsHeader {
+  @include transition.apply(color);
+
+  &.illegal {
+    color: colors.$red;
+  }
+}
+
 .evField {
   max-width: 30px;
 }
