@@ -1,11 +1,41 @@
 import { PokemonNatures } from '@showdex/consts';
-import { calcPokemonCalcdexId, calcPokemonCalcdexNonce } from '@showdex/utils/calc';
+import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import type { AbilityName, ItemName, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
-// import { sanitizeSpeciesForme } from './sanitizeSpeciesForme';
+import { toggleableAbility } from './toggleableAbility';
+
+/**
+ * Pokemon `volatiles` require special love and attention before they get Redux'd.
+ *
+ * * Ditto
+ *   - ...and Mew, I guess
+ * * hnnnnnnnnnnnnnnnnnnnnnnnng
+ * * Separated from `sanitizePokemon()` cause I'm probably using it elsewhere.
+ *
+ * @since 0.1.3
+ */
+export const sanitizePokemonVolatiles = (
+  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
+): CalcdexPokemon['volatiles'] => Object.entries(pokemon?.volatiles || {}).reduce((volatiles, [id, volatile]) => {
+  const [, value] = volatile || [];
+
+  // we're gunna replace the Pokemon object w/ its ident if it's a transform volatile
+  const transformed = id === 'transform' &&
+    typeof (<Showdown.Pokemon> <unknown> value?.[1])?.ident === 'string';
+
+  if (transformed || !value?.[1] || ['string', 'number'].includes(typeof value[1])) {
+    volatiles[id] = transformed ? [
+      id, // value[0] is also the id
+      (<Showdown.Pokemon> <unknown> value[1]).ident,
+      ...value.slice(2),
+    ] : volatile;
+  }
+
+  return volatiles;
+}, {});
 
 /**
  * Essentially converts a `Showdown.Pokemon` into our custom `CalcdexPokemon`.
@@ -24,13 +54,13 @@ export const sanitizePokemon = (
 ): CalcdexPokemon => {
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: ('calcdexId' in pokemon && pokemon.calcdexId) || null,
-    calcdexNonce: ('calcdexNonce' in pokemon && pokemon.calcdexNonce) || null,
+    // calcdexNonce: ('calcdexNonce' in pokemon && pokemon.calcdexNonce) || null,
 
     slot: pokemon?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
     speciesForme: detectSpeciesForme(pokemon),
-    rawSpeciesForme: pokemon?.speciesForme,
+    // rawSpeciesForme: pokemon?.speciesForme,
 
     name: pokemon?.name,
     details: pokemon?.details,
@@ -44,7 +74,7 @@ export const sanitizePokemon = (
 
     ability: <AbilityName> pokemon?.ability || ('abilities' in pokemon && pokemon.abilities[0]) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
-    abilityToggled: 'abilityToggled' in pokemon ? pokemon.abilityToggled : detectToggledAbility(pokemon),
+    // abilityToggled: 'abilityToggled' in pokemon ? pokemon.abilityToggled : detectToggledAbility(pokemon),
     baseAbility: <AbilityName> pokemon?.baseAbility,
     abilities: ('abilities' in pokemon && pokemon.abilities) || [],
     altAbilities: ('altAbilities' in pokemon && pokemon.altAbilities) || [],
@@ -99,16 +129,8 @@ export const sanitizePokemon = (
     },
 
     // only deep-copy non-object volatiles
-    // (particularly Ditto's `transformed` volatile, which references an existing Pokemon object as its value)
-    volatiles: Object.entries(pokemon?.volatiles || {}).reduce((volatiles, [id, volatile]) => {
-      const [, value] = volatile || [];
-
-      if (!value?.[1] || ['string', 'number'].includes(typeof value[1])) {
-        volatiles[id] = <typeof volatile> JSON.parse(JSON.stringify(volatile));
-      }
-
-      return volatiles;
-    }, {}),
+    // (particularly Ditto's 'transform' volatile, which references an existing Pokemon object as its value)
+    volatiles: sanitizePokemonVolatiles(pokemon),
 
     turnstatuses: pokemon?.turnstatuses,
     toxicCounter: pokemon?.statusData?.toxicTurns,
@@ -121,11 +143,13 @@ export const sanitizePokemon = (
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
     useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
     lastMove: pokemon?.lastMove,
-    moveTrack: Array.isArray(pokemon?.moveTrack) ?
+
+    moveTrack: Array.isArray(pokemon?.moveTrack)
       // since pokemon.moveTrack is an array of arrays,
       // we don't want to reference the original inner array elements
-      <CalcdexPokemon['moveTrack']> JSON.parse(JSON.stringify(pokemon?.moveTrack)) :
-      [],
+      ? <CalcdexPokemon['moveTrack']> structuredClone(pokemon.moveTrack)
+      : [],
+
     moveState: {
       revealed: ('moveState' in pokemon && pokemon.moveState?.revealed) || [],
       learnset: ('moveState' in pokemon && pokemon.moveState?.learnset) || [],
@@ -138,6 +162,12 @@ export const sanitizePokemon = (
     presets: ('presets' in pokemon && pokemon.presets) || [],
     autoPreset: 'autoPreset' in pokemon ? pokemon.autoPreset : true,
   };
+
+  // abilityToggleable is mainly used for UI, hence why there are two of
+  // what seems to be essentially the same thing
+  // (but note that abilityToggled stores the current toggle state)
+  sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
+  sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   // fill in additional info if the Dex global is available (should be)
   if (typeof Dex?.species?.get === 'function') {
@@ -171,7 +201,7 @@ export const sanitizePokemon = (
     sanitizedPokemon.calcdexId = calcPokemonCalcdexId(sanitizedPokemon);
   }
 
-  sanitizedPokemon.calcdexNonce = calcPokemonCalcdexNonce(sanitizedPokemon);
+  // sanitizedPokemon.calcdexNonce = calcPokemonCalcdexNonce(sanitizedPokemon);
 
   return sanitizedPokemon;
 };
