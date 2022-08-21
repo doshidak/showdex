@@ -26,6 +26,9 @@ export const sanitizePlayerSide = (
     isAuroraVeil: sideConditionNames.includes('auroraveil'),
     // isBattery: null,
     // isPowerSpot: null,
+    isFirePledge: sideConditionNames.includes('firepledge'),
+    isGrassPledge: sideConditionNames.includes('grasspledge'),
+    isWaterPledge: sideConditionNames.includes('waterpledge'),
     // isSwitching: player?.active?.[0]?.ident === player?.active?.[activeIndex]?.ident ? 'out' : 'in',
     isSwitching: null,
   };

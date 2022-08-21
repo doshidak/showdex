@@ -31,6 +31,9 @@ export const sanitizeField = (
 
     weather: WeatherMap?.[weather] ?? null,
     terrain: pseudoWeatherName ? PseudoWeatherMap?.[pseudoWeatherName] : null,
+
+    isMagicRoom: pseudoWeatherMoveNames?.includes?.('Magic Room') ?? false,
+    isWonderRoom: pseudoWeatherMoveNames?.includes?.('Wonder Room') ?? false,
     isGravity: pseudoWeatherMoveNames?.includes?.('Gravity') ?? false,
 
     attackerSide: sanitizePlayerSide(p1, attackerIndex),
