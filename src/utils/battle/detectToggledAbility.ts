@@ -1,7 +1,6 @@
-import { PokemonToggleAbilities } from '@showdex/consts';
-import { calcPokemonHp } from '@showdex/utils/calc';
-import type { AbilityName } from '@pkmn/data';
+import { formatId } from '@showdex/utils/app';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { toggleableAbility } from './toggleableAbility';
 
 /**
  * Determines whether the Pokemon's toggleable ability is active (if applicable).
@@ -26,20 +25,6 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
  */
 export const detectToggledAbility = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-): boolean => {
-  const ability = pokemon?.ability;
-  const hasMultiscale = ability?.toLowerCase?.() === 'multiscale';
-  const toggleAbility = !hasMultiscale && PokemonToggleAbilities.includes(<AbilityName> ability);
-
-  if (hasMultiscale) {
-    return calcPokemonHp(pokemon) === 1;
-  }
-
-  if (toggleAbility) {
-    return Object.keys(pokemon?.volatiles ?? {}).includes(
-      ability?.replace?.(/\s/g, '').toLowerCase(),
-    );
-  }
-
-  return false;
-};
+): boolean => toggleableAbility(pokemon) && Object.keys(pokemon.volatiles || {}).includes(
+  formatId(('dirtyAbility' in pokemon && pokemon.dirtyAbility) || pokemon.ability),
+);
