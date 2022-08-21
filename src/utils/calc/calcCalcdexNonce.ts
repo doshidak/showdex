@@ -3,8 +3,19 @@ import { env } from '@showdex/utils/core';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcCalcdexId } from './calcCalcdexId';
 
-export const calcPokemonCalcdexNonce = (
-  pokemon: Partial<Showdown.Pokemon & CalcdexPokemon>,
+/**
+ * Calculates the nonce of a `Showdown.Pokemon` object,
+ * used to determine changes in the `battle` state.
+ *
+ * * As of v0.1.3, `calcdexNonce` of `CalcdexPokemon` is deprecated.
+ *   - Since this is used in `calcBattleCalcdexNonce()`, which is still being used,
+ *     this function is not deprecated.
+ *   - However, this function is no longer exported.
+ *
+ * @since 0.1.0
+ */
+const calcPokemonCalcdexNonce = (
+  pokemon: DeepPartial<Showdown.Pokemon & CalcdexPokemon>,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   ident: pokemon?.ident,
   name: pokemon?.name,
@@ -46,17 +57,28 @@ export const calcPokemonCalcdexNonce = (
     return prev;
   }, <Partial<Record<string, number>>>{})),
   moveState: calcCalcdexId<Partial<CalcdexPokemon['moveState']>>(pokemon?.moveState),
-  boosts: calcCalcdexId<Partial<Showdown.Pokemon['boosts']>>(pokemon?.boosts),
-  dirtyBoosts: calcCalcdexId<Partial<CalcdexPokemon['dirtyBoosts']>>(pokemon?.dirtyBoosts),
-  baseStats: calcCalcdexId<Partial<CalcdexPokemon['baseStats']>>(pokemon?.baseStats),
-  calculatedStats: calcCalcdexId<Partial<CalcdexPokemon['calculatedStats']>>(pokemon?.calculatedStats),
+  boosts: calcCalcdexId<Showdown.Pokemon['boosts']>(pokemon?.boosts),
+  dirtyBoosts: calcCalcdexId<CalcdexPokemon['dirtyBoosts']>(pokemon?.dirtyBoosts),
+  baseStats: calcCalcdexId<CalcdexPokemon['baseStats']>(pokemon?.baseStats),
+  spreadStats: calcCalcdexId<CalcdexPokemon['spreadStats']>(pokemon?.spreadStats),
   criticalHit: pokemon?.criticalHit?.toString(),
   preset: pokemon?.preset,
   presets: pokemon?.presets?.map((p) => p?.calcdexId || p?.name).join('|'),
   autoPreset: pokemon?.autoPreset?.toString(),
 });
 
-export const calcSideCalcdexNonce = (
+/**
+ * Calculates the nonce of a `Showdown.Side` object,
+ * used to determine changes in the `battle` state.
+ *
+ * * As of v0.1.3, `calcdexNonce` of `CalcdexPlayerSide` is deprecated.
+ *   - Since this is used in `calcBattleCalcdexNonce()`, which is still being used,
+ *     this function is not deprecated.
+ *   - However, this function is no longer exported.
+ *
+ * @since 0.1.0
+ */
+const calcSideCalcdexNonce = (
   side: Partial<Showdown.Side>,
 ): string => calcCalcdexId<Partial<Record<keyof Showdown.Side, string>>>({
   id: side?.id,
@@ -69,6 +91,13 @@ export const calcSideCalcdexNonce = (
   sideConditions: Object.keys(side?.sideConditions || {}).join('|'),
 });
 
+/**
+ * Calculates the nonce of the battle state.
+ *
+ * @todo Would probably be more performant to read from the `stepQueue`,
+ *   but make sure doing so doesn't prevent any updates.
+ * @since 0.1.0
+ */
 export const calcBattleCalcdexNonce = (
   battle: Partial<Showdown.Battle>,
 ): string => calcCalcdexId<Partial<Record<keyof Showdown.Battle, string>>>({
@@ -83,7 +112,7 @@ export const calcBattleCalcdexNonce = (
   p3: calcSideCalcdexNonce(battle?.p3),
   p4: calcSideCalcdexNonce(battle?.p4),
   currentStep: battle?.currentStep?.toString(),
-  stepQueue: Array.isArray(battle?.stepQueue) && battle.stepQueue.length ?
-    uuidv5(battle.stepQueue.join('|'), env('uuid-namespace', NIL_UUID)) :
-    null,
+  stepQueue: Array.isArray(battle?.stepQueue) && battle.stepQueue.length
+    ? uuidv5(battle.stepQueue.join('|'), env('uuid-namespace', NIL_UUID))
+    : null,
 });
