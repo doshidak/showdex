@@ -12,3 +12,4 @@ export * from './sanitizePlayerSide';
 export * from './sanitizePokemon';
 export * from './syncField';
 export * from './syncPokemon';
+export * from './toggleableAbility';
