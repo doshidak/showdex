@@ -13,11 +13,11 @@ import {
   FormatLabels,
   PokemonCommonNatures,
   PokemonNatureBoosts,
-  PokemonToggleAbilities,
+  // PokemonToggleAbilities,
 } from '@showdex/consts';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import { detectToggledAbility } from '@showdex/utils/battle';
-import { calcPokemonHp, calcPokemonStats } from '@showdex/utils/calc';
+import { calcPokemonHp, calcPokemonSpreadStats } from '@showdex/utils/calc';
 import type {
   AbilityName,
   Generation,
@@ -27,6 +27,14 @@ import type {
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
+
+type PokeInfoPresetOptions = {
+  label: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
+}[];
 
 export interface PokeInfoProps {
   className?: string;
@@ -49,13 +57,13 @@ export const PokeInfo = ({
 }: PokeInfoProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const find = usePresets({
+  const findPresets = usePresets({
     format,
   });
 
   const downloadedSets = React.useMemo(
-    () => (pokemon?.speciesForme ? find(pokemon.speciesForme, true) : []),
-    [find, pokemon],
+    () => (pokemon?.speciesForme ? findPresets(pokemon.speciesForme, true) : []),
+    [findPresets, pokemon],
   );
 
   const presets = React.useMemo(() => [
@@ -66,7 +74,7 @@ export const PokeInfo = ({
     pokemon?.presets,
   ]);
 
-  const presetOptions = presets.reduce<({ label: string; options: ({ label: string; value: string; })[]; })[]>((options, preset) => {
+  const presetOptions = presets.reduce<PokeInfoPresetOptions>((options, preset) => {
     const genlessFormat = preset.format.replace(`gen${gen}`, '');
     const groupLabel = FormatLabels?.[genlessFormat] || genlessFormat;
     const group = options.find((option) => option.label === groupLabel);
@@ -126,7 +134,7 @@ export const PokeInfo = ({
 
     // calculate the stats with the EVs/IVs
     if (typeof dex?.stats?.calc === 'function') {
-      mutation.calculatedStats = calcPokemonStats(dex, {
+      mutation.spreadStats = calcPokemonSpreadStats(dex, {
         ...pokemon,
         ...mutation,
       });
@@ -154,7 +162,7 @@ export const PokeInfo = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const currentHp = calcPokemonHp(pokemon);
+  const hpPercentage = calcPokemonHp(pokemon);
 
   return (
     <div
@@ -171,7 +179,7 @@ export const PokeInfo = ({
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
-              speciesForme: pokemon?.speciesForme || pokemon?.rawSpeciesForme,
+              speciesForme: pokemon?.speciesForme,
               item: pokemon?.dirtyItem ?? pokemon?.item,
             }}
             tooltip="Open Smogon Page"
@@ -225,24 +233,24 @@ export const PokeInfo = ({
 
             <PokeHpBar
               className={styles.hpBar}
-              hp={currentHp}
+              hp={hpPercentage}
             />
 
             {
-              !!currentHp &&
-              <span className={styles.currentHp}>
+              !!hpPercentage &&
+              <span className={styles.hpPercentage}>
                 {' '}
-                {`${(currentHp * 100).toFixed(0)}%`}
+                {`${(hpPercentage * 100).toFixed(0)}%`}
               </span>
             }
 
             {
-              (!!pokemon && (!!pokemon.status || pokemon.fainted || !currentHp)) &&
+              (!!pokemon && (!!pokemon.status || pokemon.fainted || !hpPercentage)) &&
               <span>
                 {' '}
                 <PokeStatus
                   status={pokemon?.status}
-                  fainted={pokemon?.fainted || !currentHp}
+                  fainted={pokemon?.fainted || !hpPercentage}
                 />
               </span>
             }
@@ -311,7 +319,7 @@ export const PokeInfo = ({
             Ability
 
             {
-              PokemonToggleAbilities.includes(pokemon?.dirtyAbility ?? pokemon?.ability) &&
+              pokemon?.abilityToggleable &&
               <>
                 {' '}
                 <Button
