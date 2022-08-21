@@ -2,14 +2,17 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
 
 export const detectPokemonIdent = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<CalcdexPokemon> = {},
-): string => [
+): string => pokemon?.ident || [
+  // 'p1', 'p2', etc.
   ('side' in pokemon ? pokemon.side?.sideid : null)
     || pokemon?.ident?.split?.(':')[0],
-  ('volatiles' in pokemon && pokemon.volatiles?.formechange?.[1])
-    || pokemon?.speciesForme
-    || pokemon?.ident?.split?.(': ')[1]
+
+  // speciesForme
+  pokemon?.speciesForme
     || pokemon?.details?.split?.(', ')?.[0]
-    || pokemon?.name,
-].filter(Boolean).join(': ')
+    || pokemon?.searchid?.split?.('|')[1]
+    || pokemon?.ident?.split?.(': ')[1]
+    || pokemon?.name, // terrible cause it could be a nickname, but if we're here, oh well
+].filter(Boolean).join(': ') // e.g., 'p1: Pikachu'
   || pokemon?.ident
   || pokemon?.searchid?.split?.('|')[0];
