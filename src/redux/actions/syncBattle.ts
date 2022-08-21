@@ -60,9 +60,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       throw new Error(`Could not find a CalcdexBattleState with battleId ${battleId}`);
     }
 
-    // state isn't actually mutable here, so this is a pretty performant way to deep-copy
-    // since we don't use any complex data types, just primitives
-    const battleState = <CalcdexBattleState> JSON.parse(JSON.stringify(state[battleId]));
+    // yooo native deep-copying lessgo baby
+    const battleState = structuredClone(state[battleId]);
 
     // l.debug(
     //   '\n', 'pre-copied battleState', state[battleId],
