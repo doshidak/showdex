@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { detectToggledAbility, toggleableAbility } from '@showdex/utils/battle';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
@@ -20,7 +21,6 @@ interface PokeCalcProps {
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
-  side?: 'attacker' | 'defender';
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -36,7 +36,6 @@ export const PokeCalc = ({
   playerPokemon,
   opponentPokemon,
   field,
-  side,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
   const calculateMatchup = useSmogonMatchup(
@@ -54,10 +53,6 @@ export const PokeCalc = ({
       ...mutation,
 
       calcdexId: playerPokemon?.calcdexId,
-      // ident: playerPokemon?.ident,
-      // boosts: playerPokemon?.boosts,
-
-      // nature: mutation?.nature ?? playerPokemon?.nature,
 
       ivs: {
         ...playerPokemon?.ivs,
@@ -74,6 +69,20 @@ export const PokeCalc = ({
         ...mutation?.dirtyBoosts,
       },
     };
+
+    // re-check for toggleable abilities in the mutation
+    if ('ability' in mutation || 'dirtyAbility' in mutation) {
+      const tempPokemon = {
+        ...playerPokemon,
+        ...payload,
+      };
+
+      payload.abilityToggleable = toggleableAbility(tempPokemon);
+
+      if (payload.abilityToggleable) {
+        payload.abilityToggled = detectToggledAbility(tempPokemon);
+      }
+    }
 
     // clear any dirtyBoosts that match the current boosts
     Object.entries(playerPokemon.boosts).forEach(([
@@ -124,9 +133,11 @@ export const PokeCalc = ({
       <PokeStats
         className={cx(styles.section, styles.stats)}
         dex={dex}
-        pokemon={playerPokemon}
+        playerPokemon={playerPokemon}
+        opponentPokemon={opponentPokemon}
         field={field}
-        side={side}
+        // side={side}
+        playerKey={playerKey}
         onPokemonChange={handlePokemonChange}
       />
     </div>
