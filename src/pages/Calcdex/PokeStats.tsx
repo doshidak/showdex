@@ -11,17 +11,19 @@ import {
 } from '@showdex/consts';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
 import { calcPokemonFinalStats } from '@showdex/utils/calc';
+import { env } from '@showdex/utils/core';
 import type { Generation } from '@pkmn/data';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
   dex: Generation;
-  pokemon: CalcdexPokemon;
+  playerPokemon: CalcdexPokemon;
+  opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
-  side?: 'attacker' | 'defender';
+  playerKey?: CalcdexPlayerKey,
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -29,9 +31,10 @@ export const PokeStats = ({
   className,
   style,
   dex,
-  pokemon,
+  playerPokemon: pokemon,
+  opponentPokemon,
   field,
-  side,
+  playerKey,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
   const colorScheme = useColorScheme();
@@ -39,10 +42,22 @@ export const PokeStats = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const finalStats = React.useMemo(
-    () => (pokemon?.calcdexId ? calcPokemonFinalStats(dex, pokemon, field, side) : null),
-    [dex, pokemon, field, side],
-  );
+  const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
+  const evsLegal = totalEvs <= env.int('calcdex-pokemon-max-legal-evs');
+
+  const finalStats = React.useMemo(() => (pokemon?.calcdexId ? calcPokemonFinalStats(
+    dex,
+    pokemon,
+    opponentPokemon,
+    field,
+    playerKey,
+  ) : null), [
+    dex,
+    opponentPokemon,
+    playerKey,
+    pokemon,
+    field,
+  ]);
 
   return (
     <TableGrid
@@ -97,6 +112,7 @@ export const PokeStats = ({
               className={styles.valueField}
               label={`${stat.toUpperCase()} IV for Pokemon ${friendlyPokemonName}`}
               hint={iv.toString() || '31'}
+              fallbackValue={31}
               min={0}
               max={31}
               step={1}
@@ -116,7 +132,14 @@ export const PokeStats = ({
       })}
 
       {/* EVs */}
-      <TableGridItem align="right" header>
+      <TableGridItem
+        className={cx(
+          styles.evsHeader,
+          !evsLegal && styles.illegal,
+        )}
+        align="right"
+        header
+      >
         EV
         <span className={styles.small}>
           S
@@ -135,6 +158,7 @@ export const PokeStats = ({
               className={styles.valueField}
               label={`${stat.toUpperCase()} EV for Pokemon ${friendlyPokemonName}`}
               hint={ev.toString() || '252'}
+              fallbackValue={0}
               min={0}
               max={252}
               step={4}
@@ -157,8 +181,8 @@ export const PokeStats = ({
       <TableGridItem align="right" header />
 
       {PokemonStatNames.map((stat) => {
-        const calculatedStat = finalStats?.[stat] || 0;
-        const formattedStat = formatStatBoost(calculatedStat) || '???';
+        const finalStat = finalStats?.[stat] || 0;
+        const formattedStat = formatStatBoost(finalStat) || '???';
         const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
 
         return (
