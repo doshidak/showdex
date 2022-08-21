@@ -1,16 +1,8 @@
 import type { CalcdexPokemon } from '@showdex/redux/store';
-import { detectPokemonIdent } from './detectPokemonIdent';
-
-/* eslint-disable arrow-body-style */
 
 export const detectSpeciesForme = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-): CalcdexPokemon['speciesForme'] => {
-  // if ('speciesForme' in (pokemon || {})) {
-  //   return sanitizeSpeciesForme(pokemon.speciesForme);
-  // }
-
-  return pokemon?.volatiles?.formechange?.[1] ||
-    pokemon?.speciesForme ||
-    detectPokemonIdent(pokemon)?.split?.(': ')?.[1];
-};
+): string => pokemon?.speciesForme // 'Zygarde-Complete' -- ideally we'd use this one
+  || pokemon?.details?.split?.(', ')[0] // 'Zygarde, L100, N' -> 'Zygarde' (normally just 'Zygarde' tho)
+  || pokemon?.searchid?.split?.('|')[1] // 'p1: Zygarde|Zygarde-Complete' -> 'Zygarde-Complete'
+  || pokemon?.ident?.split?.(': ')[1]; // 'p1: Zygarde' -> 'Zygarde'
