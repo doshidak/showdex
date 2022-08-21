@@ -39,6 +39,9 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
+  const ability = pokemon?.dirtyAbility || pokemon?.ability;
+  const item = pokemon?.dirtyItem || pokemon?.item;
+
   return (
     <TableGrid
       className={cx(
@@ -113,17 +116,6 @@ export const PokeMoves = ({
         const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
 
         const move = moveid ? dex?.moves?.get?.(moveName) : null;
-
-        // if (pokemon?.useUltimateMoves) {
-        //   const ultName = gen === 7 ?
-        //     getZMove(dex, moveName, pokemon?.dirtyItem ?? pokemon?.item) :
-        //     getMaxMove(dex, moveName, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
-        //
-        //   if (ultName) {
-        //     moveName = ultName;
-        //   }
-        // }
-
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
@@ -208,17 +200,13 @@ export const PokeMoves = ({
                   label: gen === 7 ? 'Z' : 'Max',
                   options: pokemon.moves.map((name) => {
                     const ultName = gen === 7 ?
-                      getZMove(dex, name, pokemon?.dirtyItem ?? pokemon?.item) :
-                      getMaxMove(dex, name, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
+                      getZMove(dex, name, item) :
+                      getMaxMove(dex, name, ability, pokemon.speciesForme);
 
-                    if (ultName) {
-                      return {
-                        label: ultName,
-                        value: name,
-                      };
-                    }
-
-                    return null;
+                    return ultName ? {
+                      label: ultName,
+                      value: name,
+                    } : null;
                   }).filter(Boolean),
                 }, !!pokemon?.moveState?.revealed.length && {
                   label: 'Revealed',
