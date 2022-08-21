@@ -189,10 +189,10 @@ export const usePresets = ({
       return [];
     }
 
-    l.debug(
-      'Attempting to find presets for', speciesForme,
-      '\n', 'sort', sort || false,
-    );
+    // l.debug(
+    //   'Attempting to find presets for', speciesForme,
+    //   '\n', 'sort', sort || false,
+    // );
 
     // e.g., evals to true w/ speciesForme 'Urshifu-Rapid-Strike-Gmax' or 'Charizard-Mega-X'
     const hasUltForme = UltFormeRegex.test(speciesForme);
@@ -204,10 +204,10 @@ export const usePresets = ({
       const ultPresets = presets.filter((p) => p.format.includes(genlessFormat) && p.speciesForme === speciesForme);
 
       if (ultPresets.length) {
-        l.debug(
-          'Found ultPresets for', speciesForme,
-          // '\n', 'ultPresets', ultPresets,
-        );
+        // l.debug(
+        //   'Found ultPresets for', speciesForme,
+        //   // '\n', 'ultPresets', ultPresets,
+        // );
 
         return sort ? sortPresets(ultPresets, genlessFormat) : ultPresets;
       }
@@ -233,10 +233,10 @@ export const usePresets = ({
     });
 
     if (nonWildPresets.length) {
-      l.debug(
-        'Found nonWildPresets for', speciesForme,
-        '\n', 'nonWildPresets', nonWildPresets,
-      );
+      // l.debug(
+      //   'Found nonWildPresets for', speciesForme,
+      //   '\n', 'nonWildPresets', nonWildPresets,
+      // );
 
       return sort ? sortPresets(nonWildPresets, genlessFormat) : nonWildPresets;
     }
