@@ -126,6 +126,7 @@ export const PlayerCalc = ({
 
             const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
             const friendlyPokemonName = mon?.speciesForme || mon?.name || pokemonKey;
+            const item = mon?.dirtyItem ?? mon?.item;
 
             return (
               <PiconButton
@@ -142,9 +143,9 @@ export const PlayerCalc = ({
                 pokemon={mon ? {
                   ...mon,
                   speciesForme: mon?.speciesForme,
-                  item: mon?.dirtyItem ?? mon?.item,
+                  item,
                 } : 'pokeball-none'}
-                tooltip={friendlyPokemonName} /** @todo make this more descriptive, like the left-half of PokeInfo */
+                tooltip={mon ? `${friendlyPokemonName}${item ? `\n${item}` : ''}` : undefined}
                 disabled={!mon}
                 onPress={() => onIndexSelect?.(i)}
               >
