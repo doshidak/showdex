@@ -455,7 +455,9 @@ export const calcPokemonFinalStats = (
   ].filter(Boolean).some((a) => ['airlock', 'cloudnine'].includes(a));
 
   if (weather && !ignoreWeather) {
-    if (weather === 'sandstorm') {
+    // note: see WeatherMap in weather consts for the sanitized value
+    // (e.g., `weather` will be `'sand'`, not `'sandstorm'`)
+    if (weather === 'sand') {
       if (pokemon.types.includes('Rock')) {
         // 50% SPE boost if Rock type w/ darude sandstorm
         finalStats.spe = Math.floor(finalStats.spe * 1.5);
@@ -471,7 +473,7 @@ export const calcPokemonFinalStats = (
     }
 
     if (ignoreItem || item !== 'utilityumbrella') {
-      if (['sunnyday', 'desolateland'].includes(weather)) {
+      if (['sun', 'harshsunshine'].includes(weather)) {
         if (ability === 'solarpower') {
           // 50% SPA boost if ability is "Solar Power", sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
           finalStats.spa = Math.floor(finalStats.spa * 1.5);
@@ -485,7 +487,7 @@ export const calcPokemonFinalStats = (
       }
     }
 
-    if (['raindance', 'primordialsea'].includes(weather) && ability === 'swiftswim') {
+    if (['rain', 'heavyrain'].includes(weather) && ability === 'swiftswim') {
       speedMods.push(2);
     }
   }
