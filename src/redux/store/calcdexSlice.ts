@@ -79,8 +79,7 @@ export interface CalcdexPokemonPreset {
   /**
    * Unique ID (via `uuid`) generated from a serialized checksum of this preset.
    *
-   * * For more information about why this property exists,
-   *   see the `name` property.
+   * * For more information about why this property exists, see the `name` property.
    * * Note that a preset won't have a `calcdexNonce` property since none of the preset's
    *   properties should be mutable (they're pre-*set*, after all!).
    *
@@ -279,7 +278,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   abilities?: AbilityName[];
 
   /**
-   * Alternative abilities from the currently applied `preset`.
+   * Alternative abilities (i.e., ability pool) from the currently applied `preset`.
    *
    * @since 0.1.0
    */
@@ -291,18 +290,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   nature?: Showdown.PokemonNature;
-
-  /**
-   * Possible natures of the Pokemon.
-   *
-   * @deprecated Use `PokemonNatures` from `@showdex/consts` instead.
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @since 0.1.0
-   */
-  natures?: Showdown.PokemonNature[];
 
   /**
    * Item being held by the Pokemon.
@@ -363,9 +350,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * * Typically contains moves set via user input or Smogon sets.
    * * Should not be synced with the current `app.curRoom.battle` state.
-   *   - Unless the originating Pokemon object is a `Showdown.ServerPokemon`.
-   *   - ~~In that instance, `serverSourced` should be `true`.~~
-   *   - Update (v0.1.3): `serverSourced` was unused, so it's now deprecated.
+   *   - Unless the originating Pokemon object is a `Showdown.ServerPokemon` or a Pokemon that transformed,
+   *     in which the exact moveset would be made available to the client.
    *
    * @since 0.1.0
    */
@@ -439,7 +425,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * Only provided if the Pokemon belongs to the player.
    *   - Spectators won't receive this information (they only receive client `Showdown.Pokemon` objects).
    * * HP value is derived from the `maxhp` of the `Showdown.ServerPokemon` object.
-   * * EVs/IVs/nature are factored in, but not items or abilities.
+   * * EVs/IVs/nature are factored in, but not items, abilities, or field conditions.
    *   - Server doesn't report the actual EVs/IVs/nature, so we get to figure them out ourselves!
    *
    * @default
@@ -461,7 +447,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   in `applyPreset()` of `PokeInfo` when a `preset` is applied.
    *   - Additionally, this has been renamed from `calculatedStats` (pre-v1.0.3) to
    *     `spreadStats` to avoid confusion between this and existing stat properties.
-   *   - Furthermore, `guessServerSpread()` internally uses a local `calculatedStats` object
+   *   - For instance, `guessServerSpread()` internally uses a local `calculatedStats` object
    *     that's unrelated to this one, adding to the confusion.
    * * Since the user is free to change the EVs/IVs/nature, this value should not be synced with
    *   the provided `stats` in the corresponding `ServerPokemon`, if applicable.
