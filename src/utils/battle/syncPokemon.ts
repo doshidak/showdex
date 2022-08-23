@@ -226,12 +226,17 @@ export const syncPokemon = (
       ...serverPokemon.stats,
     };
 
+    // when refreshing the page, server will report dead ServerPokemon with 0 hp and 100 maxhp,
+    // which breaks the guessing part since no EV/IV combination may match 100 HP
+    // (setting 0 HP for the serverStats tells guessServerSpread() to ignore the HP when guessing)
+    if (!serverPokemon.hp && serverPokemon.maxhp === 100) {
+      syncedPokemon.serverStats.hp = 0;
+    }
+
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
-    // (note that this function doesn't pull from syncedPokemon.serverStats, but rather serverPokemon.stats)
     const guessedSpread = guessServerSpread(
       dex,
       syncedPokemon,
-      // serverPokemon, // since we have serverStats now, no need for this lol
       format?.includes('random') ? 'Hardy' : undefined,
     );
 
