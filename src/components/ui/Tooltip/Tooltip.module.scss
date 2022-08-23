@@ -28,6 +28,8 @@ $arrow-placements: (
   @include font.apply(fonts.$mono);
   font-size: $font-size;
   color: $font-color;
+  text-align: center;
+  white-space: pre;
   border-radius: $border-radius;
 
   &.light {
