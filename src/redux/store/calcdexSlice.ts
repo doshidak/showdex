@@ -202,10 +202,21 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   rawSpeciesForme?: string;
 
   /**
+   * Transformed `speciesForme`, if applicable.
+   *
+   * * Derived from the transformed `Showdown.Pokemon` in the current Pokemon's `volatiles.transform[1]`.
+   * * Separately tracked from `speciesForme` as this is primarily used to determine if the Pokemon has transformed.
+   * * This should be prioritized over `speciesForme` in `createSmogonPokemon()` so that the calculations are based off of the transformed Pokemon.
+   *
+   * @since 0.1.3
+   */
+  transformedForme?: string;
+
+  /**
    * Current types of the Pokemon.
    *
-   * * Could change depending on the Pokemon's ability, like *Protean*.
-   * * Should be set via `tooltips.getPokemonTypes()`.
+   * * Could change in certain instances, such as if the Pokemon has the *Protean* ability or
+   *   the Pokemon transformed into another Pokemon.
    *
    * @since 0.1.0
    */
@@ -358,6 +369,25 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   moves?: MoveName[];
 
   /**
+   * Moves provided by the corresponding `ServerPokemon`.
+   *
+   * * Should only be set on initialization of the `CalcdexPokemon`.
+   *   - Make sure the `ServerPokemon` isn't already transformed (as a result of a page refresh, for instance).
+   *   - If that's the case, this value should not be set.
+   * * Transformed moves revealed in the `ServerPokemon` should be set under `transformedMoves`.
+   *
+   * @since 0.1.3
+   */
+  serverMoves?: MoveName[];
+
+  /**
+   * Transformed moves provided by the corresponding `ServerPokemon`.
+   *
+   * @since 0.1.3
+   */
+  transformedMoves?: MoveName[];
+
+  /**
    * Alternative moves from the currently applied `preset`.
    *
    * * Should be rendered within the moves dropdown, similar to the moves in the properties of `moveState`.
@@ -418,6 +448,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   baseStats?: Showdown.StatsTable;
+
+  /**
+   * Base stats of the `transformedForme`.
+   *
+   * * Unlike `baseStats`, this doesn't include `hp` since *Transform* does not copy the base HP stat.
+   * * Use the truthiness of `transformedForme` (i.e., `!!transformedForme`) to determine whether
+   *   you should read from this value.
+   *
+   * @since 0.1.3
+   */
+  transformedBaseStats?: Omit<Showdown.StatsTable, 'hp'>;
 
   /**
    * Server-reported stats of the Pokemon.

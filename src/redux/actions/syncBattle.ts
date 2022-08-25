@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   detectPlayerKeyFromBattle,
   sanitizePokemon,
+  sanitizePokemonVolatiles,
   syncField,
   syncPokemon,
 } from '@showdex/utils/battle';
@@ -136,10 +137,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine if `myPokemon` belongs to the current player
-      const isMyPokemonSide = !!myPokemonSide &&
-        playerKey === myPokemonSide &&
-        Array.isArray(myPokemon) &&
-        !!myPokemon.length;
+      const isMyPokemonSide = !!myPokemonSide
+        && playerKey === myPokemonSide
+        && Array.isArray(myPokemon)
+        && !!myPokemon.length;
 
       // const hasUnrevealed = isMyPokemonSide &&
       //   myPokemon.length > player.pokemon.length;
@@ -197,19 +198,26 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           },
         });
 
-        const serverPokemon = isMyPokemonSide ?
-          // myPokemon.find((p, j) => calcPokemonCalcdexId({ ...p, slot: j }) === clientPokemonId) :
-          myPokemon.find((p) => p.ident === clientPokemon.ident) :
-          null;
+        const serverPokemon = isMyPokemonSide
+          ? myPokemon.find((p) => p.ident === clientPokemon.ident)
+          : null;
 
         const matchedPokemonIndex = playerState.pokemon.findIndex((p) => p.calcdexId === clientPokemonId);
-        const matchedPokemon = matchedPokemonIndex > -1 ? playerState.pokemon[matchedPokemonIndex] : null;
+
+        const matchedPokemon = matchedPokemonIndex > -1
+          ? playerState.pokemon[matchedPokemonIndex]
+          : null;
 
         // this is our starting point for the current clientPokemon
         const basePokemon = matchedPokemon || sanitizePokemon({
           ...clientPokemon,
           slot: i, // important that we specify this to obtain a consistent calcdexId
         });
+
+        // in case the volatiles aren't sanitized yet lol
+        if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
+          basePokemon.volatiles = sanitizePokemonVolatiles(basePokemon);
+        }
 
         // and then from here on out, we just directly modify syncedPokemon
         // (serverPokemon and dex are optional, which will add additional known properties)
@@ -303,10 +311,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // update activeIndex (and selectionIndex if autoSelect is enabled)
       // (hopefully the `ident` exists here!)
-      const activeIndex = player.active?.[0]?.ident ?
-        // playerPokemon.findIndex((p) => p === player.active[0]) :
-        playerPokemon.findIndex((p) => p.ident === player.active[0].ident) :
-        -1;
+      const activeIndex = player.active?.[0]?.ident
+        ? playerPokemon.findIndex((p) => p.ident === player.active[0].ident)
+        : -1;
 
       if (activeIndex > -1) {
         playerState.activeIndex = activeIndex;
