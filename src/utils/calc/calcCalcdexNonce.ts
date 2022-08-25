@@ -20,7 +20,7 @@ const calcPokemonCalcdexNonce = (
   ident: pokemon?.ident,
   name: pokemon?.name,
   speciesForme: pokemon?.speciesForme,
-  rawSpeciesForme: pokemon?.rawSpeciesForme ?? pokemon?.speciesForme,
+  // rawSpeciesForme: pokemon?.rawSpeciesForme ?? pokemon?.speciesForme,
   hp: pokemon?.hp?.toString(),
   maxhp: pokemon?.maxhp?.toString(),
   level: pokemon?.level?.toString(),
@@ -102,8 +102,9 @@ export const calcBattleCalcdexNonce = (
   battle: Partial<Showdown.Battle>,
 ): string => {
   // inactive timeout messages may interfere with the activeIndex currently set by the user
+  // excludes steps: '|inactive|', '|inactiveoff|', '|-message|' '|c|' (chat), '|j|' (join), and '|l|' (leave)
   const stepQueue = battle?.stepQueue
-    ?.filter?.((q) => !!q && !q.includes('|inactive')) // excludes '|inactive|' and '|inactiveoff|'
+    ?.filter?.((q) => !!q && !/^\|(?:inactive|-message|c|j|l)/i.test(q))
     ?? [];
 
   return calcCalcdexId<Partial<Record<keyof Showdown.Battle, string>>>({
