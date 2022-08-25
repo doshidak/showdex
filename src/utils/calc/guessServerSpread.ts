@@ -109,8 +109,10 @@ export const guessServerSpread = (
         break;
       }
 
+      // if we're ignoring HP, set the IVs to 31 and EVs to 0 (for now)
+      // (we'll set the remaining EVs to HP after spread guessing)
       if (ignoreHp && stat === 'hp') {
-        guessedSpread.ivs.hp = 0;
+        guessedSpread.ivs.hp = 31;
         guessedSpread.evs.hp = 0;
 
         continue;
@@ -171,8 +173,10 @@ export const guessServerSpread = (
       && serverStats.spd === calculatedStats.spd
       && serverStats.spe === calculatedStats.spe;
 
-    const evsLegal = Object.values(guessedSpread.evs)
-      .reduce((sum, ev) => sum + ev, 0) <= env.int('calcdex-pokemon-max-legal-evs'); // 252 + 252 + 4 = 508
+    const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs'); // 252 + 252 + 4 = 508
+    const totalEvs = Object.values(guessedSpread.evs).reduce((sum, ev) => sum + ev, 0);
+
+    const evsLegal = totalEvs <= maxLegalEvs;
 
     if (statsMatch && evsLegal) {
       l.debug(
@@ -184,6 +188,11 @@ export const guessServerSpread = (
       );
 
       guessedSpread.nature = nature.name;
+
+      // if we ignored the HP before, we'll set the remaining EVs to HP
+      if (ignoreHp && maxLegalEvs - totalEvs > 0) {
+        guessedSpread.evs.hp = maxLegalEvs - totalEvs;
+      }
 
       break;
     }
