@@ -1,3 +1,4 @@
+import { clamp } from '@showdex/utils/core';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
 /**
@@ -13,5 +14,13 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
  * @since 0.1.0
  */
 export const calcPokemonHp = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon>,
-): CalcdexPokemon['hp'] => (pokemon?.hp || 0) / (pokemon?.maxhp || 1);
+  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
+): CalcdexPokemon['hp'] => {
+  const hp = pokemon.hp || 0;
+
+  const maxHp = 'spreadStats' in pokemon && pokemon.serverSourced && !pokemon.transformedForme
+    ? pokemon.spreadStats.hp || pokemon.maxhp || 1
+    : pokemon.maxhp || 1;
+
+  return clamp(0, hp / maxHp, 1);
+};
