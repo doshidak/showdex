@@ -5,6 +5,7 @@ export const detectPokemonIdent = (
 ): string => pokemon?.ident || [
   // 'p1', 'p2', etc.
   ('side' in pokemon ? pokemon.side?.sideid : null)
+    || pokemon?.searchid?.split?.(':')[0]
     || pokemon?.ident?.split?.(':')[0],
 
   // speciesForme
