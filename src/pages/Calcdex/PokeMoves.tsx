@@ -4,7 +4,7 @@ import { PokeType, useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
-import { getMaxMove, getZMove } from '@showdex/utils/battle';
+import { buildMoveOptions } from '@showdex/utils/battle';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
 import type { CalcdexPokemon } from '@showdex/redux/store';
@@ -39,8 +39,7 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const ability = pokemon?.dirtyAbility || pokemon?.ability;
-  const item = pokemon?.dirtyItem || pokemon?.item;
+  const moveOptions = buildMoveOptions(dex, pokemon);
 
   return (
     <TableGrid
@@ -196,45 +195,7 @@ export const PokeMoves = ({
                     });
                   },
                 }}
-                options={[pokemon?.useUltimateMoves && {
-                  label: gen === 7 ? 'Z' : 'Max',
-                  options: pokemon.moves.map((name) => {
-                    const ultName = gen === 7 ?
-                      getZMove(dex, name, item) :
-                      getMaxMove(dex, name, ability, pokemon.speciesForme);
-
-                    return ultName ? {
-                      label: ultName,
-                      value: name,
-                    } : null;
-                  }).filter(Boolean),
-                }, !!pokemon?.moveState?.revealed.length && {
-                  label: 'Revealed',
-                  options: pokemon.moveState.revealed.map((name) => ({
-                    label: name.replace('*', '') as MoveName,
-                    value: name.replace('*', '') as MoveName,
-                  })),
-                }, !!pokemon?.altMoves?.length && {
-                  label: 'Pool',
-                  options: pokemon.altMoves
-                    .filter((n) => !!n && (!pokemon.moveState?.revealed?.length || !pokemon.moveState.revealed.includes(n)))
-                    .map((name) => ({
-                      label: name,
-                      value: name,
-                    })),
-                }, !!pokemon?.moveState?.learnset.length && {
-                  label: 'Learnset',
-                  options: pokemon.moveState.learnset.map((name) => ({
-                    label: name as MoveName,
-                    value: name as MoveName,
-                  })),
-                }, !!pokemon?.moveState?.other.length && {
-                  label: 'All',
-                  options: pokemon.moveState.other.map((name) => ({
-                    label: name as MoveName,
-                    value: name as MoveName,
-                  })),
-                }].filter(Boolean)}
+                options={moveOptions}
                 noOptionsMessage="No Moves Found"
                 disabled={!pokemon?.speciesForme}
               />
