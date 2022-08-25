@@ -69,7 +69,7 @@ const SmogonUniversityFormatSlugs: Record<string, string> = {
 const SmogonUniversityWindowFeatures = [
   'top=0',
   `left=${typeof window === 'undefined' ? 0 : (window.screen?.width ?? 960) - 960}`,
-  'width=620',
+  'width=800',
   'height=800',
   'resizable',
   'scrollbars',
