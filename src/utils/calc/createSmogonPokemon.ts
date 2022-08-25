@@ -1,12 +1,13 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
-import { PokemonToggleAbilities } from '@showdex/consts';
-import { detectPokemonIdent, detectSpeciesForme } from '@showdex/utils/battle';
+import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
 const l = logger('@showdex/utils/calc/createSmogonPokemon');
+
+/* eslint-disable no-nested-ternary */
 
 export const createSmogonPokemon = (
   dex: Generation,
@@ -15,23 +16,24 @@ export const createSmogonPokemon = (
 ): SmogonPokemon => {
   // don't bother logging in this and the `ident` check below cause the Calcdex components
   // may get partial data (or even nothing) in the beginning, so these logs would get pretty spammy
-  if (typeof dex?.num !== 'number' || dex.num < 1) {
+  if (typeof dex?.num !== 'number' || dex.num < 1 || !pokemon?.calcdexId) {
     return null;
   }
 
-  const ident = detectPokemonIdent(pokemon);
+  // const ident = detectPokemonIdent(pokemon);
 
-  if (!ident) {
-    return null;
-  }
+  // if (!ident) {
+  //   return null;
+  // }
 
   // optional chaining here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
-  const item = pokemon?.dirtyItem ?? pokemon?.item;
+  const item = pokemon.dirtyItem ?? pokemon.item;
 
   const speciesForme = SmogonPokemon.getForme(
     dex,
-    detectSpeciesForme(pokemon),
+    // detectSpeciesForme(pokemon),
+    pokemon.transformedForme || pokemon.speciesForme,
     item,
     moveName,
   );
@@ -40,7 +42,7 @@ export const createSmogonPokemon = (
   if (!speciesForme) {
     if (__DEV__) {
       l.warn(
-        'Failed to detect speciesForme from Pokemon with ident', ident,
+        'Failed to detect speciesForme from Pokemon', pokemon.ident,
         '\n', 'speciesForme', speciesForme,
         '\n', 'gen', dex.num,
         '\n', 'pokemon', pokemon,
@@ -52,13 +54,12 @@ export const createSmogonPokemon = (
   }
 
   // not using optional chaining here since ability cannot be cleared in PokeInfo
-  const ability = pokemon.dirtyAbility || pokemon.ability;
+  const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
   // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
   // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
-  const hasMultiscale = ability?.toLowerCase?.() === 'multiscale';
-  const toggleAbility = !hasMultiscale && PokemonToggleAbilities.includes(ability);
+  const hasMultiscale = formatId(ability) === 'multiscale';
 
   const options: ConstructorParameters<typeof SmogonPokemon>[2] = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
@@ -67,18 +68,30 @@ export const createSmogonPokemon = (
     // ---
     // also note: seems that maxhp is internally calculated in the instance's rawStats.hp,
     // so we can't specify it here
-    curHP: pokemon.serverSourced ? pokemon.hp : (() => { // js wizardry
-      // note that spreadStats may not be available yet, hence the fallback object
-      const hpPercentage = calcPokemonHp(pokemon);
-      const { hp: hpStat } = pokemon.spreadStats || { hp: pokemon?.maxhp || 1 };
-
+    curHP: (() => { // js wizardry
       // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
-      // (if true, we'll tell the Smogon calc that it's at 99% HP)
-      // (also, the ability toggle button in PokeInfo will disable if the HP isn't 100%)
-      const shouldMultiscale = hasMultiscale && hpPercentage === 1 && !pokemon?.abilityToggled;
+      const shouldMultiscale = hasMultiscale
+        && pokemon.abilityToggleable
+        && pokemon.abilityToggled;
 
-      // if the Pokemon fainted, assume it has full HP as to not break the damage calc
-      return (shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat;
+      if (pokemon.serverSourced) {
+        const maxHp = pokemon.spreadStats.hp || pokemon.maxhp || 100;
+
+        const hp = !pokemon.hp || pokemon.hp === maxHp // check 0% or 100% HP for Multiscale
+          ? Math.floor((pokemon.hp || maxHp) * (!hasMultiscale || shouldMultiscale ? 1 : 0.99))
+          : (shouldMultiscale ? maxHp : pokemon.hp);
+
+        return hp;
+      }
+
+      const hpPercentage = calcPokemonHp(pokemon);
+
+      // note that spreadStats may not be available yet, hence the fallback object
+      const { hp: hpStat } = pokemon.spreadStats
+        || { hp: pokemon.maxhp || 100 };
+
+      // if the Pokemon is dead, assume it has full HP as to not break the damage calc
+      return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
     })(),
 
     level: pokemon.level,
@@ -90,8 +103,8 @@ export const createSmogonPokemon = (
     isDynamaxed: pokemon.useUltimateMoves,
 
     ability,
-    abilityOn: toggleAbility ? pokemon.abilityToggled : undefined,
-    item: pokemon.dirtyItem || pokemon.item,
+    abilityOn: pokemon.abilityToggleable ? pokemon.abilityToggled : undefined,
+    item,
     nature: pokemon.nature,
     moves: pokemon.moves,
 
@@ -122,9 +135,19 @@ export const createSmogonPokemon = (
     },
   };
 
-  return new SmogonPokemon(
+  const smogonPokemon = new SmogonPokemon(
     dex,
     speciesForme,
     options,
   );
+
+  // need to update the base HP stat for transformed Pokemon
+  // (otherwise, damage calculations may be incorrect!)
+  if (pokemon.transformedForme) {
+    smogonPokemon.rawStats.hp = pokemon.baseStats.hp;
+  }
+
+  return smogonPokemon;
 };
+
+/* eslint-enable no-nested-ternary */

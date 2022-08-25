@@ -30,6 +30,7 @@ export const syncPokemon = (
   // you should not be looping through any special CalcdexPokemon-specific properties here!
   (<(keyof NonFunctionProperties<Showdown.Pokemon>)[]> [
     'name',
+    'speciesForme',
     'hp',
     'maxhp',
     'status',
@@ -40,6 +41,7 @@ export const syncPokemon = (
     'itemEffect',
     'prevItem',
     'prevItemEffect',
+    // 'moves', // warning: do not sync unless you want to overwrite the (Calcdex) user's moves
     'moveTrack',
     'volatiles',
     'turnstatuses',
@@ -131,15 +133,20 @@ export const syncPokemon = (
         break;
       }
 
-      case 'moves': {
-        const moves = <CalcdexPokemon['moves']> value;
-
-        if (!moves?.length) {
-          return;
-        }
-
-        break;
-      }
+      // case 'moves': {
+      //   const moves = <CalcdexPokemon['moves']> value;
+      //
+      //   if (!moves?.length) {
+      //     return;
+      //   }
+      //
+      //   // clean up any transformed moves
+      //   value = moves
+      //     .filter(Boolean)
+      //     .map((name) => (name.includes('*') ? name.replace(/\*/g, '') : name));
+      //
+      //   break;
+      // }
 
       case 'moveTrack': {
         const moveTrack = <Showdown.Pokemon['moveTrack']> value;
@@ -168,11 +175,34 @@ export const syncPokemon = (
         // sync Pokemon's dynamax state
         syncedPokemon.useUltimateMoves = 'dynamax' in volatiles;
 
-        /**
-         * @todo handle Ditto transformations here
-         */
+        // check for type changes
+        const changedTypes = 'typechange' in volatiles
+          ? <Showdown.TypeName[]> volatiles.typechange[1]?.split?.('/') || [] // 'Psychic/Ice' -> ['Psychic', 'Ice']
+          : [];
 
-        // sanitizing to make sure a transformed ditto/mew doesn't crash the extension lol
+        if (changedTypes.length) {
+          syncedPokemon.types = changedTypes;
+        }
+
+        // check for transformations (e.g., from Ditto/Mew)
+        const transformedPokemon = 'transform' in volatiles
+          ? <Showdown.Pokemon> <unknown> volatiles.transform[1]
+          : null;
+
+        syncedPokemon.transformedForme = transformedPokemon?.speciesForme
+          ? transformedPokemon.speciesForme
+          : null;
+
+        // check for (untransformed) forme changes
+        const formeChange = 'formechange' in volatiles
+          ? volatiles.formechange[1] || null
+          : null;
+
+        if (!transformedPokemon && formeChange) {
+          syncedPokemon.speciesForme = formeChange;
+        }
+
+        // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
         value = sanitizePokemonVolatiles(clientPokemon);
 
         break;
@@ -191,7 +221,7 @@ export const syncPokemon = (
   });
 
   // fill in some additional fields if the serverPokemon was provided
-  if (serverPokemon) {
+  if (serverPokemon?.ident) {
     // should always be the case, idk why it shouldn't be (but you know we gotta check)
     if (typeof serverPokemon.hp === 'number' && typeof serverPokemon.maxhp === 'number') {
       // serverSourced is used primarily as a flag to distinguish `hp` as the actual value or as a percentage
@@ -199,7 +229,12 @@ export const syncPokemon = (
       syncedPokemon.serverSourced = true;
 
       syncedPokemon.hp = serverPokemon.hp;
-      syncedPokemon.maxhp = serverPokemon.maxhp;
+
+      // make sure `maxhp` isn't a percentage (which is usually the case with dead Pokemon, i.e., 0% HP)
+      // (this isn't foolproof tho cause there could be instances where the `maxhp` is legit 100 lol)
+      if (serverPokemon.hp || serverPokemon.maxhp !== 100) {
+        syncedPokemon.maxhp = serverPokemon.maxhp;
+      }
     }
 
     if (serverPokemon.ability) {
@@ -221,17 +256,30 @@ export const syncPokemon = (
     }
 
     // copy the server stats for more accurate final stats calculations
-    syncedPokemon.serverStats = {
-      hp: serverPokemon.maxhp,
-      ...serverPokemon.stats,
-    };
+    if (!Object.keys(syncedPokemon.serverStats || {}).length && Object.keys(serverPokemon.stats || {}).length) {
+      syncedPokemon.serverStats = {
+        ...serverPokemon.stats,
+        hp: serverPokemon.maxhp,
+      };
 
-    // when refreshing the page, server will report dead ServerPokemon with 0 hp and 100 maxhp,
-    // which breaks the guessing part since no EV/IV combination may match 100 HP
-    // (setting 0 HP for the serverStats tells guessServerSpread() to ignore the HP when guessing)
-    if (!serverPokemon.hp && serverPokemon.maxhp === 100) {
-      syncedPokemon.serverStats.hp = 0;
+      // when refreshing the page, server will report dead ServerPokemon with 0 hp and 100 maxhp,
+      // which breaks the guessing part since no EV/IV combination may match 100 HP
+      // (setting 0 HP for the serverStats tells guessServerSpread() to ignore the HP when guessing)
+      if (!serverPokemon.hp && serverPokemon.maxhp === 100) {
+        syncedPokemon.serverStats.hp = 0;
+      }
     }
+
+    // sanitize the moves from the serverPokemon
+    const serverMoves = serverPokemon.moves?.map?.((moveName) => {
+      const dexMove = dex.moves.get(moveName);
+
+      if (!dexMove?.name) {
+        return null;
+      }
+
+      return dexMove.name;
+    }).filter(Boolean);
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
     const guessedSpread = guessServerSpread(
@@ -253,73 +301,103 @@ export const syncPokemon = (
       ...guessedSpread,
     };
 
-    syncedPokemon.nature = serverPreset.nature;
-    syncedPokemon.ivs = { ...serverPreset.ivs };
-    syncedPokemon.evs = { ...serverPreset.evs };
+    // in case a post-transformed Ditto breaks the original preset
+    const presetValid = !!serverPreset.nature
+      && !!Object.keys({ ...serverPreset.ivs, ...serverPreset.evs }).length;
 
-    // need to do some special processing for moves
-    // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
-    // what we want: ['Calm Mind', 'Moonblast', 'Flamethrower', 'Thunderbolt']
-    if (serverPokemon.moves?.length) {
-      serverPreset.moves = serverPokemon.moves.map((moveName) => {
-        const dexMove = dex.moves.get(moveName);
+    if (presetValid) {
+      syncedPokemon.nature = serverPreset.nature;
+      syncedPokemon.ivs = { ...serverPreset.ivs };
+      syncedPokemon.evs = { ...serverPreset.evs };
 
-        if (!dexMove?.name) {
-          return null;
-        }
+      // need to do some special processing for moves
+      // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
+      // what we want: ['Calm Mind', 'Moonblast', 'Flamethrower', 'Thunderbolt']
+      if (serverMoves?.length) {
+        serverPreset.moves = [...serverMoves];
+        syncedPokemon.moves = [...serverMoves];
+      }
 
-        return dexMove.name;
-      }).filter(Boolean);
+      // calculate the stats with the EVs/IVs from the server preset
+      // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
+      // (update: we calculate this at the end now, before syncedPokemon is returned)
+      // if (typeof dex?.stats?.calc === 'function') {
+      //   syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
+      // }
 
-      syncedPokemon.moves = [...serverPreset.moves];
+      serverPreset.calcdexId = calcPresetCalcdexId(serverPreset);
+
+      // technically, this should be a one-time thing, but if not, we'll at least want only have 1 'Yours' preset
+      const serverPresetIndex = syncedPokemon.presets
+        // .findIndex((p) => p.calcdexId === serverPreset.calcdexId);
+        .findIndex((p) => p.name === 'Yours');
+
+      if (serverPresetIndex > -1) {
+        syncedPokemon.presets[serverPresetIndex] = serverPreset;
+      } else {
+        syncedPokemon.presets.unshift(serverPreset);
+      }
+
+      // disabling autoPreset since we already set the preset here
+      // (also tells PokeInfo not to apply the first preset)
+      syncedPokemon.preset = serverPreset.calcdexId;
+      syncedPokemon.autoPreset = false;
     }
 
-    // calculate the stats with the EVs/IVs from the server preset
-    // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
-    if (typeof dex?.stats?.calc === 'function') {
-      syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
+    // set the serverMoves/transformedMoves if provided
+    if (serverMoves?.length) {
+      const moveKey = syncedPokemon.transformedForme
+        ? 'transformedMoves'
+        : 'serverMoves';
+
+      syncedPokemon[moveKey] = [...serverMoves];
     }
-
-    serverPreset.calcdexId = calcPresetCalcdexId(serverPreset);
-
-    const serverPresetIndex = syncedPokemon.presets
-      .findIndex((p) => p.calcdexId === serverPreset.calcdexId);
-
-    if (serverPresetIndex > -1) {
-      syncedPokemon.presets[serverPresetIndex] = serverPreset;
-    } else {
-      syncedPokemon.presets.unshift(serverPreset);
-    }
-
-    // disabling autoPreset since we already set the preset here
-    // (also tells PokeInfo not to apply the first preset)
-    syncedPokemon.preset = serverPreset.calcdexId;
-    syncedPokemon.autoPreset = false;
   }
 
   // only using sanitizePokemon() to get some values back
-  const sanitizedPokemon = sanitizePokemon(syncedPokemon);
+  // (is this a good idea? idk)
+  const {
+    abilities: transformedAbilities,
+    abilityToggleable,
+    abilityToggled,
+    baseStats,
+    transformedForme, // yeah ik this is already set above, but double-checking lol
+    transformedBaseStats,
+  } = sanitizePokemon(syncedPokemon);
 
-  // update some info if the Pokemon's speciesForme changed
-  // (since moveState requires async, we update that in syncBattle())
-  // if (pokemon.speciesForme !== syncedPokemon.speciesForme) {
-  //   syncedPokemon.baseStats = { ...sanitizedPokemon.baseStats };
-  //   syncedPokemon.types = sanitizedPokemon.types;
-  //   syncedPokemon.ability = sanitizedPokemon.ability;
-  //   syncedPokemon.dirtyAbility = null;
-  //   syncedPokemon.abilities = sanitizedPokemon.abilities;
-  // }
+  // check for toggleable abilities
+  syncedPokemon.abilityToggleable = abilityToggleable;
+  syncedPokemon.abilityToggled = abilityToggled;
 
-  syncedPokemon.abilityToggleable = sanitizedPokemon.abilityToggleable;
-  syncedPokemon.abilityToggled = sanitizedPokemon.abilityToggled;
+  // check for base stats (in case of forme changes)
+  if (Object.values(baseStats).filter(Boolean).length) {
+    syncedPokemon.baseStats = { ...baseStats };
+  }
 
-  // const calcdexId = calcPokemonCalcdexId(syncedPokemon);
+  // check for transformed base stats
+  syncedPokemon.transformedBaseStats = transformedForme ? {
+    ...transformedBaseStats,
+  } : null;
 
-  // if (!syncedPokemon?.calcdexId || syncedPokemon.calcdexId !== calcdexId) {
-  //   syncedPokemon.calcdexId = calcdexId;
-  // }
+  // if the Pokemon is transformed, auto-set the moves
+  /** @todo make auto-setting transformed moves a toggle? */
+  if (syncedPokemon.transformedMoves?.length) {
+    if (transformedForme) {
+      syncedPokemon.moves = [...syncedPokemon.transformedMoves];
+    } else {
+      // clear the list of transformed moves since the Pokemon is no longer transformed
+      syncedPokemon.transformedMoves = [];
+    }
+  }
 
-  // syncedPokemon.calcdexNonce = sanitizedPokemon.calcdexNonce;
+  // recalculate the spread stats
+  // (calcPokemonSpredStats() will determine whether to use the transformedBaseStats or baseStats)
+  syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
 
+  if (transformedForme && transformedAbilities?.length) {
+    syncedPokemon.abilities = [...transformedAbilities];
+  }
+
+  // we're done! ... I think
   return syncedPokemon;
 };

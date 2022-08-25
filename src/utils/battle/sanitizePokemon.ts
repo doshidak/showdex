@@ -1,4 +1,5 @@
 import { PokemonNatures } from '@showdex/consts';
+import { formatId } from '@showdex/utils/app';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import type { AbilityName, ItemName, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
@@ -6,6 +7,8 @@ import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
 import { toggleableAbility } from './toggleableAbility';
+
+/* eslint-disable no-nested-ternary */
 
 /**
  * Pokemon `volatiles` require special love and attention before they get Redux'd.
@@ -20,17 +23,21 @@ import { toggleableAbility } from './toggleableAbility';
 export const sanitizePokemonVolatiles = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
 ): CalcdexPokemon['volatiles'] => Object.entries(pokemon?.volatiles || {}).reduce((volatiles, [id, volatile]) => {
-  const [, value] = volatile || [];
+  const [
+    ,
+    value,
+    ...rest
+  ] = volatile || [];
 
   // we're gunna replace the Pokemon object w/ its ident if it's a transform volatile
-  const transformed = id === 'transform' &&
-    typeof (<Showdown.Pokemon> <unknown> value?.[1])?.ident === 'string';
+  const transformed = formatId(id) === 'transform'
+    && typeof (<Showdown.Pokemon> <unknown> value)?.ident === 'string';
 
-  if (transformed || !value?.[1] || ['string', 'number'].includes(typeof value[1])) {
+  if (transformed || !value || ['string', 'number'].includes(typeof value)) {
     volatiles[id] = transformed ? [
       id, // value[0] is also the id
-      (<Showdown.Pokemon> <unknown> value[1]).ident,
-      ...value.slice(2),
+      (<Showdown.Pokemon> <unknown> value).speciesForme,
+      ...rest,
     ] : volatile;
   }
 
@@ -52,6 +59,9 @@ export const sanitizePokemonVolatiles = (
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
 ): CalcdexPokemon => {
+  const typeChanged = !!pokemon.volatiles?.typechange?.[1];
+  const transformed = !!pokemon.volatiles?.transform?.[1];
+
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: ('calcdexId' in pokemon && pokemon.calcdexId) || null,
     // calcdexNonce: ('calcdexNonce' in pokemon && pokemon.calcdexNonce) || null,
@@ -59,8 +69,14 @@ export const sanitizePokemon = (
     slot: pokemon?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
+
     speciesForme: detectSpeciesForme(pokemon),
     // rawSpeciesForme: pokemon?.speciesForme,
+    transformedForme: transformed
+      ? typeof pokemon.volatiles.transform[1] === 'object'
+        ? (<Showdown.Pokemon> <unknown> pokemon.volatiles.transform[1])?.speciesForme || null
+        : pokemon.volatiles.transform[1] || null
+      : null,
 
     name: pokemon?.name,
     details: pokemon?.details,
@@ -68,9 +84,9 @@ export const sanitizePokemon = (
     gender: pokemon?.gender,
     shiny: pokemon?.shiny,
 
-    types: pokemon?.volatiles?.typechange ?
-      [<Showdown.TypeName> pokemon.volatiles.typechange[1]] :
-      ('types' in pokemon && pokemon.types) || [],
+    types: typeChanged
+      ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
+      : ('types' in pokemon && pokemon.types) || [],
 
     ability: <AbilityName> pokemon?.ability || ('abilities' in pokemon && pokemon.abilities[0]) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
@@ -140,6 +156,8 @@ export const sanitizePokemon = (
     fainted: pokemon?.fainted || !pokemon?.hp,
 
     moves: <MoveName[]> pokemon?.moves || [],
+    serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
+    transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
     useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
     lastMove: pokemon?.lastMove,
@@ -174,12 +192,27 @@ export const sanitizePokemon = (
     const species = Dex.species.get(sanitizedPokemon.speciesForme);
 
     // don't really care if species is falsy here
-    sanitizedPokemon.baseStats = {
-      ...species?.baseStats,
-    };
+    sanitizedPokemon.baseStats = { ...species?.baseStats };
+
+    // grab the baseStats of the transformed Pokemon, if applicable
+    const transformedSpecies = sanitizedPokemon.transformedForme
+      ? Dex.species.get(sanitizedPokemon.transformedForme)
+      : null;
+
+    if (transformedSpecies?.baseStats) {
+      const transformedBaseStats = { ...transformedSpecies.baseStats };
+
+      // Transform ability doesn't copy the base HP stat
+      // (uses the original Pokemon's base HP stat)
+      if ('hp' in transformedBaseStats) {
+        delete transformedBaseStats.hp;
+      }
+
+      sanitizedPokemon.transformedBaseStats = transformedBaseStats;
+    }
 
     // only update the types if the dex returned types
-    if (Array.isArray(species?.types) && species.types.length) {
+    if (!typeChanged && species?.types?.length) {
       sanitizedPokemon.types = [
         ...(<Showdown.TypeName[]> species.types),
       ];
@@ -205,3 +238,5 @@ export const sanitizePokemon = (
 
   return sanitizedPokemon;
 };
+
+/* eslint-enable no-nested-ternary */

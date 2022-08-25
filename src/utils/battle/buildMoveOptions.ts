@@ -34,7 +34,10 @@ export const buildMoveOptions = (
   const {
     serverSourced,
     speciesForme,
+    transformedForme,
     moves,
+    serverMoves,
+    transformedMoves,
     altMoves,
     moveState,
     useUltimateMoves,
@@ -43,34 +46,50 @@ export const buildMoveOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
-  if (moves?.length) {
-    if (useUltimateMoves) {
-      options.push({
-        label: gen === 7 ? 'Z' : 'Max',
-        options: moves.map((name) => {
-          const ultName = gen === 7
-            ? getZMove(dex, name, item)
-            : getMaxMove(dex, name, ability, speciesForme);
+  if (useUltimateMoves && moves?.length) {
+    options.push({
+      label: gen === 7 ? 'Z' : 'Max',
+      options: moves.map((name) => {
+        const ultName = gen === 7
+          ? getZMove(dex, name, item)
+          : getMaxMove(dex, name, ability, speciesForme);
 
-          return ultName ? {
-            label: ultName,
-            value: name,
-          } : null;
-        }).filter(Boolean),
-      });
-
-      filterMoves.push(...moves);
-    } else if (serverSourced) {
-      options.push({
-        label: 'Actual',
-        options: moves.map((name) => ({
-          label: name,
+        return ultName ? {
+          label: ultName,
           value: name,
-        })),
-      });
+        } : null;
+      }).filter(Boolean),
+    });
 
-      filterMoves.push(...moves);
-    }
+    filterMoves.push(...moves);
+  }
+
+  if (serverSourced && serverMoves?.length) {
+    const filteredServerMoves = serverMoves.filter((n) => !!n && !filterMoves.includes(n));
+
+    options.push({
+      label: 'Actual',
+      options: filteredServerMoves.map((name) => ({
+        label: name,
+        value: name,
+      })),
+    });
+
+    filterMoves.push(...filteredServerMoves);
+  }
+
+  if (transformedForme && transformedMoves?.length) {
+    const filteredTransformedMoves = transformedMoves.filter((n) => !!n && !filterMoves.includes(n));
+
+    options.unshift({
+      label: 'Transformed',
+      options: filteredTransformedMoves.map((name) => ({
+        label: name,
+        value: name,
+      })),
+    });
+
+    filterMoves.push(...filteredTransformedMoves);
   }
 
   if (moveState?.revealed?.length) {
@@ -118,12 +137,15 @@ export const buildMoveOptions = (
     filterMoves.push(...learnsetMoves);
   }
 
+  // appl
+
+  // typically only available in almostanyability and hackmons formats
   if (moveState?.other?.length) {
     const otherMoves = (<MoveName[]> moveState.other)
       .filter((n) => !!n && !filterMoves.includes(n));
 
     options.push({
-      label: 'All',
+      label: 'Other',
       options: otherMoves.map((name) => ({
         label: name,
         value: name,
