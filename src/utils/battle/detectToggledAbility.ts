@@ -1,4 +1,5 @@
 import { formatId } from '@showdex/utils/app';
+import { calcPokemonHp } from '@showdex/utils/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { toggleableAbility } from './toggleableAbility';
 
@@ -25,6 +26,24 @@ import { toggleableAbility } from './toggleableAbility';
  */
 export const detectToggledAbility = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-): boolean => toggleableAbility(pokemon) && Object.keys(pokemon.volatiles || {}).includes(
-  formatId(('dirtyAbility' in pokemon && pokemon.dirtyAbility) || pokemon.ability),
-);
+): boolean => {
+  if (!toggleableAbility(pokemon)) {
+    return false;
+  }
+
+  const ability = formatId(
+    ('dirtyAbility' in pokemon && (pokemon.dirtyAbility ?? pokemon.ability))
+      || pokemon.ability,
+  );
+
+  // by this point, the Pokemon's HP is 0% or 100% so Multiscale should be "on"
+  // (considering that we "reset" the HP to 100% if the Pokemon is dead, i.e., at 0% HP)
+  // (also note that Multiscale doesn't exist in pokemon.volatiles, hence the check here)
+  if (ability === 'multiscale') {
+    const hpPercentage = calcPokemonHp(pokemon);
+
+    return !hpPercentage || hpPercentage === 1;
+  }
+
+  return Object.keys(pokemon.volatiles || {}).includes(ability);
+};
