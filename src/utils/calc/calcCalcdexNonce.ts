@@ -100,19 +100,26 @@ const calcSideCalcdexNonce = (
  */
 export const calcBattleCalcdexNonce = (
   battle: Partial<Showdown.Battle>,
-): string => calcCalcdexId<Partial<Record<keyof Showdown.Battle, string>>>({
-  id: battle?.id,
-  gen: battle?.gen?.toString(),
-  tier: battle?.tier,
-  gameType: battle?.gameType,
-  mySide: calcSideCalcdexNonce(battle?.mySide),
-  nearSide: calcSideCalcdexNonce(battle?.nearSide),
-  p1: calcSideCalcdexNonce(battle?.p1),
-  p2: calcSideCalcdexNonce(battle?.p2),
-  p3: calcSideCalcdexNonce(battle?.p3),
-  p4: calcSideCalcdexNonce(battle?.p4),
-  currentStep: battle?.currentStep?.toString(),
-  stepQueue: Array.isArray(battle?.stepQueue) && battle.stepQueue.length
-    ? uuidv5(battle.stepQueue.join('|'), env('uuid-namespace', NIL_UUID))
-    : null,
-});
+): string => {
+  // inactive timeout messages may interfere with the activeIndex currently set by the user
+  const stepQueue = battle?.stepQueue
+    ?.filter?.((q) => !!q && !q.includes('|inactive')) // excludes '|inactive|' and '|inactiveoff|'
+    ?? [];
+
+  return calcCalcdexId<Partial<Record<keyof Showdown.Battle, string>>>({
+    id: battle?.id,
+    gen: battle?.gen?.toString(),
+    tier: battle?.tier,
+    gameType: battle?.gameType,
+    mySide: calcSideCalcdexNonce(battle?.mySide),
+    nearSide: calcSideCalcdexNonce(battle?.nearSide),
+    p1: calcSideCalcdexNonce(battle?.p1),
+    p2: calcSideCalcdexNonce(battle?.p2),
+    p3: calcSideCalcdexNonce(battle?.p3),
+    p4: calcSideCalcdexNonce(battle?.p4),
+    // currentStep: battle?.currentStep?.toString(),
+    stepQueue: stepQueue.length
+      ? uuidv5(stepQueue.join('|'), env('uuid-namespace', NIL_UUID))
+      : null,
+  });
+};
