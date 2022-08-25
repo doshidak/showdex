@@ -53,7 +53,10 @@ export const createStore = (
       [calcdexSlice.name]: calcdexSlice.reducer,
     },
 
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+      immutableCheck: false,
+      serializableCheck: false,
+    }).concat(
       pkmnApi.middleware,
     ),
   });
