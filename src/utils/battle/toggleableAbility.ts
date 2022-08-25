@@ -1,6 +1,6 @@
 import { PokemonToggleAbilities } from '@showdex/consts';
-import { formatId } from '@showdex/utils/app';
-import { calcPokemonHp } from '@showdex/utils/calc';
+// import { formatId } from '@showdex/utils/app';
+// import { calcPokemonHp } from '@showdex/utils/calc';
 import type { AbilityName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
@@ -15,18 +15,21 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
 export const toggleableAbility = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
 ): boolean => {
-  const ability = 'dirtyAbility' in pokemon ?
-    pokemon.dirtyAbility || pokemon.ability :
-    <AbilityName> pokemon?.ability;
+  const ability = 'dirtyAbility' in pokemon
+    ? pokemon.dirtyAbility ?? pokemon.ability
+    : <AbilityName> pokemon.ability;
 
   if (!ability) {
     return false;
   }
 
-  // Multiscale should only be toggleable if the Pokemon has 100% HP
-  if (formatId(ability) === 'multiscale') {
-    return calcPokemonHp(pokemon) === 1;
-  }
+  // Multiscale should only be toggleable if the Pokemon has 0% or 100% HP
+  // (update: if not 0% or 100% HP, createSmogonPokemon() will set the HP to 100% if Multiscale is on)
+  // if (formatId(ability) === 'multiscale') {
+  //   const hpPercentage = calcPokemonHp(pokemon);
+  //
+  //   return !hpPercentage || hpPercentage === 1;
+  // }
 
   return PokemonToggleAbilities.includes(ability);
 };
