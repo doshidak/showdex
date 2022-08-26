@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { detectToggledAbility, toggleableAbility } from '@showdex/utils/battle';
+import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
@@ -84,6 +85,14 @@ export const PokeCalc = ({
       }
     }
 
+    // recalculate the stats with the updated EVs/IVs
+    if (typeof dex?.stats?.calc === 'function') {
+      payload.spreadStats = calcPokemonSpreadStats(dex, {
+        ...playerPokemon,
+        ...payload,
+      });
+    }
+
     // clear any dirtyBoosts that match the current boosts
     Object.entries(playerPokemon.boosts).forEach(([
       stat,
@@ -112,7 +121,7 @@ export const PokeCalc = ({
     >
       {/* name, types, level, HP, status, set, ability, nature, item */}
       <PokeInfo
-        dex={dex}
+        // dex={dex}
         gen={gen}
         format={format}
         pokemon={playerPokemon}
