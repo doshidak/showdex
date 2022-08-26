@@ -17,10 +17,10 @@ import {
 } from '@showdex/consts';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import { detectToggledAbility } from '@showdex/utils/battle';
-import { calcPokemonHp, calcPokemonSpreadStats } from '@showdex/utils/calc';
+import { calcPokemonHp } from '@showdex/utils/calc';
 import type {
   AbilityName,
-  Generation,
+  // Generation,
   GenerationNum,
   ItemName,
 } from '@pkmn/data';
@@ -39,7 +39,7 @@ type PokeInfoPresetOptions = {
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
-  dex?: Generation;
+  // dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
@@ -49,7 +49,7 @@ export interface PokeInfoProps {
 export const PokeInfo = ({
   className,
   style,
-  dex,
+  // dex,
   gen,
   format,
   pokemon,
@@ -62,7 +62,7 @@ export const PokeInfo = ({
   });
 
   const downloadedSets = React.useMemo(
-    () => (pokemon?.speciesForme ? findPresets(pokemon.speciesForme, true) : []),
+    () => (pokemon?.speciesForme ? findPresets(pokemon.transformedForme || pokemon.speciesForme, true) : []),
     [findPresets, pokemon],
   );
 
@@ -132,17 +132,9 @@ export const PokeInfo = ({
       mutation.dirtyItem = null;
     }
 
-    // calculate the stats with the EVs/IVs
-    if (typeof dex?.stats?.calc === 'function') {
-      mutation.spreadStats = calcPokemonSpreadStats(dex, {
-        ...pokemon,
-        ...mutation,
-      });
-    }
-
+    // spreadStats will be recalculated in `onPokemonChange()` from `PokeCalc`
     onPokemonChange?.(mutation);
   }, [
-    dex,
     onPokemonChange,
     pokemon,
   ]);
@@ -179,7 +171,7 @@ export const PokeInfo = ({
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
-              speciesForme: pokemon?.speciesForme,
+              speciesForme: pokemon?.transformedForme || pokemon?.speciesForme,
               item: pokemon?.dirtyItem ?? pokemon?.item,
             }}
             tooltip="Open Smogon Page"
@@ -196,7 +188,9 @@ export const PokeInfo = ({
         <div className={styles.infoContainer}>
           <div className={styles.firstLine}>
             <span className={styles.pokemonName}>
-              {pokemon?.name || '--'}
+              {/* no nicknames, as requested by camdawgboi lol */}
+              {/* {pokemon?.name || '--'} */}
+              {pokemon?.speciesForme || '--'}
             </span>
 
             <span className={styles.small}>
@@ -374,7 +368,13 @@ export const PokeInfo = ({
                 }),
               }),
             }}
-            options={[!!pokemon?.altAbilities?.length && {
+            options={[!!pokemon?.transformedForme && {
+              label: 'Transformed',
+              options: [{
+                label: pokemon.ability,
+                value: pokemon.ability,
+              }],
+            }, !!pokemon?.altAbilities?.length && {
               label: 'Pool',
               options: pokemon.altAbilities.map((ability) => ({
                 label: ability,
@@ -382,9 +382,12 @@ export const PokeInfo = ({
               })),
             }, pokemon?.baseAbility === 'Trace' && pokemon.ability !== pokemon.baseAbility && {
               label: 'Traced',
-              options: [{ label: pokemon.ability, value: pokemon.ability }],
+              options: [{
+                label: pokemon.ability,
+                value: pokemon.ability,
+              }],
             }, !!pokemon?.abilities?.length && {
-              label: 'Other', /** @todo not saying 'All' since this isn't AAA (almost any ability) */
+              label: 'Pool',
               options: pokemon.abilities
                 .filter((a) => !!a && (!pokemon.altAbilities.length || !pokemon.altAbilities.includes(a)))
                 .map((ability) => ({ label: ability, value: ability })),
