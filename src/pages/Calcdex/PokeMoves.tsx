@@ -109,12 +109,12 @@ export const PokeMoves = ({
 
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
-        const moveid = pokemon?.moves?.[i];
+        const moveName = pokemon?.moves?.[i];
+        const move = moveName ? dex?.moves?.get?.(moveName) : null;
 
-        const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
-        const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
+        // const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
+        // const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
 
-        const move = moveid ? dex?.moves?.get?.(moveName) : null;
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
