@@ -142,7 +142,7 @@ export const PlayerCalc = ({
                 aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
-                  speciesForme: mon?.speciesForme,
+                  speciesForme: mon?.transformedForme || mon?.speciesForme,
                   item,
                 } : 'pokeball-none'}
                 tooltip={mon ? `${friendlyPokemonName}${item ? `\n${item}` : ''}` : undefined}
