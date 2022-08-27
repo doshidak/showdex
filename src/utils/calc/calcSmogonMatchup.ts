@@ -197,15 +197,15 @@ export const calcSmogonMatchup = (
     koColor: getKoColor(result),
   };
 
-  l.debug(
-    'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
-    '\n', 'dex.num', dex.num,
-    '\n', 'matchup', matchup,
-    '\n', 'result', result,
-    '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    '\n', 'field', field,
-  );
+  // l.debug(
+  //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
+  //   '\n', 'dex.num', dex.num,
+  //   '\n', 'matchup', matchup,
+  //   '\n', 'result', result,
+  //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+  //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+  //   '\n', 'field', field,
+  // );
 
   return matchup;
 };
