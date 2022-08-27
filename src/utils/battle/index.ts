@@ -1,4 +1,5 @@
 export * from './buildMoveOptions';
+export * from './detectBattleRules';
 export * from './detectGenFromFormat';
 export * from './detectPlayerKey';
 export * from './detectPokemonIdent';
