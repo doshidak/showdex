@@ -41,8 +41,8 @@ export const useCalcdex = ({
   const battleState = calcdexState[battle?.id];
 
   l.debug(
-    '\n', 'calcdexState', calcdexState,
     '\n', 'battleState', battleState,
+    '\n', 'calcdexState', calcdexState,
   );
 
   const gen = battle?.gen as GenerationNum;
@@ -63,25 +63,25 @@ export const useCalcdex = ({
   // handles `battle` changes
   React.useEffect(() => {
     l.debug(
-      'received battle update; determining sync changes...',
+      'Received battle update; determining sync changes...',
       '\n', 'battle.nonce', battle?.nonce,
       '\n', 'battleState.battleNonce', battleState?.battleNonce,
       '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
       '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
       '\n', 'battle', battle,
-      '\n', 'calcdexState', calcdexState,
+      '\n', 'battleState', battleState,
     );
 
     if (!battle?.p1 && !battle?.p2 && !battle?.p3 && !battle?.p4) {
-      l.debug(
-        'ignoring battle update due to missing players... w0t',
-        '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
-        '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
-        '\n', 'battle.p3.pokemon', battle?.p3?.pokemon,
-        '\n', 'battle.p4.pokemon', battle?.p4?.pokemon,
-        '\n', 'battle', battle,
-        '\n', 'calcdexState', calcdexState,
-      );
+      // l.debug(
+      //   'Ignoring battle update due to missing players... w0t ??',
+      //   '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
+      //   '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
+      //   '\n', 'battle.p3.pokemon', battle?.p3?.pokemon,
+      //   '\n', 'battle.p4.pokemon', battle?.p4?.pokemon,
+      //   '\n', 'battle', battle,
+      //   '\n', 'battleState', battleState,
+      // );
 
       return;
     }
@@ -89,9 +89,10 @@ export const useCalcdex = ({
     if (!battle?.nonce) {
       // this means the passed-in `battle` object is not from the bootstrapper
       l.debug(
-        'ignoring battle update due to missing nonce', battle?.nonce,
+        'Ignoring battle update due to missing battle.nonce', battle?.nonce,
+        '\n', 'battleState.battleNonce', battleState?.battleNonce,
         '\n', 'battle', battle,
-        '\n', 'calcdexState', calcdexState,
+        '\n', 'battleState', battleState,
       );
 
       return;
@@ -99,8 +100,7 @@ export const useCalcdex = ({
 
     if (!battleState?.battleId) {
       l.debug(
-        'initializing empty battleState',
-        '\n', 'with battle.nonce', battle.nonce,
+        'Initializing empty battleState with battle.nonce', battle.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
       );
@@ -115,7 +115,7 @@ export const useCalcdex = ({
       }));
     } else if (!battleState?.battleNonce || battle.nonce !== battleState.battleNonce) {
       l.debug(
-        'updating battleState via syncBattle()',
+        'Updating battleState via syncBattle() for battle.nonce', battle.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
         // '\n', 'state', state,
@@ -128,7 +128,7 @@ export const useCalcdex = ({
     }
 
     l.debug(
-      'Completed battleState sync for nonce', battle.nonce,
+      'Completed battleState sync for battle.nonce', battle.nonce,
       '\n', 'battle', battle,
       '\n', 'battleState', battleState,
       // '\n', 'state', state,
@@ -151,6 +151,7 @@ export const useCalcdex = ({
       battleId: null,
       gen: null,
       format: null,
+      rules: null,
       field: null,
       p1: null,
       p2: null,
