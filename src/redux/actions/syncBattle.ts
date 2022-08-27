@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  detectBattleRules,
   detectPlayerKeyFromBattle,
   sanitizePokemon,
   sanitizePokemonVolatiles,
@@ -51,6 +52,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       id: battleId,
       nonce: battleNonce,
       myPokemon,
+      stepQueue,
     } = battle || {};
 
     if (!battleId) {
@@ -83,6 +85,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       return;
     }
 
+    // detect the battle rules
+    if (stepQueue?.length) {
+      battleState.rules = detectBattleRules(stepQueue);
+    }
+
     if (typeof dex?.learnsets?.learnable !== 'function') {
       throw new Error('Missing required dex property in payload argument.');
     }
@@ -94,13 +101,13 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // l.debug('Processing player', playerKey);
 
       if (!(playerKey in battle) || battle[playerKey]?.sideid !== playerKey) {
-        if (__DEV__) {
-          l.warn(
-            'Ignoring player updates for', playerKey, 'since it doesn\'t exist in the battle state.',
-            '\n', `battle.${playerKey}`, battle[playerKey],
-            '\n', '(You will only see this warning on development.)',
-          );
-        }
+        // if (__DEV__) {
+        //   l.warn(
+        //     'Ignoring player updates for', playerKey, 'since it doesn\'t exist in the battle state.',
+        //     '\n', `battle.${playerKey}`, battle[playerKey],
+        //     '\n', '(You will only see this warning on development.)',
+        //   );
+        // }
 
         continue;
       }
@@ -141,9 +148,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         && playerKey === myPokemonSide
         && Array.isArray(myPokemon)
         && !!myPokemon.length;
-
-      // const hasUnrevealed = isMyPokemonSide &&
-      //   myPokemon.length > player.pokemon.length;
 
       // preserve the initial ordering of myPokemon since it's subject to change its indices
       // (battle state may move the most recent active Pokemon to the front of the array)
@@ -273,8 +277,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               l.warn(
                 'Ignoring adding clientPokemon for', playerKey, 'since they have the max number of Pokemon.',
                 '\n', 'CALCDEX_PLAYER_MAX_POKEMON', env.int('calcdex-player-max-pokemon'),
-                '\n', 'slot', i,
-                '\n', 'clientPokemonId', clientPokemonId,
+                '\n', 'slot', i, 'clientPokemonId', clientPokemonId,
                 '\n', 'clientPokemon', clientPokemon,
                 '\n', 'syncedPokemon', syncedPokemon,
                 '\n', 'player.pokemon', player.pokemon,
@@ -290,8 +293,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
           l.debug(
             'Adding new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
-            '\n', 'slot', i,
-            '\n', 'clientPokemonId', clientPokemonId,
+            '\n', 'slot', i, 'clientPokemonId', clientPokemonId,
             '\n', 'clientPokemon', clientPokemon,
             '\n', 'syncedPokemon', syncedPokemon,
             '\n', 'playerState.pokemon', playerState.pokemon,
@@ -301,7 +303,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
           l.debug(
             'Updating existing Pokemon', syncedPokemon.speciesForme, 'at index', matchedPokemonIndex, 'for player', playerKey,
-            '\n', 'clientPokemonId', clientPokemonId,
+            '\n', 'slot', i, 'clientPokemonId', clientPokemonId,
             '\n', 'clientPokemon', clientPokemon,
             '\n', 'syncedPokemon', syncedPokemon,
             '\n', 'playerState.pokemon', playerState.pokemon,
