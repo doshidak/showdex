@@ -7,7 +7,7 @@ import { Button } from '@showdex/components/ui';
 import { buildMoveOptions } from '@showdex/utils/battle';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleRules, CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 import styles from './PokeMoves.module.scss';
 
@@ -16,6 +16,7 @@ export interface PokeMovesProps {
   style?: React.CSSProperties;
   dex: Generation;
   gen: GenerationNum;
+  rules?: CalcdexBattleRules;
   pokemon: CalcdexPokemon;
   movesCount?: number;
   calculateMatchup: SmogonMatchupHookCalculator;
@@ -27,6 +28,7 @@ export const PokeMoves = ({
   style,
   dex,
   gen,
+  rules,
   pokemon,
   movesCount = 4,
   calculateMatchup,
@@ -59,7 +61,7 @@ export const PokeMoves = ({
         Moves
 
         {
-          (gen === 7 || gen === 8) &&
+          ((gen === 7 || gen === 8) && !rules?.dynamax) &&
           <>
             {' '}
             <Button
@@ -181,14 +183,14 @@ export const PokeMoves = ({
                 input={{
                   name: `PokeMoves:MoveTrack:Move:${pokemonKey}:${i}`,
                   value: moveName,
-                  onChange: (newMove: MoveName) => {
+                  onChange: (name: MoveName) => {
                     const moves = [...(pokemon?.moves || [] as MoveName[])];
 
-                    if (!Array.isArray(moves) || (moves?.[i] && moves[i] === newMove)) {
+                    if (!Array.isArray(moves) || (moves?.[i] && moves[i] === name)) {
                       return;
                     }
 
-                    moves[i] = newMove.replace('*', '') as MoveName;
+                    moves[i] = name.replace('*', '') as MoveName;
 
                     onPokemonChange?.({
                       moves,

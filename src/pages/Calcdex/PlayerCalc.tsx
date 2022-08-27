@@ -8,6 +8,7 @@ import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
 import type {
   CalcdexBattleField,
+  CalcdexBattleRules,
   CalcdexPlayer,
   CalcdexPlayerKey,
   CalcdexPokemon,
@@ -21,6 +22,7 @@ interface PlayerCalcProps {
   dex?: Generation;
   gen?: GenerationNum;
   format?: string;
+  rules?: CalcdexBattleRules;
   playerKey?: CalcdexPlayerKey;
   player: CalcdexPlayer;
   opponent: CalcdexPlayer;
@@ -37,6 +39,7 @@ export const PlayerCalc = ({
   dex,
   gen,
   format,
+  rules,
   playerKey = 'p1',
   player,
   opponent,
@@ -161,6 +164,7 @@ export const PlayerCalc = ({
         dex={dex}
         gen={gen}
         format={format}
+        rules={rules}
         playerKey={playerKey}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}

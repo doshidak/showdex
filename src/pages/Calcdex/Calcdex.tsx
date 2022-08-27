@@ -45,8 +45,9 @@ export const Calcdex = ({
   const {
     battleId,
     gen,
-    field,
     format,
+    rules,
+    field,
     p1,
     p2,
   } = state;
@@ -95,6 +96,7 @@ export const Calcdex = ({
           dex={dex}
           gen={gen}
           format={format}
+          rules={rules}
           playerKey={playerKey.current}
           player={player}
           opponent={opponent}
@@ -124,6 +126,7 @@ export const Calcdex = ({
           dex={dex}
           gen={gen}
           format={format}
+          rules={rules}
           playerKey={opponentKey}
           player={opponent}
           opponent={player}

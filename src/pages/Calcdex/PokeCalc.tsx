@@ -5,7 +5,12 @@ import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
+import type {
+  CalcdexBattleField,
+  CalcdexBattleRules,
+  CalcdexPlayerKey,
+  CalcdexPokemon,
+} from '@showdex/redux/store';
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
 import { PokeStats } from './PokeStats';
@@ -18,6 +23,7 @@ interface PokeCalcProps {
   dex?: Generation;
   gen?: GenerationNum;
   format?: string;
+  rules?: CalcdexBattleRules;
   playerKey?: CalcdexPlayerKey;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
@@ -33,6 +39,7 @@ export const PokeCalc = ({
   dex,
   gen,
   format,
+  rules,
   playerKey,
   playerPokemon,
   opponentPokemon,
@@ -121,7 +128,7 @@ export const PokeCalc = ({
     >
       {/* name, types, level, HP, status, set, ability, nature, item */}
       <PokeInfo
-        // dex={dex}
+        dex={dex}
         gen={gen}
         format={format}
         pokemon={playerPokemon}
@@ -133,6 +140,7 @@ export const PokeCalc = ({
         className={styles.section}
         dex={dex}
         gen={gen}
+        rules={rules}
         pokemon={playerPokemon}
         calculateMatchup={calculateMatchup}
         onPokemonChange={handlePokemonChange}
