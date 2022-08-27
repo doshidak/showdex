@@ -314,8 +314,14 @@ export const calcPokemonFinalStats = (
         }
 
         /**
-         * @todo Implement ally Pokemon, notably Cherrim's "Flower Gift"
+         * @todo *Properly* implement support for ally Pokemon, notably Cherrim's "Flower Gift".
+         * @see https://github.com/smogon/pokemon-showdown-client/blob/master/src/battle-tooltips.ts#L1098-L1109
          */
+        if (ability === 'flowergift' && (gen <= 4 || baseForme === 'cherrim')) {
+          // 50% ATK/SPD boost if ability is "Flower Gift" and sunny/desolate
+          finalStats.atk = Math.floor(finalStats.atk * 1.5);
+          finalStats.spd = Math.floor(finalStats.spd * 1.5);
+        }
       }
     }
 
@@ -344,7 +350,8 @@ export const calcPokemonFinalStats = (
     }
 
     /**
-     * @todo implement ally Pokemon for "Minus" and "Plus" toggleable abilities
+     * @todo Implement ally Pokemon support for "Minus" and "Plus" toggleable abilities.
+     * @see https://github.com/smogon/pokemon-showdown-client/blob/master/src/battle-tooltips.ts#L1159-L1172
      */
   }
 
