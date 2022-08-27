@@ -14,128 +14,7 @@ import type {
 import type { State as SmogonState } from '@smogon/calc';
 import { useSelector } from './hooks';
 
-export interface CalcdexMoveState {
-  /**
-   * Should only consist of moves that were revealed during the battle.
-   *
-   * * These moves should have the highest render priority
-   *   (i.e., should be at the top of the list).
-   * * This is usually accessible within the client `Showdown.Pokemon` object,
-   *   under the `moveTrack` property.
-   *
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @since 0.1.0
-   */
-  revealed: (MoveName | string)[];
-
-  /**
-   * Should only consist of moves that the Pokemon can legally learn.
-   *
-   * * These moves should be rendered after those in `revealed`.
-   * * Moves that exist in `revealed` should be filtered out.
-   *
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @since 0.1.0
-   */
-  learnset: (MoveName | string)[];
-
-  /**
-   * Optional moves, including potentially illegal ones for formats like `gen8anythinggoes` (I think lmao).
-   *
-   * * These moves, if specified, should be rendered last.
-   * * Moves that exist in `revealed` and `learnsets` should be filtered out.
-   *
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @since 0.1.0
-   */
-  other: (MoveName | string)[];
-}
-
 /* eslint-disable @typescript-eslint/indent */
-
-/**
- * Pokemon set, ~~basically~~ probably.
- *
- * * Types for some properties are more specifically typed,
- *   such as defining `item` as type `ItemName` instead of `string` (from generic `T` in `PokemonSet<T>`).
- *
- * Any mention of the word *preset* here (and anywhere else within the code) is meant to be used interchangably with *set*.
- * * Avoids potential confusion (and hurting yourself in that confusion) by avoiding the JavaScript keyword `set`.
- * * Similar to naming a property *delete*, you can imagine having to destructure `delete` as a variable!
- * * Also, `setSet()` or `setPreset()`? Hmm...
- *
- * @since 0.1.0
- */
-export interface CalcdexPokemonPreset {
-  /**
-   * Unique ID (via `uuid`) generated from a serialized checksum of this preset.
-   *
-   * * For more information about why this property exists, see the `name` property.
-   * * Note that a preset won't have a `calcdexNonce` property since none of the preset's
-   *   properties should be mutable (they're pre-*set*, after all!).
-   *
-   * @since 0.1.0
-   */
-  calcdexId?: string;
-
-  /**
-   * Alias of `calcdexId`, used internally by RTK Query in its internal tagging system.
-   *
-   * * Wherever the `calcdexId` is set, this property will be set to the same value as well.
-   * * Recommended you use `calcdexId` over this property to avoid confusion.
-   *
-   * @since 0.1.3
-   */
-  id?: string;
-
-  /**
-   * Name of the preset.
-   *
-   * * Unfortunately, when accessing the presets via `smogon.sets()` in `@pkmn/smogon` without a `format` argument,
-   *   none of the presets have their tier prefixed to the name.
-   *   - e.g., "OU Choice Band" (how Smogon does it) vs. "Choice Band" (what `smogon.sets()` returns)
-   * * This makes it difficult to differentiate presets between each tier,
-   *   especially if you're using the `name` as the value.
-   *   - e.g., "OU Choice Band" and "UU Choice Band" will both have the `name` "Choice Band".
-   * * For indexing, it's better to use the `calcdexId` property,
-   *   which is calculated from the actual preset values themselves.
-   *   - For instance, "OU Choice Band" may run a different item/nature/moveset than "UU Choice Band",
-   *     resulting in a different `calcdexId`.
-   *
-   * @example 'Choice Band'
-   * @since 0.1.0
-   */
-  name?: string;
-
-  gen?: GenerationNum;
-  format?: string;
-  speciesForme?: string;
-  level?: number;
-  gender?: Showdown.GenderName;
-  shiny?: boolean;
-  ability?: AbilityName;
-  altAbilities?: AbilityName[];
-  item?: ItemName;
-  altItems?: ItemName[];
-  moves?: MoveName[];
-  altMoves?: MoveName[];
-  nature?: Showdown.PokemonNature;
-  ivs?: Showdown.StatsTable;
-  evs?: Showdown.StatsTable;
-  happiness?: number;
-  pokeball?: string;
-  hpType?: string;
-  gigantamax?: boolean;
-}
 
 /**
  * Lean version of the `Showdown.Pokemon` object used by the official client.
@@ -528,6 +407,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - See the `name` property in `CalcdexPokemonPreset` for more information.
    * * Recommended you use the preset's `calcdexId` as this property's value instead.
    *
+   * @todo Rename this to `presetId` to avoid confusion about this property's type.
    * @since 0.1.0
    */
   preset?: string;
@@ -551,6 +431,127 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   autoPreset?: boolean;
+}
+
+export interface CalcdexMoveState {
+  /**
+   * Should only consist of moves that were revealed during the battle.
+   *
+   * * These moves should have the highest render priority
+   *   (i.e., should be at the top of the list).
+   * * This is usually accessible within the client `Showdown.Pokemon` object,
+   *   under the `moveTrack` property.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 0.1.0
+   */
+  revealed: (MoveName | string)[];
+
+  /**
+   * Should only consist of moves that the Pokemon can legally learn.
+   *
+   * * These moves should be rendered after those in `revealed`.
+   * * Moves that exist in `revealed` should be filtered out.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 0.1.0
+   */
+  learnset: (MoveName | string)[];
+
+  /**
+   * Optional moves, including potentially illegal ones for formats like `gen8anythinggoes` (I think lmao).
+   *
+   * * These moves, if specified, should be rendered last.
+   * * Moves that exist in `revealed` and `learnsets` should be filtered out.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 0.1.0
+   */
+  other: (MoveName | string)[];
+}
+
+/**
+ * Pokemon set, ~~basically~~ probably.
+ *
+ * * Types for some properties are more specifically typed,
+ *   such as defining `item` as type `ItemName` instead of `string` (from generic `T` in `PokemonSet<T>`).
+ *
+ * Any mention of the word *preset* here (and anywhere else within the code) is meant to be used interchangably with *set*.
+ * * Avoids potential confusion (and hurting yourself in that confusion) by avoiding the JavaScript keyword `set`.
+ * * Similar to naming a property *delete*, you can imagine having to destructure `delete` as a variable!
+ * * Also, `setSet()` or `setPreset()`? Hmm...
+ *
+ * @since 0.1.0
+ */
+export interface CalcdexPokemonPreset {
+  /**
+   * Unique ID (via `uuid`) generated from a serialized checksum of this preset.
+   *
+   * * For more information about why this property exists, see the `name` property.
+   * * Note that a preset won't have a `calcdexNonce` property since none of the preset's
+   *   properties should be mutable (they're pre-*set*, after all!).
+   *
+   * @since 0.1.0
+   */
+  calcdexId?: string;
+
+  /**
+   * Alias of `calcdexId`, used internally by RTK Query in its internal tagging system.
+   *
+   * * Wherever the `calcdexId` is set, this property will be set to the same value as well.
+   * * Recommended you use `calcdexId` over this property to avoid confusion.
+   *
+   * @since 0.1.3
+   */
+  id?: string;
+
+  /**
+   * Name of the preset.
+   *
+   * * Unfortunately, when accessing the presets via `smogon.sets()` in `@pkmn/smogon` without a `format` argument,
+   *   none of the presets have their tier prefixed to the name.
+   *   - e.g., "OU Choice Band" (how Smogon does it) vs. "Choice Band" (what `smogon.sets()` returns)
+   * * This makes it difficult to differentiate presets between each tier,
+   *   especially if you're using the `name` as the value.
+   *   - e.g., "OU Choice Band" and "UU Choice Band" will both have the `name` "Choice Band".
+   * * For indexing, it's better to use the `calcdexId` property,
+   *   which is calculated from the actual preset values themselves.
+   *   - For instance, "OU Choice Band" may run a different item/nature/moveset than "UU Choice Band",
+   *     resulting in a different `calcdexId`.
+   *
+   * @example 'Choice Band'
+   * @since 0.1.0
+   */
+  name?: string;
+
+  gen?: GenerationNum;
+  format?: string;
+  speciesForme?: string;
+  level?: number;
+  gender?: Showdown.GenderName;
+  shiny?: boolean;
+  ability?: AbilityName;
+  altAbilities?: AbilityName[];
+  item?: ItemName;
+  altItems?: ItemName[];
+  moves?: MoveName[];
+  altMoves?: MoveName[];
+  nature?: Showdown.PokemonNature;
+  ivs?: Showdown.StatsTable;
+  evs?: Showdown.StatsTable;
+  happiness?: number;
+  pokeball?: string;
+  hpType?: string;
+  gigantamax?: boolean;
 }
 
 /* eslint-disable @typescript-eslint/indent */
@@ -582,7 +583,7 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   /**
    * Nonce of the player, but not sure if this is actually being used anymore.
    *
-   * @deprecated Probably not being used anymore.
+   * @deprecated As of v0.1.3, probably not being used anymore.
    * @since 0.1.0
    */
   calcdexNonce?: string;
@@ -706,6 +707,111 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
 }
 
 /**
+ * Battle rules (clauses).
+ *
+ * * Derived from the `stepQueue` in the Showdown `battle` state.
+ * * Counter-intuitively, if the value for a given rule is `true`, typically indicates some mechanic is disabled.
+ * * Most of these are probably unused, but they're set just in case I decide to use them later.
+ *
+ * @since 0.1.3
+ */
+export interface CalcdexBattleRules {
+  /**
+   * Whether dynamaxing is banned.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Dynamax Clause: You cannot dynamax'`
+   * * Obviously only applies if the current gen is 8.
+   *
+   * @since 0.1.3
+   */
+  dynamax?: boolean;
+
+  /**
+   * Whether evasion items are banned.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Evasion Items Clause: Evasion items are banned'`
+   *
+   * @since 0.1.3
+   */
+  evasionItems?: boolean;
+
+  /**
+   * Whether evasion moves are banned.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Evasion Moves Clause: Evasion moves are banned'`
+   *
+   * @since 0.1.3
+   */
+  evasionMoves?: boolean;
+
+  /**
+   * Whether forcing endless battles are banned.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Endless Battle Clause: Forcing endless battles is banned'`
+   *
+   * @since 0.1.3
+   */
+  endlessBattle?: boolean;
+
+  /**
+   * Whether HP is shown in percentages.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|HP Percentage Mod: HP is shown in percentages'`
+   * * Only applies to the opponent's Pokemon as we can read the actual HP values
+   *   from the player's Pokemon via the corresponding `Showdown.ServerPokemon` objects.
+   *
+   * @since 0.1.3
+   */
+  hpPercentage?: boolean;
+
+  /**
+   * Whether Rayquaza cannot be mega-evolved.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Mega Rayquaza Clause: You cannot mega evolve Rayquaza'`
+   * * Obviously only applies if the current gen is 7, or we're in some weird format like Gen 8 National Dex.
+   *
+   * @since 0.1.3
+   */
+  megaRayquaza?: boolean;
+
+  /**
+   * Whether OHKO (one-hit-KO) moves are banned.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|OHKO Clause: OHKO moves are banned'`
+   *
+   * @since 0.1.3
+   */
+  ohko?: boolean;
+
+  /**
+   * Whether only one foe can be put to sleep.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Sleep Clause Mod: Limit one foe put to sleep'`
+   *
+   * @since 0.1.3
+   */
+  sleep?: boolean;
+
+  /**
+   * Whether players are limited to one of each Pokemon.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Species Clause: Limit one of each Pokémon'`
+   *
+   * @since 0.1.3
+   */
+  species?: boolean;
+}
+
+/**
  * Key of a given player.
  *
  * @warning Note that there isn't any support for `'p3'` and `'p4'` players at the moment.
@@ -726,9 +832,12 @@ export type CalcdexPlayerState = Partial<Record<CalcdexPlayerKey, CalcdexPlayer>
  */
 export interface CalcdexBattleState extends CalcdexPlayerState {
   /**
-   * Derived from `id` of the Showdown `battle` state.
+   * Battle ID.
+   *
+   * * Derived from `id` of the Showdown `battle` state.
    *
    * @example 'battle-gen8ubers-1636924535-utpp6tn0eya3q8q05kakyw3k4s97im9pw'
+   * @todo Rename this to `id` cause `battleState.battleId` is gross.
    * @since 0.1.0
    */
   battleId: string;
@@ -736,12 +845,42 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   /**
    * Last synced `nonce` of the Showdown `battle` state.
    *
+   * @todo Rename this to `nonce` cause `battleState.battleNonce` is gross.
    * @since 0.1.3
    */
   battleNonce?: string;
 
+  /**
+   * Generation number.
+   *
+   * * Derived from `gen` of the Showdown `battle` state.
+   *
+   * @since 0.1.0
+   */
   gen: GenerationNum;
+
+  /**
+   * Battle format.
+   *
+   * * Derived from splitting the `id` of the Showdown `battle` state.
+   *
+   * @example 'gen8ubers'
+   * @since 0.1.0
+   */
   format: string;
+
+  /**
+   * Rules (clauses) applied to the battle.
+   *
+   * @since 0.1.3
+   */
+  rules?: CalcdexBattleRules;
+
+  /**
+   * Tracked field conditions.
+   *
+   * @since 0.1.0
+   */
   field: CalcdexBattleField;
 }
 
@@ -818,6 +957,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
         battleNonce: null, // make sure we don't set this for the syncBattle() action
         gen: action.payload.gen || <GenerationNum> env.int('calcdex-default-gen'),
         format: action.payload.format || null,
+        rules: action.payload.rules || {},
         field: action.payload.field || sanitizeField(null),
 
         p1: {
@@ -829,6 +969,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
           autoSelect: true,
 
           ...action.payload.p1,
+
           pokemonOrder: [],
           pokemon: [],
         },
@@ -842,6 +983,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
           autoSelect: true,
 
           ...action.payload.p2,
+
           pokemonOrder: [],
           pokemon: [],
         },
@@ -898,7 +1040,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       l.debug(
         'DONE', action.type,
         '\n', 'action.payload', action.payload,
-        '\n', 'state.calcdex', state.calcdex,
+        '\n', `state[${battleId}]`, currentState,
       );
     },
 
@@ -942,7 +1084,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       l.debug(
         'DONE', action.type,
         '\n', 'action.payload', action.payload,
-        '\n', 'state.calcdex', state.calcdex,
+        '\n', `state[${battleId}]`, state[battleId],
       );
     },
 
@@ -998,7 +1140,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       l.debug(
         'DONE', action.type,
         '\n', 'action.payload', action.payload,
-        '\n', 'state.calcdex', state.calcdex,
+        '\n', `state[${battleId}]`, state[battleId],
       );
     },
 
@@ -1066,7 +1208,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       l.debug(
         'DONE', action.type,
         '\n', 'action.payload', action.payload,
-        '\n', 'state', state,
+        '\n', `state[${battleId}]`, state[battleId],
       );
     },
   },
