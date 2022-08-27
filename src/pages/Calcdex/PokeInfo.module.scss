@@ -122,7 +122,15 @@
   @include spacing.margin($bottom: 1px);
 }
 
+.descTooltip {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
 .itemTooltip {
   font-size: 8px;
-  user-select: none;
+  // text-align: center;
+  // user-select: none;
 }

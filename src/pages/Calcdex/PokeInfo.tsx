@@ -20,7 +20,7 @@ import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import type {
   AbilityName,
-  // Generation,
+  Generation,
   GenerationNum,
   ItemName,
 } from '@pkmn/data';
@@ -39,17 +39,19 @@ type PokeInfoPresetOptions = {
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
-  // dex?: Generation;
+  dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
+/* eslint-disable no-nested-ternary */
+
 export const PokeInfo = ({
   className,
   style,
-  // dex,
+  dex,
   gen,
   format,
   pokemon,
@@ -155,6 +157,16 @@ export const PokeInfo = ({
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const hpPercentage = calcPokemonHp(pokemon);
+
+  const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
+  const dexAbility = abilityName
+    ? dex?.abilities?.get(abilityName)
+    : null;
+
+  const itemName = pokemon?.dirtyItem ?? pokemon?.item;
+  const dexItem = itemName
+    ? dex?.items?.get(itemName)
+    : null;
 
   return (
     <div
@@ -357,14 +369,19 @@ export const PokeInfo = ({
           <Dropdown
             aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
             hint="???"
+            tooltip={dexAbility?.desc ? (
+              <div className={styles.descTooltip}>
+                {dexAbility?.shortDesc || dexAbility?.desc}
+              </div>
+            ) : null}
             input={{
               name: `PokeInfo:Ability:${pokemonKey}`,
-              value: pokemon?.dirtyAbility ?? pokemon?.ability,
-              onChange: (ability: AbilityName) => onPokemonChange?.({
-                dirtyAbility: ability,
+              value: abilityName,
+              onChange: (name: AbilityName) => onPokemonChange?.({
+                dirtyAbility: name,
                 abilityToggled: detectToggledAbility({
                   ...pokemon,
-                  ability,
+                  ability: name,
                 }),
               }),
             }}
@@ -376,9 +393,9 @@ export const PokeInfo = ({
               }],
             }, !!pokemon?.altAbilities?.length && {
               label: 'Pool',
-              options: pokemon.altAbilities.map((ability) => ({
-                label: ability,
-                value: ability,
+              options: pokemon.altAbilities.map((name) => ({
+                label: name,
+                value: name,
               })),
             }, pokemon?.baseAbility === 'Trace' && pokemon.ability !== pokemon.baseAbility && {
               label: 'Traced',
@@ -390,7 +407,7 @@ export const PokeInfo = ({
               label: 'Pool',
               options: pokemon.abilities
                 .filter((a) => !!a && (!pokemon.altAbilities.length || !pokemon.altAbilities.includes(a)))
-                .map((ability) => ({ label: ability, value: ability })),
+                .map((name) => ({ label: name, value: name })),
             }].filter(Boolean)}
             noOptionsMessage="No Abilities"
             clearable={false}
@@ -409,17 +426,17 @@ export const PokeInfo = ({
             input={{
               name: `PokeInfo:Nature:${pokemonKey}`,
               value: pokemon?.nature,
-              onChange: (nature: Showdown.PokemonNature) => onPokemonChange?.({
-                nature,
+              onChange: (name: Showdown.PokemonNature) => onPokemonChange?.({
+                nature: name,
               }),
             }}
-            options={PokemonCommonNatures.map((nature) => ({
-              label: nature,
-              subLabel: PokemonNatureBoosts[nature]?.length ? [
-                !!PokemonNatureBoosts[nature][0] && `+${PokemonNatureBoosts[nature][0].toUpperCase()}`,
-                !!PokemonNatureBoosts[nature][1] && `-${PokemonNatureBoosts[nature][1].toUpperCase()}`,
+            options={PokemonCommonNatures.map((name) => ({
+              label: name,
+              subLabel: PokemonNatureBoosts[name]?.length ? [
+                !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
+                !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
               ].filter(Boolean).join(' ') : 'Neutral',
-              value: nature,
+              value: name,
             }))}
             noOptionsMessage="No Natures"
             clearable={false}
@@ -455,7 +472,7 @@ export const PokeInfo = ({
             aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
             hint="None"
             tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
-              <div className={styles.itemTooltip}>
+              <div className={cx(styles.descTooltip, styles.itemTooltip)}>
                 {
                   !!pokemon?.itemEffect &&
                   <div className={styles.label}>
@@ -474,12 +491,16 @@ export const PokeInfo = ({
                   </>
                 }
               </div>
+            ) : dexItem?.desc ? (
+              <div className={styles.descTooltip}>
+                {dexItem?.shortDesc || dexItem?.desc}
+              </div>
             ) : null}
             input={{
               name: `PokeInfo:Item:${pokemonKey}`,
-              value: pokemon?.dirtyItem ?? pokemon?.item,
-              onChange: (item: ItemName) => onPokemonChange?.({
-                dirtyItem: item ?? ('' as ItemName),
+              value: itemName,
+              onChange: (name: ItemName) => onPokemonChange?.({
+                dirtyItem: name ?? ('' as ItemName),
               }),
             }}
             options={[!!pokemon?.altItems?.length && {
@@ -502,3 +523,5 @@ export const PokeInfo = ({
     </div>
   );
 };
+
+/* eslint-enable no-nested-ternary */
