@@ -93,7 +93,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   openMenuOnPress = true,
   openMenuOnFocus,
   minMenuHeight = 50,
-  maxMenuHeight = 100,
+  maxMenuHeight = 137,
   hideSelections,
   autoFocus,
   loading,
