@@ -6,8 +6,8 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
-const mode = isDevelopment ? 'development' : 'production';
+const __DEV__ = process.env.NODE_ENV !== 'production';
+const mode = __DEV__ ? 'development' : 'production';
 
 // __dirname is not available in ESModules lmao
 if (typeof __dirname !== 'string') {
@@ -28,7 +28,7 @@ const env = Object.entries({
 
   return prev;
 }, {
-  __DEV__: isDevelopment,
+  __DEV__,
 });
 
 const entry = {
@@ -40,7 +40,7 @@ const entry = {
 };
 
 const output = {
-  path: path.join(__dirname, isDevelopment ? 'build' : 'dist'),
+  path: path.join(__dirname, __DEV__ ? 'build' : 'dist'),
   filename: '[name].js',
   clean: true, // clean output.path dir before emitting files
   publicPath: '/',
@@ -151,7 +151,7 @@ export const config = {
   // },
 };
 
-if (isDevelopment) {
+if (__DEV__) {
   config.devtool = 'cheap-module-source-map';
 } else {
   config.optimization = {
