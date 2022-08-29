@@ -72,21 +72,22 @@ export const createSideRoom = (
   }
 
   if (icon) {
-    // using setTimeout() to put this at the top of the call stack to make sure
-    // the tab is rendered on the DOM by the time the call executes, hopefully
-    setTimeout(() => {
-      // use jQuery to select the tab
-      const $tab = $(`a[href*='${room.id}']`);
+    // hook directly into renderRoomTab(), which is hacky as hell, but necessary since it gets called pretty frequently
+    // (using jQuery to edit the class names isn't viable since the icon will just get replaced again)
+    const originalRenderer = <typeof app.topbar.renderRoomTab> app.topbar.renderRoomTab.bind(app.topbar);
 
-      // make sure we found a valid tab
-      const $tabIcon = $tab.find('i.fa');
+    app.topbar.renderRoomTab = function renderCustomRoomTab(appRoom, appRoomId) {
+      const roomId = appRoom?.id || appRoomId;
+      const buf = originalRenderer(appRoom, appRoomId);
 
-      // if the tab isn't rendered yet, attr() will return undefined
-      // (in which case our custom icon won't be set... oh well)
-      if ($tabIcon.attr('class')?.includes('fa')) {
-        $tabIcon.attr('class', `fa fa-${icon}`);
+      // set the custom icon for the current room only
+      // (note: only HTMLRooms get the 'fa-file-text-o' [Font Awesome Outlined File Text] icon)
+      if (roomId === id) {
+        return buf.replace('fa-file-text-o', `fa-${icon}`);
       }
-    });
+
+      return buf;
+    };
   }
 
   if (focus) {
