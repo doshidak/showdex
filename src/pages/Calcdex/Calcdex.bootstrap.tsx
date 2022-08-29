@@ -50,7 +50,7 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
 
   if (typeof battle?.subscribe !== 'function') {
     l.warn(
-      'must have some jank battle object cause battle.subscribe() is apparently type',
+      'Must have some jank battle object cause battle.subscribe() is apparently type',
       typeof battle?.subscribe,
     );
 
@@ -66,12 +66,12 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
   if (!subscriptionDirty) {
     l.debug(
       'battle\'s subscription isn\'t dirty yet!',
-      '\n', 'about to inject some real filth into battle.subscribe()...',
+      '\n', 'About to inject some real filth into battle.subscribe()...',
       '\n', 'subscriptionDirty', subscriptionDirty,
     );
 
     if (typeof subscription === 'function' && typeof prevSubscription !== 'function') {
-      l.debug('remapping original subscription() function to prevSubscription()');
+      l.debug('Remapping original subscription() function to prevSubscription()');
 
       battle.prevSubscription = subscription.bind(battle) as typeof subscription;
     }
@@ -87,7 +87,7 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
       if (typeof battle.prevSubscription === 'function') {
         l.debug(
           'battle.subscribe()',
-          '\n', 'calling the original battle.subscribe() function...',
+          '\n', 'Calling the original battle.subscribe() function...',
         );
 
         battle.prevSubscription(state);
@@ -96,7 +96,7 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
       if (state === 'paused') {
         l.debug(
           'battle.subscribe()',
-          '\n', 'subscription ignored cause the battle is paused or, probs more likely, ended',
+          '\n', 'Subscription ignored cause the battle is paused or, probs more likely, ended',
         );
 
         return;
@@ -114,7 +114,7 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
       if (!activeBattle) {
         l.warn(
           'battle.subscribe()',
-          '\n', 'no active battle found; ignoring Calcdex bootstrap...',
+          '\n', 'No active battle found; ignoring Calcdex bootstrap...',
         );
 
         return;
@@ -125,16 +125,15 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
 
         l.debug(
           'battle.subscribe() -> createSideRoom()',
-          '\n', 'creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
+          '\n', 'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
           '\n', 'id', calcdexRoomId,
           '\n', 'title', 'Calcdex',
         );
 
-        activeBattle.calcdexRoom = createSideRoom(
-          calcdexRoomId,
-          'Calcdex',
-          true,
-        );
+        activeBattle.calcdexRoom = createSideRoom(calcdexRoomId, 'Calcdex', {
+          icon: 'calculator',
+          focus: true,
+        });
 
         activeBattle.reactCalcdexRoom = ReactDOM.createRoot(activeBattle.calcdexRoom.el);
       }
@@ -143,7 +142,7 @@ export const bootstrap = (store: RootStore, roomid?: string): void => {
 
       l.debug(
         'battle.subscribe() -> activeBattle.reactCalcdexRoom.render()',
-        '\n', 'rendering Calcdex with battle nonce', activeBattle.nonce,
+        '\n', 'Rendering Calcdex with battle nonce', activeBattle.nonce,
         '\n', 'store.getState()', store.getState(),
       );
 
