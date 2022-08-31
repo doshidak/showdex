@@ -112,6 +112,7 @@
     "html-webpack-plugin": "^5.5.0",
     "postcss": "^8.4.16",
     "postcss-loader": "^7.0.1",
+    "rimraf": "^3.0.2",
     "sass": "^1.54.3",
     "sass-loader": "^13.0.2",
     "source-map-loader": "^4.0.0",
