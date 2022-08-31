@@ -5,9 +5,7 @@
   "version": "<-- auto-filled; do not edit -->",
   "description": "<-- auto-filled; do not edit -->",
 
-  "permissions": [
-    "activeTab"
-  ],
+  "permissions": [],
 
   "host_permissions": [
     "https://pkmn.github.io/*"
@@ -28,7 +26,12 @@
     {
       "matches": ["https://play.pokemonshowdown.com/*"],
       "resources": [
-        "main.js"
+        "github-face.svg",
+        "main.js",
+        "paypal.svg",
+        "showdex.svg",
+        "signpost-rounded.svg",
+        "tize.svg"
       ]
     }
   ],
