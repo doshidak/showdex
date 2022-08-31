@@ -23,8 +23,11 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "cm": "yarn commit",
     "cz": "yarn commit",
-    "dev": "NODE_ENV=development node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
-    "build": "NODE_ENV=production node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
+    "clean:dev": "yarn rimraf ./build",
+    "clean:prod": "yarn rimraf ./dist",
+    "clean": "yarn clean:dev && yarn clean:prod",
+    "dev": "yarn clean:dev && NODE_ENV=development node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "build": "yarn clean:prod && NODE_ENV=production node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
   },
   "config": {
     "cz-customizable": {
