@@ -5,3 +5,4 @@ export * from './getBattleRoom';
 export * from './getColorScheme';
 export * from './openShowdownUser';
 export * from './openSmogonUniversity';
+export * from './openUserPopup';
