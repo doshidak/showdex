@@ -9,12 +9,15 @@ import {
 } from '@showdex/utils/app';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
-import type { RootStore } from '@showdex/redux/store';
+import type { ShowdexBootstrapper } from '@showdex/main';
 import { Calcdex } from './Calcdex';
 
 const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
-export const bootstrap = (store: RootStore, roomid?: string): void => {
+export const calcdexBootstrapper: ShowdexBootstrapper = (
+  store,
+  roomid,
+) => {
   l.debug(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
