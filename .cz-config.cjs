@@ -15,18 +15,18 @@ module.exports = {
 
   scopes: [
     { name: 'assets' },
+    { name: 'bg' }, // background script (src/background.ts)
     { name: 'comps' },
     { name: 'consts' },
+    { name: 'content' }, // content script (src/content.ts)
+    { name: 'main' }, // main script (src/main.ts)
     { name: 'redux' },
     { name: 'styles' },
     { name: 'types' },
     { name: 'utils' },
+
     { name: 'calcdex' },
-    { name: 'typedex' },
-    { name: 'typetip' },
-    { name: 'bg' }, // background script (src/background.ts)
-    { name: 'content' }, // content script (src/content.ts)
-    { name: 'main' }, // main script (src/main.ts)
+    { name: 'hellodex' },
   ],
 
   messages: {
