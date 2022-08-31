@@ -9,3 +9,4 @@ declare module '*.module.scss' {
 declare const app: Showdown.ClientApp;
 declare const Dex: Showdown.Dex; /** @todo convert to declare class Dex in battle-dex.d.ts */
 declare const BattleMovedex: { [moveid: string]: Showdown.Move; };
+declare const UserPopup: Showdown.UserPopup;

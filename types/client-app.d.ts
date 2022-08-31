@@ -14,12 +14,18 @@ declare namespace Showdown {
     root: string;
 
     /**
-     * @default { '*path': 'dispatchFragment' }
+     * @default
+     * ```ts
+     * { '*path': 'dispatchFragment' }
+     * ```
      */
     routes: Record<string, string>;
 
     /**
-     * @default { 'submit form': 'submitSend' }
+     * @default
+     * ```ts
+     * { 'submit form': 'submitSend' }
+     * ```
      */
     events: Record<string, string>;
 
@@ -104,7 +110,7 @@ declare namespace Showdown {
     updateAutojoin(): void;
     playNotificationSound(): void;
     initializePopups(): void;
-    // addPopup(type: ClientPopupType, data?: Partial<ClientPopup>): ClientPopup;
+    addPopup<TPopup extends ClientPopup>(type: TPopup, data?: Partial<TPopup>): TPopup;
     addPopupMessage(message: string): void;
     addPopupPrompt(message: string, buttonOrCallback?: HTMLButtonElement | ((e?: Event) => void), callback?: (e?: Event) => void): void;
     closePopup(id: string): boolean;
