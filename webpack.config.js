@@ -5,6 +5,7 @@ import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
+import manifest from './src/manifest.json' assert { type: 'json' };
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
@@ -125,7 +126,11 @@ const copyPatterns = [{
 }, {
   from: 'src/assets/**/*',
   to: '[name][ext]',
-  filter: (path) => moduleRules[1].test.test(path),
+  // filter: (path) => moduleRules[1].test.test(path),
+  filter: (path) => moduleRules[1].test.test(path) && [
+    ...manifest.web_accessible_resources.flatMap((r) => r.resources),
+    ...Object.values(manifest.icons),
+  ].some((name) => path.includes(name)),
 }];
 
 const plugins = [
