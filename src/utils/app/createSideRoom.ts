@@ -53,7 +53,7 @@ export const createSideRoom = (
     room = app._addRoom<HtmlRoom>(id, 'html', true, title);
     app.sideRoomList.push(app.roomList.pop());
 
-    l.info('Created side room with room.id', room.id, 'and room.type', room.type);
+    l.debug('Created side room with room.id', room.id, 'and room.type', room.type);
   }
 
   if (!room?.el) {
