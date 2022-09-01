@@ -391,20 +391,20 @@ export const PokeInfo = ({
                 label: pokemon.ability,
                 value: pokemon.ability,
               }],
-            }, !!pokemon?.altAbilities?.length && {
-              label: 'Pool',
-              options: pokemon.altAbilities.map((name) => ({
-                label: name,
-                value: name,
-              })),
             }, pokemon?.baseAbility === 'Trace' && pokemon.ability !== pokemon.baseAbility && {
               label: 'Traced',
               options: [{
                 label: pokemon.ability,
                 value: pokemon.ability,
               }],
-            }, !!pokemon?.abilities?.length && {
+            }, !!pokemon?.altAbilities?.length && {
               label: 'Pool',
+              options: pokemon.altAbilities.map((name) => ({
+                label: name,
+                value: name,
+              })),
+            }, !!pokemon?.abilities?.length && {
+              label: 'Legal',
               options: pokemon.abilities
                 .filter((a) => !!a && (!pokemon.altAbilities.length || !pokemon.altAbilities.includes(a)))
                 .map((name) => ({ label: name, value: name })),
