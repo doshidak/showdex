@@ -133,30 +133,30 @@ export const calcPokemonFinalStats = (
           // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
           // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)
           stats[stat] = Math.floor(stats[stat] * 1.5);
-        }
+        } else {
+          switch (pokemon.status) {
+            case 'brn': {
+              if (stat === 'atk') {
+                // 50% ATK reduction (all gens... probably)
+                stats[stat] = Math.floor(stats[stat] * 0.5);
+              }
 
-        switch (pokemon.status) {
-          case 'brn': {
-            if (stat === 'atk') {
-              // 50% ATK reduction (all gens... probably)
-              stats[stat] = Math.floor(stats[stat] * 0.5);
+              break;
             }
 
-            break;
-          }
+            case 'par': {
+              if (stat === 'spe' && (gen < 4 || !hasQuickFeet)) {
+                // 75% SPE reduction if gen < 7 (i.e., gens 1-6), otherwise 50% SPE reduction
+                // (reduction is negated if ability is "Quick Feet", which is only available gen 4+)
+                stats[stat] = Math.floor(stats[stat] * (gen < 7 ? 0.25 : 0.5));
+              }
 
-          case 'par': {
-            if (stat === 'spe' && (gen < 4 || !hasQuickFeet)) {
-              // 75% SPE reduction if gen < 7 (i.e., gens 1-6), otherwise 50% SPE reduction
-              // (reduction is negated if ability is "Quick Feet", which is only available gen 4+)
-              stats[stat] = Math.floor(stats[stat] * (gen < 7 ? 0.25 : 0.5));
+              break;
             }
 
-            break;
-          }
-
-          default: {
-            break;
+            default: {
+              break;
+            }
           }
         }
       }
