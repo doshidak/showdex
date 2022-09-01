@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { getColorScheme } from '@showdex/utils/app';
 import { ColorSchemeContext } from './ColorSchemeContext';
-import { getColorScheme } from './getColorScheme';
 
 export interface ColorSchemeProviderProps {
   children?: React.ReactNode;

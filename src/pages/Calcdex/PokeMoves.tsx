@@ -4,12 +4,11 @@ import { PokeType, useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
-import { getMaxMove, getZMove } from '@showdex/utils/app';
+import { buildMoveOptions } from '@showdex/utils/battle';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
-import type { CalcdexPokemon } from './CalcdexReducer';
+import type { CalcdexBattleRules, CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
-import { createSmogonMove } from './createSmogonMove';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMovesProps {
@@ -17,10 +16,11 @@ export interface PokeMovesProps {
   style?: React.CSSProperties;
   dex: Generation;
   gen: GenerationNum;
+  rules?: CalcdexBattleRules;
   pokemon: CalcdexPokemon;
   movesCount?: number;
   calculateMatchup: SmogonMatchupHookCalculator;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeMoves = ({
@@ -28,6 +28,7 @@ export const PokeMoves = ({
   style,
   dex,
   gen,
+  rules,
   pokemon,
   movesCount = 4,
   calculateMatchup,
@@ -39,6 +40,8 @@ export const PokeMoves = ({
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
+
+  const moveOptions = buildMoveOptions(dex, pokemon);
 
   return (
     <TableGrid
@@ -58,7 +61,7 @@ export const PokeMoves = ({
         Moves
 
         {
-          (gen === 7 || gen === 8) &&
+          ((gen === 7 || gen === 8) && !rules?.dynamax) &&
           <>
             {' '}
             <Button
@@ -103,37 +106,26 @@ export const PokeMoves = ({
       </TableGridItem>
 
       <TableGridItem header>
-        %KO
+        KO %
       </TableGridItem>
 
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
-        const moveid = pokemon?.moves?.[i];
-        const move = moveid ? dex?.moves?.get?.(moveid) : null;
+        const moveName = pokemon?.moves?.[i];
+        const move = moveName ? dex?.moves?.get?.(moveName) : null;
 
-        const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
-        const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
-
-        // if (pokemon?.useUltimateMoves) {
-        //   const ultName = gen === 7 ?
-        //     getZMove(dex, moveName, pokemon?.dirtyItem ?? pokemon?.item) :
-        //     getMaxMove(dex, moveName, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
-        //
-        //   if (ultName) {
-        //     moveName = ultName;
-        //   }
-        // }
+        // const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
+        // const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
 
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
-        const calculatorMove = createSmogonMove(
-          gen,
-          pokemon,
-          moveName,
-        );
-
-        const result = calculateMatchup?.(calculatorMove);
+        const {
+          move: calculatorMove,
+          damageRange,
+          koChance,
+          koColor,
+        } = calculateMatchup?.(moveName) || {};
 
         // Z/Max/G-Max moves bypass the original move's accuracy
         // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
@@ -191,68 +183,41 @@ export const PokeMoves = ({
                 input={{
                   name: `PokeMoves:MoveTrack:Move:${pokemonKey}:${i}`,
                   value: moveName,
-                  onChange: (newMove: MoveName) => {
+                  onChange: (name: MoveName) => {
                     const moves = [...(pokemon?.moves || [] as MoveName[])];
 
-                    if (!Array.isArray(moves) || (moves?.[i] && moves[i] === newMove)) {
+                    if (!Array.isArray(moves) || (moves?.[i] && moves[i] === name)) {
                       return;
                     }
 
-                    moves[i] = newMove;
+                    moves[i] = name.replace('*', '') as MoveName;
 
                     onPokemonChange?.({
                       moves,
                     });
                   },
                 }}
-                options={[pokemon?.useUltimateMoves && {
-                  label: gen === 7 ? 'Z' : 'Max',
-                  options: pokemon.moves.map((name) => {
-                    const ultName = gen === 7 ?
-                      getZMove(dex, name, pokemon?.dirtyItem ?? pokemon?.item) :
-                      getMaxMove(dex, name, pokemon?.dirtyAbility ?? pokemon?.ability, pokemon?.rawSpeciesForme);
-
-                    if (ultName) {
-                      return { label: ultName, value: name };
-                    }
-
-                    return null;
-                  }).filter(Boolean),
-                }, !!pokemon?.moveState?.revealed.length && {
-                  label: 'Revealed',
-                  options: pokemon.moveState.revealed.map((name) => ({ label: name, value: name })),
-                }, !!pokemon?.altMoves?.length && {
-                  label: 'Pool',
-                  options: pokemon.altMoves
-                    .filter((n) => !!n && (!pokemon.moveState?.revealed?.length || !pokemon.moveState.revealed.includes(n)))
-                    .map((name) => ({ label: name, value: name })),
-                }, !!pokemon?.moveState?.learnset.length && {
-                  label: 'Learnset',
-                  options: pokemon.moveState.learnset.map((name) => ({ label: name, value: name })),
-                }, !!pokemon?.moveState?.other.length && {
-                  label: 'All',
-                  options: pokemon.moveState.other.map((name) => ({ label: name, value: name })),
-                }].filter(Boolean)}
+                options={moveOptions}
                 noOptionsMessage="No Moves Found"
                 disabled={!pokemon?.speciesForme}
               />
             </TableGridItem>
 
             <TableGridItem
-              style={!result?.damageRange ? { opacity: 0.5 } : undefined}
+              style={!damageRange ? { opacity: 0.5 } : undefined}
             >
               {/* XXX.X% &ndash; XXX.X% */}
-              {result?.damageRange}
+              {damageRange}
             </TableGridItem>
 
             <TableGridItem
               style={{
-                ...(!result?.koChance ? { opacity: 0.3 } : null),
-                ...(result?.koColor ? { color: result.koColor } : null),
+                ...(!koChance ? { opacity: 0.3 } : null),
+                ...(koColor ? { color: koColor } : null),
               }}
             >
               {/* XXX% XHKO */}
-              {result?.koChance}
+              {koChance}
             </TableGridItem>
           </React.Fragment>
         );

@@ -4,7 +4,7 @@
     [
       "@babel/preset-env",
       {
-        "debug": true,
+        "debug": false,
         "modules": false,
         "targets": {
           "node": "current"

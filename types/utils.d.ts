@@ -2,10 +2,12 @@
  * Construct a type with the properties of `T` replaced with those of `R`.
  *
  * @example
+ * ```ts
  * type ItemId = { id: string; getId: () => string; hasId: () => boolean; };
  * type ItemNumId = Modify<ItemId, { id: number; getId: () => number; }>;
  * // -> { id: number; getId: () => number; hasId: () => boolean; }
  * type ItemTId<T> = Modify<ItemId, { id: T; getId: () => T; }>;
+ * ```
  * @since 0.1.0
  */
 declare type Modify<T, R> = Omit<T, keyof R> & R;
@@ -14,6 +16,7 @@ declare type Modify<T, R> = Omit<T, keyof R> & R;
  * Construct a type with all properties of `T`, including any sub-properties, as partials.
  *
  * @example
+ * ```ts
  * type Sosig = {
  *   saturation: {
  *     fatness: number;
@@ -25,6 +28,8 @@ declare type Modify<T, R> = Omit<T, keyof R> & R;
  * // -> { saturation?: { fatness: number; color: number; }; gain?: number; }
  * type SosigDeepPartial = DeepPartial<Sosig>;
  * // -> { saturation?: { fatness?: number; color?: number; }; gain?: number; }
+ * ```
+ * @since 0.1.0
  */
 declare type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: T[P] extends string | number | boolean | symbol | Array ? T[P] : DeepPartial<T[P]>;
@@ -34,6 +39,7 @@ declare type DeepPartial<T> = T extends object ? {
  * Construct a literal type with the keys of the indexable type `T` whose types extend the literal type `K`.
  *
  * @example
+ * ```ts
  * type Sosig = {
  *   fatness: number;
  *   color: number;
@@ -42,6 +48,7 @@ declare type DeepPartial<T> = T extends object ? {
  * };
  * type SosigParams = ExtractKeys<Sosig, number>;
  * // -> 'fatness' | 'color' | 'gain'
+ * ```
  * @since 0.1.0
  */
 declare type ExtractKeys<T, K> = { [I in keyof T]: T[I] extends K ? I : never; }[keyof T];
@@ -52,6 +59,7 @@ declare type ExtractKeys<T, K> = { [I in keyof T]: T[I] extends K ? I : never; }
  * * Most useful for declaring the `[key, value]` types in `Object.entries()`.
  *
  * @example
+ * ```ts
  * const sosig: Sosig = {
  *   fatness: 100,
  *   color: 100,
@@ -60,6 +68,7 @@ declare type ExtractKeys<T, K> = { [I in keyof T]: T[I] extends K ? I : never; }
  * };
  * type SosigEntries = Extract<typeof sosig>;
  * // -> (['fatness', number] | ['color', number] | ['gain', number], ['reset', () => void])[]
+ * ```
  * @since 0.1.0
  */
 declare type Entries<T> = { [K in keyof T]: [K, T[K]] }[keyof T][];

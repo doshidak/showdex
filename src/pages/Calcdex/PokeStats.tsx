@@ -9,26 +9,32 @@ import {
   PokemonNatureBoosts,
   PokemonStatNames,
 } from '@showdex/consts';
+import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
+import { calcPokemonFinalStats } from '@showdex/utils/calc';
+import { env } from '@showdex/utils/core';
 import type { Generation } from '@pkmn/data';
-import type { CalcdexPokemon } from './CalcdexReducer';
-import { calcPokemonStats } from './calcPokemonStats';
-import { detectStatBoostDelta } from './detectStatBoostDelta';
-import { formatStatBoost } from './formatStatBoost';
+import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
   dex: Generation;
-  pokemon: CalcdexPokemon;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  playerPokemon: CalcdexPokemon;
+  opponentPokemon: CalcdexPokemon;
+  field?: CalcdexBattleField;
+  playerKey?: CalcdexPlayerKey,
+  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeStats = ({
   className,
   style,
   dex,
-  pokemon,
+  playerPokemon: pokemon,
+  opponentPokemon,
+  field,
+  playerKey,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
   const colorScheme = useColorScheme();
@@ -36,10 +42,22 @@ export const PokeStats = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const calculatedStats = React.useMemo(
-    () => (pokemon?.calcdexId ? calcPokemonStats(dex, pokemon) : null),
-    [dex, pokemon],
-  );
+  const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
+  const evsLegal = totalEvs <= env.int('calcdex-pokemon-max-legal-evs');
+
+  const finalStats = React.useMemo(() => (pokemon?.calcdexId ? calcPokemonFinalStats(
+    dex,
+    pokemon,
+    opponentPokemon,
+    field,
+    playerKey,
+  ) : null), [
+    dex,
+    opponentPokemon,
+    playerKey,
+    pokemon,
+    field,
+  ]);
 
   return (
     <TableGrid
@@ -94,9 +112,12 @@ export const PokeStats = ({
               className={styles.valueField}
               label={`${stat.toUpperCase()} IV for Pokemon ${friendlyPokemonName}`}
               hint={iv.toString() || '31'}
+              fallbackValue={31}
               min={0}
               max={31}
               step={1}
+              shiftStep={5}
+              loop
               input={{
                 value: iv,
                 onChange: (value: number) => onPokemonChange?.({
@@ -111,7 +132,14 @@ export const PokeStats = ({
       })}
 
       {/* EVs */}
-      <TableGridItem align="right" header>
+      <TableGridItem
+        className={cx(
+          styles.evsHeader,
+          !evsLegal && styles.illegal,
+        )}
+        align="right"
+        header
+      >
         EV
         <span className={styles.small}>
           S
@@ -130,9 +158,12 @@ export const PokeStats = ({
               className={styles.valueField}
               label={`${stat.toUpperCase()} EV for Pokemon ${friendlyPokemonName}`}
               hint={ev.toString() || '252'}
+              fallbackValue={0}
               min={0}
               max={252}
               step={4}
+              shiftStep={16}
+              loop
               input={{
                 value: ev,
                 onChange: (value: number) => onPokemonChange?.({
@@ -150,9 +181,9 @@ export const PokeStats = ({
       <TableGridItem align="right" header />
 
       {PokemonStatNames.map((stat) => {
-        const calculatedStat = calculatedStats?.[stat] || 0;
-        const formattedStat = formatStatBoost(calculatedStat) || '???';
-        const boostDelta = detectStatBoostDelta(pokemon, stat);
+        const finalStat = finalStats?.[stat] || 0;
+        const formattedStat = formatStatBoost(finalStat) || '???';
+        const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
 
         return (
           <TableGridItem

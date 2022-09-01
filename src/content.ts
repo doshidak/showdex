@@ -20,6 +20,7 @@ const injectables: ContentInjectable<HTMLElement>[] = [
   //     content: 'script-src \'self\' *.pokemonshowdown.com',
   //   },
   // },
+
   <ContentInjectable<HTMLLinkElement>> {
     id: 'showdex-preconnect-googleapis',
     component: 'link',
@@ -29,6 +30,17 @@ const injectables: ContentInjectable<HTMLElement>[] = [
       href: 'https://fonts.googleapis.com',
     },
   },
+
+  <ContentInjectable<HTMLLinkElement>> {
+    id: 'showdex-stylesheet-work-sans',
+    component: 'link',
+    into: 'head',
+    props: {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
+    },
+  },
+
   <ContentInjectable<HTMLLinkElement>> {
     id: 'showdex-stylesheet-fira-code',
     component: 'link',
@@ -49,49 +61,9 @@ const injectables: ContentInjectable<HTMLElement>[] = [
       'data-ext-id': chrome.runtime.id,
     },
   },
-
-  // ...['gen12', 'gen3', 'gen4', 'gen56', 'gen78', 'util'].map((file) => <ContentInjectable<HTMLScriptElement>>({
-  //   id: `showdex-honko-mechanics-${file}`,
-  //   component: 'script',
-  //   into: 'body',
-  //   props: {
-  //     src: chrome.runtime.getURL(`calc/mechanics/${file}.js`),
-  //     async: true,
-  //   },
-  // })),
-
-  // ...Array(8).fill(null).map((_, i) => <ContentInjectable<HTMLScriptElement>>({
-  //   id: `showdex-honko-sets-gen${i + 1}`,
-  //   component: 'script',
-  //   into: 'body',
-  //   props: {
-  //     src: chrome.runtime.getURL(`calc/sets/gen${i + 1}.js`),
-  //     async: true,
-  //   },
-  // })),
-
-  // ...['abilities', 'index', 'items', 'moves', 'natures', 'species', 'types'].map((file) => <ContentInjectable<HTMLScriptElement>>({
-  //   id: `showdex-honko-data-${file}`,
-  //   component: 'script',
-  //   into: 'body',
-  //   props: {
-  //     src: chrome.runtime.getURL(`calc/data/${file}.js`),
-  //     async: true,
-  //   },
-  // })),
-
-  // ...['calc', 'desc', 'field', 'items', 'pokemon', 'result', 'stats', 'util'].map((file) => <ContentInjectable<HTMLScriptElement>>({
-  //   id: `showdex-honko-${file}`,
-  //   component: 'script',
-  //   into: 'body',
-  //   props: {
-  //     src: chrome.runtime.getURL(`calc/${file}.js`),
-  //     async: true,
-  //   },
-  // })),
 ];
 
-l.info('starting Showdex with Chrome extensionId', chrome.runtime.id);
+l.info('Starting Showdex with Chrome extension runtime.id', chrome.runtime.id);
 
 injectables.forEach(({
   id,

@@ -31,6 +31,7 @@
 }
 
 .label {
+  font-weight: 500;
   text-transform: uppercase;
   user-select: none;
 
@@ -39,12 +40,21 @@
   }
 
   .light & {
-    color: color.alpha(colors.$black, 0.65);
+    color: color.alpha(colors.$black, 0.75);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.65);
+    color: color.alpha(colors.$white, 0.75);
   }
+}
+
+.infoContainer {
+  flex: 1.25;
+}
+
+.firstLine {
+  max-width: 100%;
+  @include spacing.margin($bottom: 1px);
 }
 
 .piconContainer {
@@ -55,24 +65,11 @@
 .pokemonName {
   display: inline-block;
   vertical-align: top;
-  max-width: 66px;
+  max-width: 45%;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
-}
-
-.currentHp {
-  .light & {
-    color: color.alpha(colors.$black, 0.65);
-  }
-
-  .dark & {
-    color: color.alpha(colors.$white, 0.65);
-  }
-}
-
-.infoContainer {
-  flex: 1.25;
 }
 
 .toggleButtonLabel {
@@ -94,8 +91,23 @@
   }
 }
 
+.secondLine {
+  min-height: 15px;
+  user-select: none;
+}
+
 .hpBar {
   @include spacing.margin($bottom: 2px);
+}
+
+.currentHp {
+  .light & {
+    color: color.alpha(colors.$black, 0.75);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.75);
+  }
 }
 
 .presetContainer {
@@ -110,7 +122,15 @@
   @include spacing.margin($bottom: 1px);
 }
 
+.descTooltip {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
 .itemTooltip {
   font-size: 8px;
-  user-select: none;
+  // text-align: center;
+  // user-select: none;
 }

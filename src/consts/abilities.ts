@@ -12,7 +12,7 @@ export const PokemonToggleAbilities: AbilityName[] = [
   <AbilityName> 'Flash Fire',
   // <AbilityName> 'Intimidate', // applies the ATK reduction within `boosts`, so no need to "toggle" this
   <AbilityName> 'Minus',
-  <AbilityName> 'Multiscale',
+  <AbilityName> 'Multiscale', // special case based off the HP, but specified here to allow toggling in the UI
   <AbilityName> 'Plus',
   <AbilityName> 'Slow Start',
   <AbilityName> 'Stakeout',

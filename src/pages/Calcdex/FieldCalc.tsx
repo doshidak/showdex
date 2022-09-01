@@ -5,21 +5,23 @@ import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
 import { TerrainNames, WeatherNames } from '@showdex/consts';
-import type { CalcdexBattleField } from './CalcdexReducer';
+import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
   className?: string;
   style?: React.CSSProperties;
   battleId?: string;
+  playerKey?: CalcdexPlayerKey;
   field?: CalcdexBattleField;
-  onFieldChange?: (field: Partial<CalcdexBattleField>) => void;
+  onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
 }
 
 export const FieldCalc = ({
   className,
   style,
   battleId,
+  playerKey = 'p1',
   field,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
@@ -28,9 +30,12 @@ export const FieldCalc = ({
   const {
     weather,
     terrain,
-    attackerSide,
-    defenderSide,
+    attackerSide: p1Side,
+    defenderSide: p2Side,
   } = field || {};
+
+  const attackerSide = playerKey === 'p1' ? p1Side : p2Side;
+  const defenderSide = playerKey === 'p1' ? p2Side : p1Side;
 
   return (
     <TableGrid

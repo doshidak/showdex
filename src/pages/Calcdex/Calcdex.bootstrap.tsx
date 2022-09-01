@@ -1,18 +1,23 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ColorSchemeProvider } from '@showdex/components/app';
 import {
   createSideRoom,
   // getActiveBattle,
   getBattleRoom,
 } from '@showdex/utils/app';
+import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
-import { calcBattleCalcdexNonce } from './calcCalcdexNonce';
+import type { ShowdexBootstrapper } from '@showdex/main';
 import { Calcdex } from './Calcdex';
 
 const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
-export const bootstrap = (roomid?: string): void => {
+export const calcdexBootstrapper: ShowdexBootstrapper = (
+  store,
+  roomid,
+) => {
   l.debug(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
@@ -34,7 +39,7 @@ export const bootstrap = (roomid?: string): void => {
 
   const {
     battle,
-    tooltips,
+    // tooltips,
   } = getBattleRoom(roomid);
 
   if (!battle?.id) {
@@ -48,7 +53,7 @@ export const bootstrap = (roomid?: string): void => {
 
   if (typeof battle?.subscribe !== 'function') {
     l.warn(
-      'must have some jank battle object cause battle.subscribe() is apparently type',
+      'Must have some jank battle object cause battle.subscribe() is apparently type',
       typeof battle?.subscribe,
     );
 
@@ -64,12 +69,12 @@ export const bootstrap = (roomid?: string): void => {
   if (!subscriptionDirty) {
     l.debug(
       'battle\'s subscription isn\'t dirty yet!',
-      '\n', 'about to inject some real filth into battle.subscribe()...',
+      '\n', 'About to inject some real filth into battle.subscribe()...',
       '\n', 'subscriptionDirty', subscriptionDirty,
     );
 
     if (typeof subscription === 'function' && typeof prevSubscription !== 'function') {
-      l.debug('remapping original subscription() function to prevSubscription()');
+      l.debug('Remapping original subscription() function to prevSubscription()');
 
       battle.prevSubscription = subscription.bind(battle) as typeof subscription;
     }
@@ -85,7 +90,7 @@ export const bootstrap = (roomid?: string): void => {
       if (typeof battle.prevSubscription === 'function') {
         l.debug(
           'battle.subscribe()',
-          '\n', 'calling the original battle.subscribe() function...',
+          '\n', 'Calling the original battle.subscribe() function...',
         );
 
         battle.prevSubscription(state);
@@ -94,7 +99,7 @@ export const bootstrap = (roomid?: string): void => {
       if (state === 'paused') {
         l.debug(
           'battle.subscribe()',
-          '\n', 'subscription ignored cause the battle is paused or, probs more likely, ended',
+          '\n', 'Subscription ignored cause the battle is paused or, probs more likely, ended',
         );
 
         return;
@@ -112,7 +117,7 @@ export const bootstrap = (roomid?: string): void => {
       if (!activeBattle) {
         l.warn(
           'battle.subscribe()',
-          '\n', 'no active battle found; ignoring Calcdex bootstrap...',
+          '\n', 'No active battle found; ignoring Calcdex bootstrap...',
         );
 
         return;
@@ -123,16 +128,15 @@ export const bootstrap = (roomid?: string): void => {
 
         l.debug(
           'battle.subscribe() -> createSideRoom()',
-          '\n', 'creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
+          '\n', 'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
           '\n', 'id', calcdexRoomId,
           '\n', 'title', 'Calcdex',
         );
 
-        activeBattle.calcdexRoom = createSideRoom(
-          calcdexRoomId,
-          'Calcdex',
-          true,
-        );
+        activeBattle.calcdexRoom = createSideRoom(calcdexRoomId, 'Calcdex', {
+          icon: 'calculator',
+          focus: true,
+        });
 
         activeBattle.reactCalcdexRoom = ReactDOM.createRoot(activeBattle.calcdexRoom.el);
       }
@@ -141,16 +145,19 @@ export const bootstrap = (roomid?: string): void => {
 
       l.debug(
         'battle.subscribe() -> activeBattle.reactCalcdexRoom.render()',
-        '\n', 'rendering Calcdex with battle nonce', activeBattle.nonce,
+        '\n', 'Rendering Calcdex with battle nonce', activeBattle.nonce,
+        '\n', 'store.getState()', store.getState(),
       );
 
       activeBattle.reactCalcdexRoom.render((
-        <ColorSchemeProvider>
-          <Calcdex
-            battle={activeBattle}
-            tooltips={tooltips}
-          />
-        </ColorSchemeProvider>
+        <ReduxProvider store={store}>
+          <ColorSchemeProvider>
+            <Calcdex
+              battle={activeBattle}
+              // tooltips={tooltips}
+            />
+          </ColorSchemeProvider>
+        </ReduxProvider>
       ));
     });
 

@@ -4,7 +4,7 @@ import cx from 'classnames';
 import type { AriaTextFieldProps } from '@react-types/textfield';
 import type { TextFieldAria as ITextFieldAria } from '@react-aria/textfield';
 import type { FieldRenderProps } from 'react-final-form';
-import { useTextFieldHandle } from './useTextFieldHandle';
+// import { useTextFieldHandle } from './useTextFieldHandle';
 import styles from './BaseTextField.module.scss';
 
 export type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
@@ -83,7 +83,12 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
     onBlur: input?.onBlur,
   }, inputRef) as TextFieldAria;
 
-  useTextFieldHandle(inputRef, forwardedRef, input);
+  // useTextFieldHandle(inputRef, forwardedRef, input);
+
+  React.useImperativeHandle(
+    forwardedRef,
+    () => inputRef.current,
+  );
 
   return (
     <>

@@ -1,12 +1,22 @@
-import { bootstrap as bootstrapCalcdex } from '@showdex/pages';
+import { calcdexBootstrapper, hellodexBootstrapper } from '@showdex/pages';
+import { createStore } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
+import type { RootStore } from '@showdex/redux/store';
 import '@showdex/styles/global.scss';
+
+export type ShowdexBootstrapper = (
+  store?: RootStore,
+  roomId?: string,
+) => void;
 
 const l = logger('@showdex/main');
 
-const bootstrappers: ((roomId?: string) => void)[] = [
-  bootstrapCalcdex,
+// list of bootstrappers dependent on a room
+const bootstrappers: ShowdexBootstrapper[] = [
+  calcdexBootstrapper,
 ];
+
+const store = createStore();
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { receive } = app || {};
@@ -31,7 +41,7 @@ app.receive = (data: string) => {
     );
 
     // call each bootstrapper
-    bootstrappers.forEach((bootstrapper) => bootstrapper(roomId));
+    bootstrappers.forEach((bootstrapper) => bootstrapper(store, roomId));
   }
 
   // call the original function
@@ -39,3 +49,7 @@ app.receive = (data: string) => {
 };
 
 l.info('completed main script execution!');
+
+// open the Hellodex when the Showdown client starts
+// (hence why it's not part of the bootstrappers array)
+hellodexBootstrapper();

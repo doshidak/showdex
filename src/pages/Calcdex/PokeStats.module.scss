@@ -15,6 +15,7 @@
 }
 
 .statHeader {
+  font-weight: 500;
   @include transition.apply(color);
 
   &.up {
@@ -32,6 +33,14 @@
 
 .ivField {
   max-width: 30px;
+}
+
+.evsHeader {
+  @include transition.apply(color);
+
+  &.illegal {
+    color: colors.$red;
+  }
 }
 
 .evField {

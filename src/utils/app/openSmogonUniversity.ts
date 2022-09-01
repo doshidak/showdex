@@ -1,4 +1,5 @@
 import slugify from 'slugify';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@pkmn/types';
 
@@ -68,7 +69,7 @@ const SmogonUniversityFormatSlugs: Record<string, string> = {
 const SmogonUniversityWindowFeatures = [
   'top=0',
   `left=${typeof window === 'undefined' ? 0 : (window.screen?.width ?? 960) - 960}`,
-  'width=620',
+  'width=800',
   'height=800',
   'resizable',
   'scrollbars',
@@ -150,7 +151,7 @@ export const openSmogonUniversity = (
   }
 
   const windowUrl = [
-    process.env.SMOGON_UNIVERSITY_DEX_URL,
+    env('smogon-university-dex-url'),
     genSlug,
     category,
     slugifiedName,

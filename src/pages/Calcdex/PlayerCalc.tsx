@@ -3,14 +3,16 @@ import cx from 'classnames';
 import { PiconButton, useColorScheme } from '@showdex/components/app';
 import { Button } from '@showdex/components/ui';
 import { openShowdownUser } from '@showdex/utils/app';
+import { env } from '@showdex/utils/core';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
 import type {
   CalcdexBattleField,
+  CalcdexBattleRules,
   CalcdexPlayer,
   CalcdexPlayerKey,
   CalcdexPokemon,
-} from './CalcdexReducer';
+} from '@showdex/redux/store';
 import { PokeCalc } from './PokeCalc';
 import styles from './PlayerCalc.module.scss';
 
@@ -20,12 +22,13 @@ interface PlayerCalcProps {
   dex?: Generation;
   gen?: GenerationNum;
   format?: string;
+  rules?: CalcdexBattleRules;
   playerKey?: CalcdexPlayerKey;
   player: CalcdexPlayer;
   opponent: CalcdexPlayer;
   field?: CalcdexBattleField;
   defaultName?: string;
-  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
+  onPokemonChange?: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   onIndexSelect?: (index: number) => void;
   onAutoSelectChange?: (autoSelect: boolean) => void;
 }
@@ -36,6 +39,7 @@ export const PlayerCalc = ({
   dex,
   gen,
   format,
+  rules,
   playerKey = 'p1',
   player,
   opponent,
@@ -99,7 +103,7 @@ export const PlayerCalc = ({
                 !autoSelect && styles.inactive,
               )}
               label="Auto"
-              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Active Pokémon`}
+              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pokémon`}
               absoluteHover
               disabled={!pokemon?.length}
               onPress={() => onAutoSelectChange?.(!autoSelect)}
@@ -110,20 +114,22 @@ export const PlayerCalc = ({
               <span style={{ fontSize: 8, opacity: 0.5 }}>
                 <span style={{ userSelect: 'none' }}>
                   {' '}&bull;{' '}
-                  ELO{' '}
+                  {rating}{' '}
                 </span>
 
-                {rating}
+                ELO
               </span>
             }
           </div>
         </div>
 
         <div className={styles.teamList}>
-          {Array(6).fill(null).map((_, i) => {
+          {Array(env.int('calcdex-player-max-pokemon', 6)).fill(null).map((_, i) => {
             const mon = pokemon?.[i];
+
             const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
-            const friendlyPokemonName = mon?.rawSpeciesForme || mon?.speciesForme || mon?.name || pokemonKey;
+            const friendlyPokemonName = mon?.speciesForme || mon?.name || pokemonKey;
+            const item = mon?.dirtyItem ?? mon?.item;
 
             return (
               <PiconButton
@@ -139,10 +145,10 @@ export const PlayerCalc = ({
                 aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
-                  speciesForme: mon?.rawSpeciesForme ?? mon?.speciesForme,
-                  item: mon?.dirtyItem ?? mon?.item,
+                  speciesForme: mon?.transformedForme || mon?.speciesForme,
+                  item,
                 } : 'pokeball-none'}
-                tooltip={friendlyPokemonName} /** @todo make this more descriptive, like the left-half of PokeInfo */
+                tooltip={mon ? `${friendlyPokemonName}${item ? `\n${item}` : ''}` : undefined}
                 disabled={!mon}
                 onPress={() => onIndexSelect?.(i)}
               >
@@ -158,6 +164,8 @@ export const PlayerCalc = ({
         dex={dex}
         gen={gen}
         format={format}
+        rules={rules}
+        playerKey={playerKey}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={{
@@ -165,7 +173,7 @@ export const PlayerCalc = ({
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
           defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
-        onPokemonChange={onPokemonChange}
+        onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
       />
     </div>
   );

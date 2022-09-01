@@ -13,9 +13,10 @@ export const useTextFieldHandle = <
   input: FieldInputProps<FieldValue, T>,
 ): void => React.useImperativeHandle(forwardedRef, () => ({
   ...ref?.current,
-  focus: () => {
+
+  focus: (options?: FocusOptions) => {
     if (typeof ref?.current?.focus === 'function') {
-      ref.current.focus?.();
+      ref.current.focus(options);
 
       // place the cursor at the end of the value
       // (logic will be placed at end of stack by setTimeout, otherwise, cursor may not be moved at all!)

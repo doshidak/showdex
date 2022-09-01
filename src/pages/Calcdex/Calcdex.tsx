@@ -1,8 +1,8 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/components/app';
+import { detectPlayerKeyFromBattle } from '@showdex/utils/battle';
 import { logger, printBuildInfo } from '@showdex/utils/debug';
-import { detectPlayerKeyFromBattle } from './detectPlayerKey';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -10,14 +10,14 @@ import styles from './Calcdex.module.scss';
 
 interface CalcdexProps {
   battle?: Showdown.Battle;
-  tooltips?: Showdown.BattleTooltips;
+  // tooltips?: Showdown.BattleTooltips;
 }
 
 const l = logger('@showdex/pages/Calcdex/Calcdex');
 
 export const Calcdex = ({
   battle,
-  tooltips,
+  // tooltips,
 }: CalcdexProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
@@ -31,31 +31,51 @@ export const Calcdex = ({
     setAutoSelect,
   } = useCalcdex({
     battle,
-    tooltips,
+    // tooltips,
   });
 
   l.debug(
     'rendering...',
+    '\n', 'colorScheme', colorScheme,
     '\n', 'p1.pokemon', battle?.p1?.pokemon,
     '\n', 'p2.pokemon', battle?.p2?.pokemon,
     '\n', 'state', state,
-    '\n', 'colorScheme', colorScheme,
   );
 
   const {
     battleId,
     gen,
-    field,
     format,
+    rules,
+    field,
     p1,
     p2,
   } = state;
 
-  const playerKey = detectPlayerKeyFromBattle(battle);
-  const opponentKey = playerKey === 'p1' ? 'p2' : 'p1';
+  // playerKey is a ref in case `battle` becomes `null`
+  const playerKey = React.useRef(detectPlayerKeyFromBattle(battle));
+  const opponentKey = playerKey.current === 'p1' ? 'p2' : 'p1';
 
-  const player = playerKey === 'p1' ? p1 : p2;
-  const opponent = playerKey === 'p1' ? p2 : p1;
+  React.useEffect(() => {
+    if (playerKey.current) {
+      return;
+    }
+
+    const detectedKey = detectPlayerKeyFromBattle(battle);
+
+    if (detectedKey) {
+      playerKey.current = detectedKey;
+    }
+  }, [
+    battle,
+  ]);
+
+  const player = playerKey.current === 'p1' ? p1 : p2;
+  const opponent = playerKey.current === 'p1' ? p2 : p1;
+
+  if (!state?.battleId) {
+    return null;
+  }
 
   return (
     <div
@@ -76,18 +96,19 @@ export const Calcdex = ({
           dex={dex}
           gen={gen}
           format={format}
-          playerKey={playerKey}
+          rules={rules}
+          playerKey={playerKey.current}
           player={player}
           opponent={opponent}
           field={field}
           defaultName="Player"
           onPokemonChange={updatePokemon}
           onIndexSelect={(index) => setSelectionIndex(
-            playerKey,
+            playerKey.current,
             index,
           )}
           onAutoSelectChange={(autoSelect) => setAutoSelect(
-            playerKey,
+            playerKey.current,
             autoSelect,
           )}
         />
@@ -95,6 +116,7 @@ export const Calcdex = ({
         <FieldCalc
           className={styles.fieldCalc}
           battleId={battleId}
+          playerKey={playerKey.current}
           field={field}
           onFieldChange={updateField}
         />
@@ -104,7 +126,8 @@ export const Calcdex = ({
           dex={dex}
           gen={gen}
           format={format}
-          playerKey={playerKey}
+          rules={rules}
+          playerKey={opponentKey}
           player={opponent}
           opponent={player}
           field={field}

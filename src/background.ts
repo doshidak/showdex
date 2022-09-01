@@ -16,7 +16,11 @@
 //   }
 // });
 
-chrome.runtime.onMessageExternal.addListener((message: Record<string, unknown>, _sender, sendResponse) => {
+chrome.runtime.onMessageExternal.addListener((
+  message: Record<string, unknown>,
+  _sender,
+  sendResponse,
+) => {
   switch (<string> message?.type) {
     case 'fetch': {
       void (async () => {
@@ -31,6 +35,8 @@ chrome.runtime.onMessageExternal.addListener((message: Record<string, unknown>, 
           });
 
           const json = await <Promise<Record<string, unknown>>> response.json();
+
+          // console.log('response.json()', json);
 
           sendResponse({
             ok: response.ok,
