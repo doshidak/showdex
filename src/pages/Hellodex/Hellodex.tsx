@@ -49,7 +49,7 @@ export const Hellodex = (): JSX.Element => {
             />
           </div>
           <div className={styles.presents}>
-            Presents
+            Present
           </div>
 
           <div className={styles.extensionName}>
