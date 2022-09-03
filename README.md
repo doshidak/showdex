@@ -2,7 +2,7 @@
   <code>showdex</code>
 </h1>
 
-Current [v0.1.3](https://github.com/doshidak/showdex/releases/tag/v0.1.3) | [Forum Post](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) | [Chrome Store](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
+Current [v1.0.0](https://github.com/doshidak/showdex/releases/tag/v1.0.0) | [Forum Post](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) | [Chrome Store](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
 --- | --- | --- | ---
 
 <p align="center">
