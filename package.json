@@ -3,7 +3,7 @@
   "version": "0.1.3",
   "description": "Pokémon Showdown extension that harnesses the power of parabolic calculus to strategically extract your opponents' ELO.",
   "author": "Keith Choison <keith@tize.io>",
-  "license": "UNLICENSED",
+  "license": "AGPL-3.0",
   "homepage": "https://github.com/doshidak/showdex",
   "repository": {
     "type": "git",
