@@ -53,6 +53,9 @@ export const createSmogonPokemon = (
     return null;
   }
 
+  // if applicable, convert the '???' status into an empty string
+  const status = pokemon.status === '???' ? '' : pokemon.status;
+
   // not using optional chaining here since ability cannot be cleared in PokeInfo
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
@@ -96,6 +99,8 @@ export const createSmogonPokemon = (
 
     level: pokemon.level,
     gender: pokemon.gender,
+    status,
+    toxicCounter: pokemon.toxicCounter,
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
