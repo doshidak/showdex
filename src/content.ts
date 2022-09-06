@@ -10,17 +10,22 @@ interface ContentInjectable<T = unknown> {
 
 const l = logger('@showdex/content');
 
-const injectables: ContentInjectable<HTMLElement>[] = [
-  // <ContentInjectable<HTMLMetaElement & { 'http-equiv'?: string; }>> {
-  //   id: 'showdex-meta-csp',
-  //   component: 'meta',
-  //   into: 'head',
-  //   props: {
-  //     'http-equiv': 'Content-Security-Policy',
-  //     content: 'script-src \'self\' *.pokemonshowdown.com',
-  //   },
-  // },
+const { runtime } = chrome || browser;
 
+if (!runtime?.id) {
+  l.error('Extension will not run properly since no valid runtime.id was found!');
+}
+
+// obtain the extension runtime ID with this one simple trick
+// (using runtime.id will work on Chrome, but not on Firefox since it'll return the ID defined in the manifest)
+// (e.g., 'chrome-extension://dabpnahpcemkfbgfbmegmncjllieilai/main.js', 'moz-extension://81b2e17b-928f-4689-a33f-501eae139258/main.js')
+const mainUrl = runtime.getURL('main.js');
+
+const extensionId = mainUrl?.endsWith('main.js')
+  ? mainUrl.split('/')[2] // e.g., ['chrome-extension:', '', 'dabpnahpcemkfbgfbmegmncjllieilai', 'main.js']
+  : runtime.id;
+
+const injectables: ContentInjectable<HTMLElement>[] = [
   <ContentInjectable<HTMLLinkElement>> {
     id: 'showdex-preconnect-googleapis',
     component: 'link',
@@ -56,14 +61,19 @@ const injectables: ContentInjectable<HTMLElement>[] = [
     component: 'script',
     into: 'body',
     props: {
-      src: chrome.runtime.getURL('main.js'),
+      src: mainUrl,
       async: true,
-      'data-ext-id': chrome.runtime.id,
+      'data-ext-id': extensionId,
     },
   },
 ];
 
-l.info('Starting Showdex with Chrome extension runtime.id', chrome.runtime.id);
+l.info(
+  'Starting Showdex for', process.env.BUILD_TARGET || 'chrome',
+  'with extension ID', extensionId, 'and runtime.id', runtime.id,
+);
+
+l.debug('Injecting the following injectables:', injectables);
 
 injectables.forEach(({
   id,
@@ -79,8 +89,12 @@ injectables.forEach(({
   }
 
   Object.entries(props).forEach(([key, value]) => {
-    source.setAttribute(key, <string> value);
+    if (value !== undefined) {
+      source.setAttribute(key, <string> value);
+    }
   });
+
+  l.debug('Injecting', source, 'into', destination, 'with props', props);
 
   destination.appendChild(source);
 });
