@@ -145,6 +145,24 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 * For **Chrome**, a packaged extension under `showdex-...chrome.zip` in `dist`, and
 * For **Firefox**, a packaged extension under `showdex-...firefox.xpi` in `dist`.
 
+### Contributing
+
+> **Note**  
+> This repo doesn't have any fancy CI integrations at the moment. Additionally, since this project doesn't use `tsc`, your code will still compile even if you have TypeScript or ESLint errors.
+
+**(ﾉ◕ヮ◕)ﾉ\*:･ﾟ✧** Issues & PRs (Pull Requests) are **very** welcome! **✧ﾟ･: \*ヽ(◕ヮ◕ヽ)**
+
+I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of.
+
+However, just for PRs, please:
+
+* **Fork** this repo and **commit** changes to your fork,
+* **Style** your code according to the [**ESLint rules**](./.eslintrc.json), which primarily extends from [`eslint-config-airbnb-typescript`](https://github.com/iamturns/eslint-config-airbnb-typescript),
+* **Create** a PR from your fork to this repo,
+* **Provide** a brief description of your changes in your PR.
+
+Thanks! &hearts;
+
 ## How It's Made™
 
 > **Note**  
