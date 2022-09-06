@@ -110,3 +110,62 @@ export const FormatLabels: Record<string, string> = {
   vgc2022: 'VGC 2022',
   zu: 'ZU', // ZeroUsed
 };
+
+/**
+ * Formats where abilities and moves should be locked to legal values.
+ *
+ * * Make sure to remove the gen before searching through this array.
+ *   - e.g., `'gen8ou'` -> `'ou'`
+ * * Formats not in this array should allow any illegal abilities and moves to be selected.
+ *   - However, if no Pokemon legal abilities and/or moves are available,
+ *     all abilities and/or moves will be shown, including illegal ones.
+ *   - This case would most likely be caused by Pokemon not being present in the `dex`'s generation.
+ *   - See `buildAbilityOptions()` and `buildMoveOptions()` for implementation details.
+ * * Note that this list is not final and is subject to change in subsequent versions.
+ *
+ * @since 1.0.1
+ */
+export const LegalLockedFormats: string[] = [
+  '1v1',
+  '2v2doubles',
+  'battlefactory',
+  'battlestadiumdoublesseries13',
+  'battlestadiumsingles',
+  'bdspbattlefestivaldoubles',
+  'bdspdoublesou',
+  'bdsplc',
+  'bdspmonotype',
+  'bdspnu',
+  'bdspou',
+  'bdsprandombattle',
+  'bdspru',
+  'bdspubers',
+  'bdspuu',
+  'bssfactory',
+  'doubleslc',
+  'doublesou',
+  'doublesubers',
+  'doublesuu',
+  'freeforallrandombattle',
+  'lc',
+  'lcuu',
+  'letsgorandombattle',
+  'monotype',
+  'multirandombattle',
+  'nationaldex',
+  'nationaldexmonotype',
+  'nationaldexru',
+  'nationaldexuu',
+  'nu',
+  'ou',
+  'oublitz',
+  'pu',
+  'randombattle',
+  'randombattleblitz',
+  'randomdoublesbattle',
+  'ru',
+  'ubers',
+  'unratedrandombattle',
+  'uu',
+  'zu',
+];
