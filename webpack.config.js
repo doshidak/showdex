@@ -5,10 +5,13 @@ import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
-import manifest from './src/manifest.json' assert { type: 'json' };
+import chromeManifest from './src/manifest.chrome.json' assert { type: 'json' };
+import firefoxManifest from './src/manifest.firefox.json' assert { type: 'json' };
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
+
+const buildTarget = String(process.env.BUILD_TARGET || '').toLowerCase();
 
 // __dirname is not available in ESModules lmao
 if (typeof __dirname !== 'string') {
@@ -18,6 +21,7 @@ if (typeof __dirname !== 'string') {
 const env = Object.entries({
   ...dotenv.config({ path: path.join(__dirname, '.env') }).parsed,
   NODE_ENV: mode,
+  BUILD_TARGET: buildTarget,
   PACKAGE_NAME: process.env.npm_package_name,
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_URL: process.env.npm_package_homepage,
@@ -41,7 +45,7 @@ const entry = {
 };
 
 const output = {
-  path: path.join(__dirname, __DEV__ ? 'build' : 'dist'),
+  path: path.join(__dirname, __DEV__ ? 'build' : 'dist', buildTarget),
   filename: '[name].js',
   clean: true, // clean output.path dir before emitting files
   publicPath: '/',
@@ -117,19 +121,53 @@ const resolve = {
 
 const copyPatterns = [{
   // replace version and description in manifest.json w/ those of package.json
-  from: 'src/manifest.json',
-  transform: (content) => Buffer.from(JSON.stringify({
-    ...JSON.parse(content.toString()),
-    version: process.env.npm_package_version,
-    description: process.env.npm_package_description,
-  })),
+  from: `src/manifest.${buildTarget}.json`,
+  to: 'manifest.json',
+
+  // transform: (content) => Buffer.from(JSON.stringify({
+  //   ...JSON.parse(content.toString()),
+  //   version: process.env.npm_package_version,
+  //   description: process.env.npm_package_description,
+  //   ...(process.env.BUILD_TARGET === 'firefox' ? {
+  //     background: {
+  //     }
+  //   } : null),
+  // })),
+
+  transform: (content) => {
+    const parsed = JSON.parse(content.toString());
+
+    parsed.version = process.env.npm_package_version;
+    parsed.description = process.env.npm_package_description;
+    parsed.author = process.env.npm_package_author;
+    parsed.homepage_url = process.env.npm_package_homepage;
+
+    // switch (String(process.env.BUILD_TARGET).toLowerCase()) {
+    //   // case 'chrome': {
+    //   //   delete parsed.browser_specific_settings;
+    //   //
+    //   //   break;
+    //   // }
+    //
+    //   case 'firefox': {
+    //     break;
+    //   }
+    //
+    //   default: {
+    //     break;
+    //   }
+    // }
+
+    return Buffer.from(JSON.stringify(parsed));
+  },
 }, {
   from: 'src/assets/**/*',
   to: '[name][ext]',
   // filter: (path) => moduleRules[1].test.test(path),
   filter: (path) => moduleRules[1].test.test(path) && [
-    ...manifest.web_accessible_resources.flatMap((r) => r.resources),
-    ...Object.values(manifest.icons),
+    ...(buildTarget !== 'firefox' ? chromeManifest.web_accessible_resources.flatMap((r) => r.resources) : []),
+    ...(buildTarget === 'firefox' ? firefoxManifest.web_accessible_resources : []),
+    ...Object.values((buildTarget === 'firefox' ? firefoxManifest : chromeManifest).icons),
   ].some((name) => path.includes(name)),
 }];
 
@@ -161,7 +199,7 @@ if (__DEV__) {
 } else {
   config.optimization = {
     minimize: true,
-    minimizer: [new TerserPlugin({ extractComments: false })],
+    minimizer: [new TerserPlugin({ extractComments: true })],
   };
 }
 
