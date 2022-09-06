@@ -4,6 +4,8 @@
   "name": "Showdex",
   "version": "<-- auto-filled; do not edit -->",
   "description": "<-- auto-filled; do not edit -->",
+  "author": "<-- auto-filled; do not edit -->",
+  "homepage_url": "<-- auto-filled; do not edit -->",
 
   "permissions": [],
 
@@ -17,14 +19,20 @@
 
   "content_scripts": [
     {
-      "matches": ["https://play.pokemonshowdown.com/*"],
-      "js": ["content.js"]
+      "matches": [
+        "*://play.pokemonshowdown.com/*"
+      ],
+      "js": [
+        "content.js"
+      ]
     }
   ],
 
   "web_accessible_resources": [
     {
-      "matches": ["https://play.pokemonshowdown.com/*"],
+      "matches": [
+        "*://play.pokemonshowdown.com/*"
+      ],
       "resources": [
         "github-face.svg",
         "main.js",
@@ -56,9 +64,11 @@
   },
 
   "externally_connectable": {
-    "ids": ["*"],
+    "ids": [
+      "*"
+    ],
     "matches": [
-      "https://play.pokemonshowdown.com/*"
+      "*://play.pokemonshowdown.com/*"
     ]
   }
 }
