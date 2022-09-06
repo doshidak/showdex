@@ -617,8 +617,7 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    *
    * * Each element should be some unique identifier for the Pokemon that's hopefully somewhat consistent.
    *   - Wouldn't recommend using `searchid` as it includes the `speciesForme`, subject to change.
-   *   - For instance, `searchid` may read `'p1: Zygarde|Zygarde'`, but later read `'p1: Zygarde|Zygarde-Complete'`,
-   *     which obviously doesn't qualify as "consistent."
+   *   - For instance, `searchid` may read `'p1: Zygarde|Zygarde'`, but later read `'p1: Zygarde|Zygarde-Complete'`.
    *   - `ident` seems to be the most viable property here.
    * * Typically should only be used for ordering `myPokemon` on initialization.
    *   - Array ordering of `myPokemon` switches to place the last-switched in Pokemon first.
@@ -774,7 +773,7 @@ export interface CalcdexBattleRules {
    *
    * * Derived from the existence of the following rule in the `stepQueue`:
    *   - `'|rule|Mega Rayquaza Clause: You cannot mega evolve Rayquaza'`
-   * * Obviously only applies if the current gen is 7, or we're in some weird format like Gen 8 National Dex.
+   * * Obviously only applies if the current gen is 6 or 7, or we're in some weird format like Gen 8 National Dex.
    *
    * @since 0.1.3
    */
