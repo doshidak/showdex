@@ -3,6 +3,7 @@ import { createEnvParser } from './createEnvParser';
 
 const processEnv: EnvDict = {
   NODE_ENV: process.env.NODE_ENV,
+  BUILD_TARGET: process.env.BUILD_TARGET,
 
   PACKAGE_NAME: process.env.PACKAGE_NAME,
   PACKAGE_VERSION: process.env.PACKAGE_VERSION,
