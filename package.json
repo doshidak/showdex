@@ -24,10 +24,17 @@
     "cm": "yarn commit",
     "cz": "yarn commit",
     "clean:dev": "yarn rimraf ./build",
+    "clean:dev:chrome": "yarn rimraf ./build/chrome",
+    "clean:dev:firefox": "yarn rimraf ./build/firefox",
     "clean:prod": "yarn rimraf ./dist",
+    "clean:prod:chrome": "yarn rimraf ./dist/chrome",
+    "clean:prod:firefox": "yarn rimraf ./dist/firefox",
     "clean": "yarn clean:dev && yarn clean:prod",
-    "dev": "yarn clean:dev && NODE_ENV=development node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
-    "build": "yarn clean:prod && NODE_ENV=production node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
+    "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "build:chrome": "yarn clean:prod:chrome && NODE_ENV=production BUILD_TARGET=chrome node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
+    "build:firefox": "yarn clean:prod:firefox && NODE_ENV=production BUILD_TARGET=firefox node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
+    "build": "yarn build:chrome && yarn build:firefox"
   },
   "config": {
     "cz-customizable": {
@@ -84,6 +91,7 @@
     "@pkmn/types": "^2.1.0",
     "@react-types/textfield": "^3.5.2",
     "@types/chrome": "^0.0.193",
+    "@types/firefox-webext-browser": "^94.0.1",
     "@types/fs-extra": "^9.0.13",
     "@types/jquery": "^3.5.14",
     "@types/node": "^18.6.5",
