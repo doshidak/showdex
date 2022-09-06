@@ -1,7 +1,13 @@
 import { PokemonNatures } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
-import type { AbilityName, ItemName, MoveName } from '@pkmn/data';
+import { env } from '@showdex/utils/core';
+import type {
+  AbilityName,
+  GenerationNum,
+  ItemName,
+  MoveName,
+} from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
@@ -58,6 +64,7 @@ export const sanitizePokemonVolatiles = (
  */
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
+  gen: GenerationNum = <GenerationNum> env.int('calcdex-default-gen'),
 ): CalcdexPokemon => {
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];
@@ -95,7 +102,7 @@ export const sanitizePokemon = (
     abilities: ('abilities' in pokemon && pokemon.abilities) || [],
     altAbilities: ('altAbilities' in pokemon && pokemon.altAbilities) || [],
 
-    item: <ItemName> pokemon?.item,
+    item: <ItemName> pokemon?.item?.replace('(exists)', ''),
     dirtyItem: ('dirtyItem' in pokemon && pokemon.dirtyItem) || null,
     altItems: ('altItems' in pokemon && pokemon.altItems) || [],
     itemEffect: pokemon?.itemEffect,
@@ -159,7 +166,9 @@ export const sanitizePokemon = (
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
-    useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
+    // useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
+    useZ: ('useZ' in pokemon && pokemon.useZ) || false,
+    useMax: ('useMax' in pokemon && pokemon.useMax) || false,
     lastMove: pokemon?.lastMove,
 
     moveTrack: Array.isArray(pokemon?.moveTrack)
@@ -171,7 +180,7 @@ export const sanitizePokemon = (
     moveState: {
       revealed: ('moveState' in pokemon && pokemon.moveState?.revealed) || [],
       learnset: ('moveState' in pokemon && pokemon.moveState?.learnset) || [],
-      other: ('moveState' in pokemon && pokemon.moveState?.other) || [],
+      // other: ('moveState' in pokemon && pokemon.moveState?.other) || [],
     },
 
     criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
@@ -188,15 +197,16 @@ export const sanitizePokemon = (
   sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   // fill in additional info if the Dex global is available (should be)
-  if (typeof Dex?.species?.get === 'function') {
-    const species = Dex.species.get(sanitizedPokemon.speciesForme);
+  if (typeof Dex !== 'undefined') {
+    // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
+    const species = Dex.forGen(gen).species.get(sanitizedPokemon.speciesForme);
 
     // don't really care if species is falsy here
     sanitizedPokemon.baseStats = { ...species?.baseStats };
 
     // grab the baseStats of the transformed Pokemon, if applicable
     const transformedSpecies = sanitizedPokemon.transformedForme
-      ? Dex.species.get(sanitizedPokemon.transformedForme)
+      ? Dex.forGen(gen).species.get(sanitizedPokemon.transformedForme)
       : null;
 
     if (transformedSpecies?.baseStats) {
@@ -219,8 +229,9 @@ export const sanitizePokemon = (
     }
 
     // only update the abilities if the dex returned abilities
-    if (!sanitizedPokemon.abilities.length && Object.keys(species?.abilities || {}).length) {
+    if (Object.keys(species?.abilities || {}).length) {
       sanitizedPokemon.abilities = [
+        ...(sanitizedPokemon.abilities || []),
         ...(<AbilityName[]> Object.values(species.abilities)),
       ];
 
