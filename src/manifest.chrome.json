@@ -20,7 +20,10 @@
   "content_scripts": [
     {
       "matches": [
-        "*://play.pokemonshowdown.com/*"
+        "*://play.pokemonshowdown.com/*",
+        "*://dawn.psim.us/*",
+        "*://smogtours.psim.us/*",
+        "*://sports.psim.us/*"
       ],
       "js": [
         "content.js"
@@ -31,7 +34,10 @@
   "web_accessible_resources": [
     {
       "matches": [
-        "*://play.pokemonshowdown.com/*"
+        "*://play.pokemonshowdown.com/*",
+        "*://dawn.psim.us/*",
+        "*://smogtours.psim.us/*",
+        "*://sports.psim.us/*"
       ],
       "resources": [
         "github-face.svg",
@@ -68,7 +74,10 @@
       "*"
     ],
     "matches": [
-      "*://play.pokemonshowdown.com/*"
+      "*://play.pokemonshowdown.com/*",
+      "*://dawn.psim.us/*",
+      "*://smogtours.psim.us/*",
+      "*://sports.psim.us/*"
     ]
   }
 }

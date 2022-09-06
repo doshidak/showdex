@@ -15,7 +15,10 @@
   },
 
   "permissions": [
-    "*://play.pokemonshowdown.com/*"
+    "*://play.pokemonshowdown.com/*",
+    "*://dawn.psim.us/*",
+    "*://smogtours.psim.us/*",
+    "*://sports.psim.us/*"
   ],
 
   "background": {
@@ -28,7 +31,10 @@
   "content_scripts": [
     {
       "matches": [
-        "*://play.pokemonshowdown.com/*"
+        "*://play.pokemonshowdown.com/*",
+        "*://dawn.psim.us/*",
+        "*://smogtours.psim.us/*",
+        "*://sports.psim.us/*"
       ],
       "js": [
         "content.js"
