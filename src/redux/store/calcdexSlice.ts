@@ -112,6 +112,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * Ability of the Pokemon, but it's filthy af.
    *
    * * Stank.
+   * * In all seriousness, this holds the user-edited ability, if any.
    *
    * @since 0.1.0
    */
@@ -285,9 +286,24 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - Future me found the word I was looking for: *gen-agnostic*.
    *   - ... like in the sense of *platform-agnostic*.
    *
+   * @deprecated As of v1.0.1, nationaldex entered the chat. This don't cut it no mo :(
    * @since 0.1.2
    */
   useUltimateMoves?: boolean;
+
+  /**
+   * Whether the Pokemon is using Z moves.
+   *
+   * @since 1.0.1
+   */
+  useZ?: boolean;
+
+  /**
+   * Whether the Pokemon is using D-max/G-max moves.
+   *
+   * @since 1.0.1
+   */
+  useMax?: boolean;
 
   /**
    * Moves revealed by the Pokemon to the opponent.
@@ -474,9 +490,11 @@ export interface CalcdexMoveState {
    * ```ts
    * []
    * ```
+   * @deprecated As of v1.0.1, `other` moves are deterministically filled-in by the `format` in `buildMoveOptions()`.
+   *   Original population logic in `syncBattle()` has been removed.
    * @since 0.1.0
    */
-  other: (MoveName | string)[];
+  other?: (MoveName | string)[];
 }
 
 /**
