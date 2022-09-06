@@ -25,10 +25,10 @@
     "cz": "yarn commit",
     "clean:dev": "yarn rimraf ./build",
     "clean:dev:chrome": "yarn rimraf ./build/chrome",
-    "clean:dev:firefox": "yarn rimraf ./build/firefox",
+    "clean:dev:firefox": "yarn rimraf ./build/firefox ./build/*.firefox.xpi",
     "clean:prod": "yarn rimraf ./dist",
-    "clean:prod:chrome": "yarn rimraf ./dist/chrome",
-    "clean:prod:firefox": "yarn rimraf ./dist/firefox",
+    "clean:prod:chrome": "yarn rimraf ./dist/chrome ./dist/*.chrome.zip",
+    "clean:prod:firefox": "yarn rimraf ./dist/firefox ./dist/*.firefox.xpi",
     "clean": "yarn clean:dev && yarn clean:prod",
     "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
     "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
@@ -133,6 +133,7 @@
     "typescript-plugin-css-modules": "^3.4.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "webpack-dev-server": "^4.9.3",
+    "zip-webpack-plugin": "^4.0.1"
   }
 }
