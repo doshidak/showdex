@@ -5,13 +5,15 @@ import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
+import ZipPlugin from 'zip-webpack-plugin';
 import chromeManifest from './src/manifest.chrome.json' assert { type: 'json' };
 import firefoxManifest from './src/manifest.firefox.json' assert { type: 'json' };
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
 
-const buildTarget = String(process.env.BUILD_TARGET || '').toLowerCase();
+const buildTarget = String(process.env.BUILD_TARGET || 'chrome').toLowerCase();
+const buildDate = Date.now();
 
 // __dirname is not available in ESModules lmao
 if (typeof __dirname !== 'string') {
@@ -25,7 +27,7 @@ const env = Object.entries({
   PACKAGE_NAME: process.env.npm_package_name,
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_URL: process.env.npm_package_homepage,
-  PACKAGE_BUILD_DATE: Date.now(),
+  PACKAGE_BUILD_DATE: buildDate,
 }).reduce((prev, [key, value]) => {
   if (key) {
     prev[`process.env.${key}`] = JSON.stringify(value || '');
@@ -176,6 +178,26 @@ const plugins = [
   new webpack.DefinePlugin(env),
   new CopyWebpackPlugin({ patterns: copyPatterns }),
 ];
+
+if (!__DEV__ || buildTarget === 'firefox') {
+  const ext = buildTarget === 'firefox' ? 'xpi' : 'zip';
+
+  plugins.push(new ZipPlugin({
+    // spit out the file in either `build` or `dist`
+    path: '..',
+
+    // extension will be appended to the end of the filename
+    filename: [
+      process.env.npm_package_name,
+      !!process.env.npm_package_version && `-v${process.env.npm_package_version}`,
+      !!buildDate && `-b${buildDate}`,
+      __DEV__ ? '-dev' : '',
+      `.${buildTarget}`,
+    ].filter(Boolean).join(''),
+
+    extension: ext,
+  }));
+}
 
 export const config = {
   mode,
