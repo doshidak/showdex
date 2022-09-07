@@ -83,3 +83,10 @@ button.toggleButton {
     color: colors.$white;
   }
 }
+
+.descTooltip {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
