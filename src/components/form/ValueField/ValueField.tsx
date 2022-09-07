@@ -42,6 +42,16 @@ export interface ValueFieldProps extends BaseTextFieldProps<number> {
   loop?: boolean;
 
   /**
+   * Whether to clear the displayed value when the input is focused.
+   *
+   * * If `true`, blurring with an empty value will revert the displayed value back to its original value.
+   *
+   * @default false
+   * @since 1.0.1
+   */
+  clearOnFocus?: boolean;
+
+  /**
    * Whether to use an absolutely-positioned pseudo-element
    * for indicating the input's hover/active state.
    *
@@ -67,6 +77,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   step = 1,
   shiftStep,
   loop,
+  clearOnFocus,
   absoluteHover,
   input,
   disabled,
@@ -148,8 +159,22 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     min,
   ]);
 
+  const handleFocus = React.useCallback((e?: React.FocusEvent<HTMLInputElement>) => {
+    // clear the displayed value if one is present
+    if (clearOnFocus) {
+      handleChange('');
+    }
+
+    setActive(true);
+    input?.onFocus?.(e);
+  }, [
+    clearOnFocus,
+    handleChange,
+    input,
+  ]);
+
   const handleBlur = React.useCallback((e?: React.FocusEvent<HTMLInputElement>) => {
-    const strValue = (e?.target?.value || fallbackValue)?.toString();
+    const strValue = (e?.target?.value || (clearOnFocus ? '' : fallbackValue))?.toString();
 
     if (typeof strValue === 'string' && strValue !== inputValue) {
       handleChange(strValue);
@@ -158,6 +183,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     setActive(false);
     input?.onBlur?.(e);
   }, [
+    clearOnFocus,
     fallbackValue,
     handleChange,
     input,
@@ -267,10 +293,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
           // type: 'number',
           value: inputValue,
           onChange: handleChange,
-          onFocus: (e?: React.FocusEvent<HTMLInputElement>) => {
-            setActive(true);
-            input?.onFocus?.(e);
-          },
+          onFocus: handleFocus,
           onBlur: handleBlur,
         }}
         disabled={disabled}
