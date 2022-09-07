@@ -45,8 +45,13 @@ export const useCalcdex = ({
     '\n', 'calcdexState', calcdexState,
   );
 
-  const gen = battle?.gen as GenerationNum;
   const format = battle?.id?.split?.('-')?.[1];
+
+  // for BDSP, though gen 8, should load from gen 4, otherwise,
+  // Calcdex may crash due to incomplete Pokemon entries (like Bibarel)
+  const gen = format?.includes('bdsp')
+    ? 4
+    : battle?.gen as GenerationNum;
 
   const gens = React.useRef(new Generations(PkmnDex));
   const dex = gens.current.get(gen);
