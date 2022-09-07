@@ -1,4 +1,5 @@
 import { PokemonBoostNames } from '@showdex/consts';
+import { formatId } from '@showdex/utils/app';
 import {
   calcPokemonSpreadStats,
   calcPresetCalcdexId,
@@ -6,7 +7,13 @@ import {
 } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type {
+  AbilityName,
+  Generation,
+  GenerationNum,
+  ItemName,
+  MoveName,
+} from '@pkmn/data';
 import type {
   // CalcdexMoveState,
   CalcdexPokemon,
@@ -55,6 +62,22 @@ export const syncPokemon = (
     }
 
     switch (key) {
+      case 'speciesForme': {
+        // if the speciesForme changed, update the types and possible abilities
+        // (could change due to mega-evolutions or gigantamaxing, for instance)
+        if (prevValue !== value && typeof Dex !== 'undefined') {
+          const updatedSpecies = Dex.species.get(<string> value);
+
+          syncedPokemon.types = [...(updatedSpecies?.types || syncedPokemon.types || [])];
+
+          if (Object.keys(updatedSpecies?.abilities).length) {
+            syncedPokemon.abilities = [...(<AbilityName[]> Object.values(updatedSpecies.abilities))];
+          }
+        }
+
+        break;
+      }
+
       case 'hp':
       case 'maxhp': {
         // note: returning at any point here will skip syncing the `value` from the
@@ -87,7 +110,7 @@ export const syncPokemon = (
       case 'item': {
         // ignore any unrevealed item (resulting in a falsy value) that hasn't been knocked-off/consumed/etc.
         // (this can be checked since when the item be consumed, prevItem would NOT be falsy)
-        if ((!value || value === '(exists)') && !clientPokemon?.prevItem) {
+        if ((!value || formatId(<string> value) === 'exists') && !clientPokemon?.prevItem) {
           return;
         }
 
@@ -156,8 +179,8 @@ export const syncPokemon = (
             ...syncedPokemon.moveState,
 
             // filter out any Z/Max moves from the revealed list
-            revealed: moveTrack.map((track) => track?.[0]).filter((m) => {
-              const move = dex?.moves?.get?.(m);
+            revealed: moveTrack.map((track) => track?.[0]).filter((name) => {
+              const move = Dex?.moves.get(name);
 
               return !!move?.name && !move?.isZ && !move?.isMax;
             }),
@@ -173,7 +196,8 @@ export const syncPokemon = (
         const volatiles = <Showdown.Pokemon['volatiles']> value;
 
         // sync Pokemon's dynamax state
-        syncedPokemon.useUltimateMoves = 'dynamax' in volatiles;
+        // syncedPokemon.useUltimateMoves = 'dynamax' in volatiles;
+        syncedPokemon.useMax = 'dynamax' in volatiles;
 
         // check for type changes
         const changedTypes = 'typechange' in volatiles
@@ -238,19 +262,19 @@ export const syncPokemon = (
     }
 
     if (serverPokemon.ability) {
-      const dexAbility = dex.abilities.get(serverPokemon.ability);
+      const dexAbility = Dex.abilities.get(serverPokemon.ability);
 
       if (dexAbility?.name) {
-        syncedPokemon.ability = dexAbility.name;
+        syncedPokemon.ability = <AbilityName> dexAbility.name;
         syncedPokemon.dirtyAbility = null;
       }
     }
 
     if (serverPokemon.item) {
-      const dexItem = dex.items.get(serverPokemon.item);
+      const dexItem = Dex.items.get(serverPokemon.item);
 
       if (dexItem?.name) {
-        syncedPokemon.item = dexItem.name;
+        syncedPokemon.item = <ItemName> dexItem.name;
         syncedPokemon.dirtyItem = null;
       }
     }
@@ -272,13 +296,13 @@ export const syncPokemon = (
 
     // sanitize the moves from the serverPokemon
     const serverMoves = serverPokemon.moves?.map?.((moveName) => {
-      const dexMove = dex.moves.get(moveName);
+      const dexMove = Dex.moves.get(moveName);
 
       if (!dexMove?.name) {
         return null;
       }
 
-      return dexMove.name;
+      return <MoveName> dexMove.name;
     }).filter(Boolean);
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
@@ -363,7 +387,7 @@ export const syncPokemon = (
     baseStats,
     transformedForme, // yeah ik this is already set above, but double-checking lol
     transformedBaseStats,
-  } = sanitizePokemon(syncedPokemon);
+  } = sanitizePokemon(syncedPokemon, dex?.num);
 
   // check for toggleable abilities
   syncedPokemon.abilityToggleable = abilityToggleable;
