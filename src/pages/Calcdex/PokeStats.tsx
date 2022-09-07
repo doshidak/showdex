@@ -45,6 +45,9 @@ export const PokeStats = ({
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const evsLegal = totalEvs <= env.int('calcdex-pokemon-max-legal-evs');
 
+  const missingIvs = !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
+  const missingEvs = !totalEvs;
+
   const finalStats = React.useMemo(() => (pokemon?.calcdexId ? calcPokemonFinalStats(
     dex,
     pokemon,
@@ -93,7 +96,14 @@ export const PokeStats = ({
       })}
 
       {/* IVs */}
-      <TableGridItem align="right" header>
+      <TableGridItem
+        className={cx(
+          styles.ivsHeader,
+          missingIvs && styles.missingSpread,
+        )}
+        align="right"
+        header
+      >
         IV
         <span className={styles.small}>
           S
@@ -110,7 +120,12 @@ export const PokeStats = ({
           >
             <ValueField
               className={styles.valueField}
+              inputClassName={cx(
+                styles.valueFieldInput,
+                missingIvs && styles.missingSpread,
+              )}
               label={`${stat.toUpperCase()} IV for Pokemon ${friendlyPokemonName}`}
+              hideLabel
               hint={iv.toString() || '31'}
               fallbackValue={31}
               min={0}
@@ -118,14 +133,14 @@ export const PokeStats = ({
               step={1}
               shiftStep={5}
               loop
+              clearOnFocus
+              absoluteHover
               input={{
                 value: iv,
                 onChange: (value: number) => onPokemonChange?.({
                   ivs: { [stat]: value },
                 }),
               }}
-              hideLabel
-              absoluteHover
             />
           </TableGridItem>
         );
@@ -135,6 +150,7 @@ export const PokeStats = ({
       <TableGridItem
         className={cx(
           styles.evsHeader,
+          missingEvs && styles.missingSpread,
           !evsLegal && styles.illegal,
         )}
         align="right"
@@ -156,7 +172,12 @@ export const PokeStats = ({
           >
             <ValueField
               className={styles.valueField}
+              inputClassName={cx(
+                styles.valueFieldInput,
+                missingEvs && styles.missingSpread,
+              )}
               label={`${stat.toUpperCase()} EV for Pokemon ${friendlyPokemonName}`}
+              hideLabel
               hint={ev.toString() || '252'}
               fallbackValue={0}
               min={0}
@@ -164,14 +185,14 @@ export const PokeStats = ({
               step={4}
               shiftStep={16}
               loop
+              clearOnFocus
+              absoluteHover
               input={{
                 value: ev,
                 onChange: (value: number) => onPokemonChange?.({
                   evs: { [stat]: value },
                 }),
               }}
-              hideLabel
-              absoluteHover
             />
           </TableGridItem>
         );
