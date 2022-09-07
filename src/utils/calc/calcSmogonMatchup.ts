@@ -27,6 +27,16 @@ export interface CalcdexMatchupResult {
   move?: SmogonMove;
 
   /**
+   * Description of the result.
+   *
+   * * Useful for displaying additional matchup information in a tooltip, for instance.
+   *
+   * @example '252+ SpA Life Orb Venusaur Weather Ball (50 BP Normal) vs. 4 HP / 0 SpD Azumarill: 79-94 (23 - 27.4%) -- 59.5% chance to 4HKO'
+   * @since 1.0.1
+   */
+  description?: string;
+
+  /**
    * In the format `XXX.X% - XXX.X%`, where `X` are numbers.
    *
    * @example '38.5% - 52.0%'
@@ -52,16 +62,29 @@ export interface CalcdexMatchupResult {
   koColor?: string;
 }
 
+const l = logger('@showdex/utils/calc/calcSmogonMatchup');
+
 const formatDamageRange = (
-  result: Result,
+  // result: Result,
+  description: string,
 ): string => {
-  if (!result?.damage || typeof result.desc !== 'function') {
+  // if (!result?.damage || typeof result.desc !== 'function') {
+  //   return null;
+  // }
+
+  if (!description) {
     return null;
   }
 
-  const resultDesc = result.desc();
+  // const resultDesc = result.desc();
 
-  return /\(([\d.]+\s-\s[\d.]+%)\)/.exec(resultDesc)?.[1] || '???';
+  const extractedRange = /\(([\d.]+\s-\s[\d.]+%)\)/.exec(description)?.[1] || '';
+
+  if (extractedRange.includes('0 - 0%')) {
+    return '0%';
+  }
+
+  return extractedRange;
 };
 
 const formatKoChance = (
@@ -71,29 +94,41 @@ const formatKoChance = (
     return null;
   }
 
-  const resultKoChance = result.kochance();
+  const output: string[] = [];
 
-  if (!resultKoChance?.chance && !resultKoChance?.n) {
-    return null;
-  }
+  try {
+    const resultKoChance = result.kochance();
 
-  const output: string[] = [
-    `${resultKoChance.n}HKO`,
-  ];
-
-  // no point in displaying a 100% chance to KO
-  // (should be assumed that if there's no % displayed before the KO, it's 100%)
-  if (typeof resultKoChance.chance === 'number' && resultKoChance.chance !== 1) {
-    // sometimes, we might see '0.0% 3HKO' or something along those lines...
-    // probably it's like 0.09%, but gets rounded down when we fix it to 1 decimal place
-    const chancePercentage = resultKoChance.chance * 100;
-    const decimalPlaces = ['0.0', '100.0'].includes(chancePercentage.toFixed(1)) ? 2 : 1;
-    const fixedChance = chancePercentage.toFixed(decimalPlaces);
-
-    if (fixedChance !== '0.0' && fixedChance !== '100.0') {
-      // also truncate any trailing zeroes, e.g., 75.0% -> 75%
-      output.unshift(`${fixedChance}%`.replace('.0%', '%'));
+    if (!resultKoChance?.chance && !resultKoChance?.n) {
+      return null;
     }
+
+    output.push(`${resultKoChance.n}HKO`);
+
+    // no point in displaying a 100% chance to KO
+    // (should be assumed that if there's no % displayed before the KO, it's 100%)
+    if (typeof resultKoChance.chance === 'number' && resultKoChance.chance !== 1) {
+      // sometimes, we might see '0.0% 3HKO' or something along those lines...
+      // probably it's like 0.09%, but gets rounded down when we fix it to 1 decimal place
+      const chancePercentage = resultKoChance.chance * 100;
+      const decimalPlaces = ['0.0', '100.0'].includes(chancePercentage.toFixed(1)) ? 2 : 1;
+      const fixedChance = chancePercentage.toFixed(decimalPlaces);
+
+      if (fixedChance !== '0.0' && fixedChance !== '100.0') {
+        // also truncate any trailing zeroes, e.g., 75.0% -> 75%
+        output.unshift(`${fixedChance}%`.replace('.0%', '%'));
+      }
+    }
+  } catch (error) {
+    if (__DEV__) {
+      l.error(
+        'Exception while grabbing the kochance() of the result.',
+        '\n', 'result', result,
+        '\n', '(You will only see this error on development.)',
+      );
+    }
+
+    throw error;
   }
 
   return output.join(' ');
@@ -137,8 +172,6 @@ const getKoColor = (
   return SmogonMatchupKoColors[koColorIndex];
 };
 
-const l = logger('@showdex/utils/calc/calcSmogonMatchup');
-
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.
  *
@@ -156,7 +189,7 @@ export const calcSmogonMatchup = (
   if (!dex?.num || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
       l.warn(
-        'Calculation ignored due to invalid arguments',
+        'Calculation ignored due to invalid arguments.',
         '\n', 'dex.num', dex?.num,
         '\n', 'playerPokemon.speciesForme', playerPokemon?.speciesForme,
         '\n', 'opponentPokemon.speciesForme', opponentPokemon?.speciesForme,
@@ -182,30 +215,55 @@ export const calcSmogonMatchup = (
     defenderSide,
   });
 
-  const result = calculate(
-    dex,
-    smogonPlayerPokemon,
-    smogonOpponentPokemon,
-    smogonPlayerPokemonMove,
-    smogonField,
-  );
+  try {
+    const result = calculate(
+      dex,
+      smogonPlayerPokemon,
+      smogonOpponentPokemon,
+      smogonPlayerPokemonMove,
+      smogonField,
+    );
 
-  const matchup: CalcdexMatchupResult = {
-    move: smogonPlayerPokemonMove,
-    damageRange: formatDamageRange(result),
-    koChance: formatKoChance(result),
-    koColor: getKoColor(result),
-  };
+    const description = result?.desc();
 
-  // l.debug(
-  //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
-  //   '\n', 'dex.num', dex.num,
-  //   '\n', 'matchup', matchup,
-  //   '\n', 'result', result,
-  //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-  //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-  //   '\n', 'field', field,
-  // );
+    const matchup: CalcdexMatchupResult = {
+      move: smogonPlayerPokemonMove,
+      description,
+      damageRange: formatDamageRange(description),
+      koChance: formatKoChance(result),
+      koColor: getKoColor(result),
+    };
 
-  return matchup;
+    // l.debug(
+    //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
+    //   '\n', 'dex.num', dex.num,
+    //   '\n', 'matchup', matchup,
+    //   '\n', 'result', result,
+    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+    //   '\n', 'field', field,
+    // );
+
+    return matchup;
+  } catch (error) {
+    if (__DEV__) {
+      l.error(
+        'Exception while calculating the damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
+        '\n', 'dex.num', dex.num,
+        '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+        '\n', 'field', field,
+        '\n', '(You will only see this error on development.)',
+        '\n', error,
+      );
+    }
+
+    return {
+      move: smogonPlayerPokemonMove,
+      description: null,
+      damageRange: null,
+      koChance: null,
+      koColor: null,
+    };
+  }
 };
