@@ -1,7 +1,7 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, MoveName } from '@pkmn/data';
+import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -17,6 +17,22 @@ export const createSmogonPokemon = (
   // don't bother logging in this and the `ident` check below cause the Calcdex components
   // may get partial data (or even nothing) in the beginning, so these logs would get pretty spammy
   if (typeof dex?.num !== 'number' || dex.num < 1 || !pokemon?.calcdexId) {
+    return null;
+  }
+
+  /**
+   * @todo Remove the `dex` and use the `Dex` global instead.
+   */
+  if (typeof Dex === 'undefined') {
+    if (__DEV__) {
+      l.warn(
+        'Global Dex object is unavailable.',
+        '\n', 'pokemon', pokemon,
+        '\n', 'moveName', moveName,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
+
     return null;
   }
 
@@ -52,6 +68,13 @@ export const createSmogonPokemon = (
 
     return null;
   }
+
+  // megas require special handling (like for the item), so make sure we detect these
+  const isMega = formatId(speciesForme)?.includes('mega');
+
+  const hasMegaItem = !!item
+    && /(?:ite|z$)/.test(formatId(item))
+    && formatId(item) !== 'eviolite'; // oh god
 
   // if applicable, convert the '???' status into an empty string
   const status = pokemon.status === '???' ? '' : pokemon.status;
@@ -105,11 +128,12 @@ export const createSmogonPokemon = (
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
     // (useUltimateMoves is a gen-agnostic property that's user-toggleable and syncs w/ the battle state btw)
-    isDynamaxed: pokemon.useUltimateMoves,
+    // isDynamaxed: pokemon.useUltimateMoves,
+    isDynamaxed: pokemon.useMax,
 
     ability,
     abilityOn: pokemon.abilityToggleable ? pokemon.abilityToggled : undefined,
-    item,
+    item: isMega || hasMegaItem ? null : item,
     nature: pokemon.nature,
     moves: pokemon.moves,
 
@@ -140,8 +164,38 @@ export const createSmogonPokemon = (
     },
   };
 
+  // const dexSpecies = dex.species.get(speciesForme);
+  // const dexItem = dex.items.get(item);
+
+  // const determinedDex = dexSpecies?.exists && dexItem?.exists
+  //   ? dex
+  //   : <GenerationNum> Math.max(
+  //     Dex.species.get(speciesForme)?.gen ?? 0,
+  //     Dex.items.get(item)?.gen ?? 0,
+  //     0,
+  //   ) || dex;
+
+  const isGalarian = formatId(speciesForme).includes('galar');
+  const missingSpecies = !dex.species.get(speciesForme)?.exists;
+
+  const determinedDex = isMega || hasMegaItem
+    ? 7
+    : isGalarian
+      ? 8
+      : missingSpecies
+        ? <GenerationNum> Dex.species.get(speciesForme)?.gen || 7
+        : dex;
+
+  l.debug(
+    'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
+    '\n', 'isMega?', isMega,
+    '\n', 'hasMegaItem?', hasMegaItem,
+    '\n', 'isGalarian?', isGalarian,
+    '\n', 'missingSpecies?', missingSpecies,
+  );
+
   const smogonPokemon = new SmogonPokemon(
-    dex,
+    determinedDex,
     speciesForme,
     options,
   );
