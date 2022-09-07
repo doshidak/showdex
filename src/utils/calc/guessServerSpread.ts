@@ -119,7 +119,7 @@ export const guessServerSpread = (
       }
 
       // don't say I didn't warn ya!
-      for (let iv = 31; iv >= 0; iv -= 31) { // try only 31 and 0 for IVs (who assigns any other IVs?)
+      for (const iv of [31, 30, 29, 21, 20, 19, 18, 3, 2, 1, 0]) { // try some IVs, but not all 31 possible combinations
         for (let ev = 0; ev <= 252; ev += 4) { // try 252 to 0 in multiples of 4
           calculatedStats[stat] = dex.stats.calc(
             stat,
