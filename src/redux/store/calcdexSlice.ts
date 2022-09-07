@@ -734,6 +734,16 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
  */
 export interface CalcdexBattleRules {
   /**
+   * Whether only one *Baton Pass*-er is allowed.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|One Boost Passer Clause: Limit one Baton Passer that has a way to boost its stats'`
+   *
+   * @since 1.0.1
+   */
+  boostPasser?: boolean;
+
+  /**
    * Whether dynamaxing is banned.
    *
    * * Derived from the existence of the following rule in the `stepQueue`:
@@ -775,6 +785,16 @@ export interface CalcdexBattleRules {
   endlessBattle?: boolean;
 
   /**
+   * Whether only one foe can be frozen.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Freeze Clause Mod: Limit one foe frozen'`
+   *
+   * @since 1.0.1
+   */
+  freeze?: boolean;
+
+  /**
    * Whether HP is shown in percentages.
    *
    * * Derived from the existence of the following rule in the `stepQueue`:
@@ -806,6 +826,17 @@ export interface CalcdexBattleRules {
    * @since 0.1.3
    */
   ohko?: boolean;
+
+  /**
+   * Whether Pokemon must share the same type.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Same Type Clause: Pokémon in a team must share a type'`
+   * * Typically only present in *monotype* formats.
+   *
+   * @since 1.0.1
+   */
+  sameType?: boolean;
 
   /**
    * Whether only one foe can be put to sleep.
