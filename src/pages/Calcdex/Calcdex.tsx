@@ -89,7 +89,7 @@ export const Calcdex = ({
         <div className={styles.buildInfo}>
           {printBuildInfo()}
           <br />
-          by doshidak/sumfuk &amp; camdawgboi
+          by sumfuk/doshidak &amp; camdawgboi
         </div>
 
         <PlayerCalc
