@@ -16,7 +16,7 @@ import {
   // PokemonToggleAbilities,
 } from '@showdex/consts';
 import { openSmogonUniversity } from '@showdex/utils/app';
-import { detectToggledAbility } from '@showdex/utils/battle';
+import { buildAbilityOptions, detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import type {
   AbilityName,
@@ -168,6 +168,8 @@ export const PokeInfo = ({
     ? dex?.items?.get(itemName)
     : null;
 
+  const abilityOptions = buildAbilityOptions(format, pokemon);
+
   return (
     <div
       className={cx(
@@ -240,6 +242,7 @@ export const PokeInfo = ({
             <PokeHpBar
               className={styles.hpBar}
               hp={hpPercentage}
+              width={115}
             />
 
             {
@@ -385,30 +388,7 @@ export const PokeInfo = ({
                 }),
               }),
             }}
-            options={[!!pokemon?.transformedForme && {
-              label: 'Transformed',
-              options: [{
-                label: pokemon.ability,
-                value: pokemon.ability,
-              }],
-            }, pokemon?.baseAbility === 'Trace' && pokemon.ability !== pokemon.baseAbility && {
-              label: 'Traced',
-              options: [{
-                label: pokemon.ability,
-                value: pokemon.ability,
-              }],
-            }, !!pokemon?.altAbilities?.length && {
-              label: 'Pool',
-              options: pokemon.altAbilities.map((name) => ({
-                label: name,
-                value: name,
-              })),
-            }, !!pokemon?.abilities?.length && {
-              label: 'Legal',
-              options: pokemon.abilities
-                .filter((a) => !!a && (!pokemon.altAbilities.length || !pokemon.altAbilities.includes(a)))
-                .map((name) => ({ label: name, value: name })),
-            }].filter(Boolean)}
+            options={abilityOptions}
             noOptionsMessage="No Abilities"
             clearable={false}
             disabled={!pokemon?.speciesForme}
@@ -512,7 +492,7 @@ export const PokeInfo = ({
             }, !!BattleItems && {
               label: 'All',
               options: Object.values(BattleItems)
-                .filter((i) => i?.name && (gen === 7 || (!i.megaStone && !i.zMove)) && (!pokemon?.altItems?.length || !pokemon.altItems.includes(i.name as ItemName)))
+                .filter((i) => i?.name && (format?.includes('nationaldex') || gen === 6 || gen === 7 || (!i.megaStone && !i.zMove)) && (!pokemon?.altItems?.length || !pokemon.altItems.includes(i.name as ItemName)))
                 .map((item) => ({ label: item.name, value: item.name })),
             }].filter(Boolean)}
             noOptionsMessage="No Items"
