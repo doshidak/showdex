@@ -42,6 +42,22 @@ export interface ValueFieldProps extends BaseTextFieldProps<number> {
   loop?: boolean;
 
   /**
+   * Whether to only apply the `loop` prop when changing the values via hotkeys.
+   *
+   * * Useful for looping the value when the user is using hotkeys (which +/-'s the `step` value, hence the name),
+   *   but clamping to the `min` and `max` values when entering a value.
+   *   - For example, if the `min` is `0`, `max` is `100` and both `loop` & `loopStepsOnly` are `true`,
+   *     when the user enters in `'999'`, the value will become `100` instead of `0`
+   *     (which is the behavior when `loopStepsOnly` is `false` [default]).
+   *   - Continuing the above example, assuming the `step` is `1` (default), when the value is `100` and
+   *     the user hits the `up` key, the value will become `0` (same behavior when `loop` is `true` and `loopStepsOnly` is `false`).
+   *
+   * @default false
+   * @since 1.0.1
+   */
+  loopStepsOnly?: boolean;
+
+  /**
    * Whether to clear the displayed value when the input is focused.
    *
    * * If `true`, blurring with an empty value will revert the displayed value back to its original value.
@@ -77,6 +93,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   step = 1,
   shiftStep,
   loop,
+  loopStepsOnly,
   clearOnFocus,
   absoluteHover,
   input,
@@ -107,7 +124,10 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   // type number fields don't do a good job preventing users from typing in non-numeric characters
   // (like '.' and 'e') nor does it enforce the `min` and `max` values if typed in manually.
   // hence, we use a regular 'ol type text field and control the value ourselves. yay!
-  const handleChange = React.useCallback((value: string | number) => {
+  const handleChange = React.useCallback((
+    value: string | number,
+    viaHotkeys?: boolean,
+  ) => {
     let strValue = String(value);
 
     // show empty strings in the input field, but don't update final-form's value
@@ -138,13 +158,21 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     let numValue = Number(strValue) || 0;
 
     if (typeof min === 'number') {
-      numValue = loop && typeof max === 'number' && max > min && numValue < min
+      numValue = loop
+        && (!loopStepsOnly || viaHotkeys)
+        && typeof max === 'number'
+        && max > min
+        && numValue < min
         ? max
         : Math.max(min, numValue);
     }
 
     if (typeof max === 'number') {
-      numValue = loop && typeof min === 'number' && min < max && numValue > max
+      numValue = loop
+        && (!loopStepsOnly || viaHotkeys)
+        && typeof min === 'number'
+        && min < max
+        && numValue > max
         ? min
         : Math.min(numValue, max);
     }
@@ -155,6 +183,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   }, [
     input,
     loop,
+    loopStepsOnly,
     max,
     min,
   ]);
@@ -199,30 +228,45 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     typeof shiftStep === 'number' && 'shift+down',
     'esc',
     'enter',
-  ].filter(Boolean).join(', '), (_, handler) => {
+  ].filter(Boolean).join(', '), (e, handler) => {
+    // prevent the cursor from moving, particularly when holding shift
+    e?.preventDefault?.();
+
     const currentValue = Number(input?.value ?? inputValue) || 0;
 
     switch (handler.key) {
       case 'up': {
-        handleChange(currentValue + Math.abs(step));
+        handleChange(
+          currentValue + Math.abs(step),
+          true,
+        );
 
         break;
       }
 
       case 'shift+up': {
-        handleChange(currentValue + Math.abs(shiftStep));
+        handleChange(
+          currentValue + Math.abs(shiftStep),
+          true,
+        );
 
         break;
       }
 
       case 'down': {
-        handleChange(currentValue - Math.abs(step));
+        handleChange(
+          currentValue - Math.abs(step),
+          true,
+        );
 
         break;
       }
 
       case 'shift+down': {
-        handleChange(currentValue - Math.abs(shiftStep));
+        handleChange(
+          currentValue - Math.abs(shiftStep),
+          true,
+        );
 
         break;
       }
