@@ -24,10 +24,10 @@ const env = Object.entries({
   ...dotenv.config({ path: path.join(__dirname, '.env') }).parsed,
   NODE_ENV: mode,
   BUILD_TARGET: buildTarget,
+  BUILD_DATE: buildDate,
   PACKAGE_NAME: process.env.npm_package_name,
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_URL: process.env.npm_package_homepage,
-  PACKAGE_BUILD_DATE: buildDate,
 }).reduce((prev, [key, value]) => {
   if (key) {
     prev[`process.env.${key}`] = JSON.stringify(value || '');
