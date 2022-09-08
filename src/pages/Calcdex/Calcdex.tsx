@@ -1,8 +1,9 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/components/app';
+import { BuildInfo } from '@showdex/components/debug';
 import { detectPlayerKeyFromBattle } from '@showdex/utils/battle';
-import { logger, printBuildInfo } from '@showdex/utils/debug';
+import { logger } from '@showdex/utils/debug';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -86,11 +87,9 @@ export const Calcdex = ({
       )}
     >
       <div className={styles.content}>
-        <div className={styles.buildInfo}>
-          {printBuildInfo()}
-          <br />
-          by sumfuk/doshidak &amp; camdawgboi
-        </div>
+        <BuildInfo
+          position="top-right"
+        />
 
         <PlayerCalc
           dex={dex}

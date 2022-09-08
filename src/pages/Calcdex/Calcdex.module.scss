@@ -61,24 +61,6 @@
   }
 }
 
-.buildInfo {
-  @include position.absolute-anchor($x: 0, $y: 0, $x-prop: right);
-  // @include spacing.padding-all(3px);
-  font-size: 6px;
-  text-align: right;
-  // background-color: color.alpha(colors.$black, 0.15);
-  user-select: none;
-  pointer-events: none;
-
-  .light & {
-    color: color.alpha(colors.$black, 0.15);
-  }
-
-  .dark & {
-    color: color.alpha(colors.$white, 0.15);
-  }
-}
-
 .fieldCalc {
   @include spacing.margin($top: 15px);
 }
