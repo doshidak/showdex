@@ -101,7 +101,10 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
     children,
   }, ref) as ButtonAria<ButtonElement>;
 
-  React.useImperativeHandle(forwardedRef, () => ref.current);
+  React.useImperativeHandle(
+    forwardedRef,
+    () => ref.current,
+  );
 
   const [{ scale }, springApi] = useSpring(() => ({
     scale: initScale,

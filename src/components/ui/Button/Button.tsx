@@ -37,7 +37,6 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   React.useImperativeHandle(
     forwardedRef,
     () => ref.current,
-    [ref],
   );
 
   return (
@@ -64,7 +63,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
       </BaseButton>
 
       <Tooltip
-        reference={ref.current}
+        reference={ref}
         content={tooltip}
         offset={[0, 10]}
         delay={[1000, 150]}
