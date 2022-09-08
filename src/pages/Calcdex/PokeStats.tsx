@@ -133,6 +133,7 @@ export const PokeStats = ({
               step={1}
               shiftStep={5}
               loop
+              loopStepsOnly
               clearOnFocus
               absoluteHover
               input={{
@@ -185,6 +186,7 @@ export const PokeStats = ({
               step={4}
               shiftStep={16}
               loop
+              loopStepsOnly
               clearOnFocus
               absoluteHover
               input={{
