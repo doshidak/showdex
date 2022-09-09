@@ -188,6 +188,7 @@ export const createSmogonPokemon = (
 
   l.debug(
     'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
+    '\n', 'item', item,
     '\n', 'isMega?', isMega,
     '\n', 'hasMegaItem?', hasMegaItem,
     '\n', 'isGalarian?', isGalarian,
