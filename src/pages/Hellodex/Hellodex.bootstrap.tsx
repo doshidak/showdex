@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ColorSchemeProvider } from '@showdex/components/app';
 import { createSideRoom } from '@showdex/utils/app';
 import { env } from '@showdex/utils/core';
@@ -12,7 +13,7 @@ const l = logger('@showdex/pages/Hellodex/Hellodex.bootstrap');
 // Hellodex should only open once during initialization of the Showdown client
 let opened = false;
 
-export const hellodexBootstrapper: ShowdexBootstrapper = () => {
+export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
   l.debug(
     'Hellodex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
@@ -39,16 +40,18 @@ export const hellodexBootstrapper: ShowdexBootstrapper = () => {
   const hellodexRoomId = 'view-hellodex';
 
   const hellodexRoom = createSideRoom(hellodexRoomId, 'Hellodex', {
-    icon: 'smile-o',
+    icon: Math.random() > 0.5 ? 'smile-o' : 'heart',
     focus: true,
   });
 
   const reactHellodexRoom = ReactDOM.createRoot(hellodexRoom.el);
 
   reactHellodexRoom.render((
-    <ColorSchemeProvider>
-      <Hellodex />
-    </ColorSchemeProvider>
+    <ReduxProvider store={store}>
+      <ColorSchemeProvider>
+        <Hellodex />
+      </ColorSchemeProvider>
+    </ReduxProvider>
   ));
 
   opened = true;
