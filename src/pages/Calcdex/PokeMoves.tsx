@@ -3,7 +3,7 @@ import cx from 'classnames';
 import { PokeType, useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
-import { Button, Tooltip } from '@showdex/components/ui';
+import { Button } from '@showdex/components/ui';
 import { buildMoveOptions } from '@showdex/utils/battle';
 import type { MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
@@ -38,12 +38,57 @@ export const PokeMoves = ({
 }: PokeMovesProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  // const gen = dex?.num; // this is undefined lmao
+  // kinda gross tbh
+  const moveCopiedTimeout = React.useRef<NodeJS.Timeout>(null);
+  const [movesCopied, setMovesCopied] = React.useState<boolean[]>(Array(movesCount).fill(false));
+
+  const startMoveCopiedTimeout = () => {
+    if (moveCopiedTimeout.current) {
+      clearTimeout(moveCopiedTimeout.current);
+    }
+
+    moveCopiedTimeout.current = setTimeout(() => {
+      setMovesCopied([]);
+      moveCopiedTimeout.current = null;
+    }, 1000);
+  };
+
+  // returned function in the effect function arg is the cleanup function
+  React.useEffect(() => () => {
+    if (moveCopiedTimeout.current) {
+      clearTimeout(moveCopiedTimeout.current);
+    }
+  }, []);
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const moveOptions = buildMoveOptions(format, pokemon);
+
+  // copies the matchup result description to the user's clipboard when the damage range is clicked
+  const handleDamagePress = (index: number, description: string) => {
+    if (typeof navigator === 'undefined' || typeof index !== 'number' || index < 0 || !description) {
+      return;
+    }
+
+    // wrapped in an unawaited async in order to handle any thrown errors
+    void (async () => {
+      try {
+        await navigator.clipboard.writeText(description);
+
+        if (!movesCopied[index]) {
+          const newMovesCopied = [...movesCopied];
+
+          newMovesCopied[index] = true;
+          setMovesCopied(newMovesCopied);
+          startMoveCopiedTimeout();
+        }
+      } catch (error) {
+        // no-op when an error is thrown while writing to the user's clipboard
+        (() => {})();
+      }
+    })();
+  };
 
   return (
     <TableGrid
@@ -230,36 +275,52 @@ export const PokeMoves = ({
               />
             </TableGridItem>
 
-            <TableGridItem
-              style={!damageRange || damageRange === '0%' ? { opacity: 0.5 } : undefined}
-            >
+            <TableGridItem>
               {/* [XXX.X% &ndash;] XXX.X% */}
               {/* (note: '0 - 0%' damageRange will be reported as '0%') */}
-              {damageRange === '0%' ? 'N/A' : damageRange}
+              {
+                !!damageRange &&
+                <Button
+                  className={cx(
+                    styles.damageButton,
+                    !description && styles.disabled,
+                  )}
+                  labelClassName={cx(
+                    styles.damageButtonLabel,
+                    damageRange === '0%' && styles.noDamage,
+                  )}
+                  label={damageRange === '0%' ? 'N/A' : damageRange}
+                  tooltip={description ? (
+                    <div className={styles.descTooltip}>
+                      <div
+                        className={cx(
+                          styles.copied,
+                          movesCopied[i] && styles.copiedVisible,
+                        )}
+                      >
+                        Copied!
+                      </div>
+
+                      {description}
+                    </div>
+                  ) : null}
+                  hoverScale={1}
+                  absoluteHover
+                  disabled={!description}
+                  onPress={() => handleDamagePress(i, description)}
+                />
+              }
             </TableGridItem>
 
-            <Tooltip
-              content={description ? (
-                <div className={styles.descTooltip}>
-                  {description}
-                </div>
-              ) : null}
-              offset={[0, 10]}
-              delay={[1000, 150]}
-              trigger="mouseenter"
-              touch="hold"
-              disabled={!description}
+            <TableGridItem
+              style={{
+                ...(!koChance ? { opacity: 0.3 } : null),
+                ...(koColor ? { color: koColor } : null),
+              }}
             >
-              <TableGridItem
-                style={{
-                  ...(!koChance ? { opacity: 0.3 } : null),
-                  ...(koColor ? { color: koColor } : null),
-                }}
-              >
-                {/* XXX% XHKO */}
-                {koChance}
-              </TableGridItem>
-            </Tooltip>
+              {/* XXX% XHKO */}
+              {koChance}
+            </TableGridItem>
           </React.Fragment>
         );
       })}

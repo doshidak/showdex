@@ -1,7 +1,11 @@
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
 @use 'mixins/spacing';
+@use 'mixins/transition';
 
 .container {
   grid-template-columns: minmax(150px, 1.25fr) 1.15fr 1fr;
@@ -84,9 +88,56 @@ button.toggleButton {
   }
 }
 
+.damageButton {
+  .light &:not(:hover):not(.active) .damageButtonLabel.noDamage {
+    color: color.alpha(colors.$black, 0.5);
+  }
+
+  .dark &:not(:hover):not(.active) .damageButtonLabel.noDamage {
+    color: color.alpha(colors.$white, 0.5);
+  }
+
+  // by default, a disabled button will have 0.3 opacity
+  &.disabled {
+    opacity: 1;
+  }
+}
+
+.damageButtonLabel {
+  .light & {
+    color: colors.$black;
+  }
+
+  .dark & {
+    color: colors.$white;
+  }
+}
+
 .descTooltip {
-  max-width: 175px;
+  position: relative;
+  max-width: 200px;
   text-align: center;
   white-space: normal;
   user-select: none;
+
+  .copied {
+    @include position.absolute($top: -18px, $left: 50%);
+    @include spacing.padding-xy($x: 10px, $y: 3px);
+    @include font.apply(fonts.$primary, ( font-weight: 500 ));
+    font-size: 10px;
+    text-transform: uppercase;
+    background-color: color.alpha(color.shade(colors.$green, 15%), 0.85);
+    border-radius: 50px;
+    box-shadow: 0 0 3px color.alpha(colors.$black, 0.3);
+    opacity: 0;
+    transform: translate(-50%, 5px);
+    @include transition.apply(opacity, transform);
+    user-select: none;
+    pointer-events: none;
+
+    &.copiedVisible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
 }
