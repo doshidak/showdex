@@ -57,6 +57,7 @@
     "@react-aria/button": "^3.6.0",
     "@react-aria/textfield": "^3.7.0",
     "@react-aria/visually-hidden": "^3.4.0",
+    "@react-hook/size": "^2.1.2",
     "@react-spring/web": "^9.5.2",
     "@reduxjs/toolkit": "^1.8.3",
     "@smogon/calc": "^0.6.0",
