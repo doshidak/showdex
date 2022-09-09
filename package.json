@@ -23,7 +23,7 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "cm": "yarn commit",
     "cz": "yarn commit",
-    "postinstall": "yarn patch-package",
+    "postinstall": "yarn patch-ghooks && yarn patch-package",
     "clean:dev": "yarn rimraf ./build",
     "clean:dev:chrome": "yarn rimraf ./build/chrome",
     "clean:dev:firefox": "yarn rimraf ./build/firefox ./build/*.firefox.xpi",
