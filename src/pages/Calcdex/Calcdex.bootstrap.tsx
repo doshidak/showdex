@@ -6,6 +6,7 @@ import {
   createSideRoom,
   // getActiveBattle,
   getBattleRoom,
+  getCalcdexRoomId,
 } from '@showdex/utils/app';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
@@ -105,7 +106,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         return;
       }
 
-      // const activeBattle = getActiveBattle();
       const { battle: activeBattle } = getBattleRoom(roomid);
 
       l.debug(
@@ -124,7 +124,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       }
 
       if (!activeBattle.calcdexRoom) {
-        const calcdexRoomId = `view-calcdex-${roomid}`;
+        const calcdexRoomId = getCalcdexRoomId(roomid);
 
         l.debug(
           'battle.subscribe() -> createSideRoom()',
@@ -137,6 +137,34 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           icon: 'calculator',
           focus: true,
         });
+
+        activeBattle.calcdexRoom.requestLeave = () => {
+          // hide the tab (tabHidden is used to ignore tab renders in the overwritten app.topbar.renderRoomTab() in main)
+          $(`a[href*='/${calcdexRoomId}']`).parent().css('display', 'none');
+          activeBattle.calcdexRoom.tabHidden = true;
+
+          // find the side room before the calcdexRoom to focus
+          // (the trailing dash ['-'] is important in 'battle-' cause the BattlesRoom has id 'battles')
+          const roomIds = Object.keys(app.rooms || {}).filter((id) => !!id && !id.startsWith('battle-'));
+          const currentRoomId = app.curSideRoom?.id;
+          // const calcdexRoomIndex = roomIds.findIndex((id) => id === calcdexRoomId);
+
+          const prevRoomId = roomIds
+            // .slice(0, Math.max(calcdexRoomIndex - 1, 0))
+            .filter((id) => !('tabHidden' in app.rooms[id]) || !(app.rooms[id] as HtmlRoom).tabHidden)
+            .pop();
+
+          // currentRoomId is tracked so that we don't focus to another room when this blurred Calcdex tab is "closed"
+          // (i.e., only focus a room if the user "closes" the currenly focused Calcdex room)
+          if (prevRoomId && calcdexRoomId !== prevRoomId && (!currentRoomId || calcdexRoomId === currentRoomId)) {
+            app.focusRoomRight(prevRoomId);
+          } else if (!prevRoomId) {
+            activeBattle.calcdexRoom.hide();
+          }
+
+          // don't actually leave the room
+          return false;
+        };
 
         activeBattle.reactCalcdexRoom = ReactDOM.createRoot(activeBattle.calcdexRoom.el);
       }
