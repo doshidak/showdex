@@ -1,4 +1,5 @@
 // import { v4 as uuidv4 } from 'uuid';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 
 interface ContentInjectable<T = unknown> {
@@ -12,8 +13,10 @@ const l = logger('@showdex/content');
 
 const { runtime } = chrome || browser;
 
-if (!runtime?.id) {
+if (typeof document === 'undefined' || !runtime?.id) {
   l.error('Extension will not run properly since no valid runtime.id was found!');
+
+  throw new Error('Did you forget this is a WebExtension? :o');
 }
 
 // obtain the extension runtime ID with this one simple trick
@@ -68,8 +71,29 @@ const injectables: ContentInjectable<HTMLElement>[] = [
   },
 ];
 
+// (production only)
+// include an extra script tag for the @pkmn/dex chunk
+if (!__DEV__) {
+  /**
+   * @todo See todo in webpack config about dynamically loading the chunks in as an env.
+   */
+  injectables.push(...[
+    runtime.getURL('pkmn.2c27923b.js'),
+    runtime.getURL('pkmn.356b2d28.js'),
+  ].filter(Boolean).map((src, i) => <ContentInjectable<HTMLScriptElement>> ({
+    id: `showdex-script-pkmn-${String(i).padStart(2, '0')}`,
+    component: 'script',
+    into: 'body',
+    props: {
+      src,
+      async: true,
+      // 'data-ext-id': extensionId,
+    },
+  })));
+}
+
 l.info(
-  'Starting Showdex for', process.env.BUILD_TARGET || 'chrome',
+  'Starting Showdex for', env('build-target', 'probably chrome??'),
   'with extension ID', extensionId, 'and runtime.id', runtime.id,
 );
 
