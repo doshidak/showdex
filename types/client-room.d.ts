@@ -83,6 +83,7 @@ declare namespace Showdown {
     blur(): void;
     join(): void;
     leave(): void;
+    requestLeave(e: Event): void;
     requestNotifications(): void;
     notify(title: string, body: string, tag?: string, once?: boolean): void;
     subtleNotifyOnce(): void;
