@@ -160,7 +160,7 @@ export const sanitizePokemon = (
 
     hp: pokemon?.hp || 0,
     maxhp: pokemon?.maxhp || 1,
-    fainted: pokemon?.fainted || !pokemon?.hp,
+    fainted: pokemon?.fainted ?? !pokemon?.hp,
 
     moves: <MoveName[]> pokemon?.moves || [],
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
