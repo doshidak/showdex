@@ -25,7 +25,7 @@ if (typeof receive !== 'function') {
   l.warn('main script may have executed too fast lmao');
 }
 
-l.debug('hooking into the Showdown client\'s app.receive()...');
+l.debug('Hooking into the Showdown client\'s app.receive()...');
 
 app.receive = (data: string) => {
   const receivedRoom = data?.startsWith?.('>');
@@ -48,8 +48,21 @@ app.receive = (data: string) => {
   receive.call(app, data);
 };
 
-l.info('completed main script execution!');
+l.debug('Hooking into the Showdown client\'s app.topbar.renderRoomTab()...');
+
+// overwrite the room tab renderer to ignore our special tabHidden property in HtmlRoom
+const renderRoomTab = <typeof app.topbar.renderRoomTab> app.topbar.renderRoomTab.bind(app.topbar);
+
+app.topbar.renderRoomTab = (room, id) => {
+  if ('tabHidden' in (room || {}) && (<HtmlRoom> room).tabHidden) {
+    return '';
+  }
+
+  return renderRoomTab(room, id);
+};
+
+l.info('Completed main script execution!');
 
 // open the Hellodex when the Showdown client starts
 // (hence why it's not part of the bootstrappers array)
-hellodexBootstrapper();
+hellodexBootstrapper(store);
