@@ -94,6 +94,18 @@
 
 .boostButton {
   @include spacing.margin-xy($x: 3px);
+
+  &.pristine {
+    color: inherit;
+
+    .boostButtonLabel {
+      color: inherit;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.65; // default 0.3 opacity is too faded
+  }
 }
 
 .boostModButtonLabel {

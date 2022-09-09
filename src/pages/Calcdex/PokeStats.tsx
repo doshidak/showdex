@@ -248,9 +248,12 @@ export const PokeStats = ({
             />
 
             <Button
-              className={styles.boostButton}
-              style={didDirtyBoost ? undefined : { color: 'inherit' }}
-              labelStyle={didDirtyBoost ? undefined : { color: 'inherit' }}
+              className={cx(
+                styles.boostButton,
+                !didDirtyBoost && styles.pristine,
+                !didDirtyBoost && styles.disabled, // intentionally keeping them separate
+              )}
+              labelClassName={styles.boostButtonLabel}
               label={[
                 boost > 0 && '+',
                 boost.toString(),
