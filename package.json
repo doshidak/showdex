@@ -28,8 +28,8 @@
     "clean:dev:chrome": "yarn rimraf ./build/chrome",
     "clean:dev:firefox": "yarn rimraf ./build/firefox ./build/*.firefox.xpi",
     "clean:prod": "yarn rimraf ./dist",
-    "clean:prod:chrome": "yarn rimraf ./dist/chrome ./dist/*.chrome.zip",
-    "clean:prod:firefox": "yarn rimraf ./dist/firefox ./dist/*.firefox.xpi",
+    "clean:prod:chrome": "yarn rimraf ./dist/chrome ./dist/*.chrome.zip ./dist/*.chrome.html",
+    "clean:prod:firefox": "yarn rimraf ./dist/firefox ./dist/*.firefox.xpi ./dist/*.firefox.html",
     "clean": "yarn clean:dev && yarn clean:prod",
     "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
     "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
@@ -139,6 +139,7 @@
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.3",
+    "webpack-visualizer-plugin2": "^1.0.0",
     "zip-webpack-plugin": "^4.0.1"
   }
 }
