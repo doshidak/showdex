@@ -4,27 +4,20 @@
 ////
 
 @use 'sass:list';
+@use 'sass:meta';
 @use 'config/animations';
 
 @mixin apply($props...) {
-  // flatten the $props arglist if it only has 1 argument that's a list with more than 1 element
-  // e.g., $props: ((color, background-color,),); -> $parsed-props: (color, background-color,);
-  $parsed-props: $props;
-
-  @if list.length($parsed-props) == 1 and list.length(list.nth($parsed-props, 1)) > 0 {
-    $parsed-props: list.nth($parsed-props, 1);
-  }
-
   $transitions: ();
 
-  @for $i from 1 through list.length($parsed-props) {
-    $prop: list.nth($parsed-props, $i);
+  @for $i from 1 through list.length($props) {
+    $prop: list.nth($props, $i);
 
     $name: $prop;
     $duration: animations.$transition-duration;
     $function: animations.$transition-function;
 
-    @if list.length($prop) > 1 {
+    @if meta.type-of($prop) == 'list' and list.length($prop) > 1 {
       $name: list.nth($prop, 1);
 
       @if list.nth($prop, 2) {
