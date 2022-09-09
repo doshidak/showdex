@@ -254,12 +254,12 @@ export const PokeInfo = ({
             }
 
             {
-              (!!pokemon && (!!pokemon.status || pokemon.fainted || !hpPercentage)) &&
+              (!!pokemon && (!!pokemon.status || !hpPercentage)) &&
               <span>
                 {' '}
                 <PokeStatus
                   status={pokemon?.status}
-                  fainted={pokemon?.fainted || !hpPercentage}
+                  fainted={!hpPercentage}
                 />
               </span>
             }
