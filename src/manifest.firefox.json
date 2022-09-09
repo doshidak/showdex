@@ -43,11 +43,18 @@
   ],
 
   "web_accessible_resources": [
+    "bug.svg",
+    "clipboard-heart.svg",
     "github-face.svg",
+    "info-circle.svg",
     "main.js",
-    "paypal.svg",
+    "pkmn.2c27923b.js",
+    "pkmn.356b2d28.js",
+    "remove-circle.svg",
     "showdex.svg",
-    "signpost-rounded.svg",
+    "signpost.svg",
+    "sparkle.svg",
+    "sword.svg",
     "tize.svg"
   ],
 
