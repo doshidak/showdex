@@ -75,6 +75,13 @@ button.usernameButton {
   }
 }
 
+.piconTooltip {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
 .background {
   // @include position.absolute-anchor($x: -3px, $y: -6px);
   // @include position.absolute-anchor($x: 0px, $y: -3px);

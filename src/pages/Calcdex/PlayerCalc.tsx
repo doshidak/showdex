@@ -138,7 +138,7 @@ export const PlayerCalc = ({
                   styles.piconButton,
                   !!activePokemon?.calcdexId && (activePokemon?.calcdexId === mon?.calcdexId) && styles.active,
                   !!playerPokemon?.calcdexId && (playerPokemon?.calcdexId === mon?.calcdexId) && styles.selected,
-                  (mon?.fainted || !mon?.hp) && styles.fainted,
+                  !mon?.hp && styles.fainted,
                 )}
                 piconClassName={styles.picon}
                 display="block"
@@ -148,7 +148,18 @@ export const PlayerCalc = ({
                   speciesForme: mon?.transformedForme || mon?.speciesForme,
                   item,
                 } : 'pokeball-none'}
-                tooltip={mon ? `${friendlyPokemonName}${item ? `\n${item}` : ''}` : undefined}
+                tooltip={mon ? (
+                  <div className={styles.piconTooltip}>
+                    <strong>{friendlyPokemonName}</strong>
+                    {
+                      !!item &&
+                      <>
+                        <br />
+                        {item}
+                      </>
+                    }
+                  </div>
+                ) : undefined}
                 disabled={!mon}
                 onPress={() => onIndexSelect?.(i)}
               >
