@@ -1,8 +1,10 @@
+/**
+ * Returns the exact runtime extension ID by reading the `data-ext-id` attribute
+ * of the injected `<script>` tag for `main.js` from `content`.
+ *
+ * @since 0.1.0
+ */
 export const getExtensionId = (): string => {
-  if (chrome?.runtime?.id) {
-    return chrome.runtime.id;
-  }
-
   if (typeof document?.getElementById !== 'function') {
     return null;
   }

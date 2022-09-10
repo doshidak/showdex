@@ -2,6 +2,7 @@ import { HttpMethod, PokemonReduxTagType } from '@showdex/consts';
 import { env, runtimeFetch } from '@showdex/utils/core';
 import {
   createTagProvider,
+  transformFormatPresetResponse,
   transformPresetResponse,
   transformRandomsPresetResponse,
 } from '@showdex/utils/redux';
@@ -34,6 +35,14 @@ export interface PkmnSmogonPresetRequest {
    * @since 0.1.3
    */
   format?: string;
+
+  /**
+   * Whether to download presets for the specified `format` only.
+   *
+   * @default false
+   * @since 1.0.1
+   */
+  formatOnly?: boolean;
 }
 
 /**
@@ -73,6 +82,17 @@ export interface PkmnSmogonPresetResponse {
       [presetName: string]: PkmnSmogonPreset;
     }
   }
+}
+
+/**
+ * Downloaded JSON from the Gen Format Sets API via `@pkmn/smogon`.
+ *
+ * @since 1.0.1
+ */
+export interface PkmnSmogonFormatPresetResponse {
+  [speciesForme: string]: {
+    [presetName: string]: PkmnSmogonPreset;
+  };
 }
 
 /**
@@ -161,11 +181,13 @@ export const presetApi = pkmnApi.injectEndpoints({
 
       // since this is the workaround, we must manually fetch the data and transform the response
       // (not a big deal though... considering the hours I've spent pulling my hair out LOL)
-      queryFn: async ({ gen, format }) => {
+      queryFn: async ({ gen, format, formatOnly }) => {
         const response = await runtimeFetch([
           env('pkmn-presets-base-url'),
           env('pkmn-presets-gens-path'), // e.g., '/smogon/data/sets'
-          `gen${format?.includes('bdsp') ? 4 : gen}.json`, // e.g., 'gen8.json'
+          formatOnly
+            ? `${format}.json`
+            : `gen${format?.includes('bdsp') ? 4 : gen}.json`, // e.g., 'gen8.json'
         ].join('/'), {
           method: HttpMethod.GET,
           headers: {
@@ -173,12 +195,17 @@ export const presetApi = pkmnApi.injectEndpoints({
           },
         });
 
-        const data = <PkmnSmogonPresetResponse> response.json();
+        const data = response.json();
 
         return {
-          data: transformPresetResponse(data, null, {
+          data: formatOnly ? transformFormatPresetResponse(<PkmnSmogonFormatPresetResponse> data, null, {
             gen,
             format,
+            formatOnly,
+          }) : transformPresetResponse(<PkmnSmogonPresetResponse> data, null, {
+            gen,
+            format,
+            formatOnly,
           }),
         };
       },

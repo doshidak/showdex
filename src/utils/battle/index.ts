@@ -1,3 +1,4 @@
+export * from './buildAbilityOptions';
 export * from './buildMoveOptions';
 export * from './detectBattleRules';
 export * from './detectGenFromFormat';

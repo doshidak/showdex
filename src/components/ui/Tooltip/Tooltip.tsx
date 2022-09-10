@@ -30,7 +30,7 @@ export interface TooltipProps extends TooltipTippyProps {
 const springConfig = {
   mass: 1,
   tension: 250,
-  friction: 15,
+  friction: 20,
 };
 
 const springProps: Record<string, React.CSSProperties> = {
@@ -41,7 +41,7 @@ const springProps: Record<string, React.CSSProperties> = {
 
   hide: {
     opacity: 0,
-    scale: 0.65,
+    scale: 0.75,
   },
 };
 

@@ -1,5 +1,5 @@
 import { logger } from '@showdex/utils/debug';
-import type { AbilityName, Generation, MoveName } from '@pkmn/data';
+import type { AbilityName, MoveName } from '@pkmn/data';
 
 const PokemonMaxMoveTypings: Record<Showdown.TypeName, MoveName> = {
   '???': null,
@@ -30,38 +30,48 @@ const l = logger('@showdex/utils/app/getMaxMove');
  *
  * * This requires the `'-Gmax'` suffix in the passed-in `speciesForme` to distinguish between Max and G-Max moves!
  *   - e.g., `'Alcremie-Gmax'` should be passed in for the `speciesForme` argument, not just `'Alcremie'`.
+ * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
+ *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  *
  * @see https://github.com/smogon/damage-calc/blob/bdf9e8c39fec7670ed0ce64e1fb58d1a4dc83b73/calc/src/move.ts#L242
  * @since 0.1.2
  */
 export const getMaxMove = (
-  dex: Generation,
+  // dex: Generation,
   moveName: MoveName,
   abilityName?: AbilityName,
   speciesForme?: string,
 ): MoveName => {
-  if (typeof dex?.moves?.get !== 'function') {
-    l.warn(
-      'passed-in dex object is invalid cause dex.moves.get() is not a function',
-      '\n', 'typeof dex.moves.get', typeof dex?.moves?.get,
-      '\n', 'moveName', moveName,
-      '\n', 'abilityName', abilityName,
-      '\n', 'speciesForme', speciesForme,
-    );
+  // if (typeof dex?.moves?.get !== 'function') {
+  if (typeof Dex === 'undefined') {
+    if (__DEV__) {
+      l.warn(
+        'Global Dex object is unavailable.',
+        // 'passed-in dex object is invalid cause dex.moves.get() is not a function',
+        // '\n', 'typeof dex.moves.get', typeof dex?.moves?.get,
+        '\n', 'moveName', moveName,
+        '\n', 'abilityName', abilityName,
+        '\n', 'speciesForme', speciesForme,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
 
     return null;
   }
 
-  const move = dex.moves.get(moveName);
+  const move = Dex.moves.get(moveName);
 
-  if (!move?.name) {
-    l.warn(
-      'passed-in moveName is not a valid move!',
-      '\n', 'move', move,
-      '\n', 'moveName', moveName,
-      '\n', 'abilityName', abilityName,
-      '\n', 'speciesForme', speciesForme,
-    );
+  if (!move?.exists) {
+    if (__DEV__) {
+      l.warn(
+        'Provided moveName is not a valid move!',
+        '\n', 'move', move,
+        '\n', 'moveName', moveName,
+        '\n', 'abilityName', abilityName,
+        '\n', 'speciesForme', speciesForme,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
 
     return null;
   }
@@ -70,7 +80,7 @@ export const getMaxMove = (
     return <MoveName> 'Max Guard';
   }
 
-  const ability = abilityName ? dex.abilities.get(abilityName) : null;
+  const ability = abilityName ? Dex.abilities.get(abilityName) : null;
 
   if (ability?.name === 'Normalize') {
     return PokemonMaxMoveTypings.Normal;

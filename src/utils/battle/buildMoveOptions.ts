@@ -1,5 +1,6 @@
-import { env } from '@showdex/utils/core';
-import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
+import { LegalLockedFormats } from '@showdex/consts';
+// import { env } from '@showdex/utils/core';
+import type { MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
@@ -13,15 +14,19 @@ export interface PokemonMoveOption {
 }
 
 /**
- * Builds the value for the `options` prop of the `Dropdown` component in `PokeMoves`.
+ * Builds the value for the `options` prop of the move `Dropdown` component in `PokeMoves`.
+ *
+ * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
+ *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  *
  * @since 0.1.3
  */
 export const buildMoveOptions = (
-  dex: Generation,
+  // dex: Generation,
+  format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): PokemonMoveOption[] => {
-  const gen = dex?.num || <GenerationNum> env.int('calcdex-default-gen');
+  // const gen = dex?.num || <GenerationNum> env.int('calcdex-default-gen');
   const options: PokemonMoveOption[] = [];
 
   if (!pokemon?.speciesForme) {
@@ -40,35 +45,49 @@ export const buildMoveOptions = (
     transformedMoves,
     altMoves,
     moveState,
-    useUltimateMoves,
+    // useUltimateMoves,
+    useZ,
+    useMax,
   } = pokemon;
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
-  if (useUltimateMoves && moves?.length) {
+  // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
+  // (but we'll show the corresponding Z move to the user, if any)
+  // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
+  if (useZ && moves?.length) {
     options.push({
-      label: gen === 7 ? 'Z' : 'Max',
-      options: moves.map((name) => {
-        const ultName = gen === 7
-          ? getZMove(dex, name, item)
-          : getMaxMove(dex, name, ability, speciesForme);
-
-        return ultName ? {
-          label: ultName,
-          value: name,
-        } : null;
-      }).filter(Boolean),
+      label: 'Z-PWR',
+      options: moves.map((name) => ({
+        label: getZMove(name, item) || name,
+        value: name,
+      })),
     });
 
     filterMoves.push(...moves);
+  }
+
+  // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
+  if (useMax && moves?.length) {
+    options.push({
+      label: 'Max',
+      options: moves.map((name) => ({
+        label: getMaxMove(name, ability, speciesForme) || name,
+        value: name,
+      })),
+    });
+
+    if (!useZ) {
+      filterMoves.push(...moves);
+    }
   }
 
   if (serverSourced && serverMoves?.length) {
     const filteredServerMoves = serverMoves.filter((n) => !!n && !filterMoves.includes(n));
 
     options.push({
-      label: 'Actual',
+      label: 'Current',
       options: filteredServerMoves.map((name) => ({
         label: name,
         value: name,
@@ -109,7 +128,9 @@ export const buildMoveOptions = (
   }
 
   if (altMoves?.length) {
-    const poolMoves = altMoves.filter((n) => !!n && !filterMoves.includes(n));
+    const poolMoves = altMoves
+      .filter((n) => !!n && !filterMoves.includes(n))
+      .sort();
 
     options.push({
       label: 'Pool',
@@ -124,7 +145,8 @@ export const buildMoveOptions = (
 
   if (moveState?.learnset?.length) {
     const learnsetMoves = (<MoveName[]> moveState.learnset)
-      .filter((n) => !!n && !filterMoves.includes(n));
+      .filter((n) => !!n && !filterMoves.includes(n))
+      .sort();
 
     options.push({
       label: 'Learnset',
@@ -137,12 +159,15 @@ export const buildMoveOptions = (
     filterMoves.push(...learnsetMoves);
   }
 
-  // appl
+  // show all possible moves if format is not provided, is not legal-locked, or
+  // no learnset is available (probably because the Pokemon doesn't exist in the `dex`'s gen)
+  const parsedFormat = format?.replace(/^gen\d+/i, '');
 
-  // typically only available in almostanyability and hackmons formats
-  if (moveState?.other?.length) {
-    const otherMoves = (<MoveName[]> moveState.other)
-      .filter((n) => !!n && !filterMoves.includes(n));
+  if (!parsedFormat || !LegalLockedFormats.includes(parsedFormat) || !moveState?.learnset?.length) {
+    const otherMoves = Object.keys(BattleMovedex || {})
+      .map((moveid) => <MoveName> Dex.moves.get(moveid)?.name)
+      .filter((n) => !!n && !filterMoves.includes(n))
+      .sort();
 
     options.push({
       label: 'Other',

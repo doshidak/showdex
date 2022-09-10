@@ -111,9 +111,11 @@ export const usePresets = ({
   // note: 'gen8bdspou' requires special treatment since Pokemon like Breloom don't exist in `gen8.json`,
   // despite `gen8.json` including presets for the 'bdspou' format (for Gen 8 Pokemon that also exist in BDSP)
   // (also rather unfortunately, there's a `gen8bdsprandombattle.json`, so there's that... LOL)
-  const gen = format ?
-    format?.includes('bdsp') && !format.includes('random') ? 4 : detectGenFromFormat(format) :
-    null; // e.g., 8 (if `format` is 'gen8randombattle')
+  const gen = format
+    ? format?.includes('bdsp') && !format.includes('random')
+      ? 4
+      : detectGenFromFormat(format)
+    : null; // e.g., 8 (if `format` is 'gen8randombattle')
 
   const baseGen = gen ? `gen${gen}` : null; // e.g., 'gen8' (obviously `gen` shouldn't be 0 here)
   const genlessFormat = baseGen ? format.replace(baseGen, '') : null; // e.g., 'randombattle'
@@ -127,6 +129,7 @@ export const usePresets = ({
   } = usePokemonGensPresetQuery({
     gen,
     format, // if it's BDSP, the query will automatically set the gen to 4
+    // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
   }, {
     skip: shouldSkip || randomsFormat,
   });

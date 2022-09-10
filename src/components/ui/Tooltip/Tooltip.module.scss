@@ -9,7 +9,7 @@
 
 $padding-x: 10px;
 $padding-y: 8px;
-$font-size: 8px;
+$font-size: 9px;
 $font-color: colors.$white;
 $background-color-light: #616161;
 $background-color-dark: #212121;
@@ -28,7 +28,7 @@ $arrow-placements: (
   @include font.apply(fonts.$mono);
   font-size: $font-size;
   color: $font-color;
-  text-align: center;
+  // text-align: center;
   white-space: pre;
   border-radius: $border-radius;
 

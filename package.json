@@ -1,6 +1,6 @@
 {
   "name": "showdex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pokémon Showdown extension that harnesses the power of parabolic calculus to strategically extract your opponents' ELO.",
   "author": "Keith Choison <keith@tize.io>",
   "license": "AGPL-3.0",
@@ -14,7 +14,7 @@
   },
   "private": true,
   "engines": {
-    "node": ">=14.17.0",
+    "node": ">=18.0.0",
     "yarn": ">=1.22.0"
   },
   "type": "module",
@@ -23,11 +23,20 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "cm": "yarn commit",
     "cz": "yarn commit",
+    "postinstall": "yarn patch-ghooks && yarn patch-package",
     "clean:dev": "yarn rimraf ./build",
+    "clean:dev:chrome": "yarn rimraf ./build/chrome",
+    "clean:dev:firefox": "yarn rimraf ./build/firefox ./build/*.firefox.xpi",
     "clean:prod": "yarn rimraf ./dist",
+    "clean:prod:chrome": "yarn rimraf ./dist/chrome ./dist/*.chrome.zip ./dist/*.chrome.html",
+    "clean:prod:firefox": "yarn rimraf ./dist/firefox ./dist/*.firefox.xpi ./dist/*.firefox.html",
     "clean": "yarn clean:dev && yarn clean:prod",
-    "dev": "yarn clean:dev && NODE_ENV=development node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
-    "build": "yarn clean:prod && NODE_ENV=production node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
+    "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "dev": "yarn dev:chrome",
+    "build:chrome": "yarn clean:prod:chrome && NODE_ENV=production BUILD_TARGET=chrome node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
+    "build:firefox": "yarn clean:prod:firefox && NODE_ENV=production BUILD_TARGET=firefox node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
+    "build": "yarn build:chrome && yarn build:firefox"
   },
   "config": {
     "cz-customizable": {
@@ -50,6 +59,7 @@
     "@react-aria/button": "^3.6.0",
     "@react-aria/textfield": "^3.7.0",
     "@react-aria/visually-hidden": "^3.4.0",
+    "@react-hook/size": "^2.1.2",
     "@react-spring/web": "^9.5.2",
     "@reduxjs/toolkit": "^1.8.3",
     "@smogon/calc": "^0.6.0",
@@ -84,6 +94,7 @@
     "@pkmn/types": "^2.1.0",
     "@react-types/textfield": "^3.5.2",
     "@types/chrome": "^0.0.193",
+    "@types/firefox-webext-browser": "^94.0.1",
     "@types/fs-extra": "^9.0.13",
     "@types/jquery": "^3.5.14",
     "@types/node": "^18.6.5",
@@ -113,8 +124,10 @@
     "ghooks": "^2.0.4",
     "html-loader": "^4.1.0",
     "html-webpack-plugin": "^5.5.0",
+    "patch-package": "^6.4.7",
     "postcss": "^8.4.16",
     "postcss-loader": "^7.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "rimraf": "^3.0.2",
     "sass": "^1.54.3",
     "sass-loader": "^13.0.2",
@@ -125,6 +138,8 @@
     "typescript-plugin-css-modules": "^3.4.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "webpack-dev-server": "^4.9.3",
+    "webpack-visualizer-plugin2": "^1.0.0",
+    "zip-webpack-plugin": "^4.0.1"
   }
 }

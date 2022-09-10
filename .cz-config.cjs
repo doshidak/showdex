@@ -20,6 +20,7 @@ module.exports = {
     { name: 'consts' },
     { name: 'content' }, // content script (src/content.ts)
     { name: 'main' }, // main script (src/main.ts)
+    { name: 'manifest' },
     { name: 'redux' },
     { name: 'styles' },
     { name: 'types' },

@@ -1,0 +1,48 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$padding: 3px;
+$font-size: 7px;
+$font-color-opacity: 0.15;
+
+.container {
+  @include spacing.padding-all($padding);
+  @include font.apply(fonts.$mono);
+  font-size: $font-size;
+  @include transition.apply(color);
+  user-select: none;
+  pointer-events: none;
+}
+
+.light {
+  color: color.alpha(colors.$black, $font-color-opacity);
+}
+
+.dark {
+  color: color.alpha(colors.$white, $font-color-opacity);
+}
+
+.top-left {
+  @include position.absolute-anchor($x: 0, $y: 0);
+  text-align: left;
+}
+
+.top-right {
+  @include position.absolute-anchor($x: 0, $y: 0, $x-prop: right);
+  text-align: right;
+}
+
+.bottom-right {
+  @include position.absolute-anchor($x: 0, $y: 0, $x-prop: right, $y-prop: bottom);
+  text-align: right;
+}
+
+.bottom-left {
+  @include position.absolute-anchor($x: 0, $y: 0, $y-prop: bottom);
+  text-align: left;
+}

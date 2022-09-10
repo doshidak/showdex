@@ -1,0 +1,39 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'mixins/font';
+@use 'mixins/flex';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  position: relative;
+  @include flex.column-center($inline: true);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  color: inherit;
+  @include transition.apply(color, opacity);
+  user-select: none;
+
+  &:not(.disabled):hover {
+    color: colors.$blue;
+    opacity: 1;
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  @include spacing.margin($bottom: 5px);
+}
+
+.label {
+  font-weight: inherit;
+  font-size: 10px;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+}

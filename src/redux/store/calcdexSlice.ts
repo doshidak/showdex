@@ -112,6 +112,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * Ability of the Pokemon, but it's filthy af.
    *
    * * Stank.
+   * * In all seriousness, this holds the user-edited ability, if any.
    *
    * @since 0.1.0
    */
@@ -285,9 +286,24 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - Future me found the word I was looking for: *gen-agnostic*.
    *   - ... like in the sense of *platform-agnostic*.
    *
+   * @deprecated As of v1.0.1, nationaldex entered the chat. This don't cut it no mo :(
    * @since 0.1.2
    */
   useUltimateMoves?: boolean;
+
+  /**
+   * Whether the Pokemon is using Z moves.
+   *
+   * @since 1.0.1
+   */
+  useZ?: boolean;
+
+  /**
+   * Whether the Pokemon is using D-max/G-max moves.
+   *
+   * @since 1.0.1
+   */
+  useMax?: boolean;
 
   /**
    * Moves revealed by the Pokemon to the opponent.
@@ -474,9 +490,11 @@ export interface CalcdexMoveState {
    * ```ts
    * []
    * ```
+   * @deprecated As of v1.0.1, `other` moves are deterministically filled-in by the `format` in `buildMoveOptions()`.
+   *   Original population logic in `syncBattle()` has been removed.
    * @since 0.1.0
    */
-  other: (MoveName | string)[];
+  other?: (MoveName | string)[];
 }
 
 /**
@@ -617,8 +635,7 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    *
    * * Each element should be some unique identifier for the Pokemon that's hopefully somewhat consistent.
    *   - Wouldn't recommend using `searchid` as it includes the `speciesForme`, subject to change.
-   *   - For instance, `searchid` may read `'p1: Zygarde|Zygarde'`, but later read `'p1: Zygarde|Zygarde-Complete'`,
-   *     which obviously doesn't qualify as "consistent."
+   *   - For instance, `searchid` may read `'p1: Zygarde|Zygarde'`, but later read `'p1: Zygarde|Zygarde-Complete'`.
    *   - `ident` seems to be the most viable property here.
    * * Typically should only be used for ordering `myPokemon` on initialization.
    *   - Array ordering of `myPokemon` switches to place the last-switched in Pokemon first.
@@ -717,6 +734,16 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
  */
 export interface CalcdexBattleRules {
   /**
+   * Whether only one *Baton Pass*-er is allowed.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|One Boost Passer Clause: Limit one Baton Passer that has a way to boost its stats'`
+   *
+   * @since 1.0.1
+   */
+  boostPasser?: boolean;
+
+  /**
    * Whether dynamaxing is banned.
    *
    * * Derived from the existence of the following rule in the `stepQueue`:
@@ -758,6 +785,16 @@ export interface CalcdexBattleRules {
   endlessBattle?: boolean;
 
   /**
+   * Whether only one foe can be frozen.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Freeze Clause Mod: Limit one foe frozen'`
+   *
+   * @since 1.0.1
+   */
+  freeze?: boolean;
+
+  /**
    * Whether HP is shown in percentages.
    *
    * * Derived from the existence of the following rule in the `stepQueue`:
@@ -774,7 +811,7 @@ export interface CalcdexBattleRules {
    *
    * * Derived from the existence of the following rule in the `stepQueue`:
    *   - `'|rule|Mega Rayquaza Clause: You cannot mega evolve Rayquaza'`
-   * * Obviously only applies if the current gen is 7, or we're in some weird format like Gen 8 National Dex.
+   * * Obviously only applies if the current gen is 6 or 7, or we're in some weird format like Gen 8 National Dex.
    *
    * @since 0.1.3
    */
@@ -789,6 +826,17 @@ export interface CalcdexBattleRules {
    * @since 0.1.3
    */
   ohko?: boolean;
+
+  /**
+   * Whether Pokemon must share the same type.
+   *
+   * * Derived from the existence of the following rule in the `stepQueue`:
+   *   - `'|rule|Same Type Clause: Pokémon in a team must share a type'`
+   * * Typically only present in *monotype* formats.
+   *
+   * @since 1.0.1
+   */
+  sameType?: boolean;
 
   /**
    * Whether only one foe can be put to sleep.

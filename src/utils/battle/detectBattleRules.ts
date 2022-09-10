@@ -19,13 +19,16 @@ export const detectBattleRules = (
   const hasRule = createBattleRuleDetector(stepQueue);
 
   return {
+    boostPasser: hasRule('boostpasser'),
     dynamax: hasRule('dynamax'),
     evasionItems: hasRule('evasionitems'),
     evasionMoves: hasRule('evasionmoves'),
     endlessBattle: hasRule('endlessbattle'),
+    freeze: hasRule('freeze'),
     hpPercentage: hasRule('hppercentage'),
     megaRayquaza: hasRule('megarayquaza'),
     ohko: hasRule('ohko'),
+    sameType: hasRule('sametype'),
     sleep: hasRule('sleep'),
     species: hasRule('species'),
   };

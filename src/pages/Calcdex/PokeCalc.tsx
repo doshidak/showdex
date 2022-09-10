@@ -79,7 +79,7 @@ export const PokeCalc = ({
     };
 
     // re-check for toggleable abilities in the mutation
-    if ('ability' in mutation || 'dirtyAbility' in mutation) {
+    if ('ability' in payload || 'dirtyAbility' in payload) {
       const tempPokemon = {
         ...playerPokemon,
         ...payload,
@@ -90,6 +90,16 @@ export const PokeCalc = ({
       if (payload.abilityToggleable) {
         payload.abilityToggled = detectToggledAbility(tempPokemon);
       }
+    }
+
+    // clear the dirtyAbility, if any, if it matches the ability
+    if ('dirtyAbility' in payload && payload.dirtyAbility === playerPokemon?.ability) {
+      payload.dirtyAbility = null;
+    }
+
+    // clear the dirtyItem, if any, if it matches the item
+    if ('dirtyItem' in payload && payload.dirtyItem === playerPokemon?.item) {
+      payload.dirtyItem = null;
     }
 
     // recalculate the stats with the updated EVs/IVs
@@ -138,8 +148,9 @@ export const PokeCalc = ({
       {/* moves (duh) */}
       <PokeMoves
         className={styles.section}
-        dex={dex}
+        // dex={dex}
         gen={gen}
+        format={format}
         rules={rules}
         pokemon={playerPokemon}
         calculateMatchup={calculateMatchup}

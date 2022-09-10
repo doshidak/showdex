@@ -1,4 +1,5 @@
 import { Move as SmogonMove } from '@smogon/calc';
+import { formatId } from '@showdex/utils/app';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
@@ -11,13 +12,21 @@ export const createSmogonMove = (
     return null;
   }
 
-  const smogonMove = new SmogonMove(dex, moveName, {
-    species: pokemon?.speciesForme,
-    ability: pokemon?.dirtyAbility ?? pokemon?.ability,
-    item: pokemon?.dirtyItem ?? pokemon?.item,
-    useZ: dex.num === 7 && pokemon?.useUltimateMoves,
-    useMax: dex.num === 8 && pokemon?.useUltimateMoves,
-    isCrit: pokemon?.criticalHit ?? false,
+  // note: for whatever reason, gen 8 dex does not include information about Hidden Power
+  // (including any other types, such as Hidden Power Fire -- returns undefined!)
+  const isHiddenPower = formatId(moveName).includes('hiddenpower');
+
+  const determinedDex = dex.num === 8 && (isHiddenPower || pokemon.useZ)
+    ? 7
+    : dex;
+
+  const smogonMove = new SmogonMove(determinedDex, moveName, {
+    species: pokemon.speciesForme,
+    ability: pokemon.dirtyAbility ?? pokemon.ability,
+    item: pokemon.dirtyItem ?? pokemon.item,
+    useZ: pokemon.useZ,
+    useMax: pokemon.useMax,
+    isCrit: pokemon.criticalHit ?? false,
   });
 
   return smogonMove;

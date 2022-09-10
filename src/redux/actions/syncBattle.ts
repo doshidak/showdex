@@ -216,7 +216,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const basePokemon = matchedPokemon || sanitizePokemon({
           ...clientPokemon,
           slot: i, // important that we specify this to obtain a consistent calcdexId
-        });
+        }, dex?.num);
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -243,7 +243,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (!matchedPokemon || matchedPokemon.speciesForme !== syncedPokemon.speciesForme) {
           // l.debug('Fetching learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey);
 
-          const learnset = await dex.learnsets.learnable(syncedPokemon.speciesForme);
+          const learnset = await dex.learnsets.learnable(syncedPokemon.speciesForme.replace('-Mega', ''));
 
           // l.debug(
           //   'Fetched learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
@@ -256,12 +256,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             .sort();
 
           // build `other`, only if we have no `learnsets` or the `format` has something to do with hacks
-          if (!syncedPokemon.moveState.learnset.length || (battleState.format && /anythinggoes|hackmons/i.test(battleState.format))) {
-            syncedPokemon.moveState.other = Object.keys(BattleMovedex || {})
-              .map((moveid) => dex.moves.get(moveid)?.name)
-              .filter((name) => !!name && !syncedPokemon.moveState.revealed.includes(name) && !syncedPokemon.moveState.learnset?.includes?.(name))
-              .sort();
-          }
+          // if (!syncedPokemon.moveState.learnset.length || (battleState.format && /anythinggoes|hackmons/i.test(battleState.format))) {
+          //   syncedPokemon.moveState.other = Object.keys(BattleMovedex || {})
+          //     .map((moveid) => dex.moves.get(moveid)?.name)
+          //     .filter((name) => !!name && !syncedPokemon.moveState.revealed.includes(name) && !syncedPokemon.moveState.learnset?.includes?.(name))
+          //     .sort();
+          // }
 
           // l.debug(
           //   'Updated moveState for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,

@@ -1,5 +1,5 @@
 import { logger } from '@showdex/utils/debug';
-import type { Generation, ItemName, MoveName } from '@pkmn/data';
+import type { ItemName, MoveName } from '@pkmn/data';
 
 const PokemonZMoveTypings: Record<Showdown.TypeName, MoveName> = {
   '???': null,
@@ -28,53 +28,74 @@ const l = logger('@showdex/utils/app/getZMove');
 /**
  * Returns the corresponding Z move for a given move.
  *
+ * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
+ *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
+ * * Prior to v1.0.1, this would return the corresponding Z move for any Z-powerable moves, regardless of the
+ *   provided `itemName`.
+ *   - Now, if `itemName` is provided and `itemOnly` is `true`, only the move with the same `zMoveType` as the item will return the Z move.
+ *   - Providing a falsy value for `itemOnly` (default) will function the same pre-v1.0.1.
+ *   - Note that `itemOnly` only has an effect if `itemName` is valid.
+ *
  * @see https://github.com/smogon/damage-calc/blob/bdf9e8c39fec7670ed0ce64e1fb58d1a4dc83b73/calc/src/move.ts#L191
  * @since 0.1.2
  */
 export const getZMove = (
-  dex: Generation,
+  // dex: Generation,
   moveName: MoveName,
   itemName?: ItemName,
+  itemOnly?: boolean,
 ): MoveName => {
-  if (typeof dex?.moves?.get !== 'function') {
-    l.warn(
-      'passed-in dex object is invalid cause dex.moves.get() is not a function',
-      '\n', 'typeof dex.moves.get', typeof dex?.moves?.get,
-      '\n', 'moveName', moveName,
-      '\n', 'itemName', itemName,
-    );
+  // if (typeof dex?.moves?.get !== 'function') {
+  if (typeof Dex === 'undefined') {
+    if (__DEV__) {
+      l.warn(
+        'Global Dex object is unavailable.',
+        // 'Passed-in dex object is invalid cause dex.moves.get() is not a function',
+        // '\n', 'typeof dex.moves.get', typeof dex?.moves?.get,
+        '\n', 'moveName', moveName,
+        '\n', 'itemName', itemName,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
 
     return null;
   }
 
-  const move = dex.moves.get(moveName);
+  const move = Dex.moves.get(moveName);
 
-  if (!move?.name) {
-    l.warn(
-      'passed-in moveName is not a valid move!',
-      '\n', 'move', move,
-      '\n', 'moveName', moveName,
-      '\n', 'itemName', itemName,
-    );
+  if (!move?.exists) {
+    if (__DEV__) {
+      l.warn(
+        'Provided moveName is not a valid move!',
+        '\n', 'move', move,
+        '\n', 'moveName', moveName,
+        '\n', 'itemName', itemName,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
 
     return null;
   }
 
+  // make sure the move is Z-powerable
+  // (e.g., Close Combat will have a zMove.basePower of 190,
+  // but Stealth Rock doesn't have a basePower property in zMove)
   if (!move?.zMove?.basePower) {
     return null;
   }
-
-  const item = itemName ? dex.items.get(itemName) : null;
-
-  // if (!item?.megaEvolves) {
-  //   return null;
-  // }
 
   if (move.name.includes('Hidden Power')) {
     return PokemonZMoveTypings.Normal;
   }
 
-  if (item?.name) {
+  const item = itemName ? Dex.items.get(itemName) : null;
+
+  // if (!item?.megaEvolves) {
+  //   return null;
+  // }
+
+  // check for speical Z moves
+  if (item?.exists) {
     switch (move.name) {
       case 'Clanging Scales': {
         if (item.name === 'Kommonium Z') {
@@ -204,6 +225,12 @@ export const getZMove = (
         break;
       }
     }
+  }
+
+  // if an itemName was provided and the item's Z typing doesn't match the move's typing,
+  // don't bother providing the corresponding Z move (by returning null)
+  if (itemOnly && item?.exists && (!item.zMoveType || move.type !== item.zMoveType)) {
+    return null;
   }
 
   return PokemonZMoveTypings[move.type];

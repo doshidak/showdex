@@ -4,6 +4,8 @@
   "name": "Showdex",
   "version": "<-- auto-filled; do not edit -->",
   "description": "<-- auto-filled; do not edit -->",
+  "author": "<-- auto-filled; do not edit -->",
+  "homepage_url": "<-- auto-filled; do not edit -->",
 
   "permissions": [],
 
@@ -17,20 +19,40 @@
 
   "content_scripts": [
     {
-      "matches": ["https://play.pokemonshowdown.com/*"],
-      "js": ["content.js"]
+      "matches": [
+        "*://play.pokemonshowdown.com/*",
+        "*://dawn.psim.us/*",
+        "*://smogtours.psim.us/*",
+        "*://sports.psim.us/*"
+      ],
+      "js": [
+        "content.js"
+      ]
     }
   ],
 
   "web_accessible_resources": [
     {
-      "matches": ["https://play.pokemonshowdown.com/*"],
+      "matches": [
+        "*://play.pokemonshowdown.com/*",
+        "*://dawn.psim.us/*",
+        "*://smogtours.psim.us/*",
+        "*://sports.psim.us/*"
+      ],
       "resources": [
+        "bug.svg",
+        "clipboard-heart.svg",
+        "donate-mask.svg",
         "github-face.svg",
+        "info-circle.svg",
         "main.js",
-        "paypal.svg",
+        "pkmn.2c27923b.js",
+        "pkmn.356b2d28.js",
+        "remove-circle.svg",
         "showdex.svg",
-        "signpost-rounded.svg",
+        "signpost.svg",
+        "sparkle.svg",
+        "sword.svg",
         "tize.svg"
       ]
     }
@@ -56,9 +78,14 @@
   },
 
   "externally_connectable": {
-    "ids": ["*"],
+    "ids": [
+      "*"
+    ],
     "matches": [
-      "https://play.pokemonshowdown.com/*"
+      "*://play.pokemonshowdown.com/*",
+      "*://dawn.psim.us/*",
+      "*://smogtours.psim.us/*",
+      "*://sports.psim.us/*"
     ]
   }
 }

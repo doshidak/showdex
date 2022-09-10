@@ -12,18 +12,19 @@ export interface TableGridItemProps {
   children?: React.ReactNode;
 }
 
-export const TableGridItem = ({
+export const TableGridItem = React.forwardRef<HTMLDivElement, TableGridItemProps>(({
   className,
   style,
   align = 'center',
   header,
   small,
   children,
-}: TableGridItemProps): JSX.Element => {
+}: TableGridItemProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
 
   return (
     <div
+      ref={forwardedRef}
       className={cx(
         styles.item,
         !!colorScheme && styles[colorScheme],
@@ -37,4 +38,4 @@ export const TableGridItem = ({
       {children}
     </div>
   );
-};
+});
