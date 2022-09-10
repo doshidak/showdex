@@ -2,7 +2,7 @@
   <code>showdex</code>
 </h1>
 
-Current [v1.0.1](https://github.com/doshidak/showdex/releases/tag/v1.0.1) | [Chrome](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | [~~Firefox~~](#) | [Smogon Forums](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) | [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
+Current [v1.0.1](https://github.com/doshidak/showdex/releases/tag/v1.0.1) | [Chrome](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | [Smogon Forums](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) | [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
 --- | --- | --- | --- | --- | ---
 
 <p align="center">
@@ -12,7 +12,7 @@ Current [v1.0.1](https://github.com/doshidak/showdex/releases/tag/v1.0.1) | [Chr
 **Showdex** is a browser extension for [Pokémon Showdown](https://pokemonshowdown.com) that brings the [Damage Calculator](https://calc.pokemonshowdown.com) you know and love right into your battle! Automatically syncs all Pokémon and field conditions as you play, so you can spend *less time* shitting brix and *more time* [hitting kicks](https://www.smogon.com/dex/ss/moves/high-jump-kick).
 
 > **Note**  
-> Supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) & [~~**Firefox**~~](#). No support for browsers on **Android** at the moment.  
+> Supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) & [**Firefox**](https://addons.mozilla.org/en-US/firefox/addon/showdex/). No support for browsers on **Android** at the moment.  
 > Apparently also works on [**Opera GX**](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/post-9326569), [**Brave**](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/post-9326696) & any other browser that supports Chrome Extensions.
 
 ## What's Cookin'
