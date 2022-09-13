@@ -144,12 +144,15 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           activeBattle.calcdexRoom.tabHidden = true;
 
           // find the side room before the calcdexRoom to focus
+          // (there's a room with a blank id [i.e., ''], which we're purposefully ignoring)
           // (the trailing dash ['-'] is important in 'battle-' cause the BattlesRoom has id 'battles')
-          const roomIds = Object.keys(app.rooms || {}).filter((id) => !!id && !id.startsWith('battle-'));
-          const currentRoomId = app.curSideRoom?.id;
-          // const calcdexRoomIndex = roomIds.findIndex((id) => id === calcdexRoomId);
+          const sideRoomIds = Object.keys(app.rooms || {})
+            .filter((id) => !!id && !id.startsWith('battle-') && app.rooms[id]?.isSideRoom);
 
-          const prevRoomId = roomIds
+          const currentRoomId = app.curSideRoom?.id;
+          // const calcdexRoomIndex = sideRoomIds.findIndex((id) => id === calcdexRoomId);
+
+          const prevRoomId = sideRoomIds
             // .slice(0, Math.max(calcdexRoomIndex - 1, 0))
             .filter((id) => !('tabHidden' in app.rooms[id]) || !(app.rooms[id] as HtmlRoom).tabHidden)
             .pop();
