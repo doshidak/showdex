@@ -381,6 +381,7 @@ export const syncPokemon = (
   // only using sanitizePokemon() to get some values back
   // (is this a good idea? idk)
   const {
+    altFormes,
     abilities: transformedAbilities,
     abilityToggleable,
     abilityToggled,
@@ -396,6 +397,11 @@ export const syncPokemon = (
   // check for base stats (in case of forme changes)
   if (Object.values(baseStats).filter(Boolean).length) {
     syncedPokemon.baseStats = { ...baseStats };
+  }
+
+  // check for alternative formes (in case of transformations)
+  if (altFormes?.length) {
+    syncedPokemon.altFormes = [...altFormes];
   }
 
   // check for transformed base stats
