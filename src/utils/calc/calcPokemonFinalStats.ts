@@ -106,6 +106,7 @@ export const calcPokemonFinalStats = (
   const item = id(pokemon.dirtyItem ?? pokemon.item);
 
   const ignoreItem = hasEmbargo
+    || speciesForme.endsWith('-Mega')
     || field.isMagicRoom
     || (ability === 'klutz' && !PokemonSpeedReductionItems.map((i) => id(i)).includes(item));
 
