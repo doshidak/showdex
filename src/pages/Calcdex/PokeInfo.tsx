@@ -141,8 +141,18 @@ export const PokeInfo = ({
     pokemon,
   ]);
 
+  // automatically apply the first preset if the Pokemon has no/invalid preset
+  // (invalid presets could be due to the forme changing, so new presets are loaded in)
   React.useEffect(() => {
-    if (!pokemon?.calcdexId || !pokemon.autoPreset || pokemon.preset || !presets.length) {
+    if (!pokemon?.calcdexId || !pokemon.autoPreset || !presets.length) {
+      return;
+    }
+
+    const existingPreset = pokemon.preset
+      ? presets.find((p) => p.calcdexId === pokemon.preset)
+      : null;
+
+    if (existingPreset) {
       return;
     }
 
@@ -169,6 +179,34 @@ export const PokeInfo = ({
     : null;
 
   const abilityOptions = buildAbilityOptions(format, pokemon);
+
+  // handle cycling through the Pokemon's available alternative formes, if any
+  const formeIndex = pokemon?.altFormes?.length
+    ? pokemon.altFormes.findIndex((f) => pokemon.speciesForme === f)
+    : -1;
+
+  const nextFormeIndex = formeIndex > -1
+    ? formeIndex + 1 > pokemon.altFormes.length - 1
+      ? 0
+      : formeIndex + 1
+    : -1;
+
+  const nextForme = nextFormeIndex > -1
+    ? pokemon.altFormes[nextFormeIndex]
+    : null;
+
+  const switchToNextForme = React.useCallback(() => {
+    if (!nextForme) {
+      return;
+    }
+
+    onPokemonChange?.({
+      speciesForme: nextForme,
+    });
+  }, [
+    nextForme,
+    onPokemonChange,
+  ]);
 
   return (
     <div
@@ -201,27 +239,41 @@ export const PokeInfo = ({
 
         <div className={styles.infoContainer}>
           <div className={styles.firstLine}>
-            <span className={styles.pokemonName}>
-              {/* no nicknames, as requested by camdawgboi lol */}
-              {/* {pokemon?.name || '--'} */}
+            {/* no nicknames, as requested by camdawgboi lol */}
+            {/* <span className={styles.pokemonName}>
+              {/* {pokemon?.name || '--'} *\/}
               {pokemon?.speciesForme || '--'}
-            </span>
+            </span> */}
+            <Button
+              className={cx(
+                styles.pokemonNameButton,
+                !nextForme && styles.disabled,
+              )}
+              labelClassName={styles.pokemonNameLabel}
+              label={pokemon?.speciesForme || '--'}
+              tooltip={nextForme ? (
+                <div>
+                  Switch to{' '}
+                  <strong>{nextForme}</strong>
+                </div>
+              ) : null}
+              hoverScale={1}
+              absoluteHover
+              disabled={!nextForme}
+              onPress={switchToNextForme}
+            />
 
             <span className={styles.small}>
               {
                 (typeof pokemon?.level === 'number' && pokemon.level !== 100) &&
-                <>
-                  {' '}
-                  <span style={{ opacity: 0.5 }}>
-                    L{pokemon.level}
-                  </span>
-                </>
+                <span className={styles.pokemonLevel}>
+                  L{pokemon.level}
+                </span>
               }
 
               {
                 !!pokemon?.types?.length &&
-                <span style={{ userSelect: 'none' }}>
-                  {' '}
+                <span className={styles.pokemonTypes}>
                   {pokemon.types.map((type, i) => (
                     <PokeType
                       key={`PokeInfo:PokeType:${pokemonKey}:${type}`}
