@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
-import { ColorSchemeProvider } from '@showdex/components/app';
 import { createSideRoom } from '@showdex/utils/app';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -48,9 +47,7 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
 
   reactHellodexRoom.render((
     <ReduxProvider store={store}>
-      <ColorSchemeProvider>
-        <Hellodex />
-      </ColorSchemeProvider>
+      <Hellodex />
     </ReduxProvider>
   ));
 

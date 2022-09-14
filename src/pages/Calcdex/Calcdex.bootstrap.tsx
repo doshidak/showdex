@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
-import { ColorSchemeProvider } from '@showdex/components/app';
 import {
   createSideRoom,
   // getActiveBattle,
@@ -179,12 +178,10 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       activeBattle.reactCalcdexRoom.render((
         <ReduxProvider store={store}>
-          <ColorSchemeProvider>
-            <Calcdex
-              battle={activeBattle}
-              // tooltips={tooltips}
-            />
-          </ColorSchemeProvider>
+          <Calcdex
+            battle={activeBattle}
+            // tooltips={tooltips}
+          />
         </ReduxProvider>
       ));
     });
