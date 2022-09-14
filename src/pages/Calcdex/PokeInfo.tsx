@@ -5,7 +5,6 @@ import {
   PokeHpBar,
   PokeStatus,
   PokeType,
-  useColorScheme,
 } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
@@ -15,6 +14,7 @@ import {
   PokemonNatureBoosts,
   // PokemonToggleAbilities,
 } from '@showdex/consts';
+import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import { buildAbilityOptions, detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
@@ -224,7 +224,9 @@ export const PokeInfo = ({
             pokemon={{
               ...pokemon,
               speciesForme: pokemon?.transformedForme || pokemon?.speciesForme,
-              item: pokemon?.dirtyItem ?? pokemon?.item,
+              item: (pokemon?.transformedForme || pokemon?.speciesForme)?.endsWith('-Mega')
+                ? null
+                : pokemon?.dirtyItem ?? pokemon?.item,
             }}
             tooltip="Open Smogon Page"
             disabled={!pokemon?.speciesForme}

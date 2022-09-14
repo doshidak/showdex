@@ -1,7 +1,8 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PiconButton, useColorScheme } from '@showdex/components/app';
+import { PiconButton } from '@showdex/components/app';
 import { Button } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import { openShowdownUser } from '@showdex/utils/app';
 import { env } from '@showdex/utils/core';
 import type { Generation } from '@pkmn/data';
@@ -129,7 +130,9 @@ export const PlayerCalc = ({
 
             const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
             const friendlyPokemonName = mon?.speciesForme || mon?.name || pokemonKey;
-            const item = mon?.dirtyItem ?? mon?.item;
+
+            const speciesForme = mon?.transformedForme || mon?.speciesForme;
+            const item = speciesForme?.endsWith('-Mega') ? null : mon?.dirtyItem ?? mon?.item;
 
             return (
               <PiconButton
@@ -145,7 +148,7 @@ export const PlayerCalc = ({
                 aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
-                  speciesForme: mon?.transformedForme || mon?.speciesForme,
+                  speciesForme,
                   item,
                 } : 'pokeball-none'}
                 tooltip={mon ? (
