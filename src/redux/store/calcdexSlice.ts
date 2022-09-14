@@ -4,7 +4,7 @@ import { sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
+import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
 import type {
   AbilityName,
   GenerationNum,
@@ -72,13 +72,30 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   serverSourced?: boolean;
 
   /**
-   * Unsanitized version of `speciesForme`, primarily used for determining Z/Max/G-Max moves.
+   * Alternative formes of the Pokemon.
    *
-   * @deprecated As of v0.1.3, since we no longer need to sanitize the `speciesForme`,
-   *   this is no longer needed.
-   * @since 0.1.2
+   * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
+   *   - Note that if the `speciesForme` is not a base forme or has no alternative formes, this array will be empty.
+   *   - Designed this way so that `PokeInfo` can easily check if it should allow switching formes based on this array's `length`.
+   *   - For example, `altFormes` for `'Rotom-Wash'` will be empty, while `'Rotom'` will include all possible formes.
+   * * If the Pokemon is transformed, this will include the alternative formes of the transformed Pokemon.
+   *   - Additionally, this won't include the original `speciesForme`, but the `speciesForme` of the transformed Pokemon.
+   * * `PokeInfo` should allow the user to switch between each forme if this array's `length` is greater than `0`.
+   *   - No need to retain the user's dirtied forme in a separate property like `dirtySpeciesForme`.
+   *   - Therefore, the switched forme should be stored in `speciesForme`.
+   *   - On the next sync, any modifications to `speciesForme` will be replaced with the battle's value in `syncPokemon()`.
+   *
+   * @example
+   * ```ts
+   * ['Charizard', 'Charizard-Mega-X', 'Charizard-Mega-Y']
+   * ```
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.0.2
    */
-  rawSpeciesForme?: string;
+  altFormes?: string[];
 
   /**
    * Transformed `speciesForme`, if applicable.
@@ -959,20 +976,60 @@ export interface CalcdexSlicePokemonAction {
  */
 export type CalcdexSliceState = Record<string, CalcdexBattleState>;
 
+/**
+ * Reducer function definitions.
+ *
+ * @since 1.0.2
+ */
+export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceState> {
+  /**
+   * Initializes an empty Calcdex state.
+   *
+   * @since 0.1.3
+   */
+  init: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+
+  /**
+   * Updates an existing `CalcdexBattleState`.
+   *
+   * @since 0.1.3
+   */
+  update: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+
+  /**
+   * Updates the `field` of a matching `CalcdexBattleState` from the provided `battleId`.
+   *
+   * @since 0.1.3
+   */
+  updateField: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction<'field'>) => void;
+
+  /**
+   * Updates a `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
+   *
+   * * You can technically update both players in a single `dispatch()` by providing `p1` and `p2`.
+   *
+   * @since 0.1.3
+   */
+  updatePlayer: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+
+  /**
+   * Updates a `CalcdexPokemon` of an existing `CalcdexPlayer` of a matching `CalcdexBattleState`
+   * from the provided `battleId`.
+   *
+   * @since 0.1.3
+   */
+  updatePokemon: (state: Draft<CalcdexSliceState>, action: PayloadAction<CalcdexSlicePokemonAction>) => void;
+}
+
 const l = logger('@showdex/redux/store/calcdexSlice');
 
-export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<CalcdexSliceState>, string>({
+export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers, string>({
   name: 'calcdex',
 
   initialState: {},
 
   reducers: {
-    /**
-     * Initializes an empty Calcdex state.
-     *
-     * @since 0.1.3
-     */
-    init: (state, action: CalcdexSliceStateAction) => {
+    init: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1044,12 +1101,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates an existing `CalcdexBattleState`.
-     *
-     * @since 0.1.3
-     */
-    update: (state, action: CalcdexSliceStateAction) => {
+    update: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1092,12 +1144,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates the `field` of a matching `CalcdexBattleState` from the provided `battleId`.
-     *
-     * @since 0.1.3
-     */
-    updateField: (state, action: CalcdexSliceStateAction<'field'>) => {
+    updateField: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1136,14 +1183,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates a `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
-     *
-     * * You can technically update both players in a single `dispatch()` by providing `p1` and `p2`.
-     *
-     * @since 0.1.3
-     */
-    updatePlayer: (state, action: CalcdexSliceStateAction) => {
+    updatePlayer: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1192,12 +1232,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates a `CalcdexPokemon` of an existing `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
-     *
-     * @since 0.1.3
-     */
-    updatePokemon: (state, action: PayloadAction<CalcdexSlicePokemonAction>) => {
+    updatePokemon: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
