@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { detectToggledAbility, toggleableAbility } from '@showdex/utils/battle';
+import { detectToggledAbility, sanitizePokemon, toggleableAbility } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
@@ -102,8 +102,34 @@ export const PokeCalc = ({
       payload.dirtyItem = null;
     }
 
+    // check for any possible abilities, base stat & type updates due to speciesForme changes
+    if ('speciesForme' in payload && payload.speciesForme !== playerPokemon.speciesForme) {
+      // const newSpecies = Dex.forGen(dex?.num).species.get(payload.speciesForme);
+
+      const {
+        abilities,
+        baseStats,
+        types,
+      } = sanitizePokemon({
+        ...playerPokemon,
+        ...payload,
+      }, gen);
+
+      if (abilities?.length) {
+        payload.abilities = [...abilities];
+      }
+
+      if (types?.length) {
+        payload.types = [...types];
+      }
+
+      if (Object.keys(baseStats || {}).length) {
+        payload.baseStats = { ...baseStats };
+      }
+    }
+
     // recalculate the stats with the updated EVs/IVs
-    if (typeof dex?.stats?.calc === 'function') {
+    if (typeof dex !== 'undefined') {
       payload.spreadStats = calcPokemonSpreadStats(dex, {
         ...playerPokemon,
         ...payload,
