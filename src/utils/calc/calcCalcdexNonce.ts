@@ -20,7 +20,6 @@ const calcPokemonCalcdexNonce = (
   ident: pokemon?.ident,
   name: pokemon?.name,
   speciesForme: pokemon?.speciesForme,
-  // rawSpeciesForme: pokemon?.rawSpeciesForme ?? pokemon?.speciesForme,
   hp: pokemon?.hp?.toString(),
   maxhp: pokemon?.maxhp?.toString(),
   level: pokemon?.level?.toString(),
