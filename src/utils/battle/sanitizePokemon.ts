@@ -247,12 +247,13 @@ export const sanitizePokemon = (
 
     // only update the abilities if the dex returned abilities
     if (Object.keys(species?.abilities || {}).length) {
-      sanitizedPokemon.abilities = [
+      // using Set makes sure there aren't any duplicate abilities in the array
+      sanitizedPokemon.abilities = Array.from(new Set([
         ...(sanitizedPokemon.abilities || []),
         ...(<AbilityName[]> Object.values(species.abilities)),
-      ];
+      ]));
 
-      if (!sanitizedPokemon.ability) {
+      if (!sanitizedPokemon.ability || !sanitizedPokemon.abilities.includes(sanitizedPokemon.ability)) {
         [sanitizedPokemon.ability] = sanitizedPokemon.abilities;
       }
     }
