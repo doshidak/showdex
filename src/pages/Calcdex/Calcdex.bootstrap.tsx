@@ -7,6 +7,7 @@ import {
   // getActiveBattle,
   getBattleRoom,
   getCalcdexRoomId,
+  getSideRooms,
 } from '@showdex/utils/app';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
@@ -144,17 +145,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           activeBattle.calcdexRoom.tabHidden = true;
 
           // find the side room before the calcdexRoom to focus
-          // (there's a room with a blank id [i.e., ''], which we're purposefully ignoring)
-          // (the trailing dash ['-'] is important in 'battle-' cause the BattlesRoom has id 'battles')
-          const sideRoomIds = Object.keys(app.rooms || {})
-            .filter((id) => !!id && !id.startsWith('battle-') && app.rooms[id]?.isSideRoom);
-
+          const sideRoomIds = getSideRooms().map((room) => room.id);
           const currentRoomId = app.curSideRoom?.id;
           // const calcdexRoomIndex = sideRoomIds.findIndex((id) => id === calcdexRoomId);
 
           const prevRoomId = sideRoomIds
             // .slice(0, Math.max(calcdexRoomIndex - 1, 0))
-            .filter((id) => !('tabHidden' in app.rooms[id]) || !(app.rooms[id] as HtmlRoom).tabHidden)
+            .filter((id) => !(app.rooms[id] as unknown as HtmlRoom).tabHidden)
             .pop();
 
           // currentRoomId is tracked so that we don't focus to another room when this blurred Calcdex tab is "closed"
