@@ -175,15 +175,16 @@ export const createSmogonPokemon = (
   //     0,
   //   ) || dex;
 
+  const baseGen = <GenerationNum> Dex.species.get(speciesForme)?.gen;
   const isGalarian = formatId(speciesForme).includes('galar');
   const missingSpecies = !dex.species.get(speciesForme)?.exists;
 
   const determinedDex = isMega || hasMegaItem
-    ? 7
+    ? <GenerationNum> Math.max(7, baseGen || 0)
     : isGalarian
-      ? 8
+      ? <GenerationNum> 8
       : missingSpecies
-        ? <GenerationNum> Dex.species.get(speciesForme)?.gen || 7
+        ? baseGen || <GenerationNum> 7
         : dex;
 
   l.debug(
