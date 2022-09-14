@@ -4,6 +4,7 @@ export * from './getActiveBattle';
 export * from './getBattleRoom';
 export * from './getCalcdexRoomId';
 export * from './getColorScheme';
+export * from './getSideRooms';
 export * from './openShowdownUser';
 export * from './openSmogonUniversity';
 export * from './openUserPopup';
