@@ -26,6 +26,9 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
 
+  const showPlayerName = !authName
+    || authName !== playerName;
+
   return (
     <BaseButton
       ref={forwardedRef}
@@ -55,13 +58,18 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
             (!!playerName && !!opponentName) &&
             <>
               {
-                (!authName || authName !== playerName) &&
+                showPlayerName &&
                 <div className={styles.username}>
                   {playerName}
                 </div>
               }
 
-              <div className={styles.versus}>
+              <div
+                className={cx(
+                  styles.versus,
+                  !showPlayerName && styles.noPlayerName,
+                )}
+              >
                 vs
               </div>
 
