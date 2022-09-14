@@ -52,23 +52,18 @@
 }
 
 .showdexIcon {
-  // @include position.absolute-anchor($x: 50%, $y: -63px, $y-prop: bottom);
   @include position.absolute-anchor($x: 50%, $y: -5.5em, $y-prop: bottom);
-  // @include position.absolute-center;
-  // width: 275px;
   width: 24em;
-  opacity: 0.75;
+  @include transition.apply(opacity);
   pointer-events: none;
-  // z-index: 1;
 
-  // .light & {
-  //   mix-blend-mode: multiply;
-  // }
+  .light & {
+    opacity: 0.75;
+  }
 
-  // .dark & {
-  //   // opacity: 0.85;
-  //   mix-blend-mode: screen;
-  // }
+  .dark & {
+    opacity: 0.85;
+  }
 }
 
 .topContent {
@@ -134,15 +129,22 @@
   // text-indent: 0.2em;
   text-transform: uppercase;
   text-shadow: 0 0 15px color.alpha(colors.$black, 0.3);
-  background-image: linear-gradient(65deg, #4A9AC7 1%, #F148CC 99%);
+  background: linear-gradient(65deg, #4A9AC7 1%, #F148CC 99%) 0 0 / 100% 100%;
   background-clip: text;
-  @include transition.apply((margin-right, 5s), (letter-spacing, 5s));
+  @include transition.apply(
+    (margin-right, 5s),
+    (letter-spacing, 5s),
+    (background-position, 5s),
+    (background-size, 5s),
+  );
   // user-select: none;
   // z-index: 1;
 
   &:hover {
     @include spacing.margin($right: -0.5em);
     letter-spacing: 0.5em;
+    background-position: 50% 0;
+    background-size: 200% 100%;
   }
 }
 
