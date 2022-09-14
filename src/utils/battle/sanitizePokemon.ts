@@ -78,7 +78,7 @@ export const sanitizePokemon = (
     searchid: pokemon?.searchid,
 
     speciesForme: detectSpeciesForme(pokemon),
-    // rawSpeciesForme: pokemon?.speciesForme,
+    altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
     transformedForme: transformed
       ? typeof pokemon.volatiles.transform[1] === 'object'
         ? (<Showdown.Pokemon> <unknown> pokemon.volatiles.transform[1])?.speciesForme || null
@@ -208,6 +208,23 @@ export const sanitizePokemon = (
     const transformedSpecies = sanitizedPokemon.transformedForme
       ? Dex.forGen(gen).species.get(sanitizedPokemon.transformedForme)
       : null;
+
+    // only set the altFormes if we're currently looking at the baseForme
+    sanitizedPokemon.altFormes = transformedSpecies?.baseSpecies
+      && transformedSpecies.baseSpecies === sanitizedPokemon.transformedForme
+      && transformedSpecies.otherFormes?.length
+      ? [
+        transformedSpecies.baseSpecies,
+        ...(<string[]> transformedSpecies.otherFormes), // dunno why otherFormes is type any[]
+      ]
+      : species?.baseSpecies
+        && species.baseSpecies === sanitizedPokemon.speciesForme
+        && species.otherFormes?.length
+        ? [
+          species.baseSpecies,
+          ...(<string[]> species.otherFormes),
+        ]
+        : [];
 
     if (transformedSpecies?.baseStats) {
       const transformedBaseStats = { ...transformedSpecies.baseStats };
