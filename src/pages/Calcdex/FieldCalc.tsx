@@ -1,10 +1,10 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
 import { TerrainNames, WeatherNames } from '@showdex/consts';
+import { useColorScheme } from '@showdex/redux/store';
 import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
 

@@ -1,9 +1,10 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokeType, useColorScheme } from '@showdex/components/app';
+import { PokeType } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions } from '@showdex/utils/battle';
 import type { MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';

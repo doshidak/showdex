@@ -1,9 +1,9 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { BuildInfo } from '@showdex/components/debug';
+import { useColorScheme } from '@showdex/redux/store';
 import { detectPlayerKeyFromBattle } from '@showdex/utils/battle';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -14,7 +14,7 @@ interface CalcdexProps {
   // tooltips?: Showdown.BattleTooltips;
 }
 
-const l = logger('@showdex/pages/Calcdex/Calcdex');
+// const l = logger('@showdex/pages/Calcdex/Calcdex');
 
 export const Calcdex = ({
   battle,
@@ -35,13 +35,13 @@ export const Calcdex = ({
     // tooltips,
   });
 
-  l.debug(
-    'rendering...',
-    '\n', 'colorScheme', colorScheme,
-    '\n', 'p1.pokemon', battle?.p1?.pokemon,
-    '\n', 'p2.pokemon', battle?.p2?.pokemon,
-    '\n', 'state', state,
-  );
+  // l.debug(
+  //   'rendering...',
+  //   '\n', 'colorScheme', colorScheme,
+  //   '\n', 'p1.pokemon', battle?.p1?.pokemon,
+  //   '\n', 'p2.pokemon', battle?.p2?.pokemon,
+  //   '\n', 'state', state,
+  // );
 
   const {
     battleId,

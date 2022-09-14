@@ -1,6 +1,5 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
@@ -9,6 +8,7 @@ import {
   PokemonNatureBoosts,
   PokemonStatNames,
 } from '@showdex/consts';
+import { useColorScheme } from '@showdex/redux/store';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
 import { calcPokemonFinalStats } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
