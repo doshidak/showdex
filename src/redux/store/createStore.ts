@@ -4,6 +4,7 @@ import { logger } from '@showdex/utils/debug';
 import type { Action, AnyAction, ConfigureStoreOptions } from '@reduxjs/toolkit';
 import { pkmnApi } from '../services';
 import { calcdexSlice } from './calcdexSlice';
+import { showdexSlice } from './showdexSlice';
 
 export type RootStore = ReturnType<typeof createStore>;
 export type RootDispatch = RootStore['dispatch'];
@@ -50,9 +51,11 @@ export const createStore = (
 
     reducer: {
       [pkmnApi.reducerPath]: pkmnApi.reducer,
+      [showdexSlice.name]: showdexSlice.reducer,
       [calcdexSlice.name]: calcdexSlice.reducer,
     },
 
+    // need to disable these default middlewares, otherwise, it'll get wayyy too laggy!
     middleware: (getDefaultMiddleware) => getDefaultMiddleware({
       immutableCheck: false,
       serializableCheck: false,
