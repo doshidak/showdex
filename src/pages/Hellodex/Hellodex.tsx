@@ -2,10 +2,9 @@ import * as React from 'react';
 import useSize from '@react-hook/size';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { BuildInfo } from '@showdex/components/debug';
 import { BaseButton, Button } from '@showdex/components/ui';
-import { useCalcdexState } from '@showdex/redux/store';
+import { useCalcdexState, useColorScheme } from '@showdex/redux/store';
 import { getCalcdexRoomId, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { FooterButton } from './FooterButton';
@@ -16,7 +15,7 @@ const packageVersion = `v${env('package-version', '#.#.#')}`;
 const donationUrl = env('hellodex-donation-url');
 const forumUrl = env('hellodex-forum-url');
 const repoUrl = env('hellodex-repo-url');
-const releaseUrl = env('hellodex-release-url');
+const releaseUrl = `${env('hellodex-releases-base-url')}/${packageVersion}`;
 const bugsUrl = env('hellodex-bugs-url');
 const featuresUrl = env('hellodex-features-url');
 
@@ -48,7 +47,7 @@ export const Hellodex = (): JSX.Element => {
       return;
     }
 
-    const calcdexRoom = app.rooms[calcdexRoomId] as HtmlRoom;
+    const calcdexRoom = app.rooms[calcdexRoomId] as unknown as HtmlRoom;
 
     if (calcdexRoom.tabHidden) {
       calcdexRoom.tabHidden = false;
@@ -168,7 +167,7 @@ export const Hellodex = (): JSX.Element => {
           </div>
 
           {
-            !!donationUrl &&
+            donationUrl?.startsWith('https://') &&
             <div className={styles.donations}>
               <BaseButton
                 className={styles.donateButton}
@@ -214,7 +213,7 @@ export const Hellodex = (): JSX.Element => {
         <div className={styles.footer}>
           <div className={styles.links}>
             {
-              !!forumUrl &&
+              forumUrl?.startsWith('https://') &&
               <FooterButton
                 className={styles.linkButton}
                 iconAsset="signpost.svg"
@@ -228,7 +227,7 @@ export const Hellodex = (): JSX.Element => {
             }
 
             {
-              !!repoUrl &&
+              repoUrl?.startsWith('https://') &&
               <FooterButton
                 className={styles.linkButton}
                 iconAsset="github-face.svg"
@@ -242,7 +241,7 @@ export const Hellodex = (): JSX.Element => {
             }
 
             {
-              !!releaseUrl &&
+              releaseUrl?.startsWith('https://') &&
               <FooterButton
                 className={styles.linkButton}
                 iconClassName={styles.sparkleIcon}
@@ -257,7 +256,7 @@ export const Hellodex = (): JSX.Element => {
             }
 
             {
-              !!bugsUrl &&
+              bugsUrl?.startsWith('https://') &&
               <FooterButton
                 className={styles.linkButton}
                 iconClassName={styles.bugIcon}
@@ -272,7 +271,7 @@ export const Hellodex = (): JSX.Element => {
             }
 
             {
-              !!featuresUrl &&
+              featuresUrl?.startsWith('https://') &&
               <FooterButton
                 className={styles.linkButton}
                 iconClassName={styles.clipboardIcon}

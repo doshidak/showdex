@@ -1,8 +1,8 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { BaseButton } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import { getResourceUrl } from '@showdex/utils/core';
 import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
 import styles from './InstanceButton.module.scss';
