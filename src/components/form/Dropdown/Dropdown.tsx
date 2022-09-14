@@ -2,8 +2,8 @@ import * as React from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { Tooltip } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import type { FieldInputProps, FieldRenderProps } from 'react-final-form';
 import type { SelectInstance } from 'react-select';
 import type {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
+import { useColorScheme } from '@showdex/redux/store';
 import styles from './PokeType.module.scss';
 
 export interface PokeTypeProps {

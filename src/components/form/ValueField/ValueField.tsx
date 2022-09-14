@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { BaseTextField } from '@showdex/components/form';
+import { useColorScheme } from '@showdex/redux/store';
 import type { BaseTextFieldProps } from '@showdex/components/form';
 import styles from './ValueField.module.scss';
 
