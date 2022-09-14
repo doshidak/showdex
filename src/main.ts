@@ -1,5 +1,5 @@
 import { calcdexBootstrapper, hellodexBootstrapper } from '@showdex/pages';
-import { createStore } from '@showdex/redux/store';
+import { createStore, showdexSlice } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import type { RootStore } from '@showdex/redux/store';
 import '@showdex/styles/global.scss';
@@ -88,6 +88,35 @@ $(window).off('beforeunload').on('beforeunload', (e: JQuery.TriggeredEvent<Windo
     : 'Are you sure you want to refresh?';
 
   return <string> e.returnValue;
+});
+
+l.debug('Initializing MutationObserver for client colorScheme changes...');
+
+// create a MutationObserver to listen for class changes in the <html> tag
+// (in order to dispatch colorScheme updates to Redux)
+const colorSchemeObserver = new MutationObserver((mutationList) => {
+  const [mutation] = mutationList || [];
+
+  if (mutation?.type !== 'attributes') {
+    return;
+  }
+
+  // determine the color scheme from the presence of a 'dark' class in <html>
+  const { className } = (<typeof document.documentElement> mutation.target) || {};
+  const colorScheme: Showdown.ColorScheme = className?.includes('dark') ? 'dark' : 'light';
+
+  store.dispatch(showdexSlice.actions.setColorScheme(colorScheme));
+});
+
+// note: document.documentElement is a ref to the <html> tag
+colorSchemeObserver.observe(document.documentElement, {
+  // observe only 'class' attribute on <html>
+  attributes: true,
+  attributeFilter: ['class'],
+
+  // don't observe the <html>'s children or data
+  childList: false,
+  characterData: false,
 });
 
 // open the Hellodex when the Showdown client starts
