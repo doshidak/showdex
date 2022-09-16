@@ -170,7 +170,7 @@ export const buildMoveOptions = (
       .sort();
 
     options.push({
-      label: 'Other',
+      label: filterMoves.length ? 'Other' : 'All',
       options: otherMoves.map((name) => ({
         label: name,
         value: name,
