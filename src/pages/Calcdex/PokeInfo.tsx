@@ -16,7 +16,7 @@ import {
 } from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
-import { buildAbilityOptions, detectToggledAbility } from '@showdex/utils/battle';
+import { buildAbilityOptions, buildItemOptions, detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import type {
   AbilityName,
@@ -179,6 +179,7 @@ export const PokeInfo = ({
     : null;
 
   const abilityOptions = buildAbilityOptions(format, pokemon);
+  const itemOptions = buildItemOptions(format, pokemon);
 
   // handle cycling through the Pokemon's available alternative formes, if any
   const formeIndex = pokemon?.altFormes?.length
@@ -537,18 +538,7 @@ export const PokeInfo = ({
                 dirtyItem: name ?? ('' as ItemName),
               }),
             }}
-            options={[!!pokemon?.altItems?.length && {
-              label: 'Pool',
-              options: pokemon.altItems.map((item) => ({
-                label: item,
-                value: item,
-              })),
-            }, !!BattleItems && {
-              label: 'All',
-              options: Object.values(BattleItems)
-                .filter((i) => i?.name && (format?.includes('nationaldex') || gen === 6 || gen === 7 || (!i.megaStone && !i.zMove)) && (!pokemon?.altItems?.length || !pokemon.altItems.includes(i.name as ItemName)))
-                .map((item) => ({ label: item.name, value: item.name })),
-            }].filter(Boolean)}
+            options={itemOptions}
             noOptionsMessage="No Items"
             disabled={!pokemon?.speciesForme}
           />
