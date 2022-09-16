@@ -958,8 +958,11 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
  * @since 0.1.3
  */
 export type CalcdexSliceStateAction<
-  TRequired extends keyof CalcdexBattleState = never,
-> = PayloadAction<Modify<DeepPartial<CalcdexBattleState>, Required<Pick<CalcdexBattleState, 'battleId' | TRequired>>>>;
+  TRequired extends keyof CalcdexBattleState = null,
+> = PayloadAction<Modify<DeepPartial<CalcdexBattleState>, {
+  // idk why CalcdexBattleField isn't partialed from DeepPartial<CalcdexBattleState>
+  [P in TRequired]: P extends 'field' ? DeepPartial<CalcdexBattleField> : DeepPartial<CalcdexBattleState>[P];
+}>>;
 
 export interface CalcdexSlicePokemonAction {
   battleId: string;
