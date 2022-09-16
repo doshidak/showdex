@@ -291,7 +291,7 @@ export const PokeMoves = ({
                     damageRange === '0%' && styles.noDamage,
                   )}
                   label={damageRange === '0%' ? 'N/A' : damageRange}
-                  tooltip={description ? (
+                  tooltip={description?.includes('vs.') ? (
                     <div className={styles.descTooltip}>
                       <div
                         className={cx(
@@ -302,7 +302,20 @@ export const PokeMoves = ({
                         Copied!
                       </div>
 
-                      {description}
+                      {description.slice(0, description.indexOf(' vs.'))}
+                      <br />
+                      vs
+                      <br />
+                      {description.slice(description.indexOf('vs. ') + 4, description.indexOf(': ') + 1)}
+                      <br />
+                      {description.slice(description.indexOf(': ') + 2, description.includes('--') ? description.indexOf(' --') : undefined)}
+                      {
+                        description.includes('--') &&
+                        <>
+                          <br />
+                          {description.slice(description.indexOf('-- ') + 3)}
+                        </>
+                      }
                     </div>
                   ) : null}
                   hoverScale={1}
