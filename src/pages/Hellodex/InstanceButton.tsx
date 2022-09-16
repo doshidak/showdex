@@ -19,15 +19,19 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   format,
   authName,
   playerName,
-  opponentName,
+  opponentName: opponentNameFromProps,
   hoverScale = 1.015,
   disabled,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const showPlayerName = !authName
-    || authName !== playerName;
+  const authPlayer = !!authName
+    && [playerName, opponentNameFromProps].includes(authName);
+
+  const opponentName = !authPlayer || authName === playerName
+    ? opponentNameFromProps
+    : playerName;
 
   return (
     <BaseButton
@@ -58,7 +62,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
             (!!playerName && !!opponentName) &&
             <>
               {
-                showPlayerName &&
+                !authPlayer &&
                 <div className={styles.username}>
                   {playerName}
                 </div>
@@ -67,14 +71,14 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
               <div
                 className={cx(
                   styles.versus,
-                  !showPlayerName && styles.noPlayerName,
+                  authPlayer && styles.noPlayerName,
                 )}
               >
                 vs
               </div>
 
               <div className={styles.username}>
-                {authName && authName === opponentName ? playerName : opponentName}
+                {opponentName}
               </div>
             </>
           }
