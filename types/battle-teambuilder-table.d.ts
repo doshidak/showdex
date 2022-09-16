@@ -291,7 +291,7 @@ declare namespace Showdown {
     | 'gen7letsgo'
     | 'gen7nfe'
     | 'gen7vgc'
-    | 'gen8'
+    // | 'gen8' // doesn't exist!
     | 'gen8bdsp'
     | 'gen8bdspdoubles'
     | 'gen8dlc1'
@@ -302,7 +302,7 @@ declare namespace Showdown {
     | 'metronome'
     | 'natdex';
 
-  interface BattleTeambuilderTable extends Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'overrideTier' | 'tiers' | 'zuBans'> {
-    [format?: BattleTeambuilderTableFormat]: BattleTeambuilderGenTable;
-  }
+  type BattleTeambuilderTable =
+    & Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'overrideTier' | 'tiers' | 'zuBans'>
+    & Record<BattleTeambuilderTableFormat, BattleTeambuilderGenTable>;
 }
