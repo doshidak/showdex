@@ -1,0 +1,221 @@
+@use 'config/colors';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+// derived from:
+// https://github.com/Grsmto/simplebar/blob/master/packages/simplebar/src/simplebar.css
+
+.container {
+  position: relative;
+  @include flex.column($justify: flex-start, $align: flex-start);
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.wrapper {
+  width: inherit;
+  max-width: inherit;
+  height: inherit;
+  max-height: inherit;
+  overflow: hidden;
+}
+
+.mask {
+  @include position.absolute-fill;
+  width: auto;
+  height: auto;
+  @include spacing.margin-none;
+  @include spacing.padding-none;
+  direction: inherit;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.offset {
+  @include position.absolute-fill;
+  @include spacing.margin-none;
+  @include spacing.padding-none;
+  direction: inherit;
+  resize: none;
+  // box-sizing: inherit;
+  -webkit-overflow-scrolling: touch;
+}
+
+.contentWrapper {
+  position: relative;
+  display: block;
+  width: auto;
+  max-width: 100%; // not required for horizontal scroll to trigger
+  height: 100%; // required for horizontal native scrollbar to not appear if parent is taller than natural height
+  max-height: 100%; // needed for vertical scroll to trigger
+  direction: inherit;
+  // box-sizing: border-box;
+  scrollbar-width: 0;
+  // -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+.content {
+  position: relative;
+
+  .dragging & {
+    user-select: none;
+    pointer-events: none;
+  }
+
+  // &::before, &::after {
+  //   content: '';
+  //   display: table;
+  // }
+}
+
+.placeholder {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.heightObserverWrapper {
+  position: relative;
+  flex-grow: inherit;
+  flex-shrink: 0;
+  flex-basis: 0;
+  float: left;
+  width: 100%;
+  max-width: 1px;
+  height: 100%;
+  max-height: 1px;
+  @include spacing.margin-none;
+  @include spacing.padding-none;
+  box-sizing: inherit;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.heightObserver {
+  @include position.absolute-anchor($x: 0, $y: 0);
+  display: block;
+  width: 1000%;
+  min-width: 1px;
+  height: 1000%;
+  min-height: 1px;
+  opacity: 0;
+  box-sizing: inherit;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.track {
+  @include position.absolute-anchor($x: 0, $y: 0, $x-prop: right, $y-prop: bottom);
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+
+  &.horizontal {
+    left: 0;
+    height: 11px;
+  }
+
+  &.vertical {
+    top: 0;
+    width: 11px;
+  }
+
+  // rtl support
+  [data-simplebar-direction='rtl'] &.vertical {
+    right: auto;
+    left: 0;
+  }
+
+  .dragging & {
+    pointer-events: all;
+  }
+}
+
+.scrollbar {
+  @include position.absolute($right: 0, $left: 0);
+  min-height: 10px;
+
+  .horizontal & {
+    top: 2px;
+    right: auto;
+    left: 0;
+    width: auto;
+    min-width: 10px;
+    height: 7px;
+    min-height: 0;
+  }
+
+  &::before {
+    content: '';
+    @include position.absolute($right: 2px, $left: 2px);
+    border-radius: 15px;
+    opacity: 0;
+    @include transition.apply((background-color, 0.3s, linear), (opacity, 0.3s, linear));
+  }
+
+  // when hovered, remove all transitions from drag handle
+  &.visible::before {
+    opacity: 0.45;
+    // @include transition.apply((background-color, 0.3s, linear), (opacity, 0s, linear));
+  }
+
+  &:hover.visible::before {
+    opacity: 0.75;
+  }
+
+  .horizontal &::before {
+    // right: 2px;
+    // left: 2px;
+    height: 100%;
+  }
+
+  .vertical &::before {
+    top: 2px;
+    bottom: 2px;
+  }
+
+  .light &::before {
+    background-color: colors.$black;
+  }
+
+  .dark &::before {
+    background-color: colors.$white;
+  }
+}
+
+// used for rtl (hardcoded classname)
+:global(.hs-dummy-scrollbar-size) {
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  direction: rtl;
+  opacity: 0;
+  overflow: scroll hidden;
+  visibility: hidden;
+}
+
+// used to measure the scrollbar width lol (also hardcoded classname)
+:global(.simplebar-hide-scrollbar) {
+  @include position.fixed($left: 0);
+  overflow-y: scroll;
+  visibility: hidden;
+  scrollbar-width: none;
+  // -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
