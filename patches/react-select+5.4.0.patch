@@ -1,0 +1,194 @@
+diff --git a/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js b/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js
+index b7ff289..e4803b0 100644
+--- a/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js
++++ b/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js
+@@ -839,6 +839,8 @@ var shouldHideSelectedOptions = function(props) {
+       _this.controlRef = ref;
+     }, _this.focusedOptionRef = null, _this.getFocusedOptionRef = function(ref) {
+       _this.focusedOptionRef = ref;
++    }, _this.menuListScrollRef = null, _this.getMenuListScrollRef = function(ref) {
++      _this.menuListScrollRef = ref;
+     }, _this.menuListRef = null, _this.getMenuListRef = function(ref) {
+       _this.menuListRef = ref;
+     }, _this.inputRef = null, _this.getInputRef = function(ref) {
+@@ -1111,7 +1113,7 @@ var shouldHideSelectedOptions = function(props) {
+       (isFocused && !isDisabled && prevProps.isDisabled || isFocused && menuIsOpen && !prevProps.menuIsOpen) && this.focusInput(), 
+       isFocused && isDisabled && !prevProps.isDisabled && this.setState({
+         isFocused: !1
+-      }, this.onMenuClose), this.menuListRef && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate && (index.scrollIntoView(this.menuListRef, this.focusedOptionRef), 
++      }, this.onMenuClose), (this.menuListScrollRef || this.menuListRef) && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate && (index.scrollIntoView(this.menuListScrollRef || this.menuListRef, this.focusedOptionRef), 
+       this.scrollToFocusedOptionOnUpdate = !1);
+     }
+   }, {
+@@ -1536,8 +1538,11 @@ var shouldHideSelectedOptions = function(props) {
+           lockEnabled: menuShouldBlockScroll
+         }, (function(scrollTargetRef) {
+           return React__namespace.createElement(MenuList, _extends__default.default({}, commonProps, {
++            innerScrollRef: function(instance) {
++              _this4.getMenuListScrollRef(instance), scrollTargetRef(instance);
++            },
+             innerRef: function(instance) {
+-              _this4.getMenuListRef(instance), scrollTargetRef(instance);
++              _this4.getMenuListRef(instance), _this4.menuListScrollRef || scrollTargetRef(instance);
+             },
+             isLoading: isLoading,
+             maxHeight: maxHeight,
+diff --git a/node_modules/react-select/dist/Select-54ac8379.esm.js b/node_modules/react-select/dist/Select-54ac8379.esm.js
+index b1714d1..3336023 100644
+--- a/node_modules/react-select/dist/Select-54ac8379.esm.js
++++ b/node_modules/react-select/dist/Select-54ac8379.esm.js
+@@ -1198,6 +1198,12 @@ var Select = /*#__PURE__*/function (_Component) {
+       _this.focusedOptionRef = ref;
+     };
+ 
++    _this.menuListScrollRef = null;
++
++    _this.getMenuListScrollRef = function (ref) {
++      _this.menuListScrollRef = ref;
++    };
++
+     _this.menuListRef = null;
+ 
+     _this.getMenuListRef = function (ref) {
+@@ -1862,8 +1868,8 @@ var Select = /*#__PURE__*/function (_Component) {
+       } // scroll the focused option into view if necessary
+ 
+ 
+-      if (this.menuListRef && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate) {
+-        scrollIntoView(this.menuListRef, this.focusedOptionRef);
++      if ((this.menuListScrollRef || this.menuListRef) && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate) {
++        scrollIntoView(this.menuListScrollRef || this.menuListRef, this.focusedOptionRef);
+         this.scrollToFocusedOptionOnUpdate = false;
+       }
+     }
+@@ -2031,7 +2037,7 @@ var Select = /*#__PURE__*/function (_Component) {
+     // Getters
+     // ==============================
+     function getTheme() {
+-      // Use the default theme if there are no customizations.
++      // Use the default theme if there are no customisations.
+       if (!this.props.theme) {
+         return defaultTheme;
+       } // If the theme prop is a function, assume the function
+@@ -2556,10 +2562,17 @@ var Select = /*#__PURE__*/function (_Component) {
+           lockEnabled: menuShouldBlockScroll
+         }, function (scrollTargetRef) {
+           return /*#__PURE__*/React.createElement(MenuList, _extends({}, commonProps, {
++            innerScrollRef: function innerScrollRef(instance) {
++              _this4.getMenuListScrollRef(instance);
++
++              scrollTargetRef(instance);
++            },
+             innerRef: function innerRef(instance) {
+               _this4.getMenuListRef(instance);
+ 
+-              scrollTargetRef(instance);
++              if (!_this4.menuListScrollRef) {
++                scrollTargetRef(instance);
++              }
+             },
+             isLoading: isLoading,
+             maxHeight: maxHeight,
+diff --git a/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js b/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js
+index e38369a..1c950cc 100644
+--- a/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js
++++ b/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js
+@@ -1230,6 +1230,12 @@ var Select = /*#__PURE__*/function (_Component) {
+       _this.focusedOptionRef = ref;
+     };
+ 
++    _this.menuListScrollRef = null;
++
++    _this.getMenuListScrollRef = function (ref) {
++      _this.menuListScrollRef = ref;
++    };
++
+     _this.menuListRef = null;
+ 
+     _this.getMenuListRef = function (ref) {
+@@ -1894,8 +1900,8 @@ var Select = /*#__PURE__*/function (_Component) {
+       } // scroll the focused option into view if necessary
+ 
+ 
+-      if (this.menuListRef && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate) {
+-        index.scrollIntoView(this.menuListRef, this.focusedOptionRef);
++      if ((this.menuListScrollRef || this.menuListRef) && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate) {
++        index.scrollIntoView(this.menuListScrollRef || this.menuListRef, this.focusedOptionRef);
+         this.scrollToFocusedOptionOnUpdate = false;
+       }
+     }
+@@ -2063,7 +2069,7 @@ var Select = /*#__PURE__*/function (_Component) {
+     // Getters
+     // ==============================
+     function getTheme() {
+-      // Use the default theme if there are no customizations.
++      // Use the default theme if there are no customisations.
+       if (!this.props.theme) {
+         return defaultTheme;
+       } // If the theme prop is a function, assume the function
+@@ -2588,10 +2594,17 @@ var Select = /*#__PURE__*/function (_Component) {
+           lockEnabled: menuShouldBlockScroll
+         }, function (scrollTargetRef) {
+           return /*#__PURE__*/React__namespace.createElement(MenuList, _extends__default['default']({}, commonProps, {
++            innerScrollRef: function innerScrollRef(instance) {
++              _this4.getMenuListScrollRef(instance);
++
++              scrollTargetRef(instance);
++            },
+             innerRef: function innerRef(instance) {
+               _this4.getMenuListRef(instance);
+ 
+-              scrollTargetRef(instance);
++              if (!_this4.menuListScrollRef) {
++                scrollTargetRef(instance);
++              }
+             },
+             isLoading: isLoading,
+             maxHeight: maxHeight,
+diff --git a/node_modules/react-select/dist/declarations/src/NonceProvider.d.ts b/node_modules/react-select/dist/declarations/src/NonceProvider.d.ts
+index b17e688..18ceea6 100644
+--- a/node_modules/react-select/dist/declarations/src/NonceProvider.d.ts
++++ b/node_modules/react-select/dist/declarations/src/NonceProvider.d.ts
+@@ -6,7 +6,7 @@ interface NonceProviderProps {
+ }
+ export default class NonceProvider extends Component<NonceProviderProps> {
+     constructor(props: NonceProviderProps);
+-    createEmotionCache: (nonce: string, key: string) => import("@emotion/react").EmotionCache;
++    createEmotionCache: (nonce: string, key: string) => import("@emotion/cache").EmotionCache;
+     render(): JSX.Element;
+ }
+ export {};
+diff --git a/node_modules/react-select/dist/declarations/src/Select.d.ts b/node_modules/react-select/dist/declarations/src/Select.d.ts
+index 063faf0..0b6de44 100644
+--- a/node_modules/react-select/dist/declarations/src/Select.d.ts
++++ b/node_modules/react-select/dist/declarations/src/Select.d.ts
+@@ -23,7 +23,7 @@ export interface Props<Option, IsMulti extends boolean, Group extends GroupBase<
+     'aria-labelledby'?: AriaAttributes['aria-labelledby'];
+     /** Used to set the priority with which screen reader should treat updates to live regions. The possible settings are: off, polite (default) or assertive */
+     'aria-live'?: AriaAttributes['aria-live'];
+-    /** Customize the messages used by the aria-live component */
++    /** Customise the messages used by the aria-live component */
+     ariaLiveMessages?: AriaLiveMessages<Option, IsMulti, Group>;
+     /** Focus the control when it is mounted */
+     autoFocus?: boolean;
+@@ -328,6 +328,8 @@ export default class Select<Option = unknown, IsMulti extends boolean = false, G
+     getControlRef: RefCallback<HTMLDivElement>;
+     focusedOptionRef: HTMLDivElement | null;
+     getFocusedOptionRef: RefCallback<HTMLDivElement>;
++    menuListScrollRef: HTMLDivElement | null;
++    getMenuListScrollRef: RefCallback<HTMLDivElement>;
+     menuListRef: HTMLDivElement | null;
+     getMenuListRef: RefCallback<HTMLDivElement>;
+     inputRef: HTMLInputElement | null;
+diff --git a/node_modules/react-select/dist/declarations/src/components/Menu.d.ts b/node_modules/react-select/dist/declarations/src/components/Menu.d.ts
+index 6f43f9d..f059397 100644
+--- a/node_modules/react-select/dist/declarations/src/components/Menu.d.ts
++++ b/node_modules/react-select/dist/declarations/src/components/Menu.d.ts
+@@ -92,6 +92,7 @@ export interface MenuListProps<Option = unknown, IsMulti extends boolean = boole
+     maxHeight: number;
+     /** The children to be rendered. */
+     children: ReactNode;
++    innerScrollRef?: ReactCallback<HTMLDivElement>;
+     /** Inner ref to DOM ReactNode */
+     innerRef: RefCallback<HTMLDivElement>;
+     /** The currently focused option */
