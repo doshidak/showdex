@@ -173,29 +173,14 @@
   // }
 }
 
-.instances {
+.instancesContainer {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: 53px;
-  column-gap: 10px;
-  row-gap: 10px;
   width: 100%;
-  // height: 30vh;
   height: 20em;
-  // max-height: 250px;
   @include spacing.margin-xy($y: 25px);
-  @include spacing.padding-all(10px);
-  // border: 2px solid;
   border-radius: 15px;
-  // box-shadow: 0 0 10px color.alpha(colors.$black, 0.15);
+  overflow: hidden;
   @include transition.apply(background-color, box-shadow);
-  overflow: hidden auto;
-  // z-index: 1;
-
-  .inBattle & {
-    grid-template-columns: minmax(0, 1fr);
-  }
 
   .light & {
     background-color: color.alpha(colors.$white, 0.65);
@@ -213,6 +198,37 @@
       0 0 1px color.alpha(colors.$white, 0.3),
       0 0 15px color.alpha(colors.$black, 0.5),
     );
+  }
+}
+
+.scrollableInstances {
+  height: 100%;
+  @include spacing.padding-all(10px);
+}
+
+.instances {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 53px;
+  column-gap: 10px;
+  row-gap: 10px;
+  width: 100%;
+  height: 100%;
+  // height: 30vh;
+  // height: 20em;
+  // max-height: 250px;
+  // @include spacing.margin-xy($y: 25px);
+  // @include spacing.padding-all(10px);
+  // border: 2px solid;
+  // border-radius: 15px;
+  // box-shadow: 0 0 10px color.alpha(colors.$black, 0.15);
+  // @include transition.apply(background-color, box-shadow);
+  // overflow: hidden auto;
+  // z-index: 1;
+
+  .inBattle & {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

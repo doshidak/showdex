@@ -3,7 +3,7 @@ import useSize from '@react-hook/size';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
-import { BaseButton, Button } from '@showdex/components/ui';
+import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
 import { useCalcdexState, useColorScheme } from '@showdex/redux/store';
 import { getCalcdexRoomId, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
@@ -122,7 +122,7 @@ export const Hellodex = (): JSX.Element => {
             {/* <div className={styles.spacer} /> */}
           </div>
 
-          <div className={styles.instances}>
+          <div className={styles.instancesContainer}>
             {instancesEmpty ? (
               <div className={styles.empty}>
                 <Svg
@@ -153,17 +153,23 @@ export const Hellodex = (): JSX.Element => {
                   {' '}a battle.
                 </div>
               </div>
-            ) : Object.values(calcdexState).reverse().map((battle) => (battle?.battleId ? (
-              <InstanceButton
-                key={`Hellodex:InstanceButton:${battle.battleId}`}
-                className={styles.instanceButton}
-                format={battle.format}
-                authName={app?.user?.attributes?.name}
-                playerName={battle.p1?.name}
-                opponentName={battle.p2?.name}
-                onPress={() => handleInstancePress(battle.battleId)}
-              />
-            ) : null))}
+            ) : (
+              <Scrollable className={styles.scrollableInstances}>
+                <div className={styles.instances}>
+                  {Object.values(calcdexState).reverse().map((battle) => (battle?.battleId ? (
+                    <InstanceButton
+                      key={`Hellodex:InstanceButton:${battle.battleId}`}
+                      className={styles.instanceButton}
+                      format={battle.format}
+                      authName={app?.user?.attributes?.name}
+                      playerName={battle.p1?.name}
+                      opponentName={battle.p2?.name}
+                      onPress={() => handleInstancePress(battle.battleId)}
+                    />
+                  ) : null))}
+                </div>
+              </Scrollable>
+            )}
           </div>
 
           {
