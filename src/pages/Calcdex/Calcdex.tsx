@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
+import { Scrollable } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
 import { detectPlayerKeyFromBattle } from '@showdex/utils/battle';
 // import { logger } from '@showdex/utils/debug';
@@ -86,7 +87,7 @@ export const Calcdex = ({
         !!colorScheme && styles[colorScheme],
       )}
     >
-      <div className={styles.content}>
+      <Scrollable className={styles.content}>
         <BuildInfo
           position="top-right"
         />
@@ -141,7 +142,7 @@ export const Calcdex = ({
             autoSelect,
           )}
         />
-      </div>
+      </Scrollable>
     </div>
   );
 };
