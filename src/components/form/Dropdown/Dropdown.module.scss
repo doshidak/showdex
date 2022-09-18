@@ -455,7 +455,8 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .menuList {
   position: relative;
-  overflow-y: auto;
+  // overflow-y: auto;
+  overflow-x: hidden;
 }
 
 // SelectOption
