@@ -80,6 +80,7 @@
     "react-redux": "^8.0.2",
     "react-select": "^5.4.0",
     "remove": "^0.1.5",
+    "simplebar": "^5.3.8",
     "slugify": "^1.6.5",
     "uuid": "^9.0.0"
   },
