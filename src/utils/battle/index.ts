@@ -3,6 +3,7 @@ export * from './buildItemOptions';
 export * from './buildMoveOptions';
 export * from './detectBattleRules';
 export * from './detectGenFromFormat';
+export * from './detectLegacyGen';
 export * from './detectPlayerKey';
 export * from './detectPokemonIdent';
 export * from './detectSpeciesForme';
