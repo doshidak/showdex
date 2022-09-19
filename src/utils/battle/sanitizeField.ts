@@ -1,4 +1,5 @@
 import { PseudoWeatherMap, WeatherMap } from '@showdex/consts';
+import type { GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleField } from '@showdex/redux/store';
 import { sanitizePlayerSide } from './sanitizePlayerSide';
 
@@ -8,6 +9,7 @@ export const sanitizeField = (
   defenderIndex = 0,
 ): CalcdexBattleField => {
   const {
+    gen,
     gameType,
     p1,
     p2,
@@ -26,7 +28,7 @@ export const sanitizeField = (
     ?.toLowerCase?.()
     .replace(/[^a-z]/g, '');
 
-  return {
+  const sanitizedField: CalcdexBattleField = {
     gameType: gameType === 'doubles' ? 'Doubles' : 'Singles',
 
     weather: WeatherMap?.[weather] ?? null,
@@ -36,7 +38,26 @@ export const sanitizeField = (
     isWonderRoom: pseudoWeatherMoveNames?.includes?.('Wonder Room') ?? false,
     isGravity: pseudoWeatherMoveNames?.includes?.('Gravity') ?? false,
 
-    attackerSide: sanitizePlayerSide(p1, attackerIndex),
-    defenderSide: sanitizePlayerSide(p2, defenderIndex),
+    // we can deliberately prevent a side from being sanitized by passing in -1 as its index
+    // (otherwise, the indices will fallback to its default value of 0)
+    attackerSide: attackerIndex > -1
+      ? sanitizePlayerSide(<GenerationNum> gen, p1, attackerIndex)
+      : null,
+
+    defenderSide: defenderIndex > -1
+      ? sanitizePlayerSide(<GenerationNum> gen, p2, defenderIndex)
+      : null,
   };
+
+  // in case this is spread with an existing field,
+  // we don't want to overwrite the existing side if falsy
+  if (!sanitizedField.attackerSide) {
+    delete sanitizedField.attackerSide;
+  }
+
+  if (!sanitizedField.defenderSide) {
+    delete sanitizedField.defenderSide;
+  }
+
+  return sanitizedField;
 };
