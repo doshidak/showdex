@@ -246,7 +246,11 @@ export const calcSmogonMatchup = (
 
     return matchup;
   } catch (error) {
-    if (__DEV__) {
+    // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
+    // which is separate from 'N/A' damage (e.g., status moves).
+    // typically occurs when the opposing Pokemon is immune to the damaging move,
+    // like using Earthquake against a Lando-T, which is immune due to its Flying type.
+    if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
       l.error(
         'Exception while calculating the damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
         '\n', 'dex.num', dex.num,
