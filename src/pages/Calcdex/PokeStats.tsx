@@ -9,10 +9,10 @@ import {
   PokemonStatNames,
 } from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
-import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
-import { calcPokemonFinalStats } from '@showdex/utils/calc';
+import { detectLegacyGen, detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
+import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import type { Generation } from '@pkmn/data';
+import type { Generation, GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
@@ -20,6 +20,7 @@ export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
   dex: Generation;
+  gen?: GenerationNum;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
@@ -31,6 +32,7 @@ export const PokeStats = ({
   className,
   style,
   dex,
+  gen,
   playerPokemon: pokemon,
   opponentPokemon,
   field,
@@ -39,14 +41,20 @@ export const PokeStats = ({
 }: PokeStatsProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
+  const legacy = detectLegacyGen(gen);
+
+  const statNames = PokemonStatNames.filter((stat) => gen > 1 || stat !== 'spd');
+  const boostNames = PokemonBoostNames.filter((stat) => gen > 1 || stat !== 'spd');
+
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const evsLegal = totalEvs <= env.int('calcdex-pokemon-max-legal-evs');
 
-  const missingIvs = !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
-  const missingEvs = !totalEvs;
+  // should only apply the missingSpread styles if a Pokemon is loaded in
+  const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
+  const missingEvs = !!pokemon?.speciesForme && !totalEvs;
 
   const finalStats = React.useMemo(() => (pokemon?.calcdexId ? calcPokemonFinalStats(
     dex,
@@ -66,6 +74,7 @@ export const PokeStats = ({
     <TableGrid
       className={cx(
         styles.container,
+        gen === 1 && styles.legacySpc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -74,9 +83,17 @@ export const PokeStats = ({
       {/* table headers (horizontal) */}
       <TableGridItem align="left" header />
 
-      {PokemonStatNames.map((stat) => {
+      {statNames.map((stat) => {
+        if (gen === 1 && stat === 'spd') {
+          return null;
+        }
+
         const boostUp = PokemonNatureBoosts[pokemon?.nature]?.[0] === stat;
         const boostDown = PokemonNatureBoosts[pokemon?.nature]?.[1] === stat;
+
+        const statName = gen === 1 && stat === 'spa'
+          ? 'spc'
+          : stat;
 
         return (
           <TableGridItem
@@ -90,7 +107,7 @@ export const PokeStats = ({
           >
             {boostUp && '+'}
             {boostDown && '-'}
-            {stat}
+            {statName}
           </TableGridItem>
         );
       })}
@@ -104,14 +121,26 @@ export const PokeStats = ({
         align="right"
         header
       >
-        IV
+        {legacy ? 'DV' : 'IV'}
         <span className={styles.small}>
           S
         </span>
       </TableGridItem>
 
-      {PokemonStatNames.map((stat) => {
+      {statNames.map((stat) => {
+        if (gen === 1 && stat === 'spd') {
+          return null;
+        }
+
+        const statName = gen === 1 && stat === 'spa'
+          ? 'spc'
+          : stat;
+
         const iv = pokemon?.ivs?.[stat] || 0;
+        const value = legacy ? convertIvToLegacyDv(iv) : iv;
+
+        const disabled = !pokemon?.speciesForme
+          || (legacy && stat === 'hp') || (gen === 2 && stat === 'spd');
 
         return (
           <TableGridItem
@@ -119,91 +148,103 @@ export const PokeStats = ({
             className={styles.valueFieldContainer}
           >
             <ValueField
-              className={styles.valueField}
+              className={cx(
+                styles.valueField,
+                disabled && styles.disabled,
+              )}
               inputClassName={cx(
                 styles.valueFieldInput,
                 missingIvs && styles.missingSpread,
               )}
-              label={`${stat.toUpperCase()} IV for Pokemon ${friendlyPokemonName}`}
+              label={`${statName.toUpperCase()} ${legacy ? 'DV' : 'IV'} for ${friendlyPokemonName}`}
               hideLabel
-              hint={iv.toString() || '31'}
-              fallbackValue={31}
+              hint={value.toString() || (legacy ? '15' : '31')}
+              fallbackValue={legacy ? 15 : 31}
               min={0}
-              max={31}
+              max={legacy ? 15 : 31}
               step={1}
-              shiftStep={5}
+              shiftStep={legacy ? 3 : 5}
               loop
               loopStepsOnly
               clearOnFocus
               absoluteHover
               input={{
-                value: iv,
-                onChange: (value: number) => onPokemonChange?.({
-                  ivs: { [stat]: value },
+                value,
+                onChange: (val: number) => onPokemonChange?.({
+                  // note: HP (for gen 1 and 2) and SPD (for gen 2 only) handled in
+                  // handlePokemonChange() of PokeCalc
+                  ivs: { [stat]: legacy ? convertLegacyDvToIv(val) : val },
                 }),
               }}
+              disabled={disabled}
             />
           </TableGridItem>
         );
       })}
 
       {/* EVs */}
-      <TableGridItem
-        className={cx(
-          styles.evsHeader,
-          missingEvs && styles.missingSpread,
-          !evsLegal && styles.illegal,
-        )}
-        align="right"
-        header
-      >
-        EV
-        <span className={styles.small}>
-          S
-        </span>
-      </TableGridItem>
-
-      {PokemonStatNames.map((stat) => {
-        const ev = pokemon?.evs?.[stat] || 0;
-
-        return (
+      {
+        !legacy &&
+        <>
           <TableGridItem
-            key={`PokeStats:Evs:${pokemonKey}:${stat}`}
-            className={styles.valueFieldContainer}
+            className={cx(
+              styles.evsHeader,
+              missingEvs && styles.missingSpread,
+              !evsLegal && styles.illegal,
+            )}
+            align="right"
+            header
           >
-            <ValueField
-              className={styles.valueField}
-              inputClassName={cx(
-                styles.valueFieldInput,
-                missingEvs && styles.missingSpread,
-              )}
-              label={`${stat.toUpperCase()} EV for Pokemon ${friendlyPokemonName}`}
-              hideLabel
-              hint={ev.toString() || '252'}
-              fallbackValue={0}
-              min={0}
-              max={252}
-              step={4}
-              shiftStep={16}
-              loop
-              loopStepsOnly
-              clearOnFocus
-              absoluteHover
-              input={{
-                value: ev,
-                onChange: (value: number) => onPokemonChange?.({
-                  evs: { [stat]: value },
-                }),
-              }}
-            />
+            EV
+            <span className={styles.small}>
+              S
+            </span>
           </TableGridItem>
-        );
-      })}
+
+          {statNames.map((stat) => {
+            const ev = pokemon?.evs?.[stat] || 0;
+
+            return (
+              <TableGridItem
+                key={`PokeStats:Evs:${pokemonKey}:${stat}`}
+                className={styles.valueFieldContainer}
+              >
+                <ValueField
+                  className={styles.valueField}
+                  inputClassName={cx(
+                    styles.valueFieldInput,
+                    missingEvs && styles.missingSpread,
+                  )}
+                  label={`${stat.toUpperCase()} EV for ${friendlyPokemonName}`}
+                  hideLabel
+                  hint={ev.toString() || '252'}
+                  fallbackValue={0}
+                  min={0}
+                  max={252}
+                  step={4}
+                  shiftStep={16}
+                  loop
+                  loopStepsOnly
+                  clearOnFocus
+                  absoluteHover
+                  input={{
+                    value: ev,
+                    onChange: (value: number) => onPokemonChange?.({
+                      evs: { [stat]: value },
+                    }),
+                  }}
+                  disabled={!pokemon?.speciesForme}
+                />
+              </TableGridItem>
+            );
+          })}
+        </>
+      }
 
       {/* calculated stats */}
       <TableGridItem align="right" header />
 
-      {PokemonStatNames.map((stat) => {
+      {statNames.map((stat) => {
         const finalStat = finalStats?.[stat] || 0;
         const formattedStat = formatStatBoost(finalStat) || '???';
         const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
@@ -229,7 +270,7 @@ export const PokeStats = ({
       </TableGridItem>
 
       <TableGridItem /> {/* this is used as a spacer since HP cannot be boosted, obviously! */}
-      {PokemonBoostNames.map((stat) => {
+      {boostNames.map((stat) => {
         const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
         const didDirtyBoost = typeof pokemon?.dirtyBoosts?.[stat] === 'number';
 
@@ -241,7 +282,7 @@ export const PokeStats = ({
             <Button
               labelClassName={styles.boostModButtonLabel}
               label="-"
-              disabled={boost <= -6}
+              disabled={!pokemon?.speciesForme || boost <= -6}
               onPress={() => onPokemonChange?.({
                 dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
               })}
@@ -254,12 +295,9 @@ export const PokeStats = ({
                 !didDirtyBoost && styles.disabled, // intentionally keeping them separate
               )}
               labelClassName={styles.boostButtonLabel}
-              label={[
-                boost > 0 && '+',
-                boost.toString(),
-              ].filter(Boolean).join('')}
+              label={`${boost > 0 ? '+' : ''}${boost}`}
               absoluteHover
-              disabled={!didDirtyBoost}
+              disabled={!pokemon?.speciesForme || !didDirtyBoost}
               onPress={() => onPokemonChange?.({
                 // resets the dirty boost, in which a re-render will re-sync w/
                 // the actual boost from the battle state
@@ -270,7 +308,7 @@ export const PokeStats = ({
             <Button
               labelClassName={styles.boostModButtonLabel}
               label="+"
-              disabled={boost >= 6}
+              disabled={!pokemon?.speciesForme || boost >= 6}
               onPress={() => onPokemonChange?.({
                 dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },
               })}

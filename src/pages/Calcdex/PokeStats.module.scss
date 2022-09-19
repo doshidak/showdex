@@ -9,6 +9,12 @@
   grid-template-columns: minmax(35px, 1fr) repeat(6, minmax(45px, 1.25fr));
   column-gap: 7px;
   // row-gap: 3px;
+
+  // in gen 1, there's one less column since SPD isn't a thing (and SPA is called SPC).
+  // gen 2 has SPD, so this should only be applied for gen 1.
+  &.legacySpc {
+    grid-template-columns: minmax(35px, 1fr) repeat(5, minmax(45px, 1.25fr));
+  }
 }
 
 .small {
@@ -33,6 +39,18 @@
 }
 
 .valueField {
+  &.disabled {
+    opacity: 1;
+  }
+
+  .light &.disabled {
+    color: colors.$black;
+  }
+
+  .dark &.disabled {
+    color: colors.$white;
+  }
+
   // by defaults, applies -$padding-x and -$padding-y in ValueField's styles,
   // so we reset the absolute positions to 0 with position.absolute-fill()
   &::before {
@@ -41,6 +59,10 @@
 }
 
 .valueFieldInput {
+  .disabled & {
+    color: inherit;
+  }
+
   &.missingSpread {
     color: colors.$orange;
   }
