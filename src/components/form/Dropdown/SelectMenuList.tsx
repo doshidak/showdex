@@ -15,20 +15,11 @@ export type SelectMenuListProps<
 
 /* eslint-disable @typescript-eslint/indent */
 
-/**
- * For `react-select` and `Scrollable` to work propertly, requires a patch for
- * `MenuList` of `react-select` to accept a `innerScrollRef` prop, which will
- * apply the focused option scrolling to the `scrollRef` of `Scrollable` since
- * the `contentRef` itself (that the `innerRef` is applied to) does not scroll.
- *
- * @since 0.1.0
- */
 export const SelectMenuList = <
   Option extends DropdownOption,
   Multi extends boolean,
   Group extends GroupBase<Option>,
 >({
-  innerScrollRef,
   innerRef,
   className,
   maxHeight,
@@ -37,8 +28,7 @@ export const SelectMenuList = <
   children,
 }: SelectMenuListProps<Option, Multi, Group>): JSX.Element => (
   <Scrollable
-    scrollRef={innerScrollRef}
-    contentRef={innerRef}
+    scrollRef={innerRef}
     className={cx(
       styles.menuList,
       isMulti && styles.multi,
