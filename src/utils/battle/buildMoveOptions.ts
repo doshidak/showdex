@@ -1,7 +1,10 @@
 import { LegalLockedFormats } from '@showdex/consts';
+import { formatId } from '@showdex/utils/app';
 // import { env } from '@showdex/utils/core';
 import type { MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
+// import { detectLegacyGen } from './detectLegacyGen';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
 
@@ -32,6 +35,9 @@ export const buildMoveOptions = (
   if (!pokemon?.speciesForme) {
     return options;
   }
+
+  const gen = detectGenFromFormat(format);
+  // const legacy = detectLegacyGen(gen);
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -145,7 +151,7 @@ export const buildMoveOptions = (
 
   if (moveState?.learnset?.length) {
     const learnsetMoves = (<MoveName[]> moveState.learnset)
-      .filter((n) => !!n && !filterMoves.includes(n))
+      .filter((n) => !!n && !formatId(n).startsWith('hiddenpower') && !filterMoves.includes(n))
       .sort();
 
     options.push({
@@ -159,13 +165,33 @@ export const buildMoveOptions = (
     filterMoves.push(...learnsetMoves);
   }
 
+  // Hidden Power moves were introduced in gen 2
+  if (gen > 1) {
+    // regex filters out 'hiddenpowerfighting70', which is 'hiddenpowerfighting' (BP 60),
+    // but with a BP of 70 lol (don't care about the BP here though, we just need the name)
+    const hpMoves = Object.keys(BattleMovedex || {})
+      .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
+      .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n))
+      .sort();
+
+    options.push({
+      label: 'Hidden Power',
+      options: hpMoves.map((name) => ({
+        label: name,
+        value: name,
+      })),
+    });
+
+    filterMoves.push(...hpMoves);
+  }
+
   // show all possible moves if format is not provided, is not legal-locked, or
   // no learnset is available (probably because the Pokemon doesn't exist in the `dex`'s gen)
   const parsedFormat = format?.replace(/^gen\d+/i, '');
 
   if (!parsedFormat || !LegalLockedFormats.includes(parsedFormat) || !moveState?.learnset?.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> Dex.moves.get(moveid)?.name)
+      .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
       .filter((n) => !!n && !filterMoves.includes(n))
       .sort();
 
