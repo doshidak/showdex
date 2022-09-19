@@ -9,6 +9,7 @@ import type {
   MoveName,
 } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectLegacyGen } from './detectLegacyGen';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
@@ -66,6 +67,8 @@ export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
   gen: GenerationNum = <GenerationNum> env.int('calcdex-default-gen'),
 ): CalcdexPokemon => {
+  const legacy = detectLegacyGen(gen);
+
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];
 
@@ -95,21 +98,26 @@ export const sanitizePokemon = (
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
 
-    ability: <AbilityName> pokemon?.ability || ('abilities' in pokemon && pokemon.abilities[0]) || null,
+    ability: (!legacy && (<AbilityName> pokemon?.ability || ('abilities' in pokemon && pokemon.abilities[0]))) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
     // abilityToggled: 'abilityToggled' in pokemon ? pokemon.abilityToggled : detectToggledAbility(pokemon),
-    baseAbility: <AbilityName> pokemon?.baseAbility,
-    abilities: ('abilities' in pokemon && pokemon.abilities) || [],
-    altAbilities: ('altAbilities' in pokemon && pokemon.altAbilities) || [],
+    baseAbility: <AbilityName> pokemon?.baseAbility?.replace(/no\s?ability/i, ''),
+    abilities: (!legacy && 'abilities' in pokemon && pokemon.abilities) || [],
+    altAbilities: (!legacy && 'altAbilities' in pokemon && pokemon.altAbilities) || [],
 
-    item: <ItemName> pokemon?.item?.replace('(exists)', ''),
+    item: gen > 1
+      ? <ItemName> pokemon?.item?.replace('(exists)', '')
+      : null,
+
     dirtyItem: ('dirtyItem' in pokemon && pokemon.dirtyItem) || null,
-    altItems: ('altItems' in pokemon && pokemon.altItems) || [],
+    altItems: (gen > 1 && 'altItems' in pokemon && pokemon.altItems) || [],
     itemEffect: pokemon?.itemEffect,
     prevItem: <ItemName> pokemon?.prevItem,
     prevItemEffect: pokemon?.prevItemEffect,
 
-    nature: ('nature' in pokemon && pokemon.nature) || PokemonNatures[0],
+    nature: !legacy
+      ? ('nature' in pokemon && pokemon.nature) || PokemonNatures[0]
+      : null,
 
     ivs: {
       hp: ('ivs' in pokemon && pokemon.ivs?.hp) ?? 31,
@@ -120,19 +128,21 @@ export const sanitizePokemon = (
       spe: ('ivs' in pokemon && pokemon.ivs?.spe) ?? 31,
     },
 
-    evs: {
+    evs: !legacy ? {
       hp: ('evs' in pokemon && pokemon.evs?.hp) ?? 0,
       atk: ('evs' in pokemon && pokemon.evs?.atk) ?? 0,
       def: ('evs' in pokemon && pokemon.evs?.def) ?? 0,
       spa: ('evs' in pokemon && pokemon.evs?.spa) ?? 0,
       spd: ('evs' in pokemon && pokemon.evs?.spd) ?? 0,
       spe: ('evs' in pokemon && pokemon.evs?.spe) ?? 0,
-    },
+    } : {},
 
     boosts: {
       atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,
       def: typeof pokemon?.boosts?.def === 'number' ? pokemon.boosts.def : 0,
-      spa: typeof pokemon?.boosts?.spa === 'number' ? pokemon.boosts.spa : 0,
+      spa: 'spc' in (pokemon?.boosts || {}) && typeof (<Showdown.Pokemon> pokemon).boosts.spc === 'number'
+        ? (<Showdown.Pokemon> pokemon).boosts.spc
+        : typeof pokemon?.boosts?.spa === 'number' ? pokemon.boosts.spa : 0,
       spd: typeof pokemon?.boosts?.spd === 'number' ? pokemon.boosts.spd : 0,
       spe: typeof pokemon?.boosts?.spe === 'number' ? pokemon.boosts.spe : 0,
     },
@@ -167,8 +177,8 @@ export const sanitizePokemon = (
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
     // useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
-    useZ: ('useZ' in pokemon && pokemon.useZ) || false,
-    useMax: ('useMax' in pokemon && pokemon.useMax) || false,
+    useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
+    useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
     lastMove: pokemon?.lastMove,
 
     moveTrack: Array.isArray(pokemon?.moveTrack)
