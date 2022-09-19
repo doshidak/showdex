@@ -3,6 +3,7 @@ import { formatId } from '@showdex/utils/app';
 import {
   calcPokemonSpreadStats,
   calcPresetCalcdexId,
+  guessServerLegacySpread,
   guessServerSpread,
 } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
@@ -19,8 +20,9 @@ import type {
   CalcdexPokemon,
   CalcdexPokemonPreset,
 } from '@showdex/redux/store';
-import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
+import { detectLegacyGen } from './detectLegacyGen';
 import { detectToggledAbility } from './detectToggledAbility';
+import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
 
 // const l = logger('@showdex/utils/battle/syncPokemon');
 
@@ -31,6 +33,8 @@ export const syncPokemon = (
   dex?: Generation,
   format?: string,
 ): CalcdexPokemon => {
+  const legacy = detectLegacyGen(dex);
+
   // final synced Pokemon that will be returned at the end
   const syncedPokemon = structuredClone(pokemon) || {};
 
@@ -93,7 +97,7 @@ export const syncPokemon = (
       }
 
       case 'ability': {
-        if (!value) {
+        if (!value || formatId(<string> value) === 'noability') {
           return;
         }
 
@@ -137,8 +141,11 @@ export const syncPokemon = (
 
       case 'boosts': {
         value = PokemonBoostNames.reduce<Showdown.StatsTable>((prev, stat) => {
+          // in gen 1, the client may report a SPC boost, which we'll store under SPA
+          const clientStat = dex.num === 1 && stat === 'spa' ? 'spc' : stat;
+
           const prevBoost = prev[stat];
-          const boost = clientPokemon?.boosts?.[stat] || 0;
+          const boost = clientPokemon?.boosts?.[clientStat] || 0;
 
           if (boost !== prevBoost) {
             prev[stat] = boost;
@@ -261,8 +268,11 @@ export const syncPokemon = (
       }
     }
 
-    if (serverPokemon.ability) {
-      const dexAbility = Dex.abilities.get(serverPokemon.ability);
+    // sometimes, the server may only provide the baseAbility (w/ an undefined ability)
+    const serverAbility = serverPokemon.ability || serverPokemon.baseAbility;
+
+    if (!legacy && serverAbility) {
+      const dexAbility = Dex.abilities.get(serverAbility);
 
       if (dexAbility?.name) {
         syncedPokemon.ability = <AbilityName> dexAbility.name;
@@ -306,7 +316,10 @@ export const syncPokemon = (
     }).filter(Boolean);
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
-    const guessedSpread = guessServerSpread(
+    const guessedSpread = legacy ? guessServerLegacySpread(
+      dex,
+      syncedPokemon,
+    ) : guessServerSpread(
       dex,
       syncedPokemon,
       format?.includes('random') ? 'Hardy' : undefined,
@@ -326,13 +339,16 @@ export const syncPokemon = (
     };
 
     // in case a post-transformed Ditto breaks the original preset
-    const presetValid = !!serverPreset.nature
-      && !!Object.keys({ ...serverPreset.ivs, ...serverPreset.evs }).length;
+    const presetValid = (legacy || !!serverPreset.nature)
+      && !!Object.keys({ ...serverPreset.ivs, ...(!legacy && serverPreset.evs) }).length;
 
     if (presetValid) {
-      syncedPokemon.nature = serverPreset.nature;
       syncedPokemon.ivs = { ...serverPreset.ivs };
-      syncedPokemon.evs = { ...serverPreset.evs };
+
+      if (!legacy) {
+        syncedPokemon.nature = serverPreset.nature;
+        syncedPokemon.evs = { ...serverPreset.evs };
+      }
 
       // need to do some special processing for moves
       // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
