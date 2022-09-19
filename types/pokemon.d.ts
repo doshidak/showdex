@@ -105,6 +105,7 @@ declare namespace Showdown {
     | 'imprison'
     | 'laserfocus'
     | 'leechseed'
+    | 'lightscreen' // in gen 1 only
     | 'magnetrise'
     | 'mimic'
     | 'miracleeye'
@@ -115,6 +116,7 @@ declare namespace Showdown {
     | 'perish3'
     | 'perishsong'
     | 'powertrick'
+    | 'reflect' // in gen 1 only
     | 'smackdown'
     | 'stockpile'
     | 'stockpile1'
@@ -354,7 +356,7 @@ declare namespace Showdown {
     /**
      * @default {}
      */
-    boosts: { [stat in StatNameNoHp]?: number; };
+    boosts: { [stat in StatNameNoHp | 'spc']?: number; };
 
     /**
      * @default ''
