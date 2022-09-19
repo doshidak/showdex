@@ -10,7 +10,7 @@ import {
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@pkmn/data';
+import type { Generation, GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleState, CalcdexPlayerKey, CalcdexSliceState } from '@showdex/redux/store';
 
 const l = logger('@showdex/redux/actions/syncBattle');
@@ -51,6 +51,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     const {
       id: battleId,
       nonce: battleNonce,
+      gen,
       myPokemon,
       stepQueue,
     } = battle || {};
@@ -83,6 +84,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       return;
+    }
+
+    // update the gen, if provided
+    if (typeof gen === 'number' && gen > 0) {
+      battleState.gen = <GenerationNum> gen;
     }
 
     // detect the battle rules
