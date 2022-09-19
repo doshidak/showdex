@@ -240,18 +240,24 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   prevItem?: ItemName;
 
   /**
-   * Individual Values (IVs) of the Pokemon.
+   * IVs (Individual Values) of the Pokemon.
+   *
+   * * Legacy stats (DVs [Determinant Values]) should be stored here.
+   *   - Convert the DV into an IV before storing via `convertLegacyDvToIv()`.
+   *   - Since SPA/SPD don't exist, store SPC in SPA, but make sure to specify `spc` in `createSmogonPokemon()`.
    *
    * @since 0.1.0
    */
-  ivs?: Showdown.PokemonSet['ivs'];
+  ivs?: Showdown.StatsTable;
 
   /**
-   * Effort Values (EVs) of the Pokemon.
+   * EVs (Effort Values) of the Pokemon.
+   *
+   * * Should not be used if the gen uses legacy stats.
    *
    * @since 0.1.0
    */
-  evs?: Showdown.PokemonSet['evs'];
+  evs?: Showdown.StatsTable;
 
   /**
    * Moves currently assigned to the Pokemon.
@@ -335,6 +341,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   moveState?: CalcdexMoveState;
+
+  /**
+   * Stage boosts of the Pokemon.
+   *
+   * * Note that the client can report a `spc` boost if in gen 1.
+   *   - If that's the case, set `spc` to `spa` and remove the `spc` property.
+   *   - For standardization, `boosts` of a `CalcdexPokemon` should not store `spc`.
+   *
+   * @see `Showdown.Pokemon['boosts']` in `types/pokemon.d.ts`
+   * @since 1.0.2
+   */
+  boosts?: Omit<Showdown.StatsTable, 'hp'>;
 
   /**
    * Keeps track of user-modified boosts as to not modify the actual boosts from the `battle` state.
