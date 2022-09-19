@@ -116,6 +116,7 @@ export const Calcdex = ({
         <FieldCalc
           className={styles.fieldCalc}
           battleId={battleId}
+          gen={gen}
           playerKey={playerKey.current}
           field={field}
           onFieldChange={updateField}
