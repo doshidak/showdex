@@ -89,19 +89,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       if (typeof battle.prevSubscription === 'function') {
-        l.debug(
-          'battle.subscribe()',
-          '\n', 'Calling the original battle.subscribe() function...',
-        );
+        l.debug('Calling the original battle.subscribe() function...');
 
         battle.prevSubscription(state);
       }
 
       if (state === 'paused') {
-        l.debug(
-          'battle.subscribe()',
-          '\n', 'Subscription ignored cause the battle is paused or, probs more likely, ended',
-        );
+        l.debug('Subscription ignored cause the battle is paused or, probs more likely, ended');
 
         return;
       }
@@ -115,10 +109,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       if (!activeBattle) {
-        l.warn(
-          'battle.subscribe()',
-          '\n', 'No active battle found; ignoring Calcdex bootstrap...',
-        );
+        l.warn('No active battle found; ignoring Calcdex bootstrap...');
 
         return;
       }
@@ -127,8 +118,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         const calcdexRoomId = getCalcdexRoomId(roomid);
 
         l.debug(
-          'battle.subscribe() -> createSideRoom()',
-          '\n', 'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
+          'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
           '\n', 'id', calcdexRoomId,
           '\n', 'title', 'Calcdex',
         );
@@ -171,9 +161,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       activeBattle.nonce = calcBattleCalcdexNonce(activeBattle);
 
       l.debug(
-        'battle.subscribe() -> activeBattle.reactCalcdexRoom.render()',
-        '\n', 'Rendering Calcdex with battle nonce', activeBattle.nonce,
-        '\n', 'store.getState()', store.getState(),
+        'Rendering Calcdex with battle nonce', activeBattle.nonce,
+        // '\n', 'store.getState()', store.getState(),
       );
 
       activeBattle.reactCalcdexRoom.render((
