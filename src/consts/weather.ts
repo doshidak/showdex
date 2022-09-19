@@ -1,22 +1,38 @@
 import type { State as SmogonState } from '@smogon/calc';
 
 /**
- * Adapted from `weatherNameTable` in `src/battle-animations.ts` (line 920) of `smogon/pokemon-showdown-client`.
+ * Legacy weather available since gen 2+.
  *
- * @since 0.1.0
+ * @since 1.0.2
  */
-export const WeatherMap: Record<string, SmogonState.Field['weather']> = {
-  deltastream: 'Strong Winds',
-  desolateland: 'Harsh Sunshine',
-  hail: 'Hail',
-  primordialsea: 'Heavy Rain',
+export const LegacyWeatherMap: Record<string, SmogonState.Field['weather']> = {
   raindance: 'Rain',
   sandstorm: 'Sand',
   sunnyday: 'Sun',
 };
 
 /**
- * Values of the `WeatherMap` object, sorted in lexicographically ("ABC order"), for now.
+ * Values of the `LegacyWeatherMap` object, sorted lexicographically (i.e., ABC order), for now.
+ *
+ * @since 1.0.2
+ */
+export const LegacyWeatherNames: SmogonState.Field['weather'][] = Object.values(LegacyWeatherMap).sort();
+
+/**
+ * Adapted from `weatherNameTable` in `src/battle-animations.ts` (line 920) of `smogon/pokemon-showdown-client`.
+ *
+ * @since 0.1.0
+ */
+export const WeatherMap: Record<string, SmogonState.Field['weather']> = {
+  ...LegacyWeatherMap,
+  deltastream: 'Strong Winds',
+  desolateland: 'Harsh Sunshine',
+  hail: 'Hail',
+  primordialsea: 'Heavy Rain',
+};
+
+/**
+ * Values of the `WeatherMap` object, sorted lexicographically (i.e., ABC order), for now.
  *
  * @since 0.1.1
  */
