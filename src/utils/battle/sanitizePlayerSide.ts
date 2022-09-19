@@ -1,6 +1,8 @@
+import type { GenerationNum } from '@pkmn/data';
 import type { CalcdexPlayerSide } from '@showdex/redux/store';
 
 export const sanitizePlayerSide = (
+  gen: GenerationNum,
   player: Showdown.Side,
   activeIndex = 0,
 ): CalcdexPlayerSide => {
@@ -15,8 +17,8 @@ export const sanitizePlayerSide = (
     wildfire: sideConditionNames.includes('gmaxwildfire'),
     cannonade: sideConditionNames.includes('gmaxcannonade'),
     volcalith: sideConditionNames.includes('gmaxvolcalith'),
-    isReflect: sideConditionNames.includes('reflect'),
-    isLightScreen: sideConditionNames.includes('lightscreen'),
+    isReflect: (gen === 1 ? volatileNames : sideConditionNames).includes('reflect'),
+    isLightScreen: (gen === 1 ? volatileNames : sideConditionNames).includes('lightscreen'),
     // isProtected: null,
     // isSeeded: null,
     isForesight: volatileNames.includes('foresight'),
