@@ -1,5 +1,6 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
+import { detectLegacyGen } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
@@ -19,6 +20,8 @@ export const createSmogonPokemon = (
   if (typeof dex?.num !== 'number' || dex.num < 1 || !pokemon?.calcdexId) {
     return null;
   }
+
+  const legacy = detectLegacyGen(dex);
 
   /**
    * @todo Remove the `dex` and use the `Dex` global instead.
@@ -44,7 +47,9 @@ export const createSmogonPokemon = (
 
   // optional chaining here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
-  const item = pokemon.dirtyItem ?? pokemon.item;
+  const item = dex.num > 1
+    ? pokemon.dirtyItem ?? pokemon.item
+    : null;
 
   const speciesForme = SmogonPokemon.getForme(
     dex,
@@ -80,12 +85,15 @@ export const createSmogonPokemon = (
   const status = pokemon.status === '???' ? '' : pokemon.status;
 
   // not using optional chaining here since ability cannot be cleared in PokeInfo
-  const ability = pokemon.dirtyAbility ?? pokemon.ability;
+  const ability = !legacy
+    ? pokemon.dirtyAbility ?? pokemon.ability
+    : null;
 
   // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
   // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
-  const hasMultiscale = formatId(ability) === 'multiscale';
+  const hasMultiscale = !!ability
+    && formatId(ability) === 'multiscale';
 
   const options: ConstructorParameters<typeof SmogonPokemon>[2] = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
@@ -134,7 +142,7 @@ export const createSmogonPokemon = (
     ability,
     abilityOn: pokemon.abilityToggleable ? pokemon.abilityToggled : undefined,
     item: isMega || hasMegaItem ? null : item,
-    nature: pokemon.nature,
+    nature: legacy ? undefined : pokemon.nature,
     moves: pokemon.moves,
 
     ivs: {
@@ -146,7 +154,7 @@ export const createSmogonPokemon = (
       spe: pokemon.ivs?.spe ?? 31,
     },
 
-    evs: {
+    evs: legacy ? undefined : {
       hp: pokemon.evs?.hp ?? 0,
       atk: pokemon.evs?.atk ?? 0,
       def: pokemon.evs?.def ?? 0,
@@ -197,7 +205,7 @@ export const createSmogonPokemon = (
   );
 
   const smogonPokemon = new SmogonPokemon(
-    determinedDex,
+    legacy ? dex : determinedDex,
     speciesForme,
     options,
   );
