@@ -129,7 +129,7 @@ export const PokeMoves = ({
         }
 
         {
-          ((format?.includes('nationaldex') || gen === 8) && !rules?.dynamax) &&
+          ((format?.includes('nationaldex') || (gen === 8 && !format?.includes('bdsp'))) && !rules?.dynamax) &&
           <>
             {' '}
             <Button
@@ -183,7 +183,7 @@ export const PokeMoves = ({
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
         const moveName = pokemon?.moves?.[i];
-        const move = moveName ? Dex?.moves?.get?.(moveName) : null;
+        const move = moveName ? Dex?.forGen(gen).moves.get(moveName) : null;
 
         // const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
         // const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
@@ -227,7 +227,9 @@ export const PokeMoves = ({
                         <span className={styles.label}>
                           {' '}{calculatorMove.category.slice(0, 4)}
                         </span>
-                        {calculatorMove?.bp ? ` ${calculatorMove.bp}` : null}
+                        {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
+                        {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
+                        {(calculatorMove?.bp ?? 0) > 2 && ` ${calculatorMove.bp}`}
                       </>
                     }
 
