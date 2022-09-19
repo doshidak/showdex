@@ -2,6 +2,8 @@ import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import type { AbilityName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
+import { detectLegacyGen } from './detectLegacyGen';
 
 export interface PokemonAbilityOption {
   label: string;
@@ -26,7 +28,12 @@ export const buildAbilityOptions = (
 ): PokemonAbilityOption[] => {
   const options: PokemonAbilityOption[] = [];
 
-  if (!pokemon?.speciesForme) {
+  // for legacy formats, the dex will return a 'No Ability' ability,
+  // so make sure we return an empty array
+  const gen = detectGenFromFormat(format);
+  const legacy = detectLegacyGen(gen);
+
+  if (legacy || !pokemon?.speciesForme) {
     return options;
   }
 
