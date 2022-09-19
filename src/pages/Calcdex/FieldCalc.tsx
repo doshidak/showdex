@@ -3,8 +3,15 @@ import cx from 'classnames';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
-import { TerrainNames, WeatherNames } from '@showdex/consts';
+import {
+  LegacyWeatherNames,
+  TerrainNames,
+  WeatherMap,
+  WeatherNames,
+} from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
+import { detectLegacyGen } from '@showdex/utils/battle';
+import type { GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
 
@@ -12,6 +19,7 @@ interface FieldCalcProps {
   className?: string;
   style?: React.CSSProperties;
   battleId?: string;
+  gen?: GenerationNum;
   playerKey?: CalcdexPlayerKey;
   field?: CalcdexBattleField;
   onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
@@ -21,11 +29,14 @@ export const FieldCalc = ({
   className,
   style,
   battleId,
+  gen,
   playerKey = 'p1',
   field,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
   const colorScheme = useColorScheme();
+
+  const legacy = detectLegacyGen(gen);
 
   const {
     weather,
@@ -52,7 +63,8 @@ export const FieldCalc = ({
         align="left"
         header
       >
-        Your Screens
+        {/* Your Screens */}
+        &uarr; Screens
       </TableGridItem>
       <TableGridItem
         className={styles.label}
@@ -71,17 +83,18 @@ export const FieldCalc = ({
         align="right"
         header
       >
-        Their Screens
+        {/* Their Screens */}
+        Screens &darr;
       </TableGridItem>
 
       {/* player's screens */}
       <TableGridItem align="left">
         <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
+          className={cx(
+            styles.toggleButton,
             !attackerSide?.isLightScreen && styles.inactive,
           )}
+          labelClassName={styles.toggleButtonLabel}
           label="Light"
           onPress={() => onFieldChange?.({
             attackerSide: {
@@ -93,11 +106,11 @@ export const FieldCalc = ({
         {' '}
 
         <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
+          className={cx(
+            styles.toggleButton,
             !attackerSide?.isReflect && styles.inactive,
           )}
+          labelClassName={styles.toggleButtonLabel}
           label="Reflect"
           onPress={() => onFieldChange?.({
             attackerSide: {
@@ -109,12 +122,13 @@ export const FieldCalc = ({
 
         {' '}
         <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
+          className={cx(
+            styles.toggleButton,
             !attackerSide?.isAuroraVeil && styles.inactive,
           )}
+          labelClassName={styles.toggleButtonLabel}
           label="Aurora"
+          disabled={legacy}
           onPress={() => onFieldChange?.({
             attackerSide: {
               ...attackerSide,
@@ -129,7 +143,7 @@ export const FieldCalc = ({
         <Dropdown
           style={{ textAlign: 'left' }}
           aria-label="Field Weather"
-          hint="None"
+          hint={gen === 1 ? 'N/A' : 'None'}
           input={{
             name: `FieldCalc:Weather:${battleId || '???'}`,
             value: weather,
@@ -137,11 +151,15 @@ export const FieldCalc = ({
               weather: updatedWeather,
             }),
           }}
-          options={WeatherNames.map((weatherName) => ({
-            label: weatherName,
-            value: weatherName,
+          options={(gen > 5 ? WeatherNames : [
+            ...LegacyWeatherNames,
+            gen > 2 && WeatherMap.hail,
+          ].filter(Boolean).sort()).map((name) => ({
+            label: name,
+            value: name,
           }))}
           noOptionsMessage="No Weather"
+          disabled={gen === 1}
         />
       </TableGridItem>
 
@@ -150,7 +168,7 @@ export const FieldCalc = ({
         <Dropdown
           style={{ textAlign: 'left' }}
           aria-label="Field Terrain"
-          hint="None"
+          hint={gen < 6 ? 'N/A' : 'None'}
           input={{
             name: `FieldCalc:Terrain:${battleId || '???'}`,
             value: terrain,
@@ -158,22 +176,23 @@ export const FieldCalc = ({
               terrain: updatedTerrain,
             }),
           }}
-          options={TerrainNames.map((terrainName) => ({
-            label: terrainName,
-            value: terrainName,
+          options={TerrainNames.map((name) => ({
+            label: name,
+            value: name,
           }))}
           noOptionsMessage="No Terrain"
+          disabled={gen < 6}
         />
       </TableGridItem>
 
       {/* opponent's screens */}
       <TableGridItem align="right">
         <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
+          className={cx(
+            styles.toggleButton,
             !defenderSide?.isLightScreen && styles.inactive,
           )}
+          labelClassName={styles.toggleButtonLabel}
           label="Light"
           onPress={() => onFieldChange?.({
             defenderSide: {
@@ -185,11 +204,11 @@ export const FieldCalc = ({
 
         {' '}
         <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
+          className={cx(
+            styles.toggleButton,
             !defenderSide?.isReflect && styles.inactive,
           )}
+          labelClassName={styles.toggleButtonLabel}
           label="Reflect"
           onPress={() => onFieldChange?.({
             defenderSide: {
@@ -201,12 +220,13 @@ export const FieldCalc = ({
 
         {' '}
         <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
+          className={cx(
+            styles.toggleButton,
             !defenderSide?.isAuroraVeil && styles.inactive,
           )}
+          labelClassName={styles.toggleButtonLabel}
           label="Aurora"
+          disabled={legacy}
           onPress={() => onFieldChange?.({
             // ...field,
             defenderSide: {
