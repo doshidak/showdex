@@ -3,6 +3,7 @@ import { Generations } from '@pkmn/data';
 import { Dex as PkmnDex } from '@pkmn/dex';
 import { syncBattle } from '@showdex/redux/actions';
 import { calcdexSlice, useCalcdexState, useDispatch } from '@showdex/redux/store';
+import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, GenerationNum } from '@pkmn/data';
 import type {
@@ -46,15 +47,15 @@ export const useCalcdex = ({
   );
 
   const format = battle?.id?.split?.('-')?.[1];
+  const isBdsp = format?.includes('bdsp');
 
   // for BDSP, though gen 8, should load from gen 4, otherwise,
   // Calcdex may crash due to incomplete Pokemon entries (like Bibarel)
-  const gen = format?.includes('bdsp')
-    ? 4
-    : battle?.gen as GenerationNum;
+  const gen = battle?.gen as GenerationNum;
+  // const legacy = detectLegacyGen(gen);
 
   const gens = React.useRef(new Generations(PkmnDex));
-  const dex = gens.current.get(gen);
+  const dex = gens.current.get(isBdsp ? 4 : gen);
 
   // const dex = React.useMemo(() => (typeof gen === 'number' && gen > 0 ? <Generation> <unknown> {
   //   ...pkmnDex,
@@ -192,10 +193,26 @@ export const useCalcdex = ({
       [playerKey]: { activeIndex },
     })),
 
-    setSelectionIndex: (playerKey, selectionIndex) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId: battle?.id,
-      [playerKey]: { selectionIndex },
-    })),
+    setSelectionIndex: (playerKey, selectionIndex) => {
+      dispatch(calcdexSlice.actions.updatePlayer({
+        battleId: battle?.id,
+        [playerKey]: { selectionIndex },
+      }));
+
+      // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
+      // the Pokemon itself, not in the Side, which is the case for gen 2+
+      if (gen === 1) {
+        // note: passing in -1 for the sanitizeField() index args will ignore side sanitization
+        dispatch(calcdexSlice.actions.updateField({
+          battleId: battle?.id,
+          field: sanitizeField(
+            battle,
+            playerKey === 'p1' ? selectionIndex : -1,
+            playerKey === 'p2' ? selectionIndex : -1,
+          ),
+        }));
+      }
+    },
 
     setAutoSelect: (playerKey, autoSelect) => dispatch(calcdexSlice.actions.updatePlayer({
       battleId: battle?.id,
