@@ -16,7 +16,12 @@ import {
 } from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
-import { buildAbilityOptions, buildItemOptions, detectToggledAbility } from '@showdex/utils/battle';
+import {
+  buildAbilityOptions,
+  buildItemOptions,
+  detectLegacyGen,
+  detectToggledAbility,
+} from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import type {
   AbilityName,
@@ -163,6 +168,8 @@ export const PokeInfo = ({
     presets,
   ]);
 
+  const legacy = detectLegacyGen(gen);
+
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
@@ -182,7 +189,8 @@ export const PokeInfo = ({
   const itemOptions = buildItemOptions(format, pokemon);
 
   // handle cycling through the Pokemon's available alternative formes, if any
-  const formeIndex = pokemon?.altFormes?.length
+  // (disabled for legacy gens -- this is enough since nextForme will be null if legacy)
+  const formeIndex = !legacy && pokemon?.altFormes?.length
     ? pokemon.altFormes.findIndex((f) => pokemon.speciesForme === f)
     : -1;
 
@@ -243,17 +251,14 @@ export const PokeInfo = ({
         <div className={styles.infoContainer}>
           <div className={styles.firstLine}>
             {/* no nicknames, as requested by camdawgboi lol */}
-            {/* <span className={styles.pokemonName}>
-              {/* {pokemon?.name || '--'} *\/}
-              {pokemon?.speciesForme || '--'}
-            </span> */}
             <Button
               className={cx(
                 styles.pokemonNameButton,
+                !pokemon?.speciesForme && styles.missingForme,
                 !nextForme && styles.disabled,
               )}
               labelClassName={styles.pokemonNameLabel}
-              label={pokemon?.speciesForme || '--'}
+              label={pokemon?.speciesForme || 'MissingNo.'}
               tooltip={nextForme ? (
                 <div>
                   Switch to{' '}
@@ -426,7 +431,7 @@ export const PokeInfo = ({
 
           <Dropdown
             aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
-            hint="???"
+            hint={legacy ? 'N/A' : '???'}
             tooltip={dexAbility?.desc ? (
               <div className={styles.descTooltip}>
                 {dexAbility?.shortDesc || dexAbility?.desc}
@@ -446,7 +451,7 @@ export const PokeInfo = ({
             options={abilityOptions}
             noOptionsMessage="No Abilities"
             clearable={false}
-            disabled={!pokemon?.speciesForme}
+            disabled={legacy || !pokemon?.speciesForme}
           />
         </div>
 
@@ -457,7 +462,7 @@ export const PokeInfo = ({
 
           <Dropdown
             aria-label={`Available Natures for Pokemon ${friendlyPokemonName}`}
-            hint="???"
+            hint={legacy ? 'N/A' : '???'}
             input={{
               name: `PokeInfo:Nature:${pokemonKey}`,
               value: pokemon?.nature,
@@ -476,7 +481,7 @@ export const PokeInfo = ({
             noOptionsMessage="No Natures"
             clearable={false}
             // hideSelections
-            disabled={!pokemon?.speciesForme}
+            disabled={legacy || !pokemon?.speciesForme}
           />
         </div>
 
@@ -505,7 +510,7 @@ export const PokeInfo = ({
 
           <Dropdown
             aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
-            hint="None"
+            hint={gen === 1 ? 'N/A' : 'None'}
             tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
               <div className={cx(styles.descTooltip, styles.itemTooltip)}>
                 {
@@ -540,7 +545,7 @@ export const PokeInfo = ({
             }}
             options={itemOptions}
             noOptionsMessage="No Items"
-            disabled={!pokemon?.speciesForme}
+            disabled={gen === 1 || !pokemon?.speciesForme}
           />
         </div>
       </div>

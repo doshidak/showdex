@@ -67,7 +67,11 @@ button.pokemonNameButton {
   font-weight: 500;
   color: inherit;
 
-  &.disabled {
+  &.missingForme {
+    font-weight: 300;
+  }
+
+  &:not(.missingForme).disabled {
     opacity: 1;
   }
 }
