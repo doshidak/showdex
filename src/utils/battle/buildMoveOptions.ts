@@ -59,6 +59,10 @@ export const buildMoveOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
+  // also keep track of whether the Pokemon has any actual moves
+  // (to determine the group label of the otherMoves, if applicable)
+  let hasActualMoves = false;
+
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
@@ -72,6 +76,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...moves);
+    hasActualMoves = true;
   }
 
   // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
@@ -87,6 +92,8 @@ export const buildMoveOptions = (
     if (!useZ) {
       filterMoves.push(...moves);
     }
+
+    hasActualMoves = true;
   }
 
   if (serverSourced && serverMoves?.length) {
@@ -101,6 +108,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...filteredServerMoves);
+    hasActualMoves = true;
   }
 
   if (transformedForme && transformedMoves?.length) {
@@ -115,6 +123,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...filteredTransformedMoves);
+    hasActualMoves = true;
   }
 
   if (moveState?.revealed?.length) {
@@ -131,6 +140,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...revealedMoves);
+    hasActualMoves = true;
   }
 
   if (altMoves?.length) {
@@ -147,6 +157,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...poolMoves);
+    hasActualMoves = true;
   }
 
   if (moveState?.learnset?.length) {
@@ -163,16 +174,19 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...learnsetMoves);
+    hasActualMoves = true;
   }
 
   // Hidden Power moves were introduced in gen 2
   if (gen > 1) {
     // regex filters out 'hiddenpowerfighting70', which is 'hiddenpowerfighting' (BP 60),
     // but with a BP of 70 lol (don't care about the BP here though, we just need the name)
-    const hpMoves = Object.keys(BattleMovedex || {})
+    const unsortedHpMoves = Object.keys(BattleMovedex || {})
       .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
-      .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n))
-      .sort();
+      .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
+
+    // using a Set makes sure we have no duplicate entries in the array
+    const hpMoves = Array.from(new Set(unsortedHpMoves)).sort();
 
     options.push({
       label: 'Hidden Power',
@@ -195,8 +209,14 @@ export const buildMoveOptions = (
       .filter((n) => !!n && !filterMoves.includes(n))
       .sort();
 
-    options.push({
-      label: filterMoves.length ? 'Other' : 'All',
+    // note: since we need to filter out HP moves, but keep the group last, this is the workaround.
+    // splice() will insert at the provided start index, even if an element exists at that index.
+    const hiddenPowerIndex = options.findIndex((o) => o.label === 'Hidden Power');
+    const insertionIndex = Math.max(hiddenPowerIndex, 0);
+
+    // make sure this comes before the Hidden Power moves
+    options.splice(insertionIndex, 0, {
+      label: hasActualMoves ? 'Other' : 'All',
       options: otherMoves.map((name) => ({
         label: name,
         value: name,
