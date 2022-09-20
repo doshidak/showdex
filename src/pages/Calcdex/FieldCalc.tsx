@@ -20,6 +20,7 @@ interface FieldCalcProps {
   style?: React.CSSProperties;
   battleId?: string;
   gen?: GenerationNum;
+  authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
   field?: CalcdexBattleField;
   onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
@@ -30,6 +31,7 @@ export const FieldCalc = ({
   style,
   battleId,
   gen,
+  authPlayerKey,
   playerKey = 'p1',
   field,
   onFieldChange,
@@ -63,8 +65,11 @@ export const FieldCalc = ({
         align="left"
         header
       >
-        {/* Your Screens */}
-        &uarr; Screens
+        {/* p1 screens header */}
+        {authPlayerKey ? (
+          authPlayerKey === 'p1' ? 'Your' : 'Their'
+        ) + ' ' : <>&uarr; </>}
+        Screens
       </TableGridItem>
       <TableGridItem
         className={styles.label}
@@ -83,11 +88,15 @@ export const FieldCalc = ({
         align="right"
         header
       >
-        {/* Their Screens */}
-        Screens &darr;
+        {/* p2 screens header */}
+        {!!authPlayerKey && (
+          authPlayerKey === 'p1' ? 'Their' : 'Your'
+        ) + ' '}
+        Screens
+        {!authPlayerKey && <> &darr;</>}
       </TableGridItem>
 
-      {/* player's screens */}
+      {/* p1 screens */}
       <TableGridItem align="left">
         <Button
           className={cx(
