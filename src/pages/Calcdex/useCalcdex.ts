@@ -199,19 +199,26 @@ export const useCalcdex = ({
         [playerKey]: { selectionIndex },
       }));
 
-      // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
-      // the Pokemon itself, not in the Side, which is the case for gen 2+
-      if (gen === 1) {
-        // note: passing in -1 for the sanitizeField() index args will ignore side sanitization
-        dispatch(calcdexSlice.actions.updateField({
-          battleId: battle?.id,
-          field: sanitizeField(
-            battle,
-            playerKey === 'p1' ? selectionIndex : -1,
-            playerKey === 'p2' ? selectionIndex : -1,
-          ),
-        }));
+      const updatedBattleState = structuredClone(battleState);
+
+      // purposefully made fatal (from "selectionIndex of null/undefined" errors) cause it shouldn't be
+      // null/undefined by the time this helper function is invoked
+      if (updatedBattleState[playerKey].selectionIndex !== selectionIndex) {
+        updatedBattleState[playerKey].selectionIndex = selectionIndex;
       }
+
+      // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
+      // the Pokemon itself, not in the Side, which is the case for gen 2+.
+      // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
+      dispatch(calcdexSlice.actions.updateField({
+        battleId: battle?.id,
+        field: sanitizeField(
+          battle,
+          updatedBattleState,
+          playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
+          playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
+        ),
+      }));
     },
 
     setAutoSelect: (playerKey, autoSelect) => dispatch(calcdexSlice.actions.updatePlayer({
