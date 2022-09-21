@@ -109,9 +109,10 @@ export const PokeInfo = ({
       moves: preset.moves,
       altMoves: preset.altMoves,
       nature: preset.nature,
-      dirtyAbility: pokemon.ability !== preset.ability ? preset.ability : null,
-      item: !pokemon.item || pokemon.item === '(exists)' ? preset.item : pokemon.item,
-      dirtyItem: pokemon.item && pokemon.item !== '(exists)' && pokemon.item !== preset.item ? preset.item : null,
+      dirtyAbility: preset.ability,
+      // item: !pokemon.item || pokemon.item === '(exists)' ? preset.item : pokemon.item,
+      // dirtyItem: pokemon.item && pokemon.item !== '(exists)' && pokemon.item !== preset.item ? preset.item : null,
+      dirtyItem: preset.item,
       ivs: { ...preset.ivs },
       evs: { // not specifying the 0's may cause any unspecified EVs to remain!
         hp: preset.evs?.hp || 0,
@@ -123,6 +124,16 @@ export const PokeInfo = ({
       },
     };
 
+    // don't apply the dirtyAbility/dirtyItem if we're applying the Pokemon's first preset and
+    // their abilility/item was already revealed or it matches the Pokemon's revealed ability/item
+    if ((!pokemon.preset && pokemon.ability) || pokemon.ability === preset.ability) {
+      mutation.dirtyAbility = null;
+    }
+
+    if ((!pokemon.preset && pokemon.item && pokemon.item !== '(exists)') || pokemon.item === preset.item) {
+      mutation.dirtyItem = null;
+    }
+
     if (Array.isArray(preset.altAbilities)) {
       mutation.altAbilities = [...preset.altAbilities];
     }
@@ -131,12 +142,18 @@ export const PokeInfo = ({
       mutation.altItems = [...preset.altItems];
     }
 
+    // only apply the ability/item (and remove their dirty counterparts) if there's only
+    // 1 possible ability/item in the pool
     if (preset.format?.includes('random')) {
-      mutation.ability = preset.ability;
-      mutation.dirtyAbility = null;
+      if (preset.altAbilities.length === 1) {
+        mutation.ability = preset.ability;
+        mutation.dirtyAbility = null;
+      }
 
-      mutation.item = preset.item;
-      mutation.dirtyItem = null;
+      if (preset.altItems.length === 1) {
+        mutation.item = preset.item;
+        mutation.dirtyItem = null;
+      }
     }
 
     // spreadStats will be recalculated in `onPokemonChange()` from `PokeCalc`
@@ -412,13 +429,14 @@ export const PokeInfo = ({
             }
 
             {
-              !!pokemon?.dirtyAbility &&
+              (!!pokemon?.dirtyAbility && !!pokemon.ability && pokemon.ability !== pokemon.dirtyAbility) &&
               <>
                 {' '}
                 <Button
                   className={cx(styles.infoButton, styles.abilityButton)}
                   labelClassName={styles.infoButtonLabel}
                   label="Reset"
+                  tooltip="Reset to Revealed Ability"
                   absoluteHover
                   onPress={() => onPokemonChange?.({
                     dirtyAbility: null,
@@ -498,7 +516,7 @@ export const PokeInfo = ({
                   className={cx(styles.infoButton, styles.abilityButton)}
                   labelClassName={styles.infoButtonLabel}
                   label="Reset"
-                  tooltip="Reset to Actual Item"
+                  tooltip="Reset to Revealed Item"
                   absoluteHover
                   onPress={() => onPokemonChange?.({
                     dirtyItem: null,
