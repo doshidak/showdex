@@ -195,14 +195,12 @@ export const createSmogonPokemon = (
         ? baseGen || <GenerationNum> 7
         : dex;
 
-  l.debug(
-    'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
-    '\n', 'item', item,
-    '\n', 'isMega?', isMega,
-    '\n', 'hasMegaItem?', hasMegaItem,
-    '\n', 'isGalarian?', isGalarian,
-    '\n', 'missingSpecies?', missingSpecies,
-  );
+  // l.debug(
+  //   'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
+  //   '\n', 'item', item,
+  //   '\n', 'isMega?', isMega, 'hasMegaItem?', hasMegaItem,
+  //   '\n', 'missingSpecies?', missingSpecies, 'isGalarian?', isGalarian,
+  // );
 
   const smogonPokemon = new SmogonPokemon(
     legacy ? dex : determinedDex,
