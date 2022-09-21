@@ -280,7 +280,7 @@ export const PokeMoves = ({
 
             <TableGridItem>
               {/* [XXX.X% &ndash;] XXX.X% */}
-              {/* (note: '0 - 0%' damageRange will be reported as '0%') */}
+              {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
               {
                 !!damageRange &&
                 <Button
@@ -290,10 +290,10 @@ export const PokeMoves = ({
                   )}
                   labelClassName={cx(
                     styles.damageButtonLabel,
-                    damageRange === '0%' && styles.noDamage,
+                    damageRange === 'N/A' && styles.noDamage,
                   )}
-                  label={damageRange === '0%' ? 'N/A' : damageRange}
-                  tooltip={description?.includes('vs.') ? (
+                  label={damageRange}
+                  tooltip={description?.raw ? (
                     <div className={styles.descTooltip}>
                       <div
                         className={cx(
@@ -304,26 +304,42 @@ export const PokeMoves = ({
                         Copied!
                       </div>
 
-                      {description.slice(0, description.indexOf(' vs.'))}
-                      <br />
-                      vs
-                      <br />
-                      {description.slice(description.indexOf('vs. ') + 4, description.indexOf(': ') + 1)}
-                      <br />
-                      {description.slice(description.indexOf(': ') + 2, description.includes('--') ? description.indexOf(' --') : undefined)}
+                      {description?.attacker}
                       {
-                        description.includes('--') &&
+                        !!description?.defender &&
+                        <>
+                          {
+                            !!description.attacker &&
+                            <>
+                              <br />
+                              vs
+                              <br />
+                            </>
+                          }
+                          {description.defender}
+                        </>
+                      }
+                      {(!!description?.damageRange || !!description?.koChance) && ':'}
+                      {
+                        !!description?.damageRange &&
                         <>
                           <br />
-                          {description.slice(description.indexOf('-- ') + 3)}
+                          {description.damageRange}
+                        </>
+                      }
+                      {
+                        !!description?.koChance &&
+                        <>
+                          <br />
+                          {description.koChance}
                         </>
                       }
                     </div>
                   ) : null}
                   hoverScale={1}
                   absoluteHover
-                  disabled={!description}
-                  onPress={() => handleDamagePress(i, description)}
+                  disabled={!description?.raw}
+                  onPress={() => handleDamagePress(i, description?.raw)}
                 />
               }
             </TableGridItem>
