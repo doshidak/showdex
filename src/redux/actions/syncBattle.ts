@@ -155,6 +155,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         && Array.isArray(myPokemon)
         && !!myPokemon.length;
 
+      // obtain the ident of the active Pokemon, if any
+      const activeIdent = player.active?.[0]?.ident;
+
       // preserve the initial ordering of myPokemon since it's subject to change its indices
       // (battle state may move the most recent active Pokemon to the front of the array)
       if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
@@ -319,8 +322,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // update activeIndex (and selectionIndex if autoSelect is enabled)
       // (hopefully the `ident` exists here!)
-      const activeIndex = player.active?.[0]?.ident
-        ? playerPokemon.findIndex((p) => p.ident === player.active[0].ident)
+      const activeIndex = activeIdent
+        ? playerPokemon.findIndex((p) => p.ident === activeIdent)
         : -1;
 
       if (activeIndex > -1) {
@@ -333,10 +336,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     const syncedField = syncField(
-      battleState.field,
+      battleState,
       battle,
-      battleState.p1.activeIndex,
-      battleState.p2.activeIndex,
+      // battleState.p1.activeIndex,
+      // battleState.p2.activeIndex,
     );
 
     if (!syncedField?.gameType) {
