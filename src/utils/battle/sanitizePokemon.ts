@@ -15,8 +15,6 @@ import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
 import { toggleableAbility } from './toggleableAbility';
 
-/* eslint-disable no-nested-ternary */
-
 /**
  * Pokemon `volatiles` require special love and attention before they get Redux'd.
  *
@@ -277,5 +275,3 @@ export const sanitizePokemon = (
 
   return sanitizedPokemon;
 };
-
-/* eslint-enable no-nested-ternary */

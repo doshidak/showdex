@@ -22,8 +22,6 @@ export interface SyncBattlePayload {
 
 export const SyncBattleActionType = 'calcdex:sync';
 
-/* eslint-disable no-nested-ternary */
-
 /**
  * Syncs the Showdown `battle` state with an existing `CalcdexBattleState`.
  *
@@ -376,5 +374,3 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     return battleState;
   },
 );
-
-/* eslint-enable no-nested-ternary */

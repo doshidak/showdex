@@ -3,8 +3,6 @@ import { detectLegacyGen } from '@showdex/utils/battle';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
-/* eslint-disable no-nested-ternary */
-
 /**
  * Calculates the stats of a Pokemon based on its applied EV/IV/nature spread.
  *
@@ -49,5 +47,3 @@ export const calcPokemonSpreadStats = (
     return prev;
   }, { ...PokemonInitialStats });
 };
-
-/* eslint-disable no-nested-ternary */

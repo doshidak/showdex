@@ -8,8 +8,6 @@ import { calcPokemonHp } from './calcPokemonHp';
 
 const l = logger('@showdex/utils/calc/createSmogonPokemon');
 
-/* eslint-disable no-nested-ternary */
-
 export const createSmogonPokemon = (
   dex: Generation,
   pokemon: CalcdexPokemon,
@@ -216,5 +214,3 @@ export const createSmogonPokemon = (
 
   return smogonPokemon;
 };
-
-/* eslint-enable no-nested-ternary */

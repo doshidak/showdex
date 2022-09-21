@@ -10,8 +10,6 @@ export interface PokemonItemOption {
   }[];
 }
 
-/* eslint-disable no-nested-ternary */
-
 /**
  * Local helper function that finds the indices after the `headerName` and before the next header.
  *
@@ -246,5 +244,3 @@ export const buildItemOptions = (
 
   return options;
 };
-
-/* eslint-enable no-nested-ternary */

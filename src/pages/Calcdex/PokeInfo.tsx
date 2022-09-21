@@ -51,8 +51,6 @@ export interface PokeInfoProps {
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
-/* eslint-disable no-nested-ternary */
-
 export const PokeInfo = ({
   className,
   style,
@@ -570,5 +568,3 @@ export const PokeInfo = ({
     </div>
   );
 };
-
-/* eslint-enable no-nested-ternary */
