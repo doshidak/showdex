@@ -1084,7 +1084,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen: action.payload.gen || <GenerationNum> env.int('calcdex-default-gen'),
         format: action.payload.format || null,
         rules: action.payload.rules || {},
-        field: action.payload.field || sanitizeField(null),
+        field: action.payload.field || sanitizeField(),
 
         p1: {
           sideid: 'p1',
