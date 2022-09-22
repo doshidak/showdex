@@ -203,7 +203,6 @@ export const syncPokemon = (
         const volatiles = <Showdown.Pokemon['volatiles']> value;
 
         // sync Pokemon's dynamax state
-        // syncedPokemon.useUltimateMoves = 'dynamax' in volatiles;
         syncedPokemon.useMax = 'dynamax' in volatiles;
 
         // check for type changes
@@ -398,17 +397,45 @@ export const syncPokemon = (
   // (is this a good idea? idk)
   const {
     altFormes,
-    abilities: transformedAbilities,
+    transformedForme, // yeah ik this is already set above, but double-checking lol
+    abilities,
+    transformedAbilities,
     abilityToggleable,
     abilityToggled,
     baseStats,
-    transformedForme, // yeah ik this is already set above, but double-checking lol
     transformedBaseStats,
   } = sanitizePokemon(syncedPokemon, dex?.num);
+
+  // update the abilities (including transformedAbilities) if they're different from what was stored prior
+  // (note: only checking if they're arrays instead of their length since th ability list could be empty)
+  const shouldUpdateAbilities = Array.isArray(abilities)
+    && JSON.stringify(abilities) !== JSON.stringify(syncedPokemon.abilities);
+
+  if (shouldUpdateAbilities) {
+    syncedPokemon.abilities = [...abilities];
+  }
+
+  const shouldUpdateTransformedAbilities = Array.isArray(transformedAbilities)
+    && JSON.stringify(transformedAbilities) !== JSON.stringify(syncedPokemon.transformedAbilities);
+
+  if (shouldUpdateTransformedAbilities) {
+    syncedPokemon.transformedAbilities = [...transformedAbilities];
+  }
 
   // check for toggleable abilities
   syncedPokemon.abilityToggleable = abilityToggleable;
   syncedPokemon.abilityToggled = abilityToggled;
+
+  // check if we should set the ability to one of the transformed Pokemon's abilities
+  // (only when the Pokemon isn't server-sourced since we don't know what the actual ability was)
+  const shouldUpdateTransformedAbility = !!transformedForme
+    && !syncedPokemon.serverSourced
+    && !!transformedAbilities?.length
+    && (!syncedPokemon.ability || !transformedAbilities.includes(syncedPokemon.ability));
+
+  if (shouldUpdateTransformedAbility) {
+    [syncedPokemon.ability] = transformedAbilities;
+  }
 
   // check for base stats (in case of forme changes)
   if (Object.values(baseStats).filter(Boolean).length) {
@@ -439,10 +466,6 @@ export const syncPokemon = (
   // recalculate the spread stats
   // (calcPokemonSpredStats() will determine whether to use the transformedBaseStats or baseStats)
   syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
-
-  if (transformedForme && transformedAbilities?.length) {
-    syncedPokemon.abilities = [...transformedAbilities];
-  }
 
   // we're done! ... I think
   return syncedPokemon;

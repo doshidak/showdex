@@ -102,6 +102,7 @@ export const sanitizePokemon = (
     baseAbility: <AbilityName> pokemon?.baseAbility?.replace(/no\s?ability/i, ''),
     abilities: (!legacy && 'abilities' in pokemon && pokemon.abilities) || [],
     altAbilities: (!legacy && 'altAbilities' in pokemon && pokemon.altAbilities) || [],
+    transformedAbilities: (!legacy && 'transformedAbilities' in pokemon && pokemon.transformedAbilities) || [],
 
     item: gen > 1
       ? <ItemName> pokemon?.item?.replace('(exists)', '')
@@ -174,7 +175,6 @@ export const sanitizePokemon = (
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
-    // useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
     useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
     lastMove: pokemon?.lastMove,
@@ -235,35 +235,42 @@ export const sanitizePokemon = (
         : [];
 
     if (transformedSpecies?.baseStats) {
-      const transformedBaseStats = { ...transformedSpecies.baseStats };
+      sanitizedPokemon.transformedBaseStats = { ...transformedSpecies.baseStats };
 
       // Transform ability doesn't copy the base HP stat
       // (uses the original Pokemon's base HP stat)
-      if ('hp' in transformedBaseStats) {
-        delete transformedBaseStats.hp;
+      if ('hp' in sanitizedPokemon.transformedBaseStats) {
+        delete (<Showdown.StatsTable> sanitizedPokemon.transformedBaseStats).hp;
       }
-
-      sanitizedPokemon.transformedBaseStats = transformedBaseStats;
     }
 
     // only update the types if the dex returned types
-    if (!typeChanged && species?.types?.length) {
+    // (checking against typeChanged since if true, should've been already updated above)
+    if (!typeChanged && (transformedSpecies || species)?.types?.length) {
       sanitizedPokemon.types = [
-        ...(<Showdown.TypeName[]> species.types),
+        ...(<Showdown.TypeName[]> (transformedSpecies || species).types),
       ];
     }
 
-    // only update the abilities if the dex returned abilities
-    if (Object.keys(species?.abilities || {}).length) {
-      // using Set makes sure there aren't any duplicate abilities in the array
-      sanitizedPokemon.abilities = Array.from(new Set([
-        ...(sanitizedPokemon.abilities || []),
-        ...(<AbilityName[]> Object.values(species.abilities)),
-      ]));
+    // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
+    // (using Set makes sure there aren't any duplicate abilities in the array)
+    sanitizedPokemon.abilities = Array.from(new Set([
+      ...(sanitizedPokemon.abilities || []),
+      ...(<AbilityName[]> Object.values(species?.abilities || {})),
+    ].filter(Boolean)));
 
-      if (!sanitizedPokemon.ability || !sanitizedPokemon.abilities.includes(sanitizedPokemon.ability)) {
-        [sanitizedPokemon.ability] = sanitizedPokemon.abilities;
-      }
+    // if transformed, update the legal abilities of the transformed Pokemon
+    sanitizedPokemon.transformedAbilities = [
+      ...(<AbilityName[]> Object.values(transformedSpecies?.abilities || {})),
+    ].filter(Boolean);
+
+    // check if we should auto-set the ability
+    const abilitiesSource = sanitizedPokemon.transformedAbilities.length
+      ? sanitizedPokemon.transformedAbilities
+      : sanitizedPokemon.abilities;
+
+    if (!sanitizedPokemon.ability || !abilitiesSource.includes(sanitizedPokemon.ability)) {
+      [sanitizedPokemon.ability] = abilitiesSource;
     }
   }
 
