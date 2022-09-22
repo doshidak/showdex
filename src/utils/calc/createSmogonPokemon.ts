@@ -37,12 +37,6 @@ export const createSmogonPokemon = (
     return null;
   }
 
-  // const ident = detectPokemonIdent(pokemon);
-
-  // if (!ident) {
-  //   return null;
-  // }
-
   // optional chaining here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
   const item = dex.num > 1
@@ -51,8 +45,7 @@ export const createSmogonPokemon = (
 
   const speciesForme = SmogonPokemon.getForme(
     dex,
-    // detectSpeciesForme(pokemon),
-    pokemon.transformedForme || pokemon.speciesForme,
+    pokemon.speciesForme,
     item,
     moveName,
   );
@@ -133,8 +126,6 @@ export const createSmogonPokemon = (
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
-    // (useUltimateMoves is a gen-agnostic property that's user-toggleable and syncs w/ the battle state btw)
-    // isDynamaxed: pokemon.useUltimateMoves,
     isDynamaxed: pokemon.useMax,
 
     ability,
@@ -170,6 +161,25 @@ export const createSmogonPokemon = (
     },
   };
 
+  // need to update the base HP stat for transformed Pokemon
+  // (otherwise, damage calculations may be incorrect!)
+  if (pokemon.transformedForme) {
+    const {
+      baseStats,
+      transformedBaseStats,
+      types,
+    } = pokemon || {};
+
+    options.overrides = {
+      baseStats: {
+        ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
+        hp: baseStats.hp,
+      },
+
+      types: <typeof options.overrides.types> types,
+    };
+  }
+
   // const dexSpecies = dex.species.get(speciesForme);
   // const dexItem = dex.items.get(item);
 
@@ -185,13 +195,15 @@ export const createSmogonPokemon = (
   const isGalarian = formatId(speciesForme).includes('galar');
   const missingSpecies = !dex.species.get(speciesForme)?.exists;
 
-  const determinedDex = isMega || hasMegaItem
-    ? <GenerationNum> Math.max(7, baseGen || 0)
+  const determinedDex = legacy
+    ? dex
     : isGalarian
       ? <GenerationNum> 8
-      : missingSpecies
-        ? baseGen || <GenerationNum> 7
-        : dex;
+      : isMega || hasMegaItem
+        ? <GenerationNum> Math.max(7, baseGen || 0)
+        : missingSpecies
+          ? <GenerationNum> Math.max(baseGen || 0, 4)
+          : dex;
 
   // l.debug(
   //   'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
@@ -201,16 +213,10 @@ export const createSmogonPokemon = (
   // );
 
   const smogonPokemon = new SmogonPokemon(
-    legacy ? dex : determinedDex,
+    determinedDex,
     speciesForme,
     options,
   );
-
-  // need to update the base HP stat for transformed Pokemon
-  // (otherwise, damage calculations may be incorrect!)
-  if (pokemon.transformedForme) {
-    smogonPokemon.rawStats.hp = pokemon.baseStats.hp;
-  }
 
   return smogonPokemon;
 };
