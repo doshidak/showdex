@@ -186,6 +186,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   abilities?: AbilityName[];
 
   /**
+   * Possible abilities of the transformed Pokemon.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.0.2
+   */
+  transformedAbilities?: AbilityName[];
+
+  /**
    * Alternative abilities (i.e., ability pool) from the currently applied `preset`.
    *
    * @since 0.1.0
@@ -301,18 +312,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   altMoves?: MoveName[];
-
-  /**
-   * Whether the Pokemon is using Z/Max/G-Max moves.
-   *
-   * * Using the term *ultimate* (thanks Blizzard/Riot lmaoo) to cover the nomenclature for both Z (gen 7) and Max/G-Max (gen 8) moves.
-   *   - Future me found the word I was looking for: *gen-agnostic*.
-   *   - ... like in the sense of *platform-agnostic*.
-   *
-   * @deprecated As of v1.0.1, nationaldex entered the chat. This don't cut it no mo :(
-   * @since 0.1.2
-   */
-  useUltimateMoves?: boolean;
 
   /**
    * Whether the Pokemon is using Z moves.
