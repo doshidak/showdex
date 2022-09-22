@@ -48,7 +48,7 @@ export interface CalcdexMatchupParsedDescription {
   /**
    * Description line referring to KO chance, along with any secondary effects like stage hazards, if applicable.
    *
-   * @example 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes'
+   * @example 'guaranteed 2HKO after Stealth Rock and 2 layers of Spikes'
    * @since 1.0.2
    */
   koChance?: string;
@@ -125,7 +125,7 @@ export const parseDescription = (result: Result): CalcdexMatchupParsedDescriptio
   ) || null;
 
   output.koChance = formatted.includes('--')
-    ? formatted.slice(formatted.indexOf('-- ') + 3).replace(/and/gi, '&') || null
+    ? formatted.slice(formatted.indexOf('-- ') + 3) || null
     : null;
 
   return output;
