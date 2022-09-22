@@ -161,6 +161,12 @@ export const createSmogonPokemon = (
     },
   };
 
+  // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
+  // so we won't report these abilities to the calc to avoid unintentional double boostage
+  if (['intrepidsword', 'download'].includes(formatId(ability))) {
+    options.ability = 'Pressure';
+  }
+
   // need to update the base HP stat for transformed Pokemon
   // (otherwise, damage calculations may be incorrect!)
   if (pokemon.transformedForme) {
