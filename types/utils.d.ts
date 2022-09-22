@@ -130,3 +130,17 @@ declare type NonFunctionPropertyNames<T> = Exclude<keyof T, FunctionPropertyName
  * @since 0.1.0
  */
 declare type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+
+/**
+ * Construct a type with all `readonly` properties removed.
+ *
+ * @since 1.0.2
+ */
+declare type Writable<T> = { -readonly [P in keyof T]: T[P]; };
+
+/**
+ * Construct a type with all `readonly` properties, including those in any sub-properties, removed.
+ *
+ * @since 1.0.2
+ */
+declare type DeepWritable<T> = { -readonly [P in keyof T]: DeepWritable<T[P]>; };
