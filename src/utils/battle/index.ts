@@ -12,6 +12,7 @@ export * from './detectToggledAbility';
 export * from './formatStatBoost';
 export * from './getMaxMove';
 export * from './getZMove';
+export * from './hasMegaForme';
 export * from './sanitizeField';
 export * from './sanitizePlayerSide';
 export * from './sanitizePokemon';
