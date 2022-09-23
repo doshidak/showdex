@@ -51,7 +51,6 @@ export const buildMoveOptions = (
     transformedMoves,
     altMoves,
     moveState,
-    // useUltimateMoves,
     useZ,
     useMax,
   } = pokemon;
@@ -61,7 +60,7 @@ export const buildMoveOptions = (
 
   // also keep track of whether the Pokemon has any actual moves
   // (to determine the group label of the otherMoves, if applicable)
-  let hasActualMoves = false;
+  // let hasActualMoves = false;
 
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
@@ -76,7 +75,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...moves);
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
@@ -93,14 +92,14 @@ export const buildMoveOptions = (
       filterMoves.push(...moves);
     }
 
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   if (serverSourced && serverMoves?.length) {
     const filteredServerMoves = serverMoves.filter((n) => !!n && !filterMoves.includes(n));
 
     options.push({
-      label: 'Current',
+      label: transformedForme ? 'Pre-Transform' : 'Current',
       options: filteredServerMoves.map((name) => ({
         label: name,
         value: name,
@@ -108,7 +107,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...filteredServerMoves);
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   if (transformedForme && transformedMoves?.length) {
@@ -123,7 +122,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...filteredTransformedMoves);
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   if (moveState?.revealed?.length) {
@@ -140,7 +139,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...revealedMoves);
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   if (altMoves?.length) {
@@ -157,7 +156,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...poolMoves);
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   if (moveState?.learnset?.length) {
@@ -174,7 +173,7 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...learnsetMoves);
-    hasActualMoves = true;
+    // hasActualMoves = true;
   }
 
   // Hidden Power moves were introduced in gen 2
@@ -216,7 +215,8 @@ export const buildMoveOptions = (
 
     // make sure this comes before the Hidden Power moves
     options.splice(insertionIndex, 0, {
-      label: hasActualMoves ? 'Other' : 'All',
+      // label: hasActualMoves ? 'Other' : 'All',
+      label: 'All',
       options: otherMoves.map((name) => ({
         label: name,
         value: name,
