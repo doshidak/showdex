@@ -138,14 +138,11 @@ export const PokeMoves = ({
                 styles.toggleButtonLabel,
                 !pokemon?.useMax && styles.inactive,
               )}
-              // label={gen === 6 || gen === 7 ? 'Z-PWR' : 'Max'}
               label="Max"
-              // tooltip={`${pokemon?.useUltimateMoves ? 'Deactivate' : 'Activate'} ${gen === 6 || gen === 7 ? 'Z-Power' : 'Max'} Moves`}
               tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
               // absoluteHover
               disabled={!pokemon}
               onPress={() => onPokemonChange?.({
-                // useUltimateMoves: !pokemon?.useUltimateMoves,
                 useMax: !pokemon?.useMax,
               })}
             />
@@ -292,6 +289,7 @@ export const PokeMoves = ({
                     styles.damageButtonLabel,
                     damageRange === 'N/A' && styles.noDamage,
                   )}
+                  tabIndex={-1} // not ADA compliant, obviously lol
                   label={damageRange}
                   tooltip={description?.raw ? (
                     <div className={styles.descTooltip}>
