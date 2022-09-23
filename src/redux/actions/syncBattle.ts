@@ -3,6 +3,7 @@ import {
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectPlayerKeyFromBattle,
+  hasMegaForme,
   sanitizePokemon,
   sanitizePokemonVolatiles,
   syncField,
@@ -26,14 +27,17 @@ export const SyncBattleActionType = 'calcdex:sync';
 /**
  * Internally-used search ID builder for Pokemon.
  *
- * @example 'p1: Moltres-Kanto|Moltres-Galar'
+ * @example 'p1: Moltres-Kanto|Moltres-Galar|L100'
  * @since 1.0.2
  */
 const searchId = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<Showdown.Pokemon>,
 ): string => [
   pokemon?.ident,
-  pokemon?.speciesForme.replace('-Mega', ''),
+  hasMegaForme(pokemon?.speciesForme)
+    ? pokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
+    : pokemon?.speciesForme,
+  `L${pokemon?.level || 100}`,
 ].filter(Boolean).join('|');
 
 /**
@@ -272,7 +276,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (!matchedPokemon || matchedPokemon.speciesForme !== syncedPokemon.speciesForme) {
           // l.debug('Fetching learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey);
 
-          const learnset = await dex.learnsets.learnable(syncedPokemon.speciesForme.replace('-Mega', ''));
+          const sanitizedForme = hasMegaForme(syncedPokemon.speciesForme)
+            ? syncedPokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
+            : syncedPokemon.speciesForme;
+
+          const learnset = await dex.learnsets.learnable(sanitizedForme);
 
           // l.debug(
           //   'Fetched learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,

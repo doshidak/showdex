@@ -1,7 +1,7 @@
 // import { getFinalSpeed, getModifiedStat } from '@smogon/calc/dist/mechanics/util';
 import { PokemonInitialStats, PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts';
 import { formatId as id } from '@showdex/utils/app';
-// import { detectSpeciesForme } from '@showdex/utils/battle';
+import { hasMegaForme } from '@showdex/utils/battle';
 // import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@pkmn/data';
@@ -107,7 +107,7 @@ export const calcPokemonFinalStats = (
   const item = id(pokemon.dirtyItem ?? pokemon.item);
 
   const ignoreItem = hasEmbargo
-    || speciesForme.endsWith('-Mega')
+    || hasMegaForme(speciesForme)
     || field.isMagicRoom
     || (ability === 'klutz' && !PokemonSpeedReductionItems.map((i) => id(i)).includes(item));
 

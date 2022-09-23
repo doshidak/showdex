@@ -1,6 +1,6 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
-import { detectLegacyGen } from '@showdex/utils/battle';
+import { detectLegacyGen, hasMegaForme } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
@@ -43,10 +43,13 @@ export const createSmogonPokemon = (
     ? pokemon.dirtyItem ?? pokemon.item
     : null;
 
+  // megas require special handling (like for the item), so make sure we detect these
+  const isMega = hasMegaForme(pokemon.speciesForme);
+
   const speciesForme = SmogonPokemon.getForme(
     dex,
     pokemon.speciesForme,
-    item,
+    isMega ? null : item,
     moveName,
   );
 
@@ -64,9 +67,6 @@ export const createSmogonPokemon = (
 
     return null;
   }
-
-  // megas require special handling (like for the item), so make sure we detect these
-  const isMega = pokemon.speciesForme.endsWith('-Mega');
 
   const hasMegaItem = !!item
     && /(?:ite|z$)/.test(formatId(item))

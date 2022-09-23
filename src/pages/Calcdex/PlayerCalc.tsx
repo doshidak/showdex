@@ -4,6 +4,7 @@ import { PiconButton } from '@showdex/components/app';
 import { Button } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
 import { openShowdownUser } from '@showdex/utils/app';
+import { hasMegaForme } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
@@ -132,7 +133,7 @@ export const PlayerCalc = ({
             const friendlyPokemonName = mon?.speciesForme || mon?.name || pokemonKey;
 
             const speciesForme = mon?.transformedForme || mon?.speciesForme;
-            const item = speciesForme?.endsWith('-Mega') ? null : mon?.dirtyItem ?? mon?.item;
+            const item = hasMegaForme(speciesForme) ? null : mon?.dirtyItem ?? mon?.item;
 
             return (
               <PiconButton

@@ -21,6 +21,7 @@ import {
   buildItemOptions,
   detectLegacyGen,
   detectToggledAbility,
+  hasMegaForme,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import type {
@@ -267,7 +268,7 @@ export const PokeInfo = ({
             pokemon={{
               ...pokemon,
               speciesForme: pokemon?.transformedForme || pokemon?.speciesForme,
-              item: (pokemon?.transformedForme || pokemon?.speciesForme)?.endsWith('-Mega')
+              item: hasMegaForme(pokemon?.transformedForme || pokemon?.speciesForme)
                 ? null
                 : pokemon?.dirtyItem ?? pokemon?.item,
             }}
