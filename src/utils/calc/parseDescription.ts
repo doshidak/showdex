@@ -91,11 +91,11 @@ export const parseDescription = (result: Result): CalcdexMatchupParsedDescriptio
   try {
     output.raw = result.desc();
   } catch (error) {
-    if (__DEV__) {
-      l.debug(
-        'Failed to obtain result description via result.desc(),',
+    if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
+      l.warn(
+        'Failed to obtain result description via result.desc()', error,
         '\n', 'result', result,
-        '\n', '(You will only see this error on development.)',
+        '\n', '(You will only see this warning on development.)',
       );
     }
 

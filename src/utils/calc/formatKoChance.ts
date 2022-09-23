@@ -41,10 +41,10 @@ export const formatKoChance = (result: Result): string => {
     }
   } catch (error) {
     if (__DEV__) {
-      l.error(
-        'Failed to obtain the KO chance via result.kochance().',
+      l.warn(
+        'Failed to obtain the KO chance via result.kochance()', error,
         '\n', 'result', result,
-        '\n', '(You will only see this error on development.)',
+        '\n', '(You will only see this warning on development.)',
       );
     }
 
