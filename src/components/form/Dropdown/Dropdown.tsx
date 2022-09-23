@@ -62,10 +62,11 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   clearOnEsc?: boolean;
   creatable?: boolean;
   multi?: boolean;
-  minMenuHeight?: number;
-  maxMenuHeight?: number;
   openMenuOnPress?: boolean;
   openMenuOnFocus?: boolean;
+  minMenuHeight?: number;
+  maxMenuHeight?: number;
+  tabSelectsValue?: boolean;
   hideSelections?: boolean;
   autoFocus?: boolean;
   loading?: boolean;
@@ -94,6 +95,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   openMenuOnFocus,
   minMenuHeight = 50,
   maxMenuHeight = 137,
+  tabSelectsValue = true,
   hideSelections,
   autoFocus,
   loading,
@@ -210,7 +212,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           loadingMessage={() => loadingMessage}
           noOptionsMessage={() => noOptionsMessage}
           autoFocus={autoFocus}
-          tabSelectsValue={false}
+          tabSelectsValue={tabSelectsValue}
           escapeClearsValue={clearable && clearOnEsc}
           hideSelectedOptions={hideSelections}
           minMenuHeight={minMenuHeight}
