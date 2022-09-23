@@ -10,7 +10,7 @@ import {
   WeatherNames,
 } from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
-import { detectLegacyGen } from '@showdex/utils/battle';
+// import { detectLegacyGen } from '@showdex/utils/battle';
 import type { GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
@@ -38,7 +38,7 @@ export const FieldCalc = ({
 }: FieldCalcProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const legacy = detectLegacyGen(gen);
+  // const legacy = detectLegacyGen(gen);
 
   const {
     weather,
@@ -139,7 +139,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Aurora"
-          disabled={!battleId || !p1Side || legacy}
+          disabled={!battleId || !p1Side || gen < 7}
           onPress={() => onFieldChange?.({
             attackerSide: {
               ...attackerSide,
@@ -239,7 +239,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Aurora"
-          disabled={!battleId || !p2Side || legacy}
+          disabled={!battleId || !p2Side || gen < 7}
           onPress={() => onFieldChange?.({
             // ...field,
             defenderSide: {
