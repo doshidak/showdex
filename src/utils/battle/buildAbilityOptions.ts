@@ -40,9 +40,11 @@ export const buildAbilityOptions = (
   // const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
   const {
+    serverSourced,
     ability,
     abilities,
     altAbilities,
+    transformedAbilities,
     baseAbility,
     transformedForme,
   } = pokemon;
@@ -51,15 +53,20 @@ export const buildAbilityOptions = (
   const filterAbilities: AbilityName[] = [];
 
   if (transformedForme) {
+    const transformed = Array.from(new Set([
+      serverSourced && ability,
+      ...transformedAbilities,
+    ])).filter((n) => !!n && !abilities.includes(n)).sort();
+
     options.push({
       label: 'Transformed',
-      options: [{
-        label: ability,
-        value: ability,
-      }],
+      options: transformed.map((name) => ({
+        label: name,
+        value: name,
+      })),
     });
 
-    filterAbilities.push(ability);
+    filterAbilities.push(...transformed);
   } else if (formatId(baseAbility) === 'trace' && ability !== baseAbility) {
     options.push({
       label: 'Traced',
