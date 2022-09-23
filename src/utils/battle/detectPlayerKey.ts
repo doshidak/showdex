@@ -27,9 +27,13 @@ export const detectPlayerKeyFromPokemon = (
  * @since 1.0.2
  */
 export const detectAuthPlayerKeyFromBattle = (
-  battle: Showdown.Battle,
+  battle: DeepPartial<Showdown.Battle>,
 ): CalcdexPlayerKey => {
-  const authName = app?.user?.attributes?.name;
+  if (typeof app === 'undefined') {
+    return null;
+  }
+
+  const authName = app.user?.attributes?.name;
 
   if (!authName) {
     return null;
@@ -60,7 +64,7 @@ export const detectAuthPlayerKeyFromBattle = (
  * @since 0.1.0
  */
 export const detectPlayerKeyFromBattle = (
-  battle: Showdown.Battle,
+  battle: DeepPartial<Showdown.Battle>,
 ): CalcdexPlayerKey => {
   // check if the logged in user is a player in the battle
   const authKey = detectAuthPlayerKeyFromBattle(battle);
