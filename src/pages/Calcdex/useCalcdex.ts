@@ -18,8 +18,10 @@ export interface CalcdexHookProps {
 }
 
 export interface CalcdexHookInterface {
+  gens: Generations;
   dex: Generation;
   state: CalcdexBattleState;
+
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   updateField: (field: DeepPartial<CalcdexBattleField>) => void;
   setActiveIndex: (playerKey: CalcdexPlayerKey, activeIndex: number) => void;
@@ -47,15 +49,16 @@ export const useCalcdex = ({
   );
 
   const format = battle?.id?.split?.('-')?.[1];
-  const isBdsp = format?.includes('bdsp');
+  // const isBdsp = format?.includes('bdsp');
 
   // for BDSP, though gen 8, should load from gen 4, otherwise,
   // Calcdex may crash due to incomplete Pokemon entries (like Bibarel)
+  // (update [2022/09/22]: starting to use the built-in Dex, so shouldn't be an issue anymore)
   const gen = battle?.gen as GenerationNum;
   // const legacy = detectLegacyGen(gen);
 
   const gens = React.useRef(new Generations(PkmnDex));
-  const dex = gens.current.get(isBdsp ? 4 : gen);
+  const dex = gens.current.get(gen);
 
   // const dex = React.useMemo(() => (typeof gen === 'number' && gen > 0 ? <Generation> <unknown> {
   //   ...pkmnDex,
@@ -151,6 +154,7 @@ export const useCalcdex = ({
   ]);
 
   return {
+    gens: gens.current,
     dex,
 
     state: battleState || {
@@ -158,23 +162,14 @@ export const useCalcdex = ({
       gen: null,
       format: null,
       rules: null,
-      field: null,
+      playerKey: 'p1',
+      authPlayerKey: null,
+      opponentKey: 'p2',
       p1: null,
       p2: null,
-      // p1: {
-      //   name: null,
-      //   rating: null,
-      //   activeIndex: -1,
-      //   selectionIndex: 0,
-      //   pokemon: [],
-      // },
-      // p2: {
-      //   name: null,
-      //   rating: null,
-      //   activeIndex: -1,
-      //   selectionIndex: 0,
-      //   pokemon: [],
-      // },
+      p3: null,
+      p4: null,
+      field: null,
     },
 
     updatePokemon: (playerKey, pokemon) => dispatch(calcdexSlice.actions.updatePokemon({
