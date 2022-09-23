@@ -143,14 +143,33 @@ export const PokeInfo = ({
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool
     if (preset.format?.includes('random')) {
-      if (preset.altAbilities.length === 1) {
-        mutation.ability = preset.ability;
+      if (mutation.altAbilities?.length === 1) {
+        [mutation.ability] = mutation.altAbilities;
         mutation.dirtyAbility = null;
       }
 
-      if (preset.altItems.length === 1) {
-        mutation.item = preset.item;
+      if (mutation.altItems?.length === 1) {
+        [mutation.item] = mutation.altItems;
         mutation.dirtyItem = null;
+      }
+    }
+
+    // remove spread if Pokemon is transformed and a spread was already present prior
+    const shouldRemoveSpread = !!pokemon.transformedForme
+      && !!pokemon.nature
+      && !!Object.values({ ...pokemon.ivs, ...pokemon.evs }).filter(Boolean).length;
+
+    if (shouldRemoveSpread) {
+      delete mutation.nature;
+
+      // we'll keep the original HP EVs/IVs (even if possibly illegal) since the max HP
+      // of a transformed Pokemon is preserved, which is based off of the HP's base, IV & EV
+      mutation.ivs.hp = pokemon.ivs.hp;
+      mutation.evs.hp = pokemon.evs.hp;
+
+      // if the Pokemon has an item set by a previous preset, ignore this preset's item
+      if (pokemon.dirtyItem || pokemon.item) {
+        delete mutation.dirtyItem;
       }
     }
 
