@@ -66,14 +66,17 @@ export const createSmogonPokemon = (
   }
 
   // megas require special handling (like for the item), so make sure we detect these
-  const isMega = formatId(speciesForme)?.includes('mega');
+  const isMega = pokemon.speciesForme.endsWith('-Mega');
 
   const hasMegaItem = !!item
     && /(?:ite|z$)/.test(formatId(item))
     && formatId(item) !== 'eviolite'; // oh god
 
   // if applicable, convert the '???' status into an empty string
-  const status = pokemon.status === '???' ? '' : pokemon.status;
+  // (don't apply the status if the Pokemon is fainted tho)
+  const status = pokemon.hp
+    ? pokemon.status === '???' ? null : pokemon.status
+    : null;
 
   // not using optional chaining here since ability cannot be cleared in PokeInfo
   const ability = !legacy
