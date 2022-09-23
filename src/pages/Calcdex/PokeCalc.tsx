@@ -220,7 +220,7 @@ export const PokeCalc = ({
       {/* IVs, EVs, calculated stats, boosts */}
       <PokeStats
         className={cx(styles.section, styles.stats)}
-        dex={dex}
+        // dex={dex}
         gen={gen}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
