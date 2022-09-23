@@ -919,7 +919,6 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * * Derived from `id` of the Showdown `battle` state.
    *
    * @example 'battle-gen8ubers-1636924535-utpp6tn0eya3q8q05kakyw3k4s97im9pw'
-   * @todo Rename this to `id` cause `battleState.battleId` is gross.
    * @since 0.1.0
    */
   battleId: string;
@@ -927,7 +926,6 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   /**
    * Last synced `nonce` of the Showdown `battle` state.
    *
-   * @todo Rename this to `nonce` cause `battleState.battleNonce` is gross.
    * @since 0.1.3
    */
   battleNonce?: string;
@@ -945,6 +943,7 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * Battle format.
    *
    * * Derived from splitting the `id` of the Showdown `battle` state.
+   * * Note that this includes the `'gen#'` portion of the format.
    *
    * @example 'gen8ubers'
    * @since 0.1.0
@@ -957,6 +956,43 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * @since 0.1.3
    */
   rules?: CalcdexBattleRules;
+
+  /**
+   * Side key/ID of the player.
+   *
+   * * Does not necessarily mean the logged-in user ("auth") is a player.
+   * * Check `authPlayerKey` instead to see if the logged-in user is also a player.
+   *
+   * @default 'p1'
+   * @since 1.0.2
+   */
+  playerKey: CalcdexPlayerKey;
+
+  /**
+   * Side key/ID of the logged-in user who also happens to be a player.
+   *
+   * * Will be `null` if the logged-in user ("auth") is not a player.
+   * * Primarily useful for changing parts of the UI if the auth user is a player.
+   *   - For instance, in `FieldCalc`, the arrows in the screens header will change to "Yours" and "Theirs",
+   *     depending on this value.
+   *
+   * @default null
+   * @since 1.0.2
+   */
+  authPlayerKey?: CalcdexPlayerKey;
+
+  /**
+   * Side key/ID of the opponent.
+   *
+   * * Typically the opposite of the `playerKey`.
+   *   - For example, if the `playerKey` is `'p1'`, then you can expect this value to be `'p2'`.
+   * * Note that the opposite wouldn't be the case if you were to support more than just 2 players.
+   *   - Technically, the client does support up to 4 players (there exists a `'p3'` and `'p4'`).
+   *
+   * @default 'p2'
+   * @since 1.0.2
+   */
+  opponentKey: CalcdexPlayerKey;
 
   /**
    * Tracked field conditions.
@@ -1055,7 +1091,19 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         '\n', 'action.payload', action.payload,
       );
 
-      const { battleId } = action.payload;
+      const {
+        battleId,
+        gen = env.int<GenerationNum>('calcdex-default-gen'),
+        format = null,
+        rules = {},
+        playerKey = 'p1',
+        authPlayerKey = null,
+        opponentKey = 'p2',
+        p1,
+        p2,
+        field,
+        ...payload
+      } = action.payload;
 
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
@@ -1076,14 +1124,18 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       }
 
       state[battleId] = {
-        ...action.payload,
+        ...payload,
 
         battleId,
         battleNonce: null, // make sure we don't set this for the syncBattle() action
-        gen: action.payload.gen || <GenerationNum> env.int('calcdex-default-gen'),
-        format: action.payload.format || null,
-        rules: action.payload.rules || {},
-        field: action.payload.field || sanitizeField(),
+
+        gen,
+        format,
+        rules,
+
+        playerKey,
+        authPlayerKey,
+        opponentKey,
 
         p1: {
           sideid: 'p1',
@@ -1092,10 +1144,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           activeIndex: -1,
           selectionIndex: 0,
           autoSelect: true,
-
-          ...action.payload.p1,
-
           pokemonOrder: [],
+          ...p1,
           pokemon: [],
         },
 
@@ -1106,12 +1156,16 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           activeIndex: -1,
           selectionIndex: 0,
           autoSelect: true,
-
-          ...action.payload.p2,
-
           pokemonOrder: [],
+          ...p2,
           pokemon: [],
         },
+
+        // currently unsupported
+        p3: null,
+        p4: null,
+
+        field: field || sanitizeField(),
       };
 
       l.debug(
