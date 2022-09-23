@@ -67,7 +67,7 @@ export const FieldCalc = ({
       >
         {/* p1 screens header */}
         {authPlayerKey ? (
-          authPlayerKey === 'p1' ? 'Your' : 'Their'
+          authPlayerKey === playerKey ? 'Your' : 'Their'
         ) + ' ' : <>&uarr; </>}
         Screens
       </TableGridItem>
@@ -90,7 +90,7 @@ export const FieldCalc = ({
       >
         {/* p2 screens header */}
         {!!authPlayerKey && (
-          authPlayerKey === 'p1' ? 'Their' : 'Your'
+          authPlayerKey === playerKey ? 'Their' : 'Your'
         ) + ' '}
         Screens
         {!authPlayerKey && <> &darr;</>}
@@ -105,6 +105,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Light"
+          disabled={!battleId || !p1Side}
           onPress={() => onFieldChange?.({
             attackerSide: {
               ...attackerSide,
@@ -121,6 +122,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Reflect"
+          disabled={!battleId || !p1Side}
           onPress={() => onFieldChange?.({
             attackerSide: {
               ...attackerSide,
@@ -137,7 +139,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Aurora"
-          disabled={legacy}
+          disabled={!battleId || !p1Side || legacy}
           onPress={() => onFieldChange?.({
             attackerSide: {
               ...attackerSide,
@@ -168,7 +170,7 @@ export const FieldCalc = ({
             value: name,
           }))}
           noOptionsMessage="No Weather"
-          disabled={gen === 1}
+          disabled={!battleId || gen === 1}
         />
       </TableGridItem>
 
@@ -190,7 +192,7 @@ export const FieldCalc = ({
             value: name,
           }))}
           noOptionsMessage="No Terrain"
-          disabled={gen < 6}
+          disabled={!battleId || gen < 6}
         />
       </TableGridItem>
 
@@ -203,6 +205,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Light"
+          disabled={!battleId || !p2Side}
           onPress={() => onFieldChange?.({
             defenderSide: {
               ...defenderSide,
@@ -219,6 +222,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Reflect"
+          disabled={!battleId || !p2Side}
           onPress={() => onFieldChange?.({
             defenderSide: {
               ...defenderSide,
@@ -235,7 +239,7 @@ export const FieldCalc = ({
           )}
           labelClassName={styles.toggleButtonLabel}
           label="Aurora"
-          disabled={legacy}
+          disabled={!battleId || !p2Side || legacy}
           onPress={() => onFieldChange?.({
             // ...field,
             defenderSide: {
