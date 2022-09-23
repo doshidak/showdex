@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectPlayerKeyFromBattle,
   sanitizePokemon,
@@ -21,6 +22,19 @@ export interface SyncBattlePayload {
 }
 
 export const SyncBattleActionType = 'calcdex:sync';
+
+/**
+ * Internally-used search ID builder for Pokemon.
+ *
+ * @example 'p1: Moltres-Kanto|Moltres-Galar'
+ * @since 1.0.2
+ */
+const searchId = (
+  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<Showdown.Pokemon>,
+): string => [
+  pokemon?.ident,
+  pokemon?.speciesForme.replace('-Mega', ''),
+].filter(Boolean).join('|');
 
 /**
  * Syncs the Showdown `battle` state with an existing `CalcdexBattleState`.
@@ -63,7 +77,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     // yooo native deep-copying lessgo baby
-    const battleState = structuredClone(state[battleId]);
+    const battleState: CalcdexBattleState = structuredClone(state[battleId]);
 
     // l.debug(
     //   '\n', 'pre-copied battleState', state[battleId],
@@ -99,7 +113,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     // find out which side myPokemon belongs to
-    const myPokemonSide = detectPlayerKeyFromBattle(battle);
+    const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
+
+    if (detectedPlayerKey && battleState.playerKey !== detectedPlayerKey) {
+      battleState.playerKey = detectedPlayerKey;
+    }
+
+    // also, while we're here, update the authPlayerKey (if any) and opponentKey
+    battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
+    battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
 
     for (const playerKey of <CalcdexPlayerKey[]> ['p1', 'p2']) {
       // l.debug('Processing player', playerKey);
@@ -148,28 +170,28 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine if `myPokemon` belongs to the current player
-      const isMyPokemonSide = !!myPokemonSide
-        && playerKey === myPokemonSide
+      const isMyPokemonSide = !!battleState.playerKey
+        && playerKey === battleState.playerKey
         && Array.isArray(myPokemon)
         && !!myPokemon.length;
 
-      // obtain the ident of the active Pokemon, if any
-      const activeIdent = player.active?.[0]?.ident;
+      // obtain the searchId of the active Pokemon, if any
+      const activeSearchId = searchId(player.active?.[0]);
 
       // preserve the initial ordering of myPokemon since it's subject to change its indices
       // (battle state may move the most recent active Pokemon to the front of the array)
       if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
-        playerState.pokemonOrder = myPokemon.map((p) => p.ident);
+        playerState.pokemonOrder = myPokemon.map((p) => searchId(p));
       }
 
       // reconstruct a full list of the current player's Pokemon, whether revealed or not
       // (but if we don't have the relevant info [i.e., !isMyPokemonSide], then just access the player's `pokemon`)
-      const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((ident) => {
-        const serverPokemon = myPokemon.find((p) => p.ident === ident);
+      const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((currentSearchId) => {
+        const serverPokemon = myPokemon.find((p) => searchId(p) === currentSearchId);
 
         // try to find a matching clientPokemon that has already been revealed using the ident,
         // which is seemingly consistent between the player's `pokemon` (Pokemon[]) and `myPokemon` (ServerPokemon[])
-        const clientPokemonIndex = player.pokemon.findIndex((p) => p.ident === serverPokemon.ident);
+        const clientPokemonIndex = player.pokemon.findIndex((p) => searchId(p) === currentSearchId);
 
         if (clientPokemonIndex > -1) {
           return player.pokemon[clientPokemonIndex];
@@ -179,7 +201,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // so convert the ServerPokemon into a partially-filled Pokemon object
         return <DeepPartial<Showdown.Pokemon>> {
           ident: serverPokemon.ident,
-          searchid: serverPokemon.searchid,
+          searchid: serverPokemon.searchid || currentSearchId,
           name: serverPokemon.name,
           speciesForme: serverPokemon.speciesForme,
           details: serverPokemon.details,
@@ -210,7 +232,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         });
 
         const serverPokemon = isMyPokemonSide
-          ? myPokemon.find((p) => p.ident === clientPokemon.ident)
+          ? myPokemon.find((p) => searchId(p) === searchId(clientPokemon))
           : null;
 
         const matchedPokemonIndex = playerState.pokemon.findIndex((p) => p.calcdexId === clientPokemonId);
@@ -320,8 +342,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // update activeIndex (and selectionIndex if autoSelect is enabled)
       // (hopefully the `ident` exists here!)
-      const activeIndex = activeIdent
-        ? playerPokemon.findIndex((p) => p.ident === activeIdent)
+      const activeIndex = activeSearchId
+        ? playerPokemon.findIndex((p) => searchId(p) === activeSearchId)
         : -1;
 
       if (activeIndex > -1) {
