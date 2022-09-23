@@ -12,14 +12,14 @@ import { useColorScheme } from '@showdex/redux/store';
 import { detectLegacyGen, detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
-  dex: Generation;
+  // dex: Generation;
   gen?: GenerationNum;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
@@ -31,7 +31,7 @@ export interface PokeStatsProps {
 export const PokeStats = ({
   className,
   style,
-  dex,
+  // dex,
   gen,
   playerPokemon: pokemon,
   opponentPokemon,
@@ -50,20 +50,23 @@ export const PokeStats = ({
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
-  const evsLegal = totalEvs <= env.int('calcdex-pokemon-max-legal-evs');
+  const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs') + (pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0);
+  const evsLegal = totalEvs <= maxLegalEvs;
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
   const missingEvs = !!pokemon?.speciesForme && !totalEvs;
 
   const finalStats = React.useMemo(() => (pokemon?.calcdexId ? calcPokemonFinalStats(
-    dex,
+    // dex,
+    gen,
     pokemon,
     opponentPokemon,
     field,
     playerKey,
   ) : null), [
-    dex,
+    // dex,
+    gen,
     opponentPokemon,
     playerKey,
     pokemon,
