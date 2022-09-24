@@ -2,7 +2,7 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
 
 export const detectPokemonIdent = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<CalcdexPokemon> = {},
-): string => pokemon?.ident || [
+): string => [
   // 'p1', 'p2', etc.
   ('side' in pokemon ? pokemon.side?.sideid : null)
     || pokemon?.searchid?.split?.(':')[0]
