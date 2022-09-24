@@ -12,6 +12,13 @@ export const createSmogonMove = (
     return null;
   }
 
+  /**
+   * @todo temporary workaround for CAP learnsets
+   */
+  const dexMove = typeof Dex !== 'undefined'
+    ? Dex.forGen(dex.num).moves.get(moveName)
+    : null;
+
   // note: for whatever reason, gen 8 dex does not include information about Hidden Power
   // (including any other types, such as Hidden Power Fire -- returns undefined!)
   const isHiddenPower = formatId(moveName).includes('hiddenpower');
@@ -27,6 +34,13 @@ export const createSmogonMove = (
     useZ: pokemon.useZ,
     useMax: pokemon.useMax,
     isCrit: pokemon.criticalHit ?? false,
+
+    /**
+     * @todo temporary workaround for CAP learnsets
+     */
+    overrides: dexMove?.isNonstandard === 'CAP' ? {
+      ...(<ConstructorParameters<typeof SmogonMove>[2]> <unknown> dexMove),
+    } : null,
   });
 
   return smogonMove;

@@ -159,8 +159,25 @@ export const buildMoveOptions = (
     // hasActualMoves = true;
   }
 
-  if (moveState?.learnset?.length) {
-    const learnsetMoves = (<MoveName[]> moveState.learnset)
+  /**
+   * @todo temporary workaround for CAP learnsets
+   */
+  const learnset: MoveName[] = [...(<MoveName[]> moveState?.learnset || [])];
+  const isCap = format.includes('cap');
+
+  if (isCap && typeof Dex !== 'undefined' && typeof BattleTeambuilderTable !== 'undefined') {
+    const speciesFormeId = formatId(pokemon.speciesForme);
+    const learnsetsFromTable = Object.keys(BattleTeambuilderTable.learnsets?.[speciesFormeId] || {})
+      .map((n) => !!n && <MoveName> Dex.forGen(gen).moves.get(n)?.name)
+      .filter(Boolean);
+
+    if (learnsetsFromTable.length) {
+      learnset.push(...learnsetsFromTable);
+    }
+  }
+
+  if (learnset.length) {
+    const learnsetMoves = Array.from(new Set(learnset))
       .filter((n) => !!n && !formatId(n).startsWith('hiddenpower') && !filterMoves.includes(n))
       .sort();
 
