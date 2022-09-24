@@ -174,6 +174,16 @@ export const PokeInfo = ({
       }
     }
 
+    // only remove the dirtyAbility/dirtyItem from the mutation if they're undefined (but not null)
+    // (means that the preset didn't define the ability/item, hence the undefined)
+    if (mutation.dirtyAbility === undefined) {
+      delete mutation.dirtyAbility;
+    }
+
+    if (mutation.dirtyItem === undefined) {
+      delete mutation.dirtyItem;
+    }
+
     // spreadStats will be recalculated in `onPokemonChange()` from `PokeCalc`
     onPokemonChange?.(mutation);
   }, [
