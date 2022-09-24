@@ -3,6 +3,7 @@ import {
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectPlayerKeyFromBattle,
+  detectPokemonIdent,
   hasMegaForme,
   sanitizePokemon,
   sanitizePokemonVolatiles,
@@ -27,18 +28,19 @@ export const SyncBattleActionType = 'calcdex:sync';
 /**
  * Internally-used search ID builder for Pokemon.
  *
- * @example 'p1: Moltres-Kanto|Moltres-Galar|L100'
+ * @example 'p1: Moltres-Kanto|Moltres-Galar|L100|shiny'
  * @since 1.0.2
  */
 const searchId = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<Showdown.Pokemon>,
-): string => [
-  pokemon?.ident,
+): string => (pokemon?.speciesForme ? [
+  detectPokemonIdent(pokemon),
   hasMegaForme(pokemon?.speciesForme)
     ? pokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
     : pokemon?.speciesForme,
   `L${pokemon?.level || 100}`,
-].filter(Boolean).join('|');
+  pokemon?.shiny && 'shiny',
+].filter(Boolean).join('|') : null);
 
 /**
  * Syncs the Showdown `battle` state with an existing `CalcdexBattleState`.
@@ -176,8 +178,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // determine if `myPokemon` belongs to the current player
       const isMyPokemonSide = !!battleState.playerKey
         && playerKey === battleState.playerKey
-        && Array.isArray(myPokemon)
-        && !!myPokemon.length;
+        && !!myPokemon?.length;
 
       // obtain the searchId of the active Pokemon, if any
       const activeSearchId = searchId(player.active?.[0]);
@@ -205,7 +206,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // so convert the ServerPokemon into a partially-filled Pokemon object
         return <DeepPartial<Showdown.Pokemon>> {
           ident: serverPokemon.ident,
-          searchid: serverPokemon.searchid || currentSearchId,
+          searchid: serverPokemon.searchid,
           name: serverPokemon.name,
           speciesForme: serverPokemon.speciesForme,
           details: serverPokemon.details,
@@ -215,6 +216,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           maxhp: serverPokemon.maxhp,
         };
       }) : player.pokemon;
+
+      // l.debug(
+      //   'playerKey', playerKey, 'isMyPokemonSide?', isMyPokemonSide,
+      //   '\n', 'activeSearchId', activeSearchId,
+      //   '\n', 'playerPokemon', playerPokemon,
+      // );
 
       // update each pokemon
       // (note that the index `i` should be relatively consistent between turns)
@@ -360,6 +367,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (playerState.autoSelect) {
           playerState.selectionIndex = activeIndex;
         }
+      } else if (__DEV__) {
+        l.warn(
+          'Could not find activeIndex for activeSearchId', activeSearchId,
+          '\n', 'player', playerState.sideid, 'playerPokemon', playerPokemon,
+          '\n', '(You will only see this warning on development.)',
+        );
       }
     }
 
