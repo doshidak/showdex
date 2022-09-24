@@ -110,7 +110,10 @@ export const parseDescription = (result: Result): CalcdexMatchupParsedDescriptio
 
   // e.g., '0 Def / 0 SpA' -> '0 DEF / 0 SPA'
   for (const stat of PokemonStatNames) {
-    formatted = formatted.replace(new RegExp(`(\\d+)\\s+${stat}`, 'gi'), `$1 ${stat.toUpperCase()}`);
+    formatted = formatted.replace(
+      new RegExp(`(\\d+[-+]?)\\s+${stat}`, 'gi'), // e.g., '128+ Atk'
+      `$1 ${stat.toUpperCase()}`,
+    );
   }
 
   // e.g., 'Lvl 84' -> 'L84'
