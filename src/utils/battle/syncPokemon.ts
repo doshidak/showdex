@@ -214,6 +214,15 @@ export const syncPokemon = (
           syncedPokemon.types = changedTypes;
         }
 
+        // check for type additions (separate from type changes)
+        const addedType = 'typeadd' in volatiles
+          ? <Showdown.TypeName> volatiles.typeadd[1]
+          : null;
+
+        if (addedType && !syncedPokemon.types.includes(addedType)) {
+          syncedPokemon.types.push(addedType);
+        }
+
         // check for transformations (e.g., from Ditto/Mew)
         const transformedPokemon = 'transform' in volatiles
           ? <Showdown.Pokemon> <unknown> volatiles.transform[1]
@@ -327,7 +336,7 @@ export const syncPokemon = (
     // build a preset around the serverPokemon
     const serverPreset: CalcdexPokemonPreset = {
       name: 'Yours',
-      gen: dex.num || <GenerationNum> env.int('calcdex-default-gen'),
+      gen: dex.num || env.int<GenerationNum>('calcdex-default-gen'),
       format,
       speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
       level: syncedPokemon.level || serverPokemon.level,
@@ -398,6 +407,7 @@ export const syncPokemon = (
   const {
     altFormes,
     transformedForme, // yeah ik this is already set above, but double-checking lol
+    dirtyAbility,
     abilities,
     transformedAbilities,
     abilityToggleable,
@@ -428,13 +438,18 @@ export const syncPokemon = (
 
   // check if we should set the ability to one of the transformed Pokemon's abilities
   // (only when the Pokemon isn't server-sourced since we don't know what the actual ability was)
-  const shouldUpdateTransformedAbility = !!transformedForme
-    && !syncedPokemon.serverSourced
-    && !!transformedAbilities?.length
-    && (!syncedPokemon.ability || !transformedAbilities.includes(syncedPokemon.ability));
+  // const shouldUpdateTransformedAbility = !!transformedForme
+  //   && !syncedPokemon.serverSourced
+  //   && !!transformedAbilities?.length
+  //   && (!syncedPokemon.ability || !transformedAbilities.includes(syncedPokemon.dirtyAbility));
 
-  if (shouldUpdateTransformedAbility) {
-    [syncedPokemon.ability] = transformedAbilities;
+  if (dirtyAbility && syncedPokemon.dirtyAbility !== dirtyAbility) {
+    // [syncedPokemon.dirtyAbility] = transformedAbilities;
+    syncedPokemon.dirtyAbility = dirtyAbility;
+  }
+
+  if (syncedPokemon.ability && syncedPokemon.ability === syncedPokemon.dirtyAbility) {
+    syncedPokemon.dirtyAbility = null;
   }
 
   // check for base stats (in case of forme changes)

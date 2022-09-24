@@ -63,7 +63,7 @@ export const sanitizePokemonVolatiles = (
  */
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-  gen: GenerationNum = <GenerationNum> env.int('calcdex-default-gen'),
+  gen: GenerationNum = env.int<GenerationNum>('calcdex-default-gen'),
 ): CalcdexPokemon => {
   const legacy = detectLegacyGen(gen);
 
@@ -96,7 +96,7 @@ export const sanitizePokemon = (
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
 
-    ability: (!legacy && (<AbilityName> pokemon?.ability || ('abilities' in pokemon && pokemon.abilities[0]))) || null,
+    ability: (!legacy && <AbilityName> pokemon?.ability) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
     // abilityToggled: 'abilityToggled' in pokemon ? pokemon.abilityToggled : detectToggledAbility(pokemon),
     baseAbility: <AbilityName> pokemon?.baseAbility?.replace(/no\s?ability/i, ''),
@@ -269,8 +269,8 @@ export const sanitizePokemon = (
       ? sanitizedPokemon.transformedAbilities
       : sanitizedPokemon.abilities;
 
-    if (!sanitizedPokemon.ability || !abilitiesSource.includes(sanitizedPokemon.ability)) {
-      [sanitizedPokemon.ability] = abilitiesSource;
+    if (!sanitizedPokemon.ability || (sanitizedPokemon.dirtyAbility && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))) {
+      [sanitizedPokemon.dirtyAbility] = abilitiesSource;
     }
   }
 
