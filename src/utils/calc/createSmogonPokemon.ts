@@ -6,8 +6,19 @@ import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
+export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
+export type SmogonPokemonOverrides = SmogonPokemonOptions['overrides'];
+
 const l = logger('@showdex/utils/calc/createSmogonPokemon');
 
+/**
+ * Factory that essentially converts a `CalcdexPokemon` into an instantiated `Pokemon` class from `@smogon/calc`.
+ *
+ * * This is basically the thing that "plugs-in" all the parameters for a Pokemon in the damage calculator.
+ * * Includes special handling for situations such as legacy gens, mega items, and type changes.
+ *
+ * @since 0.1.0
+ */
 export const createSmogonPokemon = (
   dex: Generation,
   pokemon: CalcdexPokemon,
@@ -89,7 +100,7 @@ export const createSmogonPokemon = (
   const hasMultiscale = !!ability
     && formatId(ability) === 'multiscale';
 
-  const options: ConstructorParameters<typeof SmogonPokemon>[2] = {
+  const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
     // of the class instance with curHP's value taking precedence over originalCurHP's value
     // (in other words, seems safe to specify either one, but if none, defaults to rawStats.hp)
@@ -162,6 +173,10 @@ export const createSmogonPokemon = (
       spd: pokemon.dirtyBoosts?.spd ?? pokemon.boosts?.spd ?? 0,
       spe: pokemon.dirtyBoosts?.spe ?? pokemon.boosts?.spe ?? 0,
     },
+
+    overrides: {
+      types: <SmogonPokemonOverrides['types']> pokemon.types,
+    },
   };
 
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
@@ -176,16 +191,11 @@ export const createSmogonPokemon = (
     const {
       baseStats,
       transformedBaseStats,
-      types,
     } = pokemon || {};
 
-    options.overrides = {
-      baseStats: {
-        ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
-        hp: baseStats.hp,
-      },
-
-      types: <typeof options.overrides.types> types,
+    (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats = {
+      ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
+      hp: baseStats.hp,
     };
   }
 
