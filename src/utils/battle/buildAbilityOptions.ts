@@ -122,7 +122,7 @@ export const buildAbilityOptions = (
       .sort();
 
     options.push({
-      label: 'Other',
+      label: 'All',
       options: otherAbilities.map((name) => ({
         label: name,
         value: name,
