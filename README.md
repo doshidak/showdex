@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="showdex-icon" width="25%" src="./src/assets/favicons/showdex-1024.png">
+  <img alt="showdex-icon" width="275px" src="./src/assets/favicons/showdex-1024.png">
 </p>
 
 <h1 align="center">
