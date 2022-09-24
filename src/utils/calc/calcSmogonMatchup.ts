@@ -6,17 +6,17 @@ import {
 } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, MoveName } from '@pkmn/data';
-import type {
-  // Field as SmogonField,
-  Move as SmogonMove,
-  // Pokemon as SmogonPokemon,
-  Result,
-} from '@smogon/calc';
+import type { Move as SmogonMove } from '@smogon/calc';
 import type {
   CalcdexBattleField,
   CalcdexPlayerKey,
   CalcdexPokemon,
 } from '@showdex/redux/store';
+import type { CalcdexMatchupParsedDescription } from './parseDescription';
+import { formatDamageRange } from './formatDamageRange';
+import { formatKoChance } from './formatKoChance';
+import { getKoColor } from './getKoColor';
+import { parseDescription } from './parseDescription';
 
 export interface CalcdexMatchupResult {
   /**
@@ -27,17 +27,28 @@ export interface CalcdexMatchupResult {
   move?: SmogonMove;
 
   /**
-   * Description of the result.
+   * Parsed description of the result.
    *
    * * Useful for displaying additional matchup information in a tooltip, for instance.
    *
-   * @example '252+ SpA Life Orb Venusaur Weather Ball (50 BP Normal) vs. 4 HP / 0 SpD Azumarill: 79-94 (23 - 27.4%) -- 59.5% chance to 4HKO'
+   * @example
+   * ```ts
+   * {
+   *   raw: '252 Atk Weavile Knock Off (97.5 BP) vs. 252 HP / 0 Def Heatran: 144-169 (37.3 - 43.7%) -- guaranteed 2HKO after Stealth Rock and 2 layers of Spikes',
+   *   attacker: '252 ATK Weavile Knock Off (97.5 BP)',
+   *   defender: '252 HP / 0 DEF Heatran',
+   *   damageRange: '144-169 (37.3 - 43.7%)',
+   *   koChance: 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes',
+   * }
+   * ```
    * @since 1.0.1
    */
-  description?: string;
+  description?: CalcdexMatchupParsedDescription;
 
   /**
    * In the format `XXX.X% - XXX.X%`, where `X` are numbers.
+   *
+   * * If the reported damage range was `'0 - 0%'`, this value will be `'N/A'` instead.
    *
    * @example '38.5% - 52.0%'
    * @since 0.1.2
@@ -64,118 +75,11 @@ export interface CalcdexMatchupResult {
 
 const l = logger('@showdex/utils/calc/calcSmogonMatchup');
 
-const formatDamageRange = (
-  // result: Result,
-  description: string,
-): string => {
-  // if (!result?.damage || typeof result.desc !== 'function') {
-  //   return null;
-  // }
-
-  if (!description) {
-    return null;
-  }
-
-  // const resultDesc = result.desc();
-
-  const extractedRange = /\(([\d.]+\s-\s[\d.]+%)\)/.exec(description)?.[1] || '';
-
-  if (extractedRange.includes('0 - 0%')) {
-    return '0%';
-  }
-
-  return extractedRange;
-};
-
-const formatKoChance = (
-  result: Result,
-): string => {
-  if (!result?.damage || typeof result.kochance !== 'function') {
-    return null;
-  }
-
-  const output: string[] = [];
-
-  try {
-    const resultKoChance = result.kochance();
-
-    if (!resultKoChance?.chance && !resultKoChance?.n) {
-      return null;
-    }
-
-    output.push(`${resultKoChance.n}HKO`);
-
-    // no point in displaying a 100% chance to KO
-    // (should be assumed that if there's no % displayed before the KO, it's 100%)
-    if (typeof resultKoChance.chance === 'number' && resultKoChance.chance !== 1) {
-      // sometimes, we might see '0.0% 3HKO' or something along those lines...
-      // probably it's like 0.09%, but gets rounded down when we fix it to 1 decimal place
-      const chancePercentage = resultKoChance.chance * 100;
-      const decimalPlaces = ['0.0', '100.0'].includes(chancePercentage.toFixed(1)) ? 2 : 1;
-      const fixedChance = chancePercentage.toFixed(decimalPlaces);
-
-      if (fixedChance !== '0.0' && fixedChance !== '100.0') {
-        // also truncate any trailing zeroes, e.g., 75.0% -> 75%
-        output.unshift(`${fixedChance}%`.replace('.0%', '%'));
-      }
-    }
-  } catch (error) {
-    if (__DEV__) {
-      l.error(
-        'Exception while grabbing the kochance() of the result.',
-        '\n', 'result', result,
-        '\n', '(You will only see this error on development.)',
-      );
-    }
-
-    throw error;
-  }
-
-  return output.join(' ');
-};
-
-/**
- * Index refers to the `result.n` value.
- *
- * * Hence why the first index (`0`) is `null` ("0HKO" = no KO... lmao).
- * * If `n` is `0` or falsy, the default color should be applied.
- * * Any index that exceeds the length of this array should use the last index's color.
- *
- * @since 0.1.2
- */
-const SmogonMatchupKoColors: string[] = [
-  null,
-  '#4CAF50', // 1HKO -- (styles/config/colors.scss) colors.$green
-  '#FF9800', // 2HKO -- MD Orange 500
-  '#FF9800', // 3HKO -- MD Orange 500
-  '#F44336', // 4+HKO -- (styles/config/colors.scss) colors.$red
-];
-
-const getKoColor = (
-  result: Result,
-): string => {
-  if (!result?.damage || typeof result.kochance !== 'function') {
-    return null;
-  }
-
-  const resultKoChance = result.kochance();
-
-  if (!resultKoChance?.chance && !resultKoChance?.n) {
-    return null;
-  }
-
-  const koColorIndex = Math.min(
-    resultKoChance.n,
-    SmogonMatchupKoColors.length - 1,
-  );
-
-  return SmogonMatchupKoColors[koColorIndex];
-};
-
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.
  *
- * @warning If using this within a React component, opt to use the `useSmogonMatchup()` hook instead.
+ * * If using this within a React component, opt to use the `useSmogonMatchup()` hook instead.
+ *
  * @since 0.1.2
  */
 export const calcSmogonMatchup = (
@@ -186,6 +90,15 @@ export const calcSmogonMatchup = (
   playerKey?: CalcdexPlayerKey,
   field?: CalcdexBattleField,
 ): CalcdexMatchupResult => {
+  // this is the object that will be returned
+  const matchup: CalcdexMatchupResult = {
+    move: null,
+    description: null,
+    damageRange: null,
+    koChance: null,
+    koColor: null,
+  };
+
   if (!dex?.num || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
       l.warn(
@@ -199,12 +112,14 @@ export const calcSmogonMatchup = (
       );
     }
 
-    return null;
+    return matchup;
   }
 
   const smogonPlayerPokemon = createSmogonPokemon(dex, playerPokemon, playerMove);
   const smogonPlayerPokemonMove = createSmogonMove(dex, playerPokemon, playerMove);
   const smogonOpponentPokemon = createSmogonPokemon(dex, opponentPokemon);
+
+  matchup.move = smogonPlayerPokemonMove;
 
   const attackerSide = playerKey === 'p1' ? field?.attackerSide : field?.defenderSide;
   const defenderSide = playerKey === 'p1' ? field?.defenderSide : field?.attackerSide;
@@ -224,15 +139,10 @@ export const calcSmogonMatchup = (
       smogonField,
     );
 
-    const description = result?.desc();
-
-    const matchup: CalcdexMatchupResult = {
-      move: smogonPlayerPokemonMove,
-      description,
-      damageRange: formatDamageRange(description),
-      koChance: formatKoChance(result),
-      koColor: getKoColor(result),
-    };
+    matchup.description = parseDescription(result);
+    matchup.damageRange = formatDamageRange(result);
+    matchup.koChance = formatKoChance(result);
+    matchup.koColor = getKoColor(result);
 
     // l.debug(
     //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
@@ -243,10 +153,12 @@ export const calcSmogonMatchup = (
     //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
     //   '\n', 'field', field,
     // );
-
-    return matchup;
   } catch (error) {
-    if (__DEV__) {
+    // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
+    // which is separate from 'N/A' damage (e.g., status moves).
+    // typically occurs when the opposing Pokemon is immune to the damaging move,
+    // like using Earthquake against a Lando-T, which is immune due to its Flying type.
+    if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
       l.error(
         'Exception while calculating the damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
         '\n', 'dex.num', dex.num,
@@ -257,13 +169,7 @@ export const calcSmogonMatchup = (
         '\n', error,
       );
     }
-
-    return {
-      move: smogonPlayerPokemonMove,
-      description: null,
-      damageRange: null,
-      koChance: null,
-      koColor: null,
-    };
   }
+
+  return matchup;
 };

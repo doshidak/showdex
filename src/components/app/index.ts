@@ -1,4 +1,3 @@
-export * from './ColorScheme';
 export * from './Picon';
 export * from './PiconButton';
 export * from './PokeHpBar';

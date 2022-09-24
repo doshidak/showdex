@@ -1,8 +1,8 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { BaseButton } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import { getResourceUrl } from '@showdex/utils/core';
 import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
 import styles from './InstanceButton.module.scss';
@@ -19,12 +19,19 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   format,
   authName,
   playerName,
-  opponentName,
+  opponentName: opponentNameFromProps,
   hoverScale = 1.015,
   disabled,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
+
+  const authPlayer = !!authName
+    && [playerName, opponentNameFromProps].includes(authName);
+
+  const opponentName = !authPlayer || authName === playerName
+    ? opponentNameFromProps
+    : playerName;
 
   return (
     <BaseButton
@@ -55,18 +62,23 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
             (!!playerName && !!opponentName) &&
             <>
               {
-                (!authName || authName !== playerName) &&
+                !authPlayer &&
                 <div className={styles.username}>
                   {playerName}
                 </div>
               }
 
-              <div className={styles.versus}>
+              <div
+                className={cx(
+                  styles.versus,
+                  authPlayer && styles.noPlayerName,
+                )}
+              >
                 vs
               </div>
 
               <div className={styles.username}>
-                {authName && authName === opponentName ? playerName : opponentName}
+                {opponentName}
               </div>
             </>
           }

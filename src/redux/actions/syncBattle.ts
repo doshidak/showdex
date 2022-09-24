@@ -1,7 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectPlayerKeyFromBattle,
+  detectPokemonIdent,
+  hasMegaForme,
   sanitizePokemon,
   sanitizePokemonVolatiles,
   syncField,
@@ -10,7 +13,7 @@ import {
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@pkmn/data';
+import type { Generation, GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleState, CalcdexPlayerKey, CalcdexSliceState } from '@showdex/redux/store';
 
 const l = logger('@showdex/redux/actions/syncBattle');
@@ -22,7 +25,22 @@ export interface SyncBattlePayload {
 
 export const SyncBattleActionType = 'calcdex:sync';
 
-/* eslint-disable no-nested-ternary */
+/**
+ * Internally-used search ID builder for Pokemon.
+ *
+ * @example 'p1: Moltres-Kanto|Moltres-Galar|L100|shiny'
+ * @since 1.0.2
+ */
+const searchId = (
+  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<Showdown.Pokemon>,
+): string => (pokemon?.speciesForme ? [
+  detectPokemonIdent(pokemon),
+  hasMegaForme(pokemon?.speciesForme)
+    ? pokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
+    : pokemon?.speciesForme,
+  `L${pokemon?.level || 100}`,
+  pokemon?.shiny && 'shiny',
+].filter(Boolean).join('|') : null);
 
 /**
  * Syncs the Showdown `battle` state with an existing `CalcdexBattleState`.
@@ -51,6 +69,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     const {
       id: battleId,
       nonce: battleNonce,
+      gen,
       myPokemon,
       stepQueue,
     } = battle || {};
@@ -64,7 +83,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     // yooo native deep-copying lessgo baby
-    const battleState = structuredClone(state[battleId]);
+    const battleState: CalcdexBattleState = structuredClone(state[battleId]);
 
     // l.debug(
     //   '\n', 'pre-copied battleState', state[battleId],
@@ -85,6 +104,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       return;
     }
 
+    // update the gen, if provided
+    if (typeof gen === 'number' && gen > 0) {
+      battleState.gen = <GenerationNum> gen;
+    }
+
     // detect the battle rules
     if (stepQueue?.length) {
       battleState.rules = detectBattleRules(stepQueue);
@@ -95,7 +119,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     // find out which side myPokemon belongs to
-    const myPokemonSide = detectPlayerKeyFromBattle(battle);
+    const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
+
+    if (detectedPlayerKey && battleState.playerKey !== detectedPlayerKey) {
+      battleState.playerKey = detectedPlayerKey;
+    }
+
+    // also, while we're here, update the authPlayerKey (if any) and opponentKey
+    battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
+    battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
 
     for (const playerKey of <CalcdexPlayerKey[]> ['p1', 'p2']) {
       // l.debug('Processing player', playerKey);
@@ -144,25 +176,27 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine if `myPokemon` belongs to the current player
-      const isMyPokemonSide = !!myPokemonSide
-        && playerKey === myPokemonSide
-        && Array.isArray(myPokemon)
-        && !!myPokemon.length;
+      const isMyPokemonSide = !!battleState.playerKey
+        && playerKey === battleState.playerKey
+        && !!myPokemon?.length;
+
+      // obtain the searchId of the active Pokemon, if any
+      const activeSearchId = searchId(player.active?.[0]);
 
       // preserve the initial ordering of myPokemon since it's subject to change its indices
       // (battle state may move the most recent active Pokemon to the front of the array)
       if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
-        playerState.pokemonOrder = myPokemon.map((p) => p.ident);
+        playerState.pokemonOrder = myPokemon.map((p) => searchId(p));
       }
 
       // reconstruct a full list of the current player's Pokemon, whether revealed or not
       // (but if we don't have the relevant info [i.e., !isMyPokemonSide], then just access the player's `pokemon`)
-      const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((ident) => {
-        const serverPokemon = myPokemon.find((p) => p.ident === ident);
+      const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((currentSearchId) => {
+        const serverPokemon = myPokemon.find((p) => searchId(p) === currentSearchId);
 
         // try to find a matching clientPokemon that has already been revealed using the ident,
         // which is seemingly consistent between the player's `pokemon` (Pokemon[]) and `myPokemon` (ServerPokemon[])
-        const clientPokemonIndex = player.pokemon.findIndex((p) => p.ident === serverPokemon.ident);
+        const clientPokemonIndex = player.pokemon.findIndex((p) => searchId(p) === currentSearchId);
 
         if (clientPokemonIndex > -1) {
           return player.pokemon[clientPokemonIndex];
@@ -182,6 +216,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           maxhp: serverPokemon.maxhp,
         };
       }) : player.pokemon;
+
+      // l.debug(
+      //   'playerKey', playerKey, 'isMyPokemonSide?', isMyPokemonSide,
+      //   '\n', 'activeSearchId', activeSearchId,
+      //   '\n', 'playerPokemon', playerPokemon,
+      // );
 
       // update each pokemon
       // (note that the index `i` should be relatively consistent between turns)
@@ -203,7 +243,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         });
 
         const serverPokemon = isMyPokemonSide
-          ? myPokemon.find((p) => p.ident === clientPokemon.ident)
+          ? myPokemon.find((p) => searchId(p) === searchId(clientPokemon))
           : null;
 
         const matchedPokemonIndex = playerState.pokemon.findIndex((p) => p.calcdexId === clientPokemonId);
@@ -243,7 +283,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (!matchedPokemon || matchedPokemon.speciesForme !== syncedPokemon.speciesForme) {
           // l.debug('Fetching learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey);
 
-          const learnset = await dex.learnsets.learnable(syncedPokemon.speciesForme.replace('-Mega', ''));
+          const sanitizedForme = hasMegaForme(syncedPokemon.speciesForme)
+            ? syncedPokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
+            : syncedPokemon.speciesForme;
+
+          const learnset = await dex.learnsets.learnable(sanitizedForme);
 
           // l.debug(
           //   'Fetched learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
@@ -313,8 +357,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // update activeIndex (and selectionIndex if autoSelect is enabled)
       // (hopefully the `ident` exists here!)
-      const activeIndex = player.active?.[0]?.ident
-        ? playerPokemon.findIndex((p) => p.ident === player.active[0].ident)
+      const activeIndex = activeSearchId
+        ? playerPokemon.findIndex((p) => searchId(p) === activeSearchId)
         : -1;
 
       if (activeIndex > -1) {
@@ -323,14 +367,20 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (playerState.autoSelect) {
           playerState.selectionIndex = activeIndex;
         }
+      } else if (__DEV__) {
+        l.warn(
+          'Could not find activeIndex for activeSearchId', activeSearchId,
+          '\n', 'player', playerState.sideid, 'playerPokemon', playerPokemon,
+          '\n', '(You will only see this warning on development.)',
+        );
       }
     }
 
     const syncedField = syncField(
-      battleState.field,
+      battleState,
       battle,
-      battleState.p1.activeIndex,
-      battleState.p2.activeIndex,
+      // battleState.p1.activeIndex,
+      // battleState.p2.activeIndex,
     );
 
     if (!syncedField?.gameType) {
@@ -367,5 +417,3 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     return battleState;
   },
 );
-
-/* eslint-enable no-nested-ternary */

@@ -1,4 +1,5 @@
 import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts';
+import { detectLegacyGen } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, NatureName } from '@pkmn/data';
@@ -7,7 +8,7 @@ import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store'
 const l = logger('@showdex/utils/calc/guessServerSpread');
 
 /**
- * Attempts to guess the spread (nature/EVs/IVs) of the passed-in `ServerPokemon`.
+ * Attempts to guess the spread (nature/EVs/IVs) of the passed-in `pokemon`.
  *
  * * Client unfortunately only gives us the *final* stats after the spread has been applied.
  * * This attempts to brute-force different values to obtain those final stats.
@@ -34,10 +35,23 @@ export const guessServerSpread = (
   pokemon: CalcdexPokemon,
   knownNature?: NatureName,
 ): Partial<CalcdexPokemonPreset> => {
-  if (!pokemon?.ident) {
+  if (detectLegacyGen(dex)) {
     if (__DEV__) {
       l.warn(
-        'Received an invalid Pokemon', pokemon?.ident,
+        'Cannot guess a legacy spread; use guessServerLegacySpread() instead.',
+        '\n', 'dex.num', dex?.num,
+        '\n', 'pokemon', pokemon,
+        '\n', '(You will only see this warning on development.)',
+      );
+    }
+
+    return null;
+  }
+
+  if (!pokemon?.speciesForme) {
+    if (__DEV__) {
+      l.warn(
+        'Received an invalid Pokemon', pokemon?.ident || pokemon?.speciesForme,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -49,7 +63,7 @@ export const guessServerSpread = (
   if (!Object.keys(pokemon.baseStats || {}).length) {
     if (__DEV__) {
       l.warn(
-        'No baseStats were found for Pokemon', pokemon.ident,
+        'No baseStats were found for Pokemon', pokemon.ident || pokemon.speciesForme,
         // '\n', 'dex', dex,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
@@ -59,9 +73,9 @@ export const guessServerSpread = (
     return null;
   }
 
-  if (!pokemon.serverSourced && __DEV__) {
+  if (__DEV__ && !pokemon.serverSourced) {
     l.warn(
-      'Attempting to guess the spread of non-server Pokemon', pokemon.ident,
+      'Attempting to guess the spread of non-server Pokemon', pokemon.ident || pokemon.speciesForme,
       '\n', 'pokemon', pokemon,
       '\n', '(You will only see this warning on development.)',
     );
@@ -83,11 +97,14 @@ export const guessServerSpread = (
     evs: {},
   };
 
-  const natureCombinations = guessedSpread?.nature ? [
-    guessedSpread.nature,
-    ...PokemonCommonNatures.filter((n) => n !== guessedSpread.nature),
-  ].filter(Boolean) : PokemonCommonNatures;
+  const natureCombinations = guessedSpread?.nature
+    ? [
+      guessedSpread.nature,
+      ...PokemonCommonNatures.filter((n) => n !== guessedSpread.nature),
+    ].filter(Boolean)
+    : PokemonCommonNatures;
 
+  // logs of each guess (only on development)
   const logs: string[] = [];
 
   // don't read any further... I'm warning you :o
@@ -119,7 +136,7 @@ export const guessServerSpread = (
       }
 
       // don't say I didn't warn ya!
-      for (const iv of [31, 30, 29, 21, 20, 19, 18, 3, 2, 1, 0]) { // try some IVs, but not all 31 possible combinations
+      for (const iv of [31, 30, 29, 28, 27, 26, 25, 22, 21, 20, 19, 18, 17, 16, 15, 10, 8, 6, 5, 3, 2, 1, 0]) { // try some IVs, but not all 31 possible combinations
         for (let ev = 0; ev <= 252; ev += 4) { // try 252 to 0 in multiples of 4
           calculatedStats[stat] = dex.stats.calc(
             stat,
@@ -130,10 +147,10 @@ export const guessServerSpread = (
             nature,
           );
 
-          if ([0, 4, 80, 84, 88, 252].includes(ev)) {
+          if (__DEV__ && [0, 4, 80, 84, 88, 252].includes(ev)) {
             logs.push([
               'TRY ',
-              nature.name.padEnd(10, '·').toUpperCase(),
+              nature.name.padEnd(8, '·').toUpperCase(),
               stat.toUpperCase(),
               `IV ${iv}`, `EV ${ev}`, '=',
               calculatedStats[stat], '===', serverStats[stat], '?',
@@ -142,13 +159,15 @@ export const guessServerSpread = (
           }
 
           if (calculatedStats[stat] === serverStats[stat]) {
-            logs.push([
-              'DONE',
-              nature.name.padEnd(10, '·').toUpperCase(),
-              stat.toUpperCase(),
-              `IV ${iv}`, `EV ${ev}`, '=',
-              calculatedStats[stat],
-            ].join(' '));
+            if (__DEV__) {
+              logs.push([
+                'DONE',
+                nature.name.padEnd(8, '·').toUpperCase(),
+                stat.toUpperCase(),
+                `IV ${iv}`, `EV ${ev}`, '=',
+                calculatedStats[stat],
+              ].join(' '));
+            }
 
             guessedSpread.ivs[stat] = iv;
             guessedSpread.evs[stat] = ev;
@@ -180,7 +199,7 @@ export const guessServerSpread = (
 
     if (statsMatch && evsLegal) {
       l.debug(
-        'Found nature that matches all of the stats for Pokemon', pokemon.ident,
+        'Found nature that matches all of the stats for Pokemon', pokemon.ident || pokemon.speciesForme,
         '\n', 'nature', nature.name,
         '\n', 'calculatedStats', calculatedStats,
         '\n', 'serverStats', serverStats,
@@ -204,7 +223,7 @@ export const guessServerSpread = (
 
   if (!Object.keys({ ...guessedSpread.ivs, ...guessedSpread.evs }).length) {
     l.debug(
-      'Failed to find the actual spread for Pokemon', pokemon.ident,
+      'Failed to find the actual spread for Pokemon', pokemon.ident || pokemon.speciesForme,
       '\n', 'guessedSpread', guessedSpread,
       '\n', 'serverStats', serverStats,
       '\n', 'pokemon', pokemon,
@@ -212,7 +231,7 @@ export const guessServerSpread = (
     );
   } else {
     l.debug(
-      'Returning the best guess of the spread for Pokemon', pokemon.ident,
+      'Returning the best guess of the spread for Pokemon', pokemon.ident || pokemon.speciesForme,
       '\n', 'guessedSpread', guessedSpread,
       '\n', 'serverStats', serverStats,
       '\n', 'pokemon', pokemon,

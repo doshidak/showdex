@@ -21,7 +21,7 @@ declare namespace Showdown {
   interface Species extends Effect {
     readonly effectType: 'Species';
 
-    readonly basicSpecies: string;
+    readonly baseSpecies: string;
     readonly forme: string;
     readonly formeid: string;
     readonly spriteid: string;

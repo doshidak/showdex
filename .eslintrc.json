@@ -98,6 +98,7 @@
     "no-console": 0,
     "no-continue": 0,
     "no-invalid-this": 0,
+    "no-nested-ternary": 0,
     "no-param-reassign": 0,
     "no-plusplus": 0,
     "no-prototype-builtins": 0,

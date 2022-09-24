@@ -19,6 +19,7 @@ module.exports = {
     { name: 'comps' },
     { name: 'consts' },
     { name: 'content' }, // content script (src/content.ts)
+    { name: 'env' },
     { name: 'main' }, // main script (src/main.ts)
     { name: 'manifest' },
     { name: 'redux' },

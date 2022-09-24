@@ -91,4 +91,8 @@ div.container {
   font-size: 9px;
   text-transform: uppercase;
   opacity: 0.6;
+
+  &.noPlayerName {
+    @include spacing.padding($left: 0);
+  }
 }

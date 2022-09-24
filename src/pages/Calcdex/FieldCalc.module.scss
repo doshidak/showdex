@@ -26,11 +26,11 @@ button.toggleButton {
 }
 
 .toggleButtonLabel {
-  .light &.inactive {
+  .light .inactive & {
     color: colors.$black;
   }
 
-  .dark &.inactive {
+  .dark .inactive & {
     color: colors.$white;
   }
 }

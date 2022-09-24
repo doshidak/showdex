@@ -1,9 +1,10 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { Picon } from '@showdex/components/app';
+import { BaseButton, Tooltip } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import type { PiconProps } from '@showdex/components/app';
 import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
-import { Picon, useColorScheme } from '@showdex/components/app';
-import { BaseButton, Tooltip } from '@showdex/components/ui';
 import styles from './PiconButton.module.scss';
 
 export interface PiconButtonProps extends BaseButtonProps {

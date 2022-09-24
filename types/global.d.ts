@@ -7,7 +7,10 @@ declare module '*.module.scss' {
 }
 
 declare const app: Showdown.ClientApp;
+declare const Config: Showdown.PSConfig;
 declare const Dex: Showdown.Dex; /** @todo convert to declare class Dex in battle-dex.d.ts */
-declare const BattleAbilities: { [abilityid: string]: Showdown.Ability; };
-declare const BattleMovedex: { [moveid: string]: Showdown.Move; };
+declare const BattleAbilities: Showdown.BattleAbilities;
+declare const BattleItems: Showdown.BattleItems;
+declare const BattleMovedex: Showdown.BattleMovedex;
+declare const BattleTeambuilderTable: Showdown.BattleTeambuilderTable;
 declare const UserPopup: Showdown.UserPopup;

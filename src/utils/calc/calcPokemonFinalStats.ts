@@ -1,10 +1,10 @@
 // import { getFinalSpeed, getModifiedStat } from '@smogon/calc/dist/mechanics/util';
 import { PokemonInitialStats, PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts';
 import { formatId as id } from '@showdex/utils/app';
-// import { detectSpeciesForme } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { hasMegaForme } from '@showdex/utils/battle';
+// import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@pkmn/data';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 // import { createSmogonField } from './createSmogonField';
@@ -28,17 +28,20 @@ const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
  * @since 0.1.3
  */
 export const calcPokemonFinalStats = (
-  dex: Generation,
+  // dex: Generation,
+  gen: GenerationNum,
   pokemon: DeepPartial<CalcdexPokemon>,
   opponentPokemon: DeepPartial<CalcdexPokemon>,
   field: CalcdexBattleField,
   playerKey: CalcdexPlayerKey,
 ): Showdown.StatsTable => {
-  if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
+  // if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
+  if (typeof Dex === 'undefined') {
     if (__DEV__) {
       l.warn(
-        'Cannot calculate stats since dex.stats.calc() and/or dex.species.get() are not available.',
-        '\n', 'dex', dex,
+        // 'Cannot calculate stats since dex.stats.calc() and/or dex.species.get() are not available.',
+        'Global Dex object is unavailable.',
+        // '\n', 'dex', dex,
         '\n', 'pokemon', pokemon,
         '\n', 'field', field,
         '\n', 'playerKey', playerKey,
@@ -48,8 +51,6 @@ export const calcPokemonFinalStats = (
 
     return { ...PokemonInitialStats };
   }
-
-  const gen = dex.num || <GenerationNum> env.int('calcdex-default-gen');
 
   const hpPercentage = calcPokemonHp(pokemon);
 
@@ -95,7 +96,7 @@ export const calcPokemonFinalStats = (
     ? pokemon.volatiles.formechange[1]
     : pokemon.speciesForme;
 
-  const species = dex.species.get(speciesForme);
+  const species = Dex.forGen(gen).species.get(speciesForme);
   const baseForme = id(species?.baseSpecies);
 
   const hasPowerTrick = 'powertrick' in pokemon.volatiles; // this is a move btw, not an ability!
@@ -106,6 +107,7 @@ export const calcPokemonFinalStats = (
   const item = id(pokemon.dirtyItem ?? pokemon.item);
 
   const ignoreItem = hasEmbargo
+    || hasMegaForme(speciesForme)
     || field.isMagicRoom
     || (ability === 'klutz' && !PokemonSpeedReductionItems.map((i) => id(i)).includes(item));
 
@@ -365,7 +367,7 @@ export const calcPokemonFinalStats = (
 
   // apply NFE (not fully evolved) effects
   const nfe = species?.evos?.some((evo) => {
-    const evoSpecies = dex.species.get(evo);
+    const evoSpecies = Dex.forGen(gen).species.get(evo);
 
     return !evoSpecies?.isNonstandard
       || evoSpecies?.isNonstandard === species.isNonstandard;

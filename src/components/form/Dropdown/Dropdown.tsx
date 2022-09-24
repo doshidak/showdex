@@ -2,8 +2,8 @@ import * as React from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
 import cx from 'classnames';
-import { useColorScheme } from '@showdex/components/app';
 import { Tooltip } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import type { FieldInputProps, FieldRenderProps } from 'react-final-form';
 import type { SelectInstance } from 'react-select';
 import type {
@@ -62,10 +62,11 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   clearOnEsc?: boolean;
   creatable?: boolean;
   multi?: boolean;
-  minMenuHeight?: number;
-  maxMenuHeight?: number;
   openMenuOnPress?: boolean;
   openMenuOnFocus?: boolean;
+  minMenuHeight?: number;
+  maxMenuHeight?: number;
+  tabSelectsValue?: boolean;
   hideSelections?: boolean;
   autoFocus?: boolean;
   loading?: boolean;
@@ -94,6 +95,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   openMenuOnFocus,
   minMenuHeight = 50,
   maxMenuHeight = 137,
+  tabSelectsValue = true,
   hideSelections,
   autoFocus,
   loading,
@@ -210,7 +212,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           loadingMessage={() => loadingMessage}
           noOptionsMessage={() => noOptionsMessage}
           autoFocus={autoFocus}
-          tabSelectsValue={false}
+          tabSelectsValue={tabSelectsValue}
           escapeClearsValue={clearable && clearOnEsc}
           hideSelectedOptions={hideSelections}
           minMenuHeight={minMenuHeight}

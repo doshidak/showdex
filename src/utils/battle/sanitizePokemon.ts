@@ -9,12 +9,11 @@ import type {
   MoveName,
 } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectLegacyGen } from './detectLegacyGen';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
 import { toggleableAbility } from './toggleableAbility';
-
-/* eslint-disable no-nested-ternary */
 
 /**
  * Pokemon `volatiles` require special love and attention before they get Redux'd.
@@ -64,8 +63,10 @@ export const sanitizePokemonVolatiles = (
  */
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-  gen: GenerationNum = <GenerationNum> env.int('calcdex-default-gen'),
+  gen: GenerationNum = env.int<GenerationNum>('calcdex-default-gen'),
 ): CalcdexPokemon => {
+  const legacy = detectLegacyGen(gen);
+
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];
 
@@ -78,7 +79,7 @@ export const sanitizePokemon = (
     searchid: pokemon?.searchid,
 
     speciesForme: detectSpeciesForme(pokemon),
-    // rawSpeciesForme: pokemon?.speciesForme,
+    altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
     transformedForme: transformed
       ? typeof pokemon.volatiles.transform[1] === 'object'
         ? (<Showdown.Pokemon> <unknown> pokemon.volatiles.transform[1])?.speciesForme || null
@@ -95,21 +96,27 @@ export const sanitizePokemon = (
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
 
-    ability: <AbilityName> pokemon?.ability || ('abilities' in pokemon && pokemon.abilities[0]) || null,
+    ability: (!legacy && <AbilityName> pokemon?.ability) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
     // abilityToggled: 'abilityToggled' in pokemon ? pokemon.abilityToggled : detectToggledAbility(pokemon),
-    baseAbility: <AbilityName> pokemon?.baseAbility,
-    abilities: ('abilities' in pokemon && pokemon.abilities) || [],
-    altAbilities: ('altAbilities' in pokemon && pokemon.altAbilities) || [],
+    baseAbility: <AbilityName> pokemon?.baseAbility?.replace(/no\s?ability/i, ''),
+    abilities: (!legacy && 'abilities' in pokemon && pokemon.abilities) || [],
+    altAbilities: (!legacy && 'altAbilities' in pokemon && pokemon.altAbilities) || [],
+    transformedAbilities: (!legacy && 'transformedAbilities' in pokemon && pokemon.transformedAbilities) || [],
 
-    item: <ItemName> pokemon?.item?.replace('(exists)', ''),
+    item: gen > 1
+      ? <ItemName> pokemon?.item?.replace('(exists)', '')
+      : null,
+
     dirtyItem: ('dirtyItem' in pokemon && pokemon.dirtyItem) || null,
-    altItems: ('altItems' in pokemon && pokemon.altItems) || [],
+    altItems: (gen > 1 && 'altItems' in pokemon && pokemon.altItems) || [],
     itemEffect: pokemon?.itemEffect,
     prevItem: <ItemName> pokemon?.prevItem,
     prevItemEffect: pokemon?.prevItemEffect,
 
-    nature: ('nature' in pokemon && pokemon.nature) || PokemonNatures[0],
+    nature: !legacy
+      ? ('nature' in pokemon && pokemon.nature) || PokemonNatures[0]
+      : null,
 
     ivs: {
       hp: ('ivs' in pokemon && pokemon.ivs?.hp) ?? 31,
@@ -120,19 +127,21 @@ export const sanitizePokemon = (
       spe: ('ivs' in pokemon && pokemon.ivs?.spe) ?? 31,
     },
 
-    evs: {
+    evs: !legacy ? {
       hp: ('evs' in pokemon && pokemon.evs?.hp) ?? 0,
       atk: ('evs' in pokemon && pokemon.evs?.atk) ?? 0,
       def: ('evs' in pokemon && pokemon.evs?.def) ?? 0,
       spa: ('evs' in pokemon && pokemon.evs?.spa) ?? 0,
       spd: ('evs' in pokemon && pokemon.evs?.spd) ?? 0,
       spe: ('evs' in pokemon && pokemon.evs?.spe) ?? 0,
-    },
+    } : {},
 
     boosts: {
       atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,
       def: typeof pokemon?.boosts?.def === 'number' ? pokemon.boosts.def : 0,
-      spa: typeof pokemon?.boosts?.spa === 'number' ? pokemon.boosts.spa : 0,
+      spa: 'spc' in (pokemon?.boosts || {}) && typeof (<Showdown.Pokemon> pokemon).boosts.spc === 'number'
+        ? (<Showdown.Pokemon> pokemon).boosts.spc
+        : typeof pokemon?.boosts?.spa === 'number' ? pokemon.boosts.spa : 0,
       spd: typeof pokemon?.boosts?.spd === 'number' ? pokemon.boosts.spd : 0,
       spe: typeof pokemon?.boosts?.spe === 'number' ? pokemon.boosts.spe : 0,
     },
@@ -166,9 +175,8 @@ export const sanitizePokemon = (
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
-    // useUltimateMoves: ('useUltimateMoves' in pokemon && pokemon.useUltimateMoves) || false,
-    useZ: ('useZ' in pokemon && pokemon.useZ) || false,
-    useMax: ('useMax' in pokemon && pokemon.useMax) || false,
+    useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
+    useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
     lastMove: pokemon?.lastMove,
 
     moveTrack: Array.isArray(pokemon?.moveTrack)
@@ -209,35 +217,60 @@ export const sanitizePokemon = (
       ? Dex.forGen(gen).species.get(sanitizedPokemon.transformedForme)
       : null;
 
+    // only set the altFormes if we're currently looking at the baseForme
+    sanitizedPokemon.altFormes = transformedSpecies?.baseSpecies
+      && transformedSpecies.baseSpecies === sanitizedPokemon.transformedForme
+      && transformedSpecies.otherFormes?.length
+      ? [
+        transformedSpecies.baseSpecies,
+        ...(<string[]> transformedSpecies.otherFormes), // dunno why otherFormes is type any[]
+      ]
+      : species?.baseSpecies
+        && species.baseSpecies === sanitizedPokemon.speciesForme
+        && species.otherFormes?.length
+        ? [
+          species.baseSpecies,
+          ...(<string[]> species.otherFormes),
+        ]
+        : [];
+
     if (transformedSpecies?.baseStats) {
-      const transformedBaseStats = { ...transformedSpecies.baseStats };
+      sanitizedPokemon.transformedBaseStats = { ...transformedSpecies.baseStats };
 
       // Transform ability doesn't copy the base HP stat
       // (uses the original Pokemon's base HP stat)
-      if ('hp' in transformedBaseStats) {
-        delete transformedBaseStats.hp;
+      if ('hp' in sanitizedPokemon.transformedBaseStats) {
+        delete (<Showdown.StatsTable> sanitizedPokemon.transformedBaseStats).hp;
       }
-
-      sanitizedPokemon.transformedBaseStats = transformedBaseStats;
     }
 
     // only update the types if the dex returned types
-    if (!typeChanged && species?.types?.length) {
+    // (checking against typeChanged since if true, should've been already updated above)
+    if (!typeChanged && (transformedSpecies || species)?.types?.length) {
       sanitizedPokemon.types = [
-        ...(<Showdown.TypeName[]> species.types),
+        ...(<Showdown.TypeName[]> (transformedSpecies || species).types),
       ];
     }
 
-    // only update the abilities if the dex returned abilities
-    if (Object.keys(species?.abilities || {}).length) {
-      sanitizedPokemon.abilities = [
-        ...(sanitizedPokemon.abilities || []),
-        ...(<AbilityName[]> Object.values(species.abilities)),
-      ];
+    // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
+    // (using Set makes sure there aren't any duplicate abilities in the array)
+    sanitizedPokemon.abilities = Array.from(new Set([
+      ...(sanitizedPokemon.abilities || []),
+      ...(<AbilityName[]> Object.values(species?.abilities || {})),
+    ].filter(Boolean)));
 
-      if (!sanitizedPokemon.ability) {
-        [sanitizedPokemon.ability] = sanitizedPokemon.abilities;
-      }
+    // if transformed, update the legal abilities of the transformed Pokemon
+    sanitizedPokemon.transformedAbilities = [
+      ...(<AbilityName[]> Object.values(transformedSpecies?.abilities || {})),
+    ].filter(Boolean);
+
+    // check if we should auto-set the ability
+    const abilitiesSource = sanitizedPokemon.transformedAbilities.length
+      ? sanitizedPokemon.transformedAbilities
+      : sanitizedPokemon.abilities;
+
+    if (!sanitizedPokemon.ability || (sanitizedPokemon.dirtyAbility && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))) {
+      [sanitizedPokemon.dirtyAbility] = abilitiesSource;
     }
   }
 
@@ -249,5 +282,3 @@ export const sanitizePokemon = (
 
   return sanitizedPokemon;
 };
-
-/* eslint-enable no-nested-ternary */

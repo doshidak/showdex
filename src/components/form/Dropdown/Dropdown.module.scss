@@ -88,8 +88,10 @@ $group-padding-x: 1px;
 $group-heading-padding-x: $option-padding-x;
 $group-heading-padding-y: $option-padding-y;
 $group-heading-font-size: 8px;
-$group-heading-light-color: color.alpha(colors.$black, 0.5);
-$group-heading-dark-color: color.alpha(colors.$white, 0.5);
+$group-heading-light-color: color.alpha(colors.$black, 0.75);
+$group-heading-dark-color: color.alpha(colors.$white, 0.75);
+$group-heading-light-background-color: color.alpha(colors.$black, 0.125);
+$group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .container {
   position: relative;
@@ -282,6 +284,7 @@ $group-heading-dark-color: color.alpha(colors.$white, 0.5);
 
 .groupHeading {
   display: block;
+  @include spacing.margin-xy($x: -1px);
   @include spacing.padding-xy($x: $group-heading-padding-x, $y: $group-heading-padding-y);
   font-size: $group-heading-font-size;
   text-transform: uppercase;
@@ -290,10 +293,12 @@ $group-heading-dark-color: color.alpha(colors.$white, 0.5);
 
   .light & {
     color: $group-heading-light-color;
+    background-color: $group-heading-light-background-color;
   }
 
   .dark & {
     color: $group-heading-dark-color;
+    background-color: $group-heading-dark-background-color;
   }
 }
 
@@ -450,7 +455,8 @@ $group-heading-dark-color: color.alpha(colors.$white, 0.5);
 
 .menuList {
   position: relative;
-  overflow-y: auto;
+  // overflow-y: auto;
+  overflow-x: hidden;
 }
 
 // SelectOption

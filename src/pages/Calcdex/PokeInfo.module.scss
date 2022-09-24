@@ -62,14 +62,42 @@
   transform: translateY(-2px);
 }
 
-.pokemonName {
-  display: inline-block;
-  vertical-align: top;
+button.pokemonNameButton {
   max-width: 45%;
   font-weight: 500;
+  color: inherit;
+
+  &.missingForme {
+    font-weight: 300;
+  }
+
+  &:not(.missingForme).disabled {
+    opacity: 1;
+  }
+}
+
+.pokemonNameLabel {
+  display: inline-block;
+  vertical-align: top;
+  // max-width: 45%;
+  // font-weight: 500;
+  font-weight: inherit;
+  color: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.pokemonLevel {
+  @include spacing.margin($left: 5px);
+  text-transform: uppercase;
+  opacity: 0.65;
+  user-select: none;
+}
+
+.pokemonTypes {
+  @include spacing.margin($left: 5px);
+  user-select: none;
 }
 
 .toggleButtonLabel {

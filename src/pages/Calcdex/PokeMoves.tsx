@@ -1,9 +1,10 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokeType, useColorScheme } from '@showdex/components/app';
+import { PokeType } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
+import { useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions } from '@showdex/utils/battle';
 import type { MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
@@ -128,7 +129,7 @@ export const PokeMoves = ({
         }
 
         {
-          ((format?.includes('nationaldex') || gen === 8) && !rules?.dynamax) &&
+          ((format?.includes('nationaldex') || (gen === 8 && !format?.includes('bdsp'))) && !rules?.dynamax) &&
           <>
             {' '}
             <Button
@@ -137,14 +138,11 @@ export const PokeMoves = ({
                 styles.toggleButtonLabel,
                 !pokemon?.useMax && styles.inactive,
               )}
-              // label={gen === 6 || gen === 7 ? 'Z-PWR' : 'Max'}
               label="Max"
-              // tooltip={`${pokemon?.useUltimateMoves ? 'Deactivate' : 'Activate'} ${gen === 6 || gen === 7 ? 'Z-Power' : 'Max'} Moves`}
               tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
               // absoluteHover
               disabled={!pokemon}
               onPress={() => onPokemonChange?.({
-                // useUltimateMoves: !pokemon?.useUltimateMoves,
                 useMax: !pokemon?.useMax,
               })}
             />
@@ -182,7 +180,7 @@ export const PokeMoves = ({
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
         const moveName = pokemon?.moves?.[i];
-        const move = moveName ? Dex?.moves?.get?.(moveName) : null;
+        const move = moveName ? Dex?.forGen(gen).moves.get(moveName) : null;
 
         // const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
         // const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
@@ -226,7 +224,9 @@ export const PokeMoves = ({
                         <span className={styles.label}>
                           {' '}{calculatorMove.category.slice(0, 4)}
                         </span>
-                        {calculatorMove?.bp ? ` ${calculatorMove.bp}` : null}
+                        {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
+                        {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
+                        {(calculatorMove?.bp ?? 0) > 2 && ` ${calculatorMove.bp}`}
                       </>
                     }
 
@@ -277,7 +277,7 @@ export const PokeMoves = ({
 
             <TableGridItem>
               {/* [XXX.X% &ndash;] XXX.X% */}
-              {/* (note: '0 - 0%' damageRange will be reported as '0%') */}
+              {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
               {
                 !!damageRange &&
                 <Button
@@ -287,10 +287,11 @@ export const PokeMoves = ({
                   )}
                   labelClassName={cx(
                     styles.damageButtonLabel,
-                    damageRange === '0%' && styles.noDamage,
+                    damageRange === 'N/A' && styles.noDamage,
                   )}
-                  label={damageRange === '0%' ? 'N/A' : damageRange}
-                  tooltip={description ? (
+                  tabIndex={-1} // not ADA compliant, obviously lol
+                  label={damageRange}
+                  tooltip={description?.raw ? (
                     <div className={styles.descTooltip}>
                       <div
                         className={cx(
@@ -301,13 +302,42 @@ export const PokeMoves = ({
                         Copied!
                       </div>
 
-                      {description}
+                      {description?.attacker}
+                      {
+                        !!description?.defender &&
+                        <>
+                          {
+                            !!description.attacker &&
+                            <>
+                              <br />
+                              vs
+                              <br />
+                            </>
+                          }
+                          {description.defender}
+                        </>
+                      }
+                      {(!!description?.damageRange || !!description?.koChance) && ':'}
+                      {
+                        !!description?.damageRange &&
+                        <>
+                          <br />
+                          {description.damageRange}
+                        </>
+                      }
+                      {
+                        !!description?.koChance &&
+                        <>
+                          <br />
+                          {description.koChance}
+                        </>
+                      }
                     </div>
                   ) : null}
                   hoverScale={1}
                   absoluteHover
-                  disabled={!description}
-                  onPress={() => handleDamagePress(i, description)}
+                  disabled={!description?.raw}
+                  onPress={() => handleDamagePress(i, description?.raw)}
                 />
               }
             </TableGridItem>

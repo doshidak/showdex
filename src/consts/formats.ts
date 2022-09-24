@@ -65,7 +65,10 @@ export const FormatLabels: Record<string, string> = {
   multirandombattle: 'Randoms Multibility',
   nationaldex: 'National Dex',
   nationaldexag: 'National Dex AG',
+  nationaldexbh: 'National Dex B-Hackmons',
   nationaldexmonotype: 'National Dex Monotype',
+  nationaldexru: 'National Dex RU',
+  nationaldexuu: 'National Dex UU',
   natureswap: 'Nature Swap',
   nextou: 'OU Next',
   nfe: 'NFE', // NotFullyEvolved

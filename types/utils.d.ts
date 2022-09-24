@@ -36,6 +36,23 @@ declare type DeepPartial<T> = T extends object ? {
 } : T;
 
 /**
+ * Construct a type from `T` whose properties in `K` are required.
+ *
+ * @example
+ * ```ts
+ * type Sosig = {
+ *   fatness?: number;
+ *   color?: number;
+ *   gain?: number;
+ * };
+ * type AddMoreSosig = PickRequired<Sosig, 'fatness'>;
+ * // -> { fatness: number; color?: number; gain?: number; }
+ * ```
+ * @since 1.0.2
+ */
+declare type PickRequired<T, K extends keyof T> = Modify<T, Required<Pick<T, K>>>;
+
+/**
  * Construct a literal type with the keys of the indexable type `T` whose types extend the literal type `K`.
  *
  * @example
@@ -113,3 +130,17 @@ declare type NonFunctionPropertyNames<T> = Exclude<keyof T, FunctionPropertyName
  * @since 0.1.0
  */
 declare type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+
+/**
+ * Construct a type with all `readonly` properties removed.
+ *
+ * @since 1.0.2
+ */
+declare type Writable<T> = { -readonly [P in keyof T]: T[P]; };
+
+/**
+ * Construct a type with all `readonly` properties, including those in any sub-properties, removed.
+ *
+ * @since 1.0.2
+ */
+declare type DeepWritable<T> = { -readonly [P in keyof T]: DeepWritable<T[P]>; };

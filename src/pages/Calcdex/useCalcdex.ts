@@ -3,6 +3,7 @@ import { Generations } from '@pkmn/data';
 import { Dex as PkmnDex } from '@pkmn/dex';
 import { syncBattle } from '@showdex/redux/actions';
 import { calcdexSlice, useCalcdexState, useDispatch } from '@showdex/redux/store';
+import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, GenerationNum } from '@pkmn/data';
 import type {
@@ -17,8 +18,10 @@ export interface CalcdexHookProps {
 }
 
 export interface CalcdexHookInterface {
+  gens: Generations;
   dex: Generation;
   state: CalcdexBattleState;
+
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   updateField: (field: DeepPartial<CalcdexBattleField>) => void;
   setActiveIndex: (playerKey: CalcdexPlayerKey, activeIndex: number) => void;
@@ -46,12 +49,13 @@ export const useCalcdex = ({
   );
 
   const format = battle?.id?.split?.('-')?.[1];
+  // const isBdsp = format?.includes('bdsp');
 
   // for BDSP, though gen 8, should load from gen 4, otherwise,
   // Calcdex may crash due to incomplete Pokemon entries (like Bibarel)
-  const gen = format?.includes('bdsp')
-    ? 4
-    : battle?.gen as GenerationNum;
+  // (update [2022/09/22]: starting to use the built-in Dex, so shouldn't be an issue anymore)
+  const gen = battle?.gen as GenerationNum;
+  // const legacy = detectLegacyGen(gen);
 
   const gens = React.useRef(new Generations(PkmnDex));
   const dex = gens.current.get(gen);
@@ -150,6 +154,7 @@ export const useCalcdex = ({
   ]);
 
   return {
+    gens: gens.current,
     dex,
 
     state: battleState || {
@@ -157,23 +162,14 @@ export const useCalcdex = ({
       gen: null,
       format: null,
       rules: null,
-      field: null,
+      playerKey: 'p1',
+      authPlayerKey: null,
+      opponentKey: 'p2',
       p1: null,
       p2: null,
-      // p1: {
-      //   name: null,
-      //   rating: null,
-      //   activeIndex: -1,
-      //   selectionIndex: 0,
-      //   pokemon: [],
-      // },
-      // p2: {
-      //   name: null,
-      //   rating: null,
-      //   activeIndex: -1,
-      //   selectionIndex: 0,
-      //   pokemon: [],
-      // },
+      p3: null,
+      p4: null,
+      field: null,
     },
 
     updatePokemon: (playerKey, pokemon) => dispatch(calcdexSlice.actions.updatePokemon({
@@ -192,10 +188,33 @@ export const useCalcdex = ({
       [playerKey]: { activeIndex },
     })),
 
-    setSelectionIndex: (playerKey, selectionIndex) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId: battle?.id,
-      [playerKey]: { selectionIndex },
-    })),
+    setSelectionIndex: (playerKey, selectionIndex) => {
+      dispatch(calcdexSlice.actions.updatePlayer({
+        battleId: battle?.id,
+        [playerKey]: { selectionIndex },
+      }));
+
+      const updatedBattleState = structuredClone(battleState);
+
+      // purposefully made fatal (from "selectionIndex of null/undefined" errors) cause it shouldn't be
+      // null/undefined by the time this helper function is invoked
+      if (updatedBattleState[playerKey].selectionIndex !== selectionIndex) {
+        updatedBattleState[playerKey].selectionIndex = selectionIndex;
+      }
+
+      // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
+      // the Pokemon itself, not in the Side, which is the case for gen 2+.
+      // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
+      dispatch(calcdexSlice.actions.updateField({
+        battleId: battle?.id,
+        field: sanitizeField(
+          battle,
+          updatedBattleState,
+          playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
+          playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
+        ),
+      }));
+    },
 
     setAutoSelect: (playerKey, autoSelect) => dispatch(calcdexSlice.actions.updatePlayer({
       battleId: battle?.id,

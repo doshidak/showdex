@@ -1,7 +1,17 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { detectToggledAbility, toggleableAbility } from '@showdex/utils/battle';
-import { calcPokemonSpreadStats } from '@showdex/utils/calc';
+import {
+  detectLegacyGen,
+  detectToggledAbility,
+  sanitizePokemon,
+  toggleableAbility,
+} from '@showdex/utils/battle';
+import {
+  calcLegacyHpDv,
+  calcPokemonSpreadStats,
+  convertLegacyDvToIv,
+  getLegacySpcDv,
+} from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@pkmn/types';
@@ -46,6 +56,8 @@ export const PokeCalc = ({
   field,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
+  const legacy = detectLegacyGen(gen);
+
   const calculateMatchup = useSmogonMatchup(
     dex,
     playerPokemon,
@@ -78,6 +90,28 @@ export const PokeCalc = ({
       },
     };
 
+    // perform special processing for IVs if we're in a legacy gen
+    if (legacy) {
+      // update SPA and SPD to equal each other since we don't keep track of SPC separately
+      payload.ivs.spa = convertLegacyDvToIv(getLegacySpcDv(payload.ivs));
+      payload.ivs.spd = payload.ivs.spa;
+
+      // recalculate & convert the HP DV into an IV
+      payload.ivs.hp = convertLegacyDvToIv(calcLegacyHpDv(payload.ivs));
+
+      // also, remove any incompatible mechanics (like abilities and natures) from the payload
+      // (it's ok that the payload doesn't actually have these properties)
+      delete payload.ability;
+      delete payload.dirtyAbility;
+      delete payload.nature;
+
+      // note: only items were introduced in gen 2
+      if (gen === 1) {
+        delete payload.item;
+        delete payload.dirtyItem;
+      }
+    }
+
     // re-check for toggleable abilities in the mutation
     if ('ability' in payload || 'dirtyAbility' in payload) {
       const tempPokemon = {
@@ -102,8 +136,34 @@ export const PokeCalc = ({
       payload.dirtyItem = null;
     }
 
+    // check for any possible abilities, base stat & type updates due to speciesForme changes
+    if ('speciesForme' in payload && payload.speciesForme !== playerPokemon.speciesForme) {
+      // const newSpecies = Dex.forGen(dex?.num).species.get(payload.speciesForme);
+
+      const {
+        abilities,
+        baseStats,
+        types,
+      } = sanitizePokemon({
+        ...playerPokemon,
+        ...payload,
+      }, gen);
+
+      if (abilities?.length) {
+        payload.abilities = [...abilities];
+      }
+
+      if (types?.length) {
+        payload.types = [...types];
+      }
+
+      if (Object.keys(baseStats || {}).length) {
+        payload.baseStats = { ...baseStats };
+      }
+    }
+
     // recalculate the stats with the updated EVs/IVs
-    if (typeof dex?.stats?.calc === 'function') {
+    if (typeof dex !== 'undefined') {
       payload.spreadStats = calcPokemonSpreadStats(dex, {
         ...playerPokemon,
         ...payload,
@@ -160,7 +220,8 @@ export const PokeCalc = ({
       {/* IVs, EVs, calculated stats, boosts */}
       <PokeStats
         className={cx(styles.section, styles.stats)}
-        dex={dex}
+        // dex={dex}
+        gen={gen}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={field}

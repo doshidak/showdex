@@ -2,6 +2,8 @@ import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import type { AbilityName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
+import { detectLegacyGen } from './detectLegacyGen';
 
 export interface PokemonAbilityOption {
   label: string;
@@ -26,16 +28,23 @@ export const buildAbilityOptions = (
 ): PokemonAbilityOption[] => {
   const options: PokemonAbilityOption[] = [];
 
-  if (!pokemon?.speciesForme) {
+  // for legacy formats, the dex will return a 'No Ability' ability,
+  // so make sure we return an empty array
+  const gen = detectGenFromFormat(format);
+  const legacy = detectLegacyGen(gen);
+
+  if (legacy || !pokemon?.speciesForme) {
     return options;
   }
 
   // const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
   const {
+    serverSourced,
     ability,
     abilities,
     altAbilities,
+    transformedAbilities,
     baseAbility,
     transformedForme,
   } = pokemon;
@@ -44,15 +53,20 @@ export const buildAbilityOptions = (
   const filterAbilities: AbilityName[] = [];
 
   if (transformedForme) {
+    const transformed = Array.from(new Set([
+      serverSourced && ability,
+      ...transformedAbilities,
+    ])).filter((n) => !!n && !abilities.includes(n)).sort();
+
     options.push({
       label: 'Transformed',
-      options: [{
-        label: ability,
-        value: ability,
-      }],
+      options: transformed.map((name) => ({
+        label: name,
+        value: name,
+      })),
     });
 
-    filterAbilities.push(ability);
+    filterAbilities.push(...transformed);
   } else if (formatId(baseAbility) === 'trace' && ability !== baseAbility) {
     options.push({
       label: 'Traced',
@@ -108,7 +122,7 @@ export const buildAbilityOptions = (
       .sort();
 
     options.push({
-      label: 'Other',
+      label: 'All',
       options: otherAbilities.map((name) => ({
         label: name,
         value: name,

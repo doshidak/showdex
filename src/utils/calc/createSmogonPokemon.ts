@@ -1,14 +1,24 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
+import { detectLegacyGen, hasMegaForme } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
+export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
+export type SmogonPokemonOverrides = SmogonPokemonOptions['overrides'];
+
 const l = logger('@showdex/utils/calc/createSmogonPokemon');
 
-/* eslint-disable no-nested-ternary */
-
+/**
+ * Factory that essentially converts a `CalcdexPokemon` into an instantiated `Pokemon` class from `@smogon/calc`.
+ *
+ * * This is basically the thing that "plugs-in" all the parameters for a Pokemon in the damage calculator.
+ * * Includes special handling for situations such as legacy gens, mega items, and type changes.
+ *
+ * @since 0.1.0
+ */
 export const createSmogonPokemon = (
   dex: Generation,
   pokemon: CalcdexPokemon,
@@ -19,6 +29,8 @@ export const createSmogonPokemon = (
   if (typeof dex?.num !== 'number' || dex.num < 1 || !pokemon?.calcdexId) {
     return null;
   }
+
+  const legacy = detectLegacyGen(dex);
 
   /**
    * @todo Remove the `dex` and use the `Dex` global instead.
@@ -36,21 +48,19 @@ export const createSmogonPokemon = (
     return null;
   }
 
-  // const ident = detectPokemonIdent(pokemon);
-
-  // if (!ident) {
-  //   return null;
-  // }
-
   // optional chaining here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
-  const item = pokemon.dirtyItem ?? pokemon.item;
+  const item = dex.num > 1
+    ? pokemon.dirtyItem ?? pokemon.item
+    : null;
+
+  // megas require special handling (like for the item), so make sure we detect these
+  const isMega = hasMegaForme(pokemon.speciesForme);
 
   const speciesForme = SmogonPokemon.getForme(
     dex,
-    // detectSpeciesForme(pokemon),
-    pokemon.transformedForme || pokemon.speciesForme,
-    item,
+    pokemon.speciesForme,
+    isMega ? null : item,
     moveName,
   );
 
@@ -69,25 +79,28 @@ export const createSmogonPokemon = (
     return null;
   }
 
-  // megas require special handling (like for the item), so make sure we detect these
-  const isMega = formatId(speciesForme)?.includes('mega');
-
   const hasMegaItem = !!item
     && /(?:ite|z$)/.test(formatId(item))
     && formatId(item) !== 'eviolite'; // oh god
 
   // if applicable, convert the '???' status into an empty string
-  const status = pokemon.status === '???' ? '' : pokemon.status;
+  // (don't apply the status if the Pokemon is fainted tho)
+  const status = pokemon.hp
+    ? pokemon.status === '???' ? null : pokemon.status
+    : null;
 
   // not using optional chaining here since ability cannot be cleared in PokeInfo
-  const ability = pokemon.dirtyAbility ?? pokemon.ability;
+  const ability = !legacy
+    ? pokemon.dirtyAbility ?? pokemon.ability
+    : null;
 
   // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
   // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
-  const hasMultiscale = formatId(ability) === 'multiscale';
+  const hasMultiscale = !!ability
+    && formatId(ability) === 'multiscale';
 
-  const options: ConstructorParameters<typeof SmogonPokemon>[2] = {
+  const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
     // of the class instance with curHP's value taking precedence over originalCurHP's value
     // (in other words, seems safe to specify either one, but if none, defaults to rawStats.hp)
@@ -127,14 +140,12 @@ export const createSmogonPokemon = (
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
-    // (useUltimateMoves is a gen-agnostic property that's user-toggleable and syncs w/ the battle state btw)
-    // isDynamaxed: pokemon.useUltimateMoves,
     isDynamaxed: pokemon.useMax,
 
     ability,
     abilityOn: pokemon.abilityToggleable ? pokemon.abilityToggled : undefined,
     item: isMega || hasMegaItem ? null : item,
-    nature: pokemon.nature,
+    nature: legacy ? undefined : pokemon.nature,
     moves: pokemon.moves,
 
     ivs: {
@@ -146,7 +157,7 @@ export const createSmogonPokemon = (
       spe: pokemon.ivs?.spe ?? 31,
     },
 
-    evs: {
+    evs: legacy ? undefined : {
       hp: pokemon.evs?.hp ?? 0,
       atk: pokemon.evs?.atk ?? 0,
       def: pokemon.evs?.def ?? 0,
@@ -162,7 +173,31 @@ export const createSmogonPokemon = (
       spd: pokemon.dirtyBoosts?.spd ?? pokemon.boosts?.spd ?? 0,
       spe: pokemon.dirtyBoosts?.spe ?? pokemon.boosts?.spe ?? 0,
     },
+
+    overrides: {
+      types: <SmogonPokemonOverrides['types']> pokemon.types,
+    },
   };
+
+  // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
+  // so we won't report these abilities to the calc to avoid unintentional double boostage
+  if (['intrepidsword', 'download'].includes(formatId(ability))) {
+    options.ability = 'Pressure';
+  }
+
+  // need to update the base HP stat for transformed Pokemon
+  // (otherwise, damage calculations may be incorrect!)
+  if (pokemon.transformedForme) {
+    const {
+      baseStats,
+      transformedBaseStats,
+    } = pokemon || {};
+
+    (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats = {
+      ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
+      hp: baseStats.hp,
+    };
+  }
 
   // const dexSpecies = dex.species.get(speciesForme);
   // const dexItem = dex.items.get(item);
@@ -175,25 +210,26 @@ export const createSmogonPokemon = (
   //     0,
   //   ) || dex;
 
+  const baseGen = <GenerationNum> Dex.species.get(speciesForme)?.gen;
   const isGalarian = formatId(speciesForme).includes('galar');
   const missingSpecies = !dex.species.get(speciesForme)?.exists;
 
-  const determinedDex = isMega || hasMegaItem
-    ? 7
+  const determinedDex = legacy
+    ? dex
     : isGalarian
-      ? 8
-      : missingSpecies
-        ? <GenerationNum> Dex.species.get(speciesForme)?.gen || 7
-        : dex;
+      ? <GenerationNum> 8
+      : isMega || hasMegaItem
+        ? <GenerationNum> Math.max(7, baseGen || 0)
+        : missingSpecies
+          ? <GenerationNum> Math.max(baseGen || 0, 4)
+          : dex;
 
-  l.debug(
-    'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
-    '\n', 'item', item,
-    '\n', 'isMega?', isMega,
-    '\n', 'hasMegaItem?', hasMegaItem,
-    '\n', 'isGalarian?', isGalarian,
-    '\n', 'missingSpecies?', missingSpecies,
-  );
+  // l.debug(
+  //   'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
+  //   '\n', 'item', item,
+  //   '\n', 'isMega?', isMega, 'hasMegaItem?', hasMegaItem,
+  //   '\n', 'missingSpecies?', missingSpecies, 'isGalarian?', isGalarian,
+  // );
 
   const smogonPokemon = new SmogonPokemon(
     determinedDex,
@@ -201,13 +237,5 @@ export const createSmogonPokemon = (
     options,
   );
 
-  // need to update the base HP stat for transformed Pokemon
-  // (otherwise, damage calculations may be incorrect!)
-  if (pokemon.transformedForme) {
-    smogonPokemon.rawStats.hp = pokemon.baseStats.hp;
-  }
-
   return smogonPokemon;
 };
-
-/* eslint-enable no-nested-ternary */

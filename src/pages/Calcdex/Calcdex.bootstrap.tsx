@@ -1,12 +1,12 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
-import { ColorSchemeProvider } from '@showdex/components/app';
 import {
   createSideRoom,
   // getActiveBattle,
   getBattleRoom,
   getCalcdexRoomId,
+  getSideRooms,
 } from '@showdex/utils/app';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
@@ -89,19 +89,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       if (typeof battle.prevSubscription === 'function') {
-        l.debug(
-          'battle.subscribe()',
-          '\n', 'Calling the original battle.subscribe() function...',
-        );
+        l.debug('Calling the original battle.subscribe() function...');
 
         battle.prevSubscription(state);
       }
 
       if (state === 'paused') {
-        l.debug(
-          'battle.subscribe()',
-          '\n', 'Subscription ignored cause the battle is paused or, probs more likely, ended',
-        );
+        l.debug('Subscription ignored cause the battle is paused or, probs more likely, ended');
 
         return;
       }
@@ -115,10 +109,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       if (!activeBattle) {
-        l.warn(
-          'battle.subscribe()',
-          '\n', 'No active battle found; ignoring Calcdex bootstrap...',
-        );
+        l.warn('No active battle found; ignoring Calcdex bootstrap...');
 
         return;
       }
@@ -127,8 +118,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         const calcdexRoomId = getCalcdexRoomId(roomid);
 
         l.debug(
-          'battle.subscribe() -> createSideRoom()',
-          '\n', 'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
+          'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
           '\n', 'id', calcdexRoomId,
           '\n', 'title', 'Calcdex',
         );
@@ -144,14 +134,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           activeBattle.calcdexRoom.tabHidden = true;
 
           // find the side room before the calcdexRoom to focus
-          // (the trailing dash ['-'] is important in 'battle-' cause the BattlesRoom has id 'battles')
-          const roomIds = Object.keys(app.rooms || {}).filter((id) => !!id && !id.startsWith('battle-'));
+          const sideRoomIds = getSideRooms().map((room) => room.id);
           const currentRoomId = app.curSideRoom?.id;
-          // const calcdexRoomIndex = roomIds.findIndex((id) => id === calcdexRoomId);
+          // const calcdexRoomIndex = sideRoomIds.findIndex((id) => id === calcdexRoomId);
 
-          const prevRoomId = roomIds
+          const prevRoomId = sideRoomIds
             // .slice(0, Math.max(calcdexRoomIndex - 1, 0))
-            .filter((id) => !('tabHidden' in app.rooms[id]) || !(app.rooms[id] as HtmlRoom).tabHidden)
+            .filter((id) => !(app.rooms[id] as unknown as HtmlRoom).tabHidden)
             .pop();
 
           // currentRoomId is tracked so that we don't focus to another room when this blurred Calcdex tab is "closed"
@@ -172,19 +161,16 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       activeBattle.nonce = calcBattleCalcdexNonce(activeBattle);
 
       l.debug(
-        'battle.subscribe() -> activeBattle.reactCalcdexRoom.render()',
-        '\n', 'Rendering Calcdex with battle nonce', activeBattle.nonce,
-        '\n', 'store.getState()', store.getState(),
+        'Rendering Calcdex with battle nonce', activeBattle.nonce,
+        // '\n', 'store.getState()', store.getState(),
       );
 
       activeBattle.reactCalcdexRoom.render((
         <ReduxProvider store={store}>
-          <ColorSchemeProvider>
-            <Calcdex
-              battle={activeBattle}
-              // tooltips={tooltips}
-            />
-          </ColorSchemeProvider>
+          <Calcdex
+            battle={activeBattle}
+            // tooltips={tooltips}
+          />
         </ReduxProvider>
       ));
     });

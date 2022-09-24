@@ -9,6 +9,9 @@
  */
 
 declare namespace Showdown {
+  type ColorScheme = 'light' | 'dark';
+  type ColorSchemeOption = ColorScheme | 'system';
+
   interface Dex extends ModdedDex {
     /**
      * @default 8
@@ -40,9 +43,11 @@ declare namespace Showdown {
     forGen(gen: number): this;
     resolveAvatar(avatar: string): string;
     sanitizeName(name: string): string;
-    prefs<T = unknown>(prop: string): T;
     getShortName(name: string): string;
     getEffect(name?: string): PureEffect | Item | Ability | Move;
+
+    prefs(prop: 'theme'): ColorSchemeOption;
+    prefs<T = unknown>(prop: string): T;
 
     moves: {
       get: (moveOrName?: string | Move) => Move;

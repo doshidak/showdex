@@ -18,34 +18,34 @@ export const createEnvParser = (
   dict: EnvDict = process.env,
   debugKey = 'DEBUG',
 ) => {
-  const env = (
+  const env = <T extends string = string>(
     key: string,
     defaultValue = '',
-  ): string => dict?.[constantCase(key)] || defaultValue;
+  ): T => <T> (dict?.[constantCase(key)] || defaultValue);
 
   // env type parsers
-  env.int = (
+  env.int = <T extends number = number>(
     key: string,
     defaultValue = 0,
-  ) => parseInt(env(key), 10) || defaultValue;
+  ): T => <T> (parseInt(env(key), 10) || defaultValue);
 
-  env.float = (
+  env.float = <T extends number = number>(
     key: string,
     defaultValue = 0,
-  ) => parseFloat(env(key)) || defaultValue;
+  ): T => <T> (parseFloat(env(key)) || defaultValue);
 
   env.bool = (
     key: string,
-  ) => env(key, 'false').toLowerCase() === 'true';
+  ): boolean => env(key, 'false').toLowerCase() === 'true';
 
   // env utilities
   env.exists = (
     key: string,
-  ) => constantCase(key) in dict;
+  ): boolean => constantCase(key) in dict;
 
   env.debug = (
     debugSubKey: string,
-  ) => [
+  ): boolean => [
     dict?.NODE_ENV,
     process.env.NODE_ENV,
   ].includes('development') && env.bool(`${debugKey}_${constantCase(debugSubKey)}`);
@@ -53,7 +53,7 @@ export const createEnvParser = (
   env.cmp = (
     key: string,
     testValue: string,
-  ) => env(key) === testValue;
+  ): boolean => env(key) === testValue;
 
   return env;
 };

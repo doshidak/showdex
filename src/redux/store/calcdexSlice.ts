@@ -4,7 +4,7 @@ import { sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
+import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
 import type {
   AbilityName,
   GenerationNum,
@@ -72,13 +72,30 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   serverSourced?: boolean;
 
   /**
-   * Unsanitized version of `speciesForme`, primarily used for determining Z/Max/G-Max moves.
+   * Alternative formes of the Pokemon.
    *
-   * @deprecated As of v0.1.3, since we no longer need to sanitize the `speciesForme`,
-   *   this is no longer needed.
-   * @since 0.1.2
+   * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
+   *   - Note that if the `speciesForme` is not a base forme or has no alternative formes, this array will be empty.
+   *   - Designed this way so that `PokeInfo` can easily check if it should allow switching formes based on this array's `length`.
+   *   - For example, `altFormes` for `'Rotom-Wash'` will be empty, while `'Rotom'` will include all possible formes.
+   * * If the Pokemon is transformed, this will include the alternative formes of the transformed Pokemon.
+   *   - Additionally, this won't include the original `speciesForme`, but the `speciesForme` of the transformed Pokemon.
+   * * `PokeInfo` should allow the user to switch between each forme if this array's `length` is greater than `0`.
+   *   - No need to retain the user's dirtied forme in a separate property like `dirtySpeciesForme`.
+   *   - Therefore, the switched forme should be stored in `speciesForme`.
+   *   - On the next sync, any modifications to `speciesForme` will be replaced with the battle's value in `syncPokemon()`.
+   *
+   * @example
+   * ```ts
+   * ['Charizard', 'Charizard-Mega-X', 'Charizard-Mega-Y']
+   * ```
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.0.2
    */
-  rawSpeciesForme?: string;
+  altFormes?: string[];
 
   /**
    * Transformed `speciesForme`, if applicable.
@@ -169,6 +186,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   abilities?: AbilityName[];
 
   /**
+   * Possible abilities of the transformed Pokemon.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.0.2
+   */
+  transformedAbilities?: AbilityName[];
+
+  /**
    * Alternative abilities (i.e., ability pool) from the currently applied `preset`.
    *
    * @since 0.1.0
@@ -223,18 +251,24 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   prevItem?: ItemName;
 
   /**
-   * Individual Values (IVs) of the Pokemon.
+   * IVs (Individual Values) of the Pokemon.
+   *
+   * * Legacy stats (DVs [Determinant Values]) should be stored here.
+   *   - Convert the DV into an IV before storing via `convertLegacyDvToIv()`.
+   *   - Since SPA/SPD don't exist, store SPC in SPA, but make sure to specify `spc` in `createSmogonPokemon()`.
    *
    * @since 0.1.0
    */
-  ivs?: Showdown.PokemonSet['ivs'];
+  ivs?: Showdown.StatsTable;
 
   /**
-   * Effort Values (EVs) of the Pokemon.
+   * EVs (Effort Values) of the Pokemon.
+   *
+   * * Should not be used if the gen uses legacy stats.
    *
    * @since 0.1.0
    */
-  evs?: Showdown.PokemonSet['evs'];
+  evs?: Showdown.StatsTable;
 
   /**
    * Moves currently assigned to the Pokemon.
@@ -280,18 +314,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   altMoves?: MoveName[];
 
   /**
-   * Whether the Pokemon is using Z/Max/G-Max moves.
-   *
-   * * Using the term *ultimate* (thanks Blizzard/Riot lmaoo) to cover the nomenclature for both Z (gen 7) and Max/G-Max (gen 8) moves.
-   *   - Future me found the word I was looking for: *gen-agnostic*.
-   *   - ... like in the sense of *platform-agnostic*.
-   *
-   * @deprecated As of v1.0.1, nationaldex entered the chat. This don't cut it no mo :(
-   * @since 0.1.2
-   */
-  useUltimateMoves?: boolean;
-
-  /**
    * Whether the Pokemon is using Z moves.
    *
    * @since 1.0.1
@@ -318,6 +340,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   moveState?: CalcdexMoveState;
+
+  /**
+   * Stage boosts of the Pokemon.
+   *
+   * * Note that the client can report a `spc` boost if in gen 1.
+   *   - If that's the case, set `spc` to `spa` and remove the `spc` property.
+   *   - For standardization, `boosts` of a `CalcdexPokemon` should not store `spc`.
+   *
+   * @see `Showdown.Pokemon['boosts']` in `types/pokemon.d.ts`
+   * @since 1.0.2
+   */
+  boosts?: Omit<Showdown.StatsTable, 'hp'>;
 
   /**
    * Keeps track of user-modified boosts as to not modify the actual boosts from the `battle` state.
@@ -885,7 +919,6 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * * Derived from `id` of the Showdown `battle` state.
    *
    * @example 'battle-gen8ubers-1636924535-utpp6tn0eya3q8q05kakyw3k4s97im9pw'
-   * @todo Rename this to `id` cause `battleState.battleId` is gross.
    * @since 0.1.0
    */
   battleId: string;
@@ -893,7 +926,6 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   /**
    * Last synced `nonce` of the Showdown `battle` state.
    *
-   * @todo Rename this to `nonce` cause `battleState.battleNonce` is gross.
    * @since 0.1.3
    */
   battleNonce?: string;
@@ -911,6 +943,7 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * Battle format.
    *
    * * Derived from splitting the `id` of the Showdown `battle` state.
+   * * Note that this includes the `'gen#'` portion of the format.
    *
    * @example 'gen8ubers'
    * @since 0.1.0
@@ -923,6 +956,43 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * @since 0.1.3
    */
   rules?: CalcdexBattleRules;
+
+  /**
+   * Side key/ID of the player.
+   *
+   * * Does not necessarily mean the logged-in user ("auth") is a player.
+   * * Check `authPlayerKey` instead to see if the logged-in user is also a player.
+   *
+   * @default null
+   * @since 1.0.2
+   */
+  playerKey: CalcdexPlayerKey;
+
+  /**
+   * Side key/ID of the logged-in user who also happens to be a player.
+   *
+   * * Will be `null` if the logged-in user ("auth") is not a player.
+   * * Primarily useful for changing parts of the UI if the auth user is a player.
+   *   - For instance, in `FieldCalc`, the arrows in the screens header will change to "Yours" and "Theirs",
+   *     depending on this value.
+   *
+   * @default null
+   * @since 1.0.2
+   */
+  authPlayerKey?: CalcdexPlayerKey;
+
+  /**
+   * Side key/ID of the opponent.
+   *
+   * * Typically the opposite of the `playerKey`.
+   *   - For example, if the `playerKey` is `'p1'`, then you can expect this value to be `'p2'`.
+   * * Note that the opposite wouldn't be the case if you were to support more than just 2 players.
+   *   - Technically, the client does support up to 4 players (there exists a `'p3'` and `'p4'`).
+   *
+   * @default null
+   * @since 1.0.2
+   */
+  opponentKey: CalcdexPlayerKey;
 
   /**
    * Tracked field conditions.
@@ -941,8 +1011,11 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
  * @since 0.1.3
  */
 export type CalcdexSliceStateAction<
-  TRequired extends keyof CalcdexBattleState = never,
-> = PayloadAction<Modify<DeepPartial<CalcdexBattleState>, Required<Pick<CalcdexBattleState, 'battleId' | TRequired>>>>;
+  TRequired extends keyof CalcdexBattleState = null,
+> = PayloadAction<Modify<DeepPartial<CalcdexBattleState>, {
+  // idk why CalcdexBattleField isn't partialed from DeepPartial<CalcdexBattleState>
+  [P in TRequired]: P extends 'field' ? DeepPartial<CalcdexBattleField> : DeepPartial<CalcdexBattleState>[P];
+}>>;
 
 export interface CalcdexSlicePokemonAction {
   battleId: string;
@@ -959,26 +1032,78 @@ export interface CalcdexSlicePokemonAction {
  */
 export type CalcdexSliceState = Record<string, CalcdexBattleState>;
 
+/**
+ * Reducer function definitions.
+ *
+ * @since 1.0.2
+ */
+export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceState> {
+  /**
+   * Initializes an empty Calcdex state.
+   *
+   * @since 0.1.3
+   */
+  init: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+
+  /**
+   * Updates an existing `CalcdexBattleState`.
+   *
+   * @since 0.1.3
+   */
+  update: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+
+  /**
+   * Updates the `field` of a matching `CalcdexBattleState` from the provided `battleId`.
+   *
+   * @since 0.1.3
+   */
+  updateField: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction<'field'>) => void;
+
+  /**
+   * Updates a `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
+   *
+   * * You can technically update both players in a single `dispatch()` by providing `p1` and `p2`.
+   *
+   * @since 0.1.3
+   */
+  updatePlayer: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+
+  /**
+   * Updates a `CalcdexPokemon` of an existing `CalcdexPlayer` of a matching `CalcdexBattleState`
+   * from the provided `battleId`.
+   *
+   * @since 0.1.3
+   */
+  updatePokemon: (state: Draft<CalcdexSliceState>, action: PayloadAction<CalcdexSlicePokemonAction>) => void;
+}
+
 const l = logger('@showdex/redux/store/calcdexSlice');
 
-export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<CalcdexSliceState>, string>({
+export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers, string>({
   name: 'calcdex',
 
   initialState: {},
 
   reducers: {
-    /**
-     * Initializes an empty Calcdex state.
-     *
-     * @since 0.1.3
-     */
-    init: (state, action: CalcdexSliceStateAction) => {
+    init: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
       );
 
-      const { battleId } = action.payload;
+      const {
+        battleId,
+        gen = env.int<GenerationNum>('calcdex-default-gen'),
+        format = null,
+        rules = {},
+        playerKey = null,
+        authPlayerKey = null,
+        opponentKey = null,
+        p1,
+        p2,
+        field,
+        ...payload
+      } = action.payload;
 
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
@@ -999,14 +1124,18 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       }
 
       state[battleId] = {
-        ...action.payload,
+        ...payload,
 
         battleId,
         battleNonce: null, // make sure we don't set this for the syncBattle() action
-        gen: action.payload.gen || <GenerationNum> env.int('calcdex-default-gen'),
-        format: action.payload.format || null,
-        rules: action.payload.rules || {},
-        field: action.payload.field || sanitizeField(null),
+
+        gen,
+        format,
+        rules,
+
+        playerKey,
+        authPlayerKey,
+        opponentKey,
 
         p1: {
           sideid: 'p1',
@@ -1015,10 +1144,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
           activeIndex: -1,
           selectionIndex: 0,
           autoSelect: true,
-
-          ...action.payload.p1,
-
           pokemonOrder: [],
+          ...p1,
           pokemon: [],
         },
 
@@ -1029,12 +1156,16 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
           activeIndex: -1,
           selectionIndex: 0,
           autoSelect: true,
-
-          ...action.payload.p2,
-
           pokemonOrder: [],
+          ...p2,
           pokemon: [],
         },
+
+        // currently unsupported
+        p3: null,
+        p4: null,
+
+        field: field || sanitizeField(),
       };
 
       l.debug(
@@ -1044,12 +1175,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates an existing `CalcdexBattleState`.
-     *
-     * @since 0.1.3
-     */
-    update: (state, action: CalcdexSliceStateAction) => {
+    update: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1092,12 +1218,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates the `field` of a matching `CalcdexBattleState` from the provided `battleId`.
-     *
-     * @since 0.1.3
-     */
-    updateField: (state, action: CalcdexSliceStateAction<'field'>) => {
+    updateField: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1136,14 +1257,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates a `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
-     *
-     * * You can technically update both players in a single `dispatch()` by providing `p1` and `p2`.
-     *
-     * @since 0.1.3
-     */
-    updatePlayer: (state, action: CalcdexSliceStateAction) => {
+    updatePlayer: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,
@@ -1192,12 +1306,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, SliceCaseReducers<Cal
       );
     },
 
-    /**
-     * Updates a `CalcdexPokemon` of an existing `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
-     *
-     * @since 0.1.3
-     */
-    updatePokemon: (state, action: PayloadAction<CalcdexSlicePokemonAction>) => {
+    updatePokemon: (state, action) => {
       l.debug(
         'RECV', action.type,
         '\n', 'action.payload', action.payload,

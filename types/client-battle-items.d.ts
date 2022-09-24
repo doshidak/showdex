@@ -53,6 +53,8 @@ declare namespace Showdown {
     onMemory?: TypeName;
     onPlate?: TypeName;
   }
-}
 
-declare const BattleItems: Record<string, Showdown.BattleItem>;
+  interface BattleItems {
+    [itemId: string]: BattleItem;
+  }
+}

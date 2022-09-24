@@ -39,7 +39,8 @@
   @include spacing.padding-xy($x: 15px, $y: 10px);
   @include font.apply(fonts.$mono);
   font-size: 10px;
-  overflow: hidden auto;
+  // overflow: hidden auto;
+  overflow-x: hidden;
 
   hr {
     width: 100%;

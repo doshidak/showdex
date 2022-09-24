@@ -94,8 +94,6 @@ const sortPresets = (
 
 const UltFormeRegex = /-(?:Mega(?:-X|-Y)?|Gmax)$/;
 
-/* eslint-disable no-nested-ternary */
-
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
  *
@@ -296,5 +294,3 @@ export const usePresets = ({
 
   return find;
 };
-
-/* eslint-enable no-nested-ternary */

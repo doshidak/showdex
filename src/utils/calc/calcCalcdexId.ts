@@ -61,9 +61,9 @@ export const calcPokemonCalcdexId = (
   name: [
     detectPlayerKeyFromPokemon(pokemon),
     // pokemon?.name?.replace(/-.+$/, ''), // 'Ho-Oh' -> 'Ho' ? LOL
-    'slot' in pokemon && typeof pokemon.slot === 'number' ?
-      String(pokemon.slot) :
-      pokemon?.speciesForme?.replace(/-.+$/, ''),
+    'slot' in pokemon && typeof pokemon.slot === 'number'
+      ? String(pokemon.slot)
+      : pokemon?.speciesForme?.replace(/-.+$/, ''),
   ].filter(Boolean).join(': '),
 
   level: String(pokemon?.level ?? 100),

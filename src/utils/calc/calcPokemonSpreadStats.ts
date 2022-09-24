@@ -1,8 +1,7 @@
 import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts';
+import { detectLegacyGen } from '@showdex/utils/battle';
 import type { Generation } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-
-/* eslint-disable no-nested-ternary */
 
 /**
  * Calculates the stats of a Pokemon based on its applied EV/IV/nature spread.
@@ -27,6 +26,8 @@ export const calcPokemonSpreadStats = (
     return { ...PokemonInitialStats };
   }
 
+  const legacy = detectLegacyGen(dex);
+
   return PokemonStatNames.reduce((prev, stat) => {
     const baseStat = stat === 'hp'
       ? pokemon.baseStats[stat]
@@ -38,13 +39,11 @@ export const calcPokemonSpreadStats = (
       stat,
       baseStat,
       pokemon.ivs?.[stat] ?? 31,
-      pokemon.evs?.[stat] ?? 0,
+      legacy ? undefined : pokemon.evs?.[stat] ?? 0,
       pokemon.level || 100,
-      dex.natures.get(pokemon.nature),
+      legacy ? undefined : dex.natures.get(pokemon.nature),
     );
 
     return prev;
   }, { ...PokemonInitialStats });
 };
-
-/* eslint-disable no-nested-ternary */
