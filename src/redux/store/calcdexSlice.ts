@@ -963,7 +963,7 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * * Does not necessarily mean the logged-in user ("auth") is a player.
    * * Check `authPlayerKey` instead to see if the logged-in user is also a player.
    *
-   * @default 'p1'
+   * @default null
    * @since 1.0.2
    */
   playerKey: CalcdexPlayerKey;
@@ -989,7 +989,7 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * * Note that the opposite wouldn't be the case if you were to support more than just 2 players.
    *   - Technically, the client does support up to 4 players (there exists a `'p3'` and `'p4'`).
    *
-   * @default 'p2'
+   * @default null
    * @since 1.0.2
    */
   opponentKey: CalcdexPlayerKey;
@@ -1096,9 +1096,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
         rules = {},
-        playerKey = 'p1',
+        playerKey = null,
         authPlayerKey = null,
-        opponentKey = 'p2',
+        opponentKey = null,
         p1,
         p2,
         field,
