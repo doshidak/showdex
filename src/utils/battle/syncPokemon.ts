@@ -459,7 +459,12 @@ export const syncPokemon = (
 
   // check for alternative formes (in case of transformations)
   if (altFormes?.length) {
-    syncedPokemon.altFormes = [...altFormes];
+    // ya, apparently Hisuian Pokemon are included in the list for some reason lol
+    syncedPokemon.altFormes = [...altFormes.filter((f) => !!f && !f.includes('-Hisui'))];
+
+    if (syncedPokemon.altFormes.length === 1) {
+      syncedPokemon.altFormes = [];
+    }
   }
 
   // check for transformed base stats
