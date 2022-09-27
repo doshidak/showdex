@@ -87,7 +87,8 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
         dragging: styles.dragging,
       },
 
-      scrollbarMinSize: 20,
+      // note: not a good idea to make this into a prop
+      scrollbarMinSize: 40,
     });
 
     // scrollRef.current = simpleBarRef.current.getScrollElement() as HTMLDivElement;
