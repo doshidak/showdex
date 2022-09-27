@@ -72,6 +72,22 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   serverSourced?: boolean;
 
   /**
+   * Whether the Pokemon can Dynamax.
+   *
+   * * In addition to the Dynamax clause (and whether the gen supports D-maxing),
+   *   this value is also used to conditionally display the "Max" button in `PokeMoves`.
+   * * Note that if the Pokemon can also Gigantamax, the G-max formes should be available in
+   *   `altFormes` for toggling within `PokeInfo`.
+   *   - G-max forme will cause the "Max" button to display any G-max moves.
+   * * Damage calculator provides invalid damage calculations when manually specifying a
+   *   D-max or G-max move (move must be unmaxed with the Pokemon's `isDynamaxed` set to `true`).
+   *
+   * @default false
+   * @since 1.0.3
+   */
+  dmaxable?: boolean;
+
+  /**
    * Alternative formes of the Pokemon.
    *
    * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
@@ -84,10 +100,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - No need to retain the user's dirtied forme in a separate property like `dirtySpeciesForme`.
    *   - Therefore, the switched forme should be stored in `speciesForme`.
    *   - On the next sync, any modifications to `speciesForme` will be replaced with the battle's value in `syncPokemon()`.
+   * * Note that in the example below, *Urshifu* only has *Urshifu-Rapid-Strike* as its alternative forme.
+   *   - `'Urshifu-Gmax'` is added due to the `canGigantamax` property being `true`.
+   *   - Another lookup for `'Urshifu-Rapid-Strike'` must be done to find its `canGigantamax` value, which is also `true`.
    *
    * @example
    * ```ts
+   * // gen 7
    * ['Charizard', 'Charizard-Mega-X', 'Charizard-Mega-Y']
+   *
+   * // gen 8
+   * ['Charizard', 'Charizard-Gmax', 'Charizard-Mega-X', 'Charizard-Mega-Y']
+   * ['Urshifu', 'Urshifu-Gmax', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax']
    * ```
    * @default
    * ```ts
@@ -255,7 +279,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * * Legacy stats (DVs [Determinant Values]) should be stored here.
    *   - Convert the DV into an IV before storing via `convertLegacyDvToIv()`.
-   *   - Since SPA/SPD don't exist, store SPC in SPA, but make sure to specify `spc` in `createSmogonPokemon()`.
+   *   - Since SPA/SPD don't exist, store SPC in both SPA and SPD, making sure SPD equals SPA.
    *
    * @since 0.1.0
    */
