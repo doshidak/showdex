@@ -269,7 +269,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           basePokemon,
           clientPokemon,
           serverPokemon,
-          dex,
           battleState.format,
         );
 
