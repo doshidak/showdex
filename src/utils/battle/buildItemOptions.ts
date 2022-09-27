@@ -1,6 +1,7 @@
 import { formatId } from '@showdex/utils/app';
 import type { ItemName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { guessTableFormatKey } from './guessTableFormatKey';
 
 export interface PokemonItemOption {
   label: string;
@@ -117,22 +118,10 @@ export const buildItemOptions = (
     return options;
   }
 
-  // reversing the order so that sub-formats like gen7letsgo comes before gen7
-  // (note: there's no gen8, only gen8dlc1. however, there is a gen8doubles and a gen8dlc1doubles,
-  // so we can't simply remove 'dlc1'; hence why we're filtering out gen8doubles since it comes before gen8dlc1doubles)
-  const genFormatKeys = <Showdown.BattleTeambuilderTableFormat[]> Object.keys(BattleTeambuilderTable)
-    .filter((key) => !!key && key.startsWith('gen') && key !== 'gen8doubles')
-    .sort()
-    .reverse();
-
-  const formatKey = format.includes('nationaldex')
-    ? 'natdex'
-    : format.includes('metronome')
-      ? 'metronome'
-      : genFormatKeys.find((key) => format.includes(key.replace(/dlc\d?/i, '')));
+  const formatKey = guessTableFormatKey(format);
 
   // const { items } = BattleTeambuilderTable;
-  const items = formatKey in BattleTeambuilderTable && Array.isArray(BattleTeambuilderTable[formatKey]?.items)
+  const items = !!format && formatKey in BattleTeambuilderTable && BattleTeambuilderTable[formatKey]?.items?.length
     ? BattleTeambuilderTable[formatKey].items
     : BattleTeambuilderTable.items;
 
