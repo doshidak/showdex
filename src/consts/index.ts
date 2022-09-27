@@ -3,6 +3,7 @@ export * from './ansiColor';
 export * from './formats';
 export * from './httpMethod';
 export * from './items';
+export * from './moves';
 export * from './natures';
 export * from './stats';
 export * from './tagTypes';
