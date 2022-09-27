@@ -10,6 +10,7 @@ export * from './detectSpeciesForme';
 export * from './detectStatBoostDelta';
 export * from './detectToggledAbility';
 export * from './formatStatBoost';
+export * from './getDexForFormat';
 export * from './getMaxMove';
 export * from './getZMove';
 export * from './hasMegaForme';
