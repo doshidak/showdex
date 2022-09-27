@@ -53,6 +53,7 @@ declare namespace Showdown {
     readonly tier: string;
     readonly isTotem: boolean;
     readonly isMega: boolean;
+    readonly cannotDynamax: boolean;
     readonly canGigantamax: boolean;
     readonly isPrimal: boolean;
     readonly battleOnly?: string | string[];
