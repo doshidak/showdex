@@ -13,6 +13,7 @@ import { detectLegacyGen } from './detectLegacyGen';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
+import { getDexForFormat } from './getDexForFormat';
 import { toggleableAbility } from './toggleableAbility';
 
 /**
@@ -78,7 +79,8 @@ export const sanitizePokemon = (
     ident: detectPokemonIdent(pokemon),
     searchid: pokemon?.searchid,
 
-    speciesForme: detectSpeciesForme(pokemon),
+    speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
+    dmaxable: ('dmaxable' in pokemon && pokemon.dmaxable) || false,
     altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
     transformedForme: transformed
       ? typeof pokemon.volatiles.transform[1] === 'object'
@@ -205,17 +207,22 @@ export const sanitizePokemon = (
   sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   // fill in additional info if the Dex global is available (should be)
-  if (typeof Dex !== 'undefined') {
-    // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
-    const species = Dex.forGen(gen).species.get(sanitizedPokemon.speciesForme);
+  // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
+  const dex = getDexForFormat(gen);
+
+  if (dex) {
+    const species = dex.species.get(sanitizedPokemon.speciesForme);
 
     // don't really care if species is falsy here
     sanitizedPokemon.baseStats = { ...species?.baseStats };
 
     // grab the baseStats of the transformed Pokemon, if applicable
     const transformedSpecies = sanitizedPokemon.transformedForme
-      ? Dex.forGen(gen).species.get(sanitizedPokemon.transformedForme)
+      ? dex.species.get(sanitizedPokemon.transformedForme)
       : null;
+
+    // check if this Pokemon can D-max
+    sanitizedPokemon.dmaxable = !species.cannotDynamax;
 
     // only set the altFormes if we're currently looking at the baseForme
     sanitizedPokemon.altFormes = transformedSpecies?.baseSpecies
@@ -233,6 +240,32 @@ export const sanitizePokemon = (
           ...(<string[]> species.otherFormes),
         ]
         : [];
+
+    // if this Pokemon can G-max, add the appropriate formes
+    if (sanitizedPokemon.dmaxable && species.canGigantamax) {
+      sanitizedPokemon.altFormes = sanitizedPokemon.altFormes.length
+        // reason for the flatMap is to achieve:
+        // ['Urshifu', 'Urshifu-Rapid-Strike']
+        // -> ['Urshifu', 'Urshifu-Gmax', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax']
+        ? sanitizedPokemon.altFormes.flatMap((forme) => {
+          const output: string[] = [forme];
+
+          // don't do another lookup if the current forme is what we've already looked up
+          const currentSpecies = forme === species.name
+            ? species
+            : dex.species.get(forme);
+
+          if (currentSpecies?.canGigantamax) {
+            output.push(`${currentSpecies.name}-Gmax`);
+          }
+
+          return output;
+        })
+        : [
+          sanitizedPokemon.speciesForme,
+          `${sanitizedPokemon.speciesForme}-Gmax`,
+        ];
+    }
 
     if (transformedSpecies?.baseStats) {
       sanitizedPokemon.transformedBaseStats = { ...transformedSpecies.baseStats };
