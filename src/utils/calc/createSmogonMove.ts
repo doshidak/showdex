@@ -1,7 +1,7 @@
 import { Move as SmogonMove } from '@smogon/calc';
 // import { formatId } from '@showdex/utils/app';
 import { getDexForFormat } from '@showdex/utils/battle';
-import type { Generation, MoveName } from '@pkmn/data';
+import type { Generation, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
 export const createSmogonMove = (

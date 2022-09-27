@@ -8,8 +8,8 @@ import {
 } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { AbilityName, ItemName, MoveName } from '@pkmn/data';
 import type { GenerationNum } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   // CalcdexMoveState,
   CalcdexPokemon,
@@ -17,7 +17,7 @@ import type {
 } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
-import { detectToggledAbility } from './detectToggledAbility';
+// import { detectToggledAbility } from './detectToggledAbility';
 import { getDexForFormat } from './getDexForFormat';
 import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
 
@@ -66,6 +66,7 @@ export const syncPokemon = (
 
     switch (key) {
       case 'speciesForme': {
+        // e.g., 'Urshifu-*' -> 'Urshifu' (to fix forme switching, which is prevented due to the wildcard forme)
         value = (<string> value).replace('-*', '');
 
         // if the speciesForme changed, update the types and possible abilities
@@ -73,10 +74,14 @@ export const syncPokemon = (
         if (prevValue !== value && dex) {
           const updatedSpecies = dex.species.get(value);
 
-          syncedPokemon.types = [...(updatedSpecies?.types || syncedPokemon.types || [])];
+          syncedPokemon.types = [
+            ...(updatedSpecies?.types || syncedPokemon.types || []),
+          ];
 
           if (Object.keys(updatedSpecies?.abilities).length) {
-            syncedPokemon.abilities = [...(<AbilityName[]> Object.values(updatedSpecies.abilities))];
+            syncedPokemon.abilities = [
+              ...(<AbilityName[]> Object.values(updatedSpecies.abilities)),
+            ];
           }
         }
 
@@ -107,7 +112,7 @@ export const syncPokemon = (
         }
 
         // update the abilityToggled state (always false if not applicable)
-        syncedPokemon.abilityToggled = detectToggledAbility(clientPokemon);
+        // syncedPokemon.abilityToggled = detectToggledAbility(clientPokemon);
 
         break;
       }
@@ -133,7 +138,7 @@ export const syncPokemon = (
         // check if the item was knocked-off and is the same as dirtyItem
         // if so, clear the dirtyItem
         // (note that `value` here is prevItem, NOT item!)
-        if (clientPokemon?.prevItemEffect === 'knocked off' && value === syncedPokemon.dirtyItem) {
+        if (clientPokemon?.prevItemEffect && value === syncedPokemon.dirtyItem) {
           syncedPokemon.dirtyItem = null;
         }
 

@@ -6,8 +6,7 @@ import { useColorScheme } from '@showdex/redux/store';
 import { openShowdownUser } from '@showdex/utils/app';
 import { hasMegaForme } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
-import type { Generation } from '@pkmn/data';
-import type { GenerationNum } from '@pkmn/types';
+import type { GenerationNum } from '@smogon/calc';
 import type {
   CalcdexBattleField,
   CalcdexBattleRules,
@@ -21,7 +20,6 @@ import styles from './PlayerCalc.module.scss';
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
@@ -38,7 +36,6 @@ interface PlayerCalcProps {
 export const PlayerCalc = ({
   className,
   style,
-  dex,
   gen,
   format,
   rules,
@@ -176,7 +173,6 @@ export const PlayerCalc = ({
 
       <PokeCalc
         className={styles.pokeCalc}
-        dex={dex}
         gen={gen}
         format={format}
         rules={rules}

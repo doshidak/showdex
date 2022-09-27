@@ -1,7 +1,7 @@
 import { PokemonDmaxMoves, PokemonDmaxAbilityMoves, PokemonGmaxMoves } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { AbilityName, MoveName } from '@pkmn/data';
+import type { AbilityName, MoveName } from '@smogon/calc/dist/data/interface';
 import { getDexForFormat } from './getDexForFormat';
 
 const l = logger('@showdex/utils/app/getMaxMove');
@@ -12,8 +12,6 @@ const l = logger('@showdex/utils/app/getMaxMove');
  * * If `allowGmax` is `true`, any matching G-max move will be returned regardless of the `'-Gmax'` suffix in the `speciesForme`.
  * * Otherwise, this requires the `'-Gmax'` suffix in the passed-in `speciesForme` to distinguish between D-max and G-max moves!
  *   - e.g., `'Alcremie-Gmax'` should be passed in for the `speciesForme` argument, not just `'Alcremie'`.
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  *
  * @see https://github.com/smogon/damage-calc/blob/bdf9e8c39fec7670ed0ce64e1fb58d1a4dc83b73/calc/src/move.ts#L242
  * @since 0.1.2

@@ -8,7 +8,7 @@ import {
   hasMegaForme,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@pkmn/data';
+import type { Generation } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -26,7 +26,6 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon');
  * @since 0.1.0
  */
 export const createSmogonPokemon = (
-  // dex: Generation,
   format: string,
   pokemon: CalcdexPokemon,
   // moveName?: MoveName,
@@ -44,22 +43,6 @@ export const createSmogonPokemon = (
   }
 
   const legacy = detectLegacyGen(gen);
-
-  /**
-   * @todo Remove the `dex` and use the `Dex` global instead.
-   */
-  // if (typeof Dex === 'undefined') {
-  //   if (__DEV__) {
-  //     l.warn(
-  //       'Global Dex object is unavailable.',
-  //       '\n', 'pokemon', pokemon,
-  //       '\n', 'moveName', moveName,
-  //       '\n', '(You will only see this warning on development.)',
-  //     );
-  //   }
-  //
-  //   return null;
-  // }
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
@@ -111,6 +94,10 @@ export const createSmogonPokemon = (
   // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
   const hasMultiscale = !!ability && formatId(ability) === 'multiscale';
 
+  const shouldMultiscale = hasMultiscale
+    && pokemon.abilityToggleable
+    && pokemon.abilityToggled;
+
   const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
     // of the class instance with curHP's value taking precedence over originalCurHP's value
@@ -119,29 +106,23 @@ export const createSmogonPokemon = (
     // also note: seems that maxhp is internally calculated in the instance's rawStats.hp,
     // so we can't specify it here
     curHP: (() => { // js wizardry
-      // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
-      const shouldMultiscale = hasMultiscale
-        && pokemon.abilityToggleable
-        && pokemon.abilityToggled;
+      // note that spreadStats may not be available yet, hence the fallback object
+      const { hp: maxHp } = pokemon.spreadStats
+        || { hp: pokemon.maxhp || 100 };
 
       if (pokemon.serverSourced) {
-        const maxHp = pokemon.spreadStats.hp || pokemon.maxhp || 100;
+        // const hp = !pokemon.hp || pokemon.hp === maxHp // check 0% or 100% HP for Multiscale
+        //   ? Math.floor((pokemon.hp || maxHp) * (!hasMultiscale || shouldMultiscale ? 1 : 0.99))
+        //   : (shouldMultiscale ? maxHp : pokemon.hp);
 
-        const hp = !pokemon.hp || pokemon.hp === maxHp // check 0% or 100% HP for Multiscale
-          ? Math.floor((pokemon.hp || maxHp) * (!hasMultiscale || shouldMultiscale ? 1 : 0.99))
-          : (shouldMultiscale ? maxHp : pokemon.hp);
-
-        return hp;
+        return shouldMultiscale && !pokemon.hp ? maxHp : pokemon.hp;
       }
 
       const hpPercentage = calcPokemonHp(pokemon);
 
-      // note that spreadStats may not be available yet, hence the fallback object
-      const { hp: hpStat } = pokemon.spreadStats
-        || { hp: pokemon.maxhp || 100 };
-
       // if the Pokemon is dead, assume it has full HP as to not break the damage calc
-      return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
+      // return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
+      return Math.floor((shouldMultiscale && !pokemon.hp ? 1 : hpPercentage || 1) * maxHp);
     })(),
 
     level: pokemon.level,
@@ -153,8 +134,9 @@ export const createSmogonPokemon = (
     // which I'd imagine affects the damage calculations in the matchup
     isDynamaxed: pokemon.useMax,
 
-    ability,
-    abilityOn: pokemon.abilityToggleable ? pokemon.abilityToggled : undefined,
+    // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
+    ability: hasMultiscale && !shouldMultiscale ? 'Pressure' : ability,
+    abilityOn: pokemon.abilityToggleable && !hasMultiscale ? pokemon.abilityToggled : undefined,
     item: isMega || hasMegaItem ? null : item,
     nature: legacy ? undefined : pokemon.nature,
     moves: pokemon.moves,
@@ -209,38 +191,6 @@ export const createSmogonPokemon = (
       hp: baseStats.hp,
     };
   }
-
-  // const dexSpecies = dex.species.get(speciesForme);
-  // const dexItem = dex.items.get(item);
-
-  // const determinedDex = dexSpecies?.exists && dexItem?.exists
-  //   ? dex
-  //   : <GenerationNum> Math.max(
-  //     Dex.species.get(speciesForme)?.gen ?? 0,
-  //     Dex.items.get(item)?.gen ?? 0,
-  //     0,
-  //   ) || dex;
-
-  // const baseGen = <GenerationNum> Dex.species.get(speciesForme)?.gen;
-  // const isGalarian = formatId(speciesForme).includes('galar');
-  // const missingSpecies = !dex.species.get(speciesForme)?.exists;
-
-  // const determinedDex = legacy
-  //   ? dex
-  //   : isGalarian
-  //     ? <GenerationNum> 8
-  //     : isMega || hasMegaItem
-  //       ? <GenerationNum> Math.max(7, baseGen || 0)
-  //       : missingSpecies
-  //         ? <GenerationNum> Math.max(baseGen || 0, 4)
-  //         : dex;
-
-  // l.debug(
-  //   'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
-  //   '\n', 'item', item,
-  //   '\n', 'isMega?', isMega, 'hasMegaItem?', hasMegaItem,
-  //   '\n', 'missingSpecies?', missingSpecies, 'isGalarian?', isGalarian,
-  // );
 
   const smogonPokemon = new SmogonPokemon(
     dex,

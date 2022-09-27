@@ -2,12 +2,8 @@ import { PokemonNatures } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import type {
-  AbilityName,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectLegacyGen } from './detectLegacyGen';
 import { detectPokemonIdent } from './detectPokemonIdent';
@@ -200,12 +196,6 @@ export const sanitizePokemon = (
     autoPreset: 'autoPreset' in pokemon ? pokemon.autoPreset : true,
   };
 
-  // abilityToggleable is mainly used for UI, hence why there are two of
-  // what seems to be essentially the same thing
-  // (but note that abilityToggled stores the current toggle state)
-  sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
-  sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
-
   // fill in additional info if the Dex global is available (should be)
   // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
   const dex = getDexForFormat(gen);
@@ -306,6 +296,12 @@ export const sanitizePokemon = (
       [sanitizedPokemon.dirtyAbility] = abilitiesSource;
     }
   }
+
+  // abilityToggleable is mainly used for UI, hence why there are two of
+  // what seems to be essentially the same thing
+  // (but note that abilityToggled stores the current toggle state)
+  sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
+  sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   if (!sanitizedPokemon?.calcdexId) {
     sanitizedPokemon.calcdexId = calcPokemonCalcdexId(sanitizedPokemon);

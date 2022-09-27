@@ -1,7 +1,7 @@
 import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 // import { env } from '@showdex/utils/core';
-import type { MoveName } from '@pkmn/data';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 // import { detectLegacyGen } from './detectLegacyGen';
@@ -19,9 +19,6 @@ export interface PokemonMoveOption {
 
 /**
  * Builds the value for the `options` prop of the move `Dropdown` component in `PokeMoves`.
- *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  *
  * @since 0.1.3
  */

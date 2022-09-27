@@ -1,4 +1,4 @@
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 
 const GenRegex = /^gen(\d+)/i;
 

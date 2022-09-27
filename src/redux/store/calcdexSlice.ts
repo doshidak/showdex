@@ -5,13 +5,8 @@ import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type {
-  AbilityName,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
-import type { State as SmogonState } from '@smogon/calc';
+import type { GenerationNum, State as SmogonState } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import { useSelector } from './hooks';
 
 /* eslint-disable @typescript-eslint/indent */

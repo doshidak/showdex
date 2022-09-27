@@ -6,8 +6,8 @@ import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions } from '@showdex/utils/battle';
-import type { MoveName } from '@pkmn/data';
-import type { GenerationNum } from '@pkmn/types';
+import type { GenerationNum } from '@smogon/calc';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexBattleRules, CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 import styles from './PokeMoves.module.scss';
@@ -15,7 +15,6 @@ import styles from './PokeMoves.module.scss';
 export interface PokeMovesProps {
   className?: string;
   style?: React.CSSProperties;
-  // dex: Generation;
   gen: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
@@ -28,7 +27,6 @@ export interface PokeMovesProps {
 export const PokeMoves = ({
   className,
   style,
-  // dex,
   gen,
   format,
   rules,
@@ -64,7 +62,10 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const moveOptions = buildMoveOptions(format, pokemon);
+  const moveOptions = React.useMemo(
+    () => buildMoveOptions(format, pokemon),
+    [format, pokemon],
+  );
 
   // copies the matchup result description to the user's clipboard when the damage range is clicked
   const handleDamagePress = (index: number, description: string) => {

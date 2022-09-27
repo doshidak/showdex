@@ -21,15 +21,12 @@ import {
   buildItemOptions,
   detectLegacyGen,
   detectToggledAbility,
+  getDexForFormat,
   hasMegaForme,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
-import type {
-  AbilityName,
-  Generation,
-  GenerationNum,
-  ItemName,
-} from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
+import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
@@ -45,7 +42,6 @@ type PokeInfoPresetOptions = {
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
-  dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
@@ -55,7 +51,6 @@ export interface PokeInfoProps {
 export const PokeInfo = ({
   className,
   style,
-  dex,
   gen,
   format,
   pokemon,
@@ -213,6 +208,7 @@ export const PokeInfo = ({
     presets,
   ]);
 
+  const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(gen);
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
@@ -230,8 +226,15 @@ export const PokeInfo = ({
     ? dex?.items?.get(itemName)
     : null;
 
-  const abilityOptions = buildAbilityOptions(format, pokemon);
-  const itemOptions = buildItemOptions(format, pokemon);
+  const abilityOptions = React.useMemo(
+    () => buildAbilityOptions(format, pokemon),
+    [format, pokemon],
+  );
+
+  const itemOptions = React.useMemo(
+    () => buildItemOptions(format, pokemon),
+    [format, pokemon],
+  );
 
   // handle cycling through the Pokemon's available alternative formes, if any
   // (disabled for legacy gens -- this is enough since nextForme will be null if legacy)
@@ -305,9 +308,14 @@ export const PokeInfo = ({
               labelClassName={styles.pokemonNameLabel}
               label={pokemon?.speciesForme || 'MissingNo.'}
               tooltip={nextForme ? (
-                <div>
-                  Switch to{' '}
-                  <strong>{nextForme}</strong>
+                <div className={styles.formeTooltip}>
+                  <div>
+                    <strong>{pokemon.speciesForme}</strong>
+                  </div>
+                  <div>
+                    Switch to{' '}
+                    <strong>{nextForme}</strong>
+                  </div>
                 </div>
               ) : null}
               hoverScale={1}

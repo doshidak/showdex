@@ -13,8 +13,7 @@ import {
   getLegacySpcDv,
 } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@pkmn/data';
-import type { GenerationNum } from '@pkmn/types';
+import type { GenerationNum } from '@smogon/calc';
 import type {
   CalcdexBattleField,
   CalcdexBattleRules,
@@ -30,7 +29,7 @@ import styles from './PokeCalc.module.scss';
 interface PokeCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  dex?: Generation;
+  // dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
@@ -46,7 +45,6 @@ interface PokeCalcProps {
 export const PokeCalc = ({
   className,
   style,
-  dex,
   gen,
   format,
   rules,
@@ -59,7 +57,8 @@ export const PokeCalc = ({
   const legacy = detectLegacyGen(gen);
 
   const calculateMatchup = useSmogonMatchup(
-    dex,
+    // dex,
+    format,
     playerPokemon,
     opponentPokemon,
     playerKey,
@@ -163,12 +162,10 @@ export const PokeCalc = ({
     }
 
     // recalculate the stats with the updated EVs/IVs
-    if (typeof dex !== 'undefined') {
-      payload.spreadStats = calcPokemonSpreadStats(dex, {
-        ...playerPokemon,
-        ...payload,
-      });
-    }
+    payload.spreadStats = calcPokemonSpreadStats(format, {
+      ...playerPokemon,
+      ...payload,
+    });
 
     // clear any dirtyBoosts that match the current boosts
     Object.entries(playerPokemon.boosts).forEach(([
@@ -198,7 +195,6 @@ export const PokeCalc = ({
     >
       {/* name, types, level, HP, status, set, ability, nature, item */}
       <PokeInfo
-        dex={dex}
         gen={gen}
         format={format}
         pokemon={playerPokemon}
@@ -208,7 +204,6 @@ export const PokeCalc = ({
       {/* moves (duh) */}
       <PokeMoves
         className={styles.section}
-        // dex={dex}
         gen={gen}
         format={format}
         rules={rules}
@@ -220,12 +215,10 @@ export const PokeCalc = ({
       {/* IVs, EVs, calculated stats, boosts */}
       <PokeStats
         className={cx(styles.section, styles.stats)}
-        // dex={dex}
         gen={gen}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={field}
-        // side={side}
         playerKey={playerKey}
         onPokemonChange={handlePokemonChange}
       />

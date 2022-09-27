@@ -1,5 +1,5 @@
 import { formatId } from '@showdex/utils/app';
-import type { ItemName } from '@pkmn/data';
+import type { ItemName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { guessTableFormatKey } from './guessTableFormatKey';
 
@@ -58,9 +58,6 @@ const findItemGroupIndices = (
 
 /**
  * Builds the value for the `options` prop of the items `Dropdown` component in `PokeInfo`.
- *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  *
  * @since 1.0.2
  */

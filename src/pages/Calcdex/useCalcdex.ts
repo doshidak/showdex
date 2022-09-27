@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { Generations } from '@pkmn/data';
-import { Dex as PkmnDex } from '@pkmn/dex';
 import { syncBattle } from '@showdex/redux/actions';
 import { calcdexSlice, useCalcdexState, useDispatch } from '@showdex/redux/store';
 import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type {
   CalcdexBattleField,
   CalcdexBattleState,
@@ -18,8 +16,6 @@ export interface CalcdexHookProps {
 }
 
 export interface CalcdexHookInterface {
-  gens: Generations;
-  dex: Generation;
   state: CalcdexBattleState;
 
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
@@ -57,8 +53,8 @@ export const useCalcdex = ({
   const gen = battle?.gen as GenerationNum;
   // const legacy = detectLegacyGen(gen);
 
-  const gens = React.useRef(new Generations(PkmnDex));
-  const dex = gens.current.get(gen);
+  // const gens = React.useRef(new Generations(PkmnDex));
+  // const dex = gens.current.get(gen);
 
   // const dex = React.useMemo(() => (typeof gen === 'number' && gen > 0 ? <Generation> <unknown> {
   //   ...pkmnDex,
@@ -132,7 +128,7 @@ export const useCalcdex = ({
 
       void dispatch(syncBattle({
         battle,
-        dex,
+        // dex,
       }));
     }
 
@@ -147,16 +143,12 @@ export const useCalcdex = ({
     battle?.nonce,
     battleState,
     calcdexState,
-    dex,
     dispatch,
     format,
     gen,
   ]);
 
   return {
-    gens: gens.current,
-    dex,
-
     state: battleState || {
       battleId: null,
       gen: null,

@@ -1,4 +1,4 @@
-import type { AbilityName } from '@pkmn/data';
+import type { AbilityName } from '@smogon/calc/dist/data/interface';
 
 /**
  * Abilities that can be toggled on/off.

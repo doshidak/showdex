@@ -6,12 +6,8 @@ import {
   transformPresetResponse,
   transformRandomsPresetResponse,
 } from '@showdex/utils/redux';
-import type {
-  AbilityName,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import { pkmnApi } from './pkmnApi';
 

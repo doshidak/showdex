@@ -1,6 +1,5 @@
 import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts';
 import { detectLegacyGen } from '@showdex/utils/battle';
-// import type { Generation } from '@pkmn/data';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonStat } from './calcPokemonStat';
@@ -21,7 +20,6 @@ import { calcPokemonStat } from './calcPokemonStat';
  * @since 0.1.0
  */
 export const calcPokemonSpreadStats = (
-  // dex: Generation,
   format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): Partial<Showdown.StatsTable> => {

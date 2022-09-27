@@ -1,15 +1,13 @@
 import { PokemonSpecialZMoves, PokemonZMoves } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { ItemName, MoveName } from '@pkmn/data';
+import type { ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 
 const l = logger('@showdex/utils/app/getZMove');
 
 /**
  * Returns the corresponding Z move for a given move.
  *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  * * Prior to v1.0.1, this would return the corresponding Z move for any Z-powerable moves, regardless of the
  *   provided `itemName`.
  *   - Now, if `itemName` is provided and `itemOnly` is `true`, only the move with the same `zMoveType` as the item will return the Z move.

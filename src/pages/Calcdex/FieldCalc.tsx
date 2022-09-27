@@ -11,7 +11,7 @@ import {
 } from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
 // import { detectLegacyGen } from '@showdex/utils/battle';
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
 

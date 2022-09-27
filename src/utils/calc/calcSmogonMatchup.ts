@@ -6,8 +6,8 @@ import {
   getTypesDex,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, MoveName } from '@pkmn/data';
 import type { Move as SmogonMove } from '@smogon/calc';
+import type { Generation, MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleField,
   CalcdexPlayerKey,

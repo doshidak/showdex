@@ -1,6 +1,6 @@
 import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
-import type { AbilityName } from '@pkmn/data';
+import type { AbilityName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
@@ -15,9 +15,6 @@ export interface PokemonAbilityOption {
 
 /**
  * Builds the value for the `options` prop of the abilities `Dropdown` component in `PokeInfo`.
- *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
  *
  * @since 1.0.1
  */
@@ -41,16 +38,28 @@ export const buildAbilityOptions = (
 
   const {
     serverSourced,
+    baseAbility,
     ability,
     abilities,
     altAbilities,
     transformedAbilities,
-    baseAbility,
     transformedForme,
   } = pokemon;
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
+
+  if (ability !== baseAbility) {
+    options.push({
+      label: formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited',
+      options: [{
+        label: ability,
+        value: ability,
+      }],
+    });
+
+    filterAbilities.push(ability);
+  }
 
   if (transformedForme) {
     const transformed = Array.from(new Set([
@@ -67,16 +76,6 @@ export const buildAbilityOptions = (
     });
 
     filterAbilities.push(...transformed);
-  } else if (formatId(baseAbility) === 'trace' && ability !== baseAbility) {
-    options.push({
-      label: 'Traced',
-      options: [{
-        label: ability,
-        value: ability,
-      }],
-    });
-
-    filterAbilities.push(ability);
   }
 
   if (altAbilities?.length) {

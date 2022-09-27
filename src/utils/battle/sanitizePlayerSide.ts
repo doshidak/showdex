@@ -1,6 +1,6 @@
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPlayer, CalcdexPlayerSide } from '@showdex/redux/store';
 
 const l = logger('@showdex/utils/battle/sanitizePlayerSide');

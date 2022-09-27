@@ -12,14 +12,13 @@ import { useColorScheme } from '@showdex/redux/store';
 import { detectLegacyGen, detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
-  // dex: Generation;
   gen?: GenerationNum;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
@@ -31,7 +30,6 @@ export interface PokeStatsProps {
 export const PokeStats = ({
   className,
   style,
-  // dex,
   gen,
   playerPokemon: pokemon,
   opponentPokemon,
@@ -58,14 +56,12 @@ export const PokeStats = ({
   const missingEvs = !!pokemon?.speciesForme && !totalEvs;
 
   const finalStats = React.useMemo(() => (pokemon?.calcdexId ? calcPokemonFinalStats(
-    // dex,
     gen,
     pokemon,
     opponentPokemon,
     field,
     playerKey,
   ) : null), [
-    // dex,
     gen,
     opponentPokemon,
     playerKey,

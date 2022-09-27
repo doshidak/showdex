@@ -2,7 +2,7 @@
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/types';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import type {
   PkmnSmogonFormatPresetResponse,
@@ -35,7 +35,7 @@ export const transformPresetResponse = (
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen ?? <GenerationNum> env.int('calcdex-default-gen');
+  const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
 
   // you bet your ass this is O(n^3), but not only that,
   // we're getting a bunch of formats and sets back from the API, all nested objects.
@@ -159,7 +159,7 @@ export const transformFormatPresetResponse = (
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen ?? <GenerationNum> env.int('calcdex-default-gen');
+  const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
 
   // you bet your ass this is O(n^3), but not only that,
   // we're getting a bunch of formats and sets back from the API, all nested objects.
@@ -272,7 +272,7 @@ export const transformRandomsPresetResponse = (
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen ?? <GenerationNum> env.int('calcdex-default-gen');
+  const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
 
   // at least this is only O(n)
   // ...stonks

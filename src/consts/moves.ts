@@ -1,4 +1,4 @@
-import type { MoveName } from '@pkmn/data';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 
 /**
  * Z moves by type.
