@@ -13,6 +13,8 @@ export * from './formatStatBoost';
 export * from './getDexForFormat';
 export * from './getMaxMove';
 export * from './getZMove';
+export * from './getNaturesDex';
+export * from './getTypesDex';
 export * from './hasMegaForme';
 export * from './sanitizeField';
 export * from './sanitizePlayerSide';
