@@ -3,6 +3,7 @@ export * from './calcCalcdexNonce';
 export * from './calcPokemonFinalStats';
 export * from './calcPokemonHp';
 export * from './calcPokemonSpreadStats';
+export * from './calcPokemonStat';
 export * from './calcSmogonMatchup';
 export * from './convertLegacyStats';
 export * from './createSmogonField';
