@@ -13,14 +13,14 @@ import {
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleState, CalcdexPlayerKey, CalcdexSliceState } from '@showdex/redux/store';
 
 const l = logger('@showdex/redux/actions/syncBattle');
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
-  dex: Generation;
+  // dex: Generation;
 }
 
 export const SyncBattleActionType = 'calcdex:sync';
@@ -50,7 +50,7 @@ const searchId = (
 export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload>(
   SyncBattleActionType,
 
-  async (payload, api) => {
+  (payload, api) => {
     l.debug(
       'RECV', SyncBattleActionType,
       '\n', 'payload', payload,
@@ -58,7 +58,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     const {
       battle,
-      dex,
+      // dex,
     } = payload || {};
 
     const rootState = <Record<'calcdex', CalcdexSliceState>> api.getState();
@@ -114,9 +114,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.rules = detectBattleRules(stepQueue);
     }
 
-    if (typeof dex?.learnsets?.learnable !== 'function') {
-      throw new Error('Missing required dex property in payload argument.');
-    }
+    // if (typeof dex?.learnsets?.learnable !== 'function') {
+    //   throw new Error('Missing required dex property in payload argument.');
+    // }
 
     // find out which side myPokemon belongs to
     const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
@@ -256,7 +256,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const basePokemon = matchedPokemon || sanitizePokemon({
           ...clientPokemon,
           slot: i, // important that we specify this to obtain a consistent calcdexId
-        }, dex?.num);
+        }, battleState.gen);
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -279,39 +279,31 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // build (or rebuild) the Pokemon's movesets
         // (which we can only do here, since it's async)
-        if (!matchedPokemon || matchedPokemon.speciesForme !== syncedPokemon.speciesForme) {
-          // l.debug('Fetching learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey);
-
-          const sanitizedForme = hasMegaForme(syncedPokemon.speciesForme)
-            ? syncedPokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
-            : syncedPokemon.speciesForme;
-
-          const learnset = await dex.learnsets.learnable(sanitizedForme);
-
-          // l.debug(
-          //   'Fetched learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
-          //   '\n', 'learnset', learnset,
-          // );
-
-          syncedPokemon.moveState.learnset = Object.keys(learnset || {})
-            .map((moveid) => dex.moves.get(moveid)?.name)
-            .filter((name) => !!name && !syncedPokemon.moveState.revealed.includes(name))
-            .sort();
-
-          // build `other`, only if we have no `learnsets` or the `format` has something to do with hacks
-          // if (!syncedPokemon.moveState.learnset.length || (battleState.format && /anythinggoes|hackmons/i.test(battleState.format))) {
-          //   syncedPokemon.moveState.other = Object.keys(BattleMovedex || {})
-          //     .map((moveid) => dex.moves.get(moveid)?.name)
-          //     .filter((name) => !!name && !syncedPokemon.moveState.revealed.includes(name) && !syncedPokemon.moveState.learnset?.includes?.(name))
-          //     .sort();
-          // }
-
-          // l.debug(
-          //   'Updated moveState for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
-          //   '\n', 'syncedPokemon.moveState', syncedPokemon.moveState,
-          //   '\n', 'syncedPokemon', syncedPokemon,
-          // );
-        }
+        // if (!matchedPokemon || matchedPokemon.speciesForme !== syncedPokemon.speciesForme) {
+        //   // l.debug('Fetching learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey);
+        //
+        //   // const sanitizedForme = hasMegaForme(syncedPokemon.speciesForme)
+        //   //   ? syncedPokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
+        //   //   : syncedPokemon.speciesForme;
+        //
+        //   // const learnset = await dex.learnsets.learnable(sanitizedForme);
+        //
+        //   // l.debug(
+        //   //   'Fetched learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
+        //   //   '\n', 'learnset', learnset,
+        //   // );
+        //
+        //   // syncedPokemon.moveState.learnset = Object.keys(learnset || {})
+        //   //   .map((moveid) => dex.moves.get(moveid)?.name)
+        //   //   .filter((name) => !!name && !syncedPokemon.moveState.revealed.includes(name))
+        //   //   .sort();
+        //
+        //   // l.debug(
+        //   //   'Updated moveState for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
+        //   //   '\n', 'syncedPokemon.moveState', syncedPokemon.moveState,
+        //   //   '\n', 'syncedPokemon', syncedPokemon,
+        //   // );
+        // }
 
         // add the pokemon to the player's Calcdex state (if not maxed already)
         if (!matchedPokemon) {
