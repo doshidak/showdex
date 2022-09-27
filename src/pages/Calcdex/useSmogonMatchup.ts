@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { calcSmogonMatchup } from '@showdex/utils/calc';
-import type { Generation, MoveName } from '@pkmn/data';
+import type { MoveName } from '@pkmn/data';
 // import type {
 //   Field as SmogonField,
 //   Move as SmogonMove,
@@ -21,7 +21,8 @@ export type SmogonMatchupHookCalculator = (
  * @since 0.1.2
  */
 export const useSmogonMatchup = (
-  dex: Generation,
+  // dex: Generation,
+  format: string,
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerKey?: CalcdexPlayerKey,
@@ -29,16 +30,18 @@ export const useSmogonMatchup = (
 ): SmogonMatchupHookCalculator => React.useCallback<SmogonMatchupHookCalculator>((
   playerMove,
 ) => calcSmogonMatchup(
-  dex,
+  // dex,
+  format,
   playerPokemon,
   opponentPokemon,
   playerMove,
   playerKey,
   field,
 ), [
-  dex,
-  playerPokemon,
+  // dex,
+  field,
+  format,
   opponentPokemon,
   playerKey,
-  field,
+  playerPokemon,
 ]);
