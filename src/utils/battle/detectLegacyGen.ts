@@ -1,5 +1,6 @@
 import { env } from '@showdex/utils/core';
-import type { Generation, GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
+import { detectGenFromFormat } from './detectGenFromFormat';
 
 /**
  * Determines if the provided `gen` uses legacy DVs (Determinant Values) instead of
@@ -9,8 +10,10 @@ import type { Generation, GenerationNum } from '@pkmn/data';
  *
  * @since 1.0.2
  */
-export const detectLegacyGen = (gen: Generation | GenerationNum): boolean => (
-  typeof gen === 'number'
-    ? gen
-    : (gen?.num || <GenerationNum> env.int('calcdex-default-gen'))
-) < 3;
+export const detectLegacyGen = (format: GenerationNum | string): boolean => {
+  const gen = typeof format === 'string'
+    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
+    : format;
+
+  return gen < 3;
+};
