@@ -8,20 +8,17 @@ import {
 } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type {
-  AbilityName,
-  Generation,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
+import type { AbilityName, ItemName, MoveName } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type {
   // CalcdexMoveState,
   CalcdexPokemon,
   CalcdexPokemonPreset,
 } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { detectToggledAbility } from './detectToggledAbility';
+import { getDexForFormat } from './getDexForFormat';
 import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
 
 // const l = logger('@showdex/utils/battle/syncPokemon');
@@ -30,10 +27,12 @@ export const syncPokemon = (
   pokemon: CalcdexPokemon,
   clientPokemon: DeepPartial<Showdown.Pokemon>,
   serverPokemon?: DeepPartial<Showdown.ServerPokemon>,
-  dex?: Generation,
   format?: string,
 ): CalcdexPokemon => {
-  const legacy = detectLegacyGen(dex);
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
+  const dex = getDexForFormat(format);
+
+  const legacy = detectLegacyGen(gen);
 
   // final synced Pokemon that will be returned at the end
   const syncedPokemon = structuredClone(pokemon) || {};
@@ -67,10 +66,12 @@ export const syncPokemon = (
 
     switch (key) {
       case 'speciesForme': {
+        value = (<string> value).replace('-*', '');
+
         // if the speciesForme changed, update the types and possible abilities
         // (could change due to mega-evolutions or gigantamaxing, for instance)
-        if (prevValue !== value && typeof Dex !== 'undefined') {
-          const updatedSpecies = Dex.species.get(<string> value);
+        if (prevValue !== value && dex) {
+          const updatedSpecies = dex.species.get(value);
 
           syncedPokemon.types = [...(updatedSpecies?.types || syncedPokemon.types || [])];
 
@@ -142,7 +143,7 @@ export const syncPokemon = (
       case 'boosts': {
         value = PokemonBoostNames.reduce<Showdown.StatsTable>((prev, stat) => {
           // in gen 1, the client may report a SPC boost, which we'll store under SPA
-          const clientStat = dex.num === 1 && stat === 'spa' ? 'spc' : stat;
+          const clientStat = gen === 1 && stat === 'spa' ? 'spc' : stat;
 
           const prevBoost = prev[stat];
           const boost = clientPokemon?.boosts?.[clientStat] || 0;
@@ -280,7 +281,7 @@ export const syncPokemon = (
     const serverAbility = serverPokemon.ability || serverPokemon.baseAbility;
 
     if (!legacy && serverAbility) {
-      const dexAbility = Dex.abilities.get(serverAbility);
+      const dexAbility = dex.abilities.get(serverAbility);
 
       if (dexAbility?.name) {
         syncedPokemon.ability = <AbilityName> dexAbility.name;
@@ -325,10 +326,10 @@ export const syncPokemon = (
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
     const guessedSpread = legacy ? guessServerLegacySpread(
-      dex,
+      format,
       syncedPokemon,
     ) : guessServerSpread(
-      dex,
+      format,
       syncedPokemon,
       format?.includes('random') ? 'Hardy' : undefined,
     );
@@ -336,7 +337,7 @@ export const syncPokemon = (
     // build a preset around the serverPokemon
     const serverPreset: CalcdexPokemonPreset = {
       name: 'Yours',
-      gen: dex.num || env.int<GenerationNum>('calcdex-default-gen'),
+      gen,
       format,
       speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
       level: syncedPokemon.level || serverPokemon.level,
@@ -414,7 +415,7 @@ export const syncPokemon = (
     abilityToggled,
     baseStats,
     transformedBaseStats,
-  } = sanitizePokemon(syncedPokemon, dex?.num);
+  } = sanitizePokemon(syncedPokemon, gen);
 
   // update the abilities (including transformedAbilities) if they're different from what was stored prior
   // (note: only checking if they're arrays instead of their length since th ability list could be empty)
@@ -485,7 +486,7 @@ export const syncPokemon = (
 
   // recalculate the spread stats
   // (calcPokemonSpredStats() will determine whether to use the transformedBaseStats or baseStats)
-  syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
+  syncedPokemon.spreadStats = calcPokemonSpreadStats(format, syncedPokemon);
 
   // we're done! ... I think
   return syncedPokemon;

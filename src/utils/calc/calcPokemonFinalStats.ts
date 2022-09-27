@@ -1,10 +1,10 @@
 // import { getFinalSpeed, getModifiedStat } from '@smogon/calc/dist/mechanics/util';
 import { PokemonInitialStats, PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts';
 import { formatId as id } from '@showdex/utils/app';
-import { hasMegaForme } from '@showdex/utils/battle';
-// import { env } from '@showdex/utils/core';
+import { detectGenFromFormat, hasMegaForme } from '@showdex/utils/battle';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 // import { createSmogonField } from './createSmogonField';
@@ -29,7 +29,7 @@ const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
  */
 export const calcPokemonFinalStats = (
   // dex: Generation,
-  gen: GenerationNum,
+  format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
   opponentPokemon: DeepPartial<CalcdexPokemon>,
   field: CalcdexBattleField,
@@ -51,6 +51,10 @@ export const calcPokemonFinalStats = (
 
     return { ...PokemonInitialStats };
   }
+
+  const gen = typeof format === 'string'
+    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
+    : format;
 
   const hpPercentage = calcPokemonHp(pokemon);
 
@@ -215,7 +219,14 @@ export const calcPokemonFinalStats = (
     return finalStats;
   }
 
-  const hasDynamax = 'dynamax' in pokemon.volatiles;
+  // apply Dynamax effects
+  const hasDynamax = 'dynamax' in pokemon.volatiles
+    || pokemon.useMax;
+
+  if (hasDynamax) {
+    // 100% (2x) HP boost when Dynamaxed
+    finalStats.hp *= 2;
+  }
 
   // apply more item effects
   // (at this point, we should at least be gen 3)

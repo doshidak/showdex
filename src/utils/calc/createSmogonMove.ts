@@ -1,47 +1,28 @@
 import { Move as SmogonMove } from '@smogon/calc';
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app';
+import { getDexForFormat } from '@showdex/utils/battle';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
 export const createSmogonMove = (
-  dex: Generation,
+  // gen: GenerationNum,
+  format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
 ): SmogonMove => {
-  if (!dex?.num || !pokemon?.speciesForme || !moveName) {
+  // using the Dex global for the gen arg of SmogonMove seems to work here lol
+  const dex = <Generation> <unknown> getDexForFormat(format);
+
+  if (!dex || !format || !pokemon?.speciesForme || !moveName) {
     return null;
   }
 
-  /**
-   * @todo temporary workaround for CAP learnsets
-   */
-  const dexMove = typeof Dex !== 'undefined'
-    ? Dex.forGen(dex.num).moves.get(moveName)
-    : null;
-
-  // note: for whatever reason, gen 8 dex does not include information about Hidden Power
-  // (including any other types, such as Hidden Power Fire -- returns undefined!)
-  const isHiddenPower = formatId(moveName).includes('hiddenpower');
-
-  const determinedDex = dex.num === 8 && (isHiddenPower || pokemon.useZ)
-    ? 7
-    : dex;
-
-  const smogonMove = new SmogonMove(determinedDex, moveName, {
+  return new SmogonMove(dex, moveName, {
     species: pokemon.speciesForme,
     ability: pokemon.dirtyAbility ?? pokemon.ability,
     item: pokemon.dirtyItem ?? pokemon.item,
-    useZ: pokemon.useZ,
+    useZ: pokemon.useZ && !pokemon.useMax, // only apply one of them, not both!
     useMax: pokemon.useMax,
-    isCrit: pokemon.criticalHit ?? false,
-
-    /**
-     * @todo temporary workaround for CAP learnsets
-     */
-    overrides: dexMove?.isNonstandard === 'CAP' ? {
-      ...(<ConstructorParameters<typeof SmogonMove>[2]> <unknown> dexMove),
-    } : null,
+    isCrit: pokemon.criticalHit,
   });
-
-  return smogonMove;
 };

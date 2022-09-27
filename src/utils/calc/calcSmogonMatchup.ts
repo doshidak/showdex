@@ -1,9 +1,10 @@
 import { calculate } from '@smogon/calc';
 import {
-  createSmogonField,
-  createSmogonMove,
-  createSmogonPokemon,
-} from '@showdex/utils/calc';
+  detectGenFromFormat,
+  getDexForFormat,
+  getNaturesDex,
+  getTypesDex,
+} from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Generation, MoveName } from '@pkmn/data';
 import type { Move as SmogonMove } from '@smogon/calc';
@@ -13,6 +14,9 @@ import type {
   CalcdexPokemon,
 } from '@showdex/redux/store';
 import type { CalcdexMatchupParsedDescription } from './parseDescription';
+import { createSmogonField } from './createSmogonField';
+import { createSmogonMove } from './createSmogonMove';
+import { createSmogonPokemon } from './createSmogonPokemon';
 import { formatDamageRange } from './formatDamageRange';
 import { formatKoChance } from './formatKoChance';
 import { getKoColor } from './getKoColor';
@@ -83,7 +87,8 @@ const l = logger('@showdex/utils/calc/calcSmogonMatchup');
  * @since 0.1.2
  */
 export const calcSmogonMatchup = (
-  dex: Generation,
+  // dex: Generation,
+  format: string,
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerMove: MoveName,
@@ -99,11 +104,21 @@ export const calcSmogonMatchup = (
     koColor: null,
   };
 
-  if (!dex?.num || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
+  const gen = detectGenFromFormat(format);
+
+  const dex = <Generation> <unknown> {
+    ...getDexForFormat(format),
+    num: gen,
+    natures: getNaturesDex(),
+    types: getTypesDex(gen),
+  };
+
+  if (!dex || !format || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
       l.warn(
         'Calculation ignored due to invalid arguments.',
-        '\n', 'dex.num', dex?.num,
+        // '\n', 'dex.num', dex?.num,
+        '\n', 'format', format, 'dex', dex,
         '\n', 'playerPokemon.speciesForme', playerPokemon?.speciesForme,
         '\n', 'opponentPokemon.speciesForme', opponentPokemon?.speciesForme,
         '\n', 'playerMove', playerMove,
@@ -115,19 +130,16 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  const smogonPlayerPokemon = createSmogonPokemon(dex, playerPokemon, playerMove);
-  const smogonPlayerPokemonMove = createSmogonMove(dex, playerPokemon, playerMove);
-  const smogonOpponentPokemon = createSmogonPokemon(dex, opponentPokemon);
+  const smogonPlayerPokemon = createSmogonPokemon(format, playerPokemon);
+  const smogonPlayerPokemonMove = createSmogonMove(format, playerPokemon, playerMove);
+  const smogonOpponentPokemon = createSmogonPokemon(format, opponentPokemon);
 
   matchup.move = smogonPlayerPokemonMove;
 
-  const attackerSide = playerKey === 'p1' ? field?.attackerSide : field?.defenderSide;
-  const defenderSide = playerKey === 'p1' ? field?.defenderSide : field?.attackerSide;
-
   const smogonField = createSmogonField({
     ...field,
-    attackerSide,
-    defenderSide,
+    attackerSide: playerKey === 'p1' ? field?.attackerSide : field?.defenderSide,
+    defenderSide: playerKey === 'p1' ? field?.defenderSide : field?.attackerSide,
   });
 
   try {
