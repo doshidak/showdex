@@ -7,6 +7,7 @@ import { detectGenFromFormat } from './detectGenFromFormat';
 // import { detectLegacyGen } from './detectLegacyGen';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
+import { getPokemonLearnset } from './getPokemonLearnset';
 
 export interface PokemonMoveOption {
   label: string;
@@ -37,7 +38,8 @@ export const buildMoveOptions = (
   }
 
   const gen = detectGenFromFormat(format);
-  // const legacy = detectLegacyGen(gen);
+  const genlessFormat = format?.replace(/^gen\d+/i, '');
+  const showAllMoves = !genlessFormat || !LegalLockedFormats.includes(genlessFormat);
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -58,14 +60,10 @@ export const buildMoveOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
-  // also keep track of whether the Pokemon has any actual moves
-  // (to determine the group label of the otherMoves, if applicable)
-  // let hasActualMoves = false;
-
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
-  if (useZ && moves?.length) {
+  if (useZ && !useMax && moves?.length) {
     options.push({
       label: 'Z-PWR',
       options: moves.map((name) => ({
@@ -75,7 +73,6 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...moves);
-    // hasActualMoves = true;
   }
 
   // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
@@ -88,11 +85,7 @@ export const buildMoveOptions = (
       })),
     });
 
-    if (!useZ) {
-      filterMoves.push(...moves);
-    }
-
-    // hasActualMoves = true;
+    filterMoves.push(...moves);
   }
 
   if (serverSourced && serverMoves?.length) {
@@ -107,7 +100,6 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...filteredServerMoves);
-    // hasActualMoves = true;
   }
 
   if (transformedForme && transformedMoves?.length) {
@@ -122,7 +114,6 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...filteredTransformedMoves);
-    // hasActualMoves = true;
   }
 
   if (moveState?.revealed?.length) {
@@ -139,7 +130,6 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...revealedMoves);
-    // hasActualMoves = true;
   }
 
   if (altMoves?.length) {
@@ -156,24 +146,26 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...poolMoves);
-    // hasActualMoves = true;
   }
 
-  /**
-   * @todo temporary workaround for CAP learnsets
-   */
-  const learnset: MoveName[] = [...(<MoveName[]> moveState?.learnset || [])];
-  const isCap = format.includes('cap');
+  // const learnset: MoveName[] = [...(<MoveName[]> moveState?.learnset || [])];
+  // const isCap = format.includes('cap');
 
-  if (isCap && typeof Dex !== 'undefined' && typeof BattleTeambuilderTable !== 'undefined') {
-    const speciesFormeId = formatId(pokemon.speciesForme);
-    const learnsetsFromTable = Object.keys(BattleTeambuilderTable.learnsets?.[speciesFormeId] || {})
-      .map((n) => !!n && <MoveName> Dex.forGen(gen).moves.get(n)?.name)
-      .filter(Boolean);
+  // if (isCap && typeof Dex !== 'undefined' && typeof BattleTeambuilderTable !== 'undefined') {
+  //   const speciesFormeId = formatId(pokemon.speciesForme);
+  //   const learnsetsFromTable = Object.keys(BattleTeambuilderTable.learnsets?.[speciesFormeId] || {})
+  //     .map((n) => !!n && <MoveName> Dex.forGen(gen).moves.get(n)?.name)
+  //     .filter(Boolean);
+  //
+  //   if (learnsetsFromTable.length) {
+  //     learnset.push(...learnsetsFromTable);
+  //   }
+  // }
 
-    if (learnsetsFromTable.length) {
-      learnset.push(...learnsetsFromTable);
-    }
+  const learnset = getPokemonLearnset(format, speciesForme, showAllMoves);
+
+  if (transformedForme) {
+    learnset.push(...getPokemonLearnset(format, transformedForme, showAllMoves));
   }
 
   if (learnset.length) {
@@ -190,7 +182,6 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...learnsetMoves);
-    // hasActualMoves = true;
   }
 
   // Hidden Power moves were introduced in gen 2
@@ -217,9 +208,7 @@ export const buildMoveOptions = (
 
   // show all possible moves if format is not provided, is not legal-locked, or
   // no learnset is available (probably because the Pokemon doesn't exist in the `dex`'s gen)
-  const parsedFormat = format?.replace(/^gen\d+/i, '');
-
-  if (!parsedFormat || !LegalLockedFormats.includes(parsedFormat) || !moveState?.learnset?.length) {
+  if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
       .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
       .filter((n) => !!n && !filterMoves.includes(n))
@@ -232,7 +221,6 @@ export const buildMoveOptions = (
 
     // make sure this comes before the Hidden Power moves
     options.splice(insertionIndex, 0, {
-      // label: hasActualMoves ? 'Other' : 'All',
       label: 'All',
       options: otherMoves.map((name) => ({
         label: name,
