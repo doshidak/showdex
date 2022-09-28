@@ -19,7 +19,6 @@ export interface PokemonAbilityOption {
  * @since 1.0.1
  */
 export const buildAbilityOptions = (
-  // dex: Generation,
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): PokemonAbilityOption[] => {
@@ -49,7 +48,7 @@ export const buildAbilityOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
 
-  if (ability !== baseAbility) {
+  if (baseAbility && ability !== baseAbility) {
     options.push({
       label: formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited',
       options: [{
