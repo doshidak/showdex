@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
+import { ErrorBoundary } from '@showdex/components/debug';
 import {
   createSideRoom,
   // getActiveBattle,
@@ -12,6 +13,7 @@ import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
 import type { ShowdexBootstrapper } from '@showdex/main';
 import { Calcdex } from './Calcdex';
+import { CalcdexError } from './CalcdexError';
 
 const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
@@ -167,10 +169,15 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       activeBattle.reactCalcdexRoom.render((
         <ReduxProvider store={store}>
-          <Calcdex
-            battle={activeBattle}
-            // tooltips={tooltips}
-          />
+          <ErrorBoundary
+            component={CalcdexError}
+            battleId={activeBattle?.id}
+          >
+            <Calcdex
+              battle={activeBattle}
+              // tooltips={tooltips}
+            />
+          </ErrorBoundary>
         </ReduxProvider>
       ));
     });
