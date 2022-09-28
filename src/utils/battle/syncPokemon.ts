@@ -107,7 +107,9 @@ export const syncPokemon = (
           return;
         }
 
-        if (value === syncedPokemon.dirtyAbility) {
+        // always remove the dirtyAbility if the actual ability was revealed
+        // (value should be available at this point from the previous check, but we'll check again lol)
+        if (value) {
           syncedPokemon.dirtyAbility = null;
         }
 
@@ -124,10 +126,9 @@ export const syncPokemon = (
           return;
         }
 
-        // clear the dirtyItem if it's what the Pokemon actually has
-        // (otherwise, if the item hasn't been revealed yet, `value` would be falsy,
-        // but that's ok cause we have dirtyItem, i.e., no worries about clearing the user's input)
-        if (value === syncedPokemon.dirtyItem) {
+        // clear the dirtyItem if an actual item is revealed or consumed
+        // (if value is falsy here, then prevItem must be available from the previous check)
+        if (value || (clientPokemon.prevItem && clientPokemon.prevItemEffect)) {
           syncedPokemon.dirtyItem = null;
         }
 
