@@ -150,6 +150,12 @@ button.pokemonNameButton {
   @include spacing.margin($bottom: 1px);
 }
 
+.formeTooltip {
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
 .descTooltip {
   max-width: 175px;
   text-align: center;
@@ -159,6 +165,12 @@ button.pokemonNameButton {
 
 .itemTooltip {
   font-size: 8px;
-  // text-align: center;
-  // user-select: none;
+
+  .itemEffect {
+    text-transform: uppercase;
+  }
+
+  .itemName {
+    font-weight: 500;
+  }
 }

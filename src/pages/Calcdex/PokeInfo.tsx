@@ -128,6 +128,10 @@ export const PokeInfo = ({
       mutation.dirtyItem = null;
     }
 
+    if (!pokemon.item && pokemon.prevItem && pokemon.prevItemEffect) {
+      mutation.dirtyItem = null;
+    }
+
     if (Array.isArray(preset.altAbilities)) {
       mutation.altAbilities = [...preset.altAbilities];
     }
@@ -569,17 +573,17 @@ export const PokeInfo = ({
               <div className={cx(styles.descTooltip, styles.itemTooltip)}>
                 {
                   !!pokemon?.itemEffect &&
-                  <div className={styles.label}>
+                  <div className={styles.itemEffect}>
                     {pokemon.itemEffect}
                   </div>
                 }
                 {
                   !!pokemon?.prevItem &&
                   <>
-                    <div className={styles.label}>
+                    <div className={styles.itemEffect}>
                       {pokemon.prevItemEffect || 'Previous'}
                     </div>
-                    <div>
+                    <div className={styles.itemName}>
                       {pokemon.prevItem}
                     </div>
                   </>
