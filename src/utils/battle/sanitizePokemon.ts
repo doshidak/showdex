@@ -117,21 +117,21 @@ export const sanitizePokemon = (
       : null,
 
     ivs: {
-      hp: ('ivs' in pokemon && pokemon.ivs?.hp) ?? 31,
-      atk: ('ivs' in pokemon && pokemon.ivs?.atk) ?? 31,
-      def: ('ivs' in pokemon && pokemon.ivs?.def) ?? 31,
-      spa: ('ivs' in pokemon && pokemon.ivs?.spa) ?? 31,
-      spd: ('ivs' in pokemon && pokemon.ivs?.spd) ?? 31,
-      spe: ('ivs' in pokemon && pokemon.ivs?.spe) ?? 31,
+      hp: ('ivs' in pokemon && pokemon.ivs?.hp) || 31,
+      atk: ('ivs' in pokemon && pokemon.ivs?.atk) || 31,
+      def: ('ivs' in pokemon && pokemon.ivs?.def) || 31,
+      spa: ('ivs' in pokemon && pokemon.ivs?.spa) || 31,
+      spd: ('ivs' in pokemon && pokemon.ivs?.spd) || 31,
+      spe: ('ivs' in pokemon && pokemon.ivs?.spe) || 31,
     },
 
     evs: !legacy ? {
-      hp: ('evs' in pokemon && pokemon.evs?.hp) ?? 0,
-      atk: ('evs' in pokemon && pokemon.evs?.atk) ?? 0,
-      def: ('evs' in pokemon && pokemon.evs?.def) ?? 0,
-      spa: ('evs' in pokemon && pokemon.evs?.spa) ?? 0,
-      spd: ('evs' in pokemon && pokemon.evs?.spd) ?? 0,
-      spe: ('evs' in pokemon && pokemon.evs?.spe) ?? 0,
+      hp: ('evs' in pokemon && pokemon.evs?.hp) || 0,
+      atk: ('evs' in pokemon && pokemon.evs?.atk) || 0,
+      def: ('evs' in pokemon && pokemon.evs?.def) || 0,
+      spa: ('evs' in pokemon && pokemon.evs?.spa) || 0,
+      spd: ('evs' in pokemon && pokemon.evs?.spd) || 0,
+      spe: ('evs' in pokemon && pokemon.evs?.spe) || 0,
     } : {},
 
     boosts: {
