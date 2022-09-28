@@ -1527,32 +1527,6 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@pkmn/data@^0.5.26":
-  version "0.5.26"
-  resolved "https://registry.yarnpkg.com/@pkmn/data/-/data-0.5.26.tgz#cffd8052e07664a1f688761924dd84132ff38ce1"
-  integrity sha512-3FnCu3tq5DXDOfBytFaU8A1KNqnN7i+vZ72xM6zUsI/cvL0Eh2bNFCeTd7xBrCzqEP1Wchi14U452Skot8dqQQ==
-  dependencies:
-    "@pkmn/dex-types" "^0.5.26"
-
-"@pkmn/dex-types@^0.5.26":
-  version "0.5.26"
-  resolved "https://registry.yarnpkg.com/@pkmn/dex-types/-/dex-types-0.5.26.tgz#c5f56c862ce2be7c01235ed44319357a4bd698c1"
-  integrity sha512-aTovN2zCcPSe89Jqw/3skfdYt/jzbDoFn5fBdeAzqvtg4A+YXwk2p1a0Jj43ZfL5zf/uioEqmEuXf9r/X1CKIg==
-  dependencies:
-    "@pkmn/types" "^2.1.0"
-
-"@pkmn/dex@^0.5.26":
-  version "0.5.26"
-  resolved "https://registry.yarnpkg.com/@pkmn/dex/-/dex-0.5.26.tgz#c14a74de5afc3bd95c9551fed9e6b91df62fe836"
-  integrity sha512-4hlKAdp5whgIzKy09M3XiJ0K8hxRSnxNukVkk1KBF+Y1KZvCnvlFLGv7FAYI5YwsgIzgkx3sq1AJmTPr5kt9/Q==
-  dependencies:
-    "@pkmn/dex-types" "^0.5.26"
-
-"@pkmn/types@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@pkmn/types/-/types-2.1.0.tgz#390c2ba69685208d446dae0efd95ae91f8432201"
-  integrity sha512-liqA1fGio93hTZqwfLzWIO++WJTFce4d253r6FkomNTu/0Edso0q9qvNeuud8gvA5UhoF2h6J45mCGemPvZyNg==
-
 "@popperjs/core@^2.9.0":
   version "2.11.2"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.2.tgz#830beaec4b4091a9e9398ac50f865ddea52186b9"
