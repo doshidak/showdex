@@ -67,6 +67,16 @@ export const PokeMoves = ({
     [format, pokemon],
   );
 
+  const showZToggle = format?.includes('nationaldex')
+    || gen === 6
+    || gen === 7;
+
+  const showMaxToggle = !rules?.dynamax
+    && (
+      format?.includes('nationaldex')
+        || (gen === 8 && !format?.includes('bdsp'))
+    );
+
   // copies the matchup result description to the user's clipboard when the damage range is clicked
   const handleDamagePress = (index: number, description: string) => {
     if (typeof navigator === 'undefined' || typeof index !== 'number' || index < 0 || !description) {
@@ -110,7 +120,7 @@ export const PokeMoves = ({
         Moves
 
         {
-          (format?.includes('nationaldex') || gen === 6 || gen === 7) &&
+          showZToggle &&
           <>
             {' '}
             <Button
@@ -124,13 +134,14 @@ export const PokeMoves = ({
               disabled={!pokemon}
               onPress={() => onPokemonChange?.({
                 useZ: !pokemon?.useZ,
+                useMax: false,
               })}
             />
           </>
         }
 
         {
-          ((format?.includes('nationaldex') || (gen === 8 && !format?.includes('bdsp'))) && !rules?.dynamax) &&
+          showMaxToggle &&
           <>
             {' '}
             <Button
@@ -144,6 +155,7 @@ export const PokeMoves = ({
               // absoluteHover
               disabled={!pokemon}
               onPress={() => onPokemonChange?.({
+                useZ: false,
                 useMax: !pokemon?.useMax,
               })}
             />
