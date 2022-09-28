@@ -1402,3 +1402,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 export const useCalcdexState = () => useSelector(
   (state) => state?.calcdex,
 );
+
+export const useCalcdexBattleState = (battleId: string) => useSelector(
+  (state) => state?.calcdex?.[battleId],
+);
