@@ -215,30 +215,30 @@ const envConfig = {
 
       // not required on dev cause you can load a single big ass file no problemo (even into Firefox!)
       /** @todo Find a way to get the names of the generated chunks and inject it as an env or something (for use in content). */
-      splitChunks: {
-        automaticNameDelimiter: '.',
-        minSize: 1024 ** 2, // 1 MB
-        maxSize: 4 * (1024 ** 2), // 4 MB
-
-        cacheGroups: {
-          // disable the default cache groups
-          default: false,
-
-          // chunk the big ass JSON files from @pkmn/dex (particularly learnsets.json)
-          // (required for submitting to Mozilla's AMO, which enforces a 4 MB limit per file)
-          pkmn: {
-            // test: /\.json$/i,
-            // test: ({ resource }) => typeof resource === 'string'
-            //   && resource.includes('node_modules')
-            //   && resource.includes('@pkmn')
-            //   && resource.endsWith('.json'),
-            test: /\/node_modules\/@pkmn\/.+\.json$/i,
-            chunks: 'all',
-            name: 'pkmn',
-            // filename: '[name].js',
-          },
-        }, // end cacheGroups in optimization.splitChunks
-      }, // end splitChunks in optimization
+      // splitChunks: {
+      //   automaticNameDelimiter: '.',
+      //   minSize: 1024 ** 2, // 1 MB
+      //   maxSize: 4 * (1024 ** 2), // 4 MB
+      //
+      //   cacheGroups: {
+      //     // disable the default cache groups
+      //     default: false,
+      //
+      //     // chunk the big ass JSON files from @pkmn/dex (particularly learnsets.json)
+      //     // (required for submitting to Mozilla's AMO, which enforces a 4 MB limit per file)
+      //     pkmn: {
+      //       // test: /\.json$/i,
+      //       // test: ({ resource }) => typeof resource === 'string'
+      //       //   && resource.includes('node_modules')
+      //       //   && resource.includes('@pkmn')
+      //       //   && resource.endsWith('.json'),
+      //       test: /\/node_modules\/@pkmn\/.+\.json$/i,
+      //       chunks: 'all',
+      //       name: 'pkmn',
+      //       // filename: '[name].js',
+      //     },
+      //   }, // end cacheGroups in optimization.splitChunks
+      // }, // end splitChunks in optimization
     },
   }),
 };
