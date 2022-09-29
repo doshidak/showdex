@@ -36,11 +36,14 @@ export type DropdownSingleValue = string | number;
 export type DropdownMultiValue = DropdownSingleValue[];
 export type DropdownValue = DropdownSingleValue | DropdownMultiValue;
 
-export interface DropdownOption {
+export interface DropdownOption<
+  TValue extends DropdownSingleValue = DropdownSingleValue,
+> {
   label?: string;
+  rightLabel?: string;
   subLabel?: React.ReactNode;
-  value?: DropdownSingleValue;
-  options?: DropdownOption[];
+  value?: TValue;
+  options?: DropdownOption<TValue>[];
 }
 
 export type DropdownFieldSingleInput = FieldInputProps<DropdownSingleValue, HTMLInputElement>;

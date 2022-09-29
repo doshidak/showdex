@@ -35,7 +35,14 @@ export const SelectOption = <
     {
       !!data?.label &&
       <div className={styles.optionLabel}>
-        {data.label}
+        <div>{data.label}</div>
+
+        {
+          !!data?.rightLabel &&
+          <div className={styles.optionRightLabel}>
+            {data.rightLabel}
+          </div>
+        }
       </div>
     }
 

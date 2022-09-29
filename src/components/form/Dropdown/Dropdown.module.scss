@@ -74,6 +74,10 @@ $option-dark-background-color-selected: color.alpha(colors.$blue, 0.75);
 $option-light-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
 $option-dark-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
 
+$option-right-label-font-size: 8px;
+$option-right-label-light-color: color.alpha($option-light-color, 0.75);
+$option-right-label-dark-color: color.alpha($option-dark-color, 0.75);
+
 $option-sub-label-font-size: 8px;
 $option-sub-label-light-color: color.alpha($option-light-color, 0.75);
 $option-sub-label-dark-color: color.alpha($option-dark-color, 0.75);
@@ -520,12 +524,28 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 }
 
 .optionLabel {
+  @include flex.row-between;
+  width: 100%;
+
   .light & {
     color: $option-light-color;
   }
 
   .dark & {
     color: $option-dark-color;
+  }
+}
+
+.optionRightLabel {
+  font-size: $option-right-label-font-size;
+  text-align: right;
+
+  .light & {
+    color: $option-right-label-light-color;
+  }
+
+  .dark & {
+    color: $option-right-label-dark-color;
   }
 }
 
