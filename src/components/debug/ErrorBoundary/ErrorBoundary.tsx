@@ -30,7 +30,6 @@ export interface ErrorBoundaryState extends ErrorBoundaryComponentProps {
  */
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    console.log('ErrorBoundary getDerivedStateFromError()', error, 'instanceof Error?', error instanceof Error);
     return {
       hasError: error instanceof Error,
       error,
@@ -41,11 +40,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     hasError: false,
     error: null,
   };
-
-  // componentDidCatch(error: Error) {
-  //   console.log('ErrorBoundary componentDidCatch() error', error, 'instanceof Error?', error instanceof Error);
-  //   this.setState({ error });
-  // }
 
   render() {
     const {
