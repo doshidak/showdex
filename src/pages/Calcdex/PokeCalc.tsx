@@ -57,7 +57,6 @@ export const PokeCalc = ({
   const legacy = detectLegacyGen(gen);
 
   const calculateMatchup = useSmogonMatchup(
-    // dex,
     format,
     playerPokemon,
     opponentPokemon,
@@ -146,7 +145,7 @@ export const PokeCalc = ({
       } = sanitizePokemon({
         ...playerPokemon,
         ...payload,
-      }, gen);
+      }, format);
 
       if (abilities?.length) {
         payload.abilities = [...abilities];
