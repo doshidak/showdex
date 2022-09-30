@@ -1,13 +1,12 @@
 import * as React from 'react';
-// import { FormatLabels } from '@showdex/consts';
 import {
   usePokemonFormatStatsQuery,
   usePokemonPresetQuery,
   usePokemonRandomsPresetQuery,
 } from '@showdex/redux/services';
-import { detectGenFromFormat } from '@showdex/utils/battle';
+import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 /**
  * Options for the `usePresets()` hook.
@@ -28,7 +27,14 @@ export interface CalcdexPresetsHookOptions {
    * @warning Fetching will be disabled (regardless of the `disabled` option) if this value is falsy.
    * @since 0.1.3
    */
-  format?: string;
+  format: string;
+
+  /**
+   * Optional presets from the `pokemon` to include in the internal list of presets.
+   *
+   * @since 1.0.3
+   */
+  pokemon?: DeepPartial<CalcdexPokemon>;
 
   /**
    * Whether the presets should not be fetched.
@@ -123,15 +129,17 @@ const UltFormeRegex = /-(?:Mega(?:-[A-Z]+)?|Gmax)$/i;
  */
 export const usePresets = ({
   format,
+  pokemon,
   disabled,
-}: CalcdexPresetsHookOptions = {}): CalcdexPresetsHookInterface => {
+}: CalcdexPresetsHookOptions = {
+  format: null,
+}): CalcdexPresetsHookInterface => {
   const gen = format ? detectGenFromFormat(format) : null;
 
-  const baseGen = gen ? `gen${gen}` : null; // e.g., 'gen8' (obviously `gen` shouldn't be 0 here)
-  const genlessFormat = baseGen ? format.replace(baseGen, '') : null; // e.g., 'randombattle'
+  const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
-  const shouldSkip = disabled || !format || !baseGen || !genlessFormat;
+  const shouldSkip = disabled || !format || !gen || !genlessFormat;
 
   const {
     data: gensPresets,
@@ -166,11 +174,13 @@ export const usePresets = ({
   });
 
   const presets = React.useMemo(() => [
+    ...((pokemon?.presets?.length && pokemon.presets) || []),
     ...((!randomsFormat && gensPresets) || []),
     ...((!randomsFormat && statsPresets) || []),
     ...((randomsFormat && randomsPresets) || []),
   ].filter(Boolean), [
     gensPresets,
+    pokemon,
     randomsFormat,
     randomsPresets,
     statsPresets,
