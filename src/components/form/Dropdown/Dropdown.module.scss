@@ -45,6 +45,9 @@ $icon-dark-color: color.alpha(colors.$white, 0.3);
 $icon-light-color-hover: color.alpha(colors.$black, 0.95);
 $icon-dark-color-hover: color.alpha(colors.$white, 0.95);
 
+$loading-indicator-light-color: color.alpha(colors.$black, 0.3);
+$loading-indicator-dark-color: color.alpha(colors.$white, 0.3);
+
 $indicator-separator-width: 1px;
 $indicator-separator-margin-x: 3px;
 $indicator-separator-light-color: colors.$transparent;
@@ -406,6 +409,49 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
   .menuOpen & {
     transform: rotate(-180deg);
+  }
+}
+
+// SelectLoadingIndicator
+
+.loadingIndicator {
+  @include flex.row;
+  align-self: center;
+  vertical-align: middle;
+  line-height: 1;
+  text-align: center;
+  @include transition.apply(color);
+
+  .light & {
+    color: $loading-indicator-light-color;
+  }
+
+  .dark & {
+    color: $loading-indicator-dark-color;
+  }
+}
+
+@keyframes loadingIndicatorDotAnimation {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+}
+
+.loadingIndicatorDot {
+  display: inline-block;
+  vertical-align: top;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  border-radius: 1em;
+  animation: loadingIndicatorDotAnimation 1s ease-in-out infinite;
+
+  &.offset {
+    @include spacing.margin($left: 1em);
   }
 }
 

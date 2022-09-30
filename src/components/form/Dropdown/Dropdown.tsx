@@ -21,6 +21,7 @@ import { SelectGroupHeading } from './SelectGroupHeading';
 import { SelectIndicatorsContainer } from './SelectIndicatorsContainer';
 import { SelectIndicatorSeparator } from './SelectIndicatorSeparator';
 import { SelectInput } from './SelectInput';
+import { SelectLoadingIndicator } from './SelectLoadingIndicator';
 import { SelectMenu } from './SelectMenu';
 import { SelectMenuList } from './SelectMenuList';
 import { SelectMultiValue } from './SelectMultiValue';
@@ -199,6 +200,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
             IndicatorsContainer: SelectIndicatorsContainer,
             IndicatorSeparator: SelectIndicatorSeparator,
             Input: SelectInput,
+            LoadingIndicator: SelectLoadingIndicator,
             LoadingMessage: SelectNotice,
             Menu: SelectMenu,
             MenuList: SelectMenuList,
