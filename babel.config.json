@@ -1,4 +1,6 @@
 {
+  "sourceMaps": true,
+
   "presets": [
     "@babel/preset-typescript",
     [
