@@ -8,6 +8,7 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 // import { detectLegacyGen } from './detectLegacyGen';
 import { flattenAlt, flattenAlts } from './flattenAlts';
+import { getGenlessFormat } from './getGenlessFormat';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
 import { getPokemonLearnset } from './getPokemonLearnset';
@@ -33,7 +34,7 @@ export const buildMoveOptions = (
   }
 
   const gen = detectGenFromFormat(format);
-  const genlessFormat = format?.replace(/^gen\d+/i, '');
+  const genlessFormat = getGenlessFormat(format);
   const showAllMoves = !genlessFormat || !LegalLockedFormats.includes(genlessFormat);
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
