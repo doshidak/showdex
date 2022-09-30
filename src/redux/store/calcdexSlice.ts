@@ -854,6 +854,7 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
  * * Counter-intuitively, if the value for a given rule is `true`, typically indicates some mechanic is disabled.
  * * Most of these are probably unused, but they're set just in case I decide to use them later.
  *
+ * @todo Update this to extract the applied battle rules from the `battle.rules` object (instead of `battle.stepQueue`).
  * @since 0.1.3
  */
 export interface CalcdexBattleRules {
@@ -1213,7 +1214,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
-      const newState: CalcdexBattleState = {
+      state[battleId] = {
         ...payload,
 
         battleId,
@@ -1258,12 +1259,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         field: field || sanitizeField(),
       };
 
-      state[battleId] = newState;
-
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState', newState,
+        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
       );
     },
 
@@ -1295,11 +1294,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       // note: this is a pointer/reference to the object in `state`
       const currentState = state[battleId];
 
-      // note: most update reducers have a separate object like this to print the updated
-      // state to the console; `state` here is actually a Proxy via RTK's use of Immutable's
-      // WritableDraft, so we'd have to call some function to get a snapshot of it
-      // (i.e., too much work lmao -- this is way easier)
-      const updatedState: CalcdexBattleState = {
+      // note: `state` is actually a Proxy object via the WritableDraft from Immutable,
+      // a dependency of RTK. spreading will only show the values of the current object depth;
+      // all inner depths will remain as Proxy objects! (you cannot read the value of a Proxy.)
+      state[battleId] = {
         ...currentState,
 
         battleId: battleId || currentState.battleId,
@@ -1308,13 +1306,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         format: format || currentState.format,
       };
 
-      // updatedState is a new object here btw since we  S P R E A D  the currentState earlier
-      state[battleId] = updatedState;
-
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (via updatedState)', updatedState,
+        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
       );
     },
 
@@ -1353,7 +1348,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (via spread)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
       );
     },
 
@@ -1402,7 +1397,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (via spread)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
       );
     },
 
@@ -1435,7 +1430,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!(playerKey in battleState)) {
         l.error(
           'Could not find player', playerKey, 'in battleId', battleId,
-          '\n', 'battleState', battleState,
+          '\n', 'battleState (Proxy)', __DEV__ && { ...battleState },
           '\n', 'pokemon', pokemon,
         );
 
@@ -1452,8 +1447,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         if (__DEV__) {
           l.warn(
             'Could not find Pokemon', pokemonId, 'of player', playerKey, 'in battleId', battleId,
-            '\n', 'battleState', battleState,
-            '\n', 'playerState', playerState,
+            '\n', 'battleState (Proxy)', __DEV__ && { ...battleState },
+            '\n', 'playerState (Proxy)', __DEV__ && { ...playerState },
             '\n', 'pokemon', pokemon,
             '\n', '(You will only see this warning on development.)',
           );
@@ -1470,7 +1465,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (via spread)', __DEV__ && { ...battleState },
+        '\n', 'battleState (Proxy)', __DEV__ && { ...battleState },
       );
     },
   },
@@ -1492,7 +1487,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', SyncBattleActionType, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (via spread)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
       );
     }),
 });
