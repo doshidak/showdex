@@ -47,8 +47,13 @@ export const FieldCalc = ({
     defenderSide: p2Side,
   } = field || {};
 
-  const attackerSide = playerKey === 'p1' ? p1Side : p2Side;
-  const defenderSide = playerKey === 'p1' ? p2Side : p1Side;
+  const p1Attacker = [authPlayerKey, playerKey].filter(Boolean).includes('p1');
+
+  const attackerSide = p1Attacker ? p1Side : p2Side;
+  const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
+
+  const defenderSide = p1Attacker ? p2Side : p1Side;
+  const defenderSideKey: keyof CalcdexBattleField = p1Attacker ? 'defenderSide' : 'attackerSide';
 
   return (
     <TableGrid
@@ -107,7 +112,7 @@ export const FieldCalc = ({
           label="Light"
           disabled={!battleId || !p1Side}
           onPress={() => onFieldChange?.({
-            attackerSide: {
+            [attackerSideKey]: {
               ...attackerSide,
               isLightScreen: !attackerSide?.isLightScreen,
             },
@@ -124,7 +129,7 @@ export const FieldCalc = ({
           label="Reflect"
           disabled={!battleId || !p1Side}
           onPress={() => onFieldChange?.({
-            attackerSide: {
+            [attackerSideKey]: {
               ...attackerSide,
               isReflect: !attackerSide?.isReflect,
             },
@@ -141,7 +146,7 @@ export const FieldCalc = ({
           label="Aurora"
           disabled={!battleId || !p1Side || gen < 7}
           onPress={() => onFieldChange?.({
-            attackerSide: {
+            [attackerSideKey]: {
               ...attackerSide,
               isAuroraVeil: !attackerSide?.isAuroraVeil,
             },
@@ -207,7 +212,7 @@ export const FieldCalc = ({
           label="Light"
           disabled={!battleId || !p2Side}
           onPress={() => onFieldChange?.({
-            defenderSide: {
+            [defenderSideKey]: {
               ...defenderSide,
               isLightScreen: !defenderSide?.isLightScreen,
             },
@@ -224,7 +229,7 @@ export const FieldCalc = ({
           label="Reflect"
           disabled={!battleId || !p2Side}
           onPress={() => onFieldChange?.({
-            defenderSide: {
+            [defenderSideKey]: {
               ...defenderSide,
               isReflect: !defenderSide?.isReflect,
             },
@@ -241,8 +246,7 @@ export const FieldCalc = ({
           label="Aurora"
           disabled={!battleId || !p2Side || gen < 7}
           onPress={() => onFieldChange?.({
-            // ...field,
-            defenderSide: {
+            [defenderSideKey]: {
               ...defenderSide,
               isAuroraVeil: !defenderSide?.isAuroraVeil,
             },
