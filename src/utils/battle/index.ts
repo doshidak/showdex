@@ -1,6 +1,7 @@
 export * from './buildAbilityOptions';
 export * from './buildItemOptions';
 export * from './buildMoveOptions';
+export * from './buildPresetOptions';
 export * from './detectBattleRules';
 export * from './detectGenFromFormat';
 export * from './detectLegacyGen';
@@ -12,6 +13,7 @@ export * from './detectToggledAbility';
 export * from './flattenAlts';
 export * from './formatStatBoost';
 export * from './getDexForFormat';
+export * from './getGenlessFormat';
 export * from './getMaxMove';
 export * from './getZMove';
 export * from './guessTableFormatKey';
