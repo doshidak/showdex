@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { syncBattle } from '@showdex/redux/actions';
-import { calcdexSlice, useCalcdexState, useDispatch } from '@showdex/redux/store';
+import { calcdexSlice, useCalcdexBattleState, useDispatch } from '@showdex/redux/store';
 import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
+import { dehydrateCalcdex } from '@showdex/utils/redux';
 import type { GenerationNum } from '@smogon/calc';
 import type {
   CalcdexBattleField,
@@ -34,43 +35,24 @@ const l = logger('@showdex/pages/Calcdex/useCalcdex');
 export const useCalcdex = ({
   battle,
 }: CalcdexHookProps): CalcdexHookInterface => {
-  const calcdexState = useCalcdexState();
+  const battleState = useCalcdexBattleState(battle?.id);
   const dispatch = useDispatch();
 
-  const battleState = calcdexState[battle?.id];
+  const format = battle?.id?.split?.('-')?.[1];
+  const gen = battle?.gen as GenerationNum;
 
   l.debug(
-    '\n', 'battleState', battleState,
-    '\n', 'calcdexState', calcdexState,
+    format, battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)',
+    '\n', 'battle.id', battle?.id || '(missing battle.id)',
+    '\n', 'battle', battle,
+    '\n', 'battleState', battleState, __DEV__ && { dehydrated: dehydrateCalcdex(battleState) },
   );
-
-  const format = battle?.id?.split?.('-')?.[1];
-  // const isBdsp = format?.includes('bdsp');
-
-  // for BDSP, though gen 8, should load from gen 4, otherwise,
-  // Calcdex may crash due to incomplete Pokemon entries (like Bibarel)
-  // (update [2022/09/22]: starting to use the built-in Dex, so shouldn't be an issue anymore)
-  const gen = battle?.gen as GenerationNum;
-  // const legacy = detectLegacyGen(gen);
-
-  // const gens = React.useRef(new Generations(PkmnDex));
-  // const dex = gens.current.get(gen);
-
-  // const dex = React.useMemo(() => (typeof gen === 'number' && gen > 0 ? <Generation> <unknown> {
-  //   ...pkmnDex,
-  //   species: (Dex ?? pkmnDex).species,
-  //   num: gen,
-  // } : null), [
-  //   gen,
-  //   pkmnDex,
-  // ]);
 
   // handles `battle` changes
   React.useEffect(() => {
     l.debug(
       'Received battle update; determining sync changes...',
-      '\n', 'battle.nonce', battle?.nonce,
-      '\n', 'battleState.battleNonce', battleState?.battleNonce,
+      '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce,
       '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
       '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
       '\n', 'battle', battle,
@@ -94,8 +76,8 @@ export const useCalcdex = ({
     if (!battle?.nonce) {
       // this means the passed-in `battle` object is not from the bootstrapper
       l.debug(
-        'Ignoring battle update due to missing battle.nonce', battle?.nonce,
-        '\n', 'battleState.battleNonce', battleState?.battleNonce,
+        'Ignoring battle update due to missing nonce for', battle?.id || '(missing battle.id)',
+        '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
       );
@@ -105,7 +87,8 @@ export const useCalcdex = ({
 
     if (!battleState?.battleId) {
       l.debug(
-        'Initializing empty battleState with battle.nonce', battle.nonce,
+        'Initializing new battleState for', battle.id,
+        '\n', 'battle.nonce', battle.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
       );
@@ -120,29 +103,27 @@ export const useCalcdex = ({
       }));
     } else if (!battleState?.battleNonce || battle.nonce !== battleState.battleNonce) {
       l.debug(
-        'Updating battleState via syncBattle() for battle.nonce', battle.nonce,
+        'Syncing existing battleState for', battle.id,
+        '\n', 'battle.nonce', battle.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
-        // '\n', 'state', state,
       );
 
-      void dispatch(syncBattle({
-        battle,
-        // dex,
-      }));
+      // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
+      // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
+      void dispatch(syncBattle({ battle }));
     }
 
     l.debug(
-      'Completed battleState sync for battle.nonce', battle.nonce,
+      'Completed battleState sync for', battle.id,
+      '\n', 'battle.nonce', battle.nonce,
       '\n', 'battle', battle,
       '\n', 'battleState', battleState,
-      // '\n', 'state', state,
     );
   }, [
     battle,
     battle?.nonce,
     battleState,
-    calcdexState,
     dispatch,
     format,
     gen,
@@ -202,8 +183,8 @@ export const useCalcdex = ({
         field: sanitizeField(
           battle,
           updatedBattleState,
-          playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
-          playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
+          gen === 1 && playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
+          gen === 1 && playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
         ),
       }));
     },

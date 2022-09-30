@@ -3,8 +3,7 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import { logger } from '@showdex/utils/debug';
-import { dehydrateCalcdex } from '@showdex/utils/redux';
+// import { logger } from '@showdex/utils/debug';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -14,7 +13,7 @@ interface CalcdexProps {
   battle?: Showdown.Battle;
 }
 
-const l = logger('@showdex/pages/Calcdex/Calcdex');
+// const l = logger('@showdex/pages/Calcdex/Calcdex');
 
 export const Calcdex = ({
   battle,
@@ -43,8 +42,6 @@ export const Calcdex = ({
     p2,
     field,
   } = state;
-
-  l.debug(dehydrateCalcdex(state));
 
   // playerKey is a ref in case `battle` becomes `null`
   // const playerKey = React.useRef(detectPlayerKeyFromBattle(battle));
