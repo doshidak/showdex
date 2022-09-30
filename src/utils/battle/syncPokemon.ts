@@ -19,7 +19,9 @@ import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 // import { detectToggledAbility } from './detectToggledAbility';
 import { getDexForFormat } from './getDexForFormat';
-import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
+import { sanitizePokemon } from './sanitizePokemon';
+import { sanitizeMoveTrack } from './sanitizeMoveTrack';
+import { sanitizeVolatiles } from './sanitizeVolatiles';
 
 // const l = logger('@showdex/utils/battle/syncPokemon');
 
@@ -29,10 +31,9 @@ export const syncPokemon = (
   serverPokemon?: DeepPartial<Showdown.ServerPokemon>,
   format?: string,
 ): CalcdexPokemon => {
-  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const dex = getDexForFormat(format);
-
-  const legacy = detectLegacyGen(gen);
+  const legacy = detectLegacyGen(format);
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // final synced Pokemon that will be returned at the end
   const syncedPokemon = structuredClone(pokemon) || {};
@@ -60,6 +61,7 @@ export const syncPokemon = (
     const prevValue = syncedPokemon[<keyof CalcdexPokemon> key];
     let value = clientPokemon?.[key];
 
+    // note: this will accept null values!
     if (value === undefined) {
       return;
     }
@@ -68,6 +70,12 @@ export const syncPokemon = (
       case 'speciesForme': {
         // e.g., 'Urshifu-*' -> 'Urshifu' (to fix forme switching, which is prevented due to the wildcard forme)
         value = (<string> value).replace('-*', '');
+
+        // retain any switched Gmax formes if it still equals its forme in-battle with the Gmax suffix removed
+        // (e.g., syncedPokemon.speciesForme = 'Cinderace-Gmax' and value = 'Cinderace' would equal)
+        if (formatId(syncedPokemon.speciesForme.replace('-Gmax', '')) === formatId(value)) {
+          return;
+        }
 
         // if the speciesForme changed, update the types and possible abilities
         // (could change due to mega-evolutions or gigantamaxing, for instance)
@@ -186,21 +194,15 @@ export const syncPokemon = (
       // }
 
       case 'moveTrack': {
-        const moveTrack = <Showdown.Pokemon['moveTrack']> value;
+        const {
+          moveTrack,
+          revealedMoves,
+        } = sanitizeMoveTrack(clientPokemon, format);
 
-        if (moveTrack?.length) {
-          syncedPokemon.moveState = {
-            ...syncedPokemon.moveState,
+        value = moveTrack;
 
-            // filter out any Z/Max moves from the revealed list
-            revealed: moveTrack.map((track) => track?.[0]).filter((name) => {
-              const move = Dex?.moves.get(name);
-
-              return !!move?.name && !move?.isZ && !move?.isMax;
-            }),
-          };
-
-          // l.debug('value of type CalcdexMoveState set to', syncedPokemon.moveState);
+        if (revealedMoves.length) {
+          syncedPokemon.revealedMoves = revealedMoves;
         }
 
         break;
@@ -218,7 +220,16 @@ export const syncPokemon = (
           : [];
 
         if (changedTypes.length) {
-          syncedPokemon.types = changedTypes;
+          syncedPokemon.types = [...changedTypes];
+        }
+
+        // check for type change resets
+        const resetTypes = 'typechange' in syncedPokemon.volatiles && !changedTypes.length
+          ? <Showdown.TypeName[]> dex.species.get(syncedPokemon.speciesForme)?.types || []
+          : [];
+
+        if (resetTypes?.length) {
+          syncedPokemon.types = [...resetTypes];
         }
 
         // check for type additions (separate from type changes)
@@ -249,7 +260,7 @@ export const syncPokemon = (
         }
 
         // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
-        value = sanitizePokemonVolatiles(clientPokemon);
+        value = sanitizeVolatiles(clientPokemon);
 
         break;
       }
@@ -421,7 +432,7 @@ export const syncPokemon = (
     abilityToggled,
     baseStats,
     transformedBaseStats,
-  } = sanitizePokemon(syncedPokemon, gen);
+  } = sanitizePokemon(syncedPokemon, format);
 
   // update the abilities (including transformedAbilities) if they're different from what was stored prior
   // (note: only checking if they're arrays instead of their length since th ability list could be empty)
