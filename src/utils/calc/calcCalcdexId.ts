@@ -1,7 +1,7 @@
 import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
 import { env } from '@showdex/utils/core';
 import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import type { CalcdexPlayerKey, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export const serializePayload = <T>(payload: T): string => Object.entries(payload || {})
   .map(([key, value]) => `${key}:${value?.toString?.() ?? 'undefined'}`)
@@ -55,13 +55,14 @@ export const calcPresetCalcdexId = (
 
 export const calcPokemonCalcdexId = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon & { slot: number; }> | DeepPartial<CalcdexPokemon> = {},
+  playerKey?: CalcdexPlayerKey,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   // ident: pokemon?.ident,
 
-  name: [
-    detectPlayerKeyFromPokemon(pokemon),
+  ident: [
+    playerKey || detectPlayerKeyFromPokemon(pokemon),
     // pokemon?.name?.replace(/-.+$/, ''), // 'Ho-Oh' -> 'Ho' ? LOL
-    'slot' in pokemon && typeof pokemon.slot === 'number'
+    'slot' in pokemon && typeof pokemon.slot === 'number' && pokemon.slot > -1
       ? String(pokemon.slot)
       : pokemon?.speciesForme?.replace(/-.+$/, ''),
   ].filter(Boolean).join(': '),
