@@ -1,6 +1,10 @@
 import * as React from 'react';
 // import { FormatLabels } from '@showdex/consts';
-import { usePokemonGensPresetQuery, usePokemonRandomsPresetQuery } from '@showdex/redux/services';
+import {
+  usePokemonFormatStatsQuery,
+  usePokemonPresetQuery,
+  usePokemonRandomsPresetQuery,
+} from '@showdex/redux/services';
 import { detectGenFromFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
@@ -76,7 +80,7 @@ const sortPresets = (
     //   return -1;
     // }
 
-    if (a.format === genlessFormat) {
+    if (a.format.includes(genlessFormat)) {
       return -1;
     }
 
@@ -84,7 +88,7 @@ const sortPresets = (
     //   return 1;
     // }
 
-    if (b.format === genlessFormat) {
+    if (b.format.includes(genlessFormat)) {
       return 1;
     }
 
@@ -92,7 +96,7 @@ const sortPresets = (
   });
 };
 
-const UltFormeRegex = /-(?:Mega(?:-X|-Y)?|Gmax)$/;
+const UltFormeRegex = /-(?:Mega(?:-[A-Z]+)?|Gmax)$/i;
 
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
@@ -106,14 +110,7 @@ export const usePresets = ({
   format,
   disabled,
 }: CalcdexPresetsHookOptions = {}): CalcdexPresetsFinder => {
-  // note: 'gen8bdspou' requires special treatment since Pokemon like Breloom don't exist in `gen8.json`,
-  // despite `gen8.json` including presets for the 'bdspou' format (for Gen 8 Pokemon that also exist in BDSP)
-  // (also rather unfortunately, there's a `gen8bdsprandombattle.json`, so there's that... LOL)
-  const gen = format
-    ? format?.includes('bdsp') && !format.includes('random')
-      ? 4
-      : detectGenFromFormat(format)
-    : null; // e.g., 8 (if `format` is 'gen8randombattle')
+  const gen = format ? detectGenFromFormat(format) : null;
 
   const baseGen = gen ? `gen${gen}` : null; // e.g., 'gen8' (obviously `gen` shouldn't be 0 here)
   const genlessFormat = baseGen ? format.replace(baseGen, '') : null; // e.g., 'randombattle'
@@ -124,10 +121,21 @@ export const usePresets = ({
   const {
     data: gensPresets,
     isLoading: gensLoading,
-  } = usePokemonGensPresetQuery({
+  } = usePokemonPresetQuery({
     gen,
-    format, // if it's BDSP, the query will automatically set the gen to 4
+    format,
+    formatOnly: genlessFormat.includes('bdsp'),
     // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
+  }, {
+    skip: shouldSkip || randomsFormat,
+  });
+
+  const {
+    data: statsPresets,
+    isLoading: statsLoading,
+  } = usePokemonFormatStatsQuery({
+    gen,
+    format,
   }, {
     skip: shouldSkip || randomsFormat,
   });
@@ -144,16 +152,18 @@ export const usePresets = ({
 
   const presets = React.useMemo(() => [
     ...((!randomsFormat && gensPresets) || []),
+    ...((!randomsFormat && statsPresets) || []),
     ...((randomsFormat && randomsPresets) || []),
   ].filter(Boolean), [
     gensPresets,
     randomsFormat,
     randomsPresets,
+    statsPresets,
   ]);
 
   const loading = React.useMemo(
-    () => gensLoading || randomsLoading,
-    [gensLoading, randomsLoading],
+    () => gensLoading || statsLoading || randomsLoading,
+    [gensLoading, randomsLoading, statsLoading],
   );
 
   const find = React.useCallback<CalcdexPresetsFinder>((
@@ -199,7 +209,7 @@ export const usePresets = ({
     const hasUltForme = UltFormeRegex.test(speciesForme);
 
     // note: ult formes are typically only available in randoms presets
-    if (hasUltForme && randomsFormat) {
+    if (hasUltForme) {
       // filter by randoms presets only w/ exact speciesForme match
       // (e.g., 'Urshifu' and 'Urshifu-Gmax' both exist in `gen8randombattle.json` [from the pkmn API])
       const ultPresets = presets.filter((p) => p.format.includes(genlessFormat) && p.speciesForme === speciesForme);
