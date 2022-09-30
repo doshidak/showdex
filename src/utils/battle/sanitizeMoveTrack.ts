@@ -37,7 +37,8 @@ export const sanitizeMoveTrack = (
   const dexMoveTrack = pokemon.moveTrack
     .filter((t) => Array.isArray(t) && !!t[0])
     .map(([moveName, ppUsed]) => <[move: Showdown.Move, ppUsed: number]> [
-      dex.moves.get(moveName),
+      // transformed moves will sometimes have an asterisk (*) in the name
+      dex.moves.get(moveName?.replace('*', '')),
       ppUsed || 0,
     ])
     .filter(([move]) => move?.exists && !!move.name);
