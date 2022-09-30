@@ -23,6 +23,7 @@ module.exports = {
     { name: 'main' }, // main script (src/main.ts)
     { name: 'manifest' },
     { name: 'redux' },
+    { name: 'scripts' },
     { name: 'styles' },
     { name: 'types' },
     { name: 'utils' },
