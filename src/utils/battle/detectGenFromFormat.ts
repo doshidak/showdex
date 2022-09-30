@@ -1,6 +1,6 @@
 import type { GenerationNum } from '@smogon/calc';
 
-const GenRegex = /^gen(\d+)/i;
+const GenRegex = /^gen(\d+)(?!v\d)/i;
 
 /**
  * Note that `defaultGen` is `null` by default, but you're free to import `env`
