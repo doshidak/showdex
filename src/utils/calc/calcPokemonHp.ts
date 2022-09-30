@@ -19,7 +19,7 @@ export const calcPokemonHp = (
   const hp = pokemon.hp || 0;
 
   const maxHp = 'spreadStats' in pokemon && pokemon.serverSourced && !pokemon.transformedForme
-    ? pokemon.spreadStats.hp || pokemon.maxhp || 1
+    ? (pokemon.spreadStats.hp * (pokemon.useMax ? 2 : 1)) || pokemon.maxhp || 1
     : pokemon.maxhp || 1;
 
   return clamp(0, hp / maxHp, 1);
