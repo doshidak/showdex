@@ -14,7 +14,7 @@ const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
 
 const buildTarget = String(process.env.BUILD_TARGET || 'chrome').toLowerCase();
-const buildDate = Date.now();
+const buildDate = Date.now().toString(16).toUpperCase();
 
 // does not include the extension
 const buildFilename = [
@@ -30,7 +30,7 @@ if (typeof __dirname !== 'string') {
   global.__dirname = path.dirname(fileURLToPath(import.meta.url));
 }
 
-const env = Object.entries({
+export const env = Object.entries({
   ...dotenv.config({ path: path.join(__dirname, '.env') }).parsed,
   NODE_ENV: mode,
   BUILD_TARGET: buildTarget,
