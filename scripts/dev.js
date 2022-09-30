@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import { config } from '../webpack.config';
+import { env as webpackEnv, config } from '../webpack.config';
 
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
@@ -88,6 +88,9 @@ const port = process.env.DEV_PORT;
     `v${process.env.npm_package_version}`,
     'development server...',
   );
+
+  console.log('Loaded node env:', env);
+  console.log('Loaded webpack env:', webpackEnv);
 
   await server.start();
 
