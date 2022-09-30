@@ -9,6 +9,11 @@ import { detectGenFromFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
+/**
+ * Options for the `usePresets()` hook.
+ *
+ * @since 0.1.3
+ */
 export interface CalcdexPresetsHookOptions {
   /**
    * Format of the battle.
@@ -55,6 +60,16 @@ export type CalcdexPresetsFinder = (
   speciesForme: string,
   sort?: boolean,
 ) => CalcdexPokemonPreset[];
+
+/**
+ * Return object of the `usePresets()` hook.
+ *
+ * @since 1.0.3
+ */
+export interface CalcdexPresetsHookInterface {
+  findPresets: CalcdexPresetsFinder;
+  presetsLoading: boolean;
+}
 
 const l = logger('@showdex/pages/Calcdex/usePresets');
 
@@ -109,7 +124,7 @@ const UltFormeRegex = /-(?:Mega(?:-[A-Z]+)?|Gmax)$/i;
 export const usePresets = ({
   format,
   disabled,
-}: CalcdexPresetsHookOptions = {}): CalcdexPresetsFinder => {
+}: CalcdexPresetsHookOptions = {}): CalcdexPresetsHookInterface => {
   const gen = format ? detectGenFromFormat(format) : null;
 
   const baseGen = gen ? `gen${gen}` : null; // e.g., 'gen8' (obviously `gen` shouldn't be 0 here)
@@ -161,12 +176,12 @@ export const usePresets = ({
     statsPresets,
   ]);
 
-  const loading = React.useMemo(
+  const presetsLoading = React.useMemo(
     () => gensLoading || statsLoading || randomsLoading,
     [gensLoading, randomsLoading, statsLoading],
   );
 
-  const find = React.useCallback<CalcdexPresetsFinder>((
+  const findPresets = React.useCallback<CalcdexPresetsFinder>((
     speciesForme,
     sort,
   ) => {
@@ -184,10 +199,10 @@ export const usePresets = ({
       return [];
     }
 
-    if (!presets.length || loading) {
-      // actually, since find() should just be spread alongside the CalcdexPokemon's existing presets (if any),
+    if (!presets.length || presetsLoading) {
+      // actually, since findPresets() should just be spread alongside the CalcdexPokemon's existing presets (if any),
       // this warning would get really annoying
-      // if (loading && __DEV__) {
+      // if (presetsLoading && __DEV__) {
       //   l.warn(
       //     'No presets are available since they are currently being fetched.',
       //     '\n', 'speciesForme', speciesForme,
@@ -290,17 +305,20 @@ export const usePresets = ({
     }
 
     l.debug(
-      'Returning basePresets for', speciesForme,
+      'Found basePresets for', speciesForme,
       '\n', 'basePresets', basePresets,
     );
 
     return basePresets;
   }, [
     genlessFormat,
-    loading,
     presets,
+    presetsLoading,
     randomsFormat,
   ]);
 
-  return find;
+  return {
+    findPresets,
+    presetsLoading,
+  };
 };
