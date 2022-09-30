@@ -59,7 +59,10 @@ export const PokeInfo = ({
 }: PokeInfoProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const findPresets = usePresets({
+  const {
+    findPresets,
+    presetsLoading,
+  } = usePresets({
     format,
   });
 
@@ -435,7 +438,9 @@ export const PokeInfo = ({
             options={presetOptions}
             noOptionsMessage="No Sets"
             clearable={false}
-            disabled={!pokemon?.speciesForme || !presets.length}
+            loading={presetsLoading}
+            loadingMessage="Downloading..."
+            disabled={!pokemon?.speciesForme || presetsLoading || !presets.length}
           />
         </div>
       </div>
