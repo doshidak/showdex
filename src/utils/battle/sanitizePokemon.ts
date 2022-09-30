@@ -1,50 +1,19 @@
 import { PokemonNatures } from '@showdex/consts';
-import { formatId } from '@showdex/utils/app';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
+import { flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
+import { sanitizeMoveTrack } from './sanitizeMoveTrack';
+import { sanitizeVolatiles } from './sanitizeVolatiles';
 import { toggleableAbility } from './toggleableAbility';
-
-/**
- * Pokemon `volatiles` require special love and attention before they get Redux'd.
- *
- * * Ditto
- *   - ...and Mew, I guess
- * * hnnnnnnnnnnnnnnnnnnnnnnnng
- * * Separated from `sanitizePokemon()` cause I'm probably using it elsewhere.
- *
- * @since 0.1.3
- */
-export const sanitizePokemonVolatiles = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-): CalcdexPokemon['volatiles'] => Object.entries(pokemon?.volatiles || {}).reduce((volatiles, [id, volatile]) => {
-  const [
-    ,
-    value,
-    ...rest
-  ] = volatile || [];
-
-  // we're gunna replace the Pokemon object w/ its ident if it's a transform volatile
-  const transformed = formatId(id) === 'transform'
-    && typeof (<Showdown.Pokemon> <unknown> value)?.ident === 'string';
-
-  if (transformed || !value || ['string', 'number'].includes(typeof value)) {
-    volatiles[id] = transformed ? [
-      id, // value[0] is also the id
-      (<Showdown.Pokemon> <unknown> value).speciesForme,
-      ...rest,
-    ] : volatile;
-  }
-
-  return volatiles;
-}, {});
 
 /**
  * Essentially converts a `Showdown.Pokemon` into our custom `CalcdexPokemon`.
@@ -60,9 +29,14 @@ export const sanitizePokemonVolatiles = (
  */
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-  gen: GenerationNum = env.int<GenerationNum>('calcdex-default-gen'),
+  format?: GenerationNum | string,
 ): CalcdexPokemon => {
-  const legacy = detectLegacyGen(gen);
+  const dex = getDexForFormat(format);
+  const legacy = detectLegacyGen(format);
+
+  const gen = typeof format === 'string'
+    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
+    : format;
 
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];
@@ -73,26 +47,40 @@ export const sanitizePokemon = (
 
     slot: pokemon?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
+    name: pokemon?.name,
+    details: pokemon?.details,
     searchid: pokemon?.searchid,
 
     speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
     dmaxable: ('dmaxable' in pokemon && pokemon.dmaxable) || false,
     altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
+
     transformedForme: transformed
       ? typeof pokemon.volatiles.transform[1] === 'object'
         ? (<Showdown.Pokemon> <unknown> pokemon.volatiles.transform[1])?.speciesForme || null
         : pokemon.volatiles.transform[1] || null
       : null,
 
-    name: pokemon?.name,
-    details: pokemon?.details,
     level: pokemon?.level || 0,
-    gender: pokemon?.gender,
+    gender: pokemon?.gender || 'N',
     shiny: pokemon?.shiny,
 
     types: typeChanged
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
+
+    hp: pokemon?.hp || 0,
+    maxhp: pokemon?.maxhp || 1,
+    fainted: pokemon?.fainted ?? !pokemon?.hp,
+
+    status: pokemon?.status,
+    turnstatuses: pokemon?.turnstatuses,
+    toxicCounter: pokemon?.statusData?.toxicTurns,
+
+    statusData: {
+      sleepTurns: pokemon?.statusData?.sleepTurns || 0,
+      toxicTurns: pokemon?.statusData?.toxicTurns || 0,
+    },
 
     ability: (!legacy && <AbilityName> pokemon?.ability) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
@@ -152,54 +140,36 @@ export const sanitizePokemon = (
       spe: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spe) || undefined,
     },
 
-    status: pokemon?.status,
-    statusData: {
-      sleepTurns: pokemon?.statusData?.sleepTurns || 0,
-      toxicTurns: pokemon?.statusData?.toxicTurns || 0,
-    },
-
-    // only deep-copy non-object volatiles
-    // (particularly Ditto's 'transform' volatile, which references an existing Pokemon object as its value)
-    volatiles: sanitizePokemonVolatiles(pokemon),
-
-    turnstatuses: pokemon?.turnstatuses,
-    toxicCounter: pokemon?.statusData?.toxicTurns,
-
-    hp: pokemon?.hp || 0,
-    maxhp: pokemon?.maxhp || 1,
-    fainted: pokemon?.fainted ?? !pokemon?.hp,
-
+    useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
+    useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
     moves: <MoveName[]> pokemon?.moves || [],
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
-    useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
-    useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
-    lastMove: pokemon?.lastMove,
+    lastMove: <MoveName> pokemon?.lastMove || null,
 
-    moveTrack: Array.isArray(pokemon?.moveTrack)
-      // since pokemon.moveTrack is an array of arrays,
-      // we don't want to reference the original inner array elements
-      ? <CalcdexPokemon['moveTrack']> structuredClone(pokemon.moveTrack)
-      : [],
+    // returns moveTrack and revealedMoves (guaranteed to be empty arrays, at the very least)
+    ...sanitizeMoveTrack(pokemon, format),
 
-    moveState: {
-      revealed: ('moveState' in pokemon && pokemon.moveState?.revealed) || [],
-      learnset: ('moveState' in pokemon && pokemon.moveState?.learnset) || [],
-      // other: ('moveState' in pokemon && pokemon.moveState?.other) || [],
-    },
+    // moveState: {
+    //   revealed: ('moveState' in pokemon && pokemon.moveState?.revealed) || [],
+    //   learnset: ('moveState' in pokemon && pokemon.moveState?.learnset) || [],
+    //   // other: ('moveState' in pokemon && pokemon.moveState?.other) || [],
+    // },
 
     criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
 
     preset: ('preset' in pokemon && pokemon.preset) || null,
     presets: ('presets' in pokemon && pokemon.presets) || [],
     autoPreset: 'autoPreset' in pokemon ? pokemon.autoPreset : true,
+
+    // only deep-copy non-object volatiles
+    // (particularly Ditto's 'transform' volatile, which references an existing Pokemon object as its value)
+    volatiles: sanitizeVolatiles(pokemon),
   };
 
   // fill in additional info if the Dex global is available (should be)
   // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
-  const dex = getDexForFormat(gen);
-
   if (dex) {
     const species = dex.species.get(sanitizedPokemon.speciesForme);
 
@@ -290,7 +260,7 @@ export const sanitizePokemon = (
     // check if we should auto-set the ability
     const abilitiesSource = sanitizedPokemon.transformedAbilities.length
       ? sanitizedPokemon.transformedAbilities
-      : sanitizedPokemon.abilities;
+      : [...flattenAlts(sanitizedPokemon.altAbilities), ...sanitizedPokemon.abilities];
 
     if (!sanitizedPokemon.ability || (sanitizedPokemon.dirtyAbility && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))) {
       [sanitizedPokemon.dirtyAbility] = abilitiesSource;
