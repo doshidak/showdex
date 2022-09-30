@@ -1,15 +1,14 @@
 import { formatId } from '@showdex/utils/app';
+import { percentage } from '@showdex/utils/humanize';
 import type { ItemName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { DropdownOption } from '@showdex/components/form';
+import { flattenAlt, flattenAlts } from './flattenAlts';
 import { guessTableFormatKey } from './guessTableFormatKey';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
+import { getDexForFormat } from './getDexForFormat';
 
-export interface PokemonItemOption {
-  label: string;
-  options: {
-    label: string;
-    value: ItemName;
-  }[];
-}
+export type PokemonItemOption = DropdownOption<ItemName>;
 
 /**
  * Local helper function that finds the indices after the `headerName` and before the next header.
@@ -71,6 +70,8 @@ export const buildItemOptions = (
     return options;
   }
 
+  const dex = getDexForFormat(format);
+
   const {
     altItems,
   } = pokemon;
@@ -78,21 +79,30 @@ export const buildItemOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
 
+  // create usage percent finder (to show them in any of the option groups)
+  const findUsagePercent = usageAltPercentFinder(altItems);
+
   if (altItems?.length) {
-    const poolItems = altItems.filter(Boolean).sort();
+    const hasUsageStats = altItems
+      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+    const poolItems = hasUsageStats
+      ? altItems
+      : flattenAlts(altItems).sort();
 
     options.push({
       label: 'Pool',
-      options: poolItems.map((name) => ({
-        label: name,
-        value: name,
+      options: poolItems.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        value: flattenAlt(alt),
       })),
     });
 
-    filterItems.push(...poolItems);
+    filterItems.push(...flattenAlts(poolItems));
   }
 
-  if (typeof Dex === 'undefined') {
+  if (!dex) {
     return options;
   }
 
@@ -107,6 +117,7 @@ export const buildItemOptions = (
         label: 'All',
         options: allItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -142,6 +153,7 @@ export const buildItemOptions = (
         label: 'Popular',
         options: popularItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -162,6 +174,7 @@ export const buildItemOptions = (
         label: 'Items',
         options: itemsItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -182,6 +195,7 @@ export const buildItemOptions = (
         label: 'Pok\u00E9mon-Specific', // U+00E9 is the accented 'e' character
         options: specificItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -202,6 +216,7 @@ export const buildItemOptions = (
         label: 'Usually Useless',
         options: usuallyUselessItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -222,6 +237,7 @@ export const buildItemOptions = (
         label: 'Useless',
         options: uselessItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });

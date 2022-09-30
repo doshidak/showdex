@@ -1,21 +1,19 @@
 import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 // import { env } from '@showdex/utils/core';
+import { percentage } from '@showdex/utils/humanize';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
+import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 // import { detectLegacyGen } from './detectLegacyGen';
+import { flattenAlt, flattenAlts } from './flattenAlts';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
 import { getPokemonLearnset } from './getPokemonLearnset';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
 
-export interface PokemonMoveOption {
-  label: string;
-  options: {
-    label: string;
-    value: MoveName;
-  }[];
-}
+export type PokemonMoveOption = DropdownOption<MoveName>;
 
 /**
  * Builds the value for the `options` prop of the move `Dropdown` component in `PokeMoves`.
@@ -49,13 +47,17 @@ export const buildMoveOptions = (
     serverMoves,
     transformedMoves,
     altMoves,
-    moveState,
+    // moveState,
+    revealedMoves,
     useZ,
     useMax,
   } = pokemon;
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
+
+  // create usage percent finder (to show them in any of the option groups)
+  const findUsagePercent = usageAltPercentFinder(altMoves, true);
 
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
@@ -78,6 +80,7 @@ export const buildMoveOptions = (
       label: 'Max',
       options: moves.map((name) => ({
         label: getMaxMove(name, ability, speciesForme) || name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -92,6 +95,7 @@ export const buildMoveOptions = (
       label: transformedForme ? 'Pre-Transform' : 'Current',
       options: filteredServerMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -106,6 +110,7 @@ export const buildMoveOptions = (
       label: 'Transformed',
       options: filteredTransformedMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -113,36 +118,43 @@ export const buildMoveOptions = (
     filterMoves.push(...filteredTransformedMoves);
   }
 
-  if (moveState?.revealed?.length) {
-    const revealedMoves = moveState.revealed
-      .map((n) => <MoveName> n?.replace?.('*', ''))
+  if (revealedMoves?.length) {
+    const filteredRevealedMoves = revealedMoves
       .filter((n) => !!n && !filterMoves.includes(n));
 
     options.push({
       label: 'Revealed',
-      options: revealedMoves.map((name) => ({
+      options: filteredRevealedMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
-    filterMoves.push(...revealedMoves);
+    filterMoves.push(...filteredRevealedMoves);
   }
 
   if (altMoves?.length) {
-    const poolMoves = altMoves
-      .filter((n) => !!n && !filterMoves.includes(n))
-      .sort();
+    const unsortedPoolMoves = altMoves
+      .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
+
+    const hasUsageStats = !!altMoves?.length && altMoves
+      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+    const poolMoves = hasUsageStats
+      ? unsortedPoolMoves
+      : flattenAlts(unsortedPoolMoves).sort();
 
     options.push({
       label: 'Pool',
-      options: poolMoves.map((name) => ({
-        label: name,
-        value: name,
+      options: poolMoves.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        value: flattenAlt(alt),
       })),
     });
 
-    filterMoves.push(...poolMoves);
+    filterMoves.push(...flattenAlts(poolMoves));
   }
 
   // const learnset: MoveName[] = [...(<MoveName[]> moveState?.learnset || [])];
@@ -174,6 +186,7 @@ export const buildMoveOptions = (
       label: 'Learnset',
       options: learnsetMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -196,6 +209,7 @@ export const buildMoveOptions = (
       label: 'Hidden Power',
       options: hpMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -221,6 +235,7 @@ export const buildMoveOptions = (
       label: 'All',
       options: otherMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });

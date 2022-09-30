@@ -1,17 +1,15 @@
 import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
+import { percentage } from '@showdex/utils/humanize';
 import type { AbilityName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { DropdownOption } from '@showdex/components/form';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
+import { flattenAlt, flattenAlts } from './flattenAlts';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
 
-export interface PokemonAbilityOption {
-  label: string;
-  options: {
-    label: string;
-    value: AbilityName;
-  }[];
-}
+export type PokemonAbilityOption = DropdownOption<AbilityName>;
 
 /**
  * Builds the value for the `options` prop of the abilities `Dropdown` component in `PokeInfo`.
@@ -48,11 +46,15 @@ export const buildAbilityOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
 
+  // create usage percent finder (to show them in any of the option groups)
+  const findUsagePercent = usageAltPercentFinder(altAbilities);
+
   if (baseAbility && ability !== baseAbility) {
     options.push({
       label: formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited',
       options: [{
         label: ability,
+        rightLabel: findUsagePercent(ability),
         value: ability,
       }],
     });
@@ -70,6 +72,7 @@ export const buildAbilityOptions = (
       label: 'Transformed',
       options: transformed.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -78,19 +81,26 @@ export const buildAbilityOptions = (
   }
 
   if (altAbilities?.length) {
-    const poolAbilities = altAbilities
-      .filter((n) => !!n && !filterAbilities.includes(n))
-      .sort();
+    const filteredPoolAbilities = altAbilities
+      .filter((a) => !!a && !filterAbilities.includes(flattenAlt(a)));
+
+    const hasUsageStats = altAbilities
+      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+    const poolAbilities = hasUsageStats
+      ? filteredPoolAbilities
+      : flattenAlts(filteredPoolAbilities).sort();
 
     options.push({
       label: 'Pool',
-      options: poolAbilities.map((name) => ({
-        label: name,
-        value: name,
+      options: poolAbilities.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        value: flattenAlt(alt),
       })),
     });
 
-    filterAbilities.push(...poolAbilities);
+    filterAbilities.push(...flattenAlts(poolAbilities));
   }
 
   if (abilities?.length) {
@@ -102,6 +112,7 @@ export const buildAbilityOptions = (
       label: 'Legal',
       options: legalAbilities.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -123,6 +134,7 @@ export const buildAbilityOptions = (
       label: 'All',
       options: otherAbilities.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
