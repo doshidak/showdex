@@ -3,10 +3,11 @@ import {
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectPlayerKeyFromBattle,
-  detectPokemonIdent,
+  detectPlayerKeyFromPokemon,
+  // detectPokemonIdent,
   hasMegaForme,
   sanitizePokemon,
-  sanitizePokemonVolatiles,
+  sanitizeVolatiles,
   syncField,
   syncPokemon,
 } from '@showdex/utils/battle';
@@ -28,18 +29,20 @@ export const SyncBattleActionType = 'calcdex:sync';
 /**
  * Internally-used search ID builder for Pokemon.
  *
- * @example 'p1: Moltres-Kanto|Moltres-Galar|L100|shiny'
+ * @example 'p1|Moltres-Galar|L100|N'
  * @since 1.0.2
  */
 const searchId = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<Showdown.Pokemon>,
+  playerKey?: CalcdexPlayerKey,
 ): string => (pokemon?.speciesForme ? [
-  detectPokemonIdent(pokemon),
+  playerKey || detectPlayerKeyFromPokemon(pokemon),
   hasMegaForme(pokemon?.speciesForme)
-    ? pokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
+    ? pokemon.speciesForme.replace(/-(?:Mega(?:-[A-Z]+)?|Gmax)$/i, '')
     : pokemon?.speciesForme,
   `L${pokemon?.level || 100}`,
-  pokemon?.shiny && 'shiny',
+  (pokemon?.gender || 'N').toUpperCase(), // update: making this consistent w/ calcPokemonCalcdexId()
+  // (pokemon?.shiny || pokemon?.searchid?.includes('shiny')) && 'shiny',
 ].filter(Boolean).join('|') : null);
 
 /**
@@ -51,11 +54,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
   SyncBattleActionType,
 
   (payload, api) => {
-    l.debug(
-      'RECV', SyncBattleActionType,
-      '\n', 'payload', payload,
-    );
-
     const {
       battle,
       // dex,
@@ -113,10 +111,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     if (stepQueue?.length) {
       battleState.rules = detectBattleRules(stepQueue);
     }
-
-    // if (typeof dex?.learnsets?.learnable !== 'function') {
-    //   throw new Error('Missing required dex property in payload argument.');
-    // }
 
     // find out which side myPokemon belongs to
     const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
@@ -180,26 +174,29 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         && playerKey === battleState.playerKey
         && !!myPokemon?.length;
 
-      // obtain the searchId of the active Pokemon, if any
-      const activeSearchId = searchId(player.active?.[0]);
-
       // preserve the initial ordering of myPokemon since it's subject to change its indices
       // (battle state may move the most recent active Pokemon to the front of the array)
       if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
-        playerState.pokemonOrder = myPokemon.map((p) => searchId(p));
+        playerState.pokemonOrder = myPokemon.map((p) => searchId(p, playerKey));
       }
 
       // reconstruct a full list of the current player's Pokemon, whether revealed or not
       // (but if we don't have the relevant info [i.e., !isMyPokemonSide], then just access the player's `pokemon`)
       const playerPokemon = isMyPokemonSide ? playerState.pokemonOrder.map((currentSearchId) => {
-        const serverPokemon = myPokemon.find((p) => searchId(p) === currentSearchId);
-
         // try to find a matching clientPokemon that has already been revealed using the ident,
         // which is seemingly consistent between the player's `pokemon` (Pokemon[]) and `myPokemon` (ServerPokemon[])
-        const clientPokemonIndex = player.pokemon.findIndex((p) => searchId(p) === currentSearchId);
+        const clientPokemonIndex = player.pokemon.findIndex((p) => searchId(p, playerKey) === currentSearchId);
 
         if (clientPokemonIndex > -1) {
           return player.pokemon[clientPokemonIndex];
+        }
+
+        const serverPokemon = isMyPokemonSide
+          ? myPokemon.find((p) => searchId(p, playerKey) === currentSearchId)
+          : null;
+
+        if (!serverPokemon) {
+          return null;
         }
 
         // at this point, most likely means that the Pokemon is not yet revealed,
@@ -223,30 +220,44 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       //   '\n', 'playerPokemon', playerPokemon,
       // );
 
+      // obtain the calcdexId of the active Pokemon, if any
+      const [activePokemon] = player.active || [];
+
+      const activeSearchId = activePokemon?.speciesForme
+        ? searchId(activePokemon, playerKey)
+        : null;
+
       // update each pokemon
       // (note that the index `i` should be relatively consistent between turns)
       for (let i = 0; i < playerPokemon.length; i++) {
-        const clientPokemon = playerPokemon[i];
+        const clientPokemon: DeepPartial<Showdown.Pokemon> = {
+          ...playerPokemon[i],
 
-        // l.debug('Processing client Pokemon', clientPokemon.speciesForme, 'for player', playerKey);
-
-        const clientPokemonId = calcPokemonCalcdexId({
-          ...clientPokemon,
+          ident: playerPokemon[i]?.ident && /^p\d:\s/i.test(playerPokemon[i].ident)
+            ? playerPokemon[i].ident
+            : `${playerKey}: ${playerPokemon[i]?.speciesForme || playerPokemon[i]?.ident}`,
 
           // always 0 for some reason, so we'll reuse it for our own purposes ;)
           slot: i,
 
           // may need to specify this for generating a unique calcdexId for the Showdown.Pokemon
-          side: clientPokemon?.side?.sideid ? clientPokemon.side : <Showdown.Side> {
+          side: playerPokemon[i]?.side?.sideid ? playerPokemon[i].side : <Showdown.Side> {
+            ...player,
             sideid: playerKey,
           },
-        });
+        };
 
-        const serverPokemon = isMyPokemonSide
-          ? myPokemon.find((p) => searchId(p) === searchId(clientPokemon))
+        // l.debug('Processing client Pokemon', clientPokemon.speciesForme, 'for player', playerKey);
+
+        const clientCalcdexId = calcPokemonCalcdexId(clientPokemon, playerKey);
+        const clientSearchId = searchId(clientPokemon, playerKey);
+
+        const serverPokemon = isMyPokemonSide && clientSearchId
+          ? myPokemon.find((p) => searchId(p, playerKey) === clientSearchId)
           : null;
 
-        const matchedPokemonIndex = playerState.pokemon.findIndex((p) => p.calcdexId === clientPokemonId);
+        const matchedPokemonIndex = playerState.pokemon
+          .findIndex((p) => p.calcdexId === clientCalcdexId);
 
         const matchedPokemon = matchedPokemonIndex > -1
           ? playerState.pokemon[matchedPokemonIndex]
@@ -256,11 +267,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const basePokemon = matchedPokemon || sanitizePokemon({
           ...clientPokemon,
           slot: i, // important that we specify this to obtain a consistent calcdexId
-        }, battleState.gen);
+        }, battleState.format);
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
-          basePokemon.volatiles = sanitizePokemonVolatiles(basePokemon);
+          basePokemon.volatiles = sanitizeVolatiles(basePokemon);
         }
 
         // and then from here on out, we just directly modify syncedPokemon
@@ -274,36 +285,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         l.debug(
           'Completed initial sync for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
+          '\n', 'slot', i, 'clientCalcdexId', clientCalcdexId, 'clientSearchId', clientSearchId,
+          '\n', 'clientPokemon', clientPokemon,
           '\n', 'syncedPokemon', syncedPokemon,
+          '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
         );
-
-        // build (or rebuild) the Pokemon's movesets
-        // (which we can only do here, since it's async)
-        // if (!matchedPokemon || matchedPokemon.speciesForme !== syncedPokemon.speciesForme) {
-        //   // l.debug('Fetching learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey);
-        //
-        //   // const sanitizedForme = hasMegaForme(syncedPokemon.speciesForme)
-        //   //   ? syncedPokemon.speciesForme.replace(/-Mega(?:-[A-Z]+)?$/i, '')
-        //   //   : syncedPokemon.speciesForme;
-        //
-        //   // const learnset = await dex.learnsets.learnable(sanitizedForme);
-        //
-        //   // l.debug(
-        //   //   'Fetched learnset for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
-        //   //   '\n', 'learnset', learnset,
-        //   // );
-        //
-        //   // syncedPokemon.moveState.learnset = Object.keys(learnset || {})
-        //   //   .map((moveid) => dex.moves.get(moveid)?.name)
-        //   //   .filter((name) => !!name && !syncedPokemon.moveState.revealed.includes(name))
-        //   //   .sort();
-        //
-        //   // l.debug(
-        //   //   'Updated moveState for Pokemon', syncedPokemon.speciesForme, 'of player', playerKey,
-        //   //   '\n', 'syncedPokemon.moveState', syncedPokemon.moveState,
-        //   //   '\n', 'syncedPokemon', syncedPokemon,
-        //   // );
-        // }
 
         // add the pokemon to the player's Calcdex state (if not maxed already)
         if (!matchedPokemon) {
@@ -312,11 +298,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               l.warn(
                 'Ignoring adding clientPokemon for', playerKey, 'since they have the max number of Pokemon.',
                 '\n', 'CALCDEX_PLAYER_MAX_POKEMON', env.int('calcdex-player-max-pokemon'),
-                '\n', 'slot', i, 'clientPokemonId', clientPokemonId,
+                '\n', 'slot', i, 'clientCalcdexId', clientCalcdexId, 'clientSearchId', clientSearchId,
                 '\n', 'clientPokemon', clientPokemon,
                 '\n', 'syncedPokemon', syncedPokemon,
                 '\n', 'player.pokemon', player.pokemon,
                 '\n', 'playerState.pokemon', playerState.pokemon,
+                '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
                 '\n', '(You will only see this warning on development.)',
               );
             }
@@ -328,20 +315,22 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
           l.debug(
             'Adding new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
-            '\n', 'slot', i, 'clientPokemonId', clientPokemonId,
+            '\n', 'slot', i, 'clientCalcdexId', clientCalcdexId, 'clientSearchId', clientSearchId,
             '\n', 'clientPokemon', clientPokemon,
             '\n', 'syncedPokemon', syncedPokemon,
             '\n', 'playerState.pokemon', playerState.pokemon,
+            '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
           );
         } else {
           playerState.pokemon[matchedPokemonIndex] = syncedPokemon;
 
           l.debug(
             'Updating existing Pokemon', syncedPokemon.speciesForme, 'at index', matchedPokemonIndex, 'for player', playerKey,
-            '\n', 'slot', i, 'clientPokemonId', clientPokemonId,
+            '\n', 'slot', i, 'clientCalcdexId', clientCalcdexId, 'clientSearchId', clientSearchId,
             '\n', 'clientPokemon', clientPokemon,
             '\n', 'syncedPokemon', syncedPokemon,
             '\n', 'playerState.pokemon', playerState.pokemon,
+            '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
           );
         }
       }
@@ -349,7 +338,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // update activeIndex (and selectionIndex if autoSelect is enabled)
       // (hopefully the `ident` exists here!)
       const activeIndex = activeSearchId
-        ? playerPokemon.findIndex((p) => searchId(p) === activeSearchId)
+        ? playerPokemon.findIndex((p) => searchId(p, playerKey) === activeSearchId)
         : -1;
 
       if (activeIndex > -1) {
@@ -360,8 +349,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
       } else if (__DEV__) {
         l.warn(
-          'Could not find activeIndex for activeSearchId', activeSearchId,
-          '\n', 'player', playerState.sideid, 'playerPokemon', playerPokemon,
+          'Could not find activeIndex with activeSearchId', activeSearchId, 'for player', playerKey,
+          '\n', 'playerPokemon', playerPokemon,
+          '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
           '\n', '(You will only see this warning on development.)',
         );
       }
@@ -370,8 +360,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     const syncedField = syncField(
       battleState,
       battle,
-      // battleState.p1.activeIndex,
-      // battleState.p2.activeIndex,
     );
 
     if (!syncedField?.gameType) {
@@ -399,7 +387,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     l.debug(
-      'DONE', SyncBattleActionType,
+      'Dispatching synced battleState for', battleState.battleId || '(missing battleId)',
       '\n', 'battle', battle,
       '\n', 'battleState', battleState,
       '\n', 'state', state,
