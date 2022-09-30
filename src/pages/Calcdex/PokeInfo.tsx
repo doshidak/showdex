@@ -8,17 +8,13 @@ import {
 } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { Button } from '@showdex/components/ui';
-import {
-  FormatLabels,
-  PokemonCommonNatures,
-  PokemonNatureBoosts,
-  // PokemonToggleAbilities,
-} from '@showdex/consts';
+import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts';
 import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import {
   buildAbilityOptions,
   buildItemOptions,
+  buildPresetOptions,
   detectLegacyGen,
   detectToggledAbility,
   flattenAlts,
@@ -31,14 +27,6 @@ import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
-
-type PokeInfoPresetOptions = {
-  label: string;
-  options: {
-    label: string;
-    value: string;
-  }[];
-}[];
 
 export interface PokeInfoProps {
   className?: string;
@@ -64,42 +52,21 @@ export const PokeInfo = ({
     presetsLoading,
   } = usePresets({
     format,
+    pokemon,
   });
 
-  const downloadedSets = React.useMemo(
+  const presets = React.useMemo(
     () => (pokemon?.speciesForme ? findPresets(pokemon.transformedForme || pokemon.speciesForme, true) : []),
     [findPresets, pokemon],
   );
 
-  const presets = React.useMemo(() => [
-    ...(pokemon?.presets || []),
-    ...downloadedSets,
-  ], [
-    downloadedSets,
-    pokemon?.presets,
-  ]);
-
-  const presetOptions = presets.reduce<PokeInfoPresetOptions>((options, preset) => {
-    const genlessFormat = preset.format.replace(`gen${gen}`, '');
-    const groupLabel = FormatLabels?.[genlessFormat] || genlessFormat;
-    const group = options.find((option) => option.label === groupLabel);
-
-    const option = {
-      label: preset.name,
-      value: preset.calcdexId,
-    };
-
-    if (!group) {
-      options.push({
-        label: groupLabel,
-        options: [option],
-      });
-    } else {
-      group.options.push(option);
-    }
-
-    return options;
-  }, []);
+  // const presets = React.useMemo(() => [
+  //   ...(pokemon?.presets || []),
+  //   ...downloadedSets,
+  // ], [
+  //   downloadedSets,
+  //   pokemon?.presets,
+  // ]);
 
   const applyPreset = React.useCallback((preset: CalcdexPokemonPreset) => {
     const mutation: DeepPartial<CalcdexPokemon> = {
@@ -228,14 +195,15 @@ export const PokeInfo = ({
   const hpPercentage = calcPokemonHp(pokemon);
 
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
-  const dexAbility = abilityName
-    ? dex?.abilities?.get(abilityName)
-    : null;
+  const dexAbility = abilityName ? dex?.abilities?.get(abilityName) : null;
 
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
-  const dexItem = itemName
-    ? dex?.items?.get(itemName)
-    : null;
+  const dexItem = itemName ? dex?.items?.get(itemName) : null;
+
+  const presetOptions = React.useMemo(
+    () => buildPresetOptions(presets),
+    [presets],
+  );
 
   const abilityOptions = React.useMemo(
     () => buildAbilityOptions(format, pokemon),
