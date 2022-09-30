@@ -21,6 +21,7 @@ import {
   buildItemOptions,
   detectLegacyGen,
   detectToggledAbility,
+  flattenAlts,
   getDexForFormat,
   hasMegaForme,
 } from '@showdex/utils/battle';
@@ -101,7 +102,6 @@ export const PokeInfo = ({
     const mutation: DeepPartial<CalcdexPokemon> = {
       preset: preset.calcdexId,
       moves: preset.moves,
-      altMoves: preset.altMoves,
       nature: preset.nature,
       dirtyAbility: preset.ability,
       // item: !pokemon.item || pokemon.item === '(exists)' ? preset.item : pokemon.item,
@@ -140,16 +140,20 @@ export const PokeInfo = ({
       mutation.altItems = [...preset.altItems];
     }
 
+    if (Array.isArray(preset.altMoves)) {
+      mutation.altMoves = [...preset.altMoves];
+    }
+
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool
     if (preset.format?.includes('random')) {
       if (mutation.altAbilities?.length === 1) {
-        [mutation.ability] = mutation.altAbilities;
+        [mutation.ability] = flattenAlts(mutation.altAbilities);
         mutation.dirtyAbility = null;
       }
 
       if (mutation.altItems?.length === 1) {
-        [mutation.item] = mutation.altItems;
+        [mutation.item] = flattenAlts(mutation.altItems);
         mutation.dirtyItem = null;
       }
     }
@@ -530,7 +534,7 @@ export const PokeInfo = ({
             }}
             options={PokemonCommonNatures.map((name) => ({
               label: name,
-              subLabel: PokemonNatureBoosts[name]?.length ? [
+              rightLabel: PokemonNatureBoosts[name]?.length ? [
                 !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
                 !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
               ].filter(Boolean).join(' ') : 'Neutral',
