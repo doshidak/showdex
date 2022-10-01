@@ -5,6 +5,8 @@ export * from './httpMethod';
 export * from './items';
 export * from './moves';
 export * from './natures';
+export * from './pokemonTypes';
 export * from './stats';
+export * from './statuses';
 export * from './tagTypes';
 export * from './weather';
