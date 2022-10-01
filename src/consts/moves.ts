@@ -159,3 +159,18 @@ export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName
     urshifurapidstrike: <MoveName> 'G-Max Rapid Flow',
   },
 };
+
+/**
+ * Moves that always critical hit.
+ *
+ * @see https://github.com/pkmn/ps/blob/bce04b4900d33386391162412cc4409442c6791d/dex/data/moves.json
+ * @see https://bulbapedia.bulbagarden.net/wiki/Category:Moves_with_a_perfect_critical_hit_chance
+ * @since 1.0.3
+ */
+export const PokemonCriticalHitMoves: MoveName[] = [
+  <MoveName> 'Frost Breath',
+  <MoveName> 'Storm Throw',
+  <MoveName> 'Surging Strikes',
+  <MoveName> 'Wicked Blow',
+  <MoveName> 'Zippy Zap',
+];
