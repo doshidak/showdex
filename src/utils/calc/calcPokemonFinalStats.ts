@@ -1,14 +1,15 @@
-// import { getFinalSpeed, getModifiedStat } from '@smogon/calc/dist/mechanics/util';
-import { PokemonInitialStats, PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts';
+import {
+  PokemonInitialStats,
+  PokemonSpeedReductionItems,
+  PokemonStatNames,
+} from '@showdex/consts';
 import { formatId as id } from '@showdex/utils/app';
-import { detectGenFromFormat, hasMegaForme } from '@showdex/utils/battle';
+import { detectGenFromFormat, getDexForFormat, hasMegaForme } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
-// import { createSmogonField } from './createSmogonField';
-// import { createSmogonPokemon } from './createSmogonPokemon';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
 
@@ -28,20 +29,20 @@ const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
  * @since 0.1.3
  */
 export const calcPokemonFinalStats = (
-  // dex: Generation,
   format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
   opponentPokemon: DeepPartial<CalcdexPokemon>,
   field: CalcdexBattleField,
   playerKey: CalcdexPlayerKey,
 ): Showdown.StatsTable => {
+  const dex = getDexForFormat(format);
+
   // if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
-  if (typeof Dex === 'undefined') {
+  if (!dex) {
     if (__DEV__) {
       l.warn(
         // 'Cannot calculate stats since dex.stats.calc() and/or dex.species.get() are not available.',
-        'Global Dex object is unavailable.',
-        // '\n', 'dex', dex,
+        'Global Dex is unavailable for format', format,
         '\n', 'pokemon', pokemon,
         '\n', 'field', field,
         '\n', 'playerKey', playerKey,
@@ -100,7 +101,7 @@ export const calcPokemonFinalStats = (
     ? pokemon.volatiles.formechange[1]
     : pokemon.speciesForme;
 
-  const species = Dex.forGen(gen).species.get(speciesForme);
+  const species = dex.species.get(speciesForme);
   const baseForme = id(species?.baseSpecies);
 
   const hasPowerTrick = 'powertrick' in pokemon.volatiles; // this is a move btw, not an ability!
@@ -378,7 +379,7 @@ export const calcPokemonFinalStats = (
 
   // apply NFE (not fully evolved) effects
   const nfe = species?.evos?.some((evo) => {
-    const evoSpecies = Dex.forGen(gen).species.get(evo);
+    const evoSpecies = dex.species.get(evo);
 
     return !evoSpecies?.isNonstandard
       || evoSpecies?.isNonstandard === species.isNonstandard;
