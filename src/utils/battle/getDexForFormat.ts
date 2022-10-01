@@ -34,8 +34,10 @@ export const getDexForFormat = (format?: string | GenerationNum): Showdown.Modde
     return Dex;
   }
 
+  // note: checking if `format > 0` in the conditional won't guarantee that `format` will
+  // be type `string` after this point
   if (typeof format === 'number') {
-    return Dex.forGen(format);
+    return format > 0 ? Dex.forGen(format) : Dex;
   }
 
   const formatAsId = formatId(format);
