@@ -5,7 +5,7 @@ import {
   detectPlayerKeyFromBattle,
   detectPlayerKeyFromPokemon,
   // detectPokemonIdent,
-  hasMegaForme,
+  // hasMegaForme,
   sanitizePokemon,
   sanitizeVolatiles,
   syncField,
@@ -37,9 +37,10 @@ const searchId = (
   playerKey?: CalcdexPlayerKey,
 ): string => (pokemon?.speciesForme ? [
   playerKey || detectPlayerKeyFromPokemon(pokemon),
-  hasMegaForme(pokemon?.speciesForme)
-    ? pokemon.speciesForme.replace(/-(?:Mega(?:-[A-Z]+)?|Gmax)$/i, '')
-    : pokemon?.speciesForme,
+  // hasMegaForme(pokemon?.speciesForme)
+  //   ? pokemon.speciesForme.replace(/-(?:Mega(?:-[A-Z]+)?|Gmax)$/i, '')
+  //   : pokemon?.speciesForme,
+  pokemon.speciesForme.replace(/-(?:Mega(?:-[A-Z]+)?|Gmax|Primal)$/i, ''),
   `L${pokemon?.level || 100}`,
   (pokemon?.gender || 'N').toUpperCase(), // update: making this consistent w/ calcPokemonCalcdexId()
   // (pokemon?.shiny || pokemon?.searchid?.includes('shiny')) && 'shiny',
