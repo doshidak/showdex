@@ -27,13 +27,28 @@ export const buildPresetOptions = (
       value: preset.calcdexId,
     };
 
-    // e.g., 'Iron Defense (Flying)' -> { label: 'Iron Defense', rightLabel: 'FLYING' }
-    if (/\s+\(\w+\)$/.test(option.label)) {
-      const [, label, rightLabel] = /((?:\w|\s)+)\s+\((\w+)\)$/.exec(option.label);
+    // e.g., 'Iron Defense (Flying)' -> { label: 'Iron Defense', rightLabel: 'FLYING' },
+    // 'Defensive (Physical Attacker)' -> { label: 'Defensive', subLabel: 'PHYSICAL ATTACKER' },
+    // 'Metal Sound + Steelium Z' -> { label: 'Metal Sound', subLabel: '+ STEELIUM Z' },
+    // 'The Pex' -> (regex fails) -> { label: 'The Pex' } (untouched lol)
+    if (/\s+(?:\+\s+\w[\w\s]*|\(\w[\w\s]*\))$/.test(option.label)) {
+      const [
+        ,
+        label,
+        plusLabel,
+        subLabel,
+      ] = /([\w\s]+)\s+(?:\+\s+(\w[\w\s]*)|\((\w[\w\s]*)\))$/.exec(option.label);
 
-      if (label && rightLabel) {
+      // it'll be one or the other since the capture groups are alternatives in a non-capturing group
+      const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;
+
+      if (label && actualSubLabel) {
         option.label = label;
-        option.rightLabel = rightLabel.toUpperCase();
+
+        const longSubLabel = actualSubLabel.length > 8;
+        const loudSubLabel = actualSubLabel.toUpperCase(); // lol
+
+        option[longSubLabel ? 'subLabel' : 'rightLabel'] = loudSubLabel;
       }
     }
 
