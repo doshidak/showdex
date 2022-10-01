@@ -2,17 +2,21 @@ import * as React from 'react';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
+import type { TooltipProps, TooltipTippyTrigger } from '@showdex/components/ui';
 import type { BaseButtonProps, ButtonElement, ButtonElementType } from './BaseButton';
 import { BaseButton } from './BaseButton';
 import styles from './Button.module.scss';
 
-interface ButtonProps<
+export interface ButtonProps<
   T extends ButtonElementType = 'button',
 > extends Omit<BaseButtonProps<T>, 'children'> {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
   label?: string;
   tooltip?: React.ReactNode;
+  tooltipTriggers?: TooltipTippyTrigger[];
+  tooltipTouch?: TooltipProps['touch'];
+  highlight?: boolean;
   absoluteHover?: boolean;
 }
 
@@ -27,6 +31,9 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   labelStyle,
   label,
   tooltip,
+  tooltipTriggers = ['mouseenter'],
+  tooltipTouch = 'hold',
+  highlight,
   absoluteHover,
   disabled,
   ...props
@@ -47,6 +54,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         className={cx(
           styles.container,
           !!colorScheme && styles[colorScheme],
+          highlight && styles.highlight,
           absoluteHover && styles.absoluteHover,
           disabled && styles.disabled,
           className,
@@ -67,8 +75,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         content={tooltip}
         offset={[0, 10]}
         delay={[1000, 150]}
-        trigger="mouseenter"
-        touch="hold"
+        trigger={tooltipTriggers?.join?.(' ')}
+        touch={tooltipTouch}
         disabled={!tooltip || disabled}
       />
     </>
