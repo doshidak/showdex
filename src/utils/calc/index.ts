@@ -1,3 +1,4 @@
+export * from './alwaysCriticalHits';
 export * from './calcCalcdexId';
 export * from './calcCalcdexNonce';
 export * from './calcPokemonFinalStats';
