@@ -1,4 +1,3 @@
-import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { AbilityName } from '@smogon/calc/dist/data/interface';
@@ -7,6 +6,7 @@ import type { DropdownOption } from '@showdex/components/form';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { flattenAlt, flattenAlts } from './flattenAlts';
+import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 
 export type PokemonAbilityOption = DropdownOption<AbilityName>;
@@ -122,9 +122,7 @@ export const buildAbilityOptions = (
 
   // show all possible abilities if format is not provided, is not legal-locked, or
   // no legal abilities are available (probably because the Pokemon doesn't exist in the `dex`'s gen)
-  const parsedFormat = format?.replace(/^gen\d+/i, '');
-
-  if (!parsedFormat || !LegalLockedFormats.includes(parsedFormat) || !abilities?.length) {
+  if (!legalLockedFormat(format) || !abilities?.length) {
     const otherAbilities = Object.values(BattleAbilities || {})
       .map((a) => <AbilityName> a?.name)
       .filter((n) => !!n && formatId(n) !== 'noability' && !filterAbilities.includes(n))

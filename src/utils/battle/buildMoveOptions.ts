@@ -1,17 +1,15 @@
-import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
-// import { env } from '@showdex/utils/core';
 import { percentage } from '@showdex/utils/humanize';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
-// import { detectLegacyGen } from './detectLegacyGen';
 import { flattenAlt, flattenAlts } from './flattenAlts';
-import { getGenlessFormat } from './getGenlessFormat';
+import { getDexForFormat } from './getDexForFormat';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
 import { getPokemonLearnset } from './getPokemonLearnset';
+import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 
 export type PokemonMoveOption = DropdownOption<MoveName>;
@@ -22,20 +20,18 @@ export type PokemonMoveOption = DropdownOption<MoveName>;
  * @since 0.1.3
  */
 export const buildMoveOptions = (
-  // dex: Generation,
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): PokemonMoveOption[] => {
-  // const gen = dex?.num || <GenerationNum> env.int('calcdex-default-gen');
   const options: PokemonMoveOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;
   }
 
+  const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
-  const genlessFormat = getGenlessFormat(format);
-  const showAllMoves = !genlessFormat || !LegalLockedFormats.includes(genlessFormat);
+  const showAllMoves = !legalLockedFormat(format);
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -64,15 +60,17 @@ export const buildMoveOptions = (
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
   if (useZ && !useMax && moves?.length) {
+    const zMoves = moves.filter((n) => !!n && (getZMove(n, item) || n) !== n);
+
     options.push({
-      label: 'Z-PWR',
-      options: moves.map((name) => ({
-        label: getZMove(name, item) || name,
+      label: 'Z',
+      options: zMoves.map((name) => ({
+        label: getZMove(name, item),
         value: name,
       })),
     });
 
-    filterMoves.push(...moves);
+    filterMoves.push(...zMoves);
   }
 
   // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
@@ -105,7 +103,8 @@ export const buildMoveOptions = (
   }
 
   if (transformedForme && transformedMoves?.length) {
-    const filteredTransformedMoves = transformedMoves.filter((n) => !!n && !filterMoves.includes(n));
+    const filteredTransformedMoves = transformedMoves
+      .filter((n) => !!n && !filterMoves.includes(n));
 
     options.unshift({
       label: 'Transformed',
@@ -158,20 +157,6 @@ export const buildMoveOptions = (
     filterMoves.push(...flattenAlts(poolMoves));
   }
 
-  // const learnset: MoveName[] = [...(<MoveName[]> moveState?.learnset || [])];
-  // const isCap = format.includes('cap');
-
-  // if (isCap && typeof Dex !== 'undefined' && typeof BattleTeambuilderTable !== 'undefined') {
-  //   const speciesFormeId = formatId(pokemon.speciesForme);
-  //   const learnsetsFromTable = Object.keys(BattleTeambuilderTable.learnsets?.[speciesFormeId] || {})
-  //     .map((n) => !!n && <MoveName> Dex.forGen(gen).moves.get(n)?.name)
-  //     .filter(Boolean);
-  //
-  //   if (learnsetsFromTable.length) {
-  //     learnset.push(...learnsetsFromTable);
-  //   }
-  // }
-
   const learnset = getPokemonLearnset(format, speciesForme, showAllMoves);
 
   if (transformedForme) {
@@ -200,7 +185,7 @@ export const buildMoveOptions = (
     // regex filters out 'hiddenpowerfighting70', which is 'hiddenpowerfighting' (BP 60),
     // but with a BP of 70 lol (don't care about the BP here though, we just need the name)
     const unsortedHpMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
+      .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
       .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
 
     // using a Set makes sure we have no duplicate entries in the array
@@ -218,11 +203,10 @@ export const buildMoveOptions = (
     filterMoves.push(...hpMoves);
   }
 
-  // show all possible moves if format is not provided, is not legal-locked, or
-  // no learnset is available (probably because the Pokemon doesn't exist in the `dex`'s gen)
+  // show all possible moves if the format is not legal-locked or no learnset is available
   if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
+      .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
       .filter((n) => !!n && !filterMoves.includes(n))
       .sort();
 
