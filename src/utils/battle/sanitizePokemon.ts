@@ -171,7 +171,9 @@ export const sanitizePokemon = (
   // fill in additional info if the Dex global is available (should be)
   // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
   if (dex) {
-    const species = dex.species.get(sanitizedPokemon.speciesForme);
+    // fix for 'Xerneas-Neutral' -> 'Xerneas'
+    const currentForme = sanitizedPokemon.speciesForme.replace(/-Neutral/gi, '');
+    const species = dex.species.get(currentForme);
 
     // don't really care if species is falsy here
     sanitizedPokemon.baseStats = { ...species?.baseStats };
@@ -193,7 +195,7 @@ export const sanitizePokemon = (
         ...(<string[]> transformedSpecies.otherFormes), // dunno why otherFormes is type any[]
       ]
       : species?.baseSpecies
-        && species.baseSpecies === sanitizedPokemon.speciesForme
+        && species.baseSpecies === currentForme
         && species.otherFormes?.length
         ? [
           species.baseSpecies,
