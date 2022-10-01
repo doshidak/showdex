@@ -1,13 +1,8 @@
 import { calculate } from '@smogon/calc';
-import {
-  detectGenFromFormat,
-  getDexForFormat,
-  getNaturesDex,
-  getTypesDex,
-} from '@showdex/utils/battle';
+import { getGenDexForFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { Move as SmogonMove } from '@smogon/calc';
-import type { Generation, MoveName } from '@smogon/calc/dist/data/interface';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleField,
   CalcdexPlayerKey,
@@ -104,14 +99,8 @@ export const calcSmogonMatchup = (
     koColor: null,
   };
 
-  const gen = detectGenFromFormat(format);
-
-  const dex = <Generation> <unknown> {
-    ...getDexForFormat(format),
-    num: gen,
-    natures: getNaturesDex(),
-    types: getTypesDex(gen),
-  };
+  const dex = getGenDexForFormat(format);
+  // const gen = detectGenFromFormat(format);
 
   if (!dex || !format || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
@@ -158,12 +147,12 @@ export const calcSmogonMatchup = (
 
     // l.debug(
     //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
-    //   '\n', 'dex.num', dex.num,
+    //   '\n', 'gen', dex.num,
     //   '\n', 'matchup', matchup,
     //   '\n', 'result', result,
-    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    //   '\n', 'field', field,
+    //   // '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+    //   // '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+    //   // '\n', 'field', field,
     // );
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,

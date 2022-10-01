@@ -3,12 +3,10 @@ import { formatId } from '@showdex/utils/app';
 import {
   detectGenFromFormat,
   detectLegacyGen,
-  getDexForFormat,
-  getNaturesDex,
+  getGenDexForFormat,
   hasMegaForme,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -30,13 +28,8 @@ export const createSmogonPokemon = (
   pokemon: CalcdexPokemon,
   // moveName?: MoveName,
 ): SmogonPokemon => {
+  const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
-
-  const dex = <Generation> <unknown> {
-    ...getDexForFormat(format),
-    natures: getNaturesDex(),
-    num: gen,
-  };
 
   if (!dex || gen < 1 || !pokemon?.calcdexId) {
     return null;
