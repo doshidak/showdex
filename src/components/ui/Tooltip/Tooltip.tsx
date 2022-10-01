@@ -18,12 +18,20 @@ export type TooltipTippyProps = Partial<Omit<TippyProps,
 
 /* eslint-enable @typescript-eslint/indent */
 
-export interface TooltipProps extends TooltipTippyProps {
+export type TooltipTippyTrigger =
+  | 'click'
+  | 'focus'
+  | 'focusin'
+  | 'manual'
+  | 'mouseenter';
+
+export interface TooltipProps extends Omit<TooltipTippyProps, 'trigger'> {
   className?: string;
   style?: React.CSSProperties;
   arrowClassName?: string;
   arrowStyle?: React.CSSProperties;
   content?: React.ReactNode;
+  trigger?: TooltipTippyTrigger | TooltipTippyTrigger[];
   children?: React.ReactElement;
 }
 
@@ -55,6 +63,7 @@ export const Tooltip = ({
     ...popperOptions
   } = {},
   content,
+  trigger,
   children,
   ...props
 }: TooltipProps): JSX.Element => {
@@ -91,6 +100,7 @@ export const Tooltip = ({
           options: { element: arrow },
         }],
       }}
+      trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
       zIndex={99}
       render={(attributes) => (
         <animated.div
