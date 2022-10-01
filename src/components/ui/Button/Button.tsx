@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { TooltipProps, TooltipTippyTrigger } from '@showdex/components/ui';
+import type { TooltipProps } from '@showdex/components/ui';
 import type { BaseButtonProps, ButtonElement, ButtonElementType } from './BaseButton';
 import { BaseButton } from './BaseButton';
 import styles from './Button.module.scss';
@@ -14,7 +14,7 @@ export interface ButtonProps<
   labelStyle?: React.CSSProperties;
   label?: string;
   tooltip?: React.ReactNode;
-  tooltipTriggers?: TooltipTippyTrigger[];
+  tooltipTrigger?: TooltipProps['trigger'];
   tooltipTouch?: TooltipProps['touch'];
   highlight?: boolean;
   absoluteHover?: boolean;
@@ -31,7 +31,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   labelStyle,
   label,
   tooltip,
-  tooltipTriggers = ['mouseenter'],
+  tooltipTrigger = 'mouseenter',
   tooltipTouch = 'hold',
   highlight,
   absoluteHover,
@@ -75,7 +75,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         content={tooltip}
         offset={[0, 10]}
         delay={[1000, 150]}
-        trigger={tooltipTriggers?.join?.(' ')}
+        trigger={tooltipTrigger}
         touch={tooltipTouch}
         disabled={!tooltip || disabled}
       />
