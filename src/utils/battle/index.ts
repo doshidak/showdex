@@ -11,6 +11,7 @@ export * from './detectSpeciesForme';
 export * from './detectStatBoostDelta';
 export * from './detectToggledAbility';
 export * from './flattenAlts';
+export * from './formatDexDescription';
 export * from './formatStatBoost';
 export * from './getDexForFormat';
 export * from './getGenDexForFormat';
