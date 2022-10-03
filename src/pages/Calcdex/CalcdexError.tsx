@@ -134,8 +134,6 @@ export const CalcdexError = ({
                 <p>
                   We have created an error report contained within the QR code below
                   that you can screenshot and send to help us improve Showdex.
-                  We will treat this report as confidential,
-                  as players' usernames are included in the error report.
                 </p>
 
                 <p>
@@ -145,6 +143,7 @@ export const CalcdexError = ({
                     className={styles.showButton}
                     label="click here"
                     tooltip={`${showState ? 'Hide' : 'Show'} Error Report`}
+                    highlight
                     absoluteHover
                     onPress={() => setShowState(!showState)}
                   />
