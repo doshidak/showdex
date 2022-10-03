@@ -1,4 +1,4 @@
-import { PokemonNatures } from '@showdex/consts';
+import { PokemonNatures } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import { sortUsageAlts } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';

@@ -1,4 +1,4 @@
-import { PokemonStatNames } from '@showdex/consts';
+import { PokemonStatNames } from '@showdex/consts/pokemon';
 import { logger } from '@showdex/utils/debug';
 import type { Result } from '@smogon/calc';
 

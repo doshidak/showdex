@@ -1,4 +1,4 @@
-import { PokemonNatures } from '@showdex/consts';
+import { PokemonNatures } from '@showdex/consts/pokemon';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';

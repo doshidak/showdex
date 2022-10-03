@@ -2,7 +2,7 @@ import {
   PokemonInitialStats,
   PokemonSpeedReductionItems,
   PokemonStatNames,
-} from '@showdex/consts';
+} from '@showdex/consts/pokemon';
 import { formatId as id } from '@showdex/utils/app';
 import { detectGenFromFormat, getDexForFormat, hasMegaForme } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';

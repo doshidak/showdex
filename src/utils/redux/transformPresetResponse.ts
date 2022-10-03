@@ -1,4 +1,3 @@
-// import { FormatLabels } from '@showdex/consts';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';

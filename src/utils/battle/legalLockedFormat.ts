@@ -1,4 +1,4 @@
-import { LegalLockedFormats } from '@showdex/consts';
+import { LegalLockedFormats } from '@showdex/consts/battle';
 
 /**
  * Determines if the provided `format` should be locked to legal values.

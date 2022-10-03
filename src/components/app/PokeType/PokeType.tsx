@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokemonTypeAbbreviations } from '@showdex/consts';
+import { PokemonTypeAbbreviations } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
 import styles from './PokeType.module.scss';
 

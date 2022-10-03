@@ -1,4 +1,4 @@
-import { PseudoWeatherMap, WeatherMap } from '@showdex/consts';
+import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/field';
 import { formatId } from '@showdex/utils/app';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexBattleState } from '@showdex/redux/store';

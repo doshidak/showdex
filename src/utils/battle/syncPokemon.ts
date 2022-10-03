@@ -1,4 +1,4 @@
-import { PokemonBoostNames } from '@showdex/consts';
+import { PokemonBoostNames } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
   calcPokemonSpreadStats,

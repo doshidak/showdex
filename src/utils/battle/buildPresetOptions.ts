@@ -1,4 +1,4 @@
-import { FormatLabels } from '@showdex/consts';
+import { FormatLabels } from '@showdex/consts/battle';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import { getGenlessFormat } from './getGenlessFormat';

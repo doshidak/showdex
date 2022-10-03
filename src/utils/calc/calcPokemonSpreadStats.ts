@@ -1,4 +1,4 @@
-import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts';
+import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts/pokemon';
 import { detectLegacyGen } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';

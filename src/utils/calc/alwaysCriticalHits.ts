@@ -1,4 +1,4 @@
-import { PokemonCriticalHitMoves } from '@showdex/consts';
+import { PokemonCriticalHitMoves } from '@showdex/consts/pokemon';
 import { getDexForFormat } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';

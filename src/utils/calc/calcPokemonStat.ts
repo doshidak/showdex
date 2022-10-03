@@ -1,4 +1,4 @@
-import { PokemonNatureBoosts } from '@showdex/consts';
+import { PokemonNatureBoosts } from '@showdex/consts/pokemon';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { clamp } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';

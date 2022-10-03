@@ -1,4 +1,4 @@
-import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts';
+import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/pokemon';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';

@@ -1,4 +1,5 @@
-import { HttpMethod, PokemonReduxTagType } from '@showdex/consts';
+import { HttpMethod } from '@showdex/consts/core';
+import { PokemonReduxTagType } from '@showdex/consts/redux';
 import { env, runtimeFetch } from '@showdex/utils/core';
 import {
   createTagProvider,

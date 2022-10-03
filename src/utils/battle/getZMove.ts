@@ -1,4 +1,4 @@
-import { PokemonSpecialZMoves, PokemonZMoves } from '@showdex/consts';
+import { PokemonSpecialZMoves, PokemonZMoves } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
 import type { ItemName, MoveName } from '@smogon/calc/dist/data/interface';

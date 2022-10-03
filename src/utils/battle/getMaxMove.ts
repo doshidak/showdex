@@ -1,4 +1,4 @@
-import { PokemonDmaxMoves, PokemonDmaxAbilityMoves, PokemonGmaxMoves } from '@showdex/consts';
+import { PokemonDmaxMoves, PokemonDmaxAbilityMoves, PokemonGmaxMoves } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
 import type { AbilityName, MoveName } from '@smogon/calc/dist/data/interface';
