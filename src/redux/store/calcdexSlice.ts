@@ -83,6 +83,21 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dmaxable?: boolean;
 
   /**
+   * Whether the Pokemon can Gigantamax.
+   *
+   * * Derived from the `requests` of the current `BattleRoom`.
+   *   - This value does not exist in the `battle` object!
+   * * If `true`, `PokeMoves` should add the `'-Gmax'` suffix to Pokemon's `speciesForme` if the G-max forme
+   *   exists in the Pokemon's `altFormes`.
+   *   - Otherwise, `PokeMoves` should not prevent the user from switching to a G-max forme.
+   * * This is also used to specify the Gigantamax property in `exportPokePaste()`.
+   *
+   * @default false
+   * @since 1.0.3
+   */
+  gmaxable?: boolean;
+
+  /**
    * Alternative formes of the Pokemon.
    *
    * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
