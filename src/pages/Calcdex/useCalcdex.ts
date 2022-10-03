@@ -42,8 +42,8 @@ export const useCalcdex = ({
   const gen = battle?.gen as GenerationNum;
 
   l.debug(
-    format, battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)',
-    '\n', 'battle.id', battle?.id || '(missing battle.id)',
+    battle?.id || '(missing battle.id)',
+    '\n', battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)',
     '\n', 'battle', battle,
     '\n', 'battleState', battleState, __DEV__ && { dehydrated: dehydrateCalcdex(battleState) },
   );
@@ -52,6 +52,7 @@ export const useCalcdex = ({
   React.useEffect(() => {
     l.debug(
       'Received battle update; determining sync changes...',
+      '\n', 'battle.id', battle?.id || '(missing battle.id)',
       '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce,
       '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
       '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
