@@ -10,6 +10,8 @@ export * from './detectPokemonIdent';
 export * from './detectSpeciesForme';
 export * from './detectStatBoostDelta';
 export * from './detectToggledAbility';
+export * from './detectUsageAlt';
+export * from './exportPokePaste';
 export * from './flattenAlts';
 export * from './formatDexDescription';
 export * from './formatStatBoost';
