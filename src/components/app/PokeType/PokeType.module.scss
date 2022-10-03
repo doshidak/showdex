@@ -1,5 +1,7 @@
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/font';
 @use 'mixins/spacing';
 
 $type-unknown-color: #424242;
@@ -16,23 +18,27 @@ $type-colors: (
   fire: #DD6510,
   water: #3A6EEB,
   grass: #549B31,
-  electric: darken(#FDD835, 15%),
-  psychic: darken(#F62765, 10%),
-  ice: darken(#73CACA, 10%),
+  electric: color.shade(#FDD835, 15%),
+  psychic: color.shade(#F62765, 10%),
+  ice: color.shade(#73CACA, 10%),
   dragon: #4D09F4,
   dark: #41332A,
   fairy: #E76D88,
 );
 
+$type-color-light-tint: 10%;
+
 $label-light-opacity: 1;
-$label-dark-opacity: 0.75;
-$background-opacity-light: 0.5;
-$background-opacity-dark: 0.3;
+$label-dark-opacity: 1;
+$background-opacity-light: 0.85;
+$background-opacity-unknown-light: 0.5;
+$background-opacity-dark: 0.5;
 
 .container {
   display: inline-block;
   width: 36px;
   @include spacing.padding-xy($y: 1px);
+  @include font.apply(fonts.$mono);
   font-size: 8px;
   text-align: center;
   text-transform: uppercase;
@@ -43,7 +49,7 @@ $background-opacity-dark: 0.3;
 
   &.light {
     color: color.alpha(colors.$white, $label-light-opacity);
-    background-color: color.alpha($type-unknown-color, $background-opacity-light);
+    background-color: color.alpha($type-unknown-color, $background-opacity-unknown-light);
   }
 
   &.dark {
@@ -53,7 +59,10 @@ $background-opacity-dark: 0.3;
 
   @each $type, $color in $type-colors {
     &.light.type-#{$type} {
-      background-color: color.alpha($color, $background-opacity-light);
+      background-color: color.alpha(
+        color.tint($color, $type-color-light-tint),
+        $background-opacity-light,
+      );
     }
 
     &.dark.type-#{$type} {

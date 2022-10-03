@@ -34,8 +34,10 @@ export const SelectOption = <
   >
     {
       !!data?.label &&
-      <div className={styles.optionLabel}>
-        <div>{data.label}</div>
+      <div className={styles.optionRow}>
+        <div className={styles.optionLabel}>
+          {data.label}
+        </div>
 
         {
           !!data?.rightLabel &&
