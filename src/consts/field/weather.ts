@@ -1,4 +1,5 @@
-import type { State as SmogonState } from '@smogon/calc';
+import { times } from '@showdex/consts/core';
+import type { Terrain, Weather } from '@smogon/calc/dist/data/interface';
 
 /**
  * Description of a field condition.
@@ -27,18 +28,11 @@ export interface FieldConditionDescription {
 }
 
 /**
- * Internally-used HTML `&times;` entity, represented as `U+00D7`.
- *
- * @since 1.0.3
- */
-const times = '\u00D7';
-
-/**
  * Legacy weather available since gen 2+.
  *
  * @since 1.0.2
  */
-export const LegacyWeatherMap: Record<string, SmogonState.Field['weather']> = {
+export const LegacyWeatherMap: Record<string, Weather> = {
   raindance: 'Rain',
   sandstorm: 'Sand',
   sunnyday: 'Sun',
@@ -49,14 +43,14 @@ export const LegacyWeatherMap: Record<string, SmogonState.Field['weather']> = {
  *
  * @since 1.0.2
  */
-export const LegacyWeatherNames: SmogonState.Field['weather'][] = Object.values(LegacyWeatherMap).sort();
+export const LegacyWeatherNames: Weather[] = Object.values(LegacyWeatherMap).sort();
 
 /**
  * Adapted from `weatherNameTable` in `src/battle-animations.ts` (line 920) of `smogon/pokemon-showdown-client`.
  *
  * @since 0.1.0
  */
-export const WeatherMap: Record<string, SmogonState.Field['weather']> = {
+export const WeatherMap: Record<string, Weather> = {
   ...LegacyWeatherMap,
   hail: 'Hail',
   deltastream: 'Strong Winds',
@@ -69,7 +63,7 @@ export const WeatherMap: Record<string, SmogonState.Field['weather']> = {
  *
  * @since 0.1.1
  */
-export const WeatherNames: SmogonState.Field['weather'][] = Object.values(WeatherMap).sort();
+export const WeatherNames: Weather[] = Object.values(WeatherMap).sort();
 
 /**
  * Weather descriptions.
@@ -77,9 +71,9 @@ export const WeatherNames: SmogonState.Field['weather'][] = Object.values(Weathe
  * @see https://smogon.com/dex/ss
  * @since 1.0.3
  */
-export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldConditionDescription> = {
+export const WeatherDescriptions: Record<Weather, FieldConditionDescription> = {
   Rain: {
-    shortDesc: `5 turns (8 w/ Damp Rock), +Water (${times}1.5), -Fire (${times}0.5).`,
+    shortDesc: `For 5 turns (8 w/ Damp Rock), Water 1.5${times}, Fire 0.5${times}.`,
     // desc: 'For 5 turns, the weather becomes Rain Dance. '
     //   + 'The damage of Water-type attacks is multiplied by 1,5 and '
     //   + 'the damage of Fire-type attacks is multiplied by 0.5 during the effect. '
@@ -88,9 +82,9 @@ export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldCond
   },
 
   Sand: {
-    shortDesc: '5 turns (8 w/ Smooth Rock), '
-      + `+SPD (${times}1.5, Rock-types only), `
-      + '-1/16 max HP (floored, non-Ground/Rock/Steel, non-Magic Guard/Overcoat/Sand Force/Sand Rush/Sand Veil).',
+    shortDesc: 'For 5 turns (8 w/ Smooth Rock), '
+      + `SPD 1.5${times} (Rock-types only), `
+      + '-6% HP (floored, non-Ground/Rock/Steel, non-Magic Guard/Overcoat/Sand Force/Sand Rush/Sand Veil).',
     // desc: 'For 5 turns, the weather becomes Sandstorm. '
     //   + 'At the end of each turn except the last, all active Pokemon lose 1/16 of their maximum HP, rounded down, '
     //   + 'unless they are a Ground, Rock, or Steel type, or '
@@ -102,7 +96,7 @@ export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldCond
   },
 
   Sun: {
-    shortDesc: `5 turns (8 w/ Heat Rock), +Fire (${times}1.5), -Water (${times}0.5).`,
+    shortDesc: `For 5 turns (8 w/ Heat Rock), Fire 1.5${times}, Water 0.5${times}.`,
     // desc: 'For 5 turns, the weather becomes Sunny Day. '
     //   + 'The damage of Fire-type attacks is multiplied by 1.5 and '
     //   + 'the damage of Water-type attacks is multiplied by 0.5 during the effect. '
@@ -111,8 +105,8 @@ export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldCond
   },
 
   Hail: {
-    shortDesc: '5 turns (8 w/ Icy Rock), '
-      + '-1/16 max HP (floored, non-Ice, non-Ice Body/Magic Guard/Overcoat/Snow Cloak).',
+    shortDesc: 'For 5 turns (8 w/ Icy Rock), '
+      + '-6% HP (floored, non-Ice, non-Ice Body/Magic Guard/Overcoat/Snow Cloak).',
     // desc: 'For 5 turns, the weather becomes Hail. '
     //   + 'At the end of each turn except the last, '
     //   + 'all active Pokemon lose 1/16 of their maximum HP, rounded down, '
@@ -136,7 +130,7 @@ export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldCond
     // (otherwise, the normal 50% BP reduction of Water-type moves from Sunny Day applies)
     // also note that "Extremely Harsh Sunlight" should technically prevent Air Lock and Cloud Nine
     // (abilities that negate weather effects) from deactivating the "no Water" effect
-    shortDesc: `Until switch-out, +Fire (${times}1.5), no Water (${times}0, non-Air Lock/Cloud Nine).`,
+    shortDesc: `Until switch-out, Fire 1.5${times}, Water 0${times} (non-Air Lock/Cloud Nine).`,
     // desc: 'On switch-in, the weather becomes Desoland Land, '
     //   + 'which includes all the effects of Sunny Day and '
     //   + 'prevents damaging Water-type moves from executing. '
@@ -146,7 +140,7 @@ export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldCond
 
   'Heavy Rain': {
     // as you can probably guess, this is the signature ability of Primal Kyogre
-    shortDesc: `Until switch-out, +Water (${times}1.5), no Fire (${times}0, non-Air Lock/Cloud Nine).`,
+    shortDesc: `Until switch-out, Water 1.5${times}, Fire 0${times} (non-Air Lock/Cloud Nine).`,
     // desc: 'On switch-in, the weather becomes Primordial Sea, '
     //   + 'which includes all the effects of Rain Dance and '
     //   + 'prevents damaging Fire-type moves from executing. '
@@ -166,7 +160,7 @@ export const WeatherDescriptions: Record<SmogonState.Field['weather'], FieldCond
  *
  * @since 0.1.0
  */
-export const PseudoWeatherMap: Record<string, SmogonState.Field['terrain']> = {
+export const PseudoWeatherMap: Record<string, Terrain> = {
   electricterrain: 'Electric',
   grassyterrain: 'Grassy',
   mistyterrain: 'Misty',
@@ -178,7 +172,7 @@ export const PseudoWeatherMap: Record<string, SmogonState.Field['terrain']> = {
  *
  * @since 0.1.1
  */
-export const TerrainNames: SmogonState.Field['terrain'][] = Object.values(PseudoWeatherMap).sort();
+export const TerrainNames: Terrain[] = Object.values(PseudoWeatherMap).sort();
 
 /**
  * Terrain descriptions.
@@ -186,9 +180,9 @@ export const TerrainNames: SmogonState.Field['terrain'][] = Object.values(Pseudo
  * @see https://smogon.com/dex/ss
  * @since 1.0.3
  */
-export const TerrainDescriptions: Record<SmogonState.Field['terrain'], FieldConditionDescription> = {
+export const TerrainDescriptions: Record<Terrain, FieldConditionDescription> = {
   Electric: {
-    shortDesc: `5 turns, +Electric (${times}1.3, grounded), can't sleep.`,
+    shortDesc: `For 5 turns, Electric 1.3${times} (grounded), can't sleep.`,
     // desc: 'For 5 turns, the terrain becomes Electric Terrain. '
     //   + 'During the effect, the power of Electric-type attacks made by grounded Pokemon is multiplied by 1.3 and '
     //   + 'grounded Pokemon cannot fall asleep; '
@@ -201,7 +195,7 @@ export const TerrainDescriptions: Record<SmogonState.Field['terrain'], FieldCond
   },
 
   Grassy: {
-    shortDesc: `5 turns, +Grass (${times}1.3, grounded), -Bulldoze/Earthquake/Magnitude (${times}0.5), +1/16 max HP (floored).`,
+    shortDesc: `For 5 turns, Grass 1.3${times} (grounded), Bulldoze/Earthquake/Magnitude 0.5${times}, +6% HP (floored).`,
     // desc: 'For 5 turns, the terrain becomes Grassy Terrain. '
     //   + 'During the effect, the power of Grass-type attacks used by grounded Pokemon is multiplied by 1.3, '
     //   + 'the power of Bulldoze, Earthquake, and Magnitude used against grounded Pokemon is multiplied by 0.5, and '
@@ -214,7 +208,7 @@ export const TerrainDescriptions: Record<SmogonState.Field['terrain'], FieldCond
   },
 
   Misty: {
-    shortDesc: `5 turns, -Dragon (${times}0.5, grounded), can't status.`,
+    shortDesc: `For 5 turns, Dragon 0.5${times} (grounded), can't status.`,
     // desc: 'For 5 turns, the terrain becomes Misty Terrain. '
     //   + 'During the effect, the power of Dragon-type attacks used against grounded Pokemon is multiplied by 0.5 and '
     //   + 'grounded Pokemon cannot be inflicted with a non-volatile status condition nor confusion. '
@@ -226,7 +220,7 @@ export const TerrainDescriptions: Record<SmogonState.Field['terrain'], FieldCond
   },
 
   Psychic: {
-    shortDesc: `5 turns, +Psychic (${times}1.3, grounded), no priority.`,
+    shortDesc: `For 5 turns, Psychic 1.3${times} (grounded), no priority.`,
     // desc: 'For 5 turns, the terrain becomes Psychic Terrain. '
     //   + 'During the effect, the power of Psychic-type attacks made by grounded Pokemon is multiplied by 1.3 and '
     //   + 'grounded Pokemon cannot be hit by moves with priority greater than 0, unless the target is an ally. '
