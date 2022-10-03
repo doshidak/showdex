@@ -15,6 +15,7 @@ import type {
   CalcdexPokemon,
 } from '@showdex/redux/store';
 import { PokeCalc } from './PokeCalc';
+import { ToggleButton } from './ToggleButton';
 import styles from './PlayerCalc.module.scss';
 
 interface PlayerCalcProps {
@@ -96,7 +97,7 @@ export const PlayerCalc = ({
           />
 
           <div>
-            <Button
+            {/* <Button
               labelClassName={cx(
                 styles.toggleButtonLabel,
                 !autoSelect && styles.inactive,
@@ -104,6 +105,15 @@ export const PlayerCalc = ({
               label="Auto"
               tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pokémon`}
               absoluteHover
+              disabled={!pokemon?.length}
+              onPress={() => onAutoSelectChange?.(!autoSelect)}
+            /> */}
+
+            <ToggleButton
+              label="Auto"
+              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pok\u00E9mon`}
+              absoluteHover
+              active={autoSelect}
               disabled={!pokemon?.length}
               onPress={() => onAutoSelectChange?.(!autoSelect)}
             />

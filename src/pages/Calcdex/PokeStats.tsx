@@ -7,9 +7,14 @@ import {
   PokemonBoostNames,
   PokemonNatureBoosts,
   PokemonStatNames,
-} from '@showdex/consts';
+} from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
-import { detectLegacyGen, detectStatBoostDelta, formatStatBoost } from '@showdex/utils/battle';
+import {
+  detectLegacyGen,
+  detectStatBoostDelta,
+  formatStatBoost,
+  legalLockedFormat,
+} from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
@@ -20,6 +25,7 @@ export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
   gen?: GenerationNum;
+  format?: string;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
@@ -31,6 +37,7 @@ export const PokeStats = ({
   className,
   style,
   gen,
+  format,
   playerPokemon: pokemon,
   opponentPokemon,
   field,
@@ -49,7 +56,7 @@ export const PokeStats = ({
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs') + (pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0);
-  const evsLegal = totalEvs <= maxLegalEvs;
+  const evsLegal = !legalLockedFormat(format) || totalEvs <= maxLegalEvs;
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
@@ -98,6 +105,7 @@ export const PokeStats = ({
           <TableGridItem
             key={`PokeStats:StatHeader:${pokemonKey}:${stat}`}
             className={cx(
+              styles.header,
               styles.statHeader,
               boostUp && styles.up,
               boostDown && styles.down,
@@ -114,6 +122,7 @@ export const PokeStats = ({
       {/* IVs */}
       <TableGridItem
         className={cx(
+          styles.header,
           styles.ivsHeader,
           missingIvs && styles.missingSpread,
         )}
@@ -187,6 +196,7 @@ export const PokeStats = ({
         <>
           <TableGridItem
             className={cx(
+              styles.header,
               styles.evsHeader,
               missingEvs && styles.missingSpread,
               !evsLegal && styles.illegal,
@@ -264,7 +274,11 @@ export const PokeStats = ({
       })}
 
       {/* boosts */}
-      <TableGridItem align="right" header>
+      <TableGridItem
+        className={styles.header}
+        align="right"
+        header
+      >
         Stage
       </TableGridItem>
 

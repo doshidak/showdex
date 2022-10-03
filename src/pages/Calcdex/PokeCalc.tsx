@@ -1,5 +1,5 @@
 import * as React from 'react';
-import cx from 'classnames';
+// import cx from 'classnames';
 import {
   detectLegacyGen,
   detectToggledAbility,
@@ -136,8 +136,6 @@ export const PokeCalc = ({
 
     // check for any possible abilities, base stat & type updates due to speciesForme changes
     if ('speciesForme' in payload && payload.speciesForme !== playerPokemon.speciesForme) {
-      // const newSpecies = Dex.forGen(dex?.num).species.get(payload.speciesForme);
-
       const {
         abilities,
         baseStats,
@@ -202,7 +200,7 @@ export const PokeCalc = ({
 
       {/* moves (duh) */}
       <PokeMoves
-        className={styles.section}
+        className={styles.moves}
         gen={gen}
         format={format}
         rules={rules}
@@ -213,8 +211,9 @@ export const PokeCalc = ({
 
       {/* IVs, EVs, calculated stats, boosts */}
       <PokeStats
-        className={cx(styles.section, styles.stats)}
+        className={styles.stats}
         gen={gen}
+        format={format}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={field}

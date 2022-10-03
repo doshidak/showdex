@@ -3,13 +3,15 @@ import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
-import { Button } from '@showdex/components/ui';
+import { Button, CopiedBadge } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import { buildMoveOptions } from '@showdex/utils/battle';
+import { buildMoveOptions, getDexForFormat } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
+import type { CopiedBadgeInstance } from '@showdex/components/ui';
 import type { CalcdexBattleRules, CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
+import { ToggleButton } from './ToggleButton';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMovesProps {
@@ -37,27 +39,31 @@ export const PokeMoves = ({
 }: PokeMovesProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
+  const dex = getDexForFormat(format);
+
   // kinda gross tbh
-  const moveCopiedTimeout = React.useRef<NodeJS.Timeout>(null);
-  const [movesCopied, setMovesCopied] = React.useState<boolean[]>(Array(movesCount).fill(false));
+  // const moveCopiedTimeout = React.useRef<NodeJS.Timeout>(null);
+  // const [movesCopied, setMovesCopied] = React.useState<boolean[]>(Array(movesCount).fill(false));
 
-  const startMoveCopiedTimeout = () => {
-    if (moveCopiedTimeout.current) {
-      clearTimeout(moveCopiedTimeout.current);
-    }
-
-    moveCopiedTimeout.current = setTimeout(() => {
-      setMovesCopied([]);
-      moveCopiedTimeout.current = null;
-    }, 1000);
-  };
+  // const startMoveCopiedTimeout = () => {
+  //   if (moveCopiedTimeout.current) {
+  //     clearTimeout(moveCopiedTimeout.current);
+  //   }
+  //
+  //   moveCopiedTimeout.current = setTimeout(() => {
+  //     setMovesCopied([]);
+  //     moveCopiedTimeout.current = null;
+  //   }, 1000);
+  // };
 
   // returned function in the effect function arg is the cleanup function
-  React.useEffect(() => () => {
-    if (moveCopiedTimeout.current) {
-      clearTimeout(moveCopiedTimeout.current);
-    }
-  }, []);
+  // React.useEffect(() => () => {
+  //   if (moveCopiedTimeout.current) {
+  //     clearTimeout(moveCopiedTimeout.current);
+  //   }
+  // }, []);
+
+  const copiedRefs = React.useRef<CopiedBadgeInstance[]>([]);
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
@@ -88,13 +94,15 @@ export const PokeMoves = ({
       try {
         await navigator.clipboard.writeText(description);
 
-        if (!movesCopied[index]) {
-          const newMovesCopied = [...movesCopied];
+        // if (!movesCopied[index]) {
+        //   const newMovesCopied = [...movesCopied];
+        //
+        //   newMovesCopied[index] = true;
+        //   setMovesCopied(newMovesCopied);
+        //   startMoveCopiedTimeout();
+        // }
 
-          newMovesCopied[index] = true;
-          setMovesCopied(newMovesCopied);
-          startMoveCopiedTimeout();
-        }
+        copiedRefs.current?.[index]?.show();
       } catch (error) {
         // no-op when an error is thrown while writing to the user's clipboard
         (() => {})();
@@ -113,17 +121,27 @@ export const PokeMoves = ({
     >
       {/* table headers */}
       <TableGridItem
-        className={styles.movesHeader}
+        className={cx(styles.header, styles.movesHeader)}
         align="left"
         header
       >
-        Moves
+        <div className={styles.headerTitle}>
+          Moves
+        </div>
+
+        <ToggleButton
+          className={cx(styles.toggleButton, styles.autoButton)}
+          label="Auto"
+          tooltip="Auto-Set Revealed Moves"
+          // disabled={!pokemon}
+          disabled
+          onPress={() => {}}
+        />
 
         {
           showZToggle &&
           <>
-            {' '}
-            <Button
+            {/* <Button
               className={styles.toggleButton}
               labelClassName={cx(
                 styles.toggleButtonLabel,
@@ -136,6 +154,18 @@ export const PokeMoves = ({
                 useZ: !pokemon?.useZ,
                 useMax: false,
               })}
+            /> */}
+            <ToggleButton
+              className={cx(styles.toggleButton, styles.ultButton)}
+              label="Z"
+              tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
+              primary
+              active={pokemon?.useZ}
+              disabled={!pokemon}
+              onPress={() => onPokemonChange?.({
+                useZ: !pokemon?.useZ,
+                useMax: false,
+              })}
             />
           </>
         }
@@ -143,8 +173,7 @@ export const PokeMoves = ({
         {
           showMaxToggle &&
           <>
-            {' '}
-            <Button
+            {/* <Button
               className={styles.toggleButton}
               labelClassName={cx(
                 styles.toggleButtonLabel,
@@ -158,19 +187,36 @@ export const PokeMoves = ({
                 useZ: false,
                 useMax: !pokemon?.useMax,
               })}
+            /> */}
+            <ToggleButton
+              className={cx(
+                styles.toggleButton,
+                styles.ultButton,
+                showZToggle && styles.lessSpacing,
+              )}
+              label="Max"
+              tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
+              primary
+              active={pokemon?.useMax}
+              disabled={!pokemon}
+              onPress={() => onPokemonChange?.({
+                useZ: false,
+                useMax: !pokemon?.useMax,
+              })}
             />
           </>
         }
       </TableGridItem>
 
       <TableGridItem
-        className={styles.dmgHeader}
+        className={cx(styles.header, styles.dmgHeader)}
         header
       >
-        DMG
+        <div className={styles.headerTitle}>
+          DMG
+        </div>
 
-        {' '}
-        <Button
+        {/* <Button
           className={styles.toggleButton}
           labelClassName={cx(
             styles.toggleButtonLabel,
@@ -183,26 +229,40 @@ export const PokeMoves = ({
           onPress={() => onPokemonChange?.({
             criticalHit: !pokemon?.criticalHit,
           })}
+        /> */}
+        <ToggleButton
+          className={styles.toggleButton}
+          label="Crit"
+          tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
+          primary
+          active={pokemon?.criticalHit}
+          disabled={!pokemon?.speciesForme}
+          onPress={() => onPokemonChange?.({
+            criticalHit: !pokemon?.criticalHit,
+          })}
         />
       </TableGridItem>
 
-      <TableGridItem header>
-        KO %
+      <TableGridItem
+        className={styles.header}
+        header
+      >
+        <div className={styles.headerTitle}>
+          KO %
+        </div>
       </TableGridItem>
 
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
         const moveName = pokemon?.moves?.[i];
-        const move = moveName ? Dex?.forGen(gen).moves.get(moveName) : null;
-
-        // const transformed = !!moveid && moveid?.charAt(0) === '*'; // moves used by a transformed Ditto
-        // const moveName = (transformed ? moveid.substring(1) : moveid) as MoveName;
+        const move = moveName ? dex?.moves.get(moveName) : null;
+        const moveDescription = move?.shortDesc || move?.desc;
 
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
         const {
-          move: calculatorMove,
+          move: calcMove,
           description,
           damageRange,
           koChance,
@@ -227,41 +287,67 @@ export const PokeMoves = ({
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for Pokemon ${friendlyPokemonName}`}
                 hint="--"
-                tooltip={calculatorMove?.type ? (
+                tooltip={calcMove?.type ? (
                   <div className={styles.moveTooltip}>
-                    <PokeType type={calculatorMove.type} />
-
                     {
-                      !!calculatorMove.category &&
-                      <>
-                        <span className={styles.label}>
-                          {' '}{calculatorMove.category.slice(0, 4)}
-                        </span>
-                        {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
-                        {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
-                        {(calculatorMove?.bp ?? 0) > 2 && ` ${calculatorMove.bp}`}
-                      </>
+                      !!moveDescription &&
+                      <div className={styles.moveDescription}>
+                        {moveDescription}
+                      </div>
                     }
 
-                    {
-                      showAccuracy &&
-                      <>
-                        <span className={styles.label}>
-                          {' '}ACC{' '}
-                        </span>
-                        {move.accuracy}%
-                      </>
-                    }
+                    <div className={styles.moveProperties}>
+                      <PokeType
+                        className={styles.moveType}
+                        type={calcMove.type}
+                        reverseColorScheme
+                      />
 
-                    {
-                      !!calculatorMove?.priority &&
-                      <>
-                        <span className={styles.label}>
-                          {' '}PRI{' '}
-                        </span>
-                        {calculatorMove.priority > 0 ? `+${calculatorMove.priority}` : calculatorMove.priority}
-                      </>
-                    }
+                      {
+                        !!calcMove.category &&
+                        <div className={styles.moveProperty}>
+                          <div className={styles.propertyName}>
+                            {calcMove.category.slice(0, 4)}
+                          </div>
+
+                          {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
+                          {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
+                          {
+                            (calcMove?.bp ?? 0) > 2 &&
+                            <div className={styles.propertyValue}>
+                              {calcMove.bp}
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      {
+                        showAccuracy &&
+                        <div className={styles.moveProperty}>
+                          <div className={styles.propertyName}>
+                            ACC
+                          </div>
+
+                          <div className={styles.propertyValue}>
+                            {move.accuracy}%
+                          </div>
+                        </div>
+                      }
+
+                      {
+                        !!calcMove?.priority &&
+                        <div className={styles.moveProperty}>
+                          <div className={styles.propertyName}>
+                            PRI
+                          </div>
+
+                          <div className={styles.propertyValue}>
+                            {calcMove.priority > 0 && '+'}
+                            {calcMove.priority}
+                          </div>
+                        </div>
+                      }
+                    </div>
                   </div>
                 ) : null}
                 input={{
@@ -306,14 +392,18 @@ export const PokeMoves = ({
                   label={damageRange}
                   tooltip={description?.raw ? (
                     <div className={styles.descTooltip}>
-                      <div
+                      {/* <div
                         className={cx(
                           styles.copied,
                           movesCopied[i] && styles.copiedVisible,
                         )}
                       >
                         Copied!
-                      </div>
+                      </div> */}
+                      <CopiedBadge
+                        ref={(ref) => { copiedRefs.current[i] = ref; }}
+                        className={styles.copiedBadge}
+                      />
 
                       {description?.attacker}
                       {
@@ -347,6 +437,7 @@ export const PokeMoves = ({
                       }
                     </div>
                   ) : null}
+                  tooltipTrigger={['focus', 'mouseenter']}
                   hoverScale={1}
                   absoluteHover
                   disabled={!description?.raw}

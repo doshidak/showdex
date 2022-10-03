@@ -1,6 +1,8 @@
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
@@ -21,8 +23,11 @@
   font-size: 8px;
 }
 
+.header {
+  @include font.apply(fonts.$primary, (font-weight: 500));
+}
+
 .statHeader {
-  font-weight: 500;
   @include transition.apply(color);
 
   &.up {

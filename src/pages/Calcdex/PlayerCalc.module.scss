@@ -1,6 +1,8 @@
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
@@ -21,16 +23,8 @@
 
 button.usernameButton {
   justify-content: initial;
-  // max-width: 78px;
   max-width: 80%;
-}
-
-.usernameButtonLabel {
-  font-weight: 500;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
 
   .light & {
     color: color.alpha(colors.$black, 0.75);
@@ -41,18 +35,25 @@ button.usernameButton {
   }
 }
 
-.toggleButtonLabel {
-  font-size: 8px;
-  text-transform: uppercase;
-
-  .light &.inactive {
-    color: colors.$black;
-  }
-
-  .dark &.inactive {
-    color: colors.$white;
-  }
+.usernameButtonLabel {
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
+
+// .toggleButtonLabel {
+//   font-size: 8px;
+//   text-transform: uppercase;
+//
+//   .light &.inactive {
+//     color: colors.$black;
+//   }
+//
+//   .dark &.inactive {
+//     color: colors.$white;
+//   }
+// }
 
 .teamList {
   @include flex.row($justify: flex-end);
@@ -106,6 +107,6 @@ button.usernameButton {
 }
 
 .pokeCalc {
-  @include spacing.padding($top: 5px);
+  @include spacing.padding($top: 3px);
   // z-index: 1;
 }

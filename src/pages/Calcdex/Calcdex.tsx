@@ -109,9 +109,11 @@ export const Calcdex = ({
             className={styles.fieldCalc}
             battleId={battleId}
             gen={gen}
+            format={format}
             authPlayerKey={authPlayerKey}
             playerKey={playerKey}
             field={field}
+            disabled={!p1?.pokemon?.length || !p2?.pokemon?.length}
             onFieldChange={updateField}
           />
 

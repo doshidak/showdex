@@ -2,17 +2,20 @@ import * as React from 'react';
 import cx from 'classnames';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
-import { Button } from '@showdex/components/ui';
 import {
   LegacyWeatherNames,
+  TerrainDescriptions,
   TerrainNames,
+  WeatherDescriptions,
   WeatherMap,
   WeatherNames,
-} from '@showdex/consts';
+} from '@showdex/consts/field';
 import { useColorScheme } from '@showdex/redux/store';
-// import { detectLegacyGen } from '@showdex/utils/battle';
+import { formatId } from '@showdex/utils/app';
+import { getDexForFormat } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
+import { ToggleButton } from './ToggleButton';
 import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
@@ -20,24 +23,35 @@ interface FieldCalcProps {
   style?: React.CSSProperties;
   battleId?: string;
   gen?: GenerationNum;
+  format?: string;
   authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
   field?: CalcdexBattleField;
+  disabled?: boolean;
   onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
 }
+
+const PlayerSideScreensMap: Record<string, keyof CalcdexPlayerSide> = {
+  Light: 'isLightScreen',
+  Reflect: 'isReflect',
+  Aurora: 'isAuroraVeil',
+};
 
 export const FieldCalc = ({
   className,
   style,
   battleId,
   gen,
+  format,
   authPlayerKey,
   playerKey = 'p1',
   field,
+  disabled,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
+  const dex = getDexForFormat(format);
   // const legacy = detectLegacyGen(gen);
 
   const {
@@ -103,55 +117,37 @@ export const FieldCalc = ({
 
       {/* p1 screens */}
       <TableGridItem align="left">
-        <Button
-          className={cx(
-            styles.toggleButton,
-            !attackerSide?.isLightScreen && styles.inactive,
-          )}
-          labelClassName={styles.toggleButtonLabel}
-          label="Light"
-          disabled={!battleId || !p1Side}
-          onPress={() => onFieldChange?.({
-            [attackerSideKey]: {
-              ...attackerSide,
-              isLightScreen: !attackerSide?.isLightScreen,
-            },
-          })}
-        />
-        {' '}
+        {Object.entries(PlayerSideScreensMap).map(([label, sideKey], i) => {
+          // e.g., 'isAuroraVeil' -> 'AuroraVeil' -> formatId() -> 'auroraveil'
+          const screenMoveId = formatId(sideKey.replace('is', ''));
+          const dexScreenMove = screenMoveId ? dex.moves.get(screenMoveId) : null;
+          const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
 
-        <Button
-          className={cx(
-            styles.toggleButton,
-            !attackerSide?.isReflect && styles.inactive,
-          )}
-          labelClassName={styles.toggleButtonLabel}
-          label="Reflect"
-          disabled={!battleId || !p1Side}
-          onPress={() => onFieldChange?.({
-            [attackerSideKey]: {
-              ...attackerSide,
-              isReflect: !attackerSide?.isReflect,
-            },
-          })}
-        />
+          return (
+            <React.Fragment key={`FieldCalc:${attackerSideKey}:${label}:ToggleButton`}>
+              <ToggleButton
+                className={styles.toggleButton}
+                label={label}
+                tooltip={screenDescription ? (
+                  <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+                    {screenDescription}
+                  </div>
+                ) : null}
+                primary
+                active={!!attackerSide?.[sideKey]}
+                disabled={disabled || !battleId || !attackerSideKey || !attackerSide}
+                onPress={() => onFieldChange?.({
+                  [attackerSideKey]: {
+                    ...attackerSide,
+                    [sideKey]: !attackerSide?.[sideKey],
+                  },
+                })}
+              />
 
-        {' '}
-        <Button
-          className={cx(
-            styles.toggleButton,
-            !attackerSide?.isAuroraVeil && styles.inactive,
-          )}
-          labelClassName={styles.toggleButtonLabel}
-          label="Aurora"
-          disabled={!battleId || !p1Side || gen < 7}
-          onPress={() => onFieldChange?.({
-            [attackerSideKey]: {
-              ...attackerSide,
-              isAuroraVeil: !attackerSide?.isAuroraVeil,
-            },
-          })}
-        />
+              {i < Object.keys(PlayerSideScreensMap).length - 1 && ' '}
+            </React.Fragment>
+          );
+        })}
       </TableGridItem>
 
       {/* weather */}
@@ -160,6 +156,11 @@ export const FieldCalc = ({
           style={{ textAlign: 'left' }}
           aria-label="Field Weather"
           hint={gen === 1 ? 'N/A' : 'None'}
+          tooltip={weather && WeatherDescriptions[weather]?.shortDesc ? (
+            <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+              {WeatherDescriptions[weather].shortDesc}
+            </div>
+          ) : null}
           input={{
             name: `FieldCalc:Weather:${battleId || '???'}`,
             value: weather,
@@ -175,7 +176,7 @@ export const FieldCalc = ({
             value: name,
           }))}
           noOptionsMessage="No Weather"
-          disabled={!battleId || gen === 1}
+          disabled={disabled || !battleId || gen === 1}
         />
       </TableGridItem>
 
@@ -185,6 +186,11 @@ export const FieldCalc = ({
           style={{ textAlign: 'left' }}
           aria-label="Field Terrain"
           hint={gen < 6 ? 'N/A' : 'None'}
+          tooltip={terrain && TerrainDescriptions[terrain]?.shortDesc ? (
+            <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+              {TerrainDescriptions[terrain].shortDesc}
+            </div>
+          ) : null}
           input={{
             name: `FieldCalc:Terrain:${battleId || '???'}`,
             value: terrain,
@@ -197,61 +203,42 @@ export const FieldCalc = ({
             value: name,
           }))}
           noOptionsMessage="No Terrain"
-          disabled={!battleId || gen < 6}
+          disabled={disabled || !battleId || gen < 6}
         />
       </TableGridItem>
 
       {/* opponent's screens */}
       <TableGridItem align="right">
-        <Button
-          className={cx(
-            styles.toggleButton,
-            !defenderSide?.isLightScreen && styles.inactive,
-          )}
-          labelClassName={styles.toggleButtonLabel}
-          label="Light"
-          disabled={!battleId || !p2Side}
-          onPress={() => onFieldChange?.({
-            [defenderSideKey]: {
-              ...defenderSide,
-              isLightScreen: !defenderSide?.isLightScreen,
-            },
-          })}
-        />
+        {Object.entries(PlayerSideScreensMap).map(([label, sideKey], i) => {
+          const screenMoveId = formatId(sideKey.replace('is', ''));
+          const dexScreenMove = screenMoveId ? dex.moves.get(screenMoveId) : null;
+          const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
 
-        {' '}
-        <Button
-          className={cx(
-            styles.toggleButton,
-            !defenderSide?.isReflect && styles.inactive,
-          )}
-          labelClassName={styles.toggleButtonLabel}
-          label="Reflect"
-          disabled={!battleId || !p2Side}
-          onPress={() => onFieldChange?.({
-            [defenderSideKey]: {
-              ...defenderSide,
-              isReflect: !defenderSide?.isReflect,
-            },
-          })}
-        />
+          return (
+            <React.Fragment key={`FieldCalc:${defenderSideKey}:${label}:ToggleButton`}>
+              <ToggleButton
+                className={styles.toggleButton}
+                label={label}
+                tooltip={screenDescription ? (
+                  <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+                    {screenDescription}
+                  </div>
+                ) : null}
+                primary
+                active={!!defenderSide?.[sideKey]}
+                disabled={disabled || !battleId || !defenderSideKey || !defenderSide}
+                onPress={() => onFieldChange?.({
+                  [defenderSideKey]: {
+                    ...defenderSide,
+                    [sideKey]: !defenderSide?.[sideKey],
+                  },
+                })}
+              />
 
-        {' '}
-        <Button
-          className={cx(
-            styles.toggleButton,
-            !defenderSide?.isAuroraVeil && styles.inactive,
-          )}
-          labelClassName={styles.toggleButtonLabel}
-          label="Aurora"
-          disabled={!battleId || !p2Side || gen < 7}
-          onPress={() => onFieldChange?.({
-            [defenderSideKey]: {
-              ...defenderSide,
-              isAuroraVeil: !defenderSide?.isAuroraVeil,
-            },
-          })}
-        />
+              {i < Object.keys(PlayerSideScreensMap).length - 1 && ' '}
+            </React.Fragment>
+          );
+        })}
       </TableGridItem>
     </TableGrid>
   );

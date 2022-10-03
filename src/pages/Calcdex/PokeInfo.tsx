@@ -7,8 +7,8 @@ import {
   PokeType,
 } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
-import { Button } from '@showdex/components/ui';
-import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts';
+import { Button, CopiedBadge, Tooltip } from '@showdex/components/ui';
+import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import {
@@ -17,14 +17,18 @@ import {
   buildPresetOptions,
   detectLegacyGen,
   detectToggledAbility,
+  exportPokePaste,
   flattenAlts,
+  formatDexDescription,
   getDexForFormat,
   hasMegaForme,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
+import type { CopiedBadgeInstance } from '@showdex/components/ui';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { ToggleButton } from './ToggleButton';
 import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
 
@@ -194,11 +198,37 @@ export const PokeInfo = ({
 
   const hpPercentage = calcPokemonHp(pokemon);
 
+  // whether we should multiply the current & max HPs by 2 if useMax is enabled
+  // and is NOT from the server or isn't currently Dynamaxed
+  // (server HP will be doubled when Dynamaxed, but not beforehand; client HP will never be doubled,
+  // since it's a percentage)
+  /**
+   * @todo Make this into `calcPokemonHp()` (and rename `calcPokemonHp()` to `calcPokemonHpPercentage()`).
+   *   Also check if the HP Percentage mod is enabled, via the `CalcdexBattleRules`, since we wouldn't
+   *   want to double the client HP if the mod is disabled (as it wouldn't be a percentage, duh).
+   */
+  const shouldDmaxHp = pokemon?.useMax
+    && (!pokemon.serverSourced || !('dynamax' in pokemon.volatiles));
+
+  const currentHp = (
+    pokemon?.serverSourced
+      ? pokemon.hp
+      : Math.floor((pokemon?.spreadStats?.hp ?? 0) * hpPercentage)
+  ) * (shouldDmaxHp ? 2 : 1);
+
+  const maxHp = (
+    (pokemon?.serverSourced && pokemon.maxhp)
+      || (pokemon?.spreadStats?.hp ?? 0)
+      || 0
+  ) * (shouldDmaxHp ? 2 : 1);
+
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
-  const dexAbility = abilityName ? dex?.abilities?.get(abilityName) : null;
+  const dexAbility = abilityName ? dex?.abilities.get(abilityName) : null;
+  const abilityDescription = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
 
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
-  const dexItem = itemName ? dex?.items?.get(itemName) : null;
+  const dexItem = itemName ? dex?.items.get(itemName) : null;
+  const itemDescription = formatDexDescription(dexItem?.shortDesc || dexItem?.desc);
 
   const presetOptions = React.useMemo(
     () => buildPresetOptions(presets),
@@ -244,6 +274,30 @@ export const PokeInfo = ({
     onPokemonChange,
   ]);
 
+  const copiedRef = React.useRef<CopiedBadgeInstance>(null);
+
+  const pokePaste = React.useMemo(
+    () => exportPokePaste(pokemon, format),
+    [format, pokemon],
+  );
+
+  const handlePokePasteCopy = () => {
+    if (typeof navigator === 'undefined' || !pokePaste) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        await navigator.clipboard.writeText(pokePaste);
+
+        copiedRef.current?.show();
+      } catch (error) {
+        // no-op when an error is thrown while writing to the user's clipboard
+        (() => {})();
+      }
+    })();
+  };
+
   return (
     <div
       className={cx(
@@ -280,14 +334,14 @@ export const PokeInfo = ({
             {/* no nicknames, as requested by camdawgboi lol */}
             <Button
               className={cx(
-                styles.pokemonNameButton,
+                styles.nameButton,
                 !pokemon?.speciesForme && styles.missingForme,
                 !nextForme && styles.disabled,
               )}
-              labelClassName={styles.pokemonNameLabel}
+              labelClassName={styles.nameLabel}
               label={pokemon?.speciesForme || 'MissingNo.'}
               tooltip={nextForme ? (
-                <div className={styles.formeTooltip}>
+                <div className={cx(styles.tooltipContent, styles.formeTooltip)}>
                   <div>
                     <strong>{pokemon.speciesForme}</strong>
                   </div>
@@ -298,62 +352,76 @@ export const PokeInfo = ({
                 </div>
               ) : null}
               hoverScale={1}
-              absoluteHover
+              // absoluteHover
               disabled={!nextForme}
               onPress={switchToNextForme}
             />
 
-            <span className={styles.small}>
-              {
-                (typeof pokemon?.level === 'number' && pokemon.level !== 100) &&
-                <span className={styles.pokemonLevel}>
-                  L{pokemon.level}
-                </span>
-              }
+            {
+              (typeof pokemon?.level === 'number' && pokemon.level !== 100) &&
+              <div className={styles.level}>
+                L{pokemon.level}
+              </div>
+            }
 
-              {
-                !!pokemon?.types?.length &&
-                <span className={styles.pokemonTypes}>
-                  {pokemon.types.map((type, i) => (
-                    <PokeType
-                      key={`PokeInfo:PokeType:${pokemonKey}:${type}`}
-                      style={pokemon.types.length > 1 && i === 0 ? { marginRight: 2 } : null}
-                      type={type}
-                    />
-                  ))}
-                </span>
-              }
-            </span>
+            {
+              !!pokemon?.types?.length &&
+              <div className={styles.types}>
+                {pokemon.types.map((type, i) => (
+                  <PokeType
+                    key={`PokeInfo:PokeType:${pokemonKey}:${type}`}
+                    style={pokemon.types.length > 1 && i === 0 ? { marginRight: 2 } : null}
+                    type={type}
+                  />
+                ))}
+              </div>
+            }
           </div>
 
           <div className={styles.secondLine}>
-            {/* <span className={styles.label}>
-              HP{' '}
-            </span> */}
-
             <PokeHpBar
-              className={styles.hpBar}
+              // className={styles.hpBar}
               hp={hpPercentage}
               width={115}
             />
 
             {
               !!hpPercentage &&
-              <span className={styles.hpPercentage}>
-                {' '}
-                {`${(hpPercentage * 100).toFixed(0)}%`}
-              </span>
+              <Tooltip
+                content={(
+                  <div className={styles.tooltipContent}>
+                    {
+                      (!pokemon.serverSourced && hpPercentage !== 1) &&
+                      <>
+                        <em>approx.</em>
+                        <br />
+                      </>
+                    }
+
+                    {currentHp} / {maxHp}
+                  </div>
+                )}
+                offset={[0, 10]}
+                delay={[1000, 150]}
+                trigger="mouseenter"
+                touch="hold"
+                disabled={!maxHp}
+              >
+                <div className={styles.hpPercentage}>
+                  {`${(hpPercentage * 100).toFixed(0)}%`}
+                </div>
+              </Tooltip>
             }
 
             {
               (!!pokemon && (!!pokemon.status || !hpPercentage)) &&
-              <span>
-                {' '}
+              <div className={styles.statuses}>
                 <PokeStatus
+                  className={styles.status}
                   status={pokemon?.status}
                   fainted={!hpPercentage}
                 />
-              </span>
+              </div>
             }
           </div>
         </div>
@@ -362,8 +430,7 @@ export const PokeInfo = ({
           <div className={cx(styles.label, styles.dropdownLabel)}>
             Set
 
-            {' '}
-            <Button
+            {/* <Button
               className={cx(
                 styles.infoButton,
                 styles.autoPresetButton,
@@ -376,10 +443,38 @@ export const PokeInfo = ({
               label="Auto"
               absoluteHover
               // disabled={!pokemon?.presets?.length}
-              disabled /** @todo remove this after implementing auto-presets */
+              disabled /** @todo remove this after implementing auto-presets *\/
               onPress={() => onPokemonChange?.({
                 autoPreset: !pokemon?.autoPreset,
               })}
+            /> */}
+            <ToggleButton
+              className={styles.toggleButton}
+              label="Auto"
+              absoluteHover
+              active={pokemon?.autoPreset}
+              disabled /** @todo remove after implementing auto-presets */
+              onPress={() => onPokemonChange?.({
+                autoPreset: !pokemon?.autoPreset,
+              })}
+            />
+
+            <ToggleButton
+              className={styles.toggleButton}
+              label="Copy"
+              tooltip={pokePaste ? (
+                <div className={styles.pokePasteTooltip}>
+                  <CopiedBadge
+                    ref={copiedRef}
+                    className={styles.copiedBadge}
+                  />
+
+                  {pokePaste}
+                </div>
+              ) : null}
+              absoluteHover
+              disabled={!pokePaste}
+              onPress={handlePokePasteCopy}
             />
           </div>
 
@@ -424,8 +519,7 @@ export const PokeInfo = ({
             {
               pokemon?.abilityToggleable &&
               <>
-                {' '}
-                <Button
+                {/* <Button
                   className={cx(
                     styles.infoButton,
                     styles.abilityButton,
@@ -441,6 +535,16 @@ export const PokeInfo = ({
                   onPress={() => onPokemonChange?.({
                     abilityToggled: !pokemon.abilityToggled,
                   })}
+                /> */}
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Active"
+                  tooltip={`${pokemon.abilityToggled ? 'Deactivate' : 'Activate'} Ability`}
+                  absoluteHover
+                  active={pokemon.abilityToggled}
+                  onPress={() => onPokemonChange?.({
+                    abilityToggled: !pokemon.abilityToggled,
+                  })}
                 />
               </>
             }
@@ -448,8 +552,7 @@ export const PokeInfo = ({
             {
               (!!pokemon?.dirtyAbility && !!pokemon.ability && pokemon.ability !== pokemon.dirtyAbility) &&
               <>
-                {' '}
-                <Button
+                {/* <Button
                   className={cx(styles.infoButton, styles.abilityButton)}
                   labelClassName={styles.infoButtonLabel}
                   label="Reset"
@@ -459,6 +562,28 @@ export const PokeInfo = ({
                     dirtyAbility: null,
                     abilityToggled: detectToggledAbility(pokemon),
                   })}
+                /> */}
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Reset"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Reset to Revealed
+                      {' '}
+                      {pokemon?.ability ? (
+                        <strong>{pokemon.ability}</strong>
+                      ) : 'Ability'}
+                    </div>
+                  )}
+                  absoluteHover
+                  active
+                  onPress={() => onPokemonChange?.({
+                    dirtyAbility: null,
+                    abilityToggled: detectToggledAbility({
+                      ...pokemon,
+                      dirtyAbility: null,
+                    }),
+                  })}
                 />
               </>
             }
@@ -467,9 +592,9 @@ export const PokeInfo = ({
           <Dropdown
             aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
             hint={legacy ? 'N/A' : '???'}
-            tooltip={dexAbility?.desc ? (
-              <div className={styles.descTooltip}>
-                {dexAbility?.shortDesc || dexAbility?.desc}
+            tooltip={abilityDescription ? (
+              <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+                {abilityDescription}
               </div>
             ) : null}
             input={{
@@ -528,13 +653,30 @@ export const PokeInfo = ({
               // (!!pokemon?.dirtyItem || (pokemon?.dirtyItem === '' && !!pokemon?.item)) &&
               (!!pokemon?.dirtyItem && (!!pokemon?.item || !!pokemon?.prevItem) && ((pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem)) &&
               <>
-                {' '}
-                <Button
+                {/* <Button
                   className={cx(styles.infoButton, styles.abilityButton)}
                   labelClassName={styles.infoButtonLabel}
                   label="Reset"
                   tooltip="Reset to Revealed Item"
                   absoluteHover
+                  onPress={() => onPokemonChange?.({
+                    dirtyItem: null,
+                  })}
+                /> */}
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Reset"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Reset to Revealed
+                      {' '}
+                      {pokemon?.item ? (
+                        <strong>{pokemon.item}</strong>
+                      ) : 'Item'}
+                    </div>
+                  )}
+                  absoluteHover
+                  active
                   onPress={() => onPokemonChange?.({
                     dirtyItem: null,
                   })}
@@ -547,7 +689,7 @@ export const PokeInfo = ({
             aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
             hint={gen === 1 ? 'N/A' : 'None'}
             tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
-              <div className={cx(styles.descTooltip, styles.itemTooltip)}>
+              <div className={cx(styles.tooltipContent, styles.descTooltip, styles.itemTooltip)}>
                 {
                   !!pokemon?.itemEffect &&
                   <div className={styles.itemEffect}>
@@ -566,9 +708,9 @@ export const PokeInfo = ({
                   </>
                 }
               </div>
-            ) : dexItem?.desc ? (
-              <div className={styles.descTooltip}>
-                {dexItem?.shortDesc || dexItem?.desc}
+            ) : itemDescription ? (
+              <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+                {itemDescription}
               </div>
             ) : null}
             input={{

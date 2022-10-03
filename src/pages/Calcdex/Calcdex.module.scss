@@ -25,7 +25,7 @@
   }
 
   &.light::before {
-    background-color: color.alpha(colors.$showdown-background-light, 0.4);
+    background-color: color.alpha(colors.$showdown-background-light, 0.5);
   }
 
   &.dark::before {
@@ -63,9 +63,9 @@
 }
 
 .fieldCalc {
-  @include spacing.margin($top: 15px);
+  @include spacing.margin($top: 13px);
 }
 
 .opponentCalc {
-  @include spacing.margin($top: 15px);
+  @include spacing.margin($top: 10px);
 }
