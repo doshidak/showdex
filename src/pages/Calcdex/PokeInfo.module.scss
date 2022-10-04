@@ -197,6 +197,8 @@ button.nameButton {
 
 .pokePasteTooltip {
   position: relative;
+  max-width: 200px;
+  white-space: pre-wrap;
 
   .copiedBadge {
     @include position.absolute($top: -16px, $left: 50%);
