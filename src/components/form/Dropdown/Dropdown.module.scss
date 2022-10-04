@@ -130,6 +130,7 @@ $option-dark-background-color-selected: color.alpha(colors.$blue, 0.9);
 $option-light-background-color-selected-hover: color.alpha(color.shade(colors.$blue, 10%), 0.75);
 $option-dark-background-color-selected-hover: color.alpha(color.shade(colors.$blue, 5%), 0.75);
 
+$option-right-label-spacing: 3px; // basically margin-left
 $option-right-label-font-size: 8px;
 $option-right-label-light-color: color.alpha($option-light-color, 0.75);
 $option-right-label-dark-color: color.alpha($option-dark-color, 0.75);
@@ -708,6 +709,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .optionRightLabel {
   // flex: 1;
+  @include spacing.margin($left: $option-right-label-spacing);
   font-size: $option-right-label-font-size;
   text-align: right;
 
@@ -717,6 +719,16 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
   .dark & {
     color: $option-right-label-dark-color;
+  }
+
+  .selected & {
+    .light & {
+      color: inherit;
+    }
+
+    .dark & {
+      color: inherit;
+    }
   }
 }
 
@@ -729,6 +741,18 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
   .dark & {
     color: $option-sub-label-dark-color;
+  }
+
+  // note: .optionSubLabel is not inside .optionRow, so it's not possible
+  // to inherit .optionRow's color here (like in .optionRightLabel)
+  .selected & {
+    .light & {
+      color: $option-light-color-selected;
+    }
+
+    .dark & {
+      color: $option-dark-color-selected;
+    }
   }
 }
 
