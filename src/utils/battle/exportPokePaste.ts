@@ -179,7 +179,13 @@ export const exportPokePaste = (
 
   // (lines 9-12) - <moveName>
   if (moves?.length) {
-    output.push(...moves.map((moveName) => `- ${moveName}`));
+    // e.g., 'Hidden Power Fire' -> 'Hidden Power [Fire]'
+    // (though, the Teambuilder will accept the former, i.e., 'Hidden Power Fire')
+    output.push(...moves.map((moveName) => '- ' + (
+      moveName?.includes('Hidden Power')
+        ? moveName.replace(/(?<=Hidden\sPower\s)(\w+)$/, '[$1]')
+        : moveName
+    )));
   }
 
   return output.join('\n') || null;
