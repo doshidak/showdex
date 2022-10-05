@@ -30,6 +30,11 @@ $label: (
       light: color.shade(colors.$blue, 15%),
       dark: colors.$blue,
     ),
+
+    read-only: (
+      light: color.alpha(colors.$black, 0.75),
+      dark: color.alpha(colors.$white, 0.75),
+    ),
   ),
 );
 
@@ -101,7 +106,7 @@ $handle: (
 
 .field {
   @include flex.row;
-  min-height: map.get($field, min-height);
+  // min-height: map.get($field, min-height);
   @include spacing.padding-xy($x: map.get($field, padding-x), $y: map.get($field, padding-y));
   font-weight: map.get($label, font-weight);
   font-size: map.get($label, font-size);
@@ -130,6 +135,14 @@ $handle: (
 
   &.readOnly {
     cursor: default;
+
+    .light & {
+      color: map.get($label, color, read-only, light);
+    }
+
+    .dark & {
+      color: map.get($label, color, read-only, dark);
+    }
   }
 
   &.disabled {
