@@ -8,6 +8,7 @@ declare module '*.module.scss' {
 
 declare const app: Showdown.ClientApp;
 declare const Config: Showdown.PSConfig;
+declare const Storage: Showdown.ClientStorage;
 declare const Dex: Showdown.Dex; /** @todo convert to declare class Dex in battle-dex.d.ts */
 declare const BattleAbilities: Showdown.BattleAbilities;
 declare const BattleItems: Showdown.BattleItems;
