@@ -1,25 +1,33 @@
 import * as React from 'react';
 import cx from 'classnames';
-import styles from './CopiedBadge.module.scss';
+import styles from './Badge.module.scss';
 
-export interface CopiedBadgeInstance {
+export interface BadgeInstance {
   show: () => void;
   hide: () => void;
 }
 
-export interface CopiedBadgeProps {
+export type BadgeColor =
+  | 'default'
+  | 'red'
+  | 'green'
+  | 'blue';
+
+export interface BadgeProps {
   className?: string;
   style?: React.CSSProperties;
   label?: string;
+  color?: BadgeColor;
   duration?: number;
 }
 
-export const CopiedBadge = React.forwardRef<CopiedBadgeInstance, CopiedBadgeProps>(({
+export const Badge = React.forwardRef<BadgeInstance, BadgeProps>(({
   className,
   style,
-  label = 'Copied!',
+  label,
+  color = 'default',
   duration = 1000,
-}: CopiedBadgeProps, forwardedRef): JSX.Element => {
+}: BadgeProps, forwardedRef): JSX.Element => {
   const visibleTimeout = React.useRef<NodeJS.Timeout>(null);
   const [visible, setVisible] = React.useState(false);
 
@@ -58,6 +66,7 @@ export const CopiedBadge = React.forwardRef<CopiedBadgeInstance, CopiedBadgeProp
     <div
       className={cx(
         styles.container,
+        !!color && styles[color],
         visible && styles.visible,
         className,
       )}
