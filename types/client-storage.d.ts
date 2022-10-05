@@ -77,7 +77,7 @@ declare namespace Showdown {
     whenAppLoaded: ClientStorageLoadTracker;
     fsReady: ClientStorageLoadTracker;
 
-    prefs: (<T = unknown>(prop: string, value: T, save?: boolean) => boolean) & {
+    prefs: (<T = unknown>(prop: string, value?: T, save?: boolean) => typeof value extends undefined ? T : boolean) & {
       /**
        * @default {}
        */
