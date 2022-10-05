@@ -9,7 +9,7 @@ import styles from './Button.module.scss';
 
 export interface ButtonProps<
   T extends ButtonElementType = 'button',
-> extends Omit<BaseButtonProps<T>, 'children'> {
+> extends BaseButtonProps<T> {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
   label?: string;
@@ -36,6 +36,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   highlight,
   absoluteHover,
   disabled,
+  children,
   ...props
 }: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
@@ -68,6 +69,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         >
           {label}
         </label>
+
+        {children}
       </BaseButton>
 
       <Tooltip
