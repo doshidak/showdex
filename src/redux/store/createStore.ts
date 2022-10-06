@@ -10,6 +10,7 @@ export type RootStore = ReturnType<typeof createStore>;
 export type RootDispatch = RootStore['dispatch'];
 
 export interface RootState extends ReturnType<RootStore['getState']> {
+  showdex: ReturnType<typeof showdexSlice.getInitialState>;
   calcdex: ReturnType<typeof calcdexSlice.getInitialState>;
 }
 
