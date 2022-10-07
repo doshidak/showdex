@@ -118,7 +118,7 @@ injectables.forEach(({
     }
   });
 
-  l.debug('Injecting', source, 'into', destination, 'with props', props);
+  // l.debug('Injecting', source, 'into', destination, 'with props', props);
 
   destination.appendChild(source);
 });
