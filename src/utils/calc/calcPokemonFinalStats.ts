@@ -353,7 +353,7 @@ export const calcPokemonFinalStats = (
 
   // apply toggleable abilities
   if (pokemon.abilityToggled) {
-    if ('slowstart' in pokemon.volatiles) {
+    if (ability === 'slowstart' || 'slowstart' in pokemon.volatiles) {
       // 50% ATK/SPE reduction if ability is "Slow Start"
       finalStats.atk = Math.floor(finalStats.atk * 0.5);
       speedMods.push(0.5);
