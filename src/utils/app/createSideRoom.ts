@@ -50,7 +50,14 @@ export const createSideRoom = (
 
     l.debug('Found existing side room with matching room.id', id);
   } else {
+    // create a new side room
     room = app._addRoom<HtmlRoom>(id, 'html', true, title);
+    room.isSideRoom = true;
+
+    // remove the initial "Page unavailable" HTML
+    room.$el.html('');
+
+    // add the room to the sideRoomList (also in the app.rooms object)
     app.sideRoomList.push(app.roomList.pop());
 
     l.debug('Created side room with room.id', room.id, 'and room.type', room.type);
@@ -92,8 +99,9 @@ export const createSideRoom = (
 
   if (focus) {
     app.focusRoomRight(room.id);
-    app.topbar.updateTabbar();
   }
+
+  app.topbar.updateTabbar();
 
   return room;
 };
