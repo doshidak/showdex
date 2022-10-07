@@ -23,7 +23,8 @@
         "*://play.pokemonshowdown.com/*",
         "*://dawn.psim.us/*",
         "*://smogtours.psim.us/*",
-        "*://sports.psim.us/*"
+        "*://sports.psim.us/*",
+        "*://rom.psim.us/*"
       ],
       "js": [
         "content.js"
@@ -37,7 +38,8 @@
         "*://play.pokemonshowdown.com/*",
         "*://dawn.psim.us/*",
         "*://smogtours.psim.us/*",
-        "*://sports.psim.us/*"
+        "*://sports.psim.us/*",
+        "*://rom.psim.us/*"
       ],
       "resources": [
         "bug.svg",
@@ -85,7 +87,8 @@
       "*://play.pokemonshowdown.com/*",
       "*://dawn.psim.us/*",
       "*://smogtours.psim.us/*",
-      "*://sports.psim.us/*"
+      "*://sports.psim.us/*",
+      "*://rom.psim.us/*"
     ]
   }
 }

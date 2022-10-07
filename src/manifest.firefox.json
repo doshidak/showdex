@@ -18,7 +18,8 @@
     "*://play.pokemonshowdown.com/*",
     "*://dawn.psim.us/*",
     "*://smogtours.psim.us/*",
-    "*://sports.psim.us/*"
+    "*://sports.psim.us/*",
+    "*://rom.psim.us/*"
   ],
 
   "background": {
@@ -34,7 +35,8 @@
         "*://play.pokemonshowdown.com/*",
         "*://dawn.psim.us/*",
         "*://smogtours.psim.us/*",
-        "*://sports.psim.us/*"
+        "*://sports.psim.us/*",
+        "*://rom.psim.us/*"
       ],
       "js": [
         "content.js"
