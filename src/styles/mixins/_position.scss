@@ -41,6 +41,15 @@
   }
 }
 
+// unset all
+
+@mixin unset-all {
+  top: unset;
+  right: unset;
+  bottom: unset;
+  left: unset;
+}
+
 // absolute
 
 @mixin absolute($top: null, $right: null, $bottom: null, $left: null) {
