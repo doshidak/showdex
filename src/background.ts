@@ -1,20 +1,4 @@
-// chrome.runtime.onMessage.addListener((message: Record<string, unknown>, sender) => {
-//   switch (<string> message?.type) {
-//     case 'showPageAction': {
-//       chrome.pageAction.show(sender.tab.id);
-//
-//       break;
-//     }
-//
-//     case 'hidePageAction': {
-//       chrome.pageAction.hide(sender.tab.id);
-//
-//       break;
-//     }
-//
-//     default: break;
-//   }
-// });
+// note: this is only used on Chrome -- Firefox should not include this with the bundle
 
 interface BackgroundFetchMessage extends Record<string, unknown> {
   type?: string;
@@ -79,22 +63,23 @@ if (typeof chrome !== 'undefined') {
     _sender,
     sendResponse,
   ) => handleFetchMessage(message, sendResponse));
-} else {
-  // note: while implemented, this would only apply for Firefox, where we can access fetch() directly,
-  // so in other words, this is pretty much unused lmao
-  // (for other browsers like Opera GX, `chrome.runtime` should be available)
-  browser.runtime.onMessageExternal.addListener((
-    message: Record<string, unknown>,
-    // _sender,
-  ) => new Promise((resolve, reject) => {
-    handleFetchMessage(message, (payload) => {
-      if (payload instanceof Error) {
-        reject(payload);
-      } else {
-        resolve(payload);
-      }
-    });
-  }));
 }
+// } else {
+//   // note: while implemented, this would only apply for Firefox, where we can access fetch() directly,
+//   // so in other words, this is pretty much unused lmao
+//   // (for other browsers like Opera GX, `chrome.runtime` should be available)
+//   // browser.runtime.onMessageExternal.addListener((
+//   //   message: Record<string, unknown>,
+//   //   // _sender,
+//   // ) => new Promise((resolve, reject) => {
+//   //   handleFetchMessage(message, (payload) => {
+//   //     if (payload instanceof Error) {
+//   //       reject(payload);
+//   //     } else {
+//   //       resolve(payload);
+//   //     }
+//   //   });
+//   // }));
+// }
 
 export {};
