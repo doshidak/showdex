@@ -14,8 +14,8 @@ config.mode = 'production';
 const packageInfo = [
   process.env.npm_package_name,
   `v${process.env.npm_package_version}`,
-  `b${webpackEnv['process.env.BUILD_DATE']}`,
-  `(${webpackEnv['process.env.BUILD_TARGET'] || 'unknown target'})`,
+  `b${webpackEnv['process.env.BUILD_DATE']?.replace(/"/g, '')}`,
+  `(${webpackEnv['process.env.BUILD_TARGET']?.replace(/"/g, '') || 'unknown target'})`,
 ];
 
 console.log(
