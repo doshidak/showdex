@@ -10,10 +10,37 @@
  *
  * @since 1.0.3
  */
-export interface ShowdexEventDetail {
+export interface ShowdexEventDetail<T = string> {
   type: string;
-  payload?: string;
+  payload?: T;
 }
+
+/**
+ * Event types for the custom Showdex event.
+ *
+ * @since 1.0.3
+ */
+export type ShowdexEventType =
+  | 'request'
+  | 'response';
+
+/**
+ * Generates a custom Showdex event name based on the provided `type`.
+ *
+ * * Kept as a function so that the event names remain consistent.
+ *   - Otherwise, the alternative would be hardcoding them across different files!
+ *
+ * @example
+ * ```ts
+ * getShowdexEventName('request');
+ *
+ * 'showdexrequest'
+ * ```
+ * @since 1.0.3
+ */
+export const getShowdexEventName = (type: ShowdexEventType): string => `showdex${type}`;
+
+/* eslint-disable @typescript-eslint/indent */
 
 /**
  * Custom event factory used for throwing the craziest Showdex parties.
@@ -56,11 +83,13 @@ export interface ShowdexEventDetail {
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Sharing_objects_with_page_scripts#sharing_content_script_objects_with_page_scripts
  * @since 1.0.3
  */
-export const createShowdexEvent = (
-  type: 'request' | 'response',
-  detail: ShowdexEventDetail,
-): CustomEvent<ShowdexEventDetail> => new CustomEvent(`showdex${type}`, {
+export const createShowdexEvent = <T = string>(
+  type: ShowdexEventType,
+  detail: ShowdexEventDetail<T>,
+): CustomEvent<ShowdexEventDetail<T>> => new CustomEvent(getShowdexEventName(type), {
   detail: typeof cloneInto === 'function'
     ? cloneInto(detail, window)
     : detail,
 });
+
+/* eslint-enable @typescript-eslint/indent */
