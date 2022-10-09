@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": "<-- auto-filled; do not edit -->",
 
   "name": "Showdex",
   "version": "<-- auto-filled; do not edit -->",
@@ -7,24 +7,50 @@
   "author": "<-- auto-filled; do not edit -->",
   "homepage_url": "<-- auto-filled; do not edit -->",
 
-  "permissions": [],
+  "applications": {
+    "gecko": {
+      "id": "showdex@tize.io",
+      "strict_min_version": "78.0",
+      "permissions": [
+        "clipboardRead",
+        "clipboardWrite"
+      ]
+    }
+  },
+
+  "permissions": [
+    "*://play.pokemonshowdown.com/*",
+    "*://dawn.psim.us/*",
+    "*://smogtours.psim.us/*",
+    "*://sports.psim.us/*",
+    "*://rom.psim.us/*"
+  ],
 
   "host_permissions": [
     "https://pkmn.github.io/*"
   ],
 
+  "externally_connectable": {
+    "matches": [
+      "<-- auto-filled; do not edit -->"
+    ],
+    "ids": [
+      "*"
+    ]
+  },
+
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "persistent": false,
+    "scripts": [
+      "background.js"
+    ]
   },
 
   "content_scripts": [
     {
       "matches": [
-        "*://play.pokemonshowdown.com/*",
-        "*://dawn.psim.us/*",
-        "*://smogtours.psim.us/*",
-        "*://sports.psim.us/*",
-        "*://rom.psim.us/*"
+        "<-- auto-filled; do not edit -->"
       ],
       "js": [
         "content.js"
@@ -35,11 +61,7 @@
   "web_accessible_resources": [
     {
       "matches": [
-        "*://play.pokemonshowdown.com/*",
-        "*://dawn.psim.us/*",
-        "*://smogtours.psim.us/*",
-        "*://sports.psim.us/*",
-        "*://rom.psim.us/*"
+        "<-- auto-filled; do not edit -->"
       ],
       "resources": [
         "bug.svg",
@@ -69,26 +91,7 @@
   },
 
   "action": {
-    "default_title": "Showdex",
-    "default_icon": {
-      "16": "showdex-16.png",
-      "24": "showdex-24.png",
-      "32": "showdex-32.png",
-      "48": "showdex-48.png",
-      "128": "showdex-128.png"
-    }
-  },
-
-  "externally_connectable": {
-    "ids": [
-      "*"
-    ],
-    "matches": [
-      "*://play.pokemonshowdown.com/*",
-      "*://dawn.psim.us/*",
-      "*://smogtours.psim.us/*",
-      "*://sports.psim.us/*",
-      "*://rom.psim.us/*"
-    ]
+    "default_title": "<-- auto-filled; do not edit -->",
+    "default_icon": "<-- auto-filled; do not edit -->"
   }
 }
