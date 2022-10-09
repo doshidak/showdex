@@ -1,5 +1,6 @@
 export * from './clamp';
 export * from './createShowdexEvent';
+export * from './dispatchShowdexEvent';
 export * from './getEnv';
 export * from './getExtensionId';
 export * from './getExtensionProtocol';
