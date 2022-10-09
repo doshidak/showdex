@@ -96,7 +96,19 @@ const packageInfo = [
   );
 
   console.log('Loaded node env:', env);
-  console.log('Loaded webpack env:', webpackEnv);
+  console.log(
+    'Loaded webpack env:',
+    Object.keys(webpackEnv).sort().reduce((prev, key) => {
+      const value = webpackEnv[key];
+
+      const parsedKey = key.replace(/(?:"|process\.env\.)/g, '');
+      const parsedValue = typeof value === 'string' ? value?.replace(/"/g, '') : value;
+
+      prev[parsedKey] = parsedValue;
+
+      return prev;
+    }, {}),
+  );
 
   await server.start();
 
