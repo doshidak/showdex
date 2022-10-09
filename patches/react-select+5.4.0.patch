@@ -1,7 +1,16 @@
 diff --git a/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js b/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js
-index b7ff289..9ae5a34 100644
+index b7ff289..2abd3e6 100644
 --- a/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js
 +++ b/node_modules/react-select/dist/Select-0478e6f3.cjs.prod.js
+@@ -1031,7 +1031,7 @@ var shouldHideSelectedOptions = function(props) {
+           if (_this.isComposing) return;
+           if (event.shiftKey || !menuIsOpen || !tabSelectsValue || !focusedOption || openMenuOnFocus && _this.isOptionSelected(focusedOption, selectValue)) return;
+           _this.selectOption(focusedOption);
+-          break;
++          return;
+ 
+          case "Enter":
+           if (229 === event.keyCode) break;
 @@ -1107,12 +1107,13 @@ var shouldHideSelectedOptions = function(props) {
    }, {
      key: "componentDidUpdate",
@@ -167,9 +176,18 @@ index b7ff289..9ae5a34 100644
            })) : React__namespace.createElement("input", {
              name: name,
 diff --git a/node_modules/react-select/dist/Select-54ac8379.esm.js b/node_modules/react-select/dist/Select-54ac8379.esm.js
-index b1714d1..89d4fb9 100644
+index b1714d1..8fd50df 100644
 --- a/node_modules/react-select/dist/Select-54ac8379.esm.js
 +++ b/node_modules/react-select/dist/Select-54ac8379.esm.js
+@@ -1710,7 +1710,7 @@ var Select = /*#__PURE__*/function (_Component) {
+ 
+           _this.selectOption(focusedOption);
+ 
+-          break;
++          return;
+ 
+         case 'Enter':
+           if (event.keyCode === 229) {
 @@ -1842,6 +1842,8 @@ var Select = /*#__PURE__*/function (_Component) {
    }, {
      key: "componentDidUpdate",
@@ -360,9 +378,18 @@ index b1714d1..89d4fb9 100644
            }) : /*#__PURE__*/React.createElement("input", {
              name: name,
 diff --git a/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js b/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js
-index e38369a..4d13995 100644
+index e38369a..caf3dbf 100644
 --- a/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js
 +++ b/node_modules/react-select/dist/Select-db7a929e.cjs.dev.js
+@@ -1742,7 +1742,7 @@ var Select = /*#__PURE__*/function (_Component) {
+ 
+           _this.selectOption(focusedOption);
+ 
+-          break;
++          return;
+ 
+         case 'Enter':
+           if (event.keyCode === 229) {
 @@ -1874,6 +1874,8 @@ var Select = /*#__PURE__*/function (_Component) {
    }, {
      key: "componentDidUpdate",
@@ -552,3 +579,45 @@ index e38369a..4d13995 100644
              });
            }) : /*#__PURE__*/React__namespace.createElement("input", {
              name: name,
+diff --git a/node_modules/react-select/dist/index-0ceaa597.cjs.dev.js b/node_modules/react-select/dist/index-0ceaa597.cjs.dev.js
+index 94e0f0d..ed11113 100644
+--- a/node_modules/react-select/dist/index-0ceaa597.cjs.dev.js
++++ b/node_modules/react-select/dist/index-0ceaa597.cjs.dev.js
+@@ -311,6 +311,10 @@ function animatedScrollTo(element, to) {
+ // ------------------------------
+ 
+ function scrollIntoView(menuEl, focusedEl) {
++  if (!menuRect || !focusedEl) {
++    return;
++  }
++
+   var menuRect = menuEl.getBoundingClientRect();
+   var focusedRect = focusedEl.getBoundingClientRect();
+   var overScroll = focusedEl.offsetHeight / 3;
+diff --git a/node_modules/react-select/dist/index-3df9f8fb.cjs.prod.js b/node_modules/react-select/dist/index-3df9f8fb.cjs.prod.js
+index f422f46..9f88cc9 100644
+--- a/node_modules/react-select/dist/index-3df9f8fb.cjs.prod.js
++++ b/node_modules/react-select/dist/index-3df9f8fb.cjs.prod.js
+@@ -151,6 +151,7 @@ function animatedScrollTo(element, to) {
+ }
+ 
+ function scrollIntoView(menuEl, focusedEl) {
++  if (!menuEl || !focusedEl) return;
+   var menuRect = menuEl.getBoundingClientRect(), focusedRect = focusedEl.getBoundingClientRect(), overScroll = focusedEl.offsetHeight / 3;
+   focusedRect.bottom + overScroll > menuRect.bottom ? scrollTo(menuEl, Math.min(focusedEl.offsetTop + focusedEl.clientHeight - menuEl.offsetHeight + overScroll, menuEl.scrollHeight)) : focusedRect.top - overScroll < menuRect.top && scrollTo(menuEl, Math.max(focusedEl.offsetTop - overScroll, 0));
+ }
+diff --git a/node_modules/react-select/dist/index-a7690a33.esm.js b/node_modules/react-select/dist/index-a7690a33.esm.js
+index cdfe289..298a186 100644
+--- a/node_modules/react-select/dist/index-a7690a33.esm.js
++++ b/node_modules/react-select/dist/index-a7690a33.esm.js
+@@ -297,6 +297,10 @@ function animatedScrollTo(element, to) {
+ // ------------------------------
+ 
+ function scrollIntoView(menuEl, focusedEl) {
++  if (!menuEl || !focusedEl) {
++    return;
++  }
++
+   var menuRect = menuEl.getBoundingClientRect();
+   var focusedRect = focusedEl.getBoundingClientRect();
+   var overScroll = focusedEl.offsetHeight / 3;
