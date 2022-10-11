@@ -87,6 +87,7 @@
     "remove": "^0.1.5",
     "simplebar": "^5.3.8",
     "slugify": "^1.6.5",
+    "use-debouncy": "^4.3.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
