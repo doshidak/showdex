@@ -14,8 +14,10 @@ $padding-y: 7px;
 $font-size: 10px;
 $color-light: colors.$white;
 $color-dark: colors.$black;
-$background-color-light: color.alpha(colors.$black, 0.9);
-$background-color-dark: color.alpha(colors.$white, 0.9);
+// $background-color-light: color.alpha(colors.$black, 0.9);
+$background-color-light: colors.$gray-darker;
+// $background-color-dark: color.alpha(colors.$white, 0.9);
+$background-color-dark: colors.$white;
 $border-radius: 12px;
 
 $arrow: (
@@ -75,25 +77,25 @@ $arrow: (
   }
 }
 
-@mixin arrow-mask($deg, $offset: 1.25px) {
-  mask: linear-gradient(
-    $deg,
-    colors.$red math.div(map.get($arrow, size), 2) + $offset,
-    colors.$transparent math.div(map.get($arrow, size), 2) + $offset,
-  );
-}
+// @mixin arrow-mask($deg, $offset: 1.25px) {
+//   mask: linear-gradient(
+//     $deg,
+//     colors.$red math.div(map.get($arrow, size), 2) + $offset,
+//     colors.$transparent math.div(map.get($arrow, size), 2) + $offset,
+//   );
+// }
 
 @each $placement, $prop in map.get($arrow, placements) {
   .container[data-placement^='#{$placement}'] > .arrow {
     #{$prop}: math.div(map.get($arrow, size), 2) * -1 + 1px;
 
-    $mask-deg: map.get($arrow, mask-angles, $placement);
+    // $mask-deg: map.get($arrow, mask-angles, $placement);
 
-    @if $mask-deg {
-      &::before {
-        @include arrow-mask($mask-deg);
-      }
-    }
+    // @if $mask-deg {
+    //   &::before {
+    //     @include arrow-mask($mask-deg);
+    //   }
+    // }
   }
 }
 
