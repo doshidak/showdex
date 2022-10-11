@@ -47,6 +47,17 @@ export const env = Object.entries({
   __DEV__,
 });
 
+export const printableEnv = Object.keys(env).sort().reduce((prev, key) => {
+  const value = env[key];
+
+  const parsedKey = key.replace(/(?:"|process\.env\.)/g, '');
+  const parsedValue = typeof value === 'string' ? value?.replace(/"/g, '') : value;
+
+  prev[parsedKey] = parsedValue;
+
+  return prev;
+}, {});
+
 const entry = {
   main: path.join(__dirname, 'src', 'main.ts'),
   content: path.join(__dirname, 'src', 'content.ts'),
