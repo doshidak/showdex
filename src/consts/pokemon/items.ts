@@ -1,4 +1,4 @@
-import type { ItemName } from '@pkmn/data';
+import type { ItemName } from '@smogon/calc/dist/data/interface';
 
 export const PokemonSpeedReductionItems: ItemName[] = [
   <ItemName> 'Macho Brace',

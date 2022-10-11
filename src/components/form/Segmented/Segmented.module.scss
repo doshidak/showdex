@@ -1,0 +1,129 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$field: (
+  padding-x: 5px,
+  padding-y: 2px,
+
+  color: (
+    default: (
+      light: colors.$black,
+      dark: colors.$white,
+    ),
+
+    hover: (
+      light: color.shade(colors.$blue, 15%),
+      dark: colors.$blue,
+    ),
+  ),
+
+  opacity-disabled: 0.3,
+);
+
+$label: (
+  spacing-x: 10px, // distance between buttons and label
+  spacing-y: 7px,
+  font-weight: 500,
+  font-size: 12px,
+);
+
+$option: (
+  spacing: 5px, // distance between buttons
+  padding-x: 5px,
+  padding-y: 3px,
+  font-size: 10px,
+);
+
+.container {
+  position: relative;
+}
+
+.field {
+  position: relative;
+  @include flex.row($align: center);
+  @include spacing.padding-xy($x: map.get($field, padding-x), $y: map.get($field, padding-y));
+  @include transition.apply(color);
+  user-select: none;
+
+  .light & {
+    color: map.get($field, color, default, light);
+  }
+
+  .dark & {
+    color: map.get($field, color, default, dark);
+  }
+
+  &:not(.column).reverse {
+    flex-direction: row-reverse;
+  }
+
+  &.column {
+    flex-direction: column;
+
+    &.reverse {
+      flex-direction: column-reverse;
+    }
+  }
+
+  &.disabled {
+    pointer-events: none;
+  }
+}
+
+.label {
+  @include spacing.margin($right: map.get($label, spacing-x));
+  font-weight: map.get($label, font-weight);
+  font-size: map.get($label, font-size);
+  color: inherit;
+  @include transition.apply(opacity);
+
+  .reverse & {
+    @include spacing.margin($top: 0, $right: 0, $bottom: 0, $left: map.get($label, spacing-x));
+  }
+
+  .column & {
+    @include spacing.margin($top: 0, $right: 0, $bottom: map.get($label, spacing-y), $left: 0);
+
+    .reverse & {
+      @include spacing.margin($top: map.get($label, spacing-y), $right: 0, $bottom: 0, $left: 0);
+    }
+  }
+
+  .disabled & {
+    opacity: map.get($field, opacity-disabled);
+  }
+}
+
+.options {
+  @include flex.row;
+
+  button.option {
+    @include spacing.padding-xy($x: map.get($option, padding-x), $y: map.get($option, padding-y));
+    font-family: inherit;
+    font-weight: 400;
+    font-size: map.get($option, font-size);
+    color: inherit;
+
+    &:hover {
+      .light & {
+        color: map.get($field, color, hover, light);
+      }
+
+      .dark & {
+        color: map.get($field, color, hover, dark);
+      }
+    }
+
+    &.selected {
+      font-weight: 500;
+    }
+
+    &:not(:last-child) {
+      @include spacing.margin($right: map.get($option, spacing));
+    }
+  }
+}

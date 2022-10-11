@@ -13,14 +13,16 @@ $status-colors: (
   fnt: #455A64,
 );
 
+$status-color-light-tint: 10%;
+
 $label-opacity-light: 1;
-$label-opacity-dark: 0.75;
-$background-opacity-light: 0.5;
-$background-opacity-dark: 0.3;
+$label-opacity-dark: 1;
+$background-opacity-light: 0.85;
+$background-opacity-dark: 0.5;
 
 .container {
   display: inline-block;
-  width: 24px;
+  width: 26px;
   @include spacing.padding-xy($y: 1px);
   font-size: 8px;
   text-align: center;
@@ -42,7 +44,10 @@ $background-opacity-dark: 0.3;
 
   @each $status, $color in $status-colors {
     &.light.#{$status} {
-      background-color: color.alpha($color, $background-opacity-light);
+      background-color: color.alpha(
+        color.tint($color, $status-color-light-tint),
+        $background-opacity-light,
+      );
     }
 
     &.dark.#{$status} {

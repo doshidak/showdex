@@ -1,4 +1,4 @@
-import { PokemonBoostNames } from '@showdex/consts';
+import { PokemonBoostNames } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
   calcPokemonSpreadStats,
@@ -8,21 +8,20 @@ import {
 } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type {
-  AbilityName,
-  Generation,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   // CalcdexMoveState,
   CalcdexPokemon,
   CalcdexPokemonPreset,
 } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
-import { detectToggledAbility } from './detectToggledAbility';
-import { sanitizePokemon, sanitizePokemonVolatiles } from './sanitizePokemon';
+// import { detectToggledAbility } from './detectToggledAbility';
+import { getDexForFormat } from './getDexForFormat';
+import { sanitizePokemon } from './sanitizePokemon';
+import { sanitizeMoveTrack } from './sanitizeMoveTrack';
+import { sanitizeVolatiles } from './sanitizeVolatiles';
 
 // const l = logger('@showdex/utils/battle/syncPokemon');
 
@@ -30,10 +29,12 @@ export const syncPokemon = (
   pokemon: CalcdexPokemon,
   clientPokemon: DeepPartial<Showdown.Pokemon>,
   serverPokemon?: DeepPartial<Showdown.ServerPokemon>,
-  dex?: Generation,
   format?: string,
+  showAllFormes?: boolean,
 ): CalcdexPokemon => {
-  const legacy = detectLegacyGen(dex);
+  const dex = getDexForFormat(format);
+  const legacy = detectLegacyGen(format);
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // final synced Pokemon that will be returned at the end
   const syncedPokemon = structuredClone(pokemon) || {};
@@ -61,21 +62,35 @@ export const syncPokemon = (
     const prevValue = syncedPokemon[<keyof CalcdexPokemon> key];
     let value = clientPokemon?.[key];
 
+    // note: this will accept null values!
     if (value === undefined) {
       return;
     }
 
     switch (key) {
       case 'speciesForme': {
+        // e.g., 'Urshifu-*' -> 'Urshifu' (to fix forme switching, which is prevented due to the wildcard forme)
+        value = (<string> value).replace('-*', '');
+
+        // retain any switched Gmax formes if it still equals its forme in-battle with the Gmax suffix removed
+        // (e.g., syncedPokemon.speciesForme = 'Cinderace-Gmax' and value = 'Cinderace' would equal)
+        if (formatId(syncedPokemon.speciesForme.replace('-Gmax', '')) === formatId(value)) {
+          return;
+        }
+
         // if the speciesForme changed, update the types and possible abilities
         // (could change due to mega-evolutions or gigantamaxing, for instance)
-        if (prevValue !== value && typeof Dex !== 'undefined') {
-          const updatedSpecies = Dex.species.get(<string> value);
+        if (prevValue !== value && dex) {
+          const updatedSpecies = dex.species.get(value);
 
-          syncedPokemon.types = [...(updatedSpecies?.types || syncedPokemon.types || [])];
+          syncedPokemon.types = [
+            ...(updatedSpecies?.types || syncedPokemon.types || []),
+          ];
 
           if (Object.keys(updatedSpecies?.abilities).length) {
-            syncedPokemon.abilities = [...(<AbilityName[]> Object.values(updatedSpecies.abilities))];
+            syncedPokemon.abilities = [
+              ...(<AbilityName[]> Object.values(updatedSpecies.abilities)),
+            ];
           }
         }
 
@@ -101,12 +116,14 @@ export const syncPokemon = (
           return;
         }
 
-        if (value === syncedPokemon.dirtyAbility) {
+        // always remove the dirtyAbility if the actual ability was revealed
+        // (value should be available at this point from the previous check, but we'll check again lol)
+        if (value) {
           syncedPokemon.dirtyAbility = null;
         }
 
         // update the abilityToggled state (always false if not applicable)
-        syncedPokemon.abilityToggled = detectToggledAbility(clientPokemon);
+        // syncedPokemon.abilityToggled = detectToggledAbility(clientPokemon);
 
         break;
       }
@@ -118,12 +135,14 @@ export const syncPokemon = (
           return;
         }
 
-        // clear the dirtyItem if it's what the Pokemon actually has
-        // (otherwise, if the item hasn't been revealed yet, `value` would be falsy,
-        // but that's ok cause we have dirtyItem, i.e., no worries about clearing the user's input)
-        if (value === syncedPokemon.dirtyItem) {
+        // clear the dirtyItem if an actual item is revealed or consumed
+        // (if value is falsy here, then prevItem must be available from the previous check)
+        if (value || (clientPokemon.prevItem && clientPokemon.prevItemEffect)) {
           syncedPokemon.dirtyItem = null;
         }
+
+        // run the item through the dex in case it's formatted as an id
+        value = dex?.items.get(<string> value)?.name || value;
 
         break;
       }
@@ -132,7 +151,7 @@ export const syncPokemon = (
         // check if the item was knocked-off and is the same as dirtyItem
         // if so, clear the dirtyItem
         // (note that `value` here is prevItem, NOT item!)
-        if (clientPokemon?.prevItemEffect === 'knocked off' && value === syncedPokemon.dirtyItem) {
+        if (clientPokemon?.prevItemEffect && value === syncedPokemon.dirtyItem) {
           syncedPokemon.dirtyItem = null;
         }
 
@@ -142,7 +161,7 @@ export const syncPokemon = (
       case 'boosts': {
         value = PokemonBoostNames.reduce<Showdown.StatsTable>((prev, stat) => {
           // in gen 1, the client may report a SPC boost, which we'll store under SPA
-          const clientStat = dex.num === 1 && stat === 'spa' ? 'spc' : stat;
+          const clientStat = gen === 1 && stat === 'spa' ? 'spc' : stat;
 
           const prevBoost = prev[stat];
           const boost = clientPokemon?.boosts?.[clientStat] || 0;
@@ -179,21 +198,15 @@ export const syncPokemon = (
       // }
 
       case 'moveTrack': {
-        const moveTrack = <Showdown.Pokemon['moveTrack']> value;
+        const {
+          moveTrack,
+          revealedMoves,
+        } = sanitizeMoveTrack(clientPokemon, format);
 
-        if (moveTrack?.length) {
-          syncedPokemon.moveState = {
-            ...syncedPokemon.moveState,
+        value = moveTrack;
 
-            // filter out any Z/Max moves from the revealed list
-            revealed: moveTrack.map((track) => track?.[0]).filter((name) => {
-              const move = Dex?.moves.get(name);
-
-              return !!move?.name && !move?.isZ && !move?.isMax;
-            }),
-          };
-
-          // l.debug('value of type CalcdexMoveState set to', syncedPokemon.moveState);
+        if (revealedMoves.length) {
+          syncedPokemon.revealedMoves = revealedMoves;
         }
 
         break;
@@ -211,7 +224,16 @@ export const syncPokemon = (
           : [];
 
         if (changedTypes.length) {
-          syncedPokemon.types = changedTypes;
+          syncedPokemon.types = [...changedTypes];
+        }
+
+        // check for type change resets
+        const resetTypes = 'typechange' in syncedPokemon.volatiles && !changedTypes.length
+          ? <Showdown.TypeName[]> dex.species.get(syncedPokemon.speciesForme)?.types || []
+          : [];
+
+        if (resetTypes?.length) {
+          syncedPokemon.types = [...resetTypes];
         }
 
         // check for type additions (separate from type changes)
@@ -241,8 +263,17 @@ export const syncPokemon = (
           syncedPokemon.speciesForme = formeChange;
         }
 
+        // note: if the target Pokemon transforms (e.g., Necrozma-Dusk-Mane -> Necrozma-Ultra)
+        // on the same turn that the Imposter Pokemon transforms (e.g., Ditto), we'll need to
+        // read from 'formechange' instead of 'transform' as the Showdown.Pokemon in 'transform'
+        // will refer to its post-changed forme, which the Imposter Pokemon will inherit
+        // (i.e., Ditto's transformedForme will be Necrozma-Ultra, which is incorrect)
+        if (transformedPokemon && formeChange) {
+          syncedPokemon.transformedForme = formeChange;
+        }
+
         // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
-        value = sanitizePokemonVolatiles(clientPokemon);
+        value = sanitizeVolatiles(clientPokemon);
 
         break;
       }
@@ -280,7 +311,7 @@ export const syncPokemon = (
     const serverAbility = serverPokemon.ability || serverPokemon.baseAbility;
 
     if (!legacy && serverAbility) {
-      const dexAbility = Dex.abilities.get(serverAbility);
+      const dexAbility = dex.abilities.get(serverAbility);
 
       if (dexAbility?.name) {
         syncedPokemon.ability = <AbilityName> dexAbility.name;
@@ -325,10 +356,10 @@ export const syncPokemon = (
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
     const guessedSpread = legacy ? guessServerLegacySpread(
-      dex,
+      format,
       syncedPokemon,
     ) : guessServerSpread(
-      dex,
+      format,
       syncedPokemon,
       format?.includes('random') ? 'Hardy' : undefined,
     );
@@ -336,7 +367,7 @@ export const syncPokemon = (
     // build a preset around the serverPokemon
     const serverPreset: CalcdexPokemonPreset = {
       name: 'Yours',
-      gen: dex.num || env.int<GenerationNum>('calcdex-default-gen'),
+      gen,
       format,
       speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
       level: syncedPokemon.level || serverPokemon.level,
@@ -414,7 +445,11 @@ export const syncPokemon = (
     abilityToggled,
     baseStats,
     transformedBaseStats,
-  } = sanitizePokemon(syncedPokemon, dex?.num);
+  } = sanitizePokemon(
+    syncedPokemon,
+    format,
+    showAllFormes,
+  );
 
   // update the abilities (including transformedAbilities) if they're different from what was stored prior
   // (note: only checking if they're arrays instead of their length since th ability list could be empty)
@@ -459,7 +494,12 @@ export const syncPokemon = (
 
   // check for alternative formes (in case of transformations)
   if (altFormes?.length) {
+    // ya, apparently Hisuian Pokemon are included in the list for some reason lol
     syncedPokemon.altFormes = [...altFormes];
+
+    if (syncedPokemon.altFormes.length === 1) {
+      syncedPokemon.altFormes = [];
+    }
   }
 
   // check for transformed base stats
@@ -480,7 +520,7 @@ export const syncPokemon = (
 
   // recalculate the spread stats
   // (calcPokemonSpredStats() will determine whether to use the transformedBaseStats or baseStats)
-  syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
+  syncedPokemon.spreadStats = calcPokemonSpreadStats(format, syncedPokemon);
 
   // we're done! ... I think
   return syncedPokemon;

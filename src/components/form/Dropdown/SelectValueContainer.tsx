@@ -25,7 +25,8 @@ export const SelectValueContainer = <
   isMulti,
   innerProps,
   selectProps: {
-    active = false,
+    active,
+    menuIsOpen,
   } = {},
   children,
 }: SelectValueContainerProps<Option, Multi, Group>): JSX.Element => (
@@ -33,6 +34,7 @@ export const SelectValueContainer = <
     className={cx(
       styles.valueContainer,
       active && styles.active,
+      menuIsOpen && styles.menuOpen,
       hasValue && styles.hasValue,
       className,
     )}

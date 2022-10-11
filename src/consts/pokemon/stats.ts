@@ -37,3 +37,17 @@ export const PokemonInitialBoosts: Omit<Showdown.StatsTable, 'hp'> = {
   spd: 0,
   spe: 0,
 };
+
+/**
+ * Stat mapping for the PokePaste syntax.
+ *
+ * @since 1.0.3
+ */
+export const PokemonPokePasteStatMap: Record<Showdown.StatName, string> = {
+  hp: 'HP',
+  atk: 'Atk',
+  def: 'Def',
+  spa: 'SpA',
+  spd: 'SpD',
+  spe: 'Spe',
+};

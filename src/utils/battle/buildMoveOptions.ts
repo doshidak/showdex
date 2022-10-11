@@ -1,43 +1,38 @@
-import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
-// import { env } from '@showdex/utils/core';
-import type { MoveName } from '@pkmn/data';
+import { percentage } from '@showdex/utils/humanize';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
+import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
-// import { detectLegacyGen } from './detectLegacyGen';
+import { flattenAlt, flattenAlts } from './flattenAlts';
+import { getDexForFormat } from './getDexForFormat';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
+import { getPokemonLearnset } from './getPokemonLearnset';
+import { legalLockedFormat } from './legalLockedFormat';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
 
-export interface PokemonMoveOption {
-  label: string;
-  options: {
-    label: string;
-    value: MoveName;
-  }[];
-}
+export type PokemonMoveOption = DropdownOption<MoveName>;
 
 /**
  * Builds the value for the `options` prop of the move `Dropdown` component in `PokeMoves`.
  *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
- *
  * @since 0.1.3
  */
 export const buildMoveOptions = (
-  // dex: Generation,
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  showAll?: boolean,
 ): PokemonMoveOption[] => {
-  // const gen = dex?.num || <GenerationNum> env.int('calcdex-default-gen');
   const options: PokemonMoveOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;
   }
 
+  const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
-  // const legacy = detectLegacyGen(gen);
+  const showAllMoves = showAll || !legalLockedFormat(format);
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -50,7 +45,8 @@ export const buildMoveOptions = (
     serverMoves,
     transformedMoves,
     altMoves,
-    moveState,
+    // moveState,
+    revealedMoves,
     useZ,
     useMax,
   } = pokemon;
@@ -58,24 +54,24 @@ export const buildMoveOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
-  // also keep track of whether the Pokemon has any actual moves
-  // (to determine the group label of the otherMoves, if applicable)
-  // let hasActualMoves = false;
+  // create usage percent finder (to show them in any of the option groups)
+  const findUsagePercent = usageAltPercentFinder(altMoves, true);
 
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
-  if (useZ && moves?.length) {
+  if (useZ && !useMax && moves?.length) {
+    const zMoves = moves.filter((n) => !!n && (getZMove(n, item) || n) !== n);
+
     options.push({
-      label: 'Z-PWR',
-      options: moves.map((name) => ({
-        label: getZMove(name, item) || name,
+      label: 'Z',
+      options: zMoves.map((name) => ({
+        label: getZMove(name, item),
         value: name,
       })),
     });
 
-    filterMoves.push(...moves);
-    // hasActualMoves = true;
+    filterMoves.push(...zMoves);
   }
 
   // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
@@ -84,15 +80,12 @@ export const buildMoveOptions = (
       label: 'Max',
       options: moves.map((name) => ({
         label: getMaxMove(name, ability, speciesForme) || name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
-    if (!useZ) {
-      filterMoves.push(...moves);
-    }
-
-    // hasActualMoves = true;
+    filterMoves.push(...moves);
   }
 
   if (serverSourced && serverMoves?.length) {
@@ -102,78 +95,73 @@ export const buildMoveOptions = (
       label: transformedForme ? 'Pre-Transform' : 'Current',
       options: filteredServerMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
     filterMoves.push(...filteredServerMoves);
-    // hasActualMoves = true;
   }
 
   if (transformedForme && transformedMoves?.length) {
-    const filteredTransformedMoves = transformedMoves.filter((n) => !!n && !filterMoves.includes(n));
+    const filteredTransformedMoves = transformedMoves
+      .filter((n) => !!n && !filterMoves.includes(n));
 
     options.unshift({
       label: 'Transformed',
       options: filteredTransformedMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
     filterMoves.push(...filteredTransformedMoves);
-    // hasActualMoves = true;
   }
 
-  if (moveState?.revealed?.length) {
-    const revealedMoves = moveState.revealed
-      .map((n) => <MoveName> n?.replace?.('*', ''))
+  if (revealedMoves?.length) {
+    const filteredRevealedMoves = revealedMoves
       .filter((n) => !!n && !filterMoves.includes(n));
 
     options.push({
       label: 'Revealed',
-      options: revealedMoves.map((name) => ({
+      options: filteredRevealedMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
-    filterMoves.push(...revealedMoves);
-    // hasActualMoves = true;
+    filterMoves.push(...filteredRevealedMoves);
   }
 
   if (altMoves?.length) {
-    const poolMoves = altMoves
-      .filter((n) => !!n && !filterMoves.includes(n))
-      .sort();
+    const unsortedPoolMoves = altMoves
+      .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
+
+    const hasUsageStats = !!altMoves?.length && altMoves
+      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+    const poolMoves = hasUsageStats
+      ? unsortedPoolMoves
+      : flattenAlts(unsortedPoolMoves).sort();
 
     options.push({
       label: 'Pool',
-      options: poolMoves.map((name) => ({
-        label: name,
-        value: name,
+      options: poolMoves.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        value: flattenAlt(alt),
       })),
     });
 
-    filterMoves.push(...poolMoves);
-    // hasActualMoves = true;
+    filterMoves.push(...flattenAlts(poolMoves));
   }
 
-  /**
-   * @todo temporary workaround for CAP learnsets
-   */
-  const learnset: MoveName[] = [...(<MoveName[]> moveState?.learnset || [])];
-  const isCap = format.includes('cap');
+  const learnset = getPokemonLearnset(format, speciesForme, showAllMoves);
 
-  if (isCap && typeof Dex !== 'undefined' && typeof BattleTeambuilderTable !== 'undefined') {
-    const speciesFormeId = formatId(pokemon.speciesForme);
-    const learnsetsFromTable = Object.keys(BattleTeambuilderTable.learnsets?.[speciesFormeId] || {})
-      .map((n) => !!n && <MoveName> Dex.forGen(gen).moves.get(n)?.name)
-      .filter(Boolean);
-
-    if (learnsetsFromTable.length) {
-      learnset.push(...learnsetsFromTable);
-    }
+  if (transformedForme) {
+    learnset.push(...getPokemonLearnset(format, transformedForme, showAllMoves));
   }
 
   if (learnset.length) {
@@ -185,12 +173,12 @@ export const buildMoveOptions = (
       label: 'Learnset',
       options: learnsetMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
     filterMoves.push(...learnsetMoves);
-    // hasActualMoves = true;
   }
 
   // Hidden Power moves were introduced in gen 2
@@ -198,7 +186,7 @@ export const buildMoveOptions = (
     // regex filters out 'hiddenpowerfighting70', which is 'hiddenpowerfighting' (BP 60),
     // but with a BP of 70 lol (don't care about the BP here though, we just need the name)
     const unsortedHpMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
+      .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
       .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
 
     // using a Set makes sure we have no duplicate entries in the array
@@ -208,6 +196,7 @@ export const buildMoveOptions = (
       label: 'Hidden Power',
       options: hpMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -215,14 +204,11 @@ export const buildMoveOptions = (
     filterMoves.push(...hpMoves);
   }
 
-  // show all possible moves if format is not provided, is not legal-locked, or
-  // no learnset is available (probably because the Pokemon doesn't exist in the `dex`'s gen)
-  const parsedFormat = format?.replace(/^gen\d+/i, '');
-
-  if (!parsedFormat || !LegalLockedFormats.includes(parsedFormat) || !moveState?.learnset?.length) {
+  // show all possible moves if the format is not legal-locked or no learnset is available
+  if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> Dex.forGen(gen).moves.get(moveid)?.name)
-      .filter((n) => !!n && !filterMoves.includes(n))
+      .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
+      .filter((n) => !!n && !/^(?:G-)?Max\s+/i.test(n) && !filterMoves.includes(n))
       .sort();
 
     // note: since we need to filter out HP moves, but keep the group last, this is the workaround.
@@ -232,10 +218,10 @@ export const buildMoveOptions = (
 
     // make sure this comes before the Hidden Power moves
     options.splice(insertionIndex, 0, {
-      // label: hasActualMoves ? 'Other' : 'All',
       label: 'All',
       options: otherMoves.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });

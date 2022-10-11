@@ -7,14 +7,13 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import ZipPlugin from 'zip-webpack-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
-import chromeManifest from './src/manifest.chrome.json' assert { type: 'json' };
-import firefoxManifest from './src/manifest.firefox.json' assert { type: 'json' };
+import manifest from './src/manifest' assert { type: 'json' };
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
 
 const buildTarget = String(process.env.BUILD_TARGET || 'chrome').toLowerCase();
-const buildDate = Date.now();
+const buildDate = Date.now().toString(16).toUpperCase();
 
 // does not include the extension
 const buildFilename = [
@@ -30,7 +29,7 @@ if (typeof __dirname !== 'string') {
   global.__dirname = path.dirname(fileURLToPath(import.meta.url));
 }
 
-const env = Object.entries({
+export const env = Object.entries({
   ...dotenv.config({ path: path.join(__dirname, '.env') }).parsed,
   NODE_ENV: mode,
   BUILD_TARGET: buildTarget,
@@ -48,11 +47,27 @@ const env = Object.entries({
   __DEV__,
 });
 
+export const printableEnv = Object.keys(env).sort().reduce((prev, key) => {
+  const value = env[key];
+
+  const parsedKey = key.replace(/(?:"|process\.env\.)/g, '');
+  const parsedValue = typeof value === 'string' ? value?.replace(/"/g, '') : value;
+
+  prev[parsedKey] = parsedValue;
+
+  return prev;
+}, {});
+
 const entry = {
   main: path.join(__dirname, 'src', 'main.ts'),
   content: path.join(__dirname, 'src', 'content.ts'),
   background: path.join(__dirname, 'src', 'background.ts'),
 };
+
+// background is not used on Firefox
+if (buildTarget === 'firefox') {
+  delete entry.background;
+}
 
 const output = {
   path: path.join(__dirname, __DEV__ ? 'build' : 'dist', buildTarget),
@@ -125,54 +140,98 @@ const resolve = {
 };
 
 const copyPatterns = [{
-  // replace version and description in manifest.json w/ those of package.json
-  from: `src/manifest.${buildTarget}.json`,
+  // fill in fields from package.json into manifest and transform it depending on the buildTarget
+  from: `src/manifest.json`,
   to: 'manifest.json',
-
-  // transform: (content) => Buffer.from(JSON.stringify({
-  //   ...JSON.parse(content.toString()),
-  //   version: process.env.npm_package_version,
-  //   description: process.env.npm_package_description,
-  //   ...(process.env.BUILD_TARGET === 'firefox' ? {
-  //     background: {
-  //     }
-  //   } : null),
-  // })),
 
   transform: (content) => {
     const parsed = JSON.parse(content.toString());
+
+    // should be set according to the buildTarget
+    // (purposefully given an erroneous value to indicate some transformation was done)
+    parsed.manifest_version = -1;
 
     parsed.version = process.env.npm_package_version;
     parsed.description = process.env.npm_package_description;
     parsed.author = process.env.npm_package_author;
     parsed.homepage_url = process.env.npm_package_homepage;
 
-    // switch (String(process.env.BUILD_TARGET).toLowerCase()) {
-    //   // case 'chrome': {
-    //   //   delete parsed.browser_specific_settings;
-    //   //
-    //   //   break;
-    //   // }
-    //
-    //   case 'firefox': {
-    //     break;
-    //   }
-    //
-    //   default: {
-    //     break;
-    //   }
-    // }
+    const {
+      applications,
+      permissions: matches = [],
+      web_accessible_resources,
+    } = parsed;
+
+    switch (buildTarget) {
+      case 'chrome': {
+        // set to Manifest V3 (MV3) for Chrome
+        parsed.manifest_version = 3;
+
+        // applications is not used on Chrome
+        delete parsed.applications;
+
+        // remove MV2-specific background properties
+        delete parsed.background.persistent;
+        delete parsed.background.scripts;
+
+        // auto-fill in matches for content_scripts, web_accessible_resources,
+        // and externally_connectable
+        parsed.content_scripts[0].matches = [...matches];
+        parsed.web_accessible_resources[0].matches = [...matches];
+        parsed.externally_connectable.matches = [...matches];
+
+        // no permissions are needed on Chrome
+        parsed.permissions = [];
+
+        // auto-fill action properties
+        parsed.action.default_title = parsed.name;
+        parsed.action.default_icon = { ...parsed.icons };
+
+        break;
+      }
+
+      case 'firefox': {
+        // set to Manifest V2 (MV2) for Firefox
+        parsed.manifest_version = 2;
+
+        // auto-fill in matches for content_scripts
+        parsed.content_scripts[0].matches = [...matches];
+
+        // set Firefox-specific permissions
+        const { permissions = [] } = applications.gecko;
+
+        parsed.permissions.unshift(...permissions);
+        delete applications.gecko.permissions;
+
+        // remove properties not used on Firefox
+        delete parsed.background;
+        delete parsed.action;
+
+        // remove properties not supported on MV2
+        delete parsed.host_permissions;
+        delete parsed.externally_connectable;
+
+        // format web_accessible_resources in MV2's format
+        const { resources = [] } = web_accessible_resources[0];
+
+        parsed.web_accessible_resources = [...resources];
+
+        break;
+      }
+
+      default: {
+        break;
+      }
+    }
 
     return Buffer.from(JSON.stringify(parsed));
   },
 }, {
   from: 'src/assets/**/*',
   to: '[name][ext]',
-  // filter: (path) => moduleRules[1].test.test(path),
   filter: (path) => moduleRules[1].test.test(path) && [
-    ...(buildTarget !== 'firefox' ? chromeManifest.web_accessible_resources.flatMap((r) => r.resources) : []),
-    ...(buildTarget === 'firefox' ? firefoxManifest.web_accessible_resources : []),
-    ...Object.values((buildTarget === 'firefox' ? firefoxManifest : chromeManifest).icons),
+    ...manifest.web_accessible_resources.flatMap((r) => r.resources),
+    ...Object.values(manifest.icons),
   ].some((name) => path.includes(name)),
 }];
 
@@ -215,30 +274,30 @@ const envConfig = {
 
       // not required on dev cause you can load a single big ass file no problemo (even into Firefox!)
       /** @todo Find a way to get the names of the generated chunks and inject it as an env or something (for use in content). */
-      splitChunks: {
-        automaticNameDelimiter: '.',
-        minSize: 1024 ** 2, // 1 MB
-        maxSize: 4 * (1024 ** 2), // 4 MB
-
-        cacheGroups: {
-          // disable the default cache groups
-          default: false,
-
-          // chunk the big ass JSON files from @pkmn/dex (particularly learnsets.json)
-          // (required for submitting to Mozilla's AMO, which enforces a 4 MB limit per file)
-          pkmn: {
-            // test: /\.json$/i,
-            // test: ({ resource }) => typeof resource === 'string'
-            //   && resource.includes('node_modules')
-            //   && resource.includes('@pkmn')
-            //   && resource.endsWith('.json'),
-            test: /\/node_modules\/@pkmn\/.+\.json$/i,
-            chunks: 'all',
-            name: 'pkmn',
-            // filename: '[name].js',
-          },
-        }, // end cacheGroups in optimization.splitChunks
-      }, // end splitChunks in optimization
+      // splitChunks: {
+      //   automaticNameDelimiter: '.',
+      //   minSize: 1024 ** 2, // 1 MB
+      //   maxSize: 4 * (1024 ** 2), // 4 MB
+      //
+      //   cacheGroups: {
+      //     // disable the default cache groups
+      //     default: false,
+      //
+      //     // chunk the big ass JSON files from @pkmn/dex (particularly learnsets.json)
+      //     // (required for submitting to Mozilla's AMO, which enforces a 4 MB limit per file)
+      //     pkmn: {
+      //       // test: /\.json$/i,
+      //       // test: ({ resource }) => typeof resource === 'string'
+      //       //   && resource.includes('node_modules')
+      //       //   && resource.includes('@pkmn')
+      //       //   && resource.endsWith('.json'),
+      //       test: /\/node_modules\/@pkmn\/.+\.json$/i,
+      //       chunks: 'all',
+      //       name: 'pkmn',
+      //       // filename: '[name].js',
+      //     },
+      //   }, // end cacheGroups in optimization.splitChunks
+      // }, // end splitChunks in optimization
     },
   }),
 };

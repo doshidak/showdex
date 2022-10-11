@@ -1,6 +1,6 @@
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPlayer, CalcdexPlayerSide } from '@showdex/redux/store';
 
 const l = logger('@showdex/utils/battle/sanitizePlayerSide');
@@ -73,10 +73,8 @@ export const sanitizePlayerSide = (
   return {
     // conditionally remove Spikes & Stealth Rocks from the calc if the Pokemon is
     // already on the field (don't want the hazard damage to re-apply)
-    ...(applyFieldHazards && {
-      spikes: sideConditionNames.includes('spikes') ? sideConditions.spikes?.[1] ?? 0 : 0,
-      isSR: sideConditionNames.includes('stealthrock'),
-    }),
+    spikes: applyFieldHazards && sideConditionNames.includes('spikes') ? sideConditions.spikes?.[1] ?? 0 : 0,
+    isSR: applyFieldHazards && sideConditionNames.includes('stealthrock'),
 
     steelsurge: sideConditionNames.includes('gmaxsteelsurge'),
     vinelash: sideConditionNames.includes('gmaxvinelash'),

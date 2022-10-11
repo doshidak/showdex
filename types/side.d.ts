@@ -109,6 +109,13 @@ declare namespace Showdown {
       ];
     };
 
+    /**
+     * Whether we overwrote the `addPokemon()` method.
+     *
+     * @since 1.0.3
+     */
+    calcdexProcessed?: boolean;
+
     (battle: Battle, n: number): this;
 
     destroy(): void;

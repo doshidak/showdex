@@ -1,7 +1,7 @@
-import { PokemonToggleAbilities } from '@showdex/consts';
+import { PokemonToggleAbilities } from '@showdex/consts/pokemon';
 // import { formatId } from '@showdex/utils/app';
 // import { calcPokemonHp } from '@showdex/utils/calc';
-import type { AbilityName } from '@pkmn/data';
+import type { AbilityName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 
 /**

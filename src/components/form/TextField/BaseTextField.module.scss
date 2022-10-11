@@ -3,7 +3,7 @@
 @use 'mixins/spacing';
 
 $label-font-size: 10px;
-$input-font-size: 10px;
+$monospace-font-size: 10px;
 
 .label {
   font-size: $label-font-size;
@@ -17,8 +17,10 @@ $input-font-size: 10px;
   outline: none;
 
   &, &::placeholder {
-    @include font.apply(fonts.$mono);
-    font-size: $input-font-size;
+    font-weight: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
   }
 
   &::placeholder {
@@ -26,10 +28,10 @@ $input-font-size: 10px;
     user-select: none;
   }
 
-  // &.monospace {
-  //   &, &::placeholder {
-  //     @include font.apply(fonts.$mono);
-  //     font-size: $monospace-font-size;
-  //   }
-  // }
+  &.monospace {
+    &, &::placeholder {
+      @include font.apply(fonts.$mono);
+      font-size: $monospace-font-size;
+    }
+  }
 }

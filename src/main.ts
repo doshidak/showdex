@@ -6,13 +6,19 @@ import '@showdex/styles/global.scss';
 
 export type ShowdexBootstrapper = (
   store?: RootStore,
+  data?: string,
   roomId?: string,
 ) => void;
 
 const l = logger('@showdex/main');
 
-if (typeof app === 'undefined') {
-  l.warn('main may have executed too fast cause app is undefined lmao.');
+if (typeof app === 'undefined' || typeof Dex === 'undefined') {
+  l.error(
+    'main may have executed too fast or',
+    'we\'re not in Showdown anymore...',
+  );
+
+  throw new Error('Showdex was attempted to start in an unsupported website.');
 }
 
 const store = createStore();
@@ -35,60 +41,18 @@ app.receive = (data: string) => {
     const room = app.rooms[roomId];
 
     l.debug(
-      'receive() event for roomId', roomId,
+      'receive() for', roomId,
       '\n', 'room', room,
-      '\n', 'data', data,
+      '\n', 'data', __DEV__ && { data },
     );
 
     // call each bootstrapper
-    bootstrappers.forEach((bootstrapper) => bootstrapper(store, roomId));
+    bootstrappers.forEach((bootstrapper) => bootstrapper(store, data, roomId));
   }
 
   // call the original function
   appReceive(data);
 };
-
-l.debug('Hooking into the client\'s app.topbar.renderRoomTab()...');
-
-// overwrite the room tab renderer to ignore our special tabHidden property in HtmlRoom
-const renderRoomTab = <typeof app.topbar.renderRoomTab> app.topbar.renderRoomTab.bind(app.topbar);
-
-app.topbar.renderRoomTab = (room, id) => {
-  if ('tabHidden' in (room || {}) && (<HtmlRoom> <unknown> room).tabHidden) {
-    // don't render anything for this room's tab by returning an empty string
-    return '';
-  }
-
-  return renderRoomTab(room, id);
-};
-
-l.debug('Overwriting existing $(window).on(\'beforeunload\') handler...');
-
-// reimplements the beforeunload handler defined in Showdown's client.js to ignore Calcdex rooms
-// (fixes the refresh prompt when Calcdex tabs are open, including hidden ones)
-// see: https://github.com/smogon/pokemon-showdown-client/blob/master/js/client.js#L582-L597
-$(window).off('beforeunload').on('beforeunload', (e: JQuery.TriggeredEvent<Window & typeof globalThis> & BeforeUnloadEvent) => {
-  if (Config.server?.host === 'localhost' || app.isDisconnected) {
-    return;
-  }
-
-  // only check the requestLeave() handler for non-Calcdex rooms
-  const nonCalcdexRooms = Object.values(app.rooms)
-    .filter((room) => !room?.id?.startsWith('view-calcdex') && typeof room?.requestLeave === 'function' && !room.requestLeave());
-
-  const hasActiveBattles = nonCalcdexRooms.length > 0;
-
-  if (!hasActiveBattles && !Dex.prefs('refreshprompt')) {
-    return;
-  }
-
-  // e.preventDefault();
-  e.returnValue = hasActiveBattles
-    ? 'You have active battles.'
-    : 'Are you sure you want to refresh?';
-
-  return <string> e.returnValue;
-});
 
 l.debug('Initializing MutationObserver for client colorScheme changes...');
 

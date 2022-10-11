@@ -4,6 +4,7 @@ import { animated, useSpring } from '@react-spring/web';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
 import type { TippyProps } from '@tippyjs/react';
+// import { LazyTippy } from './LazyTippy';
 import styles from './Tooltip.module.scss';
 
 /* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
@@ -18,19 +19,27 @@ export type TooltipTippyProps = Partial<Omit<TippyProps,
 
 /* eslint-enable @typescript-eslint/indent */
 
-export interface TooltipProps extends TooltipTippyProps {
+export type TooltipTippyTrigger =
+  | 'click'
+  | 'focus'
+  | 'focusin'
+  | 'manual'
+  | 'mouseenter';
+
+export interface TooltipProps extends Omit<TooltipTippyProps, 'trigger'> {
   className?: string;
   style?: React.CSSProperties;
   arrowClassName?: string;
   arrowStyle?: React.CSSProperties;
   content?: React.ReactNode;
+  trigger?: TooltipTippyTrigger | TooltipTippyTrigger[];
   children?: React.ReactElement;
 }
 
 const springConfig = {
   mass: 1,
   tension: 250,
-  friction: 20,
+  friction: 27,
 };
 
 const springProps: Record<string, React.CSSProperties> = {
@@ -41,7 +50,7 @@ const springProps: Record<string, React.CSSProperties> = {
 
   hide: {
     opacity: 0,
-    scale: 0.75,
+    scale: 0.9,
   },
 };
 
@@ -55,6 +64,9 @@ export const Tooltip = ({
     ...popperOptions
   } = {},
   content,
+  trigger,
+  onMount,
+  onHidden,
   children,
   ...props
 }: TooltipProps): JSX.Element => {
@@ -66,16 +78,31 @@ export const Tooltip = ({
     config: springConfig,
   }));
 
-  const handleMount: TippyProps['onMount'] = () => void springApi.start({
-    ...springProps.show,
-    config: { ...springConfig, clamp: false },
-  });
+  // keep track of the mounted state
+  const [mounted, setMounted] = React.useState(false);
 
-  const handleHide: TippyProps['onHide'] = ({ unmount }) => void springApi.start({
-    ...springProps.hide,
-    config: { ...springConfig, clamp: true },
-    onRest: unmount,
-  });
+  const handleMount: TippyProps['onMount'] = (instance) => {
+    setMounted(true);
+    onMount?.(instance);
+
+    void springApi.start({
+      ...springProps.show,
+      config: { ...springConfig, clamp: false },
+    });
+  };
+
+  const handleHide: TippyProps['onHide'] = ({ unmount }) => {
+    void springApi.start({
+      ...springProps.hide,
+      config: { ...springConfig, clamp: true },
+      onRest: unmount,
+    });
+  };
+
+  const handleHidden: TippyProps['onHidden'] = (instance) => {
+    setMounted(false);
+    onHidden?.(instance);
+  };
 
   // custom tooltip arrow
   const [arrow, setArrow] = React.useState<HTMLDivElement>(null);
@@ -91,8 +118,9 @@ export const Tooltip = ({
           options: { element: arrow },
         }],
       }}
+      trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
       zIndex={99}
-      render={(attributes) => (
+      render={(attributes, renderContent) => (mounted ? (
         <animated.div
           className={cx(
             styles.container,
@@ -106,7 +134,8 @@ export const Tooltip = ({
           tabIndex={-1}
           {...attributes}
         >
-          {content}
+          {/* {renderContent || (typeof content === 'function' ? content() : content)} */}
+          {renderContent || content}
 
           <div
             ref={setArrow}
@@ -117,9 +146,10 @@ export const Tooltip = ({
             style={arrowStyle}
           />
         </animated.div>
-      )}
+      ) : null)}
       onMount={handleMount}
       onHide={handleHide}
+      onHidden={handleHidden}
     >
       {children}
     </Tippy>

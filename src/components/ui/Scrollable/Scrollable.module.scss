@@ -52,7 +52,7 @@
   max-height: 100%; // needed for vertical scroll to trigger
   direction: inherit;
   // box-sizing: border-box;
-  scrollbar-width: 0;
+  scrollbar-width: none;
   // -ms-overflow-style: none;
 
   &::-webkit-scrollbar {

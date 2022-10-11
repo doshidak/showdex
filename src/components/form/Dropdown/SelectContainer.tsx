@@ -7,13 +7,23 @@ import type {
   SelectInstance,
 } from 'react-select';
 import type { CreatableProps as SelectCreatableProps } from 'react-select/creatable';
-import type { DropdownOption } from './Dropdown';
+import type { DropdownOption, DropdownSingleValue } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
 export interface SelectCustomProps {
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
+  filtering?: boolean;
   active?: boolean;
+  // optionTooltip?: <TValue extends DropdownSingleValue = DropdownSingleValue>(option: DropdownOption<TValue>) => JSX.Element;
+  optionTooltip?: (props: SelectOptionTooltipProps) => JSX.Element;
+  optionTooltipProps?: SelectOptionTooltipProps;
+}
+
+export interface SelectOptionTooltipProps<
+  TValue extends DropdownSingleValue = DropdownSingleValue,
+> extends DropdownOption<TValue> {
+  hidden?: boolean;
 }
 
 export type SelectProps<

@@ -1,7 +1,8 @@
-import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts';
+import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts/pokemon';
 import { detectLegacyGen } from '@showdex/utils/battle';
-import type { Generation } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { calcPokemonStat } from './calcPokemonStat';
 
 /**
  * Calculates the stats of a Pokemon based on its applied EV/IV/nature spread.
@@ -19,14 +20,14 @@ import type { CalcdexPokemon } from '@showdex/redux/store';
  * @since 0.1.0
  */
 export const calcPokemonSpreadStats = (
-  dex: Generation,
+  format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): Partial<Showdown.StatsTable> => {
-  if (typeof dex?.stats?.calc !== 'function' || !Object.keys(pokemon?.baseStats || {}).length) {
+  if (!Object.keys(pokemon?.baseStats || {}).length) {
     return { ...PokemonInitialStats };
   }
 
-  const legacy = detectLegacyGen(dex);
+  const legacy = detectLegacyGen(format);
 
   return PokemonStatNames.reduce((prev, stat) => {
     const baseStat = stat === 'hp'
@@ -35,13 +36,14 @@ export const calcPokemonSpreadStats = (
         ? pokemon.transformedBaseStats?.[stat] ?? pokemon.baseStats[stat]
         : pokemon.baseStats[stat];
 
-    prev[stat] = dex.stats.calc(
+    prev[stat] = calcPokemonStat(
+      format,
       stat,
       baseStat,
       pokemon.ivs?.[stat] ?? 31,
       legacy ? undefined : pokemon.evs?.[stat] ?? 0,
-      pokemon.level || 100,
-      legacy ? undefined : dex.natures.get(pokemon.nature),
+      pokemon.level ?? 100,
+      legacy ? undefined : pokemon.nature,
     );
 
     return prev;

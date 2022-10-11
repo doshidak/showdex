@@ -1,13 +1,15 @@
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
 
 .container {
   grid-template-columns: minmax(35px, 1fr) repeat(6, minmax(45px, 1.25fr));
-  column-gap: 7px;
+  column-gap: 5px;
   // row-gap: 3px;
 
   // in gen 1, there's one less column since SPD isn't a thing (and SPA is called SPC).
@@ -21,8 +23,11 @@
   font-size: 8px;
 }
 
+.header {
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+}
+
 .statHeader {
-  font-weight: 500;
   @include transition.apply(color);
 
   &.up {
@@ -89,6 +94,10 @@
     color: colors.$orange;
   }
 
+  &.unallocated {
+    color: colors.$cyan;
+  }
+
   &.illegal {
     color: colors.$red;
   }
@@ -107,6 +116,10 @@
 
   &.negative {
     color: colors.$red;
+  }
+
+  &.finalStat {
+    font-size: 11px;
   }
 }
 

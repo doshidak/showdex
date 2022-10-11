@@ -10,31 +10,40 @@
 .container {
   grid-template-columns: minmax(150px, 1.25fr) 1.15fr 1fr;
   column-gap: 10px;
-  row-gap: 5px;
+  row-gap: 3px;
   @include spacing.margin($top: 15px);
-  @include spacing.padding-all(10px);
+  @include spacing.padding($top: 8px, $right: 10px, $bottom: 10px, $left: 10px);
   border-radius: 10px;
+  @include transition.apply(background-color, box-shadow);
 
   &.light {
     background-color: color.alpha(colors.$white, 0.6);
     box-shadow: (
       0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 3px color.alpha(colors.$black, 0.15),
+      0 0 15px color.alpha(colors.$gray-dark, 0.15),
     );
   }
 
   &.dark {
-    background-color: color.alpha(colors.$black, 0.75);
-    // box-shadow: 0 0 1px color.alpha(colors.$white, 0.15);
+    background-color: color.alpha(#121212, 0.85);
     box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 5px color.alpha(colors.$black, 0.15),
+      0 0 1px color.alpha(colors.$white, 0.3),
+      0 0 15px color.alpha(colors.$black, 0.5),
     );
   }
 }
 
+.header {
+  @include spacing.margin($bottom: 2px);
+}
+
+.headerTitle {
+  @include spacing.margin($bottom: 0.5px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+}
+
 .movesHeader {
-  @include flex.row-start;
+  @include flex.row($align: center);
   @include spacing.margin($left: 5px);
 }
 
@@ -57,38 +66,77 @@
 }
 
 .moveTooltip {
-  font-size: 8px;
+  @include flex.column-center;
+  max-width: 160px;
+  white-space: normal;
   user-select: none;
 }
 
-button.toggleButton {
-  // vertical-align: middle;
-  // @include spacing.margin($bottom: 1px);
-  @include spacing.margin($left: 5px);
-
-  .light & {
-    background-color: color.alpha(colors.$black, 0.075);
-  }
-
-  .dark & {
-    background-color: color.alpha(colors.$white, 0.05);
-  }
+.moveDescription {
+  @include spacing.margin($bottom: 0.4em);
+  text-align: center;
 }
 
-.toggleButtonLabel {
+.moveProperties {
+  @include flex.row-center;
   font-size: 8px;
-  text-transform: uppercase;
+}
 
-  .light &.inactive {
-    color: colors.$black;
+.moveType {
+  @include spacing.margin($right: 0.8em);
+}
+
+.moveProperty {
+  @include flex.row($align: center);
+
+  &:not(:last-of-type) {
+    @include spacing.margin($right: 0.8em);
   }
 
-  .dark &.inactive {
-    color: colors.$white;
+  .propertyName {
+    font-weight: 500;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .propertyValue {
+    @include spacing.padding($left: 0.5em);
+    @include font.apply(fonts.$mono);
+    font-size: 10px;
   }
 }
 
-.damageButton {
+button.toggleButton {
+  @include spacing.margin($left: 0.5em);
+  font-size: 8px;
+
+  &.lessSpacing {
+    @include spacing.margin($left: 0.25em);
+  }
+}
+
+// .toggleButtonLabel {
+//   font-size: 8px;
+//   text-transform: uppercase;
+//
+//   .light &.inactive {
+//     color: colors.$black;
+//   }
+//
+//   .dark &.inactive {
+//     color: colors.$white;
+//   }
+// }
+
+// button.autoButton {
+//   @include spacing.margin($left: 2px, $right: -3px);
+// }
+
+button.ultButton {
+  min-width: 25px;
+}
+
+button.damageButton {
   .light &:not(:hover):not(.active) .damageButtonLabel.noDamage {
     color: color.alpha(colors.$black, 0.5);
   }
@@ -111,33 +159,47 @@ button.toggleButton {
   .dark & {
     color: colors.$white;
   }
+
+  &.noCopy.noDamage {
+    .light & {
+      color: color.alpha(colors.$black, 0.5);
+    }
+
+    .dark & {
+      color: color.alpha(colors.$white, 0.5);
+    }
+  }
 }
 
 .descTooltip {
   position: relative;
-  max-width: 250px;
+  max-width: 200px;
   text-align: center;
   white-space: normal;
   user-select: none;
 
-  .copied {
-    @include position.absolute($top: -18px, $left: 50%);
-    @include spacing.padding-xy($x: 10px, $y: 3px);
-    @include font.apply(fonts.$primary, ( font-weight: 500 ));
-    font-size: 10px;
-    text-transform: uppercase;
-    background-color: color.alpha(color.shade(colors.$green, 15%), 0.85);
-    border-radius: 50px;
-    box-shadow: 0 0 3px color.alpha(colors.$black, 0.3);
-    opacity: 0;
-    transform: translate(-50%, 5px);
-    @include transition.apply(opacity, transform);
-    user-select: none;
-    pointer-events: none;
+  // .copied {
+  //   @include position.absolute($top: -18px, $left: 50%);
+  //   @include spacing.padding-xy($x: 10px, $y: 3px);
+  //   @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  //   font-size: 10px;
+  //   text-transform: uppercase;
+  //   background-color: color.alpha(color.shade(colors.$green, 15%), 0.85);
+  //   border-radius: 50px;
+  //   box-shadow: 0 0 3px color.alpha(colors.$black, 0.3);
+  //   opacity: 0;
+  //   transform: translate(-50%, 5px);
+  //   @include transition.apply(opacity, transform);
+  //   user-select: none;
+  //   pointer-events: none;
+  //
+  //   &.copiedVisible {
+  //     opacity: 1;
+  //     transform: translate(-50%, 0);
+  //   }
+  // }
 
-    &.copiedVisible {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
+  .copiedBadge {
+    @include position.absolute($top: -16px, $left: 50%);
   }
 }

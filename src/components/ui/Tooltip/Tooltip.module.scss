@@ -1,3 +1,4 @@
+@use 'sass:map';
 @use 'sass:math';
 @use 'config/colors';
 @use 'config/fonts';
@@ -6,51 +7,102 @@
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
+@use 'mixins/transition';
 
 $padding-x: 10px;
-$padding-y: 8px;
-$font-size: 9px;
-$font-color: colors.$white;
-$background-color-light: #616161;
-$background-color-dark: #212121;
+$padding-y: 7px;
+$font-size: 10px;
+$color-light: colors.$white;
+$color-dark: colors.$black;
+// $background-color-light: color.alpha(colors.$black, 0.9);
+$background-color-light: colors.$gray-darker;
+// $background-color-dark: color.alpha(colors.$white, 0.9);
+$background-color-dark: colors.$white;
 $border-radius: 12px;
 
-$arrow-size: 10px;
-$arrow-placements: (
-  top: bottom,
-  right: left,
-  bottom: top,
-  left: right,
+$arrow: (
+  size: 10px,
+
+  placements: (
+    top: bottom,
+    right: left,
+    bottom: top,
+    left: right,
+  ),
+
+  mask-angles: (
+    top: 315deg,
+    right: 45deg,
+    bottom: 135deg,
+    left: 225deg,
+  ),
 );
+
+// $arrow-size: 10px;
+
+// $arrow-placements: (
+//   top: bottom,
+//   right: left,
+//   bottom: top,
+//   left: right,
+// );
+
+// $arrow-mask-deg: (
+//   top: 315deg,
+//   right: 45deg,
+//   bottom: 135deg,
+//   left: 225deg,
+// );
 
 .container {
   @include spacing.padding-xy($x: $padding-x, $y: $padding-y);
-  @include font.apply(fonts.$mono);
+  @include font.apply(fonts.$primary);
   font-size: $font-size;
-  color: $font-color;
-  // text-align: center;
   white-space: pre;
   border-radius: $border-radius;
+  @include transition.apply(color, background-color);
 
   &.light {
+    color: $color-light;
     background-color: $background-color-light;
   }
 
   &.dark {
+    color: $color-dark;
     background-color: $background-color-dark;
   }
 
-  @each $placement, $prop in $arrow-placements {
-    &[data-placement^='#{$placement}'] > .arrow {
-      #{$prop}: math.div($arrow-size, 2) * -1 + 1px;
-    }
+  strong {
+    font-weight: 600;
+  }
+}
+
+// @mixin arrow-mask($deg, $offset: 1.25px) {
+//   mask: linear-gradient(
+//     $deg,
+//     colors.$red math.div(map.get($arrow, size), 2) + $offset,
+//     colors.$transparent math.div(map.get($arrow, size), 2) + $offset,
+//   );
+// }
+
+@each $placement, $prop in map.get($arrow, placements) {
+  .container[data-placement^='#{$placement}'] > .arrow {
+    #{$prop}: math.div(map.get($arrow, size), 2) * -1 + 1px;
+
+    // $mask-deg: map.get($arrow, mask-angles, $placement);
+
+    // @if $mask-deg {
+    //   &::before {
+    //     @include arrow-mask($mask-deg);
+    //   }
+    // }
   }
 }
 
 @mixin arrow-styles {
   @include position.absolute;
-  width: $arrow-size;
-  height: $arrow-size;
+  width: map.get($arrow, size);
+  height: map.get($arrow, size);
   background: inherit;
 }
 
@@ -63,6 +115,5 @@ $arrow-placements: (
     @include arrow-styles;
     transform: rotate(45deg);
     visibility: visible;
-    z-index: -1;
   }
 }

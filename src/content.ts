@@ -1,6 +1,7 @@
 // import { v4 as uuidv4 } from 'uuid';
-import { env } from '@showdex/utils/core';
+import { createShowdexEvent, getShowdexEventName, env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import type { ShowdexEventDetail } from '@showdex/utils/core';
 
 interface ContentInjectable<T = unknown> {
   id: string;
@@ -73,24 +74,24 @@ const injectables: ContentInjectable<HTMLElement>[] = [
 
 // (production only)
 // include an extra script tag for the @pkmn/dex chunk
-if (!__DEV__) {
-  /**
-   * @todo See todo in webpack config about dynamically loading the chunks in as an env.
-   */
-  injectables.push(...[
-    runtime.getURL('pkmn.2c27923b.js'),
-    runtime.getURL('pkmn.356b2d28.js'),
-  ].filter(Boolean).map((src, i) => <ContentInjectable<HTMLScriptElement>> ({
-    id: `showdex-script-pkmn-${String(i).padStart(2, '0')}`,
-    component: 'script',
-    into: 'body',
-    props: {
-      src,
-      async: true,
-      // 'data-ext-id': extensionId,
-    },
-  })));
-}
+// if (!__DEV__) {
+//   /**
+//    * @todo See todo in webpack config about dynamically loading the chunks in as an env.
+//    */
+//   injectables.push(...[
+//     runtime.getURL('pkmn.2c27923b.js'),
+//     runtime.getURL('pkmn.356b2d28.js'),
+//   ].filter(Boolean).map((src, i) => <ContentInjectable<HTMLScriptElement>> ({
+//     id: `showdex-script-pkmn-${String(i).padStart(2, '0')}`,
+//     component: 'script',
+//     into: 'body',
+//     props: {
+//       src,
+//       async: true,
+//       // 'data-ext-id': extensionId,
+//     },
+//   })));
+// }
 
 l.info(
   'Starting Showdex for', env('build-target', 'probably chrome??'),
@@ -118,19 +119,62 @@ injectables.forEach(({
     }
   });
 
-  l.debug('Injecting', source, 'into', destination, 'with props', props);
+  // l.debug('Injecting', source, 'into', destination, 'with props', props);
 
   destination.appendChild(source);
 });
 
-// window.addEventListener('message', (e) => {
-//   try {
-//     chrome.runtime.sendMessage({ type: e.type });
-//   } catch (error) {
-//     if (__DEV__) {
-//       l.error(error);
-//     }
-//   }
-// });
+// Firefox needs this for importing settings from the clipboard
+// cause they don't support navigator.clipboard.getText() yet lmao
+// (at the time of writing of course)
 
-// export {};
+// found this at the wayyyy bottom of the MDN docs for readText(),
+// specifically in the browser compatibility section after clicking on the lil asterisk:
+// https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/readText#browser_compatibility
+// "Firefox only supports reading the clipboard in browser extensions,
+// "using the "clipboardRead" extension permission." ... LOL
+if (env('build-target') === 'firefox') {
+  l.debug('Adding onShowdexRequest event handler');
+
+  window.addEventListener(getShowdexEventName('request'), (e: CustomEvent<ShowdexEventDetail>) => {
+    l.debug(
+      'Received onShowdexRequest event', e?.detail?.type || '(missing event.detail.type)',
+      '\n', 'event', e,
+    );
+
+    if (e?.detail?.type !== 'clipboardReadText') {
+      return;
+    }
+
+    void (async () => {
+      l.debug(
+        'Sending message to background script via browser.runtime.sendMessage()',
+        '\n', 'event.detail.type', e.detail.type,
+        '\n', 'event', e,
+      );
+
+      try {
+        const response = await navigator.clipboard.readText();
+
+        l.debug(
+          'Firing onShowdexResponse for', e.detail.type,
+          '\n', 'response', response,
+        );
+
+        window.dispatchEvent(createShowdexEvent('response', {
+          type: 'clipboardReadText',
+          payload: response,
+        }));
+      } catch (error) {
+        if (__DEV__) {
+          l.error(
+            'Failed to handle message event', `${e.type || '(missing event.type)'}:`,
+            '\n', error,
+            '\n', 'event', e,
+            '\n', '(You will only see this error on development.)',
+          );
+        }
+      }
+    })();
+  });
+}

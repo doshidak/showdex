@@ -1,3 +1,3 @@
 export * from './logger';
 export * from './printBuildInfo';
-export * from './serializePokemon';
+export * from './sanitizeStackTrace';

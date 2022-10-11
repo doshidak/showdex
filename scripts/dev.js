@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import { config } from '../webpack.config';
+import { config, env as webpackEnv, printableEnv } from '../webpack.config';
 
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
@@ -46,6 +46,13 @@ const port = process.env.DEV_PORT;
 //   config.plugins.push(new webpack.HotModuleReplacementPlugin());
 // }
 
+const packageInfo = [
+  process.env.npm_package_name,
+  `v${process.env.npm_package_version}`,
+  `b${webpackEnv['process.env.BUILD_DATE']?.replace(/"/g, '')}`,
+  `(${webpackEnv['process.env.BUILD_TARGET']?.replace(/"/g, '') || 'unknown target'})`,
+];
+
 (async () => {
   // yeet the `build` dir, if it exists
   const buildDirPath = path.join(__dirname, 'build');
@@ -84,12 +91,19 @@ const port = process.env.DEV_PORT;
 
   console.log(
     'Starting',
-    process.env.npm_package_name,
-    `v${process.env.npm_package_version}`,
+    ...packageInfo,
     'development server...',
   );
 
+  console.log('Loaded node env:', env);
+  console.log('Loaded webpack env:', printableEnv);
+
   await server.start();
 
-  console.log('Development server started at', `${hostname}:${port}`);
+  console.log(
+    'Development server started for',
+    ...packageInfo,
+    'at',
+    `${hostname}:${port}`,
+  );
 })();

@@ -1,9 +1,46 @@
-import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts';
-import { detectLegacyGen } from '@showdex/utils/battle';
+import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/pokemon';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, NatureName } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { calcPokemonStat } from './calcPokemonStat';
+
+/**
+ * Internally-used list of IVs to use for each guess attempt, in the order of the array.
+ *
+ * * More IVs you add, the higher chance for a Chinese spread.
+ *   - Though, if a spread was found, the stats will be correct no matter how Chinese they seem.
+ *
+ * @since 1.0.3
+ */
+const AttemptedIvs = [
+  31,
+  30,
+  29,
+  28,
+  27,
+  26,
+  25,
+  24,
+  23,
+  22,
+  21,
+  20,
+  19,
+  18,
+  17,
+  16,
+  15,
+  10,
+  8,
+  6,
+  5,
+  3,
+  2,
+  1,
+  0,
+];
 
 const l = logger('@showdex/utils/calc/guessServerSpread');
 
@@ -31,15 +68,19 @@ const l = logger('@showdex/utils/calc/guessServerSpread');
  * @since 0.1.1
  */
 export const guessServerSpread = (
-  dex: Generation,
+  format: GenerationNum | string,
   pokemon: CalcdexPokemon,
-  knownNature?: NatureName,
+  knownNature?: Showdown.NatureName,
 ): Partial<CalcdexPokemonPreset> => {
-  if (detectLegacyGen(dex)) {
+  const gen = typeof format === 'string'
+    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
+    : format;
+
+  if (detectLegacyGen(gen)) {
     if (__DEV__) {
       l.warn(
         'Cannot guess a legacy spread; use guessServerLegacySpread() instead.',
-        '\n', 'dex.num', dex?.num,
+        '\n', 'format', format, 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -52,6 +93,7 @@ export const guessServerSpread = (
     if (__DEV__) {
       l.warn(
         'Received an invalid Pokemon', pokemon?.ident || pokemon?.speciesForme,
+        '\n', 'format', format, 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -64,7 +106,7 @@ export const guessServerSpread = (
     if (__DEV__) {
       l.warn(
         'No baseStats were found for Pokemon', pokemon.ident || pokemon.speciesForme,
-        // '\n', 'dex', dex,
+        '\n', 'format', format, 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -76,6 +118,7 @@ export const guessServerSpread = (
   if (__DEV__ && !pokemon.serverSourced) {
     l.warn(
       'Attempting to guess the spread of non-server Pokemon', pokemon.ident || pokemon.speciesForme,
+      '\n', 'format', format, 'gen', gen,
       '\n', 'pokemon', pokemon,
       '\n', '(You will only see this warning on development.)',
     );
@@ -109,8 +152,6 @@ export const guessServerSpread = (
 
   // don't read any further... I'm warning you :o
   for (const natureName of natureCombinations) {
-    const nature = dex.natures.get(natureName);
-
     const calculatedStats: Showdown.StatsTable = {
       hp: 0,
       atk: 0,
@@ -136,21 +177,22 @@ export const guessServerSpread = (
       }
 
       // don't say I didn't warn ya!
-      for (const iv of [31, 30, 29, 28, 27, 26, 25, 22, 21, 20, 19, 18, 17, 16, 15, 10, 8, 6, 5, 3, 2, 1, 0]) { // try some IVs, but not all 31 possible combinations
+      for (const iv of AttemptedIvs) { // try some IVs, but hopefully not all
         for (let ev = 0; ev <= 252; ev += 4) { // try 252 to 0 in multiples of 4
-          calculatedStats[stat] = dex.stats.calc(
+          calculatedStats[stat] = calcPokemonStat(
+            gen,
             stat,
             baseStats[stat],
             iv,
             ev,
             pokemon.level,
-            nature,
+            natureName,
           );
 
           if (__DEV__ && [0, 4, 80, 84, 88, 252].includes(ev)) {
             logs.push([
               'TRY ',
-              nature.name.padEnd(8, '·').toUpperCase(),
+              natureName.padEnd(8, '·').toUpperCase(),
               stat.toUpperCase(),
               `IV ${iv}`, `EV ${ev}`, '=',
               calculatedStats[stat], '===', serverStats[stat], '?',
@@ -162,7 +204,7 @@ export const guessServerSpread = (
             if (__DEV__) {
               logs.push([
                 'DONE',
-                nature.name.padEnd(8, '·').toUpperCase(),
+                natureName.padEnd(8, '·').toUpperCase(),
                 stat.toUpperCase(),
                 `IV ${iv}`, `EV ${ev}`, '=',
                 calculatedStats[stat],
@@ -200,13 +242,13 @@ export const guessServerSpread = (
     if (statsMatch && evsLegal) {
       l.debug(
         'Found nature that matches all of the stats for Pokemon', pokemon.ident || pokemon.speciesForme,
-        '\n', 'nature', nature.name,
+        '\n', 'nature', natureName,
         '\n', 'calculatedStats', calculatedStats,
         '\n', 'serverStats', serverStats,
         '\n', 'pokemon', pokemon,
       );
 
-      guessedSpread.nature = nature.name;
+      guessedSpread.nature = natureName;
 
       // if we ignored the HP before, we'll set the remaining EVs to HP
       if (ignoreHp && maxLegalEvs - totalEvs > 0) {

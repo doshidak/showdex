@@ -1,14 +1,20 @@
-// import { getFinalSpeed, getModifiedStat } from '@smogon/calc/dist/mechanics/util';
-import { PokemonInitialStats, PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts';
+import {
+  PokemonInitialStats,
+  PokemonSpeedReductionItems,
+  PokemonStatNames,
+} from '@showdex/consts/pokemon';
 import { formatId as id } from '@showdex/utils/app';
-import { hasMegaForme } from '@showdex/utils/battle';
-// import { env } from '@showdex/utils/core';
+import {
+  detectGenFromFormat,
+  getDexForFormat,
+  hasMegaForme,
+  notFullyEvolved,
+} from '@showdex/utils/battle';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
-// import { createSmogonField } from './createSmogonField';
-// import { createSmogonPokemon } from './createSmogonPokemon';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
 
@@ -28,20 +34,24 @@ const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
  * @since 0.1.3
  */
 export const calcPokemonFinalStats = (
-  // dex: Generation,
-  gen: GenerationNum,
+  format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
   opponentPokemon: DeepPartial<CalcdexPokemon>,
   field: CalcdexBattleField,
   playerKey: CalcdexPlayerKey,
 ): Showdown.StatsTable => {
+  if (!pokemon?.speciesForme || !opponentPokemon?.speciesForme) {
+    return { ...PokemonInitialStats };
+  }
+
+  const dex = getDexForFormat(format);
+
   // if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
-  if (typeof Dex === 'undefined') {
+  if (!dex) {
     if (__DEV__) {
       l.warn(
         // 'Cannot calculate stats since dex.stats.calc() and/or dex.species.get() are not available.',
-        'Global Dex object is unavailable.',
-        // '\n', 'dex', dex,
+        'Global Dex is unavailable for format', format,
         '\n', 'pokemon', pokemon,
         '\n', 'field', field,
         '\n', 'playerKey', playerKey,
@@ -51,6 +61,10 @@ export const calcPokemonFinalStats = (
 
     return { ...PokemonInitialStats };
   }
+
+  const gen = typeof format === 'string'
+    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
+    : format;
 
   const hpPercentage = calcPokemonHp(pokemon);
 
@@ -96,7 +110,7 @@ export const calcPokemonFinalStats = (
     ? pokemon.volatiles.formechange[1]
     : pokemon.speciesForme;
 
-  const species = Dex.forGen(gen).species.get(speciesForme);
+  const species = dex.species.get(speciesForme);
   const baseForme = id(species?.baseSpecies);
 
   const hasPowerTrick = 'powertrick' in pokemon.volatiles; // this is a move btw, not an ability!
@@ -215,7 +229,14 @@ export const calcPokemonFinalStats = (
     return finalStats;
   }
 
-  const hasDynamax = 'dynamax' in pokemon.volatiles;
+  // apply Dynamax effects
+  const hasDynamax = 'dynamax' in pokemon.volatiles
+    || pokemon.useMax;
+
+  if (hasDynamax) {
+    // 100% (2x) HP boost when Dynamaxed
+    finalStats.hp *= 2;
+  }
 
   // apply more item effects
   // (at this point, we should at least be gen 3)
@@ -341,7 +362,7 @@ export const calcPokemonFinalStats = (
 
   // apply toggleable abilities
   if (pokemon.abilityToggled) {
-    if ('slowstart' in pokemon.volatiles) {
+    if (ability === 'slowstart' || 'slowstart' in pokemon.volatiles) {
       // 50% ATK/SPE reduction if ability is "Slow Start"
       finalStats.atk = Math.floor(finalStats.atk * 0.5);
       speedMods.push(0.5);
@@ -366,12 +387,14 @@ export const calcPokemonFinalStats = (
   }
 
   // apply NFE (not fully evolved) effects
-  const nfe = species?.evos?.some((evo) => {
-    const evoSpecies = Dex.forGen(gen).species.get(evo);
+  // const nfe = species?.evos?.some((evo) => {
+  //   const evoSpecies = dex.species.get(evo);
+  //
+  //   return !evoSpecies?.isNonstandard
+  //     || evoSpecies?.isNonstandard === species.isNonstandard;
+  // });
 
-    return !evoSpecies?.isNonstandard
-      || evoSpecies?.isNonstandard === species.isNonstandard;
-  });
+  const nfe = notFullyEvolved(species);
 
   if (nfe) {
     if (!ignoreItem && item === 'eviolite') {

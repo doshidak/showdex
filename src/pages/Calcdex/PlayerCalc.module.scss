@@ -1,6 +1,8 @@
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
@@ -21,16 +23,8 @@
 
 button.usernameButton {
   justify-content: initial;
-  // max-width: 78px;
   max-width: 80%;
-}
-
-.usernameButtonLabel {
-  font-weight: 500;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
 
   .light & {
     color: color.alpha(colors.$black, 0.75);
@@ -41,17 +35,55 @@ button.usernameButton {
   }
 }
 
-.toggleButtonLabel {
+.usernameButtonLabel {
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// button.toggleButton {
+//   font-size: 8px;
+// }
+
+// .toggleButtonLabel {
+//   font-size: 8px;
+//   text-transform: uppercase;
+//
+//   .light &.inactive {
+//     color: colors.$black;
+//   }
+//
+//   .dark &.inactive {
+//     color: colors.$white;
+//   }
+// }
+
+.playerActions {
+  @include flex.row($align: center);
+  @include spacing.margin($top: 2px);
   font-size: 8px;
-  text-transform: uppercase;
 
-  .light &.inactive {
-    color: colors.$black;
+  button.toggleButton {
+    font-size: inherit;
   }
 
-  .dark &.inactive {
-    color: colors.$white;
+  .rating {
+    opacity: 0.65;
+
+    .ratingSeparator {
+      display: inline-block;
+      @include spacing.margin-xy($x: 0.5em);
+      user-select: none;
+    }
   }
+}
+
+.tooltipContent {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
 }
 
 .teamList {
@@ -106,6 +138,6 @@ button.usernameButton {
 }
 
 .pokeCalc {
-  @include spacing.padding($top: 5px);
+  @include spacing.padding($top: 3px);
   // z-index: 1;
 }

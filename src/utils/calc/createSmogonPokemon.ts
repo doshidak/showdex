@@ -1,8 +1,14 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
-import { detectLegacyGen, hasMegaForme } from '@showdex/utils/battle';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getGenDexForFormat,
+  // hasMegaForme,
+  notFullyEvolved,
+} from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, GenerationNum, MoveName } from '@pkmn/data';
+import type { Specie } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -20,57 +26,42 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon');
  * @since 0.1.0
  */
 export const createSmogonPokemon = (
-  dex: Generation,
+  format: string,
   pokemon: CalcdexPokemon,
-  moveName?: MoveName,
+  // moveName?: MoveName,
 ): SmogonPokemon => {
-  // don't bother logging in this and the `ident` check below cause the Calcdex components
-  // may get partial data (or even nothing) in the beginning, so these logs would get pretty spammy
-  if (typeof dex?.num !== 'number' || dex.num < 1 || !pokemon?.calcdexId) {
+  const dex = getGenDexForFormat(format);
+  const gen = detectGenFromFormat(format);
+
+  if (!dex || gen < 1 || !pokemon?.calcdexId) {
     return null;
   }
 
-  const legacy = detectLegacyGen(dex);
+  const legacy = detectLegacyGen(gen);
 
-  /**
-   * @todo Remove the `dex` and use the `Dex` global instead.
-   */
-  if (typeof Dex === 'undefined') {
-    if (__DEV__) {
-      l.warn(
-        'Global Dex object is unavailable.',
-        '\n', 'pokemon', pokemon,
-        '\n', 'moveName', moveName,
-        '\n', '(You will only see this warning on development.)',
-      );
-    }
-
-    return null;
-  }
-
-  // optional chaining here since `item` can be cleared by the user (dirtyItem) in PokeInfo
+  // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
-  const item = dex.num > 1
+  const item = gen > 1
     ? pokemon.dirtyItem ?? pokemon.item
     : null;
 
   // megas require special handling (like for the item), so make sure we detect these
-  const isMega = hasMegaForme(pokemon.speciesForme);
+  // const isMega = hasMegaForme(pokemon.speciesForme);
 
-  const speciesForme = SmogonPokemon.getForme(
-    dex,
-    pokemon.speciesForme,
-    isMega ? null : item,
-    moveName,
-  );
+  // const speciesForme = SmogonPokemon.getForme(
+  //   dex,
+  //   pokemon.speciesForme.replace('-Gmax', ''),
+  //   isMega ? null : item,
+  //   moveName,
+  // );
 
   // shouldn't happen, but just in case, ja feel
-  if (!speciesForme) {
+  if (!pokemon.speciesForme) {
     if (__DEV__) {
       l.warn(
         'Failed to detect speciesForme from Pokemon', pokemon.ident,
-        '\n', 'speciesForme', speciesForme,
-        '\n', 'gen', dex.num,
+        '\n', 'speciesForme', pokemon.speciesForme,
+        '\n', 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -79,9 +70,9 @@ export const createSmogonPokemon = (
     return null;
   }
 
-  const hasMegaItem = !!item
-    && /(?:ite|z$)/.test(formatId(item))
-    && formatId(item) !== 'eviolite'; // oh god
+  // const hasMegaItem = !!item
+  //   && /(?:ite|z$)/.test(formatId(item))
+  //   && formatId(item) !== 'eviolite'; // oh god
 
   // if applicable, convert the '???' status into an empty string
   // (don't apply the status if the Pokemon is fainted tho)
@@ -89,7 +80,6 @@ export const createSmogonPokemon = (
     ? pokemon.status === '???' ? null : pokemon.status
     : null;
 
-  // not using optional chaining here since ability cannot be cleared in PokeInfo
   const ability = !legacy
     ? pokemon.dirtyAbility ?? pokemon.ability
     : null;
@@ -97,8 +87,11 @@ export const createSmogonPokemon = (
   // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
   // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
-  const hasMultiscale = !!ability
-    && formatId(ability) === 'multiscale';
+  const hasMultiscale = !!ability && ['multiscale', 'shadowshield'].includes(formatId(ability));
+
+  const shouldMultiscale = hasMultiscale
+    && pokemon.abilityToggleable
+    && pokemon.abilityToggled;
 
   const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
@@ -108,29 +101,23 @@ export const createSmogonPokemon = (
     // also note: seems that maxhp is internally calculated in the instance's rawStats.hp,
     // so we can't specify it here
     curHP: (() => { // js wizardry
-      // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
-      const shouldMultiscale = hasMultiscale
-        && pokemon.abilityToggleable
-        && pokemon.abilityToggled;
+      // note that spreadStats may not be available yet, hence the fallback object
+      const { hp: maxHp } = pokemon.spreadStats
+        || { hp: pokemon.maxhp || 100 };
 
       if (pokemon.serverSourced) {
-        const maxHp = pokemon.spreadStats.hp || pokemon.maxhp || 100;
+        // const hp = !pokemon.hp || pokemon.hp === maxHp // check 0% or 100% HP for Multiscale
+        //   ? Math.floor((pokemon.hp || maxHp) * (!hasMultiscale || shouldMultiscale ? 1 : 0.99))
+        //   : (shouldMultiscale ? maxHp : pokemon.hp);
 
-        const hp = !pokemon.hp || pokemon.hp === maxHp // check 0% or 100% HP for Multiscale
-          ? Math.floor((pokemon.hp || maxHp) * (!hasMultiscale || shouldMultiscale ? 1 : 0.99))
-          : (shouldMultiscale ? maxHp : pokemon.hp);
-
-        return hp;
+        return shouldMultiscale && !pokemon.hp ? maxHp : pokemon.hp;
       }
 
       const hpPercentage = calcPokemonHp(pokemon);
 
-      // note that spreadStats may not be available yet, hence the fallback object
-      const { hp: hpStat } = pokemon.spreadStats
-        || { hp: pokemon.maxhp || 100 };
-
       // if the Pokemon is dead, assume it has full HP as to not break the damage calc
-      return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
+      // return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
+      return Math.floor((shouldMultiscale && !pokemon.hp ? 1 : hpPercentage || 1) * maxHp);
     })(),
 
     level: pokemon.level,
@@ -142,9 +129,10 @@ export const createSmogonPokemon = (
     // which I'd imagine affects the damage calculations in the matchup
     isDynamaxed: pokemon.useMax,
 
-    ability,
-    abilityOn: pokemon.abilityToggleable ? pokemon.abilityToggled : undefined,
-    item: isMega || hasMegaItem ? null : item,
+    // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
+    ability: hasMultiscale && !shouldMultiscale ? 'Pressure' : ability,
+    abilityOn: pokemon.abilityToggleable && !hasMultiscale ? pokemon.abilityToggled : undefined,
+    item,
     nature: legacy ? undefined : pokemon.nature,
     moves: pokemon.moves,
 
@@ -175,7 +163,12 @@ export const createSmogonPokemon = (
     },
 
     overrides: {
-      types: <SmogonPokemonOverrides['types']> pokemon.types,
+      // note: there's a cool utility called expand() that merges two objects together,
+      // which also merges array values, keeping the array length of the source object.
+      // for instance, Greninja, who has the types ['Water', 'Dark'] and the Protean ability
+      // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
+      // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
+      types: <SmogonPokemonOverrides['types']> [...pokemon.types, null].slice(0, 2),
     },
   };
 
@@ -199,43 +192,15 @@ export const createSmogonPokemon = (
     };
   }
 
-  // const dexSpecies = dex.species.get(speciesForme);
-  // const dexItem = dex.items.get(item);
-
-  // const determinedDex = dexSpecies?.exists && dexItem?.exists
-  //   ? dex
-  //   : <GenerationNum> Math.max(
-  //     Dex.species.get(speciesForme)?.gen ?? 0,
-  //     Dex.items.get(item)?.gen ?? 0,
-  //     0,
-  //   ) || dex;
-
-  const baseGen = <GenerationNum> Dex.species.get(speciesForme)?.gen;
-  const isGalarian = formatId(speciesForme).includes('galar');
-  const missingSpecies = !dex.species.get(speciesForme)?.exists;
-
-  const determinedDex = legacy
-    ? dex
-    : isGalarian
-      ? <GenerationNum> 8
-      : isMega || hasMegaItem
-        ? <GenerationNum> Math.max(7, baseGen || 0)
-        : missingSpecies
-          ? <GenerationNum> Math.max(baseGen || 0, 4)
-          : dex;
-
-  // l.debug(
-  //   'determinedDex for', speciesForme, typeof determinedDex === 'number' ? determinedDex : determinedDex?.num,
-  //   '\n', 'item', item,
-  //   '\n', 'isMega?', isMega, 'hasMegaItem?', hasMegaItem,
-  //   '\n', 'missingSpecies?', missingSpecies, 'isGalarian?', isGalarian,
-  // );
-
   const smogonPokemon = new SmogonPokemon(
-    determinedDex,
-    speciesForme,
+    dex,
+    pokemon.speciesForme,
     options,
   );
+
+  if (smogonPokemon?.species && typeof smogonPokemon.species?.nfe !== 'boolean') {
+    (<Writable<Specie>> smogonPokemon.species).nfe = notFullyEvolved(pokemon.speciesForme);
+  }
 
   return smogonPokemon;
 };

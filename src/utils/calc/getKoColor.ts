@@ -1,21 +1,29 @@
+import { clamp } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { Result } from '@smogon/calc';
 
+export type SmogonMatchupNhkoColors = [
+  one: string,
+  two: string,
+  three: string,
+  four: string,
+  after: string,
+];
+
 /**
- * Index refers to the `result.n` value.
+ * Index refers to the `result.n - 1` value.
  *
- * * Hence why the first index (`0`) is `null` ("0HKO" = no KO... lmao).
  * * If `n` is `0` or falsy, the default color should be applied.
  * * Any index that exceeds the length of this array should use the last index's color.
  *
  * @since 0.1.2
  */
-const SmogonMatchupKoColors: string[] = [
-  null,
+const SmogonMatchupDefaultNhkoColors: SmogonMatchupNhkoColors = [
   '#4CAF50', // 1HKO -- (styles/config/colors.scss) colors.$green
   '#FF9800', // 2HKO -- MD Orange 500
   '#FF9800', // 3HKO -- MD Orange 500
-  '#F44336', // 4+HKO -- (styles/config/colors.scss) colors.$red
+  '#F44336', // 4HKO -- (styles/config/colors.scss) colors.$red
+  '#F44336', // 5+HKO -- (styles/config/colors.scss) colors.$red
 ];
 
 const l = logger('@showdex/utils/calc/getKoColor');
@@ -25,7 +33,10 @@ const l = logger('@showdex/utils/calc/getKoColor');
  *
  * @since 0.1.2
  */
-export const getKoColor = (result: Result): string => {
+export const getKoColor = (
+  result: Result,
+  colors?: SmogonMatchupNhkoColors,
+): string => {
   if (!result?.damage || typeof result.kochance !== 'function') {
     return null;
   }
@@ -50,10 +61,14 @@ export const getKoColor = (result: Result): string => {
     return null;
   }
 
-  const koColorIndex = Math.min(
-    koChance.n,
-    SmogonMatchupKoColors.length - 1,
-  );
+  // const koColorIndex = Math.min(
+  //   koChance.n,
+  //   SmogonMatchupKoColors.length - 1,
+  // );
 
-  return SmogonMatchupKoColors[koColorIndex] || null;
+  const koColorIndex = clamp(0, koChance.n - 1, SmogonMatchupDefaultNhkoColors.length - 1);
+
+  return (/^#(?:[0-9A-F]{3}|[0-9A-F]{6})$/i.test(colors?.[koColorIndex]) && colors[koColorIndex])
+    || SmogonMatchupDefaultNhkoColors[koColorIndex]
+    || null;
 };

@@ -41,6 +41,15 @@
   }
 }
 
+// unset all
+
+@mixin unset-all {
+  top: unset;
+  right: unset;
+  bottom: unset;
+  left: unset;
+}
+
 // absolute
 
 @mixin absolute($top: null, $right: null, $bottom: null, $left: null) {
@@ -62,6 +71,11 @@
 
 @mixin absolute-square($margin) {
   @include absolute($margin, $margin, $margin, $margin);
+}
+
+/// @alias absolute-square
+@mixin absolute-all($margin) {
+  @include absolute-square($margin);
 }
 
 @mixin absolute-anchor($x: null, $y: null, $x-prop: left, $y-prop: top) {
@@ -110,6 +124,11 @@
 
 @mixin fixed-square($margin) {
   @include fixed($margin, $margin, $margin, $margin);
+}
+
+/// @alias fixed-square
+@mixin fixed-all($margin) {
+  @include fixed-square($margin);
 }
 
 @mixin fixed-anchor($x: null, $y: null, $x-prop: left, $y-prop: top) {

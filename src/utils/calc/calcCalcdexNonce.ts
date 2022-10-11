@@ -37,13 +37,13 @@ const calcPokemonCalcdexNonce = (
   itemEffect: pokemon?.itemEffect,
   prevItem: pokemon?.prevItem,
   prevItemEffect: pokemon?.prevItemEffect,
-  ivs: calcCalcdexId<Partial<CalcdexPokemon['ivs']>>(pokemon?.ivs),
-  evs: calcCalcdexId<Partial<CalcdexPokemon['evs']>>(pokemon?.evs),
+  ivs: calcCalcdexId(pokemon?.ivs),
+  evs: calcCalcdexId(pokemon?.evs),
   status: pokemon?.status,
-  statusData: calcCalcdexId<Partial<CalcdexPokemon['statusData']>>(pokemon?.statusData),
+  statusData: calcCalcdexId(pokemon?.statusData),
   statusStage: pokemon?.statusStage?.toString(),
-  volatiles: calcCalcdexId<Partial<Showdown.Pokemon['volatiles']>>(pokemon?.volatiles),
-  turnstatuses: calcCalcdexId<Partial<Showdown.Pokemon['turnstatuses']>>(pokemon?.turnstatuses),
+  volatiles: calcCalcdexId(pokemon?.volatiles),
+  turnstatuses: calcCalcdexId(pokemon?.turnstatuses),
   toxicCounter: pokemon?.toxicCounter?.toString(),
   moves: pokemon?.moves?.join('|'),
   altMoves: pokemon?.altMoves?.join('|'),
@@ -53,12 +53,13 @@ const calcPokemonCalcdexNonce = (
     }
 
     return prev;
-  }, <Partial<Record<string, number>>>{})),
-  moveState: calcCalcdexId<Partial<CalcdexPokemon['moveState']>>(pokemon?.moveState),
-  boosts: calcCalcdexId<Showdown.Pokemon['boosts']>(pokemon?.boosts),
-  dirtyBoosts: calcCalcdexId<CalcdexPokemon['dirtyBoosts']>(pokemon?.dirtyBoosts),
-  baseStats: calcCalcdexId<CalcdexPokemon['baseStats']>(pokemon?.baseStats),
-  spreadStats: calcCalcdexId<CalcdexPokemon['spreadStats']>(pokemon?.spreadStats),
+  }, <Partial<Record<string, number>>> {})),
+  // moveState: calcCalcdexId<Partial<CalcdexPokemon['moveState']>>(pokemon?.moveState),
+  revealedMoves: calcCalcdexId(pokemon?.revealedMoves),
+  boosts: calcCalcdexId(pokemon?.boosts),
+  dirtyBoosts: calcCalcdexId(pokemon?.dirtyBoosts),
+  baseStats: calcCalcdexId(pokemon?.baseStats),
+  spreadStats: calcCalcdexId(pokemon?.spreadStats),
   criticalHit: pokemon?.criticalHit?.toString(),
   preset: pokemon?.preset,
   presets: pokemon?.presets?.map((p) => p?.calcdexId || p?.name).join('|'),
@@ -102,7 +103,7 @@ export const calcBattleCalcdexNonce = (
   // inactive timeout messages may interfere with the activeIndex currently set by the user
   // excludes steps: '|inactive|', '|inactiveoff|', '|-message|' '|c|' (chat), '|j|' (join), and '|l|' (leave)
   const stepQueue = battle?.stepQueue
-    ?.filter?.((q) => !!q && !/^\|(?:inactive|-message|c|j|l)/i.test(q))
+    ?.filter?.((q) => !!q && !/^\|(?:inactive|-message|c|j|l|player)/i.test(q))
     ?? [];
 
   return calcCalcdexId<Partial<Record<keyof Showdown.Battle, string>>>({
@@ -110,6 +111,10 @@ export const calcBattleCalcdexNonce = (
     gen: battle?.gen?.toString(),
     tier: battle?.tier,
     gameType: battle?.gameType,
+    myPokemon: battle?.myPokemon?.length ? uuidv5(
+      battle.myPokemon.map((p) => calcPokemonCalcdexNonce(<CalcdexPokemon> <unknown> p)).join('|') || 'empty',
+      env('uuid-namespace', NIL_UUID),
+    ) : null,
     mySide: calcSideCalcdexNonce(battle?.mySide),
     nearSide: calcSideCalcdexNonce(battle?.nearSide),
     p1: calcSideCalcdexNonce(battle?.p1),

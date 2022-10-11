@@ -1,9 +1,11 @@
-import { PokemonStatNames } from '@showdex/consts';
-import { detectLegacyGen } from '@showdex/utils/battle';
+import { PokemonStatNames } from '@showdex/consts/pokemon';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcLegacyHpDv, convertLegacyDvToIv } from './convertLegacyStats';
+import { calcPokemonStat } from './calcPokemonStat';
 
 const l = logger('@showdex/utils/calc/guessServerLegacySpread');
 
@@ -19,14 +21,18 @@ const l = logger('@showdex/utils/calc/guessServerLegacySpread');
  * @since 1.0.2
  */
 export const guessServerLegacySpread = (
-  dex: Generation,
+  format: GenerationNum | string,
   pokemon: CalcdexPokemon,
 ): Partial<CalcdexPokemonPreset> => {
-  if (!detectLegacyGen(dex)) {
+  const gen = format === 'string'
+    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
+    : format;
+
+  if (!detectLegacyGen(gen)) {
     if (__DEV__) {
       l.warn(
         'Cannot guess a non-legacy spread; use guessServerSpread() instead.',
-        '\n', 'dex.num', dex?.num,
+        '\n', 'format', format, 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -40,6 +46,7 @@ export const guessServerLegacySpread = (
     if (__DEV__) {
       l.warn(
         'Received an invalid Pokemon', pokemon?.ident || pokemon?.speciesForme,
+        '\n', 'format', format, 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -52,6 +59,7 @@ export const guessServerLegacySpread = (
     if (__DEV__) {
       l.warn(
         'No baseStats were found for Pokemon', pokemon.ident || pokemon.speciesForme,
+        '\n', 'format', format, 'gen', gen,
         '\n', 'pokemon', pokemon,
         '\n', '(You will only see this warning on development.)',
       );
@@ -63,6 +71,7 @@ export const guessServerLegacySpread = (
   if (__DEV__ && !pokemon.serverSourced) {
     l.warn(
       'Attempting to guess the spread of non-server Pokemon', pokemon.ident || pokemon.speciesForme,
+      '\n', 'format', format, 'gen', gen,
       '\n', 'pokemon', pokemon,
       '\n', '(You will only see this warning on development.)',
     );
@@ -104,7 +113,8 @@ export const guessServerLegacySpread = (
       const iv = convertLegacyDvToIv(dv);
 
       // note: for gen 1, SPA and SPD should be the same since only SPC exists
-      calculatedStats[stat] = dex.stats.calc(
+      calculatedStats[stat] = calcPokemonStat(
+        gen,
         stat,
         baseStats[stat],
         iv,
@@ -142,7 +152,8 @@ export const guessServerLegacySpread = (
   // attempt to calculate the HP stat whether the IVs are available or not
   guessedSpread.ivs.hp = convertLegacyDvToIv(calcLegacyHpDv(guessedSpread.ivs));
 
-  calculatedStats.hp = dex.stats.calc(
+  calculatedStats.hp = calcPokemonStat(
+    gen,
     'hp',
     baseStats.hp,
     guessedSpread.ivs.hp,

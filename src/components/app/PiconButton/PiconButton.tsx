@@ -24,19 +24,20 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
   pokemon,
   facingLeft,
   tooltip,
-  hoverScale = 1.1,
+  hoverScale = 1.05,
+  activeScale = 0.95,
   disabled,
   children,
   ...props
 }: PiconButtonProps, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
-  const colorScheme = useColorScheme();
 
   React.useImperativeHandle(
     forwardedRef,
     () => ref.current,
-    [ref],
   );
+
+  const colorScheme = useColorScheme();
 
   return (
     <>
@@ -49,6 +50,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
           className,
         )}
         hoverScale={hoverScale}
+        activeScale={activeScale}
         disabled={disabled}
       >
         <Picon

@@ -1,47 +1,40 @@
 import { Move as SmogonMove } from '@smogon/calc';
-import { formatId } from '@showdex/utils/app';
-import type { Generation, MoveName } from '@pkmn/data';
+// import { formatId } from '@showdex/utils/app';
+import { getGenDexForFormat, getMaxMove, getZMove } from '@showdex/utils/battle';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { alwaysCriticalHits } from './alwaysCriticalHits';
 
 export const createSmogonMove = (
-  dex: Generation,
+  format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
 ): SmogonMove => {
-  if (!dex?.num || !pokemon?.speciesForme || !moveName) {
+  // using the Dex global for the gen arg of SmogonMove seems to work here lol
+  const dex = getGenDexForFormat(format);
+
+  if (!dex || !format || !pokemon?.speciesForme || !moveName) {
     return null;
   }
 
-  /**
-   * @todo temporary workaround for CAP learnsets
-   */
-  const dexMove = typeof Dex !== 'undefined'
-    ? Dex.forGen(dex.num).moves.get(moveName)
-    : null;
+  const ability = pokemon.dirtyAbility ?? pokemon.ability;
+  const item = pokemon.dirtyItem ?? pokemon.item;
 
-  // note: for whatever reason, gen 8 dex does not include information about Hidden Power
-  // (including any other types, such as Hidden Power Fire -- returns undefined!)
-  const isHiddenPower = formatId(moveName).includes('hiddenpower');
-
-  const determinedDex = dex.num === 8 && (isHiddenPower || pokemon.useZ)
-    ? 7
-    : dex;
-
-  const smogonMove = new SmogonMove(determinedDex, moveName, {
+  return new SmogonMove(dex, moveName, {
     species: pokemon.speciesForme,
-    ability: pokemon.dirtyAbility ?? pokemon.ability,
-    item: pokemon.dirtyItem ?? pokemon.item,
-    useZ: pokemon.useZ,
+
+    ability,
+    item,
+
+    // only apply one of them, not both!
+    useZ: pokemon.useZ && !pokemon.useMax,
     useMax: pokemon.useMax,
-    isCrit: pokemon.criticalHit ?? false,
 
-    /**
-     * @todo temporary workaround for CAP learnsets
-     */
-    overrides: dexMove?.isNonstandard === 'CAP' ? {
-      ...(<ConstructorParameters<typeof SmogonMove>[2]> <unknown> dexMove),
-    } : null,
+    // for moves that always crit, we need to make sure the crit doesn't apply when Z/Max'd
+    isCrit: (
+      alwaysCriticalHits(moveName, format)
+        && (!pokemon.useZ || !getZMove(moveName, item))
+        && (!pokemon.useMax || !getMaxMove(moveName, ability, pokemon.speciesForme))
+    ) || pokemon.criticalHit,
   });
-
-  return smogonMove;
 };

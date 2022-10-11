@@ -1,5 +1,13 @@
+import { clamp } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { Result } from '@smogon/calc';
+
+export type SmogonMatchupNhkoLabels = [
+  one: string,
+  two: string,
+  three: string,
+  four: string,
+];
 
 const l = logger('@showdex/utils/calc/formatKoChance');
 
@@ -9,7 +17,10 @@ const l = logger('@showdex/utils/calc/formatKoChance');
  * @example '69% 2HKO'
  * @since 0.1.0
  */
-export const formatKoChance = (result: Result): string => {
+export const formatKoChance = (
+  result: Result,
+  labels?: SmogonMatchupNhkoLabels,
+): string => {
   if (!result?.damage || typeof result.kochance !== 'function') {
     return null;
   }
@@ -38,6 +49,14 @@ export const formatKoChance = (result: Result): string => {
         // also truncate any trailing zeroes, e.g., 75.0% -> 75%
         output.unshift(`${fixedChance}%`.replace('.0%', '%'));
       }
+    }
+
+    const labelsIndex = output.length === 1 && labels?.length && resultKoChance.n <= labels.length
+      ? clamp(0, resultKoChance.n - 1, labels.length - 1)
+      : -1;
+
+    if (labelsIndex > -1 && labels[labelsIndex]) {
+      output[0] = labels[labelsIndex];
     }
   } catch (error) {
     if (__DEV__) {

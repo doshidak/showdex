@@ -3,6 +3,7 @@ import cx from 'classnames';
 import { Scrollable } from '@showdex/components/ui';
 import type { GroupBase, MenuListProps } from 'react-select';
 import type { DropdownOption } from './Dropdown';
+// import type { SelectProps } from './SelectContainer';
 import styles from './Dropdown.module.scss';
 
 export type SelectMenuListProps<
@@ -11,6 +12,7 @@ export type SelectMenuListProps<
   Group extends GroupBase<Option>,
 > = Modify<MenuListProps<Option, Multi, Group>, {
   innerProps?: Omit<JSX.IntrinsicElements['div'], 'ref'>;
+  // selectProps?: SelectProps<Option, Multi, Group>;
 }>;
 
 /* eslint-disable @typescript-eslint/indent */

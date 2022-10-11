@@ -1,0 +1,74 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/transition';
+
+$active-color-light: color.shade(colors.$blue, 15%);
+$active-color-dark: colors.$blue;
+
+button.container {
+  vertical-align: middle;
+  color: inherit;
+  text-transform: uppercase;
+
+  // don't show default hover colors
+  // (the user needs to see the toggle state the toggle state based on the color)
+  &:hover {
+    // we need to specify it like this due to the way the button is styled
+    // (otherwise, the alternative is !important, which is gross af)
+    &.light, &.dark {
+      color: inherit;
+    }
+  }
+
+  &.active {
+    font-weight: 500;
+
+    &.light {
+      color: $active-color-light;
+    }
+
+    &.dark {
+      color: $active-color-dark;
+    }
+  }
+}
+
+button.primary {
+  @include transition.apply(color, background-color, box-shadow);
+
+  &.light {
+    background-color: color.alpha(colors.$black, 0.075);
+  }
+
+  &.dark {
+    background-color: color.alpha(colors.$white, 0.05);
+  }
+
+  &:not(.active):hover {
+    &.light {
+      background-color: color.alpha(colors.$black, 0.15);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$white, 0.1);
+    }
+  }
+
+  &.active {
+    &.light {
+      background-color: color.alpha(colors.$blue, 0.2);
+      box-shadow: (
+        0 0 1px color.alpha($active-color-light, 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.5),
+      );
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$blue, 0.15);
+      box-shadow: (
+        0 0 1px color.alpha($active-color-dark, 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.5),
+      );
+    }
+  }
+}

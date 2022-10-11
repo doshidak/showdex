@@ -1,0 +1,339 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/position';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$settings-icon-size: 36px;
+$close-icon-size: 28px;
+
+.container {
+  @include position.absolute($top: 0, $right: 0, $bottom: 73px, $left: 0); // 73px = height of Hellodex footer
+  // backdrop-filter: blur(2px); // causes scrolling lag due to blurred pixel recalculations
+  @include transition.apply(color, background-color);
+  overflow: hidden;
+  z-index: 1;
+
+  &, *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  &.light {
+    color: colors.$black;
+    background-color: color.alpha(colors.$white, 0.95);
+  }
+
+  &.dark {
+    color: colors.$white;
+    background-color: color.alpha(#121212, 0.95);
+  }
+}
+
+.contentContainer {
+  @include position.absolute-fill;
+  overflow-x: hidden;
+  // z-index: 1;
+}
+
+.content {
+  @include spacing.padding-all(15px);
+}
+
+.header {
+  @include flex.row-between;
+  @include spacing.padding-xy($x: 10px, $y: 5px);
+  @include transition.apply(padding);
+  user-select: none;
+
+  .inBattle & {
+    @include spacing.padding-xy($x: 5px);
+  }
+
+  &:hover .settingsIcon {
+    transform: rotateZ(360deg);
+  }
+
+  .left {
+    @include flex.row-start;
+    opacity: 0.9;
+
+    .settingsIcon {
+      width: $settings-icon-size;
+      min-width: $settings-icon-size;
+      height: $settings-icon-size;
+      min-height: $settings-icon-size;
+      @include transition.apply((transform, 10s));
+    }
+
+    .title {
+      @include spacing.margin($left: 10px);
+      font-weight: 500;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+  }
+
+  .right {
+    @include flex.row-end;
+
+    .actionButton {
+      position: relative;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 10px;
+      color: inherit;
+      text-transform: uppercase;
+
+      &:not(.undoButton):hover {
+        .light & {
+          color: color.shade(colors.$blue, 15%);
+        }
+
+        .dark & {
+          color: colors.$blue;
+        }
+      }
+
+      &:not(:last-of-type) {
+        @include spacing.margin($right: 7px);
+      }
+
+      &:last-of-type {
+        @include spacing.margin($right: 15px);
+      }
+    }
+
+    .importButton {
+      // @include spacing.margin($right: 5px);
+
+      &.undoButton {
+        .light & {
+          color: color.shade(colors.$red, 15%);
+        }
+
+        .dark & {
+          color: colors.$red;
+        }
+      }
+    }
+
+    // .exportButton {
+    //   @include spacing.margin($right: 5px);
+    //
+    //   .inBattle & {
+    //     @include spacing.margin($right: 15px);
+    //   }
+    // }
+
+    .defaultsButton {
+      @include spacing.margin($right: 15px);
+    }
+  }
+}
+
+.importTooltip {
+  position: relative;
+
+  .importBadge {
+    @include position.absolute($top: -16px, $left: 50%);
+  }
+}
+
+.closePlaceholder {
+  width: $close-icon-size;
+  min-width: $close-icon-size;
+  height: 1px;
+  pointer-events: none;
+}
+
+.closeButton {
+  @include position.absolute($top: 24px, $right: 25px);
+  color: inherit;
+  z-index: 2;
+
+  .light & {
+    color: colors.$gray-dark;
+  }
+
+  .closeIcon {
+    width: $close-icon-size;
+    min-width: $close-icon-size;
+    height: $close-icon-size;
+    min-height: $close-icon-size;
+  }
+}
+
+.notice {
+  @include spacing.padding-all(10px);
+  font-size: 12px;
+  text-align: center;
+  opacity: 0.6;
+  user-select: none;
+
+  .face {
+    font-size: 16px;
+  }
+}
+
+.settingsGroup {
+  @include spacing.margin-all(10px);
+  @include spacing.padding-xy($x: 10px, $y: 15px);
+  border-radius: 10px;
+  @include transition.apply(background-color, box-shadow);
+
+  .light & {
+    background-color: color.alpha(colors.$white, 0.85);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.15),
+      0 0 15px color.alpha(colors.$gray-dark, 0.3),
+    );
+  }
+
+  .dark & {
+    background-color: color.alpha(#121212, 0.85);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$white, 0.3),
+      0 0 7px color.alpha(colors.$gray-dark, 0.3),
+    );
+  }
+}
+
+.settingsGroupTitle {
+  @include spacing.margin($bottom: 12px);
+  @include spacing.padding-xy($x: 10px);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  @include transition.apply(color);
+  user-select: none;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.85);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.85);
+  }
+}
+
+.settingsGroupFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); // note: 0 must come first before 1fr in minmax()
+  column-gap: 10px;
+  row-gap: 10px;
+  @include spacing.padding-xy($x: 15px);
+
+  .inBattle & {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+  }
+
+  .settingsGroupTitle {
+    grid-area: span 1 / span 2;
+    @include spacing.margin-xy($y: 7px);
+    @include spacing.padding-xy($x: 0);
+    font-size: 12px;
+
+    .inBattle & {
+      grid-area: span 1 / span 1;
+      @include spacing.margin($left: -0.5px); // matches letter-spacing of .settingsGroupTitle
+      text-align: center;
+    }
+
+    .light & {
+      color: color.alpha(colors.$black, 0.65);
+    }
+
+    .dark & {
+      color: color.alpha(colors.$white, 0.65);
+    }
+  }
+
+  .field {
+    grid-area: span 1 / span 1;
+    align-self: center;
+  }
+
+  .singleColumn {
+    grid-area: span 1 / span 2;
+  }
+}
+
+// this is basically a container for a pseudo-component frankensteined
+// from other components (namely the NHKO fields)
+// (should typically be applied with .field)
+.customField {
+  @include spacing.padding-xy($x: 5px, $y: 2px);
+}
+
+// mimics the labels of form components
+.customFieldLabel {
+  font-weight: 500;
+  font-size: 12px;
+  user-select: none;
+
+  .inBattle & {
+    text-align: center;
+  }
+
+  &.top {
+    @include spacing.margin($bottom: 10px);
+  }
+
+  &.right {
+    @include spacing.margin($left: 10px);
+  }
+
+  &.bottom {
+    @include spacing.margin($top: 10px);
+  }
+
+  &.left {
+    @include spacing.margin($right: 10px);
+  }
+}
+
+.customFieldRow {
+  @include flex.row($align: center);
+  @include spacing.margin($top: 7px);
+
+  &.centered {
+    justify-content: center;
+  }
+
+  .customFieldInput:not(:last-child) {
+    @include spacing.margin($right: 5px);
+  }
+}
+
+// .customFieldInput {
+//   @include spacing.margin-xy($x: 5px, $y: 2px);
+// }
+
+.textField {
+  @include spacing.padding-xy($x: 3px, $y: 5px);
+  font-size: 10px;
+
+  &.nhkoLabelField {
+    max-width: 75px;
+  }
+
+  &.nhkoColorField {
+    max-width: 70px;
+  }
+
+  .textFieldInput {
+    text-align: center;
+  }
+}
+
+.tooltipContent {
+  max-width: 225px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}

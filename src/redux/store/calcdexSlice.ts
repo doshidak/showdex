@@ -1,17 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { syncBattle } from '@showdex/redux/actions';
+import { createSlice, current } from '@reduxjs/toolkit';
+import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type {
-  AbilityName,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
-import type { State as SmogonState } from '@smogon/calc';
+import type { GenerationNum, State as SmogonState } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import { useSelector } from './hooks';
 
 /* eslint-disable @typescript-eslint/indent */
@@ -42,6 +37,11 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Internal unqiue ID used by the extension.
    *
+   * * As part of the new IDing mechanism introduced in v1.0.3, the corresponding `Pokemon`
+   *   and `ServerPokemon` (if applicable) will also have the same `calcdexId` as this one.
+   *   - See the notes for `calcdexId` in the `Showdown.Pokemon` interface.
+   *
+   * @see `Showdown.Pokemon['calcdexId']`
    * @since 0.1.0
    */
   calcdexId?: string;
@@ -72,6 +72,37 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   serverSourced?: boolean;
 
   /**
+   * Whether the Pokemon can Dynamax.
+   *
+   * * In addition to the Dynamax clause (and whether the gen supports D-maxing),
+   *   this value is also used to conditionally display the "Max" button in `PokeMoves`.
+   * * Note that if the Pokemon can also Gigantamax, the G-max formes should be available in
+   *   `altFormes` for toggling within `PokeInfo`.
+   *   - G-max forme will cause the "Max" button to display any G-max moves.
+   * * Damage calculator provides invalid damage calculations when manually specifying a
+   *   D-max or G-max move (move must be unmaxed with the Pokemon's `isDynamaxed` set to `true`).
+   *
+   * @default false
+   * @since 1.0.3
+   */
+  dmaxable?: boolean;
+
+  /**
+   * Whether the Pokemon can Gigantamax.
+   *
+   * * Derived from the `requests` of the current `BattleRoom`.
+   *   - This value does not exist in the `battle` object!
+   * * If `true`, `PokeMoves` should add the `'-Gmax'` suffix to Pokemon's `speciesForme` if the G-max forme
+   *   exists in the Pokemon's `altFormes`.
+   *   - Otherwise, `PokeMoves` should not prevent the user from switching to a G-max forme.
+   * * This is also used to specify the Gigantamax property in `exportPokePaste()`.
+   *
+   * @default false
+   * @since 1.0.3
+   */
+  gmaxable?: boolean;
+
+  /**
    * Alternative formes of the Pokemon.
    *
    * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
@@ -84,10 +115,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - No need to retain the user's dirtied forme in a separate property like `dirtySpeciesForme`.
    *   - Therefore, the switched forme should be stored in `speciesForme`.
    *   - On the next sync, any modifications to `speciesForme` will be replaced with the battle's value in `syncPokemon()`.
+   * * Note that in the example below, *Urshifu* only has *Urshifu-Rapid-Strike* as its alternative forme.
+   *   - `'Urshifu-Gmax'` is added due to the `canGigantamax` property being `true`.
+   *   - Another lookup for `'Urshifu-Rapid-Strike'` must be done to find its `canGigantamax` value, which is also `true`.
    *
    * @example
    * ```ts
+   * // gen 7
    * ['Charizard', 'Charizard-Mega-X', 'Charizard-Mega-Y']
+   *
+   * // gen 8
+   * ['Charizard', 'Charizard-Gmax', 'Charizard-Mega-X', 'Charizard-Mega-Y']
+   * ['Urshifu', 'Urshifu-Gmax', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax']
    * ```
    * @default
    * ```ts
@@ -201,7 +240,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @since 0.1.0
    */
-  altAbilities?: AbilityName[];
+  altAbilities?: CalcdexPokemonAlt<AbilityName>[];
 
   /**
    * Nature of the Pokemon.
@@ -225,7 +264,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @since 0.1.0
    */
-  altItems?: ItemName[];
+  altItems?: CalcdexPokemonAlt<ItemName>[];
 
   /**
    * Keeps track of the user-modified item as to not modify the actual `item` (or lack thereof) synced from the `battle` state.
@@ -255,7 +294,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * * Legacy stats (DVs [Determinant Values]) should be stored here.
    *   - Convert the DV into an IV before storing via `convertLegacyDvToIv()`.
-   *   - Since SPA/SPD don't exist, store SPC in SPA, but make sure to specify `spc` in `createSmogonPokemon()`.
+   *   - Since SPA/SPD don't exist, store SPC in both SPA and SPD, making sure SPD equals SPA.
    *
    * @since 0.1.0
    */
@@ -269,6 +308,30 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   evs?: Showdown.StatsTable;
+
+  /**
+   * Whether to show the EV/IV rows in the `PokeStats` table.
+   *
+   * * If `false`, an edit button should be shown to allow the user to set this value to `true`.
+   *
+   * @default true
+   * @since 1.0.3
+   */
+  showGenetics?: boolean;
+
+  /**
+   * Whether the Pokemon is using Z moves.
+   *
+   * @since 1.0.1
+   */
+  useZ?: boolean;
+
+  /**
+   * Whether the Pokemon is using D-max/G-max moves.
+   *
+   * @since 1.0.1
+   */
+  useMax?: boolean;
 
   /**
    * Moves currently assigned to the Pokemon.
@@ -311,32 +374,43 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @since 0.1.0
    */
-  altMoves?: MoveName[];
+  altMoves?: CalcdexPokemonAlt<MoveName>[];
 
   /**
-   * Whether the Pokemon is using Z moves.
+   * Last move used by the Pokemon.
    *
-   * @since 1.0.1
+   * @since 1.0.3
    */
-  useZ?: boolean;
+  lastMove?: MoveName;
 
   /**
-   * Whether the Pokemon is using D-max/G-max moves.
+   * Moves and their PP used so far by the Pokemon.
    *
-   * @since 1.0.1
-   */
-  useMax?: boolean;
-
-  /**
-   * Moves revealed by the Pokemon to the opponent.
+   * * Can exceed the defined max number of moves due to the inclusion of Z and/or Max moves.
+   * * In order to derive the move's remaining PP, you must subtract the `ppUsed` from the move's
+   *   max PP, obtained via `dex.moves.get()`, under the `pp` property of the returned `Showdown.Move` class.
    *
    * @since 0.1.0
    */
   moveTrack?: [moveName: MoveName, ppUsed: number][];
 
   /**
+   * Moves revealed by the Pokemon to the opponent/spectators.
+   *
+   * * Does not include Z and Max moves.
+   * * Though derived from `moveTrack`, does not include the `ppUsed`, only the `moveName`.
+   *
+   * @since 1.0.3
+   */
+  revealedMoves?: MoveName[];
+
+  /**
    * Categorized moves of the Pokemon.
    *
+   * @deprecated As of v1.0.3, this is no longer being used.
+   *   For `moveState.revealed`, use the `revealedMoves` property.
+   *   `moveState.learnset` and `moveState.other` are no longer used in favor of on-demand population
+   *   via `getPokemonLearnset()` and `BattleMovedex`, respectively, in `buildMoveOptions()`.
    * @since 0.1.0
    */
   moveState?: CalcdexMoveState;
@@ -483,6 +557,10 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   autoPreset?: boolean;
 }
 
+/**
+ * @deprecated As of v1.0.3, this is no longer being used.
+ *   See deprecation information in `CalcdexPokemon['moveState']`.
+ */
 export interface CalcdexMoveState {
   /**
    * Should only consist of moves that were revealed during the battle.
@@ -496,6 +574,8 @@ export interface CalcdexMoveState {
    * ```ts
    * []
    * ```
+   * @deprecated As of v1.0.3, this is no longer being used.
+   *   Use `CalcdexPokemon['revealedMoves']` instead.
    * @since 0.1.0
    */
   revealed: (MoveName | string)[];
@@ -510,6 +590,8 @@ export interface CalcdexMoveState {
    * ```ts
    * []
    * ```
+   * @deprecated As of v1.0.3, this is no longer being used.
+   *   Populated on-demand via `getPokemonLearnset()` in `buildMoveOptions()`.
    * @since 0.1.0
    */
   learnset: (MoveName | string)[];
@@ -524,12 +606,50 @@ export interface CalcdexMoveState {
    * ```ts
    * []
    * ```
-   * @deprecated As of v1.0.1, `other` moves are deterministically filled-in by the `format` in `buildMoveOptions()`.
-   *   Original population logic in `syncBattle()` has been removed.
+   * @deprecated As of v1.0.1, this is no longer being used.
+   *   Populated on-demand via `BattleMovedex` in `buildMoveOptions()`.
    * @since 0.1.0
    */
   other?: (MoveName | string)[];
 }
+
+/**
+ * Utility type for alternative abilities/items/moves, including those with usage percentages, if any.
+ *
+ * * You can specify `AbilityName`, `ItemName`, or `MoveName` for `T`.
+ *   - Import these types from `@smogon/calc/dist/data/interface`.
+ * * Pro-tip: Use `detectUsageAlt()` to distinguish between `T`s and `CalcdexPokemonUsageAlt<T>`s.
+ *
+ * @example
+ * ```ts
+ * type AltMove = CalcdexPokemonAlt<MoveName>;
+ * // -> MoveName | [name: MoveName, percent: number];
+ * ```
+ * @since 1.0.3
+ */
+export type CalcdexPokemonAlt<
+  T extends string,
+> = T | CalcdexPokemonUsageAlt<T>;
+
+/**
+ * Utility type for alternative abilities/items/moves with usage percentages.
+ *
+ * * You can specify `AbilityName`, `ItemName`, or `MoveName` for `T`.
+ *   - Import these types from `@smogon/calc/dist/data/interface`.
+ *
+ * @example
+ * ```ts
+ * type UsageAltMove = CalcdexPokemonUsageAlt<MoveName>;
+ * // -> [name: MoveName, percent: number];
+ * ```
+ * @since 1.0.3
+ */
+export type CalcdexPokemonUsageAlt<
+  T extends string,
+> = [
+  name: T,
+  percent: number,
+];
 
 /**
  * Pokemon set, ~~basically~~ probably.
@@ -592,11 +712,11 @@ export interface CalcdexPokemonPreset {
   gender?: Showdown.GenderName;
   shiny?: boolean;
   ability?: AbilityName;
-  altAbilities?: AbilityName[];
+  altAbilities?: CalcdexPokemonAlt<AbilityName>[];
   item?: ItemName;
-  altItems?: ItemName[];
+  altItems?: CalcdexPokemonAlt<ItemName>[];
   moves?: MoveName[];
-  altMoves?: MoveName[];
+  altMoves?: CalcdexPokemonAlt<MoveName>[];
   nature?: Showdown.PokemonNature;
   ivs?: Showdown.StatsTable;
   evs?: Showdown.StatsTable;
@@ -764,6 +884,7 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
  * * Counter-intuitively, if the value for a given rule is `true`, typically indicates some mechanic is disabled.
  * * Most of these are probably unused, but they're set just in case I decide to use them later.
  *
+ * @todo Update this to extract the applied battle rules from the `battle.rules` object (instead of `battle.stepQueue`).
  * @since 0.1.3
  */
 export interface CalcdexBattleRules {
@@ -908,6 +1029,15 @@ export type CalcdexPlayerKey =
 export type CalcdexPlayerState = Partial<Record<CalcdexPlayerKey, CalcdexPlayer>>;
 
 /**
+ * Rendering mode of the Calcdex.
+ *
+ * @since 1.0.3
+ */
+export type CalcdexRenderMode =
+  | 'panel'
+  | 'overlay';
+
+/**
  * Primary state for a given single instance of the Calcdex.
  *
  * @since 0.1.0
@@ -956,6 +1086,20 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * @since 0.1.3
    */
   rules?: CalcdexBattleRules;
+
+  /**
+   * Whether the battle is currently active (i.e., not ended).
+   *
+   * @since 1.0.3
+   */
+  active?: boolean;
+
+  /**
+   * Render mode of the Calcdex, determined from the settings during initialization.
+   *
+   * @since 1.0.3
+   */
+  renderMode?: CalcdexRenderMode;
 
   /**
    * Side key/ID of the player.
@@ -1075,6 +1219,13 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    * @since 0.1.3
    */
   updatePokemon: (state: Draft<CalcdexSliceState>, action: PayloadAction<CalcdexSlicePokemonAction>) => void;
+
+  /**
+   * Destroys the entire `CalcdexBattleState` by the passed-in `battleId` represented as `action.payload`.
+   *
+   * @since 1.0.3
+   */
+  destroy: (state: Draft<CalcdexSliceState>, action: PayloadAction<string>) => void;
 }
 
 const l = logger('@showdex/redux/store/calcdexSlice');
@@ -1087,8 +1238,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
   reducers: {
     init: (state, action) => {
       l.debug(
-        'RECV', action.type,
+        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1096,6 +1248,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
         rules = {},
+        renderMode,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
@@ -1133,6 +1286,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         format,
         rules,
 
+        renderMode,
+
         playerKey,
         authPlayerKey,
         opponentKey,
@@ -1169,16 +1324,17 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       };
 
       l.debug(
-        'DONE', action.type,
+        'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', `state[${battleId}]`, state[battleId],
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     update: (state, action) => {
       l.debug(
-        'RECV', action.type,
+        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1186,6 +1342,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce,
         gen,
         format,
+        active,
       } = action.payload;
 
       if (!battleId) {
@@ -1200,8 +1357,12 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
+      // note: this is a pointer/reference to the object in `state`
       const currentState = state[battleId];
 
+      // note: `state` is actually a Proxy object via the WritableDraft from Immutable,
+      // a dependency of RTK. spreading will only show the values of the current object depth;
+      // all inner depths will remain as Proxy objects! (you cannot read the value of a Proxy.)
       state[battleId] = {
         ...currentState,
 
@@ -1209,19 +1370,21 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce: battleNonce || currentState.battleNonce,
         gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
         format: format || currentState.format,
+        active: typeof active === 'boolean' ? active : currentState.active,
       };
 
       l.debug(
-        'DONE', action.type,
+        'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', `state[${battleId}]`, currentState,
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     updateField: (state, action) => {
       l.debug(
-        'RECV', action.type,
+        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1241,26 +1404,39 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
-      state[battleId] = {
-        ...state[battleId],
+      // using battleField here as both a pointer and popular reference
+      const battleField = state[battleId].field;
 
-        field: {
-          ...state[battleId].field,
-          ...field,
+      // only spreading this hard cause of what I chose to send as the payload,
+      // which is a DeepPartial<CalcdexBattleField>, so even the objects inside are partials!
+      // ... need to get some of that expand() util tbh lmao
+      state[battleId].field = {
+        ...battleField,
+        ...field,
+
+        attackerSide: {
+          ...battleField.attackerSide,
+          ...field?.attackerSide,
+        },
+
+        defenderSide: {
+          ...battleField.defenderSide,
+          ...field?.defenderSide,
         },
       };
 
       l.debug(
-        'DONE', action.type,
+        'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', `state[${battleId}]`, state[battleId],
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     updatePlayer: (state, action) => {
       l.debug(
-        'RECV', action.type,
+        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1300,16 +1476,17 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       }
 
       l.debug(
-        'DONE', action.type,
+        'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', `state[${battleId}]`, state[battleId],
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     updatePokemon: (state, action) => {
       l.debug(
-        'RECV', action.type,
+        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1335,8 +1512,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!(playerKey in battleState)) {
         l.error(
           'Could not find player', playerKey, 'in battleId', battleId,
-          '\n', 'battleState', battleState,
           '\n', 'pokemon', pokemon,
+          '\n', 'battleState', __DEV__ && current(state)[battleId],
         );
 
         return;
@@ -1349,12 +1526,19 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       const pokemonState = pokemonStateIndex > -1 ? playerState.pokemon[pokemonStateIndex] : null;
 
       if (!pokemonState) {
-        l.debug(
-          'Could not find Pokemon', pokemonId, 'of player', playerKey, 'in battleId', battleId,
-          '\n', 'battleState', battleState,
-          '\n', 'playerState', playerState,
-          '\n', 'pokemon', pokemon,
-        );
+        if (__DEV__) {
+          const currentState = __DEV__ ? current(state) : null;
+
+          l.warn(
+            'Could not find Pokemon', pokemonId, 'of player', playerKey, 'in battleId', battleId,
+            '\n', 'pokemon', pokemon,
+            '\n', 'playerState', __DEV__ && currentState?.[battleId]?.[playerKey],
+            '\n', 'battleState', __DEV__ && currentState?.[battleId],
+            '\n', '(You will only see this warning on development.)',
+          );
+        }
+
+        return;
       }
 
       playerState.pokemon[pokemonStateIndex] = {
@@ -1363,9 +1547,38 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       };
 
       l.debug(
+        'DONE', action.type, 'for', battleId || '(missing battleId)',
+        '\n', 'action.payload', action.payload,
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
+      );
+    },
+
+    destroy: (state, action) => {
+      l.debug(
+        'RECV', action.type,
+        '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
+      );
+
+      if (!action.payload || !(action.payload in state)) {
+        if (__DEV__) {
+          l.warn(
+            'Attempted to destroy a Calcdex that does not exist in state.',
+            '\n', 'battleId', action.payload,
+            '\n', 'state', __DEV__ && current(state),
+            '\n', '(You will only see this warning on development.)',
+          );
+        }
+
+        return;
+      }
+
+      delete state[action.payload];
+
+      l.debug(
         'DONE', action.type,
         '\n', 'action.payload', action.payload,
-        '\n', `state[${battleId}]`, state[battleId],
+        '\n', 'state', __DEV__ && current(state),
       );
     },
   },
@@ -1377,9 +1590,19 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (battleId) {
         state[battleId] = action.payload;
       }
+
+      l.debug(
+        'DONE', SyncBattleActionType, 'for', battleId || '(missing battleId)',
+        '\n', 'action.payload', action.payload,
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
+      );
     }),
 });
 
 export const useCalcdexState = () => useSelector(
   (state) => state?.calcdex,
+);
+
+export const useCalcdexBattleState = (battleId: string) => useSelector(
+  (state) => state?.calcdex?.[battleId],
 );

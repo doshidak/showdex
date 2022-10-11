@@ -1,3 +1,4 @@
+@use 'sass:map';
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
@@ -10,22 +11,70 @@
 $padding-x: 5px;
 $padding-y: 2px;
 
-$background-color-light: color.alpha(colors.$white, 0.5);
-$background-color-dark: color.alpha(colors.$white, 0.05);
-$background-color-light-hover: color.alpha(colors.$black, 0.05);
-$background-color-dark-hover: color.alpha(colors.$white, 0.075);
-$background-color-light-active: color.alpha(colors.$black, 0.1);
-$background-color-dark-active: color.alpha(colors.$white, 0.1);
+// $background-color-light: color.alpha(colors.$white, 0.5);
+// $background-color-dark: color.alpha(colors.$white, 0.05);
+// $background-color-light-hover: color.alpha(colors.$black, 0.05);
+// $background-color-dark-hover: color.alpha(colors.$white, 0.075);
+// $background-color-light-active: color.alpha(colors.$black, 0.1);
+// $background-color-dark-active: color.alpha(colors.$white, 0.1);
 
+$background-color: (
+  default: (
+    light: color.alpha(colors.$white, 0.3),
+    dark: color.alpha(colors.$white, 0.05),
+  ),
+
+  hover: (
+    light: color.alpha(color.shade(colors.$blue, 15%), 0.05),
+    dark: color.alpha(colors.$blue, 0.05),
+  ),
+
+  active: (
+    light: color.alpha(colors.$white, 0.9),
+    dark: color.alpha(colors.$white, 0.1),
+  ),
+);
+
+// $border-width: 0.5px;
+// $border-color-light: color.alpha(colors.$black, 0.15);
+// $border-color-dark: color.alpha(colors.$white, 0.15);
 $border-radius: 5px;
 
+$box-shadow: (
+  default: (
+    light: (
+      0 0 1px color.alpha(colors.$black, 0.3),
+      0 0 2px color.alpha(colors.$gray-darker, 0.15),
+    ),
+
+    dark: (
+      0 0 1px color.alpha(colors.$white, 0.5),
+      0 0 2px color.alpha(colors.$black, 0.3),
+    ),
+  ),
+
+  hover: (
+    light: (
+      0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.85),
+      0 0 2px color.alpha(colors.$blue, 0.3),
+    ),
+
+    dark: (
+      0 0 1px color.alpha(colors.$blue, 0.85),
+      0 0 2px color.alpha(colors.$blue, 0.3),
+    ),
+  ),
+);
+
+$opacity-disabled: 0.3;
+
 $value-font-size: 10px;
-$value-light-color: color.alpha(colors.$black, 0.85);
-$value-dark-color: color.alpha(colors.$white, 0.85);
-$value-light-color-hover: color.tint(colors.$blue, 15%);
-$value-dark-color-hover: $value-light-color-hover;
-$value-light-color-active: colors.$black;
-$value-dark-color-active: colors.$white;
+$value-light-color: colors.$black;
+$value-dark-color: colors.$white;
+$value-light-color-hover: color.shade(colors.$blue, 15%);
+$value-dark-color-hover:colors.$blue;
+$value-light-color-active: color.alpha(colors.$black, 0.5);
+$value-dark-color-active: color.alpha(colors.$white, 0.5);
 
 $multi-value-padding-x: 2px;
 $multi-value-padding-y: 1px;
@@ -42,37 +91,49 @@ $placeholder-dark-color-active: color.alpha(colors.$white, 0.5);
 $icon-size: 10px; // used for the close and chevron icons
 $icon-light-color: color.alpha(colors.$black, 0.3);
 $icon-dark-color: color.alpha(colors.$white, 0.3);
-$icon-light-color-hover: color.alpha(colors.$black, 0.95);
-$icon-dark-color-hover: color.alpha(colors.$white, 0.95);
+$icon-light-color-hover: color.alpha(color.shade(colors.$blue, 15%), 0.95);
+$icon-dark-color-hover: color.alpha(colors.$blue, 0.95);
+
+$loading-indicator-light-color: color.alpha(colors.$black, 0.3);
+$loading-indicator-dark-color: color.alpha(colors.$white, 0.3);
 
 $indicator-separator-width: 1px;
 $indicator-separator-margin-x: 3px;
 $indicator-separator-light-color: colors.$transparent;
 $indicator-separator-dark-color: colors.$transparent;
 
-$menu-gutter: 1px;
-$menu-light-background-color: color.alpha(colors.$white, 0.95);
-$menu-dark-background-color: color.alpha(colors.$black, 0.95);
-$menu-light-border-color: color.alpha(colors.$black, 0.15);
-$menu-dark-border-color: color.alpha(colors.$white, 0.15);
+$menu-gutter: 2px; // distance between control and menu
+$menu-light-background-color: color.alpha(colors.$white, 0.975);
+$menu-dark-background-color: color.alpha(colors.$black, 0.975);
+// $menu-border-width: 1px;
+// $menu-light-border-color: color.alpha(colors.$black, 0.15);
+// $menu-dark-border-color: color.alpha(colors.$white, 0.15);
 $menu-z-index: 10;
 
+/// @todo disgusting lol
 $option-padding-x: 3px;
 $option-padding-y: 2px;
 $option-light-color: colors.$black;
 $option-dark-color: colors.$white;
+$option-light-color-selected: colors.$white; // might as well add to the steaming pile of poo
+$option-dark-color-selected: colors.$white; // lolol
 $option-light-background-color: colors.$transparent;
 $option-dark-background-color: colors.$transparent;
 $option-light-background-color-hover: color.alpha(colors.$black, 0.15);
 $option-dark-background-color-hover: color.alpha(colors.$white, 0.15);
-$option-light-background-color-focused: color.alpha(colors.$blue, 0.25);
+$option-light-background-color-focused: color.alpha(colors.$blue, 0.2);
 $option-dark-background-color-focused: color.alpha(colors.$blue, 0.25);
 $option-light-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
 $option-dark-background-color-focused-hover: color.alpha(colors.$blue, 0.5);
-$option-light-background-color-selected: color.alpha(colors.$blue, 0.75);
-$option-dark-background-color-selected: color.alpha(colors.$blue, 0.75);
-$option-light-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
-$option-dark-background-color-selected-hover: color.alpha(colors.$blue, 0.5);
+$option-light-background-color-selected: color.alpha(color.shade(colors.$blue, 15%), 0.9);
+$option-dark-background-color-selected: color.alpha(colors.$blue, 0.9);
+$option-light-background-color-selected-hover: color.alpha(color.shade(colors.$blue, 10%), 0.75);
+$option-dark-background-color-selected-hover: color.alpha(color.shade(colors.$blue, 5%), 0.75);
+
+$option-right-label-spacing: 3px; // basically margin-left
+$option-right-label-font-size: 8px;
+$option-right-label-light-color: color.alpha($option-light-color, 0.75);
+$option-right-label-dark-color: color.alpha($option-dark-color, 0.75);
 
 $option-sub-label-font-size: 8px;
 $option-sub-label-light-color: color.alpha($option-light-color, 0.75);
@@ -85,11 +146,12 @@ $notice-dark-color: color.alpha(colors.$white, 0.5);
 
 $group-padding-x: 1px;
 
-$group-heading-padding-x: $option-padding-x;
-$group-heading-padding-y: $option-padding-y;
+$group-heading-padding-x: $option-padding-x + 1px;
+$group-heading-padding-y: $option-padding-y + 1px;
+$group-heading-font-weight: 500;
 $group-heading-font-size: 8px;
-$group-heading-light-color: color.alpha(colors.$black, 0.75);
-$group-heading-dark-color: color.alpha(colors.$white, 0.75);
+$group-heading-light-color: color.alpha(colors.$black, 0.85);
+$group-heading-dark-color: color.alpha(colors.$white, 0.85);
 $group-heading-light-background-color: color.alpha(colors.$black, 0.125);
 $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
@@ -102,31 +164,42 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .selectContainer {
   position: relative;
   @include flex.row;
+  // border: $border-width solid colors.$transparent;
   border-radius: $border-radius;
-  @include transition.apply(background-color);
+  @include transition.apply(background-color, box-shadow);
 
   .light & {
-    background-color: $background-color-light;
+    background-color: map.get($background-color, default, light);
+    // border-color: $border-color-light;
+    box-shadow: map.get($box-shadow, default, light);
   }
 
   .dark & {
-    background-color: $background-color-dark;
+    background-color: map.get($background-color, default, dark);
+    // border-color: $border-color-dark;
+    box-shadow: map.get($box-shadow, default, dark);
   }
 
-  .light &:hover {
-    background-color: $background-color-light-hover;
+  &:not(.active):hover {
+    .light & {
+      background-color: map.get($background-color, hover, light);
+      box-shadow: map.get($box-shadow, hover, light);
+    }
+
+    .dark & {
+      background-color: map.get($background-color, hover, dark);
+      box-shadow: map.get($box-shadow, hover, dark);
+    }
   }
 
-  .dark &:hover {
-    background-color: $background-color-dark-hover;
-  }
+  &.active {
+    .light & {
+      background-color: map.get($background-color, active, light);
+    }
 
-  .light &.active {
-    background-color: $background-color-light-active;
-  }
-
-  .dark &.active {
-    background-color: $background-color-dark-active;
+    .dark & {
+      background-color: map.get($background-color, active, dark);
+    }
   }
 
   &.rtl {
@@ -134,7 +207,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   }
 
   &.disabled {
-    opacity: 0.3;
+    opacity: $opacity-disabled;
     pointer-events: none;
   }
 }
@@ -171,6 +244,26 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   .dark & {
     color: $value-dark-color;
   }
+
+  .selectContainer:not(.active):hover & {
+    .light & {
+      color: $value-light-color-hover;
+    }
+
+    .dark & {
+      color: $value-dark-color-hover;
+    }
+  }
+
+  .selectContainer.active &.menuOpen {
+    .light & {
+      color: $value-light-color-active;
+    }
+
+    .dark & {
+      color: $value-dark-color-active;
+    }
+  }
 }
 
 .value {
@@ -206,20 +299,24 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
     color: $placeholder-dark-color;
   }
 
-  .light .selectContainer:not(.active):hover & {
-    color: $placeholder-light-color-hover;
+  .selectContainer:not(.active):hover & {
+    .light & {
+      color: $placeholder-light-color-hover;
+    }
+
+    .dark & {
+      color: $placeholder-dark-color-hover;
+    }
   }
 
-  .dark .selectContainer:not(.active):hover & {
-    color: $placeholder-dark-color-hover;
-  }
+  .selectContainer.active & {
+    .light & {
+      color: $placeholder-light-color-active;
+    }
 
-  .light .selectContainer.active & {
-    color: $placeholder-light-color-active;
-  }
-
-  .dark .selectContainer.active & {
-    color: $placeholder-dark-color-active;
+    .dark & {
+      color: $placeholder-dark-color-active;
+    }
   }
 }
 
@@ -227,9 +324,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .inputContainer {
   display: inline-grid;
-  // grid-template-columns: 0 max-content;
   grid-template-columns: 0 1fr;
-  // flex: 1 1 auto;
 
   &::after {
     content: attr(data-value) ' ';
@@ -250,7 +345,6 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .input {
   grid-area: 1 / 2;
-  // width: 100%;
   min-width: 2px;
   @include spacing.margin-none;
   @include spacing.padding-none;
@@ -286,6 +380,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   display: block;
   @include spacing.margin-xy($x: -1px);
   @include spacing.padding-xy($x: $group-heading-padding-x, $y: $group-heading-padding-y);
+  font-weight: $group-heading-font-weight;
   font-size: $group-heading-font-size;
   text-transform: uppercase;
   user-select: none;
@@ -311,7 +406,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  @include transition.apply(color);
+  // pointer-events: none; // strangely causes the dropdown to close on mouse up in the Calcdex overlay
 }
 
 // SelectMultiValue
@@ -356,12 +451,14 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
     color: $icon-dark-color;
   }
 
-  .light &:hover {
-    color: $icon-light-color-hover;
-  }
+  &:hover {
+    .light & {
+      color: $icon-light-color-hover;
+    }
 
-  .dark &:hover {
-    color: $icon-dark-color-hover;
+    .dark & {
+      color: $icon-dark-color-hover;
+    }
   }
 }
 
@@ -386,22 +483,79 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
     color: $icon-dark-color;
   }
 
-  .light &:hover {
-    color: $icon-light-color-hover;
-  }
+  &:hover {
+    .light & {
+      color: $icon-light-color-hover;
+    }
 
-  .dark &:hover {
-    color: $icon-dark-color-hover;
+    .dark & {
+      color: $icon-dark-color-hover;
+    }
   }
 }
 
 // SelectDropdownIndicator
 
-.dropdownIndicator i {
-  @include transition.apply(transform);
+.dropdownIndicator {
+  .selectContainer:not(.active):hover &:not(:hover) {
+    .light & {
+      color: color.alpha($icon-light-color-hover, 0.5);
+    }
 
-  .menuOpen & {
-    transform: rotate(-180deg);
+    .dark & {
+      color: color.alpha($icon-dark-color-hover, 0.5);
+    }
+  }
+
+  i {
+    @include transition.apply(transform);
+
+    .menuOpen & {
+      transform: rotate(-180deg);
+    }
+  }
+}
+
+// SelectLoadingIndicator
+
+.loadingIndicator {
+  @include flex.row;
+  align-self: center;
+  vertical-align: middle;
+  line-height: 1;
+  text-align: center;
+  @include transition.apply(color);
+
+  .light & {
+    color: $loading-indicator-light-color;
+  }
+
+  .dark & {
+    color: $loading-indicator-dark-color;
+  }
+}
+
+@keyframes loadingIndicatorDotAnimation {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+}
+
+.loadingIndicatorDot {
+  display: inline-block;
+  vertical-align: top;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  border-radius: 1em;
+  animation: loadingIndicatorDotAnimation 1s ease-in-out infinite;
+
+  &.offset {
+    @include spacing.margin($left: 1em);
   }
 }
 
@@ -428,18 +582,20 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   width: 100%;
   @include spacing.margin-xy(0, $menu-gutter);
   border-radius: $border-radius;
-  border: 1px solid colors.$transparent;
+  // border: $menu-border-width solid colors.$transparent;
   overflow: hidden;
   z-index: $menu-z-index;
 
   .light & {
     background-color: $menu-light-background-color;
-    border-color: $menu-light-border-color;
+    // border-color: $menu-light-border-color;
+    box-shadow: map.get($box-shadow, default, light);
   }
 
   .dark & {
     background-color: $menu-dark-background-color;
-    border-color: $menu-dark-border-color;
+    // border-color: $menu-dark-border-color;
+    box-shadow: map.get($box-shadow, default, dark);
   }
 
   &.placementTop {
@@ -478,54 +634,102 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
     background-color: $option-dark-background-color;
   }
 
-  .light &:hover {
-    background-color: $option-light-background-color-hover;
-  }
+  &:hover {
+    .light & {
+      background-color: $option-light-background-color-hover;
+    }
 
-  .dark &:hover {
-    background-color: $option-dark-background-color-hover;
-  }
-
-  .light &.focused {
-    background-color: $option-light-background-color-focused;
-
-    &:hover {
-      background-color: $option-light-background-color-focused-hover;
+    .dark & {
+      background-color: $option-dark-background-color-hover;
     }
   }
 
-  .dark &.focused {
-    background-color: $option-dark-background-color-focused;
+  &.focused {
+    .light & {
+      background-color: $option-light-background-color-focused;
 
-    &:hover {
-      background-color: $option-dark-background-color-focused-hover;
+      &:hover {
+        background-color: $option-light-background-color-focused-hover;
+      }
+    }
+
+    .dark & {
+      background-color: $option-dark-background-color-focused;
+
+      &:hover {
+        background-color: $option-dark-background-color-focused-hover;
+      }
     }
   }
 
-  .light &.selected {
-    background-color: $option-light-background-color-selected;
+  &.selected {
+    .light & {
+      background-color: $option-light-background-color-selected;
 
-    &:hover {
-      background-color: $option-light-background-color-selected-hover;
+      &:hover {
+        background-color: $option-light-background-color-selected-hover;
+      }
     }
-  }
 
-  .dark &.selected {
-    background-color: $option-dark-background-color-selected;
+    .dark & {
+      background-color: $option-dark-background-color-selected;
 
-    &:hover {
-      background-color: $option-dark-background-color-selected-hover;
-    }
-  }
+      &:hover {
+        background-color: $option-dark-background-color-selected-hover;
+      }
+    } // end .dark &
+  } // end &.selected
 }
 
-.optionLabel {
+.optionRow {
+  @include flex.row-between;
+  width: 100%;
+
   .light & {
     color: $option-light-color;
   }
 
   .dark & {
     color: $option-dark-color;
+  }
+
+  .selected & {
+    .light & {
+      color: $option-light-color-selected;
+    }
+
+    .dark & {
+      color: $option-dark-color-selected;
+    }
+  }
+}
+
+// .optionLabel {
+//   flex: 2 0;
+// }
+
+.optionRightLabel {
+  // flex: 1;
+  @include spacing.margin($left: $option-right-label-spacing);
+  font-size: $option-right-label-font-size;
+  text-align: right;
+
+  .light & {
+    color: $option-right-label-light-color;
+  }
+
+  .dark & {
+    color: $option-right-label-dark-color;
+  }
+
+  .selected & {
+    .light & {
+      color: inherit;
+    }
+
+    .dark & {
+      color: inherit;
+    }
   }
 }
 
@@ -538,6 +742,18 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
   .dark & {
     color: $option-sub-label-dark-color;
+  }
+
+  // note: .optionSubLabel is not inside .optionRow, so it's not possible
+  // to inherit .optionRow's color here (like in .optionRightLabel)
+  .selected & {
+    .light & {
+      color: $option-light-color-selected;
+    }
+
+    .dark & {
+      color: $option-dark-color-selected;
+    }
   }
 }
 

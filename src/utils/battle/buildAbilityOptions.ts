@@ -1,30 +1,25 @@
-import { LegalLockedFormats } from '@showdex/consts';
 import { formatId } from '@showdex/utils/app';
-import type { AbilityName } from '@pkmn/data';
+import { percentage } from '@showdex/utils/humanize';
+import type { AbilityName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { DropdownOption } from '@showdex/components/form';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
+import { flattenAlt, flattenAlts } from './flattenAlts';
+import { legalLockedFormat } from './legalLockedFormat';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
 
-export interface PokemonAbilityOption {
-  label: string;
-  options: {
-    label: string;
-    value: AbilityName;
-  }[];
-}
+export type PokemonAbilityOption = DropdownOption<AbilityName>;
 
 /**
  * Builds the value for the `options` prop of the abilities `Dropdown` component in `PokeInfo`.
  *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
- *
  * @since 1.0.1
  */
 export const buildAbilityOptions = (
-  // dex: Generation,
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  showAll?: boolean,
 ): PokemonAbilityOption[] => {
   const options: PokemonAbilityOption[] = [];
 
@@ -41,37 +36,26 @@ export const buildAbilityOptions = (
 
   const {
     serverSourced,
+    baseAbility,
     ability,
     abilities,
     altAbilities,
     transformedAbilities,
-    baseAbility,
     transformedForme,
   } = pokemon;
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
 
-  if (transformedForme) {
-    const transformed = Array.from(new Set([
-      serverSourced && ability,
-      ...transformedAbilities,
-    ])).filter((n) => !!n && !abilities.includes(n)).sort();
+  // create usage percent finder (to show them in any of the option groups)
+  const findUsagePercent = usageAltPercentFinder(altAbilities, true);
 
+  if (!transformedForme && baseAbility && ability !== baseAbility) {
     options.push({
-      label: 'Transformed',
-      options: transformed.map((name) => ({
-        label: name,
-        value: name,
-      })),
-    });
-
-    filterAbilities.push(...transformed);
-  } else if (formatId(baseAbility) === 'trace' && ability !== baseAbility) {
-    options.push({
-      label: 'Traced',
+      label: formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited',
       options: [{
         label: ability,
+        rightLabel: findUsagePercent(ability),
         value: ability,
       }],
     });
@@ -79,20 +63,45 @@ export const buildAbilityOptions = (
     filterAbilities.push(ability);
   }
 
-  if (altAbilities?.length) {
-    const poolAbilities = altAbilities
-      .filter((n) => !!n && !filterAbilities.includes(n))
-      .sort();
+  if (transformedForme) {
+    const transformed = Array.from(new Set([
+      serverSourced && ability,
+      ...transformedAbilities,
+    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort();
 
     options.push({
-      label: 'Pool',
-      options: poolAbilities.map((name) => ({
+      label: 'Transformed',
+      options: transformed.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
 
-    filterAbilities.push(...poolAbilities);
+    filterAbilities.push(...transformed);
+  }
+
+  if (altAbilities?.length) {
+    const filteredPoolAbilities = altAbilities
+      .filter((a) => !!a && !filterAbilities.includes(flattenAlt(a)));
+
+    const hasUsageStats = altAbilities
+      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+    const poolAbilities = hasUsageStats
+      ? filteredPoolAbilities
+      : flattenAlts(filteredPoolAbilities).sort();
+
+    options.push({
+      label: 'Pool',
+      options: poolAbilities.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        value: flattenAlt(alt),
+      })),
+    });
+
+    filterAbilities.push(...flattenAlts(poolAbilities));
   }
 
   if (abilities?.length) {
@@ -104,6 +113,7 @@ export const buildAbilityOptions = (
       label: 'Legal',
       options: legalAbilities.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
@@ -113,9 +123,7 @@ export const buildAbilityOptions = (
 
   // show all possible abilities if format is not provided, is not legal-locked, or
   // no legal abilities are available (probably because the Pokemon doesn't exist in the `dex`'s gen)
-  const parsedFormat = format?.replace(/^gen\d+/i, '');
-
-  if (!parsedFormat || !LegalLockedFormats.includes(parsedFormat) || !abilities?.length) {
+  if (showAll || !legalLockedFormat(format) || !abilities?.length) {
     const otherAbilities = Object.values(BattleAbilities || {})
       .map((a) => <AbilityName> a?.name)
       .filter((n) => !!n && formatId(n) !== 'noability' && !filterAbilities.includes(n))
@@ -125,6 +133,7 @@ export const buildAbilityOptions = (
       label: 'All',
       options: otherAbilities.map((name) => ({
         label: name,
+        rightLabel: findUsagePercent(name),
         value: name,
       })),
     });

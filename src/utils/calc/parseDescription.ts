@@ -1,4 +1,4 @@
-import { PokemonStatNames } from '@showdex/consts';
+import { PokemonStatNames } from '@showdex/consts/pokemon';
 import { logger } from '@showdex/utils/debug';
 import type { Result } from '@smogon/calc';
 
@@ -46,9 +46,17 @@ export interface CalcdexMatchupParsedDescription {
   damageRange?: string;
 
   /**
+   * Possible damage amounts, already joined with commas (`,`).
+   *
+   * @example '144, 145, 147, 148, 150, 151, 153, 154, 157, 159, 160, 162, 163, 165, 166, 169'
+   * @since 1.0.3
+   */
+  damageAmounts?: string;
+
+  /**
    * Description line referring to KO chance, along with any secondary effects like stage hazards, if applicable.
    *
-   * @example 'guaranteed 2HKO after Stealth Rock and 2 layers of Spikes'
+   * @example 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes'
    * @since 1.0.2
    */
   koChance?: string;
@@ -70,6 +78,7 @@ const l = logger('@showdex/utils/calc/parseDescription');
  *   attacker: '252 ATK Weavile Knock Off (97.5 BP)',
  *   defender: '252 HP / 0 DEF Heatran',
  *   damageRange: '144-169 (37.3 - 43.7%)',
+ *   damageAmounts: '144, 145, 147, 148, 150, 151, 153, 154, 157, 159, 160, 162, 163, 165, 166, 169',
  *   koChance: 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes',
  * }
  * ```
@@ -81,6 +90,7 @@ export const parseDescription = (result: Result): CalcdexMatchupParsedDescriptio
     attacker: null,
     defender: null,
     damageRange: null,
+    damageAmounts: null,
     koChance: null,
   };
 
@@ -127,9 +137,19 @@ export const parseDescription = (result: Result): CalcdexMatchupParsedDescriptio
     formatted.includes('--') ? formatted.indexOf(' --') : undefined,
   ) || null;
 
+  output.damageAmounts = (
+    Array.isArray(result.damage)
+      ? result.damage.flatMap<number>((d: number | number[]) => d).join(', ')
+      : String(result.damage)
+  ) || null;
+
   output.koChance = formatted.includes('--')
     ? formatted.slice(formatted.indexOf('-- ') + 3) || null
     : null;
+
+  if (output.koChance) {
+    output.koChance = output.koChance.replace(/(?<=\s+)and(?=\s+)/, '&');
+  }
 
   return output;
 };

@@ -1,11 +1,15 @@
+@use 'sass:math';
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
 @use 'mixins/spacing';
 
 .container {
   .row:not(:first-child) {
-    @include spacing.margin($top: 5px);
+    @include spacing.margin($top: 3px);
   }
 }
 
@@ -14,7 +18,7 @@
 
   .rowItem {
     flex: 1;
-    @include spacing.margin-xy($x: 5px);
+    @include spacing.margin-xy($x: 3px);
 
     &:first-child {
       @include spacing.margin($left: 0);
@@ -35,10 +39,6 @@
   text-transform: uppercase;
   user-select: none;
 
-  &.dropdownLabel {
-    @include spacing.margin($bottom: 1px, $left: 5px);
-  }
-
   .light & {
     color: color.alpha(colors.$black, 0.75);
   }
@@ -48,11 +48,22 @@
   }
 }
 
-.infoContainer {
-  flex: 1.25;
+button.toggleButton {
+  font-size: 8px;
+}
+
+.dropdownLabel {
+  @include flex.row($align: center);
+  @include spacing.margin($bottom: 3px, $left: 5px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+
+  button.toggleButton {
+    @include spacing.margin($left: 0.75em);
+  }
 }
 
 .firstLine {
+  @include flex.row($align: center);
   max-width: 100%;
   @include spacing.margin($bottom: 1px);
 }
@@ -62,13 +73,21 @@
   transform: translateY(-2px);
 }
 
-button.pokemonNameButton {
-  max-width: 45%;
-  font-weight: 500;
+.infoContainer {
+  flex: 1.25;
+  max-width: calc((100% - 40px - 6em) * math.div(5, 8));
+}
+
+button.nameButton {
+  flex: 0 1 auto;
+  // max-width: 100%;
+  @include spacing.margin-xy($x: -5px, $y: -1px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
   color: inherit;
+  overflow-x: hidden;
 
   &.missingForme {
-    font-weight: 300;
+    font-weight: 400;
   }
 
   &:not(.missingForme).disabled {
@@ -76,89 +95,133 @@ button.pokemonNameButton {
   }
 }
 
-.pokemonNameLabel {
-  display: inline-block;
-  vertical-align: top;
+.nameLabel {
+  // display: inline-block;
+  // vertical-align: top;
   // max-width: 45%;
   // font-weight: 500;
-  font-weight: inherit;
-  color: inherit;
+  // font-weight: inherit;
+  // color: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.pokemonLevel {
-  @include spacing.margin($left: 5px);
+.level {
+  flex: 0 0 auto;
+  @include spacing.margin($left: 0.5em);
+  font-size: 8px;
   text-transform: uppercase;
   opacity: 0.65;
   user-select: none;
 }
 
-.pokemonTypes {
-  @include spacing.margin($left: 5px);
+.types {
+  @include flex.row($align: center);
+  flex: 0 0 auto;
+  @include spacing.margin($left: 0.5em);
   user-select: none;
 }
 
-.toggleButtonLabel {
-  .light &.inactive {
-    color: colors.$black;
-  }
+// .toggleButtonLabel {
+//   .light &.inactive {
+//     color: colors.$black;
+//   }
+//
+//   .dark &.inactive {
+//     color: colors.$white;
+//   }
+// }
 
-  .dark &.inactive {
-    color: colors.$white;
-  }
-}
-
-.infoButton {
-  vertical-align: middle;
-
-  .infoButtonLabel {
-    font-size: 8px;
-    text-transform: uppercase;
-  }
-}
+// .infoButton {
+//   vertical-align: middle;
+//
+//   .infoButtonLabel {
+//     font-size: 8px;
+//     text-transform: uppercase;
+//   }
+// }
 
 .secondLine {
+  @include flex.row($align: center);
+  max-width: 100%;
   min-height: 15px;
   user-select: none;
 }
 
-.hpBar {
-  @include spacing.margin($bottom: 2px);
-}
+// .hpBar {
+//   @include spacing.margin($bottom: 2px);
+// }
 
-.currentHp {
+.hpPercentage {
+  @include spacing.margin($left: 0.5em);
+
   .light & {
-    color: color.alpha(colors.$black, 0.75);
+    color: color.alpha(colors.$black, 0.85);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.75);
+    color: color.alpha(colors.$white, 0.85);
+  }
+}
+
+.statuses {
+  @include flex.row($align: center);
+  @include spacing.margin($left: 0.5em);
+
+  .status:not(:last-child) {
+    display: inline-block;
+    @include spacing.margin($right: 0.5em);
   }
 }
 
 .presetContainer {
   flex: 1;
+  min-width: 140px;
+  @include spacing.margin($left: 1em);
 }
 
-.autoPresetButton {
-  @include spacing.margin($bottom: 2px);
-}
+// .toggleButton {
+//   @include spacing.margin($bottom: 2px);
+// }
 
-.abilityButton {
-  @include spacing.margin($bottom: 1px);
-}
+// .autoPresetButton {
+//   @include spacing.margin($bottom: 2px);
+// }
 
-.descTooltip {
-  max-width: 175px;
+// .abilityButton {
+//   @include spacing.margin($bottom: 1px);
+// }
+
+.tooltipContent {
   text-align: center;
   white-space: normal;
   user-select: none;
 }
 
+.pokePasteTooltip {
+  position: relative;
+  max-width: 200px;
+  white-space: pre-wrap;
+
+  .copiedBadge {
+    @include position.absolute($top: -16px, $left: 50%);
+  }
+}
+
+.descTooltip {
+  max-width: 165px;
+}
+
 .itemTooltip {
-  font-size: 8px;
-  // text-align: center;
-  // user-select: none;
+  // font-size: 8px;
+
+  .itemEffect {
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+
+  .itemName {
+    font-weight: 500;
+  }
 }

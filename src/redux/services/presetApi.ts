@@ -1,17 +1,15 @@
-import { HttpMethod, PokemonReduxTagType } from '@showdex/consts';
+import { HttpMethod } from '@showdex/consts/core';
+import { PokemonReduxTagType } from '@showdex/consts/redux';
 import { env, runtimeFetch } from '@showdex/utils/core';
 import {
   createTagProvider,
   transformFormatPresetResponse,
+  transformFormatStatsResponse,
   transformPresetResponse,
   transformRandomsPresetResponse,
 } from '@showdex/utils/redux';
-import type {
-  AbilityName,
-  GenerationNum,
-  ItemName,
-  MoveName,
-} from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
+import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import { pkmnApi } from './pkmnApi';
 
@@ -96,6 +94,59 @@ export interface PkmnSmogonFormatPresetResponse {
 }
 
 /**
+ * Downloaded JSON from the Gen Format Stats API via `@pkmn/smogon`.
+ *
+ * @since 1.0.3
+ */
+export interface PkmnSmogonFormatStatsResponse {
+  battles: number;
+
+  pokemon: {
+    [speciesForme: string]: {
+      count: number;
+      weight: number;
+
+      lead: {
+        raw: number;
+        real: number;
+        weighted: number;
+      };
+
+      usage: {
+        raw: number;
+        real: number;
+        weighted: number;
+      };
+
+      viability: [
+        bigBigNumberIdk: number,
+        smallerNumberMaybe: number,
+        maybeSmallerNumber: number,
+        noIdeaTbh: number,
+      ];
+
+      abilities: { [name: AbilityName]: number; };
+      items: { [name: ItemName]: number; };
+      spreads: { [spread: string]: number; };
+      moves: { [name: MoveName]: number; };
+      happinesses: { [value: string]: number; };
+
+      teammates: {
+        [speciesForme: string]: number;
+      };
+
+      counters: {
+        [speciesForme: string]: [
+          bigBigNumberIdk: number,
+          percentageProbably: number,
+          anotherPercentageIdk: number,
+        ];
+      };
+    };
+  };
+}
+
+/**
  * Schema of a randoms set for a given Pokemon.
  *
  * * Note that in randoms, all Pokemon are given the *Hardy* nature,
@@ -168,7 +219,7 @@ export const presetApi = pkmnApi.injectEndpoints({
   overrideExisting: true,
 
   endpoints: (build) => ({
-    pokemonGensPreset: build.query<CalcdexPokemonPreset[], PkmnSmogonPresetRequest>({
+    pokemonPreset: build.query<CalcdexPokemonPreset[], PkmnSmogonPresetRequest>({
       // using the fetchBaseQuery() with runtimeFetch() as the fetchFn doesn't seem to work
       // (Chrome reports a TypeError when calling fetch() in the background service worker)
       // query: ({ gen, format }) => ({
@@ -185,10 +236,8 @@ export const presetApi = pkmnApi.injectEndpoints({
         const response = await runtimeFetch([
           env('pkmn-presets-base-url'),
           env('pkmn-presets-gens-path'), // e.g., '/smogon/data/sets'
-          formatOnly
-            ? `${format}.json`
-            : `gen${format?.includes('bdsp') ? 4 : gen}.json`, // e.g., 'gen8.json'
-        ].join('/'), {
+          `/${formatOnly ? format : `gen${gen}`}.json`, // e.g., '/gen8.json'
+        ].join(''), {
           method: HttpMethod.GET,
           headers: {
             Accept: 'application/json',
@@ -214,6 +263,32 @@ export const presetApi = pkmnApi.injectEndpoints({
       providesTags: createTagProvider(PokemonReduxTagType.Preset),
     }),
 
+    pokemonFormatStats: build.query<CalcdexPokemonPreset[], Omit<PkmnSmogonPresetRequest, 'formatOnly'>>({
+      queryFn: async ({ gen, format }) => {
+        const response = await runtimeFetch<PkmnSmogonFormatStatsResponse>([
+          env('pkmn-presets-base-url'),
+          env('pkmn-presets-stats-path'), // e.g., '/smogon/data/stats'
+          `/${format}.json`, // e.g., '/gen8bdspou.json'
+        ].join(''), {
+          method: HttpMethod.GET,
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+
+        const data = response.json();
+
+        return {
+          data: transformFormatStatsResponse(data, null, {
+            gen,
+            format,
+          }),
+        };
+      },
+
+      providesTags: createTagProvider(PokemonReduxTagType.Preset),
+    }),
+
     pokemonRandomsPreset: build.query<CalcdexPokemonPreset[], PkmnSmogonPresetRequest>({
       // (see the comment in the pokemonGensPreset endpoint as to why we're using queryFn here)
       // query: ({ gen, format }) => ({
@@ -225,18 +300,18 @@ export const presetApi = pkmnApi.injectEndpoints({
       // }),
 
       queryFn: async ({ gen, format }) => {
-        const response = await runtimeFetch([
+        const response = await runtimeFetch<PkmnSmogonRandomsPresetResponse>([
           env('pkmn-presets-base-url'),
           env('pkmn-presets-randoms-path'), // e.g., '/randbats/data'
-          `gen${format?.includes('bdsp') ? '8bdsp' : gen}randombattle.json`, // e.g., 'gen8randombattle.json'
-        ].join('/'), {
+          `/gen${format?.includes('bdsp') ? '8bdsp' : gen}randombattle.json`, // e.g., '/gen8randombattle.json'
+        ].join(''), {
           method: HttpMethod.GET,
           headers: {
             Accept: 'application/json',
           },
         });
 
-        const data = <PkmnSmogonRandomsPresetResponse> response.json();
+        const data = response.json();
 
         return {
           data: transformRandomsPresetResponse(data, null, {
@@ -253,6 +328,7 @@ export const presetApi = pkmnApi.injectEndpoints({
 });
 
 export const {
-  usePokemonGensPresetQuery,
+  usePokemonPresetQuery,
+  usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
 } = presetApi;

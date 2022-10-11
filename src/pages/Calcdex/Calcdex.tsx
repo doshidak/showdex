@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
-import { useColorScheme } from '@showdex/redux/store';
+import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 // import { logger } from '@showdex/utils/debug';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
@@ -11,24 +11,34 @@ import styles from './Calcdex.module.scss';
 
 interface CalcdexProps {
   battle?: Showdown.Battle;
+  battleId?: string;
 }
 
 // const l = logger('@showdex/pages/Calcdex/Calcdex');
 
 export const Calcdex = ({
   battle,
+  battleId: battleIdFromProps,
 }: CalcdexProps): JSX.Element => {
+  const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const {
-    dex,
     state,
+    renderAsOverlay,
+    shouldRender,
     updatePokemon,
     updateField,
-    // setActiveIndex,
     setSelectionIndex,
     setAutoSelect,
-  } = useCalcdex({ battle });
+  } = useCalcdex({
+    battle,
+    battleId: battleIdFromProps,
+  });
+
+  if (!shouldRender) {
+    return null;
+  }
 
   const {
     battleId,
@@ -43,38 +53,30 @@ export const Calcdex = ({
     field,
   } = state;
 
-  // playerKey is a ref in case `battle` becomes `null`
-  // const playerKey = React.useRef(detectPlayerKeyFromBattle(battle));
-  // const opponentKey = playerKey.current === 'p2' ? 'p1' : 'p2';
+  // const topKey = authPlayerKey && playerKey === authPlayerKey && settings?.authPosition === 'bottom'
+  //   ? opponentKey
+  //   : playerKey;
 
-  // detect if the logged-in user is also a player (currently just for FieldCalc lol)
-  // (and is also a ref for the same reason as playerKey)
-  // const authPlayerKey = React.useRef(detectAuthPlayerKeyFromBattle(battle));
+  const topKey = authPlayerKey && playerKey === authPlayerKey
+    ? settings?.authPosition === 'bottom'
+      ? opponentKey
+      : (settings?.authPosition === 'auto' ? 'p1' : playerKey)
+    : playerKey;
 
-  // React.useEffect(() => {
-  //   const detectedKey = detectPlayerKeyFromBattle(battle);
-  //   const detectedAuthKey = detectAuthPlayerKeyFromBattle(battle);
-  //
-  //   if (detectedKey && playerKey.current !== detectedKey) {
-  //     playerKey.current = detectedKey;
-  //   }
-  //
-  //   if (detectedAuthKey && authPlayerKey.current !== detectedAuthKey) {
-  //     authPlayerKey.current = detectedAuthKey;
-  //   }
-  // }, [
-  //   battle,
-  // ]);
+  const bottomKey = topKey === 'p1' ? 'p2' : 'p1';
+
+  // console.log('playerKey', playerKey, 'opponentKey', opponentKey, 'authPlayerKey', authPlayerKey, 'topKey', topKey, 'bottomKey', bottomKey);
 
   // map the sides as the player and opponent to track them easier
-  const player = playerKey === 'p1' ? p1 : p2;
-  const opponent = opponentKey === 'p1' ? p1 : p2;
+  const player = topKey === 'p1' ? p1 : p2;
+  const opponent = bottomKey === 'p1' ? p1 : p2;
 
   return (
     <div
       className={cx(
         'showdex-module',
         styles.container,
+        renderAsOverlay && styles.overlay,
         !!colorScheme && styles[colorScheme],
       )}
     >
@@ -86,22 +88,21 @@ export const Calcdex = ({
           />
 
           <PlayerCalc
-            dex={dex}
             gen={gen}
             format={format}
             rules={rules}
-            playerKey={playerKey}
+            playerKey={topKey}
             player={player}
             opponent={opponent}
             field={field}
-            defaultName="Player"
+            defaultName="Player 1"
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
-              playerKey,
+              topKey,
               index,
             )}
             onAutoSelectChange={(autoSelect) => setAutoSelect(
-              playerKey,
+              topKey,
               autoSelect,
             )}
           />
@@ -110,30 +111,31 @@ export const Calcdex = ({
             className={styles.fieldCalc}
             battleId={battleId}
             gen={gen}
+            format={format}
             authPlayerKey={authPlayerKey}
-            playerKey={playerKey}
+            playerKey={topKey}
             field={field}
+            disabled={!p1?.pokemon?.length || !p2?.pokemon?.length}
             onFieldChange={updateField}
           />
 
           <PlayerCalc
             className={styles.opponentCalc}
-            dex={dex}
             gen={gen}
             format={format}
             rules={rules}
-            playerKey={opponentKey}
+            playerKey={bottomKey}
             player={opponent}
             opponent={player}
             field={field}
-            defaultName="Opponent"
+            defaultName="Player 2"
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
-              opponentKey,
+              bottomKey,
               index,
             )}
             onAutoSelectChange={(autoSelect) => setAutoSelect(
-              opponentKey,
+              bottomKey,
               autoSelect,
             )}
           />

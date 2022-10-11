@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import { format } from 'date-fns';
 import { paramCase } from 'change-case';
-import { HighIntensityAnsiColor, StandardAnsiColor } from '@showdex/consts';
-import type { AnsiColor } from '@showdex/consts';
+import { HighIntensityAnsiColor, StandardAnsiColor } from '@showdex/consts/core';
+import type { AnsiColor } from '@showdex/consts/core';
 
 export type LoggerLevel =
   | 'silly'

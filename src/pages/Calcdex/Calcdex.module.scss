@@ -5,9 +5,31 @@
 @use 'mixins/position';
 @use 'mixins/spacing';
 
+.overlayContainer {
+  // positioning based off of those of .battle-log
+  // (except for bottom: 40px cause it'll overlay on top of the .battle-log-add)
+  // (also + 1px for the border-width)
+  @include position.absolute($top: 0, $right: 0, $bottom: 0, $left: 640px + 1px);
+  z-index: 5;
+}
+
 .container {
   @include position.absolute-fill;
   overflow: hidden;
+
+  &, *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  // initially added this as a potential fix for the closing dropdown bug on mouse-up,
+  // but turns out it was an issue with the .singleValue, which I just added pointer-events: none;,
+  // which seemed to do the trick lol. leaving this here, but it does nothing I don't think.
+  &.overlay {
+    position: relative;
+    @include position.unset-all;
+    width: 100%;
+    height: 100%;
+  }
 
   &.light {
     color: colors.$black;
@@ -21,15 +43,30 @@
     content: '';
     @include position.absolute-fill;
     pointer-events: none;
-    z-index: -1;
+    // z-index: -1;
   }
 
-  &.light::before {
-    background-color: color.alpha(colors.$showdown-background-light, 0.4);
+  &.light {
+    &::before {
+      background-color: color.alpha(colors.$showdown-background-light, 0.8);
+    }
+
+    &.overlay::before {
+      // background-color: color.alpha(colors.$showdown-background-light, 0.9);
+      background-color: colors.$showdown-background-light;
+    }
   }
 
-  &.dark::before {
-    background-color: color.alpha(colors.$showdown-background-dark, 0.6);
+  &.dark {
+    &::before {
+      // background-color: color.alpha(colors.$showdown-background-dark, 0.85);
+      background-color: color.alpha(#121212, 0.85);
+    }
+
+    &.overlay::before {
+      // background-color: color.alpha(colors.$black, 0.9);
+      background-color: #121212;
+    }
   }
 }
 
@@ -63,9 +100,9 @@
 }
 
 .fieldCalc {
-  @include spacing.margin($top: 15px);
+  @include spacing.margin($top: 13px);
 }
 
 .opponentCalc {
-  @include spacing.margin($top: 15px);
+  @include spacing.margin($top: 10px);
 }

@@ -1,7 +1,7 @@
-import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
+import { NIL as NIL_UUID, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { env } from '@showdex/utils/core';
-import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectPlayerKeyFromPokemon, getDexForFormat } from '@showdex/utils/battle';
+import type { CalcdexPlayerKey, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export const serializePayload = <T>(payload: T): string => Object.entries(payload || {})
   .map(([key, value]) => `${key}:${value?.toString?.() ?? 'undefined'}`)
@@ -53,18 +53,38 @@ export const calcPresetCalcdexId = (
   // gigantamax: String(preset?.gigantamax),
 });
 
+/**
+ * Generates a unique ID used by the Calcdex to track Pokemon.
+ *
+ * * As part of the new IDing mechanism introduced in v1.0.3, since the resulting ID will be attached
+ *   to the `Showdown.Pokemon`, `Showdown.ServerPokemon` (if applicable), and `CalcdexPokemon`,
+ *   we don't really care about consistently recreating the ID, as long as it's guaranteed unique per call.
+ *   - Hence the use of `uuidv4()`, which is random.
+ *
+ * @since 0.1.0
+ */
 export const calcPokemonCalcdexId = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon & { slot: number; }> | DeepPartial<CalcdexPokemon> = {},
+  playerKey?: CalcdexPlayerKey,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   // ident: pokemon?.ident,
 
-  name: [
-    detectPlayerKeyFromPokemon(pokemon),
-    // pokemon?.name?.replace(/-.+$/, ''), // 'Ho-Oh' -> 'Ho' ? LOL
-    'slot' in pokemon && typeof pokemon.slot === 'number'
-      ? String(pokemon.slot)
-      : pokemon?.speciesForme?.replace(/-.+$/, ''),
+  // ident: [
+  //   playerKey || detectPlayerKeyFromPokemon(pokemon),
+  //   // pokemon?.name?.replace(/-.+$/, ''), // 'Ho-Oh' -> 'Ho' ? LOL
+  //   // 'slot' in pokemon && typeof pokemon.slot === 'number' && pokemon.slot > -1
+  //   //   ? String(pokemon.slot)
+  //   //   : pokemon?.speciesForme?.replace(/-.+$/, ''),
+  //   pokemon?.speciesForme && getDexForFormat()?.species.get(pokemon.speciesForme)?.baseForme,
+  // ].filter(Boolean).join(': '),
+
+  ident: [
+    playerKey || detectPlayerKeyFromPokemon(pokemon),
+    uuidv4(), // random
   ].filter(Boolean).join(': '),
+
+  speciesForme: getDexForFormat()?.species.get(pokemon?.speciesForme)?.baseForme
+    || pokemon?.speciesForme,
 
   level: String(pokemon?.level ?? 100),
   gender: pokemon?.gender || 'N', // seems like 'N'-gendered Pokemon occasionally report back with an empty string

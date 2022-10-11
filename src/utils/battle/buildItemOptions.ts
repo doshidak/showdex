@@ -1,14 +1,16 @@
+import { eacute } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
-import type { ItemName } from '@pkmn/data';
+import { percentage } from '@showdex/utils/humanize';
+import type { ItemName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { DropdownOption } from '@showdex/components/form';
+import { flattenAlt, flattenAlts } from './flattenAlts';
+import { guessTableFormatKey } from './guessTableFormatKey';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
+import { getDexForFormat } from './getDexForFormat';
+import { legalLockedFormat } from './legalLockedFormat';
 
-export interface PokemonItemOption {
-  label: string;
-  options: {
-    label: string;
-    value: ItemName;
-  }[];
-}
+export type PokemonItemOption = DropdownOption<ItemName>;
 
 /**
  * Local helper function that finds the indices after the `headerName` and before the next header.
@@ -58,20 +60,20 @@ const findItemGroupIndices = (
 /**
  * Builds the value for the `options` prop of the items `Dropdown` component in `PokeInfo`.
  *
- * * As of v1.0.1, we're opting to use the global `Dex` object as opposed to the `dex` from `@pkmn/dex`
- *   since we still get back information even if we're not in the correct gen (especially in National Dex formats).
- *
  * @since 1.0.2
  */
 export const buildItemOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  showAll?: boolean,
 ): PokemonItemOption[] => {
   const options: PokemonItemOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;
   }
+
+  const dex = getDexForFormat(format);
 
   const {
     altItems,
@@ -80,21 +82,30 @@ export const buildItemOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
 
+  // create usage percent finder (to show them in any of the option groups)
+  const findUsagePercent = usageAltPercentFinder(altItems, true);
+
   if (altItems?.length) {
-    const poolItems = altItems.filter(Boolean).sort();
+    const hasUsageStats = altItems
+      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+    const poolItems = hasUsageStats
+      ? altItems
+      : flattenAlts(altItems).sort();
 
     options.push({
       label: 'Pool',
-      options: poolItems.map((name) => ({
-        label: name,
-        value: name,
+      options: poolItems.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        value: flattenAlt(alt),
       })),
     });
 
-    filterItems.push(...poolItems);
+    filterItems.push(...flattenAlts(poolItems));
   }
 
-  if (typeof Dex === 'undefined') {
+  if (!dex) {
     return options;
   }
 
@@ -109,6 +120,7 @@ export const buildItemOptions = (
         label: 'All',
         options: allItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -117,22 +129,10 @@ export const buildItemOptions = (
     return options;
   }
 
-  // reversing the order so that sub-formats like gen7letsgo comes before gen7
-  // (note: there's no gen8, only gen8dlc1. however, there is a gen8doubles and a gen8dlc1doubles,
-  // so we can't simply remove 'dlc1'; hence why we're filtering out gen8doubles since it comes before gen8dlc1doubles)
-  const genFormatKeys = <Showdown.BattleTeambuilderTableFormat[]> Object.keys(BattleTeambuilderTable)
-    .filter((key) => !!key && key.startsWith('gen') && key !== 'gen8doubles')
-    .sort()
-    .reverse();
-
-  const formatKey = format.includes('nationaldex')
-    ? 'natdex'
-    : format.includes('metronome')
-      ? 'metronome'
-      : genFormatKeys.find((key) => format.includes(key.replace(/dlc\d?/i, '')));
+  const formatKey = guessTableFormatKey(format);
 
   // const { items } = BattleTeambuilderTable;
-  const items = formatKey in BattleTeambuilderTable && Array.isArray(BattleTeambuilderTable[formatKey]?.items)
+  const items = !!format && formatKey in BattleTeambuilderTable && BattleTeambuilderTable[formatKey]?.items?.length
     ? BattleTeambuilderTable[formatKey].items
     : BattleTeambuilderTable.items;
 
@@ -156,6 +156,7 @@ export const buildItemOptions = (
         label: 'Popular',
         options: popularItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -176,6 +177,7 @@ export const buildItemOptions = (
         label: 'Items',
         options: itemsItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -193,9 +195,10 @@ export const buildItemOptions = (
 
     if (specificItems.length) {
       options.push({
-        label: 'Pok\u00E9mon-Specific', // U+00E9 is the accented 'e' character
+        label: `Pok${eacute}mon-Specific`,
         options: specificItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -216,6 +219,7 @@ export const buildItemOptions = (
         label: 'Usually Useless',
         options: usuallyUselessItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
@@ -236,6 +240,27 @@ export const buildItemOptions = (
         label: 'Useless',
         options: uselessItems.map((name) => ({
           label: name,
+          rightLabel: findUsagePercent(name),
+          value: name,
+        })),
+      });
+
+      filterItems.push(...uselessItems);
+    }
+  }
+
+  if (showAll || !legalLockedFormat(format)) {
+    const otherItems = Object.values(BattleItems || {})
+      .map((item) => <ItemName> item?.name)
+      .filter((n) => !!n && !filterItems.includes(n))
+      .sort();
+
+    if (otherItems.length) {
+      options.push({
+        label: 'All',
+        options: otherItems.map((name) => ({
+          label: name,
+          rightLabel: findUsagePercent(name),
           value: name,
         })),
       });

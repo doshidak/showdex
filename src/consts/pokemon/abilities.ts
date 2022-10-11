@@ -1,4 +1,4 @@
-import type { AbilityName } from '@pkmn/data';
+import type { AbilityName } from '@smogon/calc/dist/data/interface';
 
 /**
  * Abilities that can be toggled on/off.
@@ -14,6 +14,7 @@ export const PokemonToggleAbilities: AbilityName[] = [
   <AbilityName> 'Minus',
   <AbilityName> 'Multiscale', // special case based off the HP, but specified here to allow toggling in the UI
   <AbilityName> 'Plus',
+  <AbilityName> 'Shadow Shield', // basically another multiscale lmao
   <AbilityName> 'Slow Start',
   <AbilityName> 'Stakeout',
   <AbilityName> 'Unburden',

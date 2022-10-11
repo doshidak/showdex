@@ -1,16 +1,24 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
-import { createSideRoom } from '@showdex/utils/app';
+import { renderCalcdex } from '@showdex/pages/Calcdex';
+import { calcdexSlice } from '@showdex/redux/store';
+import {
+  createCalcdexRoom,
+  createSideRoom,
+  getBattleRoom,
+  getCalcdexRoomId,
+} from '@showdex/utils/app';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { ShowdexBootstrapper } from '@showdex/main';
+import type { CalcdexSliceState, ShowdexSliceState } from '@showdex/redux/store';
 import { Hellodex } from './Hellodex';
 
 const l = logger('@showdex/pages/Hellodex/Hellodex.bootstrap');
 
 // Hellodex should only open once during initialization of the Showdown client
-let opened = false;
+// let opened = false;
 
 export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
   l.debug(
@@ -27,29 +35,104 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
     return;
   }
 
-  if (opened) {
-    l.debug(
-      'Hellodex bootstrap request was ignored',
-      'since it has been opened already.',
-    );
+  // if (opened) {
+  //   l.debug(
+  //     'Hellodex bootstrap request was ignored',
+  //     'since it has been opened already.',
+  //   );
+  //
+  //   return;
+  // }
 
-    return;
-  }
+  const openCalcdexInstance = (battleId: string) => {
+    if (typeof app === 'undefined' || !Object.keys(app.rooms || {}).length || !battleId) {
+      return;
+    }
 
-  const hellodexRoomId = 'view-hellodex';
+    // check if the Calcdex tab is already open
+    const calcdexRoomId = getCalcdexRoomId(battleId);
 
-  const hellodexRoom = createSideRoom(hellodexRoomId, 'Hellodex', {
+    if (calcdexRoomId in app.rooms) {
+      // no need to call app.topbar.updateTabbar() since app.focusRoomRight() will call it for us
+      // (app.focusRoomRight() -> app.updateLayout() -> app.topbar.updateTabbar())
+      app.focusRoomRight(calcdexRoomId);
+
+      return;
+    }
+
+    // attempt to grab the current battle state
+    const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battleId];
+
+    // shouldn't be the case, but we'll check again anyways
+    if (!battleState?.battleId) {
+      return;
+    }
+
+    // attempt to grab the current battle room
+    const battleRoom = getBattleRoom(battleId);
+
+    // check if the Calcdex is rendered as an overlay for this battle
+    if (battleState.renderMode === 'overlay') {
+      // note: battleRoom.id should equal battleRoom.battle.id,
+      // which is where battleId should be derived from when the Calcdex state was initialized
+      const battleRoomId = battleRoom?.id || battleId;
+
+      // if we're not even in the battleRoom anymore, destroy the state
+      if (!(battleRoomId in (app.rooms || {}))) {
+        store.dispatch(calcdexSlice.actions.destroy(battleRoomId));
+
+        return;
+      }
+
+      const shouldFocus = !app.curRoom?.id || app.curRoom.id !== battleRoomId;
+
+      if (shouldFocus) {
+        app.focusRoom(battleRoomId);
+      }
+
+      // we'll toggle it both ways here (only if we didn't have to focus the room),
+      // for use as an "emergency exit" (hehe) should the "Close Calcdex" go missing...
+      // but it shouldn't tho, think I covered all the bases... hopefully :o
+      if (!shouldFocus || !battleRoom.battle?.calcdexOverlayVisible) {
+        battleRoom.toggleCalcdexOverlay?.();
+      }
+
+      // for overlays, this is all we'll do since the Calcdex is rendered inside the battle frame
+      // (entirely possible to do more like reopen as a tab later, but for v1.0.3, nah)
+      return;
+    }
+
+    // at this point, we need to recreate the room
+    // (we should also be in the 'panel' renderMode now)
+    const calcdexRoom = createCalcdexRoom(battleId, true, store);
+    const calcdexReactRoot = ReactDOM.createRoot(calcdexRoom.el);
+
+    renderCalcdex(calcdexReactRoot, store, battleRoom?.battle || battleId);
+
+    // if the battleRoom exists, attach the created room and ReactDOM root to the battle object
+    if (battleRoom?.battle?.id) {
+      battleRoom.battle.calcdexDestroyed = false; // just in case
+      battleRoom.battle.calcdexRoom = calcdexRoom;
+      battleRoom.battle.calcdexReactRoot = calcdexReactRoot;
+    }
+  };
+
+  const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.hellodex;
+
+  const hellodexRoom = createSideRoom('view-hellodex', 'Hellodex', {
     icon: Math.random() > 0.5 ? 'smile-o' : 'heart',
-    focus: true,
+    focus: !settings?.focusRoomsRoom,
   });
 
-  const reactHellodexRoom = ReactDOM.createRoot(hellodexRoom.el);
+  const hellodexReactRoot = ReactDOM.createRoot(hellodexRoom.el);
 
-  reactHellodexRoom.render((
+  hellodexReactRoot.render((
     <ReduxProvider store={store}>
-      <Hellodex />
+      <Hellodex
+        openCalcdexInstance={openCalcdexInstance}
+      />
     </ReduxProvider>
   ));
 
-  opened = true;
+  // opened = true;
 };

@@ -1,6 +1,6 @@
 {
   "name": "showdex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Pokémon Showdown extension that harnesses the power of parabolic calculus to strategically extract your opponents' ELO.",
   "author": "Keith Choison <keith@tize.io>",
   "license": "AGPL-3.0",
@@ -53,13 +53,16 @@
     "last 3 iOS versions"
   ],
   "dependencies": {
-    "@pkmn/data": "^0.5.26",
-    "@pkmn/dex": "^0.5.26",
+    "@dnd-kit/core": "^6.0.5",
+    "@dnd-kit/modifiers": "^6.0.0",
+    "@dnd-kit/utilities": "^3.2.0",
     "@react-aria/button": "^3.6.1",
+    "@react-aria/switch": "^3.2.3",
     "@react-aria/textfield": "^3.7.1",
     "@react-aria/visually-hidden": "^3.4.1",
     "@react-hook/size": "^2.1.2",
     "@react-spring/web": "^9.5.4",
+    "@react-stately/toggle": "^3.4.1",
     "@reduxjs/toolkit": "^1.8.5",
     "@smogon/calc": "^0.6.0",
     "@tippyjs/react": "^4.2.6",
@@ -70,6 +73,8 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.2",
     "final-form": "^4.20.7",
+    "lzutf8": "^0.6.3",
+    "qrcode.react": "^3.1.0",
     "qs": "^6.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -82,6 +87,7 @@
     "remove": "^0.1.5",
     "simplebar": "^5.3.8",
     "slugify": "^1.6.5",
+    "use-debouncy": "^4.3.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -91,7 +97,6 @@
     "@babel/preset-env": "^7.19.0",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
-    "@pkmn/types": "^2.1.0",
     "@react-types/textfield": "^3.5.3",
     "@types/chrome": "^0.0.196",
     "@types/firefox-webext-browser": "^94.0.1",

@@ -1,7 +1,7 @@
 import slugify from 'slugify';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@pkmn/types';
+import type { GenerationNum } from '@smogon/calc';
 
 export type SmogonUniversityDexCategory =
   | 'pokemon'

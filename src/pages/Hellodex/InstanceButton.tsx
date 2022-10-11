@@ -12,6 +12,7 @@ export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
   authName?: string;
   playerName?: string;
   opponentName?: string;
+  active?: boolean;
 }
 
 export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
@@ -21,6 +22,8 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   playerName,
   opponentName: opponentNameFromProps,
   hoverScale = 1.015,
+  activeScale = 0.98,
+  active,
   disabled,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
@@ -40,11 +43,12 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
-        // styles.tabOpen,
+        active && styles.active,
         className,
       )}
       display="block"
       hoverScale={hoverScale}
+      activeScale={activeScale}
     >
       <Svg
         className={styles.battleIcon}

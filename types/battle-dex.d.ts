@@ -47,6 +47,7 @@ declare namespace Showdown {
     getEffect(name?: string): PureEffect | Item | Ability | Move;
 
     prefs(prop: 'theme'): ColorSchemeOption;
+    prefs(prop: 'onepanel'): boolean;
     prefs<T = unknown>(prop: string): T;
 
     moves: {

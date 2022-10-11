@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { PokemonStatusAbbreviations } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
 import styles from './PokeStatus.module.scss';
 
@@ -10,16 +11,6 @@ export interface PokeStatusProps {
   fainted?: boolean;
 }
 
-const abbrevs: Record<Showdown.PokemonStatus, string> = {
-  brn: 'BRN',
-  frz: 'FRZ',
-  par: 'PAR',
-  psn: 'PSN',
-  slp: 'SLP',
-  tox: 'TOX', // badly poisoned
-  '???': '???',
-};
-
 export const PokeStatus = ({
   className,
   style,
@@ -28,7 +19,11 @@ export const PokeStatus = ({
 }: PokeStatusProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  return (fainted || Object.keys(abbrevs).includes(status) ? (
+  if (!fainted && !Object.keys(PokemonStatusAbbreviations).includes(status)) {
+    return null;
+  }
+
+  return (
     <span
       className={cx(
         styles.container,
@@ -39,7 +34,7 @@ export const PokeStatus = ({
       )}
       style={style}
     >
-      {fainted ? 'RIP' : abbrevs[status]}
+      {fainted ? 'RIP' : PokemonStatusAbbreviations[status]}
     </span>
-  ) : null);
+  );
 };

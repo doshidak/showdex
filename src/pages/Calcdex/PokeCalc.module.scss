@@ -1,6 +1,6 @@
 @use 'mixins/spacing';
 
-.section {
+.moves {
   @include spacing.margin($top: 10px);
 }
 

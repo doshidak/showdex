@@ -1,6 +1,6 @@
-import type { GenerationNum } from '@pkmn/data';
+import type { GenerationNum } from '@smogon/calc';
 
-const GenRegex = /^gen(\d+)/i;
+export const GenFormatRegex = /^gen(\d+)(?!v\d)/i;
 
 /**
  * Note that `defaultGen` is `null` by default, but you're free to import `env`
@@ -12,11 +12,11 @@ export const detectGenFromFormat = (
   format: string,
   defaultGen: GenerationNum = null,
 ): GenerationNum => {
-  if (!GenRegex.test(format)) {
+  if (!GenFormatRegex.test(format)) {
     return defaultGen;
   }
 
-  const gen = <GenerationNum> parseInt(format.match(GenRegex)[1], 10);
+  const gen = <GenerationNum> (parseInt(format.match(GenFormatRegex)[1], 10) || 0);
 
   if (gen < 1) {
     return defaultGen;

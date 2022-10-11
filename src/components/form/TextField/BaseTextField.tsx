@@ -36,7 +36,7 @@ export interface BaseTextFieldProps<
   min?: number;
   max?: number;
   step?: number;
-  // monospace?: boolean;
+  monospace?: boolean;
   hideLabel?: boolean;
 }
 
@@ -58,7 +58,7 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
   step,
   autoFocus = false,
   autoComplete = 'off',
-  // monospace = false,
+  monospace = true,
   hideLabel = false,
   input,
   meta,
@@ -111,7 +111,7 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
         {...inputProps}
         className={cx(
           styles.input,
-          // monospace && styles.monospace,
+          monospace && styles.monospace,
           inputClassName,
         )}
         style={inputStyle}

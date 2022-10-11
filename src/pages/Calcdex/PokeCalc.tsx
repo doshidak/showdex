@@ -1,5 +1,5 @@
 import * as React from 'react';
-import cx from 'classnames';
+// import cx from 'classnames';
 import {
   detectLegacyGen,
   detectToggledAbility,
@@ -13,13 +13,13 @@ import {
   getLegacySpcDv,
 } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
-import type { Generation } from '@pkmn/data';
-import type { GenerationNum } from '@pkmn/types';
-import type {
+import type { GenerationNum } from '@smogon/calc';
+import {
   CalcdexBattleField,
   CalcdexBattleRules,
   CalcdexPlayerKey,
   CalcdexPokemon,
+  useCalcdexSettings,
 } from '@showdex/redux/store';
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
@@ -30,7 +30,7 @@ import styles from './PokeCalc.module.scss';
 interface PokeCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  dex?: Generation;
+  // dex?: Generation;
   gen?: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
@@ -46,7 +46,6 @@ interface PokeCalcProps {
 export const PokeCalc = ({
   className,
   style,
-  dex,
   gen,
   format,
   rules,
@@ -56,15 +55,18 @@ export const PokeCalc = ({
   field,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
-  const legacy = detectLegacyGen(gen);
+  const settings = useCalcdexSettings();
 
   const calculateMatchup = useSmogonMatchup(
-    dex,
+    format,
     playerPokemon,
     opponentPokemon,
     playerKey,
     field,
+    settings,
   );
+
+  const legacy = detectLegacyGen(gen);
 
   const handlePokemonChange = (
     mutation: DeepPartial<CalcdexPokemon>,
@@ -138,8 +140,6 @@ export const PokeCalc = ({
 
     // check for any possible abilities, base stat & type updates due to speciesForme changes
     if ('speciesForme' in payload && payload.speciesForme !== playerPokemon.speciesForme) {
-      // const newSpecies = Dex.forGen(dex?.num).species.get(payload.speciesForme);
-
       const {
         abilities,
         baseStats,
@@ -147,7 +147,7 @@ export const PokeCalc = ({
       } = sanitizePokemon({
         ...playerPokemon,
         ...payload,
-      }, gen);
+      }, format);
 
       if (abilities?.length) {
         payload.abilities = [...abilities];
@@ -163,12 +163,10 @@ export const PokeCalc = ({
     }
 
     // recalculate the stats with the updated EVs/IVs
-    if (typeof dex !== 'undefined') {
-      payload.spreadStats = calcPokemonSpreadStats(dex, {
-        ...playerPokemon,
-        ...payload,
-      });
-    }
+    payload.spreadStats = calcPokemonSpreadStats(format, {
+      ...playerPokemon,
+      ...payload,
+    });
 
     // clear any dirtyBoosts that match the current boosts
     Object.entries(playerPokemon.boosts).forEach(([
@@ -198,7 +196,6 @@ export const PokeCalc = ({
     >
       {/* name, types, level, HP, status, set, ability, nature, item */}
       <PokeInfo
-        dex={dex}
         gen={gen}
         format={format}
         pokemon={playerPokemon}
@@ -207,8 +204,7 @@ export const PokeCalc = ({
 
       {/* moves (duh) */}
       <PokeMoves
-        className={styles.section}
-        // dex={dex}
+        className={styles.moves}
         gen={gen}
         format={format}
         rules={rules}
@@ -219,13 +215,12 @@ export const PokeCalc = ({
 
       {/* IVs, EVs, calculated stats, boosts */}
       <PokeStats
-        className={cx(styles.section, styles.stats)}
-        // dex={dex}
+        className={styles.stats}
         gen={gen}
+        format={format}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={field}
-        // side={side}
         playerKey={playerKey}
         onPokemonChange={handlePokemonChange}
       />

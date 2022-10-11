@@ -1,24 +1,38 @@
 import { calculate } from '@smogon/calc';
-import {
-  createSmogonField,
-  createSmogonMove,
-  createSmogonPokemon,
-} from '@showdex/utils/calc';
+import { getGenDexForFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Generation, MoveName } from '@pkmn/data';
-import type { Move as SmogonMove } from '@smogon/calc';
+import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleField,
   CalcdexPlayerKey,
   CalcdexPokemon,
+  ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
 import type { CalcdexMatchupParsedDescription } from './parseDescription';
+import { createSmogonField } from './createSmogonField';
+import { createSmogonMove } from './createSmogonMove';
+import { createSmogonPokemon } from './createSmogonPokemon';
 import { formatDamageRange } from './formatDamageRange';
 import { formatKoChance } from './formatKoChance';
 import { getKoColor } from './getKoColor';
 import { parseDescription } from './parseDescription';
 
 export interface CalcdexMatchupResult {
+  /**
+   * Attacking Pokemon that the calculator used to calculate the calculatable calculation.
+   *
+   * @since 1.0.3
+   */
+  attacker?: SmogonPokemon;
+
+  /**
+   * Defending Pokemon that the calculator used to calculate the calculatable calculation.
+   *
+   * @since 1.0.3
+   */
+  defender?: SmogonPokemon;
+
   /**
    * Move that the calculator used to calculate the calculatable calculation.
    *
@@ -83,12 +97,13 @@ const l = logger('@showdex/utils/calc/calcSmogonMatchup');
  * @since 0.1.2
  */
 export const calcSmogonMatchup = (
-  dex: Generation,
+  format: string,
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerMove: MoveName,
   playerKey?: CalcdexPlayerKey,
   field?: CalcdexBattleField,
+  settings?: ShowdexCalcdexSettings,
 ): CalcdexMatchupResult => {
   // this is the object that will be returned
   const matchup: CalcdexMatchupResult = {
@@ -99,11 +114,15 @@ export const calcSmogonMatchup = (
     koColor: null,
   };
 
-  if (!dex?.num || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
+  const dex = getGenDexForFormat(format);
+  // const gen = detectGenFromFormat(format);
+
+  if (!dex || !format || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
       l.warn(
         'Calculation ignored due to invalid arguments.',
-        '\n', 'dex.num', dex?.num,
+        // '\n', 'dex.num', dex?.num,
+        '\n', 'format', format, 'dex', dex,
         '\n', 'playerPokemon.speciesForme', playerPokemon?.speciesForme,
         '\n', 'opponentPokemon.speciesForme', opponentPokemon?.speciesForme,
         '\n', 'playerMove', playerMove,
@@ -115,43 +134,38 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  const smogonPlayerPokemon = createSmogonPokemon(dex, playerPokemon, playerMove);
-  const smogonPlayerPokemonMove = createSmogonMove(dex, playerPokemon, playerMove);
-  const smogonOpponentPokemon = createSmogonPokemon(dex, opponentPokemon);
-
-  matchup.move = smogonPlayerPokemonMove;
-
-  const attackerSide = playerKey === 'p1' ? field?.attackerSide : field?.defenderSide;
-  const defenderSide = playerKey === 'p1' ? field?.defenderSide : field?.attackerSide;
+  matchup.attacker = createSmogonPokemon(format, playerPokemon);
+  matchup.move = createSmogonMove(format, playerPokemon, playerMove);
+  matchup.defender = createSmogonPokemon(format, opponentPokemon);
 
   const smogonField = createSmogonField({
     ...field,
-    attackerSide,
-    defenderSide,
+    attackerSide: playerKey === 'p1' ? field?.attackerSide : field?.defenderSide,
+    defenderSide: playerKey === 'p1' ? field?.defenderSide : field?.attackerSide,
   });
 
   try {
     const result = calculate(
       dex,
-      smogonPlayerPokemon,
-      smogonOpponentPokemon,
-      smogonPlayerPokemonMove,
+      matchup.attacker,
+      matchup.defender,
+      matchup.move,
       smogonField,
     );
 
     matchup.description = parseDescription(result);
     matchup.damageRange = formatDamageRange(result);
-    matchup.koChance = formatKoChance(result);
-    matchup.koColor = getKoColor(result);
+    matchup.koChance = formatKoChance(result, settings?.nhkoLabels);
+    matchup.koColor = getKoColor(result, settings?.nhkoColors);
 
     // l.debug(
     //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
-    //   '\n', 'dex.num', dex.num,
-    //   '\n', 'matchup', matchup,
-    //   '\n', 'result', result,
+    //   '\n', 'gen', dex.num,
     //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
     //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
     //   '\n', 'field', field,
+    //   '\n', 'matchup', matchup,
+    //   '\n', 'result', result,
     // );
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
