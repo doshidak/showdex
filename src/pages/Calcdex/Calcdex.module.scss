@@ -15,7 +15,7 @@
 
 .container {
   @include position.absolute-fill;
-  // overflow: hidden;
+  overflow: hidden;
 
   &, *, *::before, *::after {
     box-sizing: border-box;
