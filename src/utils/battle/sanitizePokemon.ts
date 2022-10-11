@@ -30,6 +30,7 @@ import { toggleableAbility } from './toggleableAbility';
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
   format?: GenerationNum | string,
+  showAllFormes?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(format);
@@ -53,6 +54,7 @@ export const sanitizePokemon = (
 
     speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
     dmaxable: ('dmaxable' in pokemon && pokemon.dmaxable) || false,
+    gmaxable: ('gmaxable' in pokemon && pokemon.gmaxable) || false,
     altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
 
     transformedForme: transformed
@@ -90,8 +92,8 @@ export const sanitizePokemon = (
     altAbilities: (!legacy && 'altAbilities' in pokemon && pokemon.altAbilities) || [],
     transformedAbilities: (!legacy && 'transformedAbilities' in pokemon && pokemon.transformedAbilities) || [],
 
-    item: gen > 1
-      ? <ItemName> pokemon?.item?.replace('(exists)', '')
+    item: gen > 1 && pokemon?.item && pokemon.item !== '(exists)'
+      ? <ItemName> dex.items.get(pokemon.item)?.name
       : null,
 
     dirtyItem: ('dirtyItem' in pokemon && pokemon.dirtyItem) || null,
@@ -121,6 +123,8 @@ export const sanitizePokemon = (
       spd: ('evs' in pokemon && pokemon.evs?.spd) || 0,
       spe: ('evs' in pokemon && pokemon.evs?.spe) || 0,
     } : {},
+
+    showGenetics: ('showGenetics' in pokemon && pokemon.showGenetics) || true,
 
     boosts: {
       atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,
@@ -170,38 +174,55 @@ export const sanitizePokemon = (
 
   // fill in additional info if the Dex global is available (should be)
   // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
+  /** @todo remove `dex` check here since we already check for `Dex` in `main` */
   if (dex) {
-    // fix for 'Xerneas-Neutral' -> 'Xerneas'
-    const currentForme = sanitizedPokemon.speciesForme.replace(/-Neutral/gi, '');
-    const species = dex.species.get(currentForme);
+    const species = dex.species.get(sanitizedPokemon.speciesForme);
 
     // don't really care if species is falsy here
     sanitizedPokemon.baseStats = { ...species?.baseStats };
+
+    // grab the base species forme to obtain its other formes
+    // (since sanitizedPokemon.speciesForme could be one of those other formes)
+    const baseSpeciesForme = species?.baseSpecies;
+    const baseSpecies = baseSpeciesForme ? dex.species.get(baseSpeciesForme) : null;
 
     // grab the baseStats of the transformed Pokemon, if applicable
     const transformedSpecies = sanitizedPokemon.transformedForme
       ? dex.species.get(sanitizedPokemon.transformedForme)
       : null;
 
-    // check if this Pokemon can D-max
+    const transformedBaseSpeciesForme = transformedSpecies?.baseSpecies;
+    const transformedBaseSpecies = transformedBaseSpeciesForme
+      ? dex.species.get(transformedBaseSpeciesForme)
+      : null;
+
+    // check if this Pokemon can Dynamax
     sanitizedPokemon.dmaxable = !species.cannotDynamax;
 
-    // only set the altFormes if we're currently looking at the baseForme
-    sanitizedPokemon.altFormes = transformedSpecies?.baseSpecies
-      && transformedSpecies.baseSpecies === sanitizedPokemon.transformedForme
-      && transformedSpecies.otherFormes?.length
+    /** @todo read from `BattleRoom.requests` */
+    // sanitizedPokemon.gmaxable = 'read from BattleRoom.requests';
+
+    // attempt to populate all other formes based on the base forme
+    // (or determined base forme from the curren other forme if showAllFormes is true)
+    sanitizedPokemon.altFormes = transformedBaseSpecies?.otherFormes?.length
+        && (!showAllFormes && transformedBaseSpeciesForme === sanitizedPokemon.transformedForme)
+        && transformedBaseSpecies.otherFormes.includes(sanitizedPokemon.transformedForme)
       ? [
-        transformedSpecies.baseSpecies,
-        ...(<string[]> transformedSpecies.otherFormes), // dunno why otherFormes is type any[]
+        transformedBaseSpeciesForme,
+        ...(<string[]> transformedBaseSpecies.otherFormes),
       ]
-      : species?.baseSpecies
-        && species.baseSpecies === currentForme
-        && species.otherFormes?.length
+      : baseSpecies?.otherFormes?.length
+          && (!showAllFormes && baseSpeciesForme === sanitizedPokemon.speciesForme)
+          && baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
         ? [
-          species.baseSpecies,
-          ...(<string[]> species.otherFormes),
+          baseSpeciesForme,
+          ...(<string[]> baseSpecies.otherFormes),
         ]
         : [];
+
+    // make sure we don't got any bunk formes like Hisuian formes
+    sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
+      .filter((f) => !!f && !f.includes('-Hisui'));
 
     // if this Pokemon can G-max, add the appropriate formes
     if (sanitizedPokemon.dmaxable && species.canGigantamax) {
