@@ -14,11 +14,12 @@ import {
 } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import type {
+import {
   CalcdexBattleField,
   CalcdexBattleRules,
   CalcdexPlayerKey,
   CalcdexPokemon,
+  useCalcdexSettings,
 } from '@showdex/redux/store';
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
@@ -54,7 +55,7 @@ export const PokeCalc = ({
   field,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
-  const legacy = detectLegacyGen(gen);
+  const settings = useCalcdexSettings();
 
   const calculateMatchup = useSmogonMatchup(
     format,
@@ -62,7 +63,10 @@ export const PokeCalc = ({
     opponentPokemon,
     playerKey,
     field,
+    settings,
   );
+
+  const legacy = detectLegacyGen(gen);
 
   const handlePokemonChange = (
     mutation: DeepPartial<CalcdexPokemon>,
