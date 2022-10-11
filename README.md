@@ -6,7 +6,7 @@
   <code>showdex</code>
 </h1>
 
-Current [v1.0.2](https://github.com/doshidak/showdex/releases/tag/v1.0.2) | Install on [Chrome](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) · [Opera](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
+Current [v1.0.3](https://github.com/doshidak/showdex/releases/tag/v1.0.3) | Install on [Chrome](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) · [Opera](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
 --- | --- | --- | ---
 
 <br>
