@@ -1,3 +1,4 @@
+import { getAuthUsername } from '@showdex/utils/app';
 import type { CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { detectPokemonIdent } from './detectPokemonIdent';
 
@@ -33,7 +34,7 @@ export const detectAuthPlayerKeyFromBattle = (
     return null;
   }
 
-  const authName = app.user?.attributes?.name;
+  const authName = getAuthUsername();
 
   if (!authName) {
     return null;
@@ -46,11 +47,7 @@ export const detectAuthPlayerKeyFromBattle = (
     s.name,
   ].filter(Boolean).includes(authName));
 
-  if (!authSide?.sideid) {
-    return null;
-  }
-
-  return authSide.sideid;
+  return authSide?.sideid || null;
 };
 
 /**
