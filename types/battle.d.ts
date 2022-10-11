@@ -275,6 +275,7 @@ declare namespace Showdown {
     ignoreNicks: boolean;
     ignoreOpponent: boolean;
     ignoreSpects: boolean;
+    forfeitPending: boolean;
     debug: boolean;
 
     /**
