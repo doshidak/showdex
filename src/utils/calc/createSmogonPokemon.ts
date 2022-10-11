@@ -4,9 +4,11 @@ import {
   detectGenFromFormat,
   detectLegacyGen,
   getGenDexForFormat,
-  hasMegaForme,
+  // hasMegaForme,
+  notFullyEvolved,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
+import type { Specie } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -44,7 +46,7 @@ export const createSmogonPokemon = (
     : null;
 
   // megas require special handling (like for the item), so make sure we detect these
-  const isMega = hasMegaForme(pokemon.speciesForme);
+  // const isMega = hasMegaForme(pokemon.speciesForme);
 
   // const speciesForme = SmogonPokemon.getForme(
   //   dex,
@@ -68,9 +70,9 @@ export const createSmogonPokemon = (
     return null;
   }
 
-  const hasMegaItem = !!item
-    && /(?:ite|z$)/.test(formatId(item))
-    && formatId(item) !== 'eviolite'; // oh god
+  // const hasMegaItem = !!item
+  //   && /(?:ite|z$)/.test(formatId(item))
+  //   && formatId(item) !== 'eviolite'; // oh god
 
   // if applicable, convert the '???' status into an empty string
   // (don't apply the status if the Pokemon is fainted tho)
@@ -130,7 +132,7 @@ export const createSmogonPokemon = (
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
     ability: hasMultiscale && !shouldMultiscale ? 'Pressure' : ability,
     abilityOn: pokemon.abilityToggleable && !hasMultiscale ? pokemon.abilityToggled : undefined,
-    item: isMega || hasMegaItem ? null : item,
+    item,
     nature: legacy ? undefined : pokemon.nature,
     moves: pokemon.moves,
 
@@ -161,7 +163,12 @@ export const createSmogonPokemon = (
     },
 
     overrides: {
-      types: <SmogonPokemonOverrides['types']> pokemon.types,
+      // note: there's a cool utility called expand() that merges two objects together,
+      // which also merges array values, keeping the array length of the source object.
+      // for instance, Greninja, who has the types ['Water', 'Dark'] and the Protean ability
+      // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
+      // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
+      types: <SmogonPokemonOverrides['types']> [...pokemon.types, null].slice(0, 2),
     },
   };
 
@@ -190,6 +197,10 @@ export const createSmogonPokemon = (
     pokemon.speciesForme,
     options,
   );
+
+  if (smogonPokemon?.species && typeof smogonPokemon.species?.nfe !== 'boolean') {
+    (<Writable<Specie>> smogonPokemon.species).nfe = notFullyEvolved(pokemon.speciesForme);
+  }
 
   return smogonPokemon;
 };
