@@ -57,6 +57,9 @@ declare class BattleRoom implements Showdown.ClientRoom {
   public events: Record<string, string>;
   public lastUpdate?: number;
 
+  // Showdex-injected custom properties
+  public toggleCalcdexOverlay?(): void;
+
   public constructor(props: {
     id: string;
     el?: JQuery<HTMLDivElement>;
