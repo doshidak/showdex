@@ -1,6 +1,11 @@
 import * as React from 'react';
 import { syncBattle } from '@showdex/redux/actions';
-import { calcdexSlice, useCalcdexBattleState, useDispatch } from '@showdex/redux/store';
+import {
+  calcdexSlice,
+  useCalcdexBattleState,
+  useCalcdexSettings,
+  useDispatch,
+} from '@showdex/redux/store';
 import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateCalcdex } from '@showdex/utils/redux';
@@ -12,12 +17,15 @@ import type {
   CalcdexPokemon,
 } from '@showdex/redux/store';
 
-export interface CalcdexHookProps {
-  battle: Showdown.Battle;
+export interface CalcdexHookOptions {
+  battle?: Showdown.Battle;
+  battleId?: string;
 }
 
 export interface CalcdexHookInterface {
   state: CalcdexBattleState;
+  renderAsOverlay: boolean;
+  shouldRender: boolean;
 
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   updateField: (field: DeepPartial<CalcdexBattleField>) => void;
@@ -34,33 +42,48 @@ const l = logger('@showdex/pages/Calcdex/useCalcdex');
 
 export const useCalcdex = ({
   battle,
-}: CalcdexHookProps): CalcdexHookInterface => {
-  const battleState = useCalcdexBattleState(battle?.id);
+  battleId: manualBattleId,
+}: CalcdexHookOptions = {}): CalcdexHookInterface => {
+  const battleId = battle?.id || manualBattleId;
+
+  const settings = useCalcdexSettings();
+  const battleState = useCalcdexBattleState(battleId);
   const dispatch = useDispatch();
 
-  const format = battle?.id?.split?.('-')?.[1];
-  const gen = battle?.gen as GenerationNum;
-
   l.debug(
-    battle?.id || '(missing battle.id)',
+    battleId || '(missing battle.id)',
     '\n', battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)',
     '\n', 'battle', battle,
     '\n', 'battleState', battleState, __DEV__ && { dehydrated: dehydrateCalcdex(battleState) },
   );
 
+  // determine if this Calcdex is set up by the bootstrapper to open as an overlay
+  const renderAsOverlay = !!settings?.openAs
+    // && settings.openAs === 'overlay' // bad cause user can change the setting post-bootstrap :o
+    && !battle?.calcdexRoom // shouldn't be present in overlay mode
+    && typeof battle?.calcdexOverlayVisible === 'boolean'; // should've been set by the bootstrapper
+
+  // determine if we should render the Calcdex
+  const shouldRender = !battle?.calcdexDestroyed
+    && (!renderAsOverlay || settings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+
   // handles `battle` changes
   React.useEffect(() => {
+    if (!battle?.id) {
+      return;
+    }
+
     l.debug(
       'Received battle update; determining sync changes...',
-      '\n', 'battle.id', battle?.id || '(missing battle.id)',
-      '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce,
-      '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
-      '\n', 'battle.p2.pokemon', battle?.p2?.pokemon,
+      '\n', 'battle.id', battle.id,
+      '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle.nonce,
+      '\n', 'battle.p1.pokemon', battle.p1?.pokemon,
+      '\n', 'battle.p2.pokemon', battle.p2?.pokemon,
       '\n', 'battle', battle,
       '\n', 'battleState', battleState,
     );
 
-    if (!battle?.p1 && !battle?.p2 && !battle?.p3 && !battle?.p4) {
+    if (!battle.p1 && !battle.p2 && !battle.p3 && !battle.p4) {
       // l.debug(
       //   'Ignoring battle update due to missing players... w0t ??',
       //   '\n', 'battle.p1.pokemon', battle?.p1?.pokemon,
@@ -74,10 +97,21 @@ export const useCalcdex = ({
       return;
     }
 
-    if (!battle?.nonce) {
+    if (battle.calcdexDestroyed) {
+      l.debug(
+        'Ignoring battle due to destroyed battleState for', battle?.id || '(missing battle.id)',
+        '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce,
+        '\n', 'battle', battle,
+        '\n', 'battleState', battleState,
+      );
+
+      return;
+    }
+
+    if (!battle.nonce) {
       // this means the passed-in `battle` object is not from the bootstrapper
       l.debug(
-        'Ignoring battle update due to missing nonce for', battle?.id || '(missing battle.id)',
+        'Ignoring battle due to missing nonce for', battle?.id || '(missing battle.id)',
         '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
@@ -88,23 +122,25 @@ export const useCalcdex = ({
 
     if (!battleState?.battleId) {
       l.debug(
-        'Initializing new battleState for', battle.id,
+        'Initializing battleState for', battle.id,
         '\n', 'battle.nonce', battle.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
       );
 
       dispatch(calcdexSlice.actions.init({
-        battleId: battle.id,
-        gen,
-        format,
+        battleId,
         battleNonce: battle.nonce,
+        gen: battle.gen as GenerationNum,
+        format: battle.id.split('-')?.[1],
+        active: !battle.ended,
+        renderMode: renderAsOverlay ? 'overlay' : 'panel',
         p1: { name: battle.p1?.name, rating: battle.p1?.rating },
         p2: { name: battle.p2?.name, rating: battle.p2?.rating },
       }));
     } else if (!battleState?.battleNonce || battle.nonce !== battleState.battleNonce) {
       l.debug(
-        'Syncing existing battleState for', battle.id,
+        'Syncing battleState for', battle.id,
         '\n', 'battle.nonce', battle.nonce,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
@@ -115,19 +151,19 @@ export const useCalcdex = ({
       void dispatch(syncBattle({ battle }));
     }
 
-    l.debug(
-      'Completed battleState sync for', battle.id,
-      '\n', 'battle.nonce', battle.nonce,
-      '\n', 'battle', battle,
-      '\n', 'battleState', battleState,
-    );
+    // l.debug(
+    //   'Completed battleState sync for', battle.id,
+    //   '\n', 'battle.nonce', battle.nonce,
+    //   '\n', 'battle', battle,
+    //   '\n', 'battleState', battleState,
+    // );
   }, [
     battle,
+    battleId,
     battle?.nonce,
     battleState,
     dispatch,
-    format,
-    gen,
+    renderAsOverlay,
   ]);
 
   return {
@@ -146,25 +182,28 @@ export const useCalcdex = ({
       field: null,
     },
 
+    renderAsOverlay,
+    shouldRender,
+
     updatePokemon: (playerKey, pokemon) => dispatch(calcdexSlice.actions.updatePokemon({
-      battleId: battle?.id,
+      battleId,
       playerKey,
       pokemon,
     })),
 
     updateField: (field) => dispatch(calcdexSlice.actions.updateField({
-      battleId: battle?.id,
+      battleId,
       field,
     })),
 
     setActiveIndex: (playerKey, activeIndex) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId: battle?.id,
+      battleId,
       [playerKey]: { activeIndex },
     })),
 
     setSelectionIndex: (playerKey, selectionIndex) => {
       dispatch(calcdexSlice.actions.updatePlayer({
-        battleId: battle?.id,
+        battleId,
         [playerKey]: { selectionIndex },
       }));
 
@@ -179,19 +218,32 @@ export const useCalcdex = ({
       // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
       // the Pokemon itself, not in the Side, which is the case for gen 2+.
       // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
+      const updatedField = sanitizeField(
+        battle,
+        updatedBattleState,
+        updatedBattleState.gen === 1 && playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
+        updatedBattleState.gen === 1 && playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
+      );
+
+      // don't sync screens here, otherwise, user's values will be overwritten when switching Pokemon
+      // (normally should only be overwritten per sync at the end of the turn, via syncBattle())
+      if (updatedBattleState.gen > 1) {
+        delete updatedField.attackerSide.isReflect;
+        delete updatedField.attackerSide.isLightScreen;
+        delete updatedField.attackerSide.isAuroraVeil;
+        delete updatedField.defenderSide.isReflect;
+        delete updatedField.defenderSide.isLightScreen;
+        delete updatedField.defenderSide.isAuroraVeil;
+      }
+
       dispatch(calcdexSlice.actions.updateField({
-        battleId: battle?.id,
-        field: sanitizeField(
-          battle,
-          updatedBattleState,
-          gen === 1 && playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
-          gen === 1 && playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
-        ),
+        battleId,
+        field: updatedField,
       }));
     },
 
     setAutoSelect: (playerKey, autoSelect) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId: battle?.id,
+      battleId,
       [playerKey]: { autoSelect },
     })),
   };
