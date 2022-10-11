@@ -2,6 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
+import { ToggleButton } from '@showdex/components/ui';
 import {
   LegacyWeatherNames,
   TerrainDescriptions,
@@ -10,12 +11,12 @@ import {
   WeatherMap,
   WeatherNames,
 } from '@showdex/consts/field';
-import { useColorScheme } from '@showdex/redux/store';
+import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { getDexForFormat } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
+import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
-import { ToggleButton } from './ToggleButton';
 import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
@@ -49,10 +50,51 @@ export const FieldCalc = ({
   disabled,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
+  const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const dex = getDexForFormat(format);
   // const legacy = detectLegacyGen(gen);
+
+  const weatherTooltip = React.useCallback((option: DropdownOption<CalcdexBattleField['weather']>) => {
+    if (!option?.value || !settings?.showFieldTooltips) {
+      return null;
+    }
+
+    const description = WeatherDescriptions[option.value]?.shortDesc;
+
+    if (!description) {
+      return null;
+    }
+
+    return (
+      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+        {description}
+      </div>
+    );
+  }, [
+    settings,
+  ]);
+
+  const terrainTooltip = React.useCallback((option: DropdownOption<CalcdexBattleField['terrain']>) => {
+    if (!option?.value || !settings?.showFieldTooltips) {
+      return null;
+    }
+
+    const description = TerrainDescriptions[option.value]?.shortDesc;
+
+    if (!description) {
+      return null;
+    }
+
+    return (
+      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+        {description}
+      </div>
+    );
+  }, [
+    settings,
+  ]);
 
   const {
     weather,
@@ -61,7 +103,8 @@ export const FieldCalc = ({
     defenderSide: p2Side,
   } = field || {};
 
-  const p1Attacker = [authPlayerKey, playerKey].filter(Boolean).includes('p1');
+  // const p1Attacker = [authPlayerKey, playerKey].filter(Boolean).includes('p1');
+  const p1Attacker = playerKey === 'p1';
 
   const attackerSide = p1Attacker ? p1Side : p2Side;
   const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
@@ -80,15 +123,14 @@ export const FieldCalc = ({
     >
       {/* table headers */}
       <TableGridItem
-        className={styles.label}
+        className={cx(styles.label, styles.leftScreens)}
         align="left"
         header
       >
         {/* p1 screens header */}
         {authPlayerKey ? (
-          authPlayerKey === playerKey ? 'Your' : 'Their'
-        ) + ' ' : <>&uarr; </>}
-        Screens
+          authPlayerKey === playerKey ? 'Yours' : 'Theirs'
+        ) : <>&uarr; Screens</>}
       </TableGridItem>
       <TableGridItem
         className={styles.label}
@@ -103,16 +145,16 @@ export const FieldCalc = ({
         Terrain
       </TableGridItem>
       <TableGridItem
-        className={styles.label}
+        className={cx(styles.label, styles.rightScreens)}
         align="right"
         header
       >
         {/* p2 screens header */}
-        {!!authPlayerKey && (
-          authPlayerKey === playerKey ? 'Their' : 'Your'
-        ) + ' '}
-        Screens
-        {!authPlayerKey && <> &darr;</>}
+        {authPlayerKey ? (
+          authPlayerKey === playerKey ? 'Theirs' : 'Yours'
+        ) : <>Screens &darr;</>}
+        {/* Screens */}
+        {/* {!authPlayerKey && <> &darr;</>} */}
       </TableGridItem>
 
       {/* p1 screens */}
@@ -120,11 +162,14 @@ export const FieldCalc = ({
         {Object.entries(PlayerSideScreensMap).map(([label, sideKey], i) => {
           // e.g., 'isAuroraVeil' -> 'AuroraVeil' -> formatId() -> 'auroraveil'
           const screenMoveId = formatId(sideKey.replace('is', ''));
-          const dexScreenMove = screenMoveId ? dex.moves.get(screenMoveId) : null;
+          const dexScreenMove = screenMoveId && settings?.showFieldTooltips
+            ? dex.moves.get(screenMoveId)
+            : null;
+
           const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
 
           return (
-            <React.Fragment key={`FieldCalc:${attackerSideKey}:${label}:ToggleButton`}>
+            <React.Fragment key={`FieldCalc:${battleId || '???'}:${attackerSideKey}:${label}:ToggleButton`}>
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}
@@ -156,13 +201,15 @@ export const FieldCalc = ({
           style={{ textAlign: 'left' }}
           aria-label="Field Weather"
           hint={gen === 1 ? 'N/A' : 'None'}
-          tooltip={weather && WeatherDescriptions[weather]?.shortDesc ? (
-            <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-              {WeatherDescriptions[weather].shortDesc}
-            </div>
-          ) : null}
+          // tooltip={weather && settings?.showFieldTooltips && WeatherDescriptions[weather]?.shortDesc ? (
+          //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+          //     {WeatherDescriptions[weather].shortDesc}
+          //   </div>
+          // ) : null}
+          optionTooltip={weatherTooltip}
+          optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
-            name: `FieldCalc:Weather:${battleId || '???'}`,
+            name: `FieldCalc:${battleId || '???'}:Weather:Dropdown`,
             value: weather,
             onChange: (updatedWeather: CalcdexBattleField['weather']) => onFieldChange?.({
               weather: updatedWeather,
@@ -172,7 +219,8 @@ export const FieldCalc = ({
             ...LegacyWeatherNames,
             gen > 2 && WeatherMap.hail,
           ].filter(Boolean).sort()).map((name) => ({
-            label: name,
+            /** @todo gross */
+            label: name === 'Harsh Sunshine' ? 'Intense Sun' : name,
             value: name,
           }))}
           noOptionsMessage="No Weather"
@@ -186,13 +234,15 @@ export const FieldCalc = ({
           style={{ textAlign: 'left' }}
           aria-label="Field Terrain"
           hint={gen < 6 ? 'N/A' : 'None'}
-          tooltip={terrain && TerrainDescriptions[terrain]?.shortDesc ? (
-            <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-              {TerrainDescriptions[terrain].shortDesc}
-            </div>
-          ) : null}
+          // tooltip={terrain && settings?.showFieldTooltips && TerrainDescriptions[terrain]?.shortDesc ? (
+          //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+          //     {TerrainDescriptions[terrain].shortDesc}
+          //   </div>
+          // ) : null}
+          optionTooltip={terrainTooltip}
+          optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
-            name: `FieldCalc:Terrain:${battleId || '???'}`,
+            name: `FieldCalc:${battleId || '???'}:Terrain:Dropdown`,
             value: terrain,
             onChange: (updatedTerrain: CalcdexBattleField['terrain']) => onFieldChange?.({
               terrain: updatedTerrain,
@@ -211,11 +261,14 @@ export const FieldCalc = ({
       <TableGridItem align="right">
         {Object.entries(PlayerSideScreensMap).map(([label, sideKey], i) => {
           const screenMoveId = formatId(sideKey.replace('is', ''));
-          const dexScreenMove = screenMoveId ? dex.moves.get(screenMoveId) : null;
+          const dexScreenMove = screenMoveId && settings?.showFieldTooltips
+            ? dex.moves.get(screenMoveId)
+            : null;
+
           const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
 
           return (
-            <React.Fragment key={`FieldCalc:${defenderSideKey}:${label}:ToggleButton`}>
+            <React.Fragment key={`FieldCalc:${battleId || '???'}:${defenderSideKey}:${label}:ToggleButton`}>
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}
