@@ -58,7 +58,7 @@ $close-icon-size: 28px;
 
   .left {
     @include flex.row-start;
-    opacity: 0.8;
+    opacity: 0.9;
 
     .settingsIcon {
       width: $settings-icon-size;
@@ -79,7 +79,7 @@ $close-icon-size: 28px;
   .right {
     @include flex.row-end;
 
-    .importButton, .exportButton {
+    .actionButton {
       position: relative;
       font-family: inherit;
       font-weight: 500;
@@ -87,7 +87,7 @@ $close-icon-size: 28px;
       color: inherit;
       text-transform: uppercase;
 
-      &:hover {
+      &:not(.undoButton):hover {
         .light & {
           color: color.shade(colors.$blue, 15%);
         }
@@ -96,13 +96,39 @@ $close-icon-size: 28px;
           color: colors.$blue;
         }
       }
+
+      &:not(:last-of-type) {
+        @include spacing.margin($right: 7px);
+      }
+
+      &:last-of-type {
+        @include spacing.margin($right: 15px);
+      }
     }
 
     .importButton {
-      @include spacing.margin($right: 5px);
+      // @include spacing.margin($right: 5px);
+
+      &.undoButton {
+        .light & {
+          color: color.shade(colors.$red, 15%);
+        }
+
+        .dark & {
+          color: colors.$red;
+        }
+      }
     }
 
-    .exportButton {
+    // .exportButton {
+    //   @include spacing.margin($right: 5px);
+    //
+    //   .inBattle & {
+    //     @include spacing.margin($right: 15px);
+    //   }
+    // }
+
+    .defaultsButton {
       @include spacing.margin($right: 15px);
     }
   }
@@ -293,11 +319,11 @@ $close-icon-size: 28px;
   font-size: 10px;
 
   &.nhkoLabelField {
-    max-width: 70px;
+    max-width: 75px;
   }
 
   &.nhkoColorField {
-    max-width: 80px;
+    max-width: 70px;
   }
 
   .textFieldInput {

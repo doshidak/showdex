@@ -27,7 +27,7 @@ export interface SettingsPaneProps {
   onRequestClose?: BaseButtonProps['onPress'];
 }
 
-const DehydratedRegex = /^v:\d+\.\d+\.\d+;b:[0-9A-F]+;/;
+const DehydratedRegex = /^v:\d+\.\d+\.\d+;[a-z]{1,3}:/;
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
 
@@ -64,8 +64,9 @@ export const SettingsPane = ({
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
-  const exportBadgeRef = React.useRef<BadgeInstance>(null);
-  const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
+
+  const [prevSettings, setPrevSettings] = React.useState<string>(null);
+  const importUndoTimeout = React.useRef<NodeJS.Timeout>(null);
 
   const handleSettingsImport = () => {
     if (typeof navigator === 'undefined') {
@@ -80,6 +81,20 @@ export const SettingsPane = ({
       );
 
       try {
+        if (DehydratedRegex.test(prevSettings)) {
+          const rehydratedPrev = hydrateShowdexSettings(prevSettings);
+
+          if (importUndoTimeout.current) {
+            clearTimeout(importUndoTimeout.current);
+            importUndoTimeout.current = null;
+          }
+
+          updateSettings(rehydratedPrev);
+          setPrevSettings(null);
+
+          return;
+        }
+
         const importedSettings = env('build-target') === 'firefox'
           // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
           ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
@@ -99,6 +114,21 @@ export const SettingsPane = ({
           importFailedBadgeRef.current?.show();
 
           return;
+        }
+
+        const dehydratedCurrent = dehydrateShowdexSettings(settings);
+
+        if (DehydratedRegex.test(dehydratedCurrent)) {
+          setPrevSettings(dehydratedCurrent);
+
+          if (importUndoTimeout.current) {
+            clearTimeout(importUndoTimeout.current);
+          }
+
+          importUndoTimeout.current = setTimeout(() => {
+            setPrevSettings(null);
+            importUndoTimeout.current = null;
+          }, 5000);
         }
 
         const hydratedSettings = hydrateShowdexSettings(importedSettings);
@@ -129,6 +159,9 @@ export const SettingsPane = ({
       }
     })();
   };
+
+  const exportBadgeRef = React.useRef<BadgeInstance>(null);
+  const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
 
   const handleSettingsExport = () => {
     if (typeof navigator === 'undefined') {
@@ -162,6 +195,46 @@ export const SettingsPane = ({
         }
 
         exportFailedBadgeRef.current?.show();
+      }
+    })();
+  };
+
+  const defaultsBadgeRef = React.useRef<BadgeInstance>(null);
+  const defaultsFailedBadgeRef = React.useRef<BadgeInstance>(null);
+
+  const handleSettingsDefaults = () => {
+    if (typeof navigator === 'undefined') {
+      return;
+    }
+
+    void (async () => {
+      try {
+        const hydratedDefaults = hydrateShowdexSettings();
+        const dehydratedDefaults = dehydrateShowdexSettings(hydratedDefaults);
+
+        if (!DehydratedRegex.test(dehydratedDefaults)) {
+          l.debug(
+            'Failed the dehydrated settings regex test!',
+            '\n', 'dehydratedDefaults', dehydratedDefaults,
+          );
+
+          defaultsFailedBadgeRef.current?.show();
+
+          return;
+        }
+
+        await navigator.clipboard.writeText(dehydratedDefaults);
+        defaultsBadgeRef.current?.show();
+      } catch (error) {
+        if (__DEV__) {
+          l.error(
+            'Failed to export dehydrated settings to clipboard:',
+            '\n', error,
+            '\n', '(You will only see this error on development.)',
+          );
+        }
+
+        defaultsFailedBadgeRef.current?.show();
       }
     })();
   };
@@ -243,8 +316,12 @@ export const SettingsPane = ({
 
                 <div className={styles.right}>
                   <Button
-                    className={styles.importButton}
-                    label="Import"
+                    className={cx(
+                      styles.actionButton,
+                      styles.importButton,
+                      !!prevSettings && styles.undoButton,
+                    )}
+                    label={prevSettings ? 'Undo?' : 'Import'}
                     tooltip={(
                       <div className={cx(styles.tooltipContent, styles.importTooltip)}>
                         <Badge
@@ -265,11 +342,15 @@ export const SettingsPane = ({
                       </div>
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
+                    tooltipDisabled={!!prevSettings}
                     onPress={handleSettingsImport}
                   />
 
                   <Button
-                    className={styles.exportButton}
+                    className={cx(
+                      styles.actionButton,
+                      styles.exportButton,
+                    )}
                     label="Export"
                     tooltip={(
                       <div className={cx(styles.tooltipContent, styles.importTooltip)}>
@@ -293,6 +374,38 @@ export const SettingsPane = ({
                     tooltipTrigger={['focus', 'mouseenter']}
                     onPress={handleSettingsExport}
                   />
+
+                  {
+                    !inBattle &&
+                    <Button
+                      className={cx(
+                        styles.actionButton,
+                        styles.defaultsButton,
+                      )}
+                      label="Defaults"
+                      tooltip={(
+                        <div className={cx(styles.tooltipContent, styles.importTooltip)}>
+                          <Badge
+                            ref={defaultsBadgeRef}
+                            className={styles.importBadge}
+                            label="Copied!"
+                            color="green"
+                          />
+
+                          <Badge
+                            ref={defaultsFailedBadgeRef}
+                            className={styles.importBadge}
+                            label="Failed"
+                            color="red"
+                          />
+
+                          Export Defaults to Clipboard
+                        </div>
+                      )}
+                      tooltipTrigger={['focus', 'mouseenter']}
+                      onPress={handleSettingsDefaults}
+                    />
+                  }
 
                   <div className={styles.closePlaceholder} />
                 </div>
@@ -855,7 +968,7 @@ export const SettingsPane = ({
                     name="calcdex.defaultAutoMoves"
                     component={Switch}
                     className={styles.field}
-                    label="Auto-Fill Opponent's Moves"
+                    label="Auto-Fill Revealed Moves"
                     // tooltip={(
                     //   <div className={styles.tooltipContent}>
                     //     Selects revealed moves of your opponent's
