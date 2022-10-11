@@ -15,10 +15,10 @@ $field: (
       dark: colors.$white,
     ),
 
-    // hover: (
-    //   light: color.shade(colors.$blue, 15%),
-    //   dark: colors.$blue,
-    // ),
+    hover: (
+      light: color.shade(colors.$blue, 15%),
+      dark: colors.$blue,
+    ),
   ),
 
   opacity-disabled: 0.3,
@@ -107,6 +107,16 @@ $option: (
     font-weight: 400;
     font-size: map.get($option, font-size);
     color: inherit;
+
+    &:hover {
+      .light & {
+        color: map.get($field, color, hover, light);
+      }
+
+      .dark & {
+        color: map.get($field, color, hover, dark);
+      }
+    }
 
     &.selected {
       font-weight: 500;
