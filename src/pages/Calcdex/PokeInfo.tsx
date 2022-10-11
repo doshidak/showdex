@@ -388,11 +388,12 @@ export const PokeInfo = ({
   const itemOptions = React.useMemo(() => buildItemOptions(
     format,
     pokemon,
-    settings?.showAllOptions,
+    // settings?.showAllOptions,
+    true, // fuck it w/e lol
   ), [
     format,
     pokemon,
-    settings,
+    // settings,
   ]);
 
   // const itemOptionTooltip = React.useCallback((option: DropdownOption<ItemName>) => {
@@ -427,7 +428,6 @@ export const PokeInfo = ({
     : -1;
 
   const nextFormeIndex = formeIndex > -1
-      && (!settings?.showAllFormes || formeIndex === 0) // index 0 is the base forme
     ? formeIndex + 1 > pokemon.altFormes.length - 1
       ? 0
       : formeIndex + 1
