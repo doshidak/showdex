@@ -342,7 +342,7 @@ export const SettingsPane = ({
                       </div>
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
-                    tooltipDisabled={!!prevSettings}
+                    // tooltipDisabled={!!prevSettings}
                     onPress={handleSettingsImport}
                   />
 
