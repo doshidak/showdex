@@ -111,6 +111,10 @@ export const calcBattleCalcdexNonce = (
     gen: battle?.gen?.toString(),
     tier: battle?.tier,
     gameType: battle?.gameType,
+    myPokemon: battle?.myPokemon?.length ? uuidv5(
+      battle.myPokemon.map((p) => calcPokemonCalcdexNonce(<CalcdexPokemon> <unknown> p)).join('|') || 'empty',
+      env('uuid-namespace', NIL_UUID),
+    ) : null,
     mySide: calcSideCalcdexNonce(battle?.mySide),
     nearSide: calcSideCalcdexNonce(battle?.nearSide),
     p1: calcSideCalcdexNonce(battle?.p1),
