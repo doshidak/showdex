@@ -5,7 +5,7 @@ import cx from 'classnames';
 import lzutf8 from 'lzutf8';
 import { BuildInfo } from '@showdex/components/debug';
 import { Button, Scrollable } from '@showdex/components/ui';
-import { useCalcdexBattleState, useColorScheme } from '@showdex/redux/store';
+import { useCalcdexBattleState } from '@showdex/redux/store';
 import { getResourceUrl } from '@showdex/utils/core';
 import { sanitizeStackTrace } from '@showdex/utils/debug';
 import { dehydrateCalcdex } from '@showdex/utils/redux';
@@ -32,7 +32,7 @@ export const CalcdexError = ({
   error,
   battleId,
 }: CalcdexErrorProps): JSX.Element => {
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
 
   const state = useCalcdexBattleState(battleId);
 
@@ -164,7 +164,8 @@ export const CalcdexError = ({
                 <QRCodeCanvas
                   value={compressed}
                   size={325}
-                  fgColor={colorScheme === 'dark' ? '#FFFFFF' : '#000000'}
+                  // fgColor={colorScheme === 'dark' ? '#FFFFFF' : '#000000'}
+                  fgColor="#000000"
                   bgColor="transparent"
                 />
               </div>

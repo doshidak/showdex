@@ -11,8 +11,13 @@
   @include font.apply(fonts.$mono);
   font-size: 10px;
   color: colors.$red;
-  background-color: color.alpha(colors.$red, 0.15);
+  // background-color: color.alpha(colors.$red, 0.15);
+  background-color: #F0D8D9;
   overflow: hidden;
+
+  &, *, *::before, *::after {
+    box-sizing: border-box;
+  }
 
   p {
     margin-block-start: 0;
