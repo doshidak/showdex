@@ -1,10 +1,11 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { PiconButton } from '@showdex/components/app';
-import { Button } from '@showdex/components/ui';
-import { useColorScheme } from '@showdex/redux/store';
+import { Button, ToggleButton } from '@showdex/components/ui';
+import { eacute } from '@showdex/consts/core';
+import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { openShowdownUser } from '@showdex/utils/app';
-import { hasMegaForme } from '@showdex/utils/battle';
+import { hasNickname } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type {
@@ -15,7 +16,6 @@ import type {
   CalcdexPokemon,
 } from '@showdex/redux/store';
 import { PokeCalc } from './PokeCalc';
-import { ToggleButton } from './ToggleButton';
 import styles from './PlayerCalc.module.scss';
 
 interface PlayerCalcProps {
@@ -49,6 +49,7 @@ export const PlayerCalc = ({
   onIndexSelect,
   onAutoSelectChange,
 }: PlayerCalcProps): JSX.Element => {
+  const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const {
@@ -56,6 +57,7 @@ export const PlayerCalc = ({
     name,
     rating,
     pokemon,
+    // pokemonOrder,
     activeIndex,
     selectionIndex: playerIndex,
     autoSelect,
@@ -90,28 +92,27 @@ export const PlayerCalc = ({
             className={styles.usernameButton}
             labelClassName={styles.usernameButtonLabel}
             label={name || defaultName}
-            tooltip="Open User Profile"
+            tooltip={(
+              <div className={styles.tooltipContent}>
+                Open{' '}
+                {name ? (
+                  <>
+                    <strong>{name}</strong>'s
+                  </>
+                ) : 'User'}{' '}
+                Profile
+              </div>
+            )}
             absoluteHover
             disabled={!name}
             onPress={() => openShowdownUser(name)}
           />
 
-          <div>
-            {/* <Button
-              labelClassName={cx(
-                styles.toggleButtonLabel,
-                !autoSelect && styles.inactive,
-              )}
-              label="Auto"
-              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pokémon`}
-              absoluteHover
-              disabled={!pokemon?.length}
-              onPress={() => onAutoSelectChange?.(!autoSelect)}
-            /> */}
-
+          <div className={styles.playerActions}>
             <ToggleButton
+              className={styles.toggleButton}
               label="Auto"
-              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pok\u00E9mon`}
+              tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pok${eacute}mon`}
               absoluteHover
               active={autoSelect}
               disabled={!pokemon?.length}
@@ -119,15 +120,14 @@ export const PlayerCalc = ({
             />
 
             {
-              !!rating &&
-              <span style={{ fontSize: 8, opacity: 0.5 }}>
-                <span style={{ userSelect: 'none' }}>
-                  {' '}&bull;{' '}
-                  {rating}{' '}
+              (settings?.showPlayerRatings && !!rating) &&
+              <div className={styles.rating}>
+                <span className={styles.ratingSeparator}>
+                  &bull;
                 </span>
 
-                ELO
-              </span>
+                {rating} ELO
+              </div>
             }
           </div>
         </div>
@@ -139,8 +139,12 @@ export const PlayerCalc = ({
             const pokemonKey = mon?.calcdexId || mon?.ident || defaultName || '???';
             const friendlyPokemonName = mon?.speciesForme || mon?.name || pokemonKey;
 
+            const nickname = hasNickname(mon) && settings?.showNicknames
+              ? mon.name
+              : null;
+
             const speciesForme = mon?.transformedForme || mon?.speciesForme;
-            const item = hasMegaForme(speciesForme) ? null : mon?.dirtyItem ?? mon?.item;
+            const item = mon?.dirtyItem ?? mon?.item;
 
             return (
               <PiconButton
@@ -161,6 +165,13 @@ export const PlayerCalc = ({
                 } : 'pokeball-none'}
                 tooltip={mon ? (
                   <div className={styles.piconTooltip}>
+                    {
+                      !!nickname &&
+                      <>
+                        <em>{nickname}</em>
+                        {' '}aka.{' '}
+                      </>
+                    }
                     <strong>{friendlyPokemonName}</strong>
                     {
                       !!item &&

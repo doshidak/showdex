@@ -42,6 +42,10 @@ button.usernameButton {
   overflow: hidden;
 }
 
+// button.toggleButton {
+//   font-size: 8px;
+// }
+
 // .toggleButtonLabel {
 //   font-size: 8px;
 //   text-transform: uppercase;
@@ -54,6 +58,33 @@ button.usernameButton {
 //     color: colors.$white;
 //   }
 // }
+
+.playerActions {
+  @include flex.row($align: center);
+  @include spacing.margin($top: 2px);
+  font-size: 8px;
+
+  button.toggleButton {
+    font-size: inherit;
+  }
+
+  .rating {
+    opacity: 0.65;
+
+    .ratingSeparator {
+      display: inline-block;
+      @include spacing.margin-xy($x: 0.5em);
+      user-select: none;
+    }
+  }
+}
+
+.tooltipContent {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
 
 .teamList {
   @include flex.row($justify: flex-end);
