@@ -183,7 +183,19 @@ declare namespace Showdown {
   type PokemonStats = { [K in StatNameNoHp]: number; };
   type StatsTable = { [K in StatName]?: number; };
 
+  /**
+   * Note that unlike `Pokemon`, this is a POJO (Plain Ol' JavaScript Object), not a class.
+   */
   interface ServerPokemon extends PokemonDetails, PokemonHealth {
+    /**
+     * Custom property used to consistently track Pokemon.
+     *
+     * * See `calcdexId` in `Pokemon` for more details.
+     *
+     * @since 1.0.3
+     */
+    calcdexId?: string;
+
     condition: string;
     active: boolean;
 
@@ -224,6 +236,9 @@ declare namespace Showdown {
     gigantamax: string | false;
   }
 
+  /**
+   * Note that this is actually a class in the client.
+   */
   interface Pokemon extends PokemonDetails, PokemonHealth {
     /**
      * @default ''
@@ -234,6 +249,22 @@ declare namespace Showdown {
      * @default ''
      */
     speciesForme: string;
+
+    /**
+     * Custom property used to track Pokemon since the server does not provide consistent IDs.
+     *
+     * * Luckily in my testing, I have found that custom properties persist throughout updates,
+     *   most likely since the client is updating the existing `Pokemon` when processing updates
+     *   from the server.
+     *   - Only exception is forme changes, like *Groudon* to *Groudon-Primal*, which is the client
+     *     will recreate the Pokemon via the player `Side`'s `addPokemon()`.
+     *   - Aforementioned function is overridden in the Calcdex bootstrapper in order to preserve
+     *     the old Pokemon's `calcdexId`, should it exist.
+     *   - Works consistently well, even in the worse case scenario: a team of all *Arceus-\**.
+     *
+     * @since 1.0.3
+     */
+    calcdexId?: string;
 
     /**
      * String with the following extractable information:
