@@ -4,7 +4,12 @@ import {
   PokemonStatNames,
 } from '@showdex/consts/pokemon';
 import { formatId as id } from '@showdex/utils/app';
-import { detectGenFromFormat, getDexForFormat, hasMegaForme } from '@showdex/utils/battle';
+import {
+  detectGenFromFormat,
+  getDexForFormat,
+  hasMegaForme,
+  notFullyEvolved,
+} from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
@@ -35,6 +40,10 @@ export const calcPokemonFinalStats = (
   field: CalcdexBattleField,
   playerKey: CalcdexPlayerKey,
 ): Showdown.StatsTable => {
+  if (!pokemon?.speciesForme || !opponentPokemon?.speciesForme) {
+    return { ...PokemonInitialStats };
+  }
+
   const dex = getDexForFormat(format);
 
   // if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
@@ -378,12 +387,14 @@ export const calcPokemonFinalStats = (
   }
 
   // apply NFE (not fully evolved) effects
-  const nfe = species?.evos?.some((evo) => {
-    const evoSpecies = dex.species.get(evo);
+  // const nfe = species?.evos?.some((evo) => {
+  //   const evoSpecies = dex.species.get(evo);
+  //
+  //   return !evoSpecies?.isNonstandard
+  //     || evoSpecies?.isNonstandard === species.isNonstandard;
+  // });
 
-    return !evoSpecies?.isNonstandard
-      || evoSpecies?.isNonstandard === species.isNonstandard;
-  });
+  const nfe = notFullyEvolved(species);
 
   if (nfe) {
     if (!ignoreItem && item === 'eviolite') {
