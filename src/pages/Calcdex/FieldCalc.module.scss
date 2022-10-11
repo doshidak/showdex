@@ -12,6 +12,14 @@
 .label {
   @include spacing.margin($bottom: 1px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
+
+  &.leftScreens {
+    @include spacing.margin($left: 7px);
+  }
+
+  &.rightScreens {
+    @include spacing.margin($right: 7px);
+  }
 }
 
 button.toggleButton {
