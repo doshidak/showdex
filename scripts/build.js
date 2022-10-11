@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import { config, env as webpackEnv } from '../webpack.config';
+import { config, env as webpackEnv, printableEnv } from '../webpack.config';
 
 // note: this doesn't apply to the webpack config since it's imported before
 process.env.BABEL_ENV = 'production';
@@ -14,8 +14,8 @@ config.mode = 'production';
 const packageInfo = [
   process.env.npm_package_name,
   `v${process.env.npm_package_version}`,
-  `b${webpackEnv['process.env.BUILD_DATE']?.replace(/"/g, '')}`,
-  `(${webpackEnv['process.env.BUILD_TARGET']?.replace(/"/g, '') || 'unknown target'})`,
+  `b${printableEnv.BUILD_DATE}`,
+  `(${printableEnv.BUILD_TARGET || 'unknown target'})`,
 ];
 
 console.log(
@@ -24,9 +24,9 @@ console.log(
   'for production...',
 );
 
-console.log('Loaded webpack env:', webpackEnv);
-console.log('webpack entry:', config.entry);
-console.log('webpack output:', config.output);
+console.log('Loaded webpack env:', printableEnv);
+console.log('Entry:', config.entry);
+console.log('Output:', config.output);
 
 webpack(config, (err) => {
   if (err) {

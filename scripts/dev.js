@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import { config, env as webpackEnv } from '../webpack.config';
+import { config, env as webpackEnv, printableEnv } from '../webpack.config';
 
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
@@ -96,19 +96,7 @@ const packageInfo = [
   );
 
   console.log('Loaded node env:', env);
-  console.log(
-    'Loaded webpack env:',
-    Object.keys(webpackEnv).sort().reduce((prev, key) => {
-      const value = webpackEnv[key];
-
-      const parsedKey = key.replace(/(?:"|process\.env\.)/g, '');
-      const parsedValue = typeof value === 'string' ? value?.replace(/"/g, '') : value;
-
-      prev[parsedKey] = parsedValue;
-
-      return prev;
-    }, {}),
-  );
+  console.log('Loaded webpack env:', printableEnv);
 
   await server.start();
 
