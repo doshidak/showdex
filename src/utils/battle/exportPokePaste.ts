@@ -2,6 +2,7 @@ import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from './getDexForFormat';
+import { hasNickname } from './hasNickname';
 
 /**
  * Internally-used helper function to export a `Showdown.StatsTable` to the PokePaste syntax.
@@ -96,6 +97,7 @@ export const exportPokePaste = (
     speciesForme,
     gender,
     item,
+    prevItem,
     dirtyItem,
     shiny,
     ability,
@@ -115,19 +117,20 @@ export const exportPokePaste = (
 
   // (line 1) <name | speciesForme> [(<speciesForme>)] [(<gender>)] [@ <item>]
   const dexCurrentForme = dex?.species.get(speciesForme);
-  const hasNickname = !!name
-    && name !== speciesForme
-    && (!dexCurrentForme || name !== dexCurrentForme.baseSpecies);
 
-  if (hasNickname) {
-    output[0] = `${name} (${speciesForme})`;
+  if (dexCurrentForme?.name && dexCurrentForme.name !== output[0]) {
+    output[0] = dexCurrentForme.name;
+  }
+
+  if (hasNickname(pokemon)) {
+    output[0] = `${name} (${output[0]})`;
   }
 
   if (['M', 'F'].includes(gender)) {
     output[0] += ` (${gender})`;
   }
 
-  const currentItem = dirtyItem ?? item;
+  const currentItem = dirtyItem ?? (prevItem || item);
 
   if (currentItem) {
     output[0] += ` @ ${currentItem}`;
