@@ -44,7 +44,7 @@ button.primary {
     background-color: color.alpha(colors.$white, 0.05);
   }
 
-  &:hover {
+  &:not(.active):hover {
     &.light {
       background-color: color.alpha(colors.$black, 0.15);
     }
