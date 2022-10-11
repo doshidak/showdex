@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { renderCalcdex } from '@showdex/pages/Calcdex';
+import { calcdexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
   createSideRoom,
@@ -75,6 +76,14 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       // note: battleRoom.id should equal battleRoom.battle.id,
       // which is where battleId should be derived from when the Calcdex state was initialized
       const battleRoomId = battleRoom?.id || battleId;
+
+      // if we're not even in the battleRoom anymore, destroy the state
+      if (!(battleRoomId in (app.rooms || {}))) {
+        store.dispatch(calcdexSlice.actions.destroy(battleRoomId));
+
+        return;
+      }
+
       const shouldFocus = !app.curRoom?.id || app.curRoom.id !== battleRoomId;
 
       if (shouldFocus) {
