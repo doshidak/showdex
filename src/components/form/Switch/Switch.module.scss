@@ -32,8 +32,8 @@ $label: (
     ),
 
     read-only: (
-      light: color.alpha(colors.$black, 0.75),
-      dark: color.alpha(colors.$white, 0.75),
+      light: color.alpha(colors.$black, 0.65),
+      dark: color.alpha(colors.$white, 0.65),
     ),
   ),
 );
@@ -44,8 +44,8 @@ $backdrop: (
 
   background-color: (
     default: (
-      light: colors.$transparent,
-      dark: colors.$transparent,
+      light: color.alpha(colors.$black, 0.025),
+      dark: color.alpha(colors.$white, 0.025),
     ),
 
     selected: (
@@ -62,12 +62,12 @@ $track: (
   box-shadow: (
     light: (
       0 0 1px color.alpha(colors.$black, 0.3),
-      0 0 3px color.alpha(colors.$gray-darker, 0.3),
+      0 0 2px color.alpha(colors.$gray-darker, 0.3),
     ),
 
     dark: (
       0 0 1px color.alpha(colors.$white, 0.5),
-      0 0 3px color.alpha(colors.$black, 0.3),
+      0 0 2px color.alpha(colors.$black, 0.3),
     ),
   )
 );
@@ -76,19 +76,26 @@ $handle: (
   size: map.get($track, height) - map.get($track, gutter),
 
   background-color: (
-    light: colors.$white,
-    dark: colors.$white,
+    default: (
+      light: colors.$white,
+      dark: colors.$white,
+    ),
+
+    disabled: (
+      light: colors.$gray-light,
+      dark: colors.$white,
+    ),
   ),
 
   box-shadow: (
     light: (
-      0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 3px color.alpha(colors.$gray-darker, 0.3),
+      0 0 1px color.alpha(colors.$black, 0.3),
+      0 0 3px color.alpha(colors.$gray-darker, 0.25),
     ),
 
     dark: (
-      0 0 1px color.alpha(colors.$white, 0.15),
-      0 0 3px color.alpha(colors.$black, 0.3),
+      0 0 1px color.alpha(colors.$white, 0.3),
+      0 0 3px color.alpha(colors.$black, 0.25),
     ),
   ),
 
@@ -248,12 +255,12 @@ $handle: (
   cursor: grab;
 
   .light & {
-    background-color: map.get($handle, background-color, light);
+    background-color: map.get($handle, background-color, default, light);
     box-shadow: map.get($handle, box-shadow, light);
   }
 
   .dark & {
-    background-color: map.get($handle, background-color, dark);
+    background-color: map.get($handle, background-color, default, dark);
     box-shadow: map.get($handle, box-shadow, dark);
   }
 
@@ -270,5 +277,13 @@ $handle: (
     box-shadow: none;
     opacity: map.get($handle, opacity, disabled);
     cursor: not-allowed;
+
+    .light & {
+      background-color: map.get($handle, background-color, disabled, light);
+    }
+
+    .dark & {
+      background-color: map.get($handle, background-color, disabled, dark);
+    }
   }
 }
