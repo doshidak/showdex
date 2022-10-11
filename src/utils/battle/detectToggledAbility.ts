@@ -10,8 +10,8 @@ import { toggleableAbility } from './toggleableAbility';
  *   - For instance, if Heatran's *Flash Fire* ability is activated, you'll see its `volatiles` object
  *     set to `{ flashfire: ['flashfire'] }` (at the time of writing this, of course).
  *   - Otherwise, its `ability` would still be `'Flash Fire'`, but `volatiles` would be an empty object, i.e., `{}`.
- * * Only exception is the *Multiscale* ability, which is only active when the Pokemon's HP is at 100%,
- *   similar to how the *Focus Sash* item works.
+ * * Only exception is the *Multiscale* & *Shadow Shield* abilities, which is only active when the Pokemon's HP
+ *   is at 100%, similar to how the *Focus Sash* item works.
  *   - Pretty sure `calculate()` from `@smogon/calc` doesn't care whether `abilityOn` (of `SmogonPokemon`)
  *     is `true` or `false`, but we keep track of it for visual purposes.
  *     - (Side note: `SmogonPokemon` mentioned above is an alias of the `Pokemon` class from `@smogon/calc`.)
