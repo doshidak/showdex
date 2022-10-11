@@ -31,7 +31,7 @@ $background-color: (
 
   active: (
     light: color.alpha(colors.$white, 0.9),
-    dark: color.alpha(colors.$black, 0.9),
+    dark: color.alpha(colors.$white, 0.1),
   ),
 );
 
@@ -44,24 +44,24 @@ $box-shadow: (
   default: (
     light: (
       0 0 1px color.alpha(colors.$black, 0.3),
-      0 0 3px color.alpha(colors.$gray-darker, 0.15),
+      0 0 2px color.alpha(colors.$gray-darker, 0.15),
     ),
 
     dark: (
       0 0 1px color.alpha(colors.$white, 0.5),
-      0 0 3px color.alpha(colors.$black, 0.3),
+      0 0 2px color.alpha(colors.$black, 0.3),
     ),
   ),
 
   hover: (
     light: (
       0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.85),
-      0 0 3px color.alpha(color.shade(colors.$blue, 5%), 0.15),
+      0 0 2px color.alpha(colors.$blue, 0.3),
     ),
 
     dark: (
       0 0 1px color.alpha(colors.$blue, 0.85),
-      0 0 3px color.alpha(colors.$blue, 0.15),
+      0 0 2px color.alpha(colors.$blue, 0.3),
     ),
   ),
 );
@@ -255,7 +255,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
     }
   }
 
-  .selectContainer.active & {
+  .selectContainer.active &.menuOpen {
     .light & {
       color: $value-light-color-active;
     }
@@ -406,6 +406,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  // pointer-events: none; // strangely causes the dropdown to close on mouse up in the Calcdex overlay
 }
 
 // SelectMultiValue
