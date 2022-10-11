@@ -4,7 +4,7 @@ import { PiconButton } from '@showdex/components/app';
 import { Button, ToggleButton } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
-import { openShowdownUser } from '@showdex/utils/app';
+import { openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
@@ -105,7 +105,7 @@ export const PlayerCalc = ({
             )}
             absoluteHover
             disabled={!name}
-            onPress={() => openShowdownUser(name)}
+            onPress={() => openUserPopup(name)}
           />
 
           <div className={styles.playerActions}>
