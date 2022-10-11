@@ -48,12 +48,16 @@
   }
 }
 
+button.toggleButton {
+  font-size: 8px;
+}
+
 .dropdownLabel {
   @include flex.row($align: center);
   @include spacing.margin($bottom: 3px, $left: 5px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
 
-  .toggleButton {
+  button.toggleButton {
     @include spacing.margin($left: 0.75em);
   }
 }
@@ -83,7 +87,7 @@ button.nameButton {
   overflow-x: hidden;
 
   &.missingForme {
-    font-weight: 300;
+    font-weight: 400;
   }
 
   &:not(.missingForme).disabled {
@@ -173,7 +177,7 @@ button.nameButton {
 
 .presetContainer {
   flex: 1;
-  min-width: 150px;
+  min-width: 140px;
   @include spacing.margin($left: 1em);
 }
 
@@ -213,6 +217,7 @@ button.nameButton {
   // font-size: 8px;
 
   .itemEffect {
+    font-size: 8px;
     text-transform: uppercase;
   }
 
