@@ -6,6 +6,42 @@ import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPokemonStat } from './calcPokemonStat';
 
+/**
+ * Internally-used list of IVs to use for each guess attempt, in the order of the array.
+ *
+ * * More IVs you add, the higher chance for a Chinese spread.
+ *   - Though, if a spread was found, the stats will be correct no matter how Chinese they seem.
+ *
+ * @since 1.0.3
+ */
+const AttemptedIvs = [
+  31,
+  30,
+  29,
+  28,
+  27,
+  26,
+  25,
+  24,
+  23,
+  22,
+  21,
+  20,
+  19,
+  18,
+  17,
+  16,
+  15,
+  10,
+  8,
+  6,
+  5,
+  3,
+  2,
+  1,
+  0,
+];
+
 const l = logger('@showdex/utils/calc/guessServerSpread');
 
 /**
@@ -141,7 +177,7 @@ export const guessServerSpread = (
       }
 
       // don't say I didn't warn ya!
-      for (const iv of [31, 30, 29, 28, 27, 26, 25, 22, 21, 20, 19, 18, 17, 16, 15, 10, 8, 6, 5, 3, 2, 1, 0]) { // try some IVs, but not all 31 possible combinations
+      for (const iv of AttemptedIvs) { // try some IVs, but hopefully not all
         for (let ev = 0; ev <= 252; ev += 4) { // try 252 to 0 in multiples of 4
           calculatedStats[stat] = calcPokemonStat(
             gen,
