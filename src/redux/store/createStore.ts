@@ -47,7 +47,7 @@ export const createStore = (
   const store = configureStore({
     ...options,
 
-    // devTools: __DEV__,
+    // devTools: __DEV__, // warning: enable at your own risk!
     devTools: false, // update: see the comments in pkmnApi as to why this is disabled
 
     reducer: {
