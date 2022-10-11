@@ -14,6 +14,7 @@ const DexDescriptionFormatters: { regex: RegExp; replacement: string; }[] = [
   { regex: /Item(s)?/, replacement: 'item$1' },
   { regex: /KOes/, replacement: 'KOs' },
   { regex: /supereffective/, replacement: 'super effective' },
+  { regex: /(?<=\s+)and(?=\s+)/, replacement: '&' },
   { regex: /(?<=\d)x(?=[.,:;!?\s])/i, replacement: times },
   { regex: /1\/2[\w\s]+max\s+HP/, replacement: '50% HP' },
   { regex: /1\/3[\w\s]+max\s+HP/, replacement: '33% HP' },
