@@ -31,6 +31,7 @@ declare class BattleRoom implements Showdown.ClientRoom {
   public autoTimerActivated = false;
   public battlePaused = false;
   public battleEnded: boolean;
+  public expired: boolean;
   public controlsShown = false;
   public callbackWaiting: boolean;
   public timerInterval: number;
@@ -71,7 +72,7 @@ declare class BattleRoom implements Showdown.ClientRoom {
   public showChat(): void;
   public hideChat(): void;
   public leave(): void;
-  public requestLeave(e: Event): void;
+  public requestLeave(e?: Event): boolean;
   public updateLayout(): void;
   public show(): void;
   public hide(): void;
