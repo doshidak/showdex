@@ -108,6 +108,7 @@
 
 button.toggleButton {
   @include spacing.margin($left: 0.5em);
+  font-size: 8px;
 
   &.lessSpacing {
     @include spacing.margin($left: 0.25em);
@@ -127,9 +128,9 @@ button.toggleButton {
 //   }
 // }
 
-button.autoButton {
-  @include spacing.margin($left: 2px, $right: -3px);
-}
+// button.autoButton {
+//   @include spacing.margin($left: 2px, $right: -3px);
+// }
 
 button.ultButton {
   min-width: 25px;
@@ -158,11 +159,21 @@ button.damageButton {
   .dark & {
     color: colors.$white;
   }
+
+  &.noCopy.noDamage {
+    .light & {
+      color: color.alpha(colors.$black, 0.5);
+    }
+
+    .dark & {
+      color: color.alpha(colors.$white, 0.5);
+    }
+  }
 }
 
 .descTooltip {
   position: relative;
-  max-width: 250px;
+  max-width: 200px;
   text-align: center;
   white-space: normal;
   user-select: none;

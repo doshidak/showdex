@@ -1,17 +1,22 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokeType } from '@showdex/components/app';
 import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
-import { Button, CopiedBadge } from '@showdex/components/ui';
-import { useColorScheme } from '@showdex/redux/store';
-import { buildMoveOptions, getDexForFormat } from '@showdex/utils/battle';
+import {
+  Badge,
+  Button,
+  ToggleButton,
+  Tooltip,
+} from '@showdex/components/ui';
+import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
+import { buildMoveOptions } from '@showdex/utils/battle';
+import { upsizeArray } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CopiedBadgeInstance } from '@showdex/components/ui';
+import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexBattleRules, CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
-import { ToggleButton } from './ToggleButton';
+import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMovesProps {
@@ -37,41 +42,31 @@ export const PokeMoves = ({
   calculateMatchup,
   onPokemonChange,
 }: PokeMovesProps): JSX.Element => {
+  const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
-  const dex = getDexForFormat(format);
+  // const dex = getDexForFormat(format);
 
-  // kinda gross tbh
-  // const moveCopiedTimeout = React.useRef<NodeJS.Timeout>(null);
-  // const [movesCopied, setMovesCopied] = React.useState<boolean[]>(Array(movesCount).fill(false));
-
-  // const startMoveCopiedTimeout = () => {
-  //   if (moveCopiedTimeout.current) {
-  //     clearTimeout(moveCopiedTimeout.current);
-  //   }
-  //
-  //   moveCopiedTimeout.current = setTimeout(() => {
-  //     setMovesCopied([]);
-  //     moveCopiedTimeout.current = null;
-  //   }, 1000);
-  // };
-
-  // returned function in the effect function arg is the cleanup function
-  // React.useEffect(() => () => {
-  //   if (moveCopiedTimeout.current) {
-  //     clearTimeout(moveCopiedTimeout.current);
-  //   }
-  // }, []);
-
-  const copiedRefs = React.useRef<CopiedBadgeInstance[]>([]);
+  const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const moveOptions = React.useMemo(
-    () => buildMoveOptions(format, pokemon),
-    [format, pokemon],
+    () => buildMoveOptions(format, pokemon, settings?.showAllOptions),
+    [format, pokemon, settings],
   );
+
+  const matchups = React.useMemo(() => upsizeArray(
+    pokemon?.moves || [],
+    movesCount,
+    null,
+    true,
+  ).map((moveName) => calculateMatchup?.(moveName) || null), [
+    calculateMatchup,
+    movesCount,
+    pokemon,
+  ]);
 
   const showZToggle = format?.includes('nationaldex')
     || gen === 6
@@ -83,6 +78,21 @@ export const PokeMoves = ({
         || (gen === 8 && !format?.includes('bdsp'))
     );
 
+  const handleMoveChange = (name: MoveName, index: number) => {
+    const moves = [...(pokemon?.moves || [] as MoveName[])];
+
+    if (!Array.isArray(moves) || (moves?.[index] && moves[index] === name)) {
+      return;
+    }
+
+    // when move is cleared, `name` will be null/undefined, so coalesce into an empty string
+    moves[index] = (name?.replace('*', '') ?? '') as MoveName;
+
+    onPokemonChange?.({
+      moves,
+    });
+  };
+
   // copies the matchup result description to the user's clipboard when the damage range is clicked
   const handleDamagePress = (index: number, description: string) => {
     if (typeof navigator === 'undefined' || typeof index !== 'number' || index < 0 || !description) {
@@ -93,14 +103,6 @@ export const PokeMoves = ({
     void (async () => {
       try {
         await navigator.clipboard.writeText(description);
-
-        // if (!movesCopied[index]) {
-        //   const newMovesCopied = [...movesCopied];
-        //
-        //   newMovesCopied[index] = true;
-        //   setMovesCopied(newMovesCopied);
-        //   startMoveCopiedTimeout();
-        // }
 
         copiedRefs.current?.[index]?.show();
       } catch (error) {
@@ -129,82 +131,49 @@ export const PokeMoves = ({
           Moves
         </div>
 
-        <ToggleButton
+        {/* <ToggleButton
           className={cx(styles.toggleButton, styles.autoButton)}
           label="Auto"
           tooltip="Auto-Set Revealed Moves"
           // disabled={!pokemon}
           disabled
           onPress={() => {}}
-        />
+        /> */}
 
         {
           showZToggle &&
-          <>
-            {/* <Button
-              className={styles.toggleButton}
-              labelClassName={cx(
-                styles.toggleButtonLabel,
-                !pokemon?.useZ && styles.inactive,
-              )}
-              label="Z-PWR"
-              tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Max Moves`}
-              disabled={!pokemon}
-              onPress={() => onPokemonChange?.({
-                useZ: !pokemon?.useZ,
-                useMax: false,
-              })}
-            /> */}
-            <ToggleButton
-              className={cx(styles.toggleButton, styles.ultButton)}
-              label="Z"
-              tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
-              primary
-              active={pokemon?.useZ}
-              disabled={!pokemon}
-              onPress={() => onPokemonChange?.({
-                useZ: !pokemon?.useZ,
-                useMax: false,
-              })}
-            />
-          </>
+          <ToggleButton
+            className={cx(styles.toggleButton, styles.ultButton)}
+            label="Z"
+            tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
+            primary
+            active={pokemon?.useZ}
+            disabled={!pokemon?.speciesForme}
+            onPress={() => onPokemonChange?.({
+              useZ: !pokemon?.useZ,
+              useMax: false,
+            })}
+          />
         }
 
         {
           showMaxToggle &&
-          <>
-            {/* <Button
-              className={styles.toggleButton}
-              labelClassName={cx(
-                styles.toggleButtonLabel,
-                !pokemon?.useMax && styles.inactive,
-              )}
-              label="Max"
-              tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
-              // absoluteHover
-              disabled={!pokemon}
-              onPress={() => onPokemonChange?.({
-                useZ: false,
-                useMax: !pokemon?.useMax,
-              })}
-            /> */}
-            <ToggleButton
-              className={cx(
-                styles.toggleButton,
-                styles.ultButton,
-                showZToggle && styles.lessSpacing,
-              )}
-              label="Max"
-              tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
-              primary
-              active={pokemon?.useMax}
-              disabled={!pokemon}
-              onPress={() => onPokemonChange?.({
-                useZ: false,
-                useMax: !pokemon?.useMax,
-              })}
-            />
-          </>
+          <ToggleButton
+            className={cx(
+              styles.toggleButton,
+              styles.ultButton,
+              showZToggle && styles.lessSpacing,
+            )}
+            label="Max"
+            tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
+            primary
+            active={pokemon?.useMax}
+            disabled={!pokemon?.speciesForme}
+            onPress={() => onPokemonChange?.({
+              useZ: false,
+              useMax: !pokemon?.useMax,
+            })}
+          />
         }
       </TableGridItem>
 
@@ -216,20 +185,6 @@ export const PokeMoves = ({
           DMG
         </div>
 
-        {/* <Button
-          className={styles.toggleButton}
-          labelClassName={cx(
-            styles.toggleButtonLabel,
-            !pokemon?.criticalHit && styles.inactive,
-          )}
-          label="Crit"
-          tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
-          // absoluteHover
-          disabled={!pokemon?.speciesForme}
-          onPress={() => onPokemonChange?.({
-            criticalHit: !pokemon?.criticalHit,
-          })}
-        /> */}
         <ToggleButton
           className={styles.toggleButton}
           label="Crit"
@@ -254,119 +209,181 @@ export const PokeMoves = ({
 
       {/* (actual) moves */}
       {Array(movesCount).fill(null).map((_, i) => {
-        const moveName = pokemon?.moves?.[i];
-        const move = moveName ? dex?.moves.get(moveName) : null;
-        const moveDescription = move?.shortDesc || move?.desc;
+        // const moveName = pokemon?.moves?.[i];
+        // const move = moveName ? dex?.moves.get(moveName) : null;
+        // const moveDescription = move?.shortDesc || move?.desc;
 
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
         const {
+          defender,
           move: calcMove,
           description,
           damageRange,
           koChance,
           koColor,
-        } = calculateMatchup?.(moveName) || {};
+        } = matchups[i] || {};
+
+        // const moveName = calcMove?.name;
+        const moveName = pokemon?.moves?.[i] || calcMove?.name;
 
         // Z/Max/G-Max moves bypass the original move's accuracy
         // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
         // after using moves like Fly, Dig, Phantom Force, etc.)
-        const showAccuracy = !pokemon?.useMax
-          && typeof move?.accuracy !== 'boolean'
-          && (move?.accuracy || -1) > 0
-          && move.accuracy !== 100;
+        // const showAccuracy = !pokemon?.useMax
+        //   && typeof move?.accuracy !== 'boolean'
+        //   && (move?.accuracy || -1) > 0
+        //   && move.accuracy !== 100;
 
         // const showMoveStats = !!move?.type;
 
+        // const damageButtonDisabled = !settings?.showMatchupTooltip
+        //   || !settings?.copyMatchupDescription
+        //   || !description?.raw;
+
+        const showDamageAmounts = !!description?.damageAmounts
+          && (
+            settings?.showMatchupDamageAmounts === 'always'
+              || (settings?.showMatchupDamageAmounts === 'nfe' && defender?.species.nfe)
+          );
+
+        const matchupTooltip = settings?.showMatchupTooltip && description?.raw ? (
+          <div className={styles.descTooltip}>
+            <Badge
+              ref={(ref) => { copiedRefs.current[i] = ref; }}
+              className={styles.copiedBadge}
+              label="Copied!"
+              color="green"
+            />
+
+            {settings?.prettifyMatchupDescription ? (
+              <>
+                {description?.attacker}
+                {
+                  !!description?.defender &&
+                  <>
+                    {
+                      !!description.attacker &&
+                      <>
+                        <br />
+                        vs
+                        <br />
+                      </>
+                    }
+                    {description.defender}
+                  </>
+                }
+                {(!!description?.damageRange || !!description?.koChance) && ':'}
+                {
+                  !!description?.damageRange &&
+                  <>
+                    <br />
+                    {description.damageRange}
+                  </>
+                }
+                {
+                  !!description?.koChance &&
+                  <>
+                    <br />
+                    {description.koChance}
+                  </>
+                }
+              </>
+            ) : description.raw}
+
+            {
+              showDamageAmounts &&
+              <>
+                <br />
+                ({description.damageAmounts})
+              </>
+            }
+          </div>
+        ) : null;
+
         return (
           <React.Fragment
-            key={`PokeMoves:MoveTrack:${pokemonKey}:${moveName || '???'}:${i}`}
+            key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}
           >
             <TableGridItem align="left">
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for Pokemon ${friendlyPokemonName}`}
                 hint="--"
-                tooltip={calcMove?.type ? (
-                  <div className={styles.moveTooltip}>
-                    {
-                      !!moveDescription &&
-                      <div className={styles.moveDescription}>
-                        {moveDescription}
-                      </div>
-                    }
-
-                    <div className={styles.moveProperties}>
-                      <PokeType
-                        className={styles.moveType}
-                        type={calcMove.type}
-                        reverseColorScheme
-                      />
-
-                      {
-                        !!calcMove.category &&
-                        <div className={styles.moveProperty}>
-                          <div className={styles.propertyName}>
-                            {calcMove.category.slice(0, 4)}
-                          </div>
-
-                          {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
-                          {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
-                          {
-                            (calcMove?.bp ?? 0) > 2 &&
-                            <div className={styles.propertyValue}>
-                              {calcMove.bp}
-                            </div>
-                          }
-                        </div>
-                      }
-
-                      {
-                        showAccuracy &&
-                        <div className={styles.moveProperty}>
-                          <div className={styles.propertyName}>
-                            ACC
-                          </div>
-
-                          <div className={styles.propertyValue}>
-                            {move.accuracy}%
-                          </div>
-                        </div>
-                      }
-
-                      {
-                        !!calcMove?.priority &&
-                        <div className={styles.moveProperty}>
-                          <div className={styles.propertyName}>
-                            PRI
-                          </div>
-
-                          <div className={styles.propertyValue}>
-                            {calcMove.priority > 0 && '+'}
-                            {calcMove.priority}
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                ) : null}
+                // tooltip={calcMove?.type ? (
+                //   <div className={styles.moveTooltip}>
+                //     {
+                //       !!moveDescription &&
+                //       <div className={styles.moveDescription}>
+                //         {moveDescription}
+                //       </div>
+                //     }
+                //
+                //     <div className={styles.moveProperties}>
+                //       <PokeType
+                //         className={styles.moveType}
+                //         type={calcMove.type}
+                //         reverseColorScheme
+                //       />
+                //
+                //       {
+                //         !!calcMove.category &&
+                //         <div className={styles.moveProperty}>
+                //           <div className={styles.propertyName}>
+                //             {calcMove.category.slice(0, 4)}
+                //           </div>
+                //
+                //           {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
+                //           {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
+                //           {
+                //             (calcMove?.bp ?? 0) > 2 &&
+                //             <div className={styles.propertyValue}>
+                //               {calcMove.bp}
+                //             </div>
+                //           }
+                //         </div>
+                //       }
+                //
+                //       {
+                //         showAccuracy &&
+                //         <div className={styles.moveProperty}>
+                //           <div className={styles.propertyName}>
+                //             ACC
+                //           </div>
+                //
+                //           <div className={styles.propertyValue}>
+                //             {move.accuracy}%
+                //           </div>
+                //         </div>
+                //       }
+                //
+                //       {
+                //         !!calcMove?.priority &&
+                //         <div className={styles.moveProperty}>
+                //           <div className={styles.propertyName}>
+                //             PRI
+                //           </div>
+                //
+                //           <div className={styles.propertyValue}>
+                //             {calcMove.priority > 0 && '+'}
+                //             {calcMove.priority}
+                //           </div>
+                //         </div>
+                //       }
+                //     </div>
+                //   </div>
+                // ) : null}
+                // optionTooltip={moveOptionTooltip}
+                optionTooltip={PokeMoveOptionTooltip}
+                optionTooltipProps={{
+                  format,
+                  pokemon,
+                  hidden: !settings?.showMoveTooltip,
+                }}
                 input={{
-                  name: `PokeMoves:MoveTrack:Move:${pokemonKey}:${i}`,
+                  name: `PokeMoves:Moves:${pokemonKey}:Dropdown:${i}`,
                   value: moveName,
-                  onChange: (name: MoveName) => {
-                    const moves = [...(pokemon?.moves || [] as MoveName[])];
-
-                    if (!Array.isArray(moves) || (moves?.[i] && moves[i] === name)) {
-                      return;
-                    }
-
-                    // when move is cleared, `name` will be null/undefined, so coalesce into an empty string
-                    moves[i] = (name?.replace('*', '') ?? '') as MoveName;
-
-                    onPokemonChange?.({
-                      moves,
-                    });
-                  },
+                  onChange: (name: MoveName) => handleMoveChange(name, i),
                 }}
                 options={moveOptions}
                 noOptionsMessage="No Moves Found"
@@ -377,73 +394,52 @@ export const PokeMoves = ({
             <TableGridItem>
               {/* [XXX.X% &ndash;] XXX.X% */}
               {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
-              {
-                !!damageRange &&
-                <Button
-                  className={cx(
-                    styles.damageButton,
-                    !description && styles.disabled,
-                  )}
-                  labelClassName={cx(
-                    styles.damageButtonLabel,
-                    damageRange === 'N/A' && styles.noDamage,
-                  )}
-                  tabIndex={-1} // not ADA compliant, obviously lol
-                  label={damageRange}
-                  tooltip={description?.raw ? (
-                    <div className={styles.descTooltip}>
-                      {/* <div
-                        className={cx(
-                          styles.copied,
-                          movesCopied[i] && styles.copiedVisible,
-                        )}
-                      >
-                        Copied!
-                      </div> */}
-                      <CopiedBadge
-                        ref={(ref) => { copiedRefs.current[i] = ref; }}
-                        className={styles.copiedBadge}
-                      />
-
-                      {description?.attacker}
-                      {
-                        !!description?.defender &&
-                        <>
-                          {
-                            !!description.attacker &&
-                            <>
-                              <br />
-                              vs
-                              <br />
-                            </>
-                          }
-                          {description.defender}
-                        </>
-                      }
-                      {(!!description?.damageRange || !!description?.koChance) && ':'}
-                      {
-                        !!description?.damageRange &&
-                        <>
-                          <br />
-                          {description.damageRange}
-                        </>
-                      }
-                      {
-                        !!description?.koChance &&
-                        <>
-                          <br />
-                          {description.koChance}
-                        </>
-                      }
+              {(!!damageRange && (settings?.showNonDamageRanges || damageRange !== 'N/A')) ? (
+                settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
+                  <Button
+                    className={cx(
+                      styles.damageButton,
+                      // damageButtonDisabled && styles.disabled,
+                    )}
+                    labelClassName={cx(
+                      styles.damageButtonLabel,
+                      damageRange === 'N/A' && styles.noDamage,
+                    )}
+                    tabIndex={-1} // not ADA compliant, obviously lol
+                    label={damageRange}
+                    tooltip={matchupTooltip}
+                    tooltipTrigger="mouseenter"
+                    hoverScale={1}
+                    // activeScale={damageButtonDisabled ? 1 : undefined}
+                    absoluteHover
+                    // disabled={!settings?.showMatchupTooltip || !settings?.copyMatchupDescription || !description?.raw}
+                    disabled={!description?.raw}
+                    onPress={() => handleDamagePress(i, [
+                      description.raw,
+                      showDamageAmounts && `(${description.damageAmounts})`,
+                    ].filter(Boolean).join(' '))}
+                  />
+                ) : (
+                  <Tooltip
+                    content={matchupTooltip}
+                    offset={[0, 10]}
+                    delay={[1000, 50]}
+                    trigger="mouseenter"
+                    touch="hold"
+                    disabled={!settings?.showMatchupTooltip}
+                  >
+                    <div
+                      className={cx(
+                        styles.damageButtonLabel,
+                        styles.noCopy,
+                        damageRange === 'N/A' && styles.noDamage,
+                      )}
+                    >
+                      {damageRange}
                     </div>
-                  ) : null}
-                  tooltipTrigger={['focus', 'mouseenter']}
-                  hoverScale={1}
-                  absoluteHover
-                  disabled={!description?.raw}
-                  onPress={() => handleDamagePress(i, description?.raw)}
-                />
-              }
+                  </Tooltip>
+                )
+              ) : null}
             </TableGridItem>
 
             <TableGridItem
