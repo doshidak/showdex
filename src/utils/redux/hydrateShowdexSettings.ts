@@ -46,7 +46,7 @@ export const HydratedCalcdexSettingsMap = reverseObjectKv(DehydratedCalcdexSetti
  */
 const IgnoredDehydratedShowdexKeys = [
   DehydratedShowdexSettingsMap.packageVersion,
-  DehydratedShowdexSettingsMap.buildDate,
+  // DehydratedShowdexSettingsMap.buildDate,
 ];
 
 const l = logger('@showdex/utils/redux/hydrateShowdexSettings');
@@ -91,13 +91,13 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       authPosition: 'top',
       showNicknames: false,
       reverseIconName: false,
-      showAllFormes: false,
+      showAllFormes: true,
       showAllOptions: false,
       showNonDamageRanges: true,
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,
       downloadUsageStats: true,
-      prioritizeUsageStats: true,
+      prioritizeUsageStats: false,
       includeTeambuilder: false, /** @todo disabled for now (default: `true`) */
       autoExportOpponent: false,
 

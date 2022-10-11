@@ -235,7 +235,7 @@ export interface ShowdexCalcdexSettings {
   /**
    * Whether to allow all possible formes to be switched to, if any, even if a forme is revealed.
    *
-   * @default false
+   * @default true
    * @since 1.0.3
    */
   showAllFormes: boolean;
@@ -296,7 +296,7 @@ export interface ShowdexCalcdexSettings {
    *
    * * Has no effect if `downloadUsageStats` is `false`.
    *
-   * @default true
+   * @default false
    * @since 1.0.3
    */
   prioritizeUsageStats: boolean;
