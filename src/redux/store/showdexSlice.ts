@@ -144,7 +144,7 @@ export interface ShowdexCalcdexSettings {
    * * This also applies if `closeOnEnd` is `true`.
    * * Has no effect if `openAs` is `'overlay'`.
    *
-   * @default false
+   * @default true
    * @since 1.0.3
    */
   destroyOnClose: boolean;

@@ -76,7 +76,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       openAs: 'showdown',
       // forcedOpenAs: 'showdown',
       closeOnEnd: false,
-      destroyOnClose: false,
+      destroyOnClose: true,
       preserveRenderStates: true,
 
       defaultAutoSelect: {
