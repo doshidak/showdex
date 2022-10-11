@@ -37,15 +37,6 @@ declare class HtmlRoom implements Showdown.ClientRoom {
   public events: Record<string, string>;
   public lastUpdate?: number;
 
-  /**
-   * Whether the room's tab is hidden.
-   *
-   * * This is a custom property used by the extension only.
-   *
-   * @since 1.0.3
-   */
-  public tabHidden?: boolean;
-
   public constructor(props?: {
     id: string;
     el?: JQuery<HTMLDivElement>;
@@ -60,7 +51,7 @@ declare class HtmlRoom implements Showdown.ClientRoom {
   public add(log: string | string[]): void;
   public join(): void;
   public leave(): void;
-  public requestLeave(e: Event): void;
+  public requestLeave(e?: Event): boolean;
   public login(): void;
   public addRow(line: string): void;
   public clickUsername(e: Event): void;
