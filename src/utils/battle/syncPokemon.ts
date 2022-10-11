@@ -30,6 +30,7 @@ export const syncPokemon = (
   clientPokemon: DeepPartial<Showdown.Pokemon>,
   serverPokemon?: DeepPartial<Showdown.ServerPokemon>,
   format?: string,
+  showAllFormes?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(format);
@@ -139,6 +140,9 @@ export const syncPokemon = (
         if (value || (clientPokemon.prevItem && clientPokemon.prevItemEffect)) {
           syncedPokemon.dirtyItem = null;
         }
+
+        // run the item through the dex in case it's formatted as an id
+        value = dex?.items.get(<string> value)?.name || value;
 
         break;
       }
@@ -257,6 +261,15 @@ export const syncPokemon = (
 
         if (!transformedPokemon && formeChange) {
           syncedPokemon.speciesForme = formeChange;
+        }
+
+        // note: if the target Pokemon transforms (e.g., Necrozma-Dusk-Mane -> Necrozma-Ultra)
+        // on the same turn that the Imposter Pokemon transforms (e.g., Ditto), we'll need to
+        // read from 'formechange' instead of 'transform' as the Showdown.Pokemon in 'transform'
+        // will refer to its post-changed forme, which the Imposter Pokemon will inherit
+        // (i.e., Ditto's transformedForme will be Necrozma-Ultra, which is incorrect)
+        if (transformedPokemon && formeChange) {
+          syncedPokemon.transformedForme = formeChange;
         }
 
         // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
@@ -432,7 +445,11 @@ export const syncPokemon = (
     abilityToggled,
     baseStats,
     transformedBaseStats,
-  } = sanitizePokemon(syncedPokemon, format);
+  } = sanitizePokemon(
+    syncedPokemon,
+    format,
+    showAllFormes,
+  );
 
   // update the abilities (including transformedAbilities) if they're different from what was stored prior
   // (note: only checking if they're arrays instead of their length since th ability list could be empty)
@@ -478,7 +495,7 @@ export const syncPokemon = (
   // check for alternative formes (in case of transformations)
   if (altFormes?.length) {
     // ya, apparently Hisuian Pokemon are included in the list for some reason lol
-    syncedPokemon.altFormes = [...altFormes.filter((f) => !!f && !f.includes('-Hisui'))];
+    syncedPokemon.altFormes = [...altFormes];
 
     if (syncedPokemon.altFormes.length === 1) {
       syncedPokemon.altFormes = [];
