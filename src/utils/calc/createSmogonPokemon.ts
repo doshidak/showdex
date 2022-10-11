@@ -87,7 +87,7 @@ export const createSmogonPokemon = (
   // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
   // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
-  const hasMultiscale = !!ability && formatId(ability) === 'multiscale';
+  const hasMultiscale = !!ability && ['multiscale', 'shadowshield'].includes(formatId(ability));
 
   const shouldMultiscale = hasMultiscale
     && pokemon.abilityToggleable

@@ -39,7 +39,7 @@ export const detectToggledAbility = (
   // by this point, the Pokemon's HP is 0% or 100% so Multiscale should be "on"
   // (considering that we "reset" the HP to 100% if the Pokemon is dead, i.e., at 0% HP)
   // (also note that Multiscale doesn't exist in pokemon.volatiles, hence the check here)
-  if (ability === 'multiscale') {
+  if (['multiscale', 'shadowshield'].includes(ability)) {
     const hpPercentage = calcPokemonHp(pokemon);
 
     return !hpPercentage || hpPercentage === 1;
