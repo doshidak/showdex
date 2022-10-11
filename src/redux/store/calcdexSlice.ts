@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, current } from '@reduxjs/toolkit';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
@@ -37,6 +37,11 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Internal unqiue ID used by the extension.
    *
+   * * As part of the new IDing mechanism introduced in v1.0.3, the corresponding `Pokemon`
+   *   and `ServerPokemon` (if applicable) will also have the same `calcdexId` as this one.
+   *   - See the notes for `calcdexId` in the `Showdown.Pokemon` interface.
+   *
+   * @see `Showdown.Pokemon['calcdexId']`
    * @since 0.1.0
    */
   calcdexId?: string;
@@ -303,6 +308,16 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   evs?: Showdown.StatsTable;
+
+  /**
+   * Whether to show the EV/IV rows in the `PokeStats` table.
+   *
+   * * If `false`, an edit button should be shown to allow the user to set this value to `true`.
+   *
+   * @default true
+   * @since 1.0.3
+   */
+  showGenetics?: boolean;
 
   /**
    * Whether the Pokemon is using Z moves.
@@ -1014,6 +1029,15 @@ export type CalcdexPlayerKey =
 export type CalcdexPlayerState = Partial<Record<CalcdexPlayerKey, CalcdexPlayer>>;
 
 /**
+ * Rendering mode of the Calcdex.
+ *
+ * @since 1.0.3
+ */
+export type CalcdexRenderMode =
+  | 'panel'
+  | 'overlay';
+
+/**
  * Primary state for a given single instance of the Calcdex.
  *
  * @since 0.1.0
@@ -1062,6 +1086,20 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * @since 0.1.3
    */
   rules?: CalcdexBattleRules;
+
+  /**
+   * Whether the battle is currently active (i.e., not ended).
+   *
+   * @since 1.0.3
+   */
+  active?: boolean;
+
+  /**
+   * Render mode of the Calcdex, determined from the settings during initialization.
+   *
+   * @since 1.0.3
+   */
+  renderMode?: CalcdexRenderMode;
 
   /**
    * Side key/ID of the player.
@@ -1181,6 +1219,13 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    * @since 0.1.3
    */
   updatePokemon: (state: Draft<CalcdexSliceState>, action: PayloadAction<CalcdexSlicePokemonAction>) => void;
+
+  /**
+   * Destroys the entire `CalcdexBattleState` by the passed-in `battleId` represented as `action.payload`.
+   *
+   * @since 1.0.3
+   */
+  destroy: (state: Draft<CalcdexSliceState>, action: PayloadAction<string>) => void;
 }
 
 const l = logger('@showdex/redux/store/calcdexSlice');
@@ -1195,6 +1240,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1202,6 +1248,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
         rules = {},
+        renderMode,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
@@ -1238,6 +1285,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen,
         format,
         rules,
+
+        renderMode,
 
         playerKey,
         authPlayerKey,
@@ -1277,7 +1326,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
@@ -1285,6 +1334,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1292,6 +1342,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce,
         gen,
         format,
+        active,
       } = action.payload;
 
       if (!battleId) {
@@ -1319,12 +1370,13 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce: battleNonce || currentState.battleNonce,
         gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
         format: format || currentState.format,
+        active: typeof active === 'boolean' ? active : currentState.active,
       };
 
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
@@ -1332,6 +1384,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1351,19 +1404,31 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
-      state[battleId] = {
-        ...state[battleId],
+      // using battleField here as both a pointer and popular reference
+      const battleField = state[battleId].field;
 
-        field: {
-          ...state[battleId].field,
-          ...field,
+      // only spreading this hard cause of what I chose to send as the payload,
+      // which is a DeepPartial<CalcdexBattleField>, so even the objects inside are partials!
+      // ... need to get some of that expand() util tbh lmao
+      state[battleId].field = {
+        ...battleField,
+        ...field,
+
+        attackerSide: {
+          ...battleField.attackerSide,
+          ...field?.attackerSide,
+        },
+
+        defenderSide: {
+          ...battleField.defenderSide,
+          ...field?.defenderSide,
         },
       };
 
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
@@ -1371,6 +1436,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1412,7 +1478,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
@@ -1420,6 +1486,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
 
       const {
@@ -1445,8 +1512,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!(playerKey in battleState)) {
         l.error(
           'Could not find player', playerKey, 'in battleId', battleId,
-          '\n', 'battleState (Proxy)', __DEV__ && { ...battleState },
           '\n', 'pokemon', pokemon,
+          '\n', 'battleState', __DEV__ && current(state)[battleId],
         );
 
         return;
@@ -1460,11 +1527,13 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       if (!pokemonState) {
         if (__DEV__) {
+          const currentState = __DEV__ ? current(state) : null;
+
           l.warn(
             'Could not find Pokemon', pokemonId, 'of player', playerKey, 'in battleId', battleId,
-            '\n', 'battleState (Proxy)', __DEV__ && { ...battleState },
-            '\n', 'playerState (Proxy)', __DEV__ && { ...playerState },
             '\n', 'pokemon', pokemon,
+            '\n', 'playerState', __DEV__ && currentState?.[battleId]?.[playerKey],
+            '\n', 'battleState', __DEV__ && currentState?.[battleId],
             '\n', '(You will only see this warning on development.)',
           );
         }
@@ -1480,18 +1549,41 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (Proxy)', __DEV__ && { ...battleState },
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
+      );
+    },
+
+    destroy: (state, action) => {
+      l.debug(
+        'RECV', action.type,
+        '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
+      );
+
+      if (!action.payload || !(action.payload in state)) {
+        if (__DEV__) {
+          l.warn(
+            'Attempted to destroy a Calcdex that does not exist in state.',
+            '\n', 'battleId', action.payload,
+            '\n', 'state', __DEV__ && current(state),
+            '\n', '(You will only see this warning on development.)',
+          );
+        }
+
+        return;
+      }
+
+      delete state[action.payload];
+
+      l.debug(
+        'DONE', action.type,
+        '\n', 'action.payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
       );
     },
   },
 
   extraReducers: (build) => void build
-    .addCase(syncBattle.pending, (_state, action) => {
-      l.debug(
-        'RECV', SyncBattleActionType, 'for', (<CalcdexBattleState> action.payload)?.battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
-      );
-    })
     .addCase(syncBattle.fulfilled, (state, action) => {
       const { battleId } = action.payload;
 
@@ -1502,7 +1594,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', SyncBattleActionType, 'for', battleId || '(missing battleId)',
         '\n', 'action.payload', action.payload,
-        '\n', 'battleState (Proxy)', __DEV__ && { ...state[battleId] },
+        '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     }),
 });
