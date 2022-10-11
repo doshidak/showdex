@@ -1042,8 +1042,8 @@ export const SettingsPane = ({
                           autoComplete="off"
                           autoCapitalize="off"
                           spellCheck={false}
-                          maxLength={8}
-                          monospace={false}
+                          maxLength={10}
+                          // monospace={false}
                         />
                       ))}
                     </div>
