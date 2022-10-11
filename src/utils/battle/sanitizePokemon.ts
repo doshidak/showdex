@@ -205,15 +205,19 @@ export const sanitizePokemon = (
     // attempt to populate all other formes based on the base forme
     // (or determined base forme from the curren other forme if showAllFormes is true)
     sanitizedPokemon.altFormes = transformedBaseSpecies?.otherFormes?.length
-        && (!showAllFormes && transformedBaseSpeciesForme === sanitizedPokemon.transformedForme)
-        && transformedBaseSpecies.otherFormes.includes(sanitizedPokemon.transformedForme)
+        && (
+          (showAllFormes && transformedBaseSpecies.otherFormes.includes(sanitizedPokemon.transformedForme))
+            || transformedBaseSpeciesForme === sanitizedPokemon.transformedForme
+        )
       ? [
         transformedBaseSpeciesForme,
         ...(<string[]> transformedBaseSpecies.otherFormes),
       ]
       : baseSpecies?.otherFormes?.length
-          && (!showAllFormes && baseSpeciesForme === sanitizedPokemon.speciesForme)
-          && baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
+          && (
+            (showAllFormes && baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme))
+              || baseSpeciesForme === sanitizedPokemon.speciesForme
+          )
         ? [
           baseSpeciesForme,
           ...(<string[]> baseSpecies.otherFormes),
