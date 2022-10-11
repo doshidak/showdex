@@ -143,7 +143,8 @@ export const PlayerCalc = ({
               ? mon.name
               : null;
 
-            const speciesForme = mon?.transformedForme || mon?.speciesForme;
+            // const speciesForme = mon?.transformedForme || mon?.speciesForme;
+            const speciesForme = mon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
             const item = mon?.dirtyItem ?? mon?.item;
 
             return (
