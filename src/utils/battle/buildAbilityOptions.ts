@@ -19,6 +19,7 @@ export type PokemonAbilityOption = DropdownOption<AbilityName>;
 export const buildAbilityOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  showAll?: boolean,
 ): PokemonAbilityOption[] => {
   const options: PokemonAbilityOption[] = [];
 
@@ -47,9 +48,9 @@ export const buildAbilityOptions = (
   const filterAbilities: AbilityName[] = [];
 
   // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(altAbilities);
+  const findUsagePercent = usageAltPercentFinder(altAbilities, true);
 
-  if (baseAbility && ability !== baseAbility) {
+  if (!transformedForme && baseAbility && ability !== baseAbility) {
     options.push({
       label: formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited',
       options: [{
@@ -66,7 +67,7 @@ export const buildAbilityOptions = (
     const transformed = Array.from(new Set([
       serverSourced && ability,
       ...transformedAbilities,
-    ])).filter((n) => !!n && !abilities.includes(n)).sort();
+    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort();
 
     options.push({
       label: 'Transformed',
@@ -122,7 +123,7 @@ export const buildAbilityOptions = (
 
   // show all possible abilities if format is not provided, is not legal-locked, or
   // no legal abilities are available (probably because the Pokemon doesn't exist in the `dex`'s gen)
-  if (!legalLockedFormat(format) || !abilities?.length) {
+  if (showAll || !legalLockedFormat(format) || !abilities?.length) {
     const otherAbilities = Object.values(BattleAbilities || {})
       .map((a) => <AbilityName> a?.name)
       .filter((n) => !!n && formatId(n) !== 'noability' && !filterAbilities.includes(n))

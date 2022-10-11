@@ -1,3 +1,4 @@
+import { eacute } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { ItemName } from '@smogon/calc/dist/data/interface';
@@ -7,6 +8,7 @@ import { flattenAlt, flattenAlts } from './flattenAlts';
 import { guessTableFormatKey } from './guessTableFormatKey';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { getDexForFormat } from './getDexForFormat';
+import { legalLockedFormat } from './legalLockedFormat';
 
 export type PokemonItemOption = DropdownOption<ItemName>;
 
@@ -63,6 +65,7 @@ const findItemGroupIndices = (
 export const buildItemOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  showAll?: boolean,
 ): PokemonItemOption[] => {
   const options: PokemonItemOption[] = [];
 
@@ -80,7 +83,7 @@ export const buildItemOptions = (
   const filterItems: ItemName[] = [];
 
   // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(altItems);
+  const findUsagePercent = usageAltPercentFinder(altItems, true);
 
   if (altItems?.length) {
     const hasUsageStats = altItems
@@ -192,7 +195,7 @@ export const buildItemOptions = (
 
     if (specificItems.length) {
       options.push({
-        label: 'Pok\u00E9mon-Specific', // U+00E9 is the accented 'e' character
+        label: `Pok${eacute}mon-Specific`,
         options: specificItems.map((name) => ({
           label: name,
           rightLabel: findUsagePercent(name),
@@ -236,6 +239,26 @@ export const buildItemOptions = (
       options.push({
         label: 'Useless',
         options: uselessItems.map((name) => ({
+          label: name,
+          rightLabel: findUsagePercent(name),
+          value: name,
+        })),
+      });
+
+      filterItems.push(...uselessItems);
+    }
+  }
+
+  if (showAll || !legalLockedFormat(format)) {
+    const otherItems = Object.values(BattleItems || {})
+      .map((item) => <ItemName> item?.name)
+      .filter((n) => !!n && !filterItems.includes(n))
+      .sort();
+
+    if (otherItems.length) {
+      options.push({
+        label: 'All',
+        options: otherItems.map((name) => ({
           label: name,
           rightLabel: findUsagePercent(name),
           value: name,

@@ -22,6 +22,7 @@ export type PokemonMoveOption = DropdownOption<MoveName>;
 export const buildMoveOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  showAll?: boolean,
 ): PokemonMoveOption[] => {
   const options: PokemonMoveOption[] = [];
 
@@ -31,7 +32,7 @@ export const buildMoveOptions = (
 
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
-  const showAllMoves = !legalLockedFormat(format);
+  const showAllMoves = showAll || !legalLockedFormat(format);
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -207,7 +208,7 @@ export const buildMoveOptions = (
   if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
       .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
-      .filter((n) => !!n && !filterMoves.includes(n))
+      .filter((n) => !!n && !/^(?:G-)?Max\s+/i.test(n) && !filterMoves.includes(n))
       .sort();
 
     // note: since we need to filter out HP moves, but keep the group last, this is the workaround.
