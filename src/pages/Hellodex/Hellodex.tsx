@@ -5,11 +5,16 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
 import { useCalcdexState, useColorScheme } from '@showdex/redux/store';
-import { getCalcdexRoomId, openUserPopup } from '@showdex/utils/app';
+import { getAuthUsername, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { FooterButton } from './FooterButton';
 import { InstanceButton } from './InstanceButton';
+import { SettingsPane } from './SettingsPane';
 import styles from './Hellodex.module.scss';
+
+export interface HellodexProps {
+  openCalcdexInstance?: (battleId: string) => void;
+}
 
 const packageVersion = `v${env('package-version', '#.#.#')}`;
 const donationUrl = env('hellodex-donation-url');
@@ -19,9 +24,10 @@ const releaseUrl = `${env('hellodex-releases-base-url')}/${packageVersion}`;
 const bugsUrl = env('hellodex-bugs-url');
 const featuresUrl = env('hellodex-features-url');
 
-export const Hellodex = (): JSX.Element => {
+export const Hellodex = ({
+  openCalcdexInstance,
+}: HellodexProps): JSX.Element => {
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const colorScheme = useColorScheme();
 
   const [contentWidth] = useSize(contentRef, {
     initialWidth: 400,
@@ -32,31 +38,37 @@ export const Hellodex = (): JSX.Element => {
 
   const inBattle = contentWidth < 500;
 
+  const authName = getAuthUsername();
   const calcdexState = useCalcdexState();
   const instancesEmpty = !Object.keys(calcdexState).length;
 
-  const handleInstancePress = (battleId: string) => {
-    if (typeof app === 'undefined' || !Object.keys(app.rooms || {}).length || !battleId) {
-      return;
-    }
+  // const handleInstancePress = (battleId: string) => {
+  //   if (typeof app === 'undefined' || !Object.keys(app.rooms || {}).length || !battleId) {
+  //     return;
+  //   }
+  //
+  //   // check if the Calcdex tab is already open
+  //   const calcdexRoomId = getCalcdexRoomId(battleId);
+  //
+  //   if (!(calcdexRoomId in app.rooms)) {
+  //     return;
+  //   }
+  //
+  //   const calcdexRoom = app.rooms[calcdexRoomId] as unknown as HtmlRoom;
+  //
+  //   if (calcdexRoom.tabHidden) {
+  //     calcdexRoom.tabHidden = false;
+  //   }
+  //
+  //   // no need to call app.topbar.updateTabbar() since app.focusRoomRight() will call it for us
+  //   // (app.focusRoomRight() -> app.updateLayout() -> app.topbar.updateTabbar())
+  //   app.focusRoomRight(calcdexRoomId);
+  // };
 
-    // check if the Calcdex tab is already open
-    const calcdexRoomId = getCalcdexRoomId(battleId);
+  // settings pane visibility
+  const [settingsVisible, setSettingsVisible] = React.useState(false);
 
-    if (!(calcdexRoomId in app.rooms)) {
-      return;
-    }
-
-    const calcdexRoom = app.rooms[calcdexRoomId] as unknown as HtmlRoom;
-
-    if (calcdexRoom.tabHidden) {
-      calcdexRoom.tabHidden = false;
-    }
-
-    // no need to call app.topbar.updateTabbar() since app.focusRoomRight() will call it for us
-    // (app.focusRoomRight() -> app.updateLayout() -> app.topbar.updateTabbar())
-    app.focusRoomRight(calcdexRoomId);
-  };
+  const colorScheme = useColorScheme();
 
   return (
     <div
@@ -77,6 +89,14 @@ export const Hellodex = (): JSX.Element => {
           inBattle && styles.inBattle,
         )}
       >
+        {
+          settingsVisible &&
+          <SettingsPane
+            inBattle={inBattle}
+            onRequestClose={() => setSettingsVisible(false)}
+          />
+        }
+
         <Svg
           className={styles.showdexIcon}
           description="Showdex Icon"
@@ -156,17 +176,25 @@ export const Hellodex = (): JSX.Element => {
             ) : (
               <Scrollable className={styles.scrollableInstances}>
                 <div className={styles.instances}>
-                  {Object.values(calcdexState).reverse().map((battle) => (battle?.battleId ? (
+                  {Object.values(calcdexState).reverse().filter((b) => !!b?.battleId).map(({
+                    battleId,
+                    format,
+                    active,
+                    p1,
+                    p2,
+                  }) => (
                     <InstanceButton
-                      key={`Hellodex:InstanceButton:${battle.battleId}`}
+                      key={`Hellodex:InstanceButton:${battleId}`}
                       className={styles.instanceButton}
-                      format={battle.format}
-                      authName={app?.user?.attributes?.name}
-                      playerName={battle.p1?.name}
-                      opponentName={battle.p2?.name}
-                      onPress={() => handleInstancePress(battle.battleId)}
+                      format={format}
+                      authName={authName}
+                      playerName={p1?.name}
+                      opponentName={p2?.name}
+                      active={active}
+                      // onPress={() => handleInstancePress(battle.battleId)}
+                      onPress={() => openCalcdexInstance?.(battleId)}
                     />
-                  ) : null))}
+                  ))}
                 </div>
               </Scrollable>
             )}
@@ -217,11 +245,26 @@ export const Hellodex = (): JSX.Element => {
         </div>
 
         <div className={styles.footer}>
-          <div className={styles.links}>
+          <div
+            className={cx(
+              styles.links,
+              settingsVisible && styles.settingsVisible,
+            )}
+          >
+            <FooterButton
+              className={styles.settingsButton}
+              iconAsset={settingsVisible ? 'close-circle.svg' : 'cog.svg'}
+              iconDescription={settingsVisible ? 'Close Circle Icon' : 'Cog Icon'}
+              label={settingsVisible ? 'Close' : 'Settings'}
+              aria-label="Showdex Extension Settings"
+              tooltip={`${settingsVisible ? 'Close' : 'Open'} Showdex Settings`}
+              onPress={() => setSettingsVisible(!settingsVisible)}
+            />
+
             {
               forumUrl?.startsWith('https://') &&
               <FooterButton
-                className={styles.linkButton}
+                className={cx(styles.linkButton, styles.forumButton)}
                 iconAsset="signpost.svg"
                 iconDescription="Signpost Icon"
                 label="Smogon"
@@ -235,7 +278,7 @@ export const Hellodex = (): JSX.Element => {
             {
               repoUrl?.startsWith('https://') &&
               <FooterButton
-                className={styles.linkButton}
+                className={cx(styles.linkButton, styles.repoButton)}
                 iconAsset="github-face.svg"
                 iconDescription="GitHub Octocat Face Icon"
                 label="GitHub"
