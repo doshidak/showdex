@@ -217,42 +217,69 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
       //   playerState.pokemonOrder = myPokemon.map((p, i) => searchId(p, playerKey, i));
       // }
-      if (playerState.pokemonOrder.length < env.int('calcdex-player-max-pokemon')) {
-        const initialPokemon = (isMyPokemonSide && hasMyPokemon && myPokemon)
-          || player.pokemon;
+      // if (playerState.pokemonOrder.length < env.int('calcdex-player-max-pokemon')) {
+      //   const useMyPokemon = isMyPokemonSide && hasMyPokemon;
 
-        playerState.pokemonOrder = initialPokemon?.map((
-          pokemon: Showdown.ServerPokemon | Showdown.Pokemon,
-        ) => {
-          if (pokemon.calcdexId) {
-            return pokemon.calcdexId;
-          }
+      // if we're in an active battle and the logged-in user is also a player,
+      // but did not receieve myPokemon from the server yet, don't process any Pokemon!
+      // (we need the calcdexId to be assigned to myPokemon first, then mapped to the clientPokemon)
+      const initialPokemon = battleState.active
+          && isMyPokemonSide
+          && battleState.authPlayerKey === playerKey
+        ? myPokemon || []
+        : player.pokemon;
 
+      const currentOrder = initialPokemon?.map((
+        pokemon: Showdown.ServerPokemon | Showdown.Pokemon,
+      ) => {
+        if (!pokemon.calcdexId) {
           pokemon.calcdexId = calcPokemonCalcdexId(pokemon, playerKey);
+        }
 
-          if (isMyPokemonSide && hasMyPokemon) {
-            const clientPokemon = player.pokemon
-              .find((p) => !p.calcdexId && pokemon.speciesForme.includes(
-                p.speciesForme.replace('-*', ''),
-              ));
+        // l.debug('Assigning calcdexId', pokemon.calcdexId, 'to', pokemon.speciesForme);
 
-            if (clientPokemon) {
-              clientPokemon.calcdexId = pokemon.calcdexId;
-            }
+        if (isMyPokemonSide && hasMyPokemon && !('getIdent' in pokemon)) {
+          const clientPokemon = player.pokemon
+            .find((p) => !p.calcdexId && (
+              !!p.ident
+                && !!p.speciesForme
+                && !!p.details
+                && !!p.searchid
+            ) && (
+              p.ident === pokemon.ident
+                || p.details === pokemon.details
+                || p.searchid === pokemon.searchid
+                || p.speciesForme === pokemon.speciesForme
+                || pokemon.searchid.includes(p.ident)
+                || pokemon.speciesForme.includes(p.speciesForme.replace('-*', ''))
+            ));
+
+          if (clientPokemon) {
+            clientPokemon.calcdexId = pokemon.calcdexId;
+
+            // l.debug(
+            //   'Found matching clientPokemon', clientPokemon.speciesForme,
+            //   '\n', 'clientPokemon', clientPokemon,
+            //   '\n', 'serverPokemon', pokemon,
+            // );
           }
+        }
 
-          return pokemon.calcdexId;
-        }) ?? [];
+        return pokemon.calcdexId;
+      }) ?? [];
 
-        // l.debug(
-        //   'Setting initial Pokemon ordering for player', playerKey,
-        //   '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
-        //   '\n', 'isMyPokemonSide?', isMyPokemonSide,
-        //   '\n', 'initialPokemon', initialPokemon,
-        //   '\n', 'battle', battle,
-        //   '\n', 'battleState', battleState,
-        // );
+      if (currentOrder.length > playerState.pokemonOrder.length) {
+        playerState.pokemonOrder = currentOrder;
       }
+
+      // l.debug(
+      //   'Setting initial Pokemon ordering for player', playerKey,
+      //   '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
+      //   '\n', 'isMyPokemonSide?', isMyPokemonSide,
+      //   '\n', 'initialPokemon', initialPokemon,
+      //   '\n', 'battle', battle,
+      //   '\n', 'battleState', battleState,
+      // );
 
       // reconstruct a full list of the current player's Pokemon, whether revealed or not
       // (but if we don't have the relevant info [i.e., !isMyPokemonSide], then just access the player's `pokemon`)
@@ -270,9 +297,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           return player.pokemon[clientPokemonIndex];
         }
 
-        const serverPokemon = isMyPokemonSide
+        const serverPokemon = isMyPokemonSide && hasMyPokemon
           // ? myPokemon.find((p) => searchId(p, playerKey, i) === currentSearchId)
-          ? myPokemon?.find((p) => p.calcdexId === calcdexId)
+          ? myPokemon.find((p) => p.calcdexId === calcdexId)
           : null;
 
         if (!serverPokemon) {
@@ -300,19 +327,13 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         };
       });
 
-      // obtain the calcdexId of the active Pokemon, if any
-      const [activePokemon] = player.active || [];
-
-      const activeId = activePokemon?.calcdexId
-        ? activePokemon.calcdexId
-        : player.pokemon.find((p) => p === activePokemon)?.calcdexId;
-
       l.debug(
         'Preparing to process', playerPokemon.length, 'Pokemon for player', playerKey,
         '\n', 'battleId', battleId,
         // '\n', 'activeSearchId', activeSearchId,
-        '\n', 'activeId', activeId, 'activePokemon', activePokemon,
-        '\n', 'isMyPokemonSide?', isMyPokemonSide, 'playerPokemon', playerPokemon,
+        // '\n', 'activeId', activeId, 'activePokemon', activePokemon,
+        '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+        '\n', 'playerPokemon', playerPokemon,
         '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
         '\n', 'battle', battle,
         '\n', 'battleState', battleState,
@@ -366,9 +387,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           ? myPokemon.find((p) => p.calcdexId === clientPokemon.calcdexId)
           : null;
 
-        if (serverPokemon && !serverPokemon.calcdexId) {
-          serverPokemon.calcdexId = clientPokemon.calcdexId;
-        }
+        // if (serverPokemon && !serverPokemon.calcdexId) {
+        //   serverPokemon.calcdexId = clientPokemon.calcdexId;
+        // }
 
         const matchedPokemonIndex = playerState.pokemon
           // .findIndex((p) => p.calcdexId === clientCalcdexId);
@@ -381,7 +402,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // this is our starting point for the current clientPokemon
         const basePokemon = matchedPokemon
-          || sanitizePokemon(clientPokemon, battleState.format);
+          || sanitizePokemon(clientPokemon, battleState.format, settings?.showAllFormes);
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -403,6 +424,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           '\n', 'battleId', battleId,
           '\n', 'slot', i, 'clientPokemon.calcdexId', clientPokemon.calcdexId,
           '\n', 'clientPokemon', clientPokemon,
+          '\n', 'serverPokemon', serverPokemon,
           '\n', 'syncedPokemon', syncedPokemon,
           '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
           '\n', 'battle', battle,
@@ -468,11 +490,18 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
       }
 
+      // obtain the calcdexId of the active Pokemon, if any
+      const [activePokemon] = player.active || [];
+
+      const activeId = activePokemon?.calcdexId
+        ? activePokemon.calcdexId
+        : player.pokemon.find((p) => p === activePokemon)?.calcdexId;
+
       // update activeIndex (and selectionIndex if autoSelect is enabled)
       // (hopefully the `ident` exists here!)
       const activeIndex = activeId
         // ? playerPokemon.findIndex((p, i) => searchId(p, playerKey, i) === activeSearchId)
-        ? playerPokemon.findIndex((p) => p.calcdexId === activeId)
+        ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
         : -1;
 
       if (activeIndex > -1) {
