@@ -4,8 +4,10 @@ import {
   usePokemonPresetQuery,
   usePokemonRandomsPresetQuery,
 } from '@showdex/redux/services';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
-import { logger } from '@showdex/utils/debug';
+import { useCalcdexSettings } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/app';
+import { detectGenFromFormat, getDexForFormat, getGenlessFormat } from '@showdex/utils/battle';
+// import { logger } from '@showdex/utils/debug';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 /**
@@ -46,78 +48,61 @@ export interface CalcdexPresetsHookOptions {
 }
 
 /**
- * Returns all the presets for the provided `speciesForme`.
- *
- * * No need to sanitize the `speciesForme`, as this will find presets of the closest matching `speciesForme` for you.
- *   - Particularly for randoms, where Pokemon may only have the G-Max forme (with `speciesForme` suffix `'-Gmax'`).
- * * Providing `true` to the optional `sort` argument will arrange the presets
- *   of the current `format` towards the top (i.e., index `0`).
- *   - Otherwise, they'll be in the order they were added in `presets`.
- * * Nomenclature of this function is more closely related to `Model.find()` from `mongoose` than `Array.find()`.
- *   - `Model.find()` runs a database query and returns an array of matching documents, which this function does do
- *     (without the database, of course).
- *   - `Array.find()` only returns a single document, which this function does not do.
- *   - `Array.filter()`, which is basically what this does, sounded like a terrible name.
- * * Returns an empty array (i.e., `[]`) if no matching presets were found.
- *
- * @since 0.1.3
- */
-export type CalcdexPresetsFinder = (
-  speciesForme: string,
-  sort?: boolean,
-) => CalcdexPokemonPreset[];
-
-/**
  * Return object of the `usePresets()` hook.
  *
  * @since 1.0.3
  */
 export interface CalcdexPresetsHookInterface {
-  findPresets: CalcdexPresetsFinder;
+  presets: CalcdexPokemonPreset[];
   presetsLoading: boolean;
 }
 
-const l = logger('@showdex/pages/Calcdex/usePresets');
+// const l = logger('@showdex/pages/Calcdex/usePresets');
 
 const sortPresets = (
-  presets: CalcdexPokemonPreset[],
-  genlessFormat: string,
-): CalcdexPokemonPreset[] => {
+  genlessFormat?: string,
+): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => (a, b) => {
+  // if (a.name.startsWith(formatSearchString)) {
+  //   return -1;
+  // }
+
   if (!genlessFormat) {
-    return presets;
+    return 0;
   }
 
-  // const formatLabel = genlessFormat in FormatLabels ?
-  //   FormatLabels[genlessFormat] :
-  //   // genlessFormat.toUpperCase().slice(0, 3); // e.g., 'huhwtf' -> 'HUH'
-  //   genlessFormat;
+  if (a.format.includes(genlessFormat)) {
+    return -1;
+  }
 
-  // trailing space prevents something like 'OU-2X' being sorted before 'OU'
-  // (assuming the genlessFormat is 'ou' and not 'doublesou')
-  // const formatSearchString = `${formatLabel} `;
+  // if (b.name.startsWith(formatSearchString)) {
+  //   return 1;
+  // }
 
-  return presets.sort((a, b) => {
-    // if (a.name.startsWith(formatSearchString)) {
-    //   return -1;
-    // }
+  if (b.format.includes(genlessFormat)) {
+    return 1;
+  }
 
-    if (a.format.includes(genlessFormat)) {
-      return -1;
-    }
-
-    // if (b.name.startsWith(formatSearchString)) {
-    //   return 1;
-    // }
-
-    if (b.format.includes(genlessFormat)) {
-      return 1;
-    }
-
-    return 0;
-  });
+  return 0;
 };
 
-const UltFormeRegex = /-(?:Mega(?:-[A-Z]+)?|Gmax)$/i;
+const selectPresetsFromResult = (
+  presets: CalcdexPokemonPreset[],
+  formes: string[],
+): CalcdexPokemonPreset[] => {
+  if (!presets?.length || !formes?.length) {
+    return [];
+  }
+
+  const [firstForme] = formes;
+  const firstFormePresets = presets
+    .filter((p) => !!p?.speciesForme && formatId(p.speciesForme) === firstForme);
+
+  if (firstFormePresets.length) {
+    return firstFormePresets;
+  }
+
+  return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
+};
 
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
@@ -134,15 +119,24 @@ export const usePresets = ({
 }: CalcdexPresetsHookOptions = {
   format: null,
 }): CalcdexPresetsHookInterface => {
-  const gen = format ? detectGenFromFormat(format) : null;
+  const settings = useCalcdexSettings();
+
+  const dex = getDexForFormat(format);
+  const gen = detectGenFromFormat(format);
 
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
   const shouldSkip = disabled || !format || !gen || !genlessFormat;
 
+  const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme;
+  const formes = Array.from(new Set([
+    formatId(speciesForme),
+    speciesForme?.includes('-') && formatId(dex?.species.get(speciesForme)?.baseSpecies),
+  ].filter(Boolean)));
+
   const {
-    data: gensPresets,
+    gensPresets,
     isLoading: gensLoading,
   } = usePokemonPresetQuery({
     gen,
@@ -150,35 +144,60 @@ export const usePresets = ({
     formatOnly: genlessFormat.includes('bdsp'),
     // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
   }, {
-    skip: shouldSkip || randomsFormat,
+    skip: shouldSkip || randomsFormat || !settings?.downloadSmogonPresets,
+
+    selectFromResult: ({ data, isLoading }) => ({
+      gensPresets: selectPresetsFromResult(data, formes),
+      isLoading,
+    }),
   });
 
+  // l.debug(
+  //   '\n', 'shouldSkip', shouldSkip,
+  //   '\n', 'downloadSmogonStats', settings?.downloadSmogonPresets,
+  //   '\n', 'downloadUsageStats', settings?.downloadUsageStats,
+  //   '\n', 'downloadRandomsPresets', settings?.downloadRandomsPresets,
+  // );
+
   const {
-    data: statsPresets,
+    statsPresets,
     isLoading: statsLoading,
   } = usePokemonFormatStatsQuery({
     gen,
     format,
   }, {
-    skip: shouldSkip || randomsFormat,
+    skip: shouldSkip || randomsFormat || !settings?.downloadUsageStats,
+
+    selectFromResult: ({ data, isLoading }) => ({
+      statsPresets: selectPresetsFromResult(data, formes),
+      isLoading,
+    }),
   });
 
   const {
-    data: randomsPresets,
+    randomsPresets,
     isLoading: randomsLoading,
   } = usePokemonRandomsPresetQuery({
     gen,
     format, // if it's BDSP, the query will automatically fetch from `gen8bdsprandombattle.json`
   }, {
-    skip: shouldSkip || !randomsFormat,
+    skip: shouldSkip || !randomsFormat || !settings?.downloadRandomsPresets,
+
+    selectFromResult: ({ data, isLoading }) => ({
+      randomsPresets: selectPresetsFromResult(data, formes),
+      isLoading,
+    }),
   });
 
   const presets = React.useMemo(() => [
-    ...((pokemon?.presets?.length && pokemon.presets) || []),
-    ...((!randomsFormat && gensPresets) || []),
-    ...((!randomsFormat && statsPresets) || []),
-    ...((randomsFormat && randomsPresets) || []),
+    ...((!!pokemon?.presets?.length && pokemon.presets) || []),
+    ...[
+      ...((!randomsFormat && !!gensPresets?.length && gensPresets) || []),
+      ...((!randomsFormat && !!statsPresets?.length && statsPresets) || []),
+      ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
+    ].filter(Boolean).sort(sortPresets(genlessFormat)),
   ].filter(Boolean), [
+    genlessFormat,
     gensPresets,
     pokemon,
     randomsFormat,
@@ -191,144 +210,8 @@ export const usePresets = ({
     [gensLoading, randomsLoading, statsLoading],
   );
 
-  const findPresets = React.useCallback<CalcdexPresetsFinder>((
-    speciesForme,
-    sort,
-  ) => {
-    if (!speciesForme) {
-      if (__DEV__) {
-        l.warn(
-          'Missing required speciesForme argument.',
-          '\n', 'speciesForme', speciesForme,
-          // '\n', 'sort', sort || false,
-          // '\n', 'presets', presets,
-          '\n', '(You will only see this warning on development.)',
-        );
-      }
-
-      return [];
-    }
-
-    if (!presets.length || presetsLoading) {
-      // actually, since findPresets() should just be spread alongside the CalcdexPokemon's existing presets (if any),
-      // this warning would get really annoying
-      // if (presetsLoading && __DEV__) {
-      //   l.warn(
-      //     'No presets are available since they are currently being fetched.',
-      //     '\n', 'speciesForme', speciesForme,
-      //     '\n', 'sort', sort || false,
-      //     '\n', 'presets', presets,
-      //     '\n', '(You will only see this warning on development.)',
-      //   );
-      // }
-
-      return [];
-    }
-
-    // l.debug(
-    //   'Attempting to find presets for', speciesForme,
-    //   '\n', 'sort', sort || false,
-    // );
-
-    // e.g., evals to true w/ speciesForme 'Urshifu-Rapid-Strike-Gmax' or 'Charizard-Mega-X'
-    const hasUltForme = UltFormeRegex.test(speciesForme);
-
-    // note: ult formes are typically only available in randoms presets
-    if (hasUltForme) {
-      // filter by randoms presets only w/ exact speciesForme match
-      // (e.g., 'Urshifu' and 'Urshifu-Gmax' both exist in `gen8randombattle.json` [from the pkmn API])
-      const ultPresets = presets.filter((p) => p.format.includes(genlessFormat) && p.speciesForme === speciesForme);
-
-      if (ultPresets.length) {
-        // l.debug(
-        //   'Found ultPresets for', speciesForme,
-        //   // '\n', 'ultPresets', ultPresets,
-        // );
-
-        return sort ? sortPresets(ultPresets, genlessFormat) : ultPresets;
-      }
-    }
-
-    // since we're still here, that means the ult forme wasn't found in the randoms presets
-    // e.g., 'Urshifu-Rapid-Strike-Gmax' -> 'Ursifu-Rapid-Strike'
-    const nonUltForme = hasUltForme ? speciesForme.replace(UltFormeRegex, '') : speciesForme;
-
-    // client sometimes will report a wildcard forme (indicating unrevealed an forme), which can be problematic
-    // e.g., 'Urshifu-*' -> 'Urshifu'
-    const nonWildForme = nonUltForme.replace(/-\*$/, '');
-
-    // try again with the non-ult, non-wildcard forme this time
-    // (...you know, I have a feeling there's probably a function in one of the @smogon/* or @pkmn/* packages that does all this)
-    const nonWildPresets = presets.filter((p) => {
-      // make sure we're only grabbing randoms presets if the format is randoms
-      // (otherwise, ignore randoms presets for any other format)
-      const randomsPreset = p.format.includes('random');
-      const precondition = randomsFormat ? randomsPreset : !randomsPreset;
-
-      return precondition && p.speciesForme === nonWildForme;
-    });
-
-    if (nonWildPresets.length) {
-      // l.debug(
-      //   'Found nonWildPresets for', speciesForme,
-      //   '\n', 'nonWildPresets', nonWildPresets,
-      // );
-
-      return sort ? sortPresets(nonWildPresets, genlessFormat) : nonWildPresets;
-    }
-
-    // hmm... at this point, we'll try to obtain the actual base species forme
-    // (unfortunately, there are Pokemon like Ho-Oh, Jangmo-o, Kommo-o, which have dashes in their names, so we gotta account for those)
-    const hasAltForme = nonWildForme.includes('-') && ![
-      'ho-oh',
-      'jangmo-o',
-      'indeedee-f', // 'Indeedee-M' should be just 'Indeedee'
-      'kommo-o',
-      'meowstic-f', // 'Meowstic-M' is just 'Meowstic', hopefully LOL
-      'nidoran-m', // verified to be present in `gen7lc.json`
-      'nidoran-f', // verified to be present in `gen7lc.json`
-      'porygon-z',
-    ].includes(nonWildForme.toLowerCase());
-
-    // e.g., 'Aegislash-Shield' -> 'Aegislash', 'Ho-Oh' -> 'Ho-Oh' (left untouched, theoretically)
-    const baseForme = hasAltForme ? nonWildForme.split('-')[0] : nonWildForme;
-
-    // aiite, well, fuck it lol
-    const basePresets = presets.filter((p) => {
-      const randomsPreset = p.format.includes('random');
-      const precondition = randomsFormat ? randomsPreset : !randomsPreset;
-
-      // note: we're not doing a hard match here, just a partial one cause we're desparate
-      // (inb4 "why do I get sets for completely unrelated Pokemon ???")
-      return precondition && p.speciesForme.includes(baseForme);
-    });
-
-    if (__DEV__ && !basePresets.length) {
-      l.warn(
-        'Still couldn\'t find any presets for the initial speciesForme', speciesForme,
-        '\n', 'Stage 1: nonUltForme', nonUltForme, 'hasUltForme', hasUltForme,
-        '\n', 'Stage 2: nonWildForme', nonWildForme, 'hasAltForme', hasAltForme,
-        '\n', 'Stage 3: baseForme', baseForme, 'hasAltForme', hasAltForme,
-        // '\n', 'presets', presets,
-        '\n', '(You will only see this warning on development.)',
-      );
-    }
-
-    l.debug(
-      'Found basePresets for', speciesForme,
-      '\n', 'basePresets', basePresets,
-    );
-
-    return basePresets;
-  }, [
-    genlessFormat,
-    presets,
-    presetsLoading,
-    randomsFormat,
-  ]);
-
   return {
-    findPresets,
+    presets,
     presetsLoading,
   };
 };
