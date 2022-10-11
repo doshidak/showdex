@@ -6,6 +6,7 @@ import '@showdex/styles/global.scss';
 
 export type ShowdexBootstrapper = (
   store?: RootStore,
+  data?: string,
   roomId?: string,
 ) => void;
 
@@ -46,7 +47,7 @@ app.receive = (data: string) => {
     );
 
     // call each bootstrapper
-    bootstrappers.forEach((bootstrapper) => bootstrapper(store, roomId));
+    bootstrappers.forEach((bootstrapper) => bootstrapper(store, data, roomId));
   }
 
   // call the original function
