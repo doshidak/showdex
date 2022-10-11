@@ -16,9 +16,9 @@ import {
  *
  * @since 1.0.3
  */
-export const DehydratedShowdexSettingsMap: Record<'packageVersion' | 'buildDate' | keyof ShowdexSettings, string> = {
+export const DehydratedShowdexSettingsMap: Record<'packageVersion' | keyof ShowdexSettings, string> = {
   packageVersion: 'v',
-  buildDate: 'b',
+  // buildDate: 'b',
   colorScheme: 'cs',
   forcedColorScheme: 'fc',
   developerMode: 'dm',
@@ -97,7 +97,6 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
  *
  * ```
  * v:{package_version};
- * b:{build_date};
  * fc:{forcedColorScheme};
  * dm:{developerMode};
  * hd:{hellodexSettings};
@@ -163,7 +162,7 @@ export const dehydrateShowdexSettings = (settings: ShowdexSettings): string => {
 
   const output: string[] = [
     `${DehydratedShowdexSettingsMap.packageVersion}:${env('package-version', '?')}`,
-    `${DehydratedShowdexSettingsMap.buildDate}:${env('build-date', '?')}`,
+    // `${DehydratedShowdexSettingsMap.buildDate}:${env('build-date', '?')}`,
     `${DehydratedShowdexSettingsMap.forcedColorScheme}:${dehydrateValue(forcedColorScheme)}`,
     `${DehydratedShowdexSettingsMap.developerMode}:${dehydrateBoolean(developerMode)}`,
   ];
