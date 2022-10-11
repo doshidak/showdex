@@ -19,7 +19,7 @@
 
   &.light {
     color: colors.$black;
-    background-color: color.alpha(colors.$showdown-background-light, 0.9);
+    background-color: color.alpha(colors.$showdown-background-light, 0.85);
   }
 
   &.dark {
@@ -398,12 +398,12 @@ button.spectateButton {
   }
 
   .light & {
-    background-color: color.alpha(colors.$white, 0.6);
+    background-color: color.alpha(colors.$white, 0.75);
     border-top-color: color.alpha(colors.$white, 0.15);
   }
 
   .dark & {
-    background-color: color.alpha(colors.$black, 0.6);
+    background-color: color.alpha(colors.$black, 0.7);
     border-top-color: color.alpha(#121212, 0.15);
   }
 }
