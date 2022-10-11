@@ -16,6 +16,7 @@ export interface ButtonProps<
   tooltip?: React.ReactNode;
   tooltipTrigger?: TooltipProps['trigger'];
   tooltipTouch?: TooltipProps['touch'];
+  tooltipDisabled?: boolean;
   highlight?: boolean;
   absoluteHover?: boolean;
 }
@@ -33,6 +34,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   tooltip,
   tooltipTrigger = 'mouseenter',
   tooltipTouch = 'hold',
+  tooltipDisabled,
   highlight,
   absoluteHover,
   disabled,
@@ -80,7 +82,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         delay={[1000, 50]}
         trigger={tooltipTrigger}
         touch={tooltipTouch}
-        disabled={!tooltip || disabled}
+        disabled={disabled || tooltipDisabled || !tooltip}
       />
     </>
   );
