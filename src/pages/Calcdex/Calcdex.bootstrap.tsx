@@ -438,6 +438,15 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         battleRoom.$chatbox.prop('disabled', battle.calcdexOverlayVisible);
       }
 
+      // found another one lol (typically in spectator mode)
+      if (battleRoom.$chatAdd?.length) {
+        const $joinButton = battleRoom.$chatAdd.find('button');
+
+        if ($joinButton.length) {
+          $joinButton.prop('disabled', battle.calcdexOverlayVisible);
+        }
+      }
+
       battleRoom.updateControls(); // most BattleRoom button callbacks seem to do this at the end lol
       battle.subscription('callback'); // re-render the Calcdex React root
     };
