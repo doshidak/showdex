@@ -1,0 +1,13 @@
+diff --git a/node_modules/@babel/helper-compilation-targets/lib/utils.js b/node_modules/@babel/helper-compilation-targets/lib/utils.js
+index f046054..63a1617 100644
+--- a/node_modules/@babel/helper-compilation-targets/lib/utils.js
++++ b/node_modules/@babel/helper-compilation-targets/lib/utils.js
+@@ -62,7 +62,7 @@ function getHighestUnreleased(a, b, env) {
+ }
+ 
+ function getLowestImplementedVersion(plugin, environment) {
+-  const result = plugin[environment];
++  const result = plugin && plugin[environment];
+ 
+   if (!result && environment === "android") {
+     return plugin.chrome;

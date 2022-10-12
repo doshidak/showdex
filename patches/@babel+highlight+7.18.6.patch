@@ -1,0 +1,13 @@
+diff --git a/node_modules/@babel/highlight/lib/index.js b/node_modules/@babel/highlight/lib/index.js
+index 856dfd9..48c65e5 100644
+--- a/node_modules/@babel/highlight/lib/index.js
++++ b/node_modules/@babel/highlight/lib/index.js
+@@ -11,7 +11,7 @@ var _jsTokens = require("js-tokens");
+ 
+ var _helperValidatorIdentifier = require("@babel/helper-validator-identifier");
+ 
+-var _chalk = require("chalk");
++var _chalk = import("chalk");
+ 
+ const sometimesKeywords = new Set(["as", "async", "from", "get", "of", "set"]);
+ 
