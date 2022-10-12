@@ -30,7 +30,7 @@ import styles from './Calcdex.module.scss';
  * @since 1.0.3
  */
 export interface BattleRoomOverride<
-  TFunc extends (...args: unknown[]) => void = (...args: unknown[]) => void,
+  TFunc extends (...args: unknown[]) => unknown = (...args: unknown[]) => unknown,
 > {
   name: FunctionPropertyNames<BattleRoom>;
   native: TFunc;
