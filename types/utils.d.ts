@@ -90,8 +90,6 @@ declare type ExtractKeys<T, K> = { [I in keyof T]: T[I] extends K ? I : never; }
  */
 declare type Entries<T> = { [K in keyof T]: [K, T[K]] }[keyof T][];
 
-/* eslint-disable @typescript-eslint/ban-types */
-
 /**
  * Construct a literal type of the property keys of `T` whose types are those of `Function`.
  *
@@ -99,9 +97,7 @@ declare type Entries<T> = { [K in keyof T]: [K, T[K]] }[keyof T][];
  *
  * @since 0.1.0
  */
-declare type FunctionPropertyNames<T> = ExtractKeys<T, Function>;
-
-/* eslint-enable @typescript-eslint/ban-types */
+declare type FunctionPropertyNames<T> = ExtractKeys<T, (...args: unknown[]) => unknown>;
 
 /**
  * Construct a type with the properties of `T` whose types are those of `Function`.
