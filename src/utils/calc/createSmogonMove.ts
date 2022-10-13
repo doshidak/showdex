@@ -1,6 +1,13 @@
 import { Move as SmogonMove } from '@smogon/calc';
 // import { formatId } from '@showdex/utils/app';
-import { getGenDexForFormat, getMaxMove, getZMove } from '@showdex/utils/battle';
+import {
+  getGenDexForFormat,
+  getMaxMove,
+  getZMove,
+  detectGenFromFormat,
+} from '@showdex/utils/battle';
+import { env } from '@showdex/utils/core';
+import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
@@ -12,6 +19,7 @@ export const createSmogonMove = (
 ): SmogonMove => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   if (!dex || !format || !pokemon?.speciesForme || !moveName) {
     return null;
@@ -19,6 +27,10 @@ export const createSmogonMove = (
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
+
+  // may need to perform an additional lookup using @smogon/calc's internal Generation dex
+  // (which is used when passing in a type number for the first constructor parameter)
+  const lookupMove = new SmogonMove(gen, moveName);
 
   return new SmogonMove(dex, moveName, {
     species: pokemon.speciesForme,
@@ -36,5 +48,13 @@ export const createSmogonMove = (
         && (!pokemon.useZ || !getZMove(moveName, item))
         && (!pokemon.useMax || !getMaxMove(moveName, ability, pokemon.speciesForme))
     ) || pokemon.criticalHit,
+
+    // if an invalid move, `type` here will be `undefined`
+    overrides: lookupMove?.type ? {
+      overrideDefensivePokemon: lookupMove.overrideDefensivePokemon,
+      overrideDefensiveStat: lookupMove.overrideDefensiveStat,
+      overrideOffensivePokemon: lookupMove.overrideOffensivePokemon,
+      overrideOffensiveStat: lookupMove.overrideOffensiveStat,
+    } : undefined,
   });
 };
