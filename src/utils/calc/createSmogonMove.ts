@@ -1,5 +1,5 @@
 import { Move as SmogonMove } from '@smogon/calc';
-// import { formatId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app';
 import {
   getGenDexForFormat,
   getMaxMove,
@@ -11,6 +11,7 @@ import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
+import { calcHiddenPower } from './calcHiddenPower';
 
 export const createSmogonMove = (
   format: string,
@@ -49,12 +50,19 @@ export const createSmogonMove = (
         && (!pokemon.useMax || !getMaxMove(moveName, ability, pokemon.speciesForme))
     ) || pokemon.criticalHit,
 
-    // if an invalid move, `type` here will be `undefined`
-    overrides: lookupMove?.type ? {
-      overrideDefensivePokemon: lookupMove.overrideDefensivePokemon,
-      overrideDefensiveStat: lookupMove.overrideDefensiveStat,
-      overrideOffensivePokemon: lookupMove.overrideOffensivePokemon,
-      overrideOffensiveStat: lookupMove.overrideOffensiveStat,
-    } : undefined,
+    overrides: {
+      // recalculate the base power if the move is Hidden Power
+      ...(formatId(moveName).includes('hiddenpower') && {
+        basePower: calcHiddenPower(format, pokemon) || undefined,
+      }),
+
+      // if an invalid move, `type` here will be `undefined`
+      ...(!!lookupMove?.type && {
+        overrideDefensivePokemon: lookupMove.overrideDefensivePokemon,
+        overrideDefensiveStat: lookupMove.overrideDefensiveStat,
+        overrideOffensivePokemon: lookupMove.overrideOffensivePokemon,
+        overrideOffensiveStat: lookupMove.overrideOffensiveStat,
+      }),
+    },
   });
 };
