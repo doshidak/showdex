@@ -1,6 +1,7 @@
 export * from './alwaysCriticalHits';
 export * from './calcCalcdexId';
 export * from './calcCalcdexNonce';
+export * from './calcHiddenPower';
 export * from './calcPokemonFinalStats';
 export * from './calcPokemonHp';
 export * from './calcPokemonSpreadStats';
