@@ -237,7 +237,7 @@ export const PokeStats = ({
                   <>
                     There are no EVs set!
                   </>
-                ) : totalEvs < maxLegalEvs ? (
+                ) : (!format?.includes('random') && totalEvs < maxLegalEvs) ? (
                   <>
                     You have{' '}
                     <strong>{pluralize(maxLegalEvs - totalEvs, 'unallocated EV:s')}</strong>.
@@ -256,14 +256,14 @@ export const PokeStats = ({
             delay={[1000, 50]}
             trigger="mouseenter"
             touch="hold"
-            disabled={!missingEvs && totalEvs === maxLegalEvs && evsLegal}
+            disabled={!missingEvs && (format?.includes('random') || totalEvs === maxLegalEvs) && evsLegal}
           >
             <TableGridItem
               className={cx(
                 styles.header,
                 styles.evsHeader,
                 missingEvs && styles.missingSpread,
-                totalEvs < maxLegalEvs && styles.unallocated,
+                (!format?.includes('random') && totalEvs < maxLegalEvs) && styles.unallocated,
                 !evsLegal && styles.illegal,
               )}
               align="right"
