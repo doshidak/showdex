@@ -2,7 +2,9 @@ import * as React from 'react';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
 // import { useCalcdexSettings } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/app';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/battle';
+import { calcHiddenPower } from '@showdex/utils/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { SelectOptionTooltipProps } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
@@ -33,6 +35,10 @@ export const PokeMoveOptionTooltip = ({
   if (!dexMove?.type) {
     return null;
   }
+
+  const basePower = formatId(value).includes('hiddenpower')
+    ? calcHiddenPower(format, pokemon)
+    : dexMove?.basePower || 0;
 
   const description = formatDexDescription(dexMove.shortDesc || dexMove.desc);
 
@@ -76,9 +82,9 @@ export const PokeMoveOptionTooltip = ({
             {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
             {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
             {
-              (dexMove.basePower ?? 0) > 2 &&
+              basePower > 2 &&
               <div className={styles.propertyValue}>
-                {dexMove.basePower}
+                {basePower}
               </div>
             }
           </div>
