@@ -36,7 +36,7 @@ export const Hellodex = ({
     initialHeight: 700,
   });
 
-  const inBattle = contentWidth < 500;
+  const inBattle = contentWidth < 650;
 
   const authName = getAuthUsername();
   const calcdexState = useCalcdexState();
