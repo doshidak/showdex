@@ -240,13 +240,13 @@ export const guessServerSpread = (
     const evsLegal = totalEvs <= maxLegalEvs;
 
     if (statsMatch && evsLegal) {
-      l.debug(
-        'Found nature that matches all of the stats for Pokemon', pokemon.ident || pokemon.speciesForme,
-        '\n', 'nature', natureName,
-        '\n', 'calculatedStats', calculatedStats,
-        '\n', 'serverStats', serverStats,
-        '\n', 'pokemon', pokemon,
-      );
+      // l.debug(
+      //   'Found nature that matches all of the stats for Pokemon', pokemon.ident || pokemon.speciesForme,
+      //   '\n', 'nature', natureName,
+      //   '\n', 'calculatedStats', calculatedStats,
+      //   '\n', 'serverStats', serverStats,
+      //   '\n', 'pokemon', pokemon,
+      // );
 
       guessedSpread.nature = natureName;
 
@@ -271,14 +271,16 @@ export const guessServerSpread = (
       '\n', 'pokemon', pokemon,
       '\n', 'logs', logs,
     );
-  } else {
-    l.debug(
-      'Returning the best guess of the spread for Pokemon', pokemon.ident || pokemon.speciesForme,
-      '\n', 'guessedSpread', guessedSpread,
-      '\n', 'serverStats', serverStats,
-      '\n', 'pokemon', pokemon,
-    );
   }
+
+  // } else {
+  //   l.debug(
+  //     'Returning the best guess of the spread for Pokemon', pokemon.ident || pokemon.speciesForme,
+  //     '\n', 'guessedSpread', guessedSpread,
+  //     '\n', 'serverStats', serverStats,
+  //     '\n', 'pokemon', pokemon,
+  //   );
+  // }
 
   return guessedSpread;
 };
