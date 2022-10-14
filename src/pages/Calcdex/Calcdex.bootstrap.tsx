@@ -17,7 +17,12 @@ import { detectAuthPlayerKeyFromBattle } from '@showdex/utils/battle';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
 import type { ShowdexBootstrapper } from '@showdex/main';
-import type { CalcdexSliceState, RootStore, ShowdexSliceState } from '@showdex/redux/store';
+import type {
+  CalcdexPokemon,
+  CalcdexSliceState,
+  RootStore,
+  ShowdexSliceState,
+} from '@showdex/redux/store';
 import { Calcdex } from './Calcdex';
 import { CalcdexError } from './CalcdexError';
 import styles from './Calcdex.module.scss';
@@ -32,7 +37,7 @@ import styles from './Calcdex.module.scss';
 export interface BattleRoomOverride<
   TFunc extends (...args: unknown[]) => unknown = (...args: unknown[]) => unknown,
 > {
-  name: FunctionPropertyNames<BattleRoom>;
+  name: FunctionPropertyNames<Showdown.BattleRoom>;
   native: TFunc;
 }
 
@@ -150,13 +155,14 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   }
 
   const {
-    subscription,
-    prevSubscription,
-    subscriptionDirty,
+    calcdexInit,
+    // subscription,
+    // prevSubscription,
+    // subscriptionDirty,
   } = battle;
 
   // don't process this battle if we've already added (or forcibly prevented) the filth
-  if (subscriptionDirty) {
+  if (calcdexInit) {
     return;
   }
 
@@ -196,67 +202,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   if (openAsPanel) {
     // create the calcdexRoom if it doesn't already exist (shouldn't tho)
     if (!battle.calcdexRoom) {
-      // const calcdexRoomId = getCalcdexRoomId(roomid);
-
-      // l.debug(
-      //   'Creating a side-room for Calcdex since battle.calcdexRoom is falsy...',
-      //   '\n', 'id', calcdexRoomId,
-      //   '\n', 'title', 'Calcdex',
-      // );
-
-      // battle.calcdexRoom = createSideRoom(calcdexRoomId, 'Calcdex', {
-      //   icon: 'calculator',
-      //   focus: true,
-      // });
-
       battle.calcdexRoom = createCalcdexRoom(roomid, true, store);
-
-      // battle.calcdexRoom.requestLeave = () => {
-      //   // we need to grab a fresher version of the state when this function runs
-      //   // (i.e., do NOT use calcdexSettings here! it may contain a stale version of the settings)
-      //   const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
-      //
-      //   if (settings?.destroyOnClose) {
-      //     if (battle.id) {
-      //       store.dispatch(calcdexSlice.actions.destroy(battle.id));
-      //       battle.calcdexDestroyed = true;
-      //
-      //       delete battle.calcdexRoom;
-      //       delete battle.calcdexReactRoot;
-      //     }
-      //
-      //     // actually leave the room
-      //     // return true; // (below)
-      //   }
-      //
-      //   // hide the tab (tabHidden is used to ignore tab renders in the overwritten app.topbar.renderRoomTab() in main)
-      //   // battle.calcdexRoom.tabHidden = true;
-      //   // $(`a[href*='/${calcdexRoomId}']`).parent().css('display', 'none');
-      //
-      //   // find the side room before the calcdexRoom to focus
-      //   // const sideRoomIds = getSideRooms().map((room) => room.id);
-      //   // const currentRoomId = app.curSideRoom?.id;
-      //   // const calcdexRoomIndex = sideRoomIds.findIndex((id) => id === calcdexRoomId);
-      //
-      //   // const prevRoomId = sideRoomIds
-      //   //   // .slice(0, Math.max(calcdexRoomIndex - 1, 0))
-      //   //   .filter((id) => !(app.rooms[id] as unknown as HtmlRoom).tabHidden)
-      //   //   .pop();
-      //
-      //   // currentRoomId is tracked so that we don't focus to another room when this blurred Calcdex tab is "closed"
-      //   // (i.e., only focus a room if the user "closes" the currenly focused Calcdex room)
-      //   // if (prevRoomId && calcdexRoomId !== prevRoomId && (!currentRoomId || calcdexRoomId === currentRoomId)) {
-      //   //   app.focusRoomRight(prevRoomId);
-      //   // } else if (!prevRoomId) {
-      //   //   battle.calcdexRoom.hide();
-      //   // }
-      //
-      //   // don't actually leave the room
-      //   // return false;
-      //
-      //   // but actually tho, actually leave the room
-      //   return true;
-      // };
     }
 
     battle.calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
@@ -307,19 +253,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         $toggleButton.children('span').text(toggleButtonLabel);
       }
 
-      // (forgot jQuery is an accessible global here lul)
-      // const toggleButtonHtml = `
-      //   <button
-      //     class="button"
-      //     style="float:right;"
-      //     type="button"
-      //     name="toggleCalcdexOverlay"
-      //   >
-      //     <i class="fa fa-${visible ? 'close' : 'calculator'}"></i>
-      //     ${visible ? 'Close' : 'Open'} Calcdex
-      //   </button>
-      // `.replace(/\s{2}/g, '').replace(/\s+(>|<)/g, '$1').trim();
-
       // $floatingContainer typically contains spectator & replay controls
       // (asterisk [*] in the CSS selector [style*="<value>"] checks if style includes the <value>)
       const $floatingContainer = $controls.find('div.controls span[style*="float:"]');
@@ -361,9 +294,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       const $timerButton = $controlsTarget.find('button[name*="Timer"]');
       const hasTimerButton = !!$timerButton.length;
 
-      // const $existingButton = $controlsTarget.find('button[name*="Timer"], a.button');
-      // const hasExistingButton = !!$existingButton.length;
-
       if (hasTimerButton) {
         $toggleButton.insertAfter($timerButton);
       } else {
@@ -381,7 +311,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       'updateSwitchControls', // div.controls .whatdo
       'updateTeamControls', // div.controls .whatdo
       'updateWaitControls', // div.controls p
-    ] as FunctionPropertyNames<BattleRoom>[]).map((name) => ({
+    ] as FunctionPropertyNames<Showdown.BattleRoom>[]).map((name) => ({
       name,
       native: typeof battleRoom[name] === 'function'
         ? battleRoom[name].bind(battleRoom) as typeof battleRoom[typeof name]
@@ -396,7 +326,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     }) => {
       // sometimes you gotta do what you gotta do to get 'er done
       // (but this definitely hurts my soul lmfao)
-      (battleRoom as unknown as Record<FunctionPropertyNames<BattleRoom>, (...args: unknown[]) => void>)[name] = (
+      (battleRoom as unknown as Record<FunctionPropertyNames<Showdown.BattleRoom>, (...args: unknown[]) => void>)[name] = (
         ...args: unknown[]
       ) => {
         // run the native function first since it modifies $controls (from battleRoom)
@@ -463,13 +393,38 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     battleRoom.requestLeave = (e) => {
       const shouldLeave = requestLeave(e);
 
+      // ForfeitPopup probably appeared
       if (!shouldLeave) {
+        // attempt to find the ForfeitPopup to override its submit() callback to destroy the Calcdex
+        // (otherwise, the state will remain in the Hellodex since the battleRoom's overrides didn't fire)
+        const forfeitPopup = app.popups.find((p) => (p as Showdown.ForfeitPopup).room === battleRoom);
+
+        if (typeof forfeitPopup?.submit === 'function') {
+          l.debug(
+            'Overriding submit() of spawned ForfeitPopup in app.popups[]...',
+            '\n', 'battleId', roomid,
+          );
+
+          const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
+
+          forfeitPopup.submit = (data) => {
+            store.dispatch(calcdexSlice.actions.destroy(roomid));
+            submitForfeit(data);
+          };
+        }
+
+        // don't actually leave the room, as requested by requestLeave()
         return false;
       }
 
-      if (battle.id) {
-        store.dispatch(calcdexSlice.actions.destroy(battle.id));
-        battle.calcdexDestroyed = true;
+      const battleId = battle?.id || roomid;
+
+      if (battleId) {
+        store.dispatch(calcdexSlice.actions.destroy(battleId));
+
+        if (battle?.id) {
+          battle.calcdexDestroyed = true;
+        }
       }
 
       // actually leave the room
@@ -477,7 +432,97 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     };
   }
 
-  l.debug('Overriding updateSide() of the current BattleRoom');
+  // override each player's addPokemon() method to assign a calcdexId lol
+  (['p1', 'p2', 'p3', 'p4'] as Showdown.SideID[]).forEach((playerKey) => {
+    if (!(playerKey in battle) || typeof battle[playerKey]?.addPokemon !== 'function') {
+      return;
+    }
+
+    l.debug(
+      'Overriding addPokemon() of player', playerKey,
+      '\n', 'battleId', roomid,
+    );
+
+    const side = battle[playerKey];
+    const addPokemon = side.addPokemon.bind(side) as Showdown.Side['addPokemon'];
+
+    side.addPokemon = (name, ident, details, replaceSlot) => {
+      // we'll collect potential candidates to assemble the final search list below
+      const pokemonSearchCandidates: (Showdown.Pokemon | CalcdexPokemon)[] = [];
+
+      // make sure this comes first before `pokemonState` in case `replaceSlot` is specified
+      if (side.pokemon?.length) {
+        pokemonSearchCandidates.push(...side.pokemon);
+      }
+
+      // retrieve any previously tagged Pokemon in the state if we don't have any candidates atm
+      if (!pokemonSearchCandidates.length) {
+        const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id];
+        const pokemonState = battleState?.[playerKey]?.pokemon || [];
+
+        if (pokemonState.length) {
+          pokemonSearchCandidates.push(...pokemonState);
+        }
+      }
+
+      // don't filter this in case `replaceSlot` is specified
+      const pokemonSearchList = pokemonSearchCandidates.map((p) => ({
+        calcdexId: p.calcdexId,
+        ident: p.ident,
+        // name: p.name,
+        speciesForme: p.speciesForme,
+        details: p.details,
+        searchid: p.searchid,
+      }));
+
+      // just js things uwu
+      const prevPokemon = (replaceSlot > -1 && pokemonSearchList[replaceSlot])
+        || pokemonSearchList.filter((p) => !!p.calcdexId).find((p) => (
+          (!!ident && (
+            (!!p?.ident && p.ident === ident)
+              || (!!p?.searchid && p.searchid.includes(ident))
+          ))
+            || (!!details && (
+              (!!p?.details && p.details === details)
+                || (!!p?.searchid && p.searchid.includes(details))
+                || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
+            ))
+        ));
+
+      l.debug(
+        'side.addPokemon()', 'w/ name', name, 'for player', side.sideid,
+        '\n', 'ident', ident,
+        '\n', 'details', details,
+        '\n', 'replaceSlot', replaceSlot,
+        '\n', 'prevPokemon', prevPokemon,
+        '\n', 'pokemonSearchList', pokemonSearchList,
+        // '\n', 'side', side,
+        // '\n', 'battle', battle,
+      );
+
+      const newPokemon = addPokemon(name, ident, details, replaceSlot);
+
+      if (prevPokemon?.calcdexId) {
+        newPokemon.calcdexId = prevPokemon.calcdexId;
+
+        l.debug(
+          'Restored calcdexId', newPokemon.calcdexId,
+          'from prevPokemon', prevPokemon.ident || prevPokemon.speciesForme,
+          'to newPokemon', newPokemon.ident || newPokemon.speciesForme,
+          'for player', side.sideid,
+          '\n', 'prevPokemon', prevPokemon,
+          '\n', 'newPokemon', newPokemon,
+        );
+      }
+
+      return newPokemon;
+    };
+  });
+
+  l.debug(
+    'Overriding updateSide() of the current battleRoom',
+    '\n', 'battleId', roomid,
+  );
 
   const updateSide = battleRoom.updateSide.bind(battleRoom) as typeof battleRoom.updateSide;
 
@@ -490,14 +535,10 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     updateSide();
 
     l.debug(
-      'battleRoom.updateSide() was called!',
-      '\n', 'myPokemon (prev)', myPokemon,
-      '\n', 'myPokemon (now)', battleRoom.battle.myPokemon,
+      'updateSide()',
+      '\n', 'battleId', roomid,
+      '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
     );
-
-    // if (battleRoom.battle.myPokemon.length === myPokemon.length) {
-    //   return;
-    // }
 
     let didUpdate = !myPokemon?.length
       && !!battleRoom.battle.myPokemon?.length;
@@ -523,16 +564,15 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       didUpdate = true;
     });
 
-    if (didUpdate && battleRoom.battle.subscriptionDirty) {
+    if (didUpdate && battleRoom.battle.calcdexInit) {
       const prevNonce = battleRoom.battle.nonce;
 
       battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle);
 
       l.debug(
-        'Restored calcdexId\'s in myPokemon',
+        'Restored previous calcdexId\'s in battle.myPokemon[]',
         '\n', 'nonce', '(prev)', prevNonce, '(now)', battleRoom.battle.nonce,
-        '\n', 'myPokemon (prev)', myPokemon,
-        '\n', 'myPokemon (now)', battleRoom.battle.myPokemon,
+        '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
       );
 
       // battleRoom.battle.subscription('callback');
@@ -540,80 +580,67 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   };
 
   l.debug(
-    'battle\'s subscription isn\'t dirty yet!',
-    '\n', 'About to inject some real filth into battle.subscribe()...',
-    '\n', 'subscriptionDirty', subscriptionDirty,
+    'battle\'s subscription() isn\'t dirty yet!',
+    'About to inject some real filth into battle.subscribe()...',
+    '\n', 'battleId', roomid,
+    '\n', 'typeof battle.subscription', typeof battle.subscription,
+    '\n', 'battle', battle,
   );
 
-  if (typeof subscription === 'function' && typeof prevSubscription !== 'function') {
-    l.debug('Remapping original subscription() function to prevSubscription()');
-
-    /**
-     * @todo don't think we need to store the original func in the battle obj
-     */
-    battle.prevSubscription = subscription.bind(battle) as typeof subscription;
-  }
+  const prevSubscription = battle.subscription?.bind?.(battle) as typeof battle.subscription;
 
   // note: battle.subscribe() internally sets its `subscription` property to the `listener` arg
   // (in js/battle.js) battle.subscribe = function (listener) { this.subscription = listener; };
   battle.subscribe((state) => {
     l.debug(
-      'battle.subscribe() for', battle?.id || '(missing battle.id)',
-      '\n', 'state', state,
-      '\n', 'roomid', roomid,
+      'subscribe()',
+      '\n', 'state (argv[0])', state,
+      '\n', 'typeof prevSubscription', typeof prevSubscription,
+      '\n', 'battleId', battle?.id || roomid,
       '\n', 'battle', battle,
     );
 
-    if (typeof battle.prevSubscription === 'function') {
-      // l.debug('Calling the original battle.subscribe() function...');
+    // call the original subscription() first, if any, so we don't break anything we don't mean to!
+    prevSubscription?.(state);
 
-      battle.prevSubscription(state);
-    }
-
-    if (state === 'paused') {
-      l.debug('Subscription ignored cause the battle is paused or, probs more likely, ended');
-
-      return;
-    }
+    // update (2022/10/13): allowing paused battle states to trigger a re-render
+    // if (state === 'paused') {
+    //   l.debug(
+    //     'Subscription ignored cause the battle is paused or, probs more likely, ended',
+    //     '\n', 'battleId', roomid,
+    //   );
+    //
+    //   return;
+    // }
 
     // don't render if we've already destroyed the battleState
     // (via calcdexRoom's requestLeave() when leaving via app.leaveRoom())
     if (battle.calcdexDestroyed) {
-      l.debug('Subscription ignored cause the Calcdex battleState has already been destroyed');
+      l.debug(
+        'Calcdex battleState has been destroyed',
+        '\n', 'battleId', roomid,
+      );
 
       return;
     }
 
     if (!battle?.id) {
-      l.warn('No active battle found; ignoring Calcdex bootstrap...');
+      l.debug(
+        'No valid battle object was found',
+        '\n', 'battleId', roomid,
+      );
 
       return;
     }
 
-    // override each player's addPokemon() method to assign a calcdexId lol
-    (['p1', 'p2', 'p3', 'p4'] as Showdown.SideID[]).forEach((playerKey) => {
-      if (!(playerKey in battle) || battle[playerKey]?.calcdexProcessed || typeof battle[playerKey]?.addPokemon !== 'function') {
-        return;
-      }
+    if (battle.id !== roomid) {
+      l.debug(
+        'Current battle update is not for this battleRoom',
+        '\n', 'battleId', '(init)', roomid, '(recv)', battle.id,
+      );
 
-      l.debug('Overriding addPokemon() of player', playerKey);
-
-      const side = battle[playerKey];
-      const addPokemon = side.addPokemon.bind(side) as Showdown.Side['addPokemon'];
-
-      side.addPokemon = (name, ident, details, replaceSlot) => {
-        const oldPokemon = replaceSlot > -1 ? side.pokemon[replaceSlot] : null;
-        const newPokemon = addPokemon(name, ident, details, replaceSlot);
-
-        if (oldPokemon?.calcdexId) {
-          newPokemon.calcdexId = oldPokemon.calcdexId;
-        }
-
-        return newPokemon;
-      };
-
-      side.calcdexProcessed = true;
-    });
+      return;
+    }
 
     // since this is inside a function, we need to grab a fresher snapshot of the Redux state
     const currentState = store.getState();
@@ -633,8 +660,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       l.debug(
         'Battle ended; updating active state...',
+        '\n', 'battleId', battle?.id || roomid,
         '\n', 'calcdexRoomId', calcdexRoomId,
-        '\n', 'battle.id', battle.id,
         '\n', 'battle', battle,
       );
 
@@ -647,8 +674,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       if (settings?.closeOnEnd && calcdexRoomId && calcdexRoomId in app.rooms) {
         l.debug(
           'Leaving calcdexRoom due to user settings...',
+          '\n', 'battleId', battle?.id || roomid,
           '\n', 'calcdexRoomId', calcdexRoomId,
-          '\n', 'battle.id', battle.id,
           '\n', 'battle', battle,
         );
 
@@ -656,11 +683,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         // removes the calcdexRoom & calcdexReactRoot properties
         app.leaveRoom(calcdexRoomId);
       }
-
-      // if (settings.destroyOnClose) {
-      //   delete battle.calcdexRoom;
-      //   delete battle.calcdexReactRoot;
-      // }
 
       return;
     }
@@ -672,26 +694,17 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     }
 
     l.debug(
-      'Rendering Calcdex with battle nonce', battle.nonce,
-      // '\n', 'store.getState()', store.getState(),
+      'Rendering Calcdex for battle', battle.id || roomid,
+      '\n', 'nonce', battle.nonce,
+      '\n', 'battle', battle,
     );
 
-    // battle.calcdexReactRoot.render((
-    //   <ReduxProvider store={store}>
-    //     <ErrorBoundary
-    //       component={CalcdexError}
-    //       battleId={battle?.id}
-    //     >
-    //       <Calcdex
-    //         battle={battle}
-    //         // tooltips={tooltips}
-    //       />
-    //     </ErrorBoundary>
-    //   </ReduxProvider>
-    // ));
-
-    renderCalcdex(battle.calcdexReactRoot, store, battle);
+    renderCalcdex(
+      battle.calcdexReactRoot,
+      store,
+      battle,
+    );
   });
 
-  battle.subscriptionDirty = true;
+  battle.calcdexInit = true;
 };
