@@ -139,6 +139,11 @@ export const PokeInfo = ({
     // update (2022/10/06): nvm on the setting the actual ability/item cause it's screwy when switching formes,
     // so opting to use their dirty counterparts instead lol
     if (preset.format?.includes('random')) {
+      // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
+      if (preset.speciesForme.endsWith('-Gmax')) {
+        mutation.speciesForme = preset.speciesForme;
+      }
+
       if (!clearDirtyAbility && mutation.altAbilities?.length === 1) {
         [mutation.dirtyAbility] = flattenAlts(mutation.altAbilities);
         // mutation.dirtyAbility = null;
@@ -454,11 +459,11 @@ export const PokeInfo = ({
   const nextFormeTooltip = nextForme ? (
     <div className={styles.tooltipContent}>
       <div>
-        <strong>{pokemon.speciesForme}</strong>
-      </div>
-      <div>
         Switch to{' '}
         <em>{nextForme}</em>
+      </div>
+      <div>
+        <strong>{pokemon.speciesForme}</strong>
       </div>
     </div>
   ) : null;
