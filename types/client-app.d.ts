@@ -56,7 +56,7 @@ declare namespace Showdown {
     sideRoomList: ClientRoom[];
     sideRoom?: ClientRoom;
     draggingSideRoom?: ClientRoom;
-    // popups?: ClientPopup[];
+    popups?: ClientPopup[];
 
     /**
      * @default {}
