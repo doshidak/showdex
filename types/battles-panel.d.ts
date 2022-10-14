@@ -1,5 +1,5 @@
 /**
- * battles-room.d.ts
+ * `battles-panel.d.ts`
  *
  * Adapted from `pokemon-showdown-client/src/panel-battle.tsx`.
  *
@@ -18,18 +18,18 @@ declare namespace Showdown {
     p4?: string;
   };
 
-  interface BattlesRoom extends PSRoom {
-    override readonly classType: 'battles';
+  class BattlesPanel extends PSRoom {
+    public override readonly classType: 'battles';
 
     /**
      * @default ''
      */
-    format: string;
-    battles?: BattleDesc[];
+    public format: string;
+    public battles?: BattleDesc[];
 
-    (options: RoomOptions): this;
+    public constructor(options: RoomOptions);
 
-    setFormat(format: string): void;
-    refresh(): void;
+    public setFormat(format: string): void;
+    public refresh(): void;
   }
 }

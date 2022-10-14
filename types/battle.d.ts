@@ -295,9 +295,8 @@ declare namespace Showdown {
     calcdexRoom?: HtmlRoom;
     calcdexOverlayVisible?: boolean;
     calcdexReactRoot?: import('react-dom/client').Root;
+    calcdexInit?: boolean;
     calcdexDestroyed?: boolean;
-    prevSubscription?: Battle['subscription'];
-    subscriptionDirty?: boolean;
     nonce?: string;
 
     (options?: {
