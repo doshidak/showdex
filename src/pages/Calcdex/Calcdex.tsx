@@ -12,6 +12,7 @@ import styles from './Calcdex.module.scss';
 interface CalcdexProps {
   battle?: Showdown.Battle;
   battleId?: string;
+  request?: Showdown.BattleRequest;
 }
 
 // const l = logger('@showdex/pages/Calcdex/Calcdex');
@@ -19,6 +20,7 @@ interface CalcdexProps {
 export const Calcdex = ({
   battle,
   battleId: battleIdFromProps,
+  request,
 }: CalcdexProps): JSX.Element => {
   const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
@@ -34,6 +36,7 @@ export const Calcdex = ({
   } = useCalcdex({
     battle,
     battleId: battleIdFromProps,
+    request,
   });
 
   if (!shouldRender) {
