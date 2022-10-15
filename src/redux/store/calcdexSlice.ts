@@ -785,6 +785,16 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   autoSelect?: boolean;
 
   /**
+   * Maximum amount of Pokemon for this player.
+   *
+   * * Keeping this player-specific since that's how Showdown keeps it lol (i.e., `totalPokemon`).
+   *
+   * @default process.env.CALCDEX_PLAYER_MAX_POKEMON
+   * @since 1.0.4
+   */
+  maxPokemon?: number;
+
+  /**
    * Keeps track of the ordering of the Pokemon.
    *
    * * Each element should be some unique identifier for the Pokemon that's hopefully somewhat consistent.
@@ -1228,6 +1238,7 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
   destroy: (state: Draft<CalcdexSliceState>, action: PayloadAction<string>) => void;
 }
 
+const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
 const l = logger('@showdex/redux/store/calcdexSlice');
 
 export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers, string>({
@@ -1299,6 +1310,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           activeIndex: -1,
           selectionIndex: 0,
           autoSelect: true,
+          maxPokemon: defaultMaxPokemon,
           pokemonOrder: [],
           ...p1,
           pokemon: [],
@@ -1311,6 +1323,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           activeIndex: -1,
           selectionIndex: 0,
           autoSelect: true,
+          maxPokemon: defaultMaxPokemon,
           pokemonOrder: [],
           ...p2,
           pokemon: [],
