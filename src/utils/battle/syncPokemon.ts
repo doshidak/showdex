@@ -112,7 +112,7 @@ export const syncPokemon = (
       }
 
       case 'ability': {
-        if (!value || formatId(<string> value) === 'noability') {
+        if (!value || /^\([\w\s]+\)$/.test(<string> value) || formatId(<string> value) === 'noability') {
           return;
         }
 
