@@ -49,17 +49,6 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       return;
     }
 
-    // check if the Calcdex tab is already open
-    const calcdexRoomId = getCalcdexRoomId(battleId);
-
-    if (calcdexRoomId in app.rooms) {
-      // no need to call app.topbar.updateTabbar() since app.focusRoomRight() will call it for us
-      // (app.focusRoomRight() -> app.updateLayout() -> app.topbar.updateTabbar())
-      app.focusRoomRight(calcdexRoomId);
-
-      return;
-    }
-
     // attempt to grab the current battle state
     const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battleId];
 
@@ -71,12 +60,12 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
     // attempt to grab the current battle room
     const battleRoom = getBattleRoom(battleId);
 
+    // note: battleRoom.id should equal battleRoom.battle.id,
+    // which is where battleId should be derived from when the Calcdex state was initialized
+    const battleRoomId = battleRoom?.id || battleId;
+
     // check if the Calcdex is rendered as an overlay for this battle
     if (battleState.renderMode === 'overlay') {
-      // note: battleRoom.id should equal battleRoom.battle.id,
-      // which is where battleId should be derived from when the Calcdex state was initialized
-      const battleRoomId = battleRoom?.id || battleId;
-
       // if we're not even in the battleRoom anymore, destroy the state
       if (!(battleRoomId in (app.rooms || {}))) {
         store.dispatch(calcdexSlice.actions.destroy(battleRoomId));
@@ -102,18 +91,37 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       return;
     }
 
-    // at this point, we need to recreate the room
-    // (we should also be in the 'panel' renderMode now)
-    const calcdexRoom = createCalcdexRoom(battleId, true, store);
-    const calcdexReactRoot = ReactDOM.createRoot(calcdexRoom.el);
+    // check if the Calcdex tab is already open
+    const calcdexRoomId = getCalcdexRoomId(battleId);
 
-    renderCalcdex(calcdexReactRoot, store, battleRoom?.battle || battleId);
+    if (calcdexRoomId in app.rooms) {
+      // no need to call app.topbar.updateTabbar() since app.focusRoomRight() will call it for us
+      // (app.focusRoomRight() -> app.updateLayout() -> app.topbar.updateTabbar())
+      app.focusRoomRight(calcdexRoomId);
+    } else {
+      // at this point, we need to recreate the room
+      // (we should also be in the 'panel' renderMode now)
+      const calcdexRoom = createCalcdexRoom(battleId, true, store);
+      const calcdexReactRoot = ReactDOM.createRoot(calcdexRoom.el);
 
-    // if the battleRoom exists, attach the created room and ReactDOM root to the battle object
-    if (battleRoom?.battle?.id) {
-      battleRoom.battle.calcdexDestroyed = false; // just in case
-      battleRoom.battle.calcdexRoom = calcdexRoom;
-      battleRoom.battle.calcdexReactRoot = calcdexReactRoot;
+      renderCalcdex(
+        calcdexReactRoot,
+        store,
+        battleRoom?.battle || battleId,
+        battleRoom?.request,
+      );
+
+      // if the battleRoom exists, attach the created room and ReactDOM root to the battle object
+      if (battleRoom?.battle?.id) {
+        battleRoom.battle.calcdexDestroyed = false; // just in case
+        battleRoom.battle.calcdexRoom = calcdexRoom;
+        battleRoom.battle.calcdexReactRoot = calcdexReactRoot;
+      }
+    }
+
+    // refocus the battleRoom that the tabbed Calcdex pertains to, if still joined
+    if ((!app.curRoom?.id || app.curRoom.id !== battleRoomId) && battleRoomId in (app.rooms || {})) {
+      app.focusRoom(battleRoomId);
     }
   };
 
