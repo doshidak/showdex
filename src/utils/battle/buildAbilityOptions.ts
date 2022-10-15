@@ -50,7 +50,8 @@ export const buildAbilityOptions = (
   // create usage percent finder (to show them in any of the option groups)
   const findUsagePercent = usageAltPercentFinder(altAbilities, true);
 
-  if (!transformedForme && baseAbility && ability !== baseAbility) {
+  // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
+  if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
     options.push({
       label: formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited',
       options: [{
@@ -65,7 +66,8 @@ export const buildAbilityOptions = (
 
   if (transformedForme) {
     const transformed = Array.from(new Set([
-      serverSourced && ability,
+      // filter out "revealed" abilities with parentheses, like "(suppressed)"
+      serverSourced && !/^\([\w\s]+\)$/.test(ability) && ability,
       ...transformedAbilities,
     ])).filter((n) => !!n && !filterAbilities.includes(n)).sort();
 
