@@ -26,10 +26,6 @@ export const PokeItemOptionTooltip = ({
   const dexItem = dex?.items.get(value);
   const description = formatDexDescription(dexItem?.shortDesc || dexItem?.desc);
 
-  if (!description) {
-    return null;
-  }
-
   return (
     <div
       className={cx(
@@ -39,7 +35,7 @@ export const PokeItemOptionTooltip = ({
       )}
       style={style}
     >
-      {description}
+      {description || 'No description available.'}
     </div>
   );
 };

@@ -26,10 +26,6 @@ export const PokeAbilityOptionTooltip = ({
   const dexAbility = dex?.abilities.get(value);
   const description = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
 
-  if (!description) {
-    return null;
-  }
-
   return (
     <div
       className={cx(
@@ -39,7 +35,7 @@ export const PokeAbilityOptionTooltip = ({
       )}
       style={style}
     >
-      {description}
+      {description || 'No description available.'}
     </div>
   );
 };
