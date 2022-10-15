@@ -622,25 +622,68 @@ export const SettingsPane = ({
                     }]}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['closeOnEnd']>
-                    name="calcdex.closeOnEnd"
-                    component={Switch}
-                    className={styles.field}
-                    label="Close Tab When Battle Ends"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Closes the tab once the battle ends.
-                        <br />
-                        <br />
-                        Unless <em>Clear Memory After Tab Closes</em> is on,
-                        the closed tab can be reopened from the Hellodex tab.
-                        <br />
-                        <br />
-                        This does not affect Calcdexes that <em>Open As</em> a{' '}
-                        <strong>Battle Overlay</strong> as they are embedded into the battle.
-                      </div>
+                  <Field<ShowdexSettings['calcdex']['closeOn']>
+                    name="calcdex.closeOn"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
                     )}
-                    format={(value) => (values.calcdex?.openAs === 'overlay' ? false : value)}
+                    label="Close Tab When"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Battle Ends',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Closes the tabbed Calcdex panel once the battle ends.
+                          <br />
+                          <br />
+                          Unless <em>Clear Memory After Tab Closes</em> is on,
+                          the closed tab can be reopened from the Hellodex.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'battle-end',
+                    }, {
+                      label: 'Battle Closes',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Closes the tabbed Calcdex panel when the battle is closed.
+                          <br />
+                          <br />
+                          Unless <em>Clear Memory After Tab Closes</em> is on,
+                          the closed tab can be reopened from the Hellodex.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'battle-tab',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Disables auto-closing of the tabbed Calcdex panel
+                          based on the battle's state.
+                          <br />
+                          Instead, the Calcdex must be manually closed every time.
+                          <br />
+                          <br />
+                          Unless <em>Clear Memory After Tab Closes</em> is on,
+                          the closed tab can be reopened from the Hellodex.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                    format={(value) => (values.calcdex?.openAs === 'overlay' ? 'never' : value)}
                     disabled={values.calcdex?.openAs === 'overlay'}
                   />
 
@@ -1224,6 +1267,7 @@ export const SettingsPane = ({
                       <div className={styles.tooltipContent}>
                         Clicking on the damage range will copy the <em>unprettied</em> (if on)
                         matchup description to your clipboard.
+                        <br />
                         <br />
                         Disable this if you like to highlight what you're reading on screen.
                       </div>
