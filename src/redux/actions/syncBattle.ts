@@ -16,6 +16,7 @@ import type { CalcdexBattleState, CalcdexPlayerKey, RootState } from '@showdex/r
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
+  request?: Showdown.BattleRequest;
 }
 
 export const SyncBattleActionType = 'calcdex:sync';
@@ -31,7 +32,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
   SyncBattleActionType,
 
   (payload, api) => {
-    const { battle } = payload || {};
+    const {
+      battle,
+      request,
+    } = payload || {};
 
     const rootState = <RootState> api.getState();
     const settings = rootState?.showdex?.settings?.calcdex;
@@ -353,6 +357,53 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           battleState.format,
           settings?.showAllFormes,
         );
+
+        if (request?.requestType === 'move' && request.side?.id === playerKey) {
+          const {
+            active,
+            side,
+          } = request;
+
+          for (let j = 0; j < (active?.length ?? 0); j++) {
+            const moveData = active[j];
+
+            const {
+              calcdexId: reqCalcdexId, // probably won't have a calcdexId
+              ident: reqIdent,
+              details: reqDetails,
+            } = side.pokemon?.[j] || {};
+
+            const shouldIgnore = !moveData?.maxMoves?.gigantamax
+              || (!reqIdent && !reqDetails)
+              || (!!reqCalcdexId && syncedPokemon.calcdexId !== reqCalcdexId)
+              || (syncedPokemon.ident !== reqIdent && syncedPokemon.details !== reqDetails)
+              || !syncedPokemon.altFormes.some((f) => f.endsWith('-Gmax'));
+
+            l.debug(
+              'Processing move request for', reqIdent || reqDetails,
+              'with G-Max move?', moveData?.maxMoves?.gigantamax, // ? = partial, i.e., could be null/undefined
+              '\n', 'battleId', battleId,
+              '\n', 'shouldIgnore?', shouldIgnore,
+              '\n', 'moveData', moveData,
+              '\n', 'sidePokemon', side.pokemon?.[j],
+              '\n', 'request', request,
+              '\n', 'battle', battle,
+            );
+
+            if (shouldIgnore) {
+              continue;
+            }
+
+            syncedPokemon.dmaxable = true; // if not already
+            syncedPokemon.gmaxable = true;
+
+            if (!syncedPokemon.speciesForme.endsWith('-Gmax')) {
+              syncedPokemon.speciesForme += '-Gmax';
+            }
+
+            break;
+          }
+        }
 
         l.debug(
           'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
