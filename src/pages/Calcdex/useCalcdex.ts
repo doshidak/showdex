@@ -20,6 +20,7 @@ import type {
 export interface CalcdexHookOptions {
   battle?: Showdown.Battle;
   battleId?: string;
+  request?: Showdown.BattleRequest;
 }
 
 export interface CalcdexHookInterface {
@@ -43,6 +44,7 @@ const l = logger('@showdex/pages/Calcdex/useCalcdex');
 export const useCalcdex = ({
   battle,
   battleId: manualBattleId,
+  request,
 }: CalcdexHookOptions = {}): CalcdexHookInterface => {
   const battleId = battle?.id || manualBattleId;
 
@@ -79,6 +81,7 @@ export const useCalcdex = ({
       '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle.nonce,
       '\n', 'battle.p1.pokemon', battle.p1?.pokemon,
       '\n', 'battle.p2.pokemon', battle.p2?.pokemon,
+      '\n', 'request', request,
       '\n', 'battle', battle,
       '\n', 'battleState', battleState,
     );
@@ -148,7 +151,10 @@ export const useCalcdex = ({
 
       // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
       // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
-      void dispatch(syncBattle({ battle }));
+      void dispatch(syncBattle({
+        battle,
+        request,
+      }));
     }
 
     // l.debug(
@@ -164,6 +170,8 @@ export const useCalcdex = ({
     battleState,
     dispatch,
     renderAsOverlay,
+    request,
+    request?.rqid,
   ]);
 
   return {
