@@ -45,7 +45,8 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   openOnStart: 'oos',
   openAs: 'oas',
   // forcedOpenAs: 'foa',
-  closeOnEnd: 'coe',
+  // closeOnEnd: 'coe',
+  closeOn: 'con',
   destroyOnClose: 'doc',
   preserveRenderStates: 'prs',
   defaultAutoSelect: 'das',
@@ -118,7 +119,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
  * ```
  * oos~{openOnStart}|
  * oas~{openAs}|
- * coe~{closeOnEnd}|
+ * con~{closeOn}|
  * doc~{destroyOnClose}|
  * prs~{preserveRenderStates}|
  * das~{defaultAutoSelect}|
