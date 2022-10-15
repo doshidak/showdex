@@ -116,25 +116,22 @@ export interface ShowdexCalcdexSettings {
   openAs: 'showdown' | CalcdexRenderMode;
 
   /**
-   * Forced render mode.
+   * How the Calcdex panel tab automatically closes.
    *
-   * * `'showdown'` (default) will open the Calcdex based on the Layout option in Showdown's graphic settings.
-   *   - Similar functionality to `forcedColorScheme` in the `ShowdexSettings`.
-   *
-   * @default 'showdown'
-   * @since 1.0.3
-   */
-  // forcedOpenAs: 'showdown' | CalcdexRenderMode;
-
-  /**
-   * Whether the Calcdex panel tab should automatically close when the battle ends.
-   *
+   * * `'battle-end'` will close the Calcdex panel tab when the battle ends.
+   * * `'battle-tab'` will close the Calcdex panel tab when the user closes the battle tab.
+   *   - More specifically, we'll be hooking into the `BattleRoom`'s `onRequestLeave()`
+   *     (invoked by `app.leaveRoom()`, which is invoked by the user clicking the "X" button)
+   *     to detect when the user closes the battle tab (as opposed to switching to another tab).
+   *   - This is probably more safe than directly hooking into the globally used `app.leaveRoom()`.
+   * * `'never'` refers to the automatic closing mechanism.
+   *   - Users will still be able to close the tab *manually*!
    * * Has no effect if `openAs` is `'overlay'`.
    *
-   * @default false
-   * @since 1.0.3
+   * @default 'battle-tab'
+   * @since 1.0.4
    */
-  closeOnEnd: boolean;
+  closeOn: 'battle-end' | 'battle-tab' | 'never';
 
   /**
    * Whether the Calcdex should be destroyed from the Redux state when the panel tab is closed.
