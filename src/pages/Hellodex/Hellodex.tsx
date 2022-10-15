@@ -20,7 +20,7 @@ const packageVersion = `v${env('package-version', '#.#.#')}`;
 const donationUrl = env('hellodex-donation-url');
 const forumUrl = env('hellodex-forum-url');
 const repoUrl = env('hellodex-repo-url');
-const releaseUrl = `${env('hellodex-releases-base-url')}/${packageVersion}`;
+const releasesUrl = env('hellodex-releases-url');
 const bugsUrl = env('hellodex-bugs-url');
 const featuresUrl = env('hellodex-features-url');
 
@@ -290,7 +290,7 @@ export const Hellodex = ({
             }
 
             {
-              releaseUrl?.startsWith('https://') &&
+              releasesUrl?.startsWith('https://') &&
               <FooterButton
                 className={styles.linkButton}
                 iconClassName={styles.sparkleIcon}
@@ -299,8 +299,8 @@ export const Hellodex = ({
                 label="New"
                 aria-label="Latest Release Notes on GitHub"
                 tooltip={`See What's New in ${packageVersion}`}
-                // disabled={!releaseUrl}
-                onPress={() => window.open(releaseUrl, '_blank', 'noopener,noreferrer')}
+                // disabled={!releasesUrl}
+                onPress={() => window.open(releasesUrl, '_blank', 'noopener,noreferrer')}
               />
             }
 
