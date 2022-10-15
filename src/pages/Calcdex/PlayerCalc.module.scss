@@ -12,13 +12,16 @@
 }
 
 .playerBar {
-  @include flex.row-between;
+  @include flex.row($justify: space-between);
   width: 100%;
 }
 
 .playerInfo {
   // @include flex.column;
-  width: 100%;
+  // flex: 1 0;
+  @include spacing.margin($top: 7px);
+  // width: 100%;
+  max-width: 33%;
 }
 
 button.usernameButton {
@@ -87,15 +90,19 @@ button.usernameButton {
 }
 
 .teamList {
-  @include flex.row($justify: flex-end);
+  // @include flex.row($justify: flex-end);
+  display: grid;
+  // grid-template-columns: repeat(6, min-content); // inline style now
+  // column-gap: 3px;
+  // flex: 0 0 auto;
 }
 
 .piconButton {
   align-self: center;
 
-  &:not(:last-of-type) {
-    @include spacing.margin($right: 5px);
-  }
+  // &:not(:last-of-type) {
+  //   @include spacing.margin($right: 5px);
+  // }
 }
 
 .picon {
@@ -127,9 +134,24 @@ button.usernameButton {
   // user-select: none;
   pointer-events: none;
 
+  .piconButton:not(.selected):hover & {
+    .light & {
+      border-color: color.alpha(colors.$black, 0.15);
+    }
+
+    .dark & {
+      border-color: color.alpha(colors.$white, 0.15);
+    }
+  }
+
   .active & {
-    // border-color: color.alpha(color.tint(colors.$red, 15%), 0.15);
-    background-color: color.alpha(colors.$blue, 0.25);
+    .light & {
+      background-color: color.alpha(color.shade(colors.$blue, 15%), 0.15);
+    }
+
+    .dark & {
+      background-color: color.alpha(colors.$blue, 0.15);
+    }
   }
 
   .selected & {
