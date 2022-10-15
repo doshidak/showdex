@@ -8,7 +8,9 @@
   width: 40px; // should equal the width of Picon
   height: 40px; // should equal the height of Picon
   user-select: none;
+}
 
+.shadow {
   &::before {
     content: '';
     // @include position.absolute-anchor($x: -3px, $y: -6px);
@@ -29,12 +31,14 @@
     pointer-events: none;
   }
 
-  &.light:hover::before {
-    background-color: color.alpha(colors.$black, 0.15);
-  }
+  &:hover {
+    &.light::before {
+      background-color: color.alpha(colors.$black, 0.05);
+    }
 
-  &.dark:hover::before {
-    background-color: color.alpha(colors.$white, 0.15);
+    &.dark::before {
+      background-color: color.alpha(colors.$white, 0.075);
+    }
   }
 }
 

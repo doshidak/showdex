@@ -18,6 +18,7 @@ export interface PiconButtonProps extends BaseButtonProps {
   tooltipTrigger?: TooltipProps['trigger'];
   tooltipTouch?: TooltipProps['touch'];
   tooltipDisabled?: boolean;
+  shadow?: boolean;
 }
 
 /* eslint-disable react/prop-types -- this rule can't handle props from extended interfaces apparently lmaoo */
@@ -30,12 +31,13 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
   facingLeft,
   tooltip,
   tooltipOffset = [0, 5],
-  tooltipDelay = [500, 50],
+  tooltipDelay = [150, 50],
   tooltipTrigger = 'mouseenter',
   tooltipTouch = 'hold',
   tooltipDisabled,
-  hoverScale = 1.05,
+  hoverScale = 1,
   activeScale = 0.95,
+  shadow,
   disabled,
   children,
   ...props
@@ -56,6 +58,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
         {...props}
         className={cx(
           styles.container,
+          shadow && styles.shadow,
           !!colorScheme && styles[colorScheme],
           className,
         )}
