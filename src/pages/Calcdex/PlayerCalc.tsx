@@ -161,7 +161,7 @@ export const PlayerCalc = ({
                 aria-label={`Select ${friendlyPokemonName}`}
                 pokemon={mon ? {
                   ...mon,
-                  speciesForme,
+                  speciesForme: speciesForme?.replace(mon?.useMax ? '' : '-Gmax', ''),
                   item,
                 } : 'pokeball-none'}
                 tooltip={mon ? (

@@ -528,10 +528,14 @@ export const PokeInfo = ({
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
-              speciesForme: pokemon?.transformedForme || pokemon?.speciesForme,
+              speciesForme: (
+                pokemon?.transformedForme
+                  || pokemon?.speciesForme
+              )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
               item: itemName,
             }}
             tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
+            tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
             disabled={settings?.reverseIconName ? !nextForme : !pokemon?.speciesForme}
             onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
           />
@@ -549,6 +553,7 @@ export const PokeInfo = ({
               labelClassName={styles.nameLabel}
               label={nickname || pokemon?.speciesForme || 'MissingNo.'}
               tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
+              tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
               hoverScale={1}
               // absoluteHover
               disabled={settings?.reverseIconName ? !pokemon?.speciesForme : !nextForme}
@@ -580,7 +585,7 @@ export const PokeInfo = ({
             <PokeHpBar
               // className={styles.hpBar}
               hp={hpPercentage}
-              width={115}
+              width={100}
             />
 
             {
@@ -600,7 +605,7 @@ export const PokeInfo = ({
                   </div>
                 )}
                 offset={[0, 10]}
-                delay={[1000, 50]}
+                delay={[500, 50]}
                 trigger="mouseenter"
                 touch="hold"
                 disabled={!maxHp}
