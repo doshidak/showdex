@@ -21,6 +21,7 @@ export interface SyncBattlePayload {
 
 export const SyncBattleActionType = 'calcdex:sync';
 
+const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
 const l = logger('@showdex/redux/actions/syncBattle');
 
 /**
@@ -161,7 +162,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine the max amount of Pokemon
-      const maxPokemon = player?.totalPokemon || env.int('calcdex-player-max-pokemon');
+      const maxPokemon = player?.totalPokemon || defaultMaxPokemon;
+
+      if (playerState.maxPokemon !== maxPokemon) {
+        playerState.maxPokemon = maxPokemon;
+      }
 
       // determine if `myPokemon` belongs to the current player
       const isMyPokemonSide = !!battleState.playerKey
@@ -408,11 +413,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         l.debug(
           'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
           '\n', 'battleId', battleId,
-          '\n', 'slot', i, 'clientPokemon.calcdexId', clientPokemon.calcdexId,
+          '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
           '\n', 'clientPokemon', clientPokemon,
           '\n', 'serverPokemon', serverPokemon,
           '\n', 'syncedPokemon', syncedPokemon,
-          '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
+          '\n', 'pokemonOrder', playerState.pokemonOrder,
           '\n', 'battle', battle,
           '\n', 'battleState', battleState,
         );
@@ -423,7 +428,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // (this typically only applies for opponent Pokemon in Randoms, where the Pokemon are revealed as they're switched-in;
           // duplicate mimicked Pokemon don't exist for myPokemon and formats like OU, where the entire team is already revealed)
           // see: https://github.com/smogon/pokemon-showdown-client/blob/4e5002411cc80ff8044fd586bd0db2f80979b8f6/src/battle.ts#L747-L808
-          if (playerState.pokemon.length >= maxPokemon || speciesClause) {
+          if (playerState.pokemon.length >= playerState.maxPokemon || speciesClause) {
             const existingTable: Record<string, number> = {};
             let removalId: string = null;
 
@@ -495,7 +500,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 'Removed Illusion Pokemon', removalPokemon.speciesForme, 'for player', playerKey,
                 '\n', 'battleId', battleId,
                 '\n', 'removalIndex', removalIndex, 'removalId', removalId,
-                '\n', 'length', '(prev)', playerState.pokemon.length + 1, '(now)', playerState.pokemon.length, '(max)', maxPokemon,
+                '\n', 'length', '(prev)', playerState.pokemon.length + 1,
+                '(now)', playerState.pokemon.length,
+                '(max)', playerState.maxPokemon,
                 '\n', 'removalPokemon', removalPokemon,
                 '\n', 'clientPokemon', clientPokemon,
                 '\n', 'serverPokemon', serverPokemon,
@@ -508,13 +515,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             }
           }
 
-          if (playerState.pokemon.length >= maxPokemon) {
+          if (playerState.pokemon.length >= playerState.maxPokemon) {
             if (__DEV__) {
               l.warn(
-                'Ignoring', syncedPokemon.speciesForme, 'for player', playerKey, 'since they have the max number of Pokemon.',
+                'Ignoring', syncedPokemon.speciesForme, 'for player', playerKey,
+                'since they have the max number of Pokemon.',
                 '\n', 'battleId', battleId,
-                '\n', 'slot', i, 'clientPokemon.calcdexId', clientPokemon.calcdexId,
-                '\n', 'length', '(now)', playerState.pokemon.length, '(max)', maxPokemon,
+                '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
+                '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
                 '\n', 'clientPokemon', clientPokemon,
                 '\n', 'serverPokemon', serverPokemon,
                 '\n', 'syncedPokemon', syncedPokemon,
@@ -541,13 +549,13 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           l.debug(
             'Added new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
             '\n', 'battleId', battleId,
-            '\n', 'slot', i, 'clientPokemon.calcdexId', clientPokemon.calcdexId,
-            '\n', 'length', '(now)', playerState.pokemon.length, '(max)', maxPokemon,
+            '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
+            '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
             '\n', 'clientPokemon', clientPokemon,
             '\n', 'serverPokemon', serverPokemon,
             '\n', 'syncedPokemon', syncedPokemon,
             '\n', 'playerState.pokemon', playerState.pokemon,
-            '\n', 'playerState.pokemonOrder', playerState.pokemonOrder,
+            '\n', 'pokemonOrder', playerState.pokemonOrder,
             '\n', 'battle', battle,
             '\n', 'battleState', battleState,
           );
@@ -555,9 +563,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           playerState.pokemon[matchedPokemonIndex] = syncedPokemon;
 
           l.debug(
-            'Updated existing Pokemon', syncedPokemon.speciesForme, 'at index', matchedPokemonIndex, 'for player', playerKey,
+            'Updated existing Pokemon', syncedPokemon.speciesForme,
+            'at index', matchedPokemonIndex, 'for player', playerKey,
             '\n', 'battleId', battleId,
-            '\n', 'slot', i, 'clientPokemon.calcdexId', clientPokemon.calcdexId,
+            '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
             '\n', 'clientPokemon', clientPokemon,
             '\n', 'serverPokemon', serverPokemon,
             '\n', 'syncedPokemon', syncedPokemon,
