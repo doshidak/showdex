@@ -47,6 +47,7 @@ export const renderCalcdex = (
   dom: ReactDOM.Root,
   store: RootStore,
   battle?: Showdown.Battle | string,
+  request?: Showdown.BattleRequest,
 ): void => dom.render((
   <ReduxProvider store={store}>
     <ErrorBoundary
@@ -56,6 +57,7 @@ export const renderCalcdex = (
       <Calcdex
         battle={typeof battle === 'string' ? undefined : battle}
         battleId={typeof battle === 'string' ? battle : undefined}
+        request={request}
       />
     </ErrorBoundary>
   </ReduxProvider>
@@ -110,23 +112,24 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       const calcdexRoomId = getCalcdexRoomId(roomid);
 
       l.debug(
-        '\n', 'settings.closeOnEnd', settings?.closeOnEnd,
+        '\n', 'settings.closeOn', settings?.closeOn,
         '\n', 'battleState.renderMode', battleState.renderMode,
         '\n', 'calcdexRoomId', calcdexRoomId,
         '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
       );
 
       // this would only apply in the tabbed panel mode, obviously
-      if (battleState.renderMode === 'panel' && settings?.closeOnEnd && calcdexRoomId in app.rooms) {
+      if (battleState.renderMode === 'panel' && settings?.closeOn !== 'never' && calcdexRoomId in app.rooms) {
         l.debug(
           'Leaving calcdexRoom with destroyed battle due to user settings...',
           '\n', 'calcdexRoomId', calcdexRoomId,
         );
 
-        if (settings.destroyOnClose) {
-          store.dispatch(calcdexSlice.actions.destroy(roomid));
-        }
+        // if (settings.destroyOnClose) {
+        //   store.dispatch(calcdexSlice.actions.destroy(roomid));
+        // }
 
+        // this will destroy the Calcdex state if configured to, via calcdexRoom's requestLeave() handler
         app.leaveRoom(calcdexRoomId);
       }
 
@@ -204,6 +207,51 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     if (!battle.calcdexRoom) {
       battle.calcdexRoom = createCalcdexRoom(roomid, true, store);
     }
+
+    // handle destroying the Calcdex when leaving the battleRoom
+    const requestLeave = battleRoom.requestLeave.bind(battleRoom) as typeof battleRoom.requestLeave;
+
+    battleRoom.requestLeave = (e) => {
+      const shouldLeave = requestLeave(e);
+
+      // ForfeitPopup probably appeared
+      if (!shouldLeave) {
+        // similar to the battle overlay, we'll override the submit() handler of the ForfeitPopup
+        const forfeitPopup = app.popups.find((p) => (p as Showdown.ForfeitPopup).room === battleRoom);
+
+        if (typeof forfeitPopup?.submit === 'function') {
+          l.debug(
+            'Overriding submit() of spawned ForfeitPopup in app.popups[]...',
+            '\n', 'battleId', roomid,
+          );
+
+          const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
+
+          // unlike the battle overlay, we'll only close if configured to (and destroy if closing the room)
+          forfeitPopup.submit = (data) => {
+            const calcdexRoomId = getCalcdexRoomId(roomid);
+
+            // grab the current settings
+            const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
+
+            if (settings?.closeOn !== 'never' && calcdexRoomId && calcdexRoomId in (app.rooms || {})) {
+              // this will trigger calcdexRoom's requestLeave() handler,
+              // which may destroy the state depending on the user's settings
+              app.leaveRoom(calcdexRoomId);
+            }
+
+            // call ForfeitPopup's original submit() handler
+            submitForfeit(data);
+          };
+        }
+
+        // don't actually leave the room, as requested by requestLeave()
+        return false;
+      }
+
+      // actually leave the room
+      return true;
+    };
 
     battle.calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
   } else { // must be opening as an overlay here
@@ -671,7 +719,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         active: false,
       }));
 
-      if (settings?.closeOnEnd && calcdexRoomId && calcdexRoomId in app.rooms) {
+      // only close the calcdexRoom if configured to
+      // (here, it's only on 'battle-end' since we're specifically handling that scenario rn)
+      if (settings?.closeOn === 'battle-end' && calcdexRoomId && calcdexRoomId in (app.rooms || {})) {
         l.debug(
           'Leaving calcdexRoom due to user settings...',
           '\n', 'battleId', battle?.id || roomid,
@@ -687,7 +737,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       return;
     }
 
-    battle.nonce = calcBattleCalcdexNonce(battle);
+    // note: since we're filtering the subscription callback to avoid UI spamming,
+    // we get the value of battleRoom.request right before it updates on the next callback.
+    // not a big deal tho, but it's usually first `null`, then becomes populated on the
+    // next Calcdex render callback (i.e., here).
+    battle.nonce = calcBattleCalcdexNonce(battle, battleRoom.request);
 
     if (!battle.calcdexReactRoot) {
       return;
@@ -696,6 +750,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     l.debug(
       'Rendering Calcdex for battle', battle.id || roomid,
       '\n', 'nonce', battle.nonce,
+      '\n', 'request', battleRoom.request,
       '\n', 'battle', battle,
     );
 
@@ -703,6 +758,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       battle.calcdexReactRoot,
       store,
       battle,
+      battleRoom.request,
     );
   });
 
