@@ -101,6 +101,7 @@ export const PlayerCalc = ({
                 Profile
               </div>
             )}
+            tooltipDisabled={!settings?.showUiTooltips}
             absoluteHover
             disabled={!name}
             onPress={() => openUserPopup(name)}
@@ -111,6 +112,7 @@ export const PlayerCalc = ({
               className={styles.toggleButton}
               label="Auto"
               tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pok${eacute}mon`}
+              tooltipDisabled={!settings?.showUiTooltips}
               absoluteHover
               active={autoSelect}
               disabled={!pokemon?.length}

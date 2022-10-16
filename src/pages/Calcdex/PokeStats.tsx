@@ -8,7 +8,7 @@ import {
   PokemonNatureBoosts,
   PokemonStatNames,
 } from '@showdex/consts/pokemon';
-import { useColorScheme } from '@showdex/redux/store';
+import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import {
   detectLegacyGen,
   detectStatBoostDelta,
@@ -45,6 +45,7 @@ export const PokeStats = ({
   playerKey,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
+  const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const legacy = detectLegacyGen(gen);
@@ -99,6 +100,7 @@ export const PokeStats = ({
               {legacy ? 'DVs' : 'EVs/IVs'}
             </div>
           )}
+          tooltipDisabled={!settings?.showUiTooltips}
           primary
           disabled={!pokemon?.speciesForme || missingIvs || missingEvs}
           onPress={() => onPokemonChange?.({

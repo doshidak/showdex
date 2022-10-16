@@ -536,6 +536,8 @@ export const PokeInfo = ({
             }}
             tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
             tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
+            tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
+            shadow
             disabled={settings?.reverseIconName ? !nextForme : !pokemon?.speciesForme}
             onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
           />
@@ -554,6 +556,7 @@ export const PokeInfo = ({
               label={nickname || pokemon?.speciesForme || 'MissingNo.'}
               tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
               tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
+              tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
               hoverScale={1}
               // absoluteHover
               disabled={settings?.reverseIconName ? !pokemon?.speciesForme : !nextForme}
@@ -605,7 +608,7 @@ export const PokeInfo = ({
                   </div>
                 )}
                 offset={[0, 10]}
-                delay={[500, 50]}
+                delay={[250, 50]}
                 trigger="mouseenter"
                 touch="hold"
                 disabled={!maxHp}
@@ -704,6 +707,7 @@ export const PokeInfo = ({
                     ) : 'Ability'}
                   </div>
                 )}
+                tooltipDisabled={!settings?.showUiTooltips}
                 absoluteHover
                 active={pokemon.abilityToggled}
                 onPress={() => onPokemonChange?.({
@@ -726,6 +730,7 @@ export const PokeInfo = ({
                     ) : 'Ability'}
                   </div>
                 )}
+                tooltipDisabled={!settings?.showUiTooltips}
                 absoluteHover
                 active
                 onPress={handleAbilityReset}
@@ -816,6 +821,7 @@ export const PokeInfo = ({
                     ) : 'Item'}
                   </div>
                 )}
+                tooltipDisabled={!settings?.showUiTooltips}
                 absoluteHover
                 active
                 onPress={() => onPokemonChange?.({

@@ -147,6 +147,7 @@ export const PokeMoves = ({
             className={cx(styles.toggleButton, styles.ultButton)}
             label="Z"
             tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
+            tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useZ}
             disabled={!pokemon?.speciesForme}
@@ -167,6 +168,7 @@ export const PokeMoves = ({
             )}
             label="Max"
             tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
+            tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useMax}
             disabled={!pokemon?.speciesForme}
@@ -190,6 +192,7 @@ export const PokeMoves = ({
           className={styles.toggleButton}
           label="Crit"
           tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
+          tooltipDisabled={!settings?.showUiTooltips}
           primary
           active={pokemon?.criticalHit}
           disabled={!pokemon?.speciesForme}
