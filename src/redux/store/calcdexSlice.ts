@@ -1098,6 +1098,13 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   rules?: CalcdexBattleRules;
 
   /**
+   * Current turn number, primarily recorded for debugging purposes.
+   *
+   * @since 1.0.4
+   */
+  turn?: number;
+
+  /**
    * Whether the battle is currently active (i.e., not ended).
    *
    * @since 1.0.3
@@ -1259,6 +1266,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
         rules = {},
+        turn = 0,
         renderMode,
         playerKey = null,
         authPlayerKey = null,
@@ -1296,6 +1304,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen,
         format,
         rules,
+        turn,
 
         renderMode,
 
