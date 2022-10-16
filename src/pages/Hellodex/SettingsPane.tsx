@@ -411,14 +411,6 @@ export const SettingsPane = ({
                 </div>
               </div>
 
-              <div className={styles.notice}>
-                plz excuse the mess, this is a work in progress
-                <br />
-                <span className={styles.face}>
-                  (｡◕‿◕｡)
-                </span>
-              </div>
-
               <div className={styles.settingsGroup}>
                 <div className={styles.settingsGroupTitle}>
                   Showdex
@@ -1314,7 +1306,41 @@ export const SettingsPane = ({
                     format={(value) => (!values.calcdex?.showMatchupTooltip ? 'never' : value)}
                     disabled={!values.calcdex?.showMatchupTooltip}
                   />
+
+                  <Field<ShowdexSettings['calcdex']['formatMatchupDamageAmounts']>
+                    name="calcdex.formatMatchupDamageAmounts"
+                    component={Switch}
+                    className={styles.field}
+                    label="Percentify Damage Amounts"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Combines the list of damage amounts into unique amounts with percentages.
+                        <br />
+                        <br />
+                        If there are more than 5 unique damage amounts, no percentages will be shown
+                        to avoid lengthy lists.
+                      </div>
+                    )}
+                    format={(value) => (
+                      !values.calcdex?.showMatchupTooltip
+                        || values.calcdex?.showMatchupDamageAmounts === 'never'
+                        ? false
+                        : value
+                    )}
+                    disabled={(
+                      !values.calcdex?.showMatchupTooltip
+                        || values.calcdex?.showMatchupDamageAmounts === 'never'
+                    )}
+                  />
                 </div>
+              </div>
+
+              <div className={styles.notice}>
+                plz excuse the mess, this is a work in progress
+                <br />
+                <span className={styles.face}>
+                  (｡◕‿◕｡)
+                </span>
               </div>
             </form>
           )}
