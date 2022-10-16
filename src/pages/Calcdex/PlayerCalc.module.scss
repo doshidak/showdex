@@ -146,11 +146,11 @@ button.usernameButton {
 
   .active & {
     .light & {
-      background-color: color.alpha(color.shade(colors.$blue, 15%), 0.15);
+      background-color: color.alpha(color.shade(colors.$blue, 15%), 0.25);
     }
 
     .dark & {
-      background-color: color.alpha(colors.$blue, 0.15);
+      background-color: color.alpha(colors.$blue, 0.25);
     }
   }
 
