@@ -1172,6 +1172,21 @@ export const SettingsPane = ({
                     Tooltips
                   </div>
 
+                  <Field<ShowdexSettings['calcdex']['showUiTooltips']>
+                    name="calcdex.showUiTooltips"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show UI Help Tooltips"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows explainer tooltips for buttons in the UI when hovered over.
+                        <br />
+                        <br />
+                        Disable this if you're a Calcdex pro and know what everything does already.
+                      </div>
+                    )}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
                     name="calcdex.showFieldTooltips"
                     component={Switch}
