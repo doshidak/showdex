@@ -370,6 +370,14 @@ export interface ShowdexCalcdexSettings {
   defaultShowGenetics: Record<'auth' | CalcdexPlayerKey, boolean>;
 
   /**
+   * Whether to show UI tooltips.
+   *
+   * @default true
+   * @since 1.0.4
+   */
+  showUiTooltips: boolean;
+
+  /**
    * Whether to show the ability tooltip.
    *
    * @default true

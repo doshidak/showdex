@@ -122,6 +122,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
+      showUiTooltips: true,
       showAbilityTooltip: true,
       showItemTooltip: true,
       showMoveTooltip: true,
