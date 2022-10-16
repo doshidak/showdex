@@ -22,21 +22,22 @@ export const PokeMoveOptionTooltip = ({
   style,
   format,
   pokemon,
-  value,
+  label,
   hidden,
 }: PokeMoveOptionTooltipProps): JSX.Element => {
-  if (!value || hidden) {
+  // using label here instead of value since the move can turn into a Z or Max move
+  if (!label || hidden) {
     return null;
   }
 
   const dex = getDexForFormat(format);
-  const dexMove = dex?.moves.get(value);
+  const dexMove = dex?.moves.get(label);
 
   if (!dexMove?.type) {
     return null;
   }
 
-  const basePower = formatId(value).includes('hiddenpower')
+  const basePower = formatId(label).includes('hiddenpower')
     ? calcHiddenPower(format, pokemon)
     : dexMove?.basePower || 0;
 
