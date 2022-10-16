@@ -23,7 +23,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   authName,
   playerName,
   opponentName: opponentNameFromProps,
-  hoverScale = 1.01,
+  hoverScale = 1,
   activeScale = 0.98,
   active,
   disabled,
