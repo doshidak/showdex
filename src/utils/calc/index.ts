@@ -11,6 +11,7 @@ export * from './convertLegacyStats';
 export * from './createSmogonField';
 export * from './createSmogonMove';
 export * from './createSmogonPokemon';
+export * from './formatDamageAmounts';
 export * from './formatDamageRange';
 export * from './formatKoChance';
 export * from './getKoColor';
