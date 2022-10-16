@@ -128,6 +128,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       showMatchupTooltip: true,
       prettifyMatchupDescription: true,
       showMatchupDamageAmounts: 'nfe',
+      formatMatchupDamageAmounts: true,
       copyMatchupDescription: true,
       showFieldTooltips: true,
 

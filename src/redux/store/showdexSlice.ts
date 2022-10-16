@@ -412,7 +412,7 @@ export interface ShowdexCalcdexSettings {
   prettifyMatchupDescription: boolean;
 
   /**
-   * Whether to show possible damage amounts in the matchup tooltip.
+   * When to show possible damage amounts in the matchup tooltip.
    *
    * * Has no effect if `showMatchupTooltip` is `false`.
    * * `'nfe'` will only show the possible damage amounts against Pokemon who are NFE (Not Fully Evolved).
@@ -421,6 +421,20 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.3
    */
   showMatchupDamageAmounts: 'always' | 'nfe' | 'never';
+
+  /**
+   * Whether to format the damage amounts as percentages.
+   *
+   * * Percentages should only be shown if there are 5 or less unique damage amounts.
+   *   - Otherwise, each amount would have some small percentage, making it really dense to quickly read!
+   *   - Why 5? Completely arbitrary, but probably a safe bet to distinguish those of many repeats from uniques.
+   *   - (If you find that exact number to be a bad idea, don't forget to update `formatDamageAmounts()`!)
+   * * Has no effect if `showMatchupDamageAmounts` is `'never'`.
+   *
+   * @default true
+   * @since 1.0.4
+   */
+  formatMatchupDamageAmounts: boolean;
 
   /**
    * Whether to allow the matchup result description to be copied to the clipboard when clicked.
