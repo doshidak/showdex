@@ -10,6 +10,7 @@ import {
 } from '@showdex/components/ui';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions } from '@showdex/utils/battle';
+import { formatDamageAmounts } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
@@ -296,7 +297,12 @@ export const PokeMoves = ({
               showDamageAmounts &&
               <>
                 <br />
-                ({description.damageAmounts})
+                <br />
+                {settings?.formatMatchupDamageAmounts ? (
+                  <>({formatDamageAmounts(description.damageAmounts)})</>
+                ) : (
+                  <>({description.damageAmounts})</>
+                )}
               </>
             }
           </div>
