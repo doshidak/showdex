@@ -146,8 +146,8 @@ $notice-dark-color: color.alpha(colors.$white, 0.5);
 
 $group-padding-x: 1px;
 
-$group-heading-padding-x: $option-padding-x + 1px;
-$group-heading-padding-y: $option-padding-y + 1px;
+$group-heading-padding-x: $option-padding-x + 2px;
+$group-heading-padding-y: $option-padding-y + 2px;
 $group-heading-font-weight: 500;
 $group-heading-font-size: 8px;
 $group-heading-light-color: color.alpha(colors.$black, 0.85);
@@ -380,7 +380,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   display: block;
   @include spacing.margin-xy($x: -1px);
   @include spacing.padding-xy($x: $group-heading-padding-x, $y: $group-heading-padding-y);
-  font-weight: $group-heading-font-weight;
+  @include font.apply(fonts.$primary, ( font-weight: $group-heading-font-weight ));
   font-size: $group-heading-font-size;
   text-transform: uppercase;
   user-select: none;
