@@ -76,7 +76,7 @@ export const useCalcdex = ({
     }
 
     l.debug(
-      'Received battle update; determining sync changes...',
+      'Effect spawned reacting to a battle or battleState mutation!',
       '\n', 'battle.id', battle.id,
       '\n', 'nonce', '(prev)', battleState?.battleNonce, '(now)', battle.nonce,
       '\n', 'battle.p1.pokemon', battle.p1?.pokemon,
@@ -136,6 +136,7 @@ export const useCalcdex = ({
         battleNonce: battle.nonce,
         gen: battle.gen as GenerationNum,
         format: battle.id.split('-')?.[1],
+        turn: battle.turn || 0,
         active: !battle.ended,
         renderMode: renderAsOverlay ? 'overlay' : 'panel',
         p1: { name: battle.p1?.name, rating: battle.p1?.rating },
@@ -180,6 +181,7 @@ export const useCalcdex = ({
       gen: null,
       format: null,
       rules: null,
+      turn: 0,
       playerKey: 'p1',
       authPlayerKey: null,
       opponentKey: 'p2',
