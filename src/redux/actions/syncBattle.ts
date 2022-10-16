@@ -53,6 +53,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       id: battleId,
       nonce: battleNonce,
       gen,
+      turn,
       ended,
       myPokemon,
       speciesClause,
@@ -94,12 +95,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.gen = <GenerationNum> gen;
     }
 
-    // detect the battle rules
+    // detect the battle's rules
     if (stepQueue?.length) {
       battleState.rules = detectBattleRules(stepQueue);
     }
 
-    // update the battle active state
+    // update the current turn number
+    battleState.turn = turn || 0;
+
+    // update the battle's active state
     battleState.active = !ended;
 
     // find out which side myPokemon belongs to
