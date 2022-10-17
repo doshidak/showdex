@@ -365,6 +365,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           serverPokemon,
           battleState.format,
           settings?.showAllFormes,
+          (!isMyPokemonSide || !hasMyPokemon)
+            && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey ? 'auth' : playerKey],
         );
 
         if (request?.requestType === 'move' && request.side?.id === playerKey) {
