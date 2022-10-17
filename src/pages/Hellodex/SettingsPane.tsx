@@ -1004,21 +1004,13 @@ export const SettingsPane = ({
                     component={Switch}
                     className={styles.field}
                     label="Auto-Fill Revealed Moves"
-                    // tooltip={(
-                    //   <div className={styles.tooltipContent}>
-                    //     Selects revealed moves of your opponent's
-                    //     (or spectating players') Pok&eacute;mon,
-                    //     if not already selected from the applied set.
-                    //   </div>
-                    // )}
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        <em>This is a planned feature.</em>
-                        <br />
-                        <em>Stay tuned!</em>
+                        Selects revealed moves of your opponent's
+                        (or spectating players') Pok&eacute;mon,
+                        if not already selected from the applied set.
                       </div>
                     )}
-                    readOnly
                     parse={(value) => ({
                       auth: false,
                       p1: value,
@@ -1026,8 +1018,7 @@ export const SettingsPane = ({
                       p3: value,
                       p4: value,
                     })}
-                    // format={(value) => Object.values(value || {}).some((v) => !!v)}
-                    format={() => false}
+                    format={(value) => Object.values(value || {}).some((v) => !!v)}
                   />
 
                   <Field<ShowdexSettings['calcdex']['showNonDamageRanges']>
