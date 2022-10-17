@@ -330,7 +330,6 @@ export interface ShowdexCalcdexSettings {
    *   - Will override the side's setting that `auth` pertains to with the value of `auth`.
    * * Though `p3` and `p4` are defined, they currently aren't being used.
    *
-   * @deprecated As of v1.0.3, this currently does nothing.
    * @default
    * ```ts
    * {
