@@ -19,6 +19,7 @@ import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 // import { detectToggledAbility } from './detectToggledAbility';
 import { getDexForFormat } from './getDexForFormat';
+import { mergeRevealedMoves } from './mergeRevealedMoves';
 import { sanitizePokemon } from './sanitizePokemon';
 import { sanitizeMoveTrack } from './sanitizeMoveTrack';
 import { sanitizeVolatiles } from './sanitizeVolatiles';
@@ -31,6 +32,7 @@ export const syncPokemon = (
   serverPokemon?: DeepPartial<Showdown.ServerPokemon>,
   format?: string,
   showAllFormes?: boolean,
+  autoMoves?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(format);
@@ -207,6 +209,10 @@ export const syncPokemon = (
 
         if (revealedMoves.length) {
           syncedPokemon.revealedMoves = revealedMoves;
+        }
+
+        if (autoMoves) {
+          syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
         }
 
         break;
