@@ -28,6 +28,7 @@ import {
   // getDexForFormat,
   // hasMegaForme,
   hasNickname,
+  mergeRevealedMoves,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
@@ -133,6 +134,12 @@ export const PokeInfo = ({
     if (preset.altMoves?.length) {
       mutation.altMoves = [...preset.altMoves];
     }
+
+    // check if we already have revealed moves (typical of spectating or replaying a battle)
+    mutation.moves = mergeRevealedMoves({
+      ...pokemon,
+      moves: mutation.moves,
+    });
 
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
