@@ -113,6 +113,15 @@ export const syncPokemon = (
         break;
       }
 
+      case 'status': {
+        // remove the Pokemon's status if fainted
+        if (!syncedPokemon.hp) {
+          value = null;
+        }
+
+        break;
+      }
+
       case 'ability': {
         if (!value || /^\([\w\s]+\)$/.test(<string> value) || formatId(<string> value) === 'noability') {
           return;

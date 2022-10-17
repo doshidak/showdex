@@ -75,7 +75,7 @@ export const sanitizePokemon = (
     maxhp: pokemon?.maxhp || 1,
     fainted: pokemon?.fainted ?? !pokemon?.hp,
 
-    status: pokemon?.status,
+    status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
     turnstatuses: pokemon?.turnstatuses,
     toxicCounter: pokemon?.statusData?.toxicTurns,
 
