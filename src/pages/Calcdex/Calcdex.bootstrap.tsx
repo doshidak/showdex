@@ -504,13 +504,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       }
 
       // retrieve any previously tagged Pokemon in the state if we don't have any candidates atm
-      if (!pokemonSearchCandidates.length) {
-        const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id];
-        const pokemonState = battleState?.[playerKey]?.pokemon || [];
+      const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id];
+      const pokemonState = battleState?.[playerKey]?.pokemon || [];
 
-        if (pokemonState.length) {
-          pokemonSearchCandidates.push(...pokemonState);
-        }
+      if (pokemonState.length) {
+        pokemonSearchCandidates.push(...pokemonState);
       }
 
       // don't filter this in case `replaceSlot` is specified
