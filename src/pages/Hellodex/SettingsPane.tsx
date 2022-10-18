@@ -1070,6 +1070,7 @@ export const SettingsPane = ({
                           spellCheck={false}
                           maxLength={10}
                           // monospace={false}
+                          parse={(value) => value?.replace(/[^A-Z 0-9]/i, '')}
                         />
                       ))}
                     </div>
@@ -1094,7 +1095,7 @@ export const SettingsPane = ({
                     >
                       {Array(inBattle ? 3 : 5).fill(null).map((_, i) => (
                         <Field<ShowdexSettings['calcdex']['nhkoColors'][typeof i]>
-                          key={`SettingsPane:Field:TextField:nhkoLabel:${i}`}
+                          key={`SettingsPane:Field:TextField:nhkoColor:${i}`}
                           name={`calcdex.nhkoColors[${i}]`}
                           component={TextField}
                           className={cx(
@@ -1128,7 +1129,7 @@ export const SettingsPane = ({
                       <div className={cx(styles.customFieldRow, styles.centered)}>
                         {Array(2).fill(null).map((_, i) => (
                           <Field<ShowdexSettings['calcdex']['nhkoColors'][typeof i]>
-                            key={`SettingsPane:Field:TextField:nhkoLabel:${i + 3}`}
+                            key={`SettingsPane:Field:TextField:nhkoColor:${i + 3}`}
                             name={`calcdex.nhkoColors[${i + 3}]`}
                             component={TextField}
                             className={cx(
