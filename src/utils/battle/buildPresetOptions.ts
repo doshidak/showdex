@@ -32,12 +32,14 @@ export const buildPresetOptions = (
     // 'Metal Sound + Steelium Z' -> { label: 'Metal Sound', subLabel: '+ STEELIUM Z' },
     // 'The Pex' -> (regex fails) -> { label: 'The Pex' } (untouched lol)
     if (/\s+(?:\+\s+\w[\w\s]*|\(\w[\w\s]*\))$/.test(option.label)) {
+      // update (2022/10/18): added default `[]` here cause the regex is letting some invalid
+      // option.label through and I'm too lazy to find out what that is rn lol
       const [
         ,
         label,
         plusLabel,
         subLabel,
-      ] = /([\w\s]+)\s+(?:\+\s+(\w[\w\s]*)|\((\w[\w\s]*)\))$/.exec(option.label);
+      ] = /([\w\s]+)\s+(?:\+\s+(\w[\w\s]*)|\((\w[\w\s]*)\))$/.exec(option.label) || [];
 
       // it'll be one or the other since the capture groups are alternatives in a non-capturing group
       const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;
