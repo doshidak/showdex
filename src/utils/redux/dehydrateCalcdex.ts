@@ -1,3 +1,4 @@
+import base64 from 'base-64';
 import { env } from '@showdex/utils/core';
 import type { CalcdexBattleState } from '@showdex/redux/store';
 import {
@@ -51,7 +52,7 @@ import {
  * ```
  * {name}|
  * {rating}|
- * {activeIndex}|
+ * {activeIndices[0]}[/{activeIndices[1]}...]|
  * {selectionIndex}|
  * {autoSelect}|
  * {pokemon}[|{pokemon}...]
@@ -110,8 +111,10 @@ import {
  * b:1664325002779;
  * t:chrome;
  * e:d;
+ * s:VHlwZUVycm9yOiBDYW5ub3QgcmVhZCBwcm9wZXJ0aWVzIG9mIHVuZGVmaW5lZCAocmVhZGluZyAnZGVlek51dHMnKQ==;
  * g:8;
- * fm:gen8nationaldexag;
+ * m:gen8nationaldexag;
+ * n:1;
  * p:p1/p1/p2;
  * p1:sumfuk|?|0|0|y
  *   |0/s,Runerigus,Runerigus>?,F,100,n,Ground/Ghost,320/320/n,?/0/0/0,y,?/Wandering Spirit~?/n/n,Leftovers~?/?/?/?,Impish,58/95>?/145>?/50>?/105>?/30>?,31/31/31/31/31/31,252/0/252/0/4/0,320/226/427/122/247/96,0~?/0~?/0~?/0~?/0~?,320/226/427/122/247/96,Stealth Rock/Earthquake/Will-O-Wisp/Toxic Spikes,n/n/Stealth Rock/Earthquake/Will-O-Wisp/Toxic Spikes,Will-O-Wisp+1,
@@ -127,20 +130,24 @@ import {
  *   |3/c,Gengar,Gengar>?,M,100,n,Ghost/Poison,1000/1000/n,?/0/0/0,y,?/?~Cursed Body/n/n,?~Gengarite/?/?/?,Timid,60/65>?/60>?/130>?/75>?/110>?,31/31/31/31/31/31,248/0/0/0/8/252,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,323/149/156/296/188/350,,n/n/Perish Song/Encore/Substitute/Destiny Bond,,
  *   |4/c,Melmetal,Melmetal>?,N,100,n,Steel,1000/1000/n,?/0/0/0,y,?/?~Iron Fist/n/n,?~Protective Pads/?/?/?,Adamant,135/143>?/143>?/80>?/65>?/34>?,31/31/31/31/31/31,40/252/0/0/104/112,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,421/423/322/176/192/132,,n/n/Double Iron Bash/Superpower/Thunder Punch/Thunder Wave,,
  *   |5/c,Venusaur,Venusaur>?,F,100,n,Grass/Poison,1000/1000/n,?/0/0/0,y,?/?~Chlorophyll/n/n,?~Life Orb/?/?/?,Modest,80/82>?/83>?/100>?/100>?/80>?,31/31/31/31/31/31,0/0/0/252/4/252,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,301/180/202/328/237/259,,n/n/Growth/Giga Drain/Weather Ball/Sludge Bomb,,;
- * fd:s|Harsh Sunshine|Electric
+ * f:s|Harsh Sunshine|Electric
  *   |isReflect=y/isLightScreen=y
  *   |isAuroraVeil=y
  * `
  * ```
  * @since 1.0.3
  */
-export const dehydrateCalcdex = (state: CalcdexBattleState): string => {
+export const dehydrateCalcdex = (
+  state: CalcdexBattleState,
+  error?: Error,
+): string => {
   if (!state?.format) {
     return null;
   }
 
   const {
     gen,
+    turn,
     format,
     authPlayerKey,
     playerKey,
@@ -155,13 +162,15 @@ export const dehydrateCalcdex = (state: CalcdexBattleState): string => {
     `b:${env('build-date', '?')}`,
     `t:${env('build-target', '?')}`,
     `e:${__DEV__ ? 'd' : 'p'}`,
+    `s:${error?.message ? base64.encode(error.message) : '?'}`,
     `g:${dehydrateValue(gen)}`,
-    `fm:${dehydrateValue(format)}`,
+    `m:${dehydrateValue(format)}`,
     'p:' + dehydrateArray([
       authPlayerKey,
       playerKey,
       opponentKey,
     ]),
+    `n:${dehydrateValue(turn)}`,
   ];
 
   for (const player of [p1, p2]) {
@@ -173,7 +182,8 @@ export const dehydrateCalcdex = (state: CalcdexBattleState): string => {
       sideid,
       name: playerName,
       rating,
-      activeIndex = -1,
+      // activeIndex = -1,
+      activeIndices,
       selectionIndex = -1,
       autoSelect,
       pokemon: playerPokemon = [],
@@ -182,7 +192,8 @@ export const dehydrateCalcdex = (state: CalcdexBattleState): string => {
     const playerOutput: string[] = [
       dehydrateValue(playerName),
       dehydrateValue(rating),
-      typeof activeIndex === 'number' ? String(activeIndex) : '-1',
+      // typeof activeIndex === 'number' ? String(activeIndex) : '-1',
+      dehydrateArray(activeIndices),
       typeof selectionIndex === 'number' ? String(selectionIndex) : '-1',
       dehydrateBoolean(autoSelect),
     ];
@@ -308,7 +319,7 @@ export const dehydrateCalcdex = (state: CalcdexBattleState): string => {
     dehydrateFieldSide(defenderSide),
   ];
 
-  output.push(`fd:${fieldOutput.join('|')}`);
+  output.push(`f:${fieldOutput.join('|')}`);
 
   return output.filter(Boolean).join(';');
 };

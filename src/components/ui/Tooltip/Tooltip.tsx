@@ -38,7 +38,7 @@ export interface TooltipProps extends Omit<TooltipTippyProps, 'trigger'> {
 
 const springConfig = {
   mass: 1,
-  tension: 250,
+  tension: 300,
   friction: 27,
 };
 

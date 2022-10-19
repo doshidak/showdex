@@ -8,7 +8,7 @@ import {
   PokemonNatureBoosts,
   PokemonStatNames,
 } from '@showdex/consts/pokemon';
-import { useColorScheme } from '@showdex/redux/store';
+import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import {
   detectLegacyGen,
   detectStatBoostDelta,
@@ -45,6 +45,7 @@ export const PokeStats = ({
   playerKey,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
+  const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const legacy = detectLegacyGen(gen);
@@ -99,6 +100,7 @@ export const PokeStats = ({
               {legacy ? 'DVs' : 'EVs/IVs'}
             </div>
           )}
+          tooltipDisabled={!settings?.showUiTooltips}
           primary
           disabled={!pokemon?.speciesForme || missingIvs || missingEvs}
           onPress={() => onPokemonChange?.({
@@ -237,7 +239,7 @@ export const PokeStats = ({
                   <>
                     There are no EVs set!
                   </>
-                ) : totalEvs < maxLegalEvs ? (
+                ) : (!format?.includes('random') && totalEvs < maxLegalEvs) ? (
                   <>
                     You have{' '}
                     <strong>{pluralize(maxLegalEvs - totalEvs, 'unallocated EV:s')}</strong>.
@@ -256,14 +258,14 @@ export const PokeStats = ({
             delay={[1000, 50]}
             trigger="mouseenter"
             touch="hold"
-            disabled={!missingEvs && totalEvs === maxLegalEvs && evsLegal}
+            disabled={!missingEvs && (format?.includes('random') || totalEvs === maxLegalEvs) && evsLegal}
           >
             <TableGridItem
               className={cx(
                 styles.header,
                 styles.evsHeader,
                 missingEvs && styles.missingSpread,
-                totalEvs < maxLegalEvs && styles.unallocated,
+                (!format?.includes('random') && totalEvs < maxLegalEvs) && styles.unallocated,
                 !evsLegal && styles.illegal,
               )}
               align="right"
@@ -362,6 +364,7 @@ export const PokeStats = ({
             <Button
               labelClassName={styles.boostModButtonLabel}
               label="-"
+              hoverScale={1}
               disabled={!pokemon?.speciesForme || boost <= -6}
               onPress={() => onPokemonChange?.({
                 dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
@@ -377,6 +380,7 @@ export const PokeStats = ({
               labelClassName={styles.boostButtonLabel}
               label={`${boost > 0 ? '+' : ''}${boost}`}
               highlight={didDirtyBoost}
+              hoverScale={1}
               absoluteHover
               disabled={!pokemon?.speciesForme || !didDirtyBoost}
               onPress={() => onPokemonChange?.({
@@ -389,6 +393,7 @@ export const PokeStats = ({
             <Button
               labelClassName={styles.boostModButtonLabel}
               label="+"
+              hoverScale={1}
               disabled={!pokemon?.speciesForme || boost >= 6}
               onPress={() => onPokemonChange?.({
                 dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },

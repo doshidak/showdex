@@ -99,6 +99,7 @@ const calcSideCalcdexNonce = (
  */
 export const calcBattleCalcdexNonce = (
   battle: Partial<Showdown.Battle>,
+  request?: Partial<Showdown.BattleRequest>,
 ): string => {
   // inactive timeout messages may interfere with the activeIndex currently set by the user
   // excludes steps: '|inactive|', '|inactiveoff|', '|-message|' '|c|' (chat), '|j|' (join), and '|l|' (leave)
@@ -106,7 +107,7 @@ export const calcBattleCalcdexNonce = (
     ?.filter?.((q) => !!q && !/^\|(?:inactive|-message|c|j|l|player)/i.test(q))
     ?? [];
 
-  return calcCalcdexId<Partial<Record<keyof Showdown.Battle, string>>>({
+  return calcCalcdexId<Partial<Record<(keyof Showdown.Battle) | (keyof Showdown.BattleRequest), string>>>({
     id: battle?.id,
     gen: battle?.gen?.toString(),
     tier: battle?.tier,
@@ -125,5 +126,11 @@ export const calcBattleCalcdexNonce = (
     stepQueue: stepQueue.length
       ? uuidv5(stepQueue.join('|'), env('uuid-namespace', NIL_UUID))
       : null,
+    rqid: request?.rqid?.toString(),
+    requestType: request?.requestType,
+    side: [
+      request?.side?.id,
+      (<Showdown.BattleMoveRequest> request)?.active?.map((a) => a?.maxMoves?.gigantamax)?.join('|'),
+    ].filter(Boolean).join(': '),
   });
 };

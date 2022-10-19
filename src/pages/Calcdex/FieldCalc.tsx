@@ -15,6 +15,7 @@ import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { getDexForFormat } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
+import type { Weather } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
 import styles from './FieldCalc.module.scss';
@@ -159,9 +160,13 @@ export const FieldCalc = ({
 
       {/* p1 screens */}
       <TableGridItem align="left">
-        {Object.entries(PlayerSideScreensMap).map(([label, sideKey], i) => {
+        {Object.entries(PlayerSideScreensMap).map(([
+          label,
+          sideKey,
+        ], i) => {
           // e.g., 'isAuroraVeil' -> 'AuroraVeil' -> formatId() -> 'auroraveil'
           const screenMoveId = formatId(sideKey.replace('is', ''));
+
           const dexScreenMove = screenMoveId && settings?.showFieldTooltips
             ? dex.moves.get(screenMoveId)
             : null;
@@ -169,7 +174,9 @@ export const FieldCalc = ({
           const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
 
           return (
-            <React.Fragment key={`FieldCalc:${battleId || '???'}:${attackerSideKey}:${label}:ToggleButton`}>
+            <React.Fragment
+              key={`FieldCalc:${battleId || '???'}:${attackerSideKey}:${label}:ToggleButton`}
+            >
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}
@@ -218,9 +225,8 @@ export const FieldCalc = ({
           options={(gen > 5 ? WeatherNames : [
             ...LegacyWeatherNames,
             gen > 2 && WeatherMap.hail,
-          ].filter(Boolean).sort()).map((name) => ({
-            /** @todo gross */
-            label: name === 'Harsh Sunshine' ? 'Intense Sun' : name,
+          ].filter(Boolean)).map((name: Weather) => ({
+            label: WeatherDescriptions[name]?.label || name,
             value: name,
           }))}
           noOptionsMessage="No Weather"
@@ -259,8 +265,12 @@ export const FieldCalc = ({
 
       {/* opponent's screens */}
       <TableGridItem align="right">
-        {Object.entries(PlayerSideScreensMap).map(([label, sideKey], i) => {
+        {Object.entries(PlayerSideScreensMap).map(([
+          label,
+          sideKey,
+        ], i) => {
           const screenMoveId = formatId(sideKey.replace('is', ''));
+
           const dexScreenMove = screenMoveId && settings?.showFieldTooltips
             ? dex.moves.get(screenMoveId)
             : null;
@@ -268,7 +278,9 @@ export const FieldCalc = ({
           const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
 
           return (
-            <React.Fragment key={`FieldCalc:${battleId || '???'}:${defenderSideKey}:${label}:ToggleButton`}>
+            <React.Fragment
+              key={`FieldCalc:${battleId || '???'}:${defenderSideKey}:${label}:ToggleButton`}
+            >
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}

@@ -180,6 +180,13 @@ const copyPatterns = [{
         parsed.web_accessible_resources[0].matches = [...matches];
         parsed.externally_connectable.matches = [...matches];
 
+        // add source maps to web_accessible_resources
+        parsed.web_accessible_resources[0].resources.unshift(
+          'background.js.map',
+          'content.js.map',
+          'main.js.map',
+        );
+
         // no permissions are needed on Chrome
         parsed.permissions = [];
 
@@ -214,7 +221,12 @@ const copyPatterns = [{
         // format web_accessible_resources in MV2's format
         const { resources = [] } = web_accessible_resources[0];
 
-        parsed.web_accessible_resources = [...resources];
+        // note: background.js.map isn't here since background.js isn't used on Firefox
+        parsed.web_accessible_resources = [
+          'content.js.map',
+          'main.js.map',
+          ...resources,
+        ];
 
         break;
       }

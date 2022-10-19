@@ -28,7 +28,7 @@ export const createSideRoom = (
   id: string,
   title: string,
   options?: SideRoomOptions,
-): HtmlRoom => {
+): Showdown.HtmlRoom => {
   if (typeof app?._addRoom !== 'function') {
     l.error(
       'Cannot make side room since app._addRoom() is currently unavailable',
@@ -43,15 +43,15 @@ export const createSideRoom = (
     focus,
   } = options || {};
 
-  let room: HtmlRoom;
+  let room: Showdown.HtmlRoom;
 
   if (id in app.rooms) {
-    room = <HtmlRoom> app.rooms[id];
+    room = <Showdown.HtmlRoom> app.rooms[id];
 
     l.debug('Found existing side room with matching room.id', id);
   } else {
     // create a new side room
-    room = app._addRoom<HtmlRoom>(id, 'html', true, title);
+    room = app._addRoom<Showdown.HtmlRoom>(id, 'html', true, title);
     room.isSideRoom = true;
 
     // remove the initial "Page unavailable" HTML

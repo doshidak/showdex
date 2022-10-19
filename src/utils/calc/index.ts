@@ -1,6 +1,7 @@
 export * from './alwaysCriticalHits';
 export * from './calcCalcdexId';
 export * from './calcCalcdexNonce';
+export * from './calcHiddenPower';
 export * from './calcPokemonFinalStats';
 export * from './calcPokemonHp';
 export * from './calcPokemonSpreadStats';
@@ -10,6 +11,7 @@ export * from './convertLegacyStats';
 export * from './createSmogonField';
 export * from './createSmogonMove';
 export * from './createSmogonPokemon';
+export * from './formatDamageAmounts';
 export * from './formatDamageRange';
 export * from './formatKoChance';
 export * from './getKoColor';

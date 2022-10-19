@@ -75,7 +75,8 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       openOnStart: 'always',
       openAs: 'showdown',
       // forcedOpenAs: 'showdown',
-      closeOnEnd: false,
+      // closeOnEnd: false,
+      closeOn: 'battle-tab',
       destroyOnClose: true,
       preserveRenderStates: true,
 
@@ -121,12 +122,14 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
+      showUiTooltips: true,
       showAbilityTooltip: true,
       showItemTooltip: true,
       showMoveTooltip: true,
       showMatchupTooltip: true,
       prettifyMatchupDescription: true,
       showMatchupDamageAmounts: 'nfe',
+      formatMatchupDamageAmounts: true,
       copyMatchupDescription: true,
       showFieldTooltips: true,
 
@@ -238,7 +241,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
 
           // thanks TypeScript!
           // (without this declaration, you'll get a type <type> is not assignable to type 'never' error lmfao)
-          const calcdexSettings: Record<typeof hydratedCalcdexKey, ShowdexCalcdexSettings[typeof hydratedCalcdexKey]> = settings.calcdex;
+          const calcdexSettings: Partial<Record<typeof hydratedCalcdexKey, ShowdexCalcdexSettings[typeof hydratedCalcdexKey]>> = settings.calcdex;
 
           // currently, there are no number values in ShowdexCalcdexSettings
           calcdexSettings[hydratedCalcdexKey] = [

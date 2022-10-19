@@ -109,6 +109,10 @@ div.container {
   flex: 1;
   max-width: calc(100% - 26px - 10px);
   @include spacing.margin($left: 10px);
+
+  strong {
+    font-weight: 500;
+  }
 }
 
 .format {

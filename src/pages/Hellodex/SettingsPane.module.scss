@@ -167,7 +167,8 @@ $close-icon-size: 28px;
 }
 
 .notice {
-  @include spacing.padding-all(10px);
+  // @include spacing.padding-all(10px);
+  @include spacing.padding($top: 10px, $right: 10px, $left: 10px);
   font-size: 12px;
   text-align: center;
   opacity: 0.6;

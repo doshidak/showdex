@@ -6,42 +6,6 @@ import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPokemonStat } from './calcPokemonStat';
 
-/**
- * Internally-used list of IVs to use for each guess attempt, in the order of the array.
- *
- * * More IVs you add, the higher chance for a Chinese spread.
- *   - Though, if a spread was found, the stats will be correct no matter how Chinese they seem.
- *
- * @since 1.0.3
- */
-const AttemptedIvs = [
-  31,
-  30,
-  29,
-  28,
-  27,
-  26,
-  25,
-  24,
-  23,
-  22,
-  21,
-  20,
-  19,
-  18,
-  17,
-  16,
-  15,
-  10,
-  8,
-  6,
-  5,
-  3,
-  2,
-  1,
-  0,
-];
-
 const l = logger('@showdex/utils/calc/guessServerSpread');
 
 /**
@@ -177,7 +141,7 @@ export const guessServerSpread = (
       }
 
       // don't say I didn't warn ya!
-      for (const iv of AttemptedIvs) { // try some IVs, but hopefully not all
+      for (let iv = 31; iv >= 0; iv--) { // update (2022/10/18): fuck it we're trying them all
         for (let ev = 0; ev <= 252; ev += 4) { // try 252 to 0 in multiples of 4
           calculatedStats[stat] = calcPokemonStat(
             gen,
@@ -240,13 +204,13 @@ export const guessServerSpread = (
     const evsLegal = totalEvs <= maxLegalEvs;
 
     if (statsMatch && evsLegal) {
-      l.debug(
-        'Found nature that matches all of the stats for Pokemon', pokemon.ident || pokemon.speciesForme,
-        '\n', 'nature', natureName,
-        '\n', 'calculatedStats', calculatedStats,
-        '\n', 'serverStats', serverStats,
-        '\n', 'pokemon', pokemon,
-      );
+      // l.debug(
+      //   'Found nature that matches all of the stats for Pokemon', pokemon.ident || pokemon.speciesForme,
+      //   '\n', 'nature', natureName,
+      //   '\n', 'calculatedStats', calculatedStats,
+      //   '\n', 'serverStats', serverStats,
+      //   '\n', 'pokemon', pokemon,
+      // );
 
       guessedSpread.nature = natureName;
 
@@ -271,14 +235,16 @@ export const guessServerSpread = (
       '\n', 'pokemon', pokemon,
       '\n', 'logs', logs,
     );
-  } else {
-    l.debug(
-      'Returning the best guess of the spread for Pokemon', pokemon.ident || pokemon.speciesForme,
-      '\n', 'guessedSpread', guessedSpread,
-      '\n', 'serverStats', serverStats,
-      '\n', 'pokemon', pokemon,
-    );
   }
+
+  // } else {
+  //   l.debug(
+  //     'Returning the best guess of the spread for Pokemon', pokemon.ident || pokemon.speciesForme,
+  //     '\n', 'guessedSpread', guessedSpread,
+  //     '\n', 'serverStats', serverStats,
+  //     '\n', 'pokemon', pokemon,
+  //   );
+  // }
 
   return guessedSpread;
 };

@@ -27,6 +27,7 @@ export * from './getTypesDex';
 export * from './hasMegaForme';
 export * from './hasNickname';
 export * from './legalLockedFormat';
+export * from './mergeRevealedMoves';
 export * from './notFullyEvolved';
 export * from './sanitizeField';
 export * from './sanitizeMoveTrack';

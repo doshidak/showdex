@@ -28,6 +28,7 @@ import {
   // getDexForFormat,
   // hasMegaForme,
   hasNickname,
+  mergeRevealedMoves,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
@@ -134,11 +135,22 @@ export const PokeInfo = ({
       mutation.altMoves = [...preset.altMoves];
     }
 
+    // check if we already have revealed moves (typical of spectating or replaying a battle)
+    mutation.moves = mergeRevealedMoves({
+      ...pokemon,
+      moves: mutation.moves,
+    });
+
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
     // update (2022/10/06): nvm on the setting the actual ability/item cause it's screwy when switching formes,
     // so opting to use their dirty counterparts instead lol
     if (preset.format?.includes('random')) {
+      // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
+      if (preset.speciesForme.endsWith('-Gmax')) {
+        mutation.speciesForme = preset.speciesForme;
+      }
+
       if (!clearDirtyAbility && mutation.altAbilities?.length === 1) {
         [mutation.dirtyAbility] = flattenAlts(mutation.altAbilities);
         // mutation.dirtyAbility = null;
@@ -454,11 +466,11 @@ export const PokeInfo = ({
   const nextFormeTooltip = nextForme ? (
     <div className={styles.tooltipContent}>
       <div>
-        <strong>{pokemon.speciesForme}</strong>
-      </div>
-      <div>
         Switch to{' '}
         <em>{nextForme}</em>
+      </div>
+      <div>
+        <strong>{pokemon.speciesForme}</strong>
       </div>
     </div>
   ) : null;
@@ -523,10 +535,16 @@ export const PokeInfo = ({
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
               ...pokemon,
-              speciesForme: pokemon?.transformedForme || pokemon?.speciesForme,
+              speciesForme: (
+                pokemon?.transformedForme
+                  || pokemon?.speciesForme
+              )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
               item: itemName,
             }}
             tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
+            tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
+            tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
+            shadow
             disabled={settings?.reverseIconName ? !nextForme : !pokemon?.speciesForme}
             onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
           />
@@ -544,6 +562,8 @@ export const PokeInfo = ({
               labelClassName={styles.nameLabel}
               label={nickname || pokemon?.speciesForme || 'MissingNo.'}
               tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
+              tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
+              tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
               hoverScale={1}
               // absoluteHover
               disabled={settings?.reverseIconName ? !pokemon?.speciesForme : !nextForme}
@@ -575,7 +595,7 @@ export const PokeInfo = ({
             <PokeHpBar
               // className={styles.hpBar}
               hp={hpPercentage}
-              width={115}
+              width={100}
             />
 
             {
@@ -595,7 +615,7 @@ export const PokeInfo = ({
                   </div>
                 )}
                 offset={[0, 10]}
-                delay={[1000, 50]}
+                delay={[250, 50]}
                 trigger="mouseenter"
                 touch="hold"
                 disabled={!maxHp}
@@ -694,6 +714,7 @@ export const PokeInfo = ({
                     ) : 'Ability'}
                   </div>
                 )}
+                tooltipDisabled={!settings?.showUiTooltips}
                 absoluteHover
                 active={pokemon.abilityToggled}
                 onPress={() => onPokemonChange?.({
@@ -716,6 +737,7 @@ export const PokeInfo = ({
                     ) : 'Ability'}
                   </div>
                 )}
+                tooltipDisabled={!settings?.showUiTooltips}
                 absoluteHover
                 active
                 onPress={handleAbilityReset}
@@ -806,6 +828,7 @@ export const PokeInfo = ({
                     ) : 'Item'}
                   </div>
                 )}
+                tooltipDisabled={!settings?.showUiTooltips}
                 absoluteHover
                 active
                 onPress={() => onPokemonChange?.({

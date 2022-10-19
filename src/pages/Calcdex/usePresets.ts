@@ -131,9 +131,10 @@ export const usePresets = ({
 
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme;
   const formes = Array.from(new Set([
-    formatId(speciesForme),
-    speciesForme?.includes('-') && formatId(dex?.species.get(speciesForme)?.baseSpecies),
-  ].filter(Boolean)));
+    speciesForme,
+    speciesForme?.includes('-') && dex?.species.get(speciesForme)?.baseSpecies,
+    randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`,
+  ].filter(Boolean))).map((f) => formatId(f));
 
   const {
     gensPresets,

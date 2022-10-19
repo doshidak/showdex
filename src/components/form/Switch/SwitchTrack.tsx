@@ -42,6 +42,7 @@ export const SwitchTrack = ({
       style={{
         ...style,
         width,
+        minWidth: width,
       }}
     >
       <span

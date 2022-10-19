@@ -343,6 +343,7 @@ export const SettingsPane = ({
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
                     // tooltipDisabled={!!prevSettings}
+                    hoverScale={1}
                     onPress={handleSettingsImport}
                   />
 
@@ -372,6 +373,7 @@ export const SettingsPane = ({
                       </div>
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
+                    hoverScale={1}
                     onPress={handleSettingsExport}
                   />
 
@@ -403,20 +405,13 @@ export const SettingsPane = ({
                         </div>
                       )}
                       tooltipTrigger={['focus', 'mouseenter']}
+                      hoverScale={1}
                       onPress={handleSettingsDefaults}
                     />
                   }
 
                   <div className={styles.closePlaceholder} />
                 </div>
-              </div>
-
-              <div className={styles.notice}>
-                plz excuse the mess, this is a work in progress
-                <br />
-                <span className={styles.face}>
-                  (｡◕‿◕｡)
-                </span>
               </div>
 
               <div className={styles.settingsGroup}>
@@ -622,25 +617,68 @@ export const SettingsPane = ({
                     }]}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['closeOnEnd']>
-                    name="calcdex.closeOnEnd"
-                    component={Switch}
-                    className={styles.field}
-                    label="Close Tab When Battle Ends"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Closes the tab once the battle ends.
-                        <br />
-                        <br />
-                        Unless <em>Clear Memory After Tab Closes</em> is on,
-                        the closed tab can be reopened from the Hellodex tab.
-                        <br />
-                        <br />
-                        This does not affect Calcdexes that <em>Open As</em> a{' '}
-                        <strong>Battle Overlay</strong> as they are embedded into the battle.
-                      </div>
+                  <Field<ShowdexSettings['calcdex']['closeOn']>
+                    name="calcdex.closeOn"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
                     )}
-                    format={(value) => (values.calcdex?.openAs === 'overlay' ? false : value)}
+                    label="Close Tab When"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Battle Ends',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Closes the tabbed Calcdex panel once the battle ends.
+                          <br />
+                          <br />
+                          Unless <em>Clear Memory After Tab Closes</em> is on,
+                          the closed tab can be reopened from the Hellodex.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'battle-end',
+                    }, {
+                      label: 'Battle Closes',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Closes the tabbed Calcdex panel when the battle is closed.
+                          <br />
+                          <br />
+                          Unless <em>Clear Memory After Tab Closes</em> is on,
+                          the closed tab can be reopened from the Hellodex.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'battle-tab',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Disables auto-closing of the tabbed Calcdex panel
+                          based on the battle's state.
+                          <br />
+                          Instead, the Calcdex must be manually closed every time.
+                          <br />
+                          <br />
+                          Unless <em>Clear Memory After Tab Closes</em> is on,
+                          the closed tab can be reopened from the Hellodex.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                    format={(value) => (values.calcdex?.openAs === 'overlay' ? 'never' : value)}
                     disabled={values.calcdex?.openAs === 'overlay'}
                   />
 
@@ -969,21 +1007,13 @@ export const SettingsPane = ({
                     component={Switch}
                     className={styles.field}
                     label="Auto-Fill Revealed Moves"
-                    // tooltip={(
-                    //   <div className={styles.tooltipContent}>
-                    //     Selects revealed moves of your opponent's
-                    //     (or spectating players') Pok&eacute;mon,
-                    //     if not already selected from the applied set.
-                    //   </div>
-                    // )}
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        <em>This is a planned feature.</em>
-                        <br />
-                        <em>Stay tuned!</em>
+                        Selects revealed moves of your opponent's
+                        (or spectating players') Pok&eacute;mon,
+                        if not already selected from the applied set.
                       </div>
                     )}
-                    readOnly
                     parse={(value) => ({
                       auth: false,
                       p1: value,
@@ -991,8 +1021,7 @@ export const SettingsPane = ({
                       p3: value,
                       p4: value,
                     })}
-                    // format={(value) => Object.values(value || {}).some((v) => !!v)}
-                    format={() => false}
+                    format={(value) => Object.values(value || {}).some((v) => !!v)}
                   />
 
                   <Field<ShowdexSettings['calcdex']['showNonDamageRanges']>
@@ -1044,6 +1073,7 @@ export const SettingsPane = ({
                           spellCheck={false}
                           maxLength={10}
                           // monospace={false}
+                          parse={(value) => value?.replace(/[^A-Z 0-9]/i, '')}
                         />
                       ))}
                     </div>
@@ -1068,7 +1098,7 @@ export const SettingsPane = ({
                     >
                       {Array(inBattle ? 3 : 5).fill(null).map((_, i) => (
                         <Field<ShowdexSettings['calcdex']['nhkoColors'][typeof i]>
-                          key={`SettingsPane:Field:TextField:nhkoLabel:${i}`}
+                          key={`SettingsPane:Field:TextField:nhkoColor:${i}`}
                           name={`calcdex.nhkoColors[${i}]`}
                           component={TextField}
                           className={cx(
@@ -1102,7 +1132,7 @@ export const SettingsPane = ({
                       <div className={cx(styles.customFieldRow, styles.centered)}>
                         {Array(2).fill(null).map((_, i) => (
                           <Field<ShowdexSettings['calcdex']['nhkoColors'][typeof i]>
-                            key={`SettingsPane:Field:TextField:nhkoLabel:${i + 3}`}
+                            key={`SettingsPane:Field:TextField:nhkoColor:${i + 3}`}
                             name={`calcdex.nhkoColors[${i + 3}]`}
                             component={TextField}
                             className={cx(
@@ -1136,6 +1166,21 @@ export const SettingsPane = ({
                   <div className={styles.settingsGroupTitle}>
                     Tooltips
                   </div>
+
+                  <Field<ShowdexSettings['calcdex']['showUiTooltips']>
+                    name="calcdex.showUiTooltips"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show UI Help Tooltips"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows explainer tooltips for buttons in the UI when hovered over.
+                        <br />
+                        <br />
+                        Disable this if you're a Calcdex pro and know what everything does already.
+                      </div>
+                    )}
+                  />
 
                   <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
                     name="calcdex.showFieldTooltips"
@@ -1225,6 +1270,7 @@ export const SettingsPane = ({
                         Clicking on the damage range will copy the <em>unprettied</em> (if on)
                         matchup description to your clipboard.
                         <br />
+                        <br />
                         Disable this if you like to highlight what you're reading on screen.
                       </div>
                     )}
@@ -1270,7 +1316,41 @@ export const SettingsPane = ({
                     format={(value) => (!values.calcdex?.showMatchupTooltip ? 'never' : value)}
                     disabled={!values.calcdex?.showMatchupTooltip}
                   />
+
+                  <Field<ShowdexSettings['calcdex']['formatMatchupDamageAmounts']>
+                    name="calcdex.formatMatchupDamageAmounts"
+                    component={Switch}
+                    className={styles.field}
+                    label="Percentify Damage Amounts"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Combines the list of damage amounts into unique amounts with percentages.
+                        <br />
+                        <br />
+                        If there are more than 5 unique damage amounts, no percentages will be shown
+                        to avoid lengthy lists.
+                      </div>
+                    )}
+                    format={(value) => (
+                      !values.calcdex?.showMatchupTooltip
+                        || values.calcdex?.showMatchupDamageAmounts === 'never'
+                        ? false
+                        : value
+                    )}
+                    disabled={(
+                      !values.calcdex?.showMatchupTooltip
+                        || values.calcdex?.showMatchupDamageAmounts === 'never'
+                    )}
+                  />
                 </div>
+              </div>
+
+              <div className={styles.notice}>
+                plz excuse the mess, this is a work in progress
+                <br />
+                <span className={styles.face}>
+                  (｡◕‿◕｡)
+                </span>
               </div>
             </form>
           )}

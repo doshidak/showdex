@@ -10,6 +10,7 @@ import {
 } from '@showdex/components/ui';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions } from '@showdex/utils/battle';
+import { formatDamageAmounts } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
@@ -146,6 +147,7 @@ export const PokeMoves = ({
             className={cx(styles.toggleButton, styles.ultButton)}
             label="Z"
             tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
+            tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useZ}
             disabled={!pokemon?.speciesForme}
@@ -166,6 +168,7 @@ export const PokeMoves = ({
             )}
             label="Max"
             tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
+            tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useMax}
             disabled={!pokemon?.speciesForme}
@@ -189,6 +192,7 @@ export const PokeMoves = ({
           className={styles.toggleButton}
           label="Crit"
           tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
+          tooltipDisabled={!settings?.showUiTooltips}
           primary
           active={pokemon?.criticalHit}
           disabled={!pokemon?.speciesForme}
@@ -296,7 +300,12 @@ export const PokeMoves = ({
               showDamageAmounts &&
               <>
                 <br />
-                ({description.damageAmounts})
+                <br />
+                {settings?.formatMatchupDamageAmounts ? (
+                  <>({formatDamageAmounts(description.damageAmounts)})</>
+                ) : (
+                  <>({description.damageAmounts})</>
+                )}
               </>
             }
           </div>

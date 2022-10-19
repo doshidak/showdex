@@ -36,10 +36,14 @@ export const CalcdexError = ({
 
   const state = useCalcdexBattleState(battleId);
 
-  const dehydratedState = React.useMemo(
-    () => (Object.keys(state || {}).length ? dehydrateCalcdex(state) : null),
-    [state],
-  );
+  const dehydratedState = React.useMemo(() => (
+    Object.keys(state || {}).length
+      ? dehydrateCalcdex(state, error)
+      : null
+  ), [
+    error,
+    state,
+  ]);
 
   const [showState, setShowState] = React.useState(false);
   const [compressed, setCompressed] = React.useState<string>(null);

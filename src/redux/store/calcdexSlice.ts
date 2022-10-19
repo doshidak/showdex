@@ -763,10 +763,19 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   /**
    * Index of the `CalcdexPokemon` that is currently active on the field.
    *
+   * @deprecated As of v1.0.4, not being used anymore in favor of `activeIndices`.
    * @default -1
    * @since 0.1.0
    */
   activeIndex?: number;
+
+  /**
+   * Indices of `CalcdexPokemon` that are currently active on the field.
+   *
+   * @default []
+   * @since 1.0.4
+   */
+  activeIndices?: number[];
 
   /**
    * Index of the `CalcdexPokemon` that the user is currently viewing.
@@ -783,6 +792,16 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    * @since 0.1.2
    */
   autoSelect?: boolean;
+
+  /**
+   * Maximum amount of Pokemon for this player.
+   *
+   * * Keeping this player-specific since that's how Showdown keeps it lol (i.e., `totalPokemon`).
+   *
+   * @default process.env.CALCDEX_PLAYER_MAX_POKEMON
+   * @since 1.0.4
+   */
+  maxPokemon?: number;
 
   /**
    * Keeps track of the ordering of the Pokemon.
@@ -1088,6 +1107,13 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   rules?: CalcdexBattleRules;
 
   /**
+   * Current turn number, primarily recorded for debugging purposes.
+   *
+   * @since 1.0.4
+   */
+  turn?: number;
+
+  /**
    * Whether the battle is currently active (i.e., not ended).
    *
    * @since 1.0.3
@@ -1228,6 +1254,7 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
   destroy: (state: Draft<CalcdexSliceState>, action: PayloadAction<string>) => void;
 }
 
+const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
 const l = logger('@showdex/redux/store/calcdexSlice');
 
 export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers, string>({
@@ -1248,6 +1275,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
         rules = {},
+        turn = 0,
         renderMode,
         playerKey = null,
         authPlayerKey = null,
@@ -1285,6 +1313,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen,
         format,
         rules,
+        turn,
 
         renderMode,
 
@@ -1297,8 +1326,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           name: null,
           rating: null,
           activeIndex: -1,
+          activeIndices: [],
           selectionIndex: 0,
           autoSelect: true,
+          maxPokemon: defaultMaxPokemon,
           pokemonOrder: [],
           ...p1,
           pokemon: [],
@@ -1309,8 +1340,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           name: null,
           rating: null,
           activeIndex: -1,
+          activeIndices: [],
           selectionIndex: 0,
           autoSelect: true,
+          maxPokemon: defaultMaxPokemon,
           pokemonOrder: [],
           ...p2,
           pokemon: [],

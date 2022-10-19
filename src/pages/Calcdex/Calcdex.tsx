@@ -1,4 +1,5 @@
 import * as React from 'react';
+import useSize from '@react-hook/size';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
@@ -12,6 +13,7 @@ import styles from './Calcdex.module.scss';
 interface CalcdexProps {
   battle?: Showdown.Battle;
   battleId?: string;
+  request?: Showdown.BattleRequest;
 }
 
 // const l = logger('@showdex/pages/Calcdex/Calcdex');
@@ -19,7 +21,17 @@ interface CalcdexProps {
 export const Calcdex = ({
   battle,
   battleId: battleIdFromProps,
+  request,
 }: CalcdexProps): JSX.Element => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const [containerWidth] = useSize(containerRef, {
+    initialWidth: 400,
+    initialHeight: 700,
+  });
+
+  const inBattle = containerWidth < 550;
+
   const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
@@ -34,6 +46,7 @@ export const Calcdex = ({
   } = useCalcdex({
     battle,
     battleId: battleIdFromProps,
+    request,
   });
 
   if (!shouldRender) {
@@ -73,6 +86,7 @@ export const Calcdex = ({
 
   return (
     <div
+      ref={containerRef}
       className={cx(
         'showdex-module',
         styles.container,
@@ -96,6 +110,7 @@ export const Calcdex = ({
             opponent={opponent}
             field={field}
             defaultName="Player 1"
+            inBattle={inBattle}
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
               topKey,
@@ -129,6 +144,7 @@ export const Calcdex = ({
             opponent={player}
             field={field}
             defaultName="Player 2"
+            inBattle={inBattle}
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
               bottomKey,

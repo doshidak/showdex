@@ -4,7 +4,7 @@ import { Picon } from '@showdex/components/app';
 import { BaseButton, Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
 import type { PiconProps } from '@showdex/components/app';
-import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
+import type { BaseButtonProps, ButtonElement, TooltipProps } from '@showdex/components/ui';
 import styles from './PiconButton.module.scss';
 
 export interface PiconButtonProps extends BaseButtonProps {
@@ -13,6 +13,12 @@ export interface PiconButtonProps extends BaseButtonProps {
   pokemon?: PiconProps['pokemon'];
   facingLeft?: PiconProps['facingLeft'];
   tooltip?: React.ReactNode;
+  tooltipOffset?: TooltipProps['offset'];
+  tooltipDelay?: TooltipProps['delay'];
+  tooltipTrigger?: TooltipProps['trigger'];
+  tooltipTouch?: TooltipProps['touch'];
+  tooltipDisabled?: boolean;
+  shadow?: boolean;
 }
 
 /* eslint-disable react/prop-types -- this rule can't handle props from extended interfaces apparently lmaoo */
@@ -24,8 +30,14 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
   pokemon,
   facingLeft,
   tooltip,
-  hoverScale = 1.05,
+  tooltipOffset = [0, 5],
+  tooltipDelay = [150, 50],
+  tooltipTrigger = 'mouseenter',
+  tooltipTouch = 'hold',
+  tooltipDisabled,
+  hoverScale = 1,
   activeScale = 0.95,
+  shadow,
   disabled,
   children,
   ...props
@@ -46,6 +58,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
         {...props}
         className={cx(
           styles.container,
+          shadow && styles.shadow,
           !!colorScheme && styles[colorScheme],
           className,
         )}
@@ -69,11 +82,11 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
       <Tooltip
         reference={ref.current}
         content={tooltip}
-        offset={[0, 5]}
-        delay={[1250, 250]}
-        trigger="mouseenter"
-        touch="hold"
-        disabled={!tooltip || disabled}
+        offset={tooltipOffset}
+        delay={tooltipDelay}
+        trigger={tooltipTrigger}
+        touch={tooltipTouch}
+        disabled={!tooltip || tooltipDisabled || disabled}
       />
     </>
   );

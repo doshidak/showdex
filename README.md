@@ -6,14 +6,14 @@
   <code>showdex</code>
 </h1>
 
-Current [v1.0.3](https://github.com/doshidak/showdex/releases/tag/v1.0.3) | Install on [Chrome](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) · [Opera](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
+Current [v1.0.4](https://github.com/doshidak/showdex/releases/tag/v1.0.4) | Install on [Chrome · Opera · Edge](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
 --- | --- | --- | ---
 
 <br>
 
 **Showdex** is a browser extension for [Pokémon Showdown](https://pokemonshowdown.com) that brings the [Damage Calculator](https://calc.pokemonshowdown.com) you know and love right into your battle! Automatically syncs all Pokémon and field conditions as you play, so you can spend *less time* shitting brix and *more time* [hitting kicks](https://www.smogon.com/dex/ss/moves/high-jump-kick).
 
-Fully supported and installable on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai), [**Firefox**](https://addons.mozilla.org/en-US/firefox/addon/showdex/) & [**Opera**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (including GX & Crypto).
+Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (+ any browser that natively supports Chrome extensions, like [**Opera**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) & [**Edge**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai)) & [**Firefox**](https://addons.mozilla.org/en-US/firefox/addon/showdex/).
 
 > **Note**  
 > Unfortunately, we don't ever plan on supporting **Safari** since [Apple requires us to shell out $100/year for the Apple Developer Program](https://developer.apple.com/documentation/safariservices/safari_web_extensions) just to distribute a singular *free* extension on the App Store. Alternative would be to manually distribute the extension, but there's the potential issue of codesigning, making for a very unpleasant installation process. Thanks Tim!

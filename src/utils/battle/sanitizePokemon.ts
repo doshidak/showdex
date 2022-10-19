@@ -75,7 +75,7 @@ export const sanitizePokemon = (
     maxhp: pokemon?.maxhp || 1,
     fainted: pokemon?.fainted ?? !pokemon?.hp,
 
-    status: pokemon?.status,
+    status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
     turnstatuses: pokemon?.turnstatuses,
     toxicCounter: pokemon?.statusData?.toxicTurns,
 
@@ -180,6 +180,7 @@ export const sanitizePokemon = (
 
     // don't really care if species is falsy here
     sanitizedPokemon.baseStats = { ...species?.baseStats };
+    sanitizedPokemon.dmaxable = !species?.cannotDynamax;
 
     // grab the base species forme to obtain its other formes
     // (since sanitizedPokemon.speciesForme could be one of those other formes)

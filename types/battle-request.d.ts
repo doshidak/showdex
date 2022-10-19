@@ -26,11 +26,14 @@ declare namespace Showdown {
     }[];
 
     maxMoves?: {
-      name: string;
-      id: string;
-      target: MoveTarget;
-      disabled?: boolean;
-    }[];
+      maxMoves?: {
+        name: string;
+        id: string;
+        target: MoveTarget;
+        disabled?: boolean;
+      }[];
+      gigantamax: string;
+    };
 
     zMoves?: {
       name: string;
