@@ -595,42 +595,54 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // obtain the calcdexId of the active Pokemon, if any
-      const [activePokemon] = player.active || [];
+      // const [activePokemon] = player.active || [];
 
-      // checking myPokemon first (if it's available) for Illusion/Zoroark
-      const activeId = (
-        isMyPokemonSide
-          && hasMyPokemon
-          && myPokemon.find((p) => p?.active)?.calcdexId
-      )
-        || activePokemon?.calcdexId
-        || player.pokemon.find((p) => p === activePokemon)?.calcdexId;
+      playerState.activeIndices = player.active?.map((activePokemon) => {
+        // checking myPokemon first (if it's available) for Illusion/Zoroark
+        const activeId = (
+          isMyPokemonSide
+            && hasMyPokemon
+            && myPokemon.find((p) => p?.active)?.calcdexId
+        )
+          || activePokemon?.calcdexId
+          || player.pokemon.find((p) => p === activePokemon)?.calcdexId;
 
-      // update activeIndex (and selectionIndex if autoSelect is enabled)
-      // (hopefully the `ident` exists here!)
-      const activeIndex = activeId
-        // ? playerPokemon.findIndex((p, i) => searchId(p, playerKey, i) === activeSearchId)
-        ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
-        : -1;
+        // update activeIndex (and selectionIndex if autoSelect is enabled)
+        // (hopefully the `ident` exists here!)
+        const activeIndex = activeId
+          // ? playerPokemon.findIndex((p, i) => searchId(p, playerKey, i) === activeSearchId)
+          ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
+          : -1;
 
-      if (activeIndex > -1) {
-        playerState.activeIndex = activeIndex;
+        if (activeIndex > -1) {
+          // playerState.activeIndex = activeIndex;
 
-        if (playerState.autoSelect) {
-          playerState.selectionIndex = activeIndex;
+          // if (playerState.autoSelect) {
+          //   playerState.selectionIndex = activeIndex;
+          // }
+
+          return activeIndex;
         }
-      } else if (activePokemon && __DEV__) {
-        l.warn(
-          'Could not find activeIndex with activeId', activeId, 'for player', playerKey,
-          '\n', 'battleId', battleId,
-          '\n', 'activePokemon', activePokemon,
-          '\n', 'playerPokemon', playerPokemon,
-          '\n', 'playerState.pokemon', playerState.pokemon,
-          '\n', 'pokemonOrder', playerState.pokemonOrder,
-          '\n', 'battle', battle,
-          '\n', 'battleState', battleState,
-          '\n', '(You will only see this warning on development.)',
-        );
+
+        if (activePokemon && __DEV__) {
+          l.warn(
+            'Could not find activeIndex with activeId', activeId, 'for player', playerKey,
+            '\n', 'battleId', battleId,
+            '\n', 'activePokemon', activePokemon,
+            '\n', 'playerPokemon', playerPokemon,
+            '\n', 'playerState.pokemon', playerState.pokemon,
+            '\n', 'pokemonOrder', playerState.pokemonOrder,
+            '\n', 'battle', battle,
+            '\n', 'battleState', battleState,
+            '\n', '(You will only see this warning on development.)',
+          );
+        }
+
+        return null;
+      }).filter((n) => typeof n === 'number' && n > -1) || [];
+
+      if (playerState.activeIndices?.length && playerState.autoSelect) {
+        [playerState.selectionIndex] = playerState.activeIndices;
       }
     }
 
@@ -645,7 +657,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           'Failed to sync the field state from the battle.',
           '\n', 'syncedField', syncedField,
           '\n', 'battleState.field', battleState.field,
-          '\n', 'attackerIndex', battleState.p1.activeIndex, 'defenderIndex', battleState.p2.activeIndex,
+          // '\n', 'attackerIndex', battleState.p1.activeIndex, 'defenderIndex', battleState.p2.activeIndex,
           '\n', 'battle', battle,
           '\n', 'battleState', battleState,
           '\n', '(You will only see this warning on development.)',
