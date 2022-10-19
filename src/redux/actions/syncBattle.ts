@@ -209,7 +209,17 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // );
 
         if (!pokemon.calcdexId) {
-          pokemon.calcdexId = calcPokemonCalcdexId(pokemon, playerKey);
+          // update (2022/10/18): found a case where the client Pokemon was given before
+          // the ServerPokemon for the myPokemon side rip lol
+          pokemon.calcdexId = (
+            isMyPokemonSide
+              && !!pokemon.ident
+              && player.pokemon.find((p) => !!p?.calcdexId && (
+                !!p.ident
+                  && p.ident === pokemon.ident
+              ))?.calcdexId
+          )
+            || calcPokemonCalcdexId(pokemon, playerKey);
 
           l.debug(
             'Assigned calcdexId', pokemon.calcdexId, 'to', pokemon.speciesForme,
