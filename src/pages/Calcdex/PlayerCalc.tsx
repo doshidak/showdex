@@ -60,7 +60,8 @@ export const PlayerCalc = ({
     rating,
     pokemon,
     // pokemonOrder,
-    activeIndex,
+    // activeIndex,
+    activeIndices,
     selectionIndex: playerIndex,
     autoSelect,
   } = player || {};
@@ -71,7 +72,7 @@ export const PlayerCalc = ({
     selectionIndex: opponentIndex,
   } = opponent || {};
 
-  const activePokemon = pokemon[activeIndex];
+  // const activePokemon = pokemon[activeIndex];
   const playerPokemon = pokemon[playerIndex];
   const opponentPokemon = opponentPokemons[opponentIndex];
 
@@ -102,6 +103,7 @@ export const PlayerCalc = ({
               </div>
             )}
             tooltipDisabled={!settings?.showUiTooltips}
+            hoverScale={1}
             absoluteHover
             disabled={!name}
             onPress={() => openUserPopup(name)}
@@ -161,8 +163,9 @@ export const PlayerCalc = ({
             const item = mon?.dirtyItem ?? mon?.item;
 
             const pokemonActive = !!mon?.calcdexId
-              && !!activePokemon?.calcdexId
-              && activePokemon.calcdexId === mon.calcdexId;
+              // && !!activePokemon?.calcdexId
+              // && activePokemon.calcdexId === mon.calcdexId;
+              && activeIndices.includes(i);
 
             const pokemonSelected = !!mon?.calcdexId
               && !!playerPokemon?.calcdexId
