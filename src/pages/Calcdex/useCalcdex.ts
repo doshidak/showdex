@@ -31,6 +31,7 @@ export interface CalcdexHookInterface {
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   updateField: (field: DeepPartial<CalcdexBattleField>) => void;
   setActiveIndex: (playerKey: CalcdexPlayerKey, activeIndex: number) => void;
+  setActiveIndices: (playerKey: CalcdexPlayerKey, activeIndices: number[]) => void;
   setSelectionIndex: (playerKey: CalcdexPlayerKey, selectionIndex: number) => void;
   setAutoSelect: (playerKey: CalcdexPlayerKey, autoSelect: boolean) => void;
 }
@@ -209,6 +210,11 @@ export const useCalcdex = ({
     setActiveIndex: (playerKey, activeIndex) => dispatch(calcdexSlice.actions.updatePlayer({
       battleId,
       [playerKey]: { activeIndex },
+    })),
+
+    setActiveIndices: (playerKey, activeIndices) => dispatch(calcdexSlice.actions.updatePlayer({
+      battleId,
+      [playerKey]: { activeIndices },
     })),
 
     setSelectionIndex: (playerKey, selectionIndex) => {
