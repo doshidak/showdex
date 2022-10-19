@@ -763,10 +763,19 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   /**
    * Index of the `CalcdexPokemon` that is currently active on the field.
    *
+   * @deprecated As of v1.0.4, not being used anymore in favor of `activeIndices`.
    * @default -1
    * @since 0.1.0
    */
   activeIndex?: number;
+
+  /**
+   * Indices of `CalcdexPokemon` that are currently active on the field.
+   *
+   * @default []
+   * @since 1.0.4
+   */
+  activeIndices?: number[];
 
   /**
    * Index of the `CalcdexPokemon` that the user is currently viewing.
@@ -1317,6 +1326,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           name: null,
           rating: null,
           activeIndex: -1,
+          activeIndices: [],
           selectionIndex: 0,
           autoSelect: true,
           maxPokemon: defaultMaxPokemon,
@@ -1330,6 +1340,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           name: null,
           rating: null,
           activeIndex: -1,
+          activeIndices: [],
           selectionIndex: 0,
           autoSelect: true,
           maxPokemon: defaultMaxPokemon,

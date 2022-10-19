@@ -52,7 +52,7 @@ import {
  * ```
  * {name}|
  * {rating}|
- * {activeIndex}|
+ * {activeIndices[0]}[/{activeIndices[1]}...]|
  * {selectionIndex}|
  * {autoSelect}|
  * {pokemon}[|{pokemon}...]
@@ -182,7 +182,8 @@ export const dehydrateCalcdex = (
       sideid,
       name: playerName,
       rating,
-      activeIndex = -1,
+      // activeIndex = -1,
+      activeIndices,
       selectionIndex = -1,
       autoSelect,
       pokemon: playerPokemon = [],
@@ -191,7 +192,8 @@ export const dehydrateCalcdex = (
     const playerOutput: string[] = [
       dehydrateValue(playerName),
       dehydrateValue(rating),
-      typeof activeIndex === 'number' ? String(activeIndex) : '-1',
+      // typeof activeIndex === 'number' ? String(activeIndex) : '-1',
+      dehydrateArray(activeIndices),
       typeof selectionIndex === 'number' ? String(selectionIndex) : '-1',
       dehydrateBoolean(autoSelect),
     ];
