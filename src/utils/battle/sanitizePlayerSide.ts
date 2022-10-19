@@ -9,7 +9,7 @@ const l = logger('@showdex/utils/battle/sanitizePlayerSide');
  * Sanitizes a player side (e.g., `p1`, `p2`, etc.) from the `battle` state.
  *
  * * Omits reporting *Spikes* and *Stealth Rocks* for active Pokemon already out on the field.
- *   - Active Pokemon is determined by the `activeIndex` in the `player.pokemon` array, if provided.
+ *   - Active Pokemon is determined by the `activeIndices` in the `player.pokemon` array, if provided.
  *   - Otherwise, defaults to using the `active` array from the provided `battleSide`.
  *
  * @since 0.1.0
@@ -25,22 +25,26 @@ export const sanitizePlayerSide = (
   } = battleSide || {};
 
   const {
-    activeIndex,
+    // activeIndex,
+    activeIndices,
     selectionIndex,
     pokemon: playerPokemon,
   } = player || {};
 
   // obtain the "active" Pokemon by using the selectionIndex to properly apply the screens in
-  // gen 1 (since they're directly applied to the Pokemon as a volatile) or using the activeIndex
+  // gen 1 (since they're directly applied to the Pokemon as a volatile) or using the activeIndicies
   // in gens 2+ to make sure stage hazards only apply for non-active Pokemon (otherwise, they'd be
   // always affecting the damage ranges!)
   // (note that these indices serve different purposes in gen 1 and in gens 2+)
-  const currentPokemon = playerPokemon?.length
-    ? gen === 1 && selectionIndex > -1
-      ? playerPokemon[selectionIndex]
-      : gen > 1 && activeIndex > -1
-        ? playerPokemon[activeIndex]
-        : null
+  // const currentPokemon = playerPokemon?.length
+  //   ? gen === 1 && selectionIndex > -1
+  //     ? playerPokemon[selectionIndex]
+  //     : gen > 1 && activeIndex > -1
+  //       ? playerPokemon[activeIndex]
+  //       : null
+  //   : null;
+  const currentPokemon = gen === 1 && playerPokemon?.length && selectionIndex > -1
+    ? playerPokemon[selectionIndex]
     : null;
 
   const sideConditionNames = Object.keys(sideConditions || {})
@@ -61,11 +65,12 @@ export const sanitizePlayerSide = (
   const applyFieldHazards = gen > 1
     && !!currentPokemon?.speciesForme
     && selectionIndex > -1
-    && activeIndex !== selectionIndex;
+    // && activeIndex !== selectionIndex;
+    && !activeIndices.includes(selectionIndex);
 
   l.debug(
     'Sanitizing side for player', player?.sideid || 'p?', player?.name || '???',
-    '\n', 'gen', gen, 'activeIndex', activeIndex, 'selectionIndex', selectionIndex,
+    '\n', 'gen', gen, 'activeIndices', activeIndices, 'selectionIndex', selectionIndex,
     '\n', 'currentPokemon', currentPokemon,
     ...(gen > 1 ? ['\n', 'applyFieldHazards?', applyFieldHazards] : []),
   );
