@@ -364,6 +364,7 @@ export const PokeStats = ({
             <Button
               labelClassName={styles.boostModButtonLabel}
               label="-"
+              hoverScale={1}
               disabled={!pokemon?.speciesForme || boost <= -6}
               onPress={() => onPokemonChange?.({
                 dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
@@ -379,6 +380,7 @@ export const PokeStats = ({
               labelClassName={styles.boostButtonLabel}
               label={`${boost > 0 ? '+' : ''}${boost}`}
               highlight={didDirtyBoost}
+              hoverScale={1}
               absoluteHover
               disabled={!pokemon?.speciesForme || !didDirtyBoost}
               onPress={() => onPokemonChange?.({
@@ -391,6 +393,7 @@ export const PokeStats = ({
             <Button
               labelClassName={styles.boostModButtonLabel}
               label="+"
+              hoverScale={1}
               disabled={!pokemon?.speciesForme || boost >= 6}
               onPress={() => onPokemonChange?.({
                 dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },

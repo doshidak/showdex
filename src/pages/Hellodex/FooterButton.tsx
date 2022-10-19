@@ -24,6 +24,7 @@ export const FooterButton = React.forwardRef<ButtonElement, FooterButtonProps>((
   label,
   'aria-label': ariaLabel,
   tooltip,
+  hoverScale = 1,
   disabled,
   ...props
 }: FooterButtonProps, forwardedRef) => {
@@ -46,6 +47,7 @@ export const FooterButton = React.forwardRef<ButtonElement, FooterButtonProps>((
         )}
         display="inline"
         aria-label={ariaLabel || label}
+        hoverScale={hoverScale}
         disabled={disabled}
       >
         {

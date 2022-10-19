@@ -343,6 +343,7 @@ export const SettingsPane = ({
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
                     // tooltipDisabled={!!prevSettings}
+                    hoverScale={1}
                     onPress={handleSettingsImport}
                   />
 
@@ -372,6 +373,7 @@ export const SettingsPane = ({
                       </div>
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
+                    hoverScale={1}
                     onPress={handleSettingsExport}
                   />
 
@@ -403,6 +405,7 @@ export const SettingsPane = ({
                         </div>
                       )}
                       tooltipTrigger={['focus', 'mouseenter']}
+                      hoverScale={1}
                       onPress={handleSettingsDefaults}
                     />
                   }
