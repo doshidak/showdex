@@ -6,24 +6,17 @@
   <code>showdex</code>
 </h1>
 
-Current [v1.0.4](https://github.com/doshidak/showdex/releases/tag/v1.0.4) | Install on [Chrome · Opera · Edge](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
---- | --- | --- | ---
+&nbsp;&nbsp;Current&nbsp;&nbsp;<br>[v1.0.4](https://github.com/doshidak/showdex/releases/tag/v1.0.4) | Install on<br>[Chrome · Opera · Edge](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | Discuss on<br>[Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | &nbsp;What's Cookin'&nbsp;<br>[Features](https://github.com/users/doshidak/projects/1) · [Bugs](https://github.com/users/doshidak/projects/2) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
+--- | --- | --- | --- | ---
 
 <br>
 
 **Showdex** is a browser extension for [Pokémon Showdown](https://pokemonshowdown.com) that brings the [Damage Calculator](https://calc.pokemonshowdown.com) you know and love right into your battle! Automatically syncs all Pokémon and field conditions as you play, so you can spend *less time* shitting brix and *more time* [hitting kicks](https://www.smogon.com/dex/ss/moves/high-jump-kick).
 
-Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (+ any browser that natively supports Chrome extensions, like [**Opera**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) & [**Edge**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai)) & [**Firefox**](https://addons.mozilla.org/en-US/firefox/addon/showdex/).
+Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (+ any native [**Chromium**](https://www.chromium.org/Home) browser, like **Opera**, **Edge** & **Brave**) & [**Firefox**](https://addons.mozilla.org/en-US/firefox/addon/showdex/).
 
 > **Note**  
 > Unfortunately, we don't ever plan on supporting **Safari** since [Apple requires us to shell out $100/year for the Apple Developer Program](https://developer.apple.com/documentation/safariservices/safari_web_extensions) just to distribute a singular *free* extension on the App Store. Alternative would be to manually distribute the extension, but there's the potential issue of codesigning, making for a very unpleasant installation process. Thanks Tim!
-
-<br>
-
-## What's Cookin'
-
-* [**Planned Features**](https://github.com/users/doshidak/projects/1)
-* [**Known Issues**](https://github.com/users/doshidak/projects/2)
 
 <br>
 
@@ -49,11 +42,15 @@ This extension is written in **TypeScript**, which is essentially JavaScript on 
 * **ESLint** for *suggestive* code linting, and
 * **webpack** for chunking & bundling.
 
+<br>
+
 ### Requirements
 
 * **`node`** v18.0.0+
 * **`yarn`** (Classic) v1.22.0+
 * **`bash`** ([Windows WSL](https://docs.microsoft.com/en-us/windows/wsl/install), macOS, or Linux)
+
+<br>
 
 ### Setup
 
@@ -84,6 +81,8 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
   5. Select **This Firefox** on the left-hand panel.
   6. Verify that the **Temporary Extensions** section and the **Load Temporary Add-on...** option are available.
 </details>
+
+<br>
 
 ### Installation
 
@@ -132,7 +131,12 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
   <br>
 </details>
 
+<br>
+
 ### Development
+
+> **Warning**  
+> Although this project makes use of TypeScript & ESLint, they are only used *suggestively*. In other words, your code will still compile even if you have errors!
 
 > **Note**  
 > `yarn dev` is an alias of `yarn dev:chrome`.
@@ -185,23 +189,27 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
   ---
 
-  > **Note**  
-  > Recommended you develop on **Chrome** since the reloading process for other browsers such as **Firefox** may be very inconvenient.
-
   > **Warning**  
   > Hot-reloading is a bit of a mess right now since it requires you to reload the extension and refresh Pokémon Showdown. Will figure out a better system in the future.
 
   While `yarn dev:chrome` or `yarn dev:firefox` is running, Webpack will trigger a re-compilation of the bundle when files are changed in the [`src`](./src) directory.
 
   * For **Chrome**, you'll need to select the **reload icon** button in the **Chrome extensions** page (`chrome://extensions`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
-  * For **Firefox**, you'll need to **Remove** the extension in the **Debugging** page (`about:debugging`), then **Load Temporary Add-on...** to the newly packaged `xpi` file. Once re-added, **refresh** Pokémon Showdown to see your changes.
-    - Note that you cannot simply **Reload** the extension since the packaged `xpi` file will have a different file name.
+  * For **Firefox**, you'll need to **Reload** the extension in the **Debugging** page (`about:debugging`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
 
   ---
   <br>
 </details>
 
+<br>
+
 ### Building
+
+> **Warning**  
+> As mentioned in the [**Development**](#development) section, TypeScript & ESLint are configured to be *suggestive*, so your code will still compile even if you have errors!
+
+> **Note**  
+> `yarn build` is an alias of `yarn build:chrome && yarn build:firefox`.
 
 1. `cd showdex`
 2. `yarn build:chrome` or `yarn build:firefox`
@@ -213,9 +221,12 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 * For **Chrome**, a packaged extension under `showdex-...chrome.zip` in `dist`, and
 * For **Firefox**, a packaged extension under `showdex-...firefox.xpi` in `dist`.
 
-Courtesy of [AMO by Mozilla](https://addons.mozilla.org), every build now comes with its very own bundle size pie chart, showing you exactly which unchunked packages in the bundle are too **thicc**.
+> **Note**  
+> Courtesy of [AMO by Mozilla](https://addons.mozilla.org), every build now comes with its very own bundle size pie chart, showing you exactly which unchunked packages in the bundle are too **thicc**. AMO enforces a 5 MB size limit per file.  
+>
+> * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
 
-* Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
+<br>
 
 ### Contributing
 
@@ -234,7 +245,7 @@ If possible, including the following would be **immensely** helpful!
 #### PRs
 
 > **Note**  
-> This repo doesn't have any fancy CI integrations at the moment. Additionally, since this project doesn't use `tsc`, your code will still compile even if you have TypeScript or ESLint errors.
+> This repo doesn't have any fancy CI integrations at the moment.
 
 * **Fork** this repo and **commit** changes to your fork,
 * **Style** your code according to the [**ESLint rules**](./.eslintrc.json),
@@ -243,12 +254,16 @@ If possible, including the following would be **immensely** helpful!
 
 Thanks! &hearts;
 
+<br>
+
 ## How It's Made™
 
 > **Note**  
 > This section is a work-in-progress.
 
 uhhhhhhhhh
+
+<br>
 
 ## Credits
 
