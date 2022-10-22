@@ -268,7 +268,7 @@ uhhhhhhhhh
 ## Credits
 
 > **Note**  
-> This work-in-progress is a section.
+> This section is a work-in-progress.
 
 big thank to:
 
