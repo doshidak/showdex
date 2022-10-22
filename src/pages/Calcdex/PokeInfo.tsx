@@ -239,14 +239,31 @@ export const PokeInfo = ({
       prioritizeUsageStats,
     } = settings || {};
 
-    const initialPreset = presets?.find?.((p) => (
-      (!pokemon.transformedForme || formatId(p.name) !== 'yours')
+    // Setup the initial preset.
+    // If we are playing random battles, grab the appropriate randombattles set.
+    let initialPreset: CalcdexPokemonPreset;
+    if (format.includes('random')) {
+      initialPreset = presets.find((p) => (
+        (p.format === format)
+      ));
+    } else if (downloadUsageStats && prioritizeUsageStats) {
+      // If we aren't in a random battle, check if we should prioritize
+      // the showdown usage stats.
+      initialPreset = presets.find((p) => (
+        (p.format === format && formatId(p.name) === 'showdownusage')
+      ));
+    } else {
+      // Follow the original algorithm for preset setting if neither of
+      // the above cases are true.
+      initialPreset = presets?.find?.((p) => (
+        (!pokemon.transformedForme || formatId(p.name) !== 'yours')
         && (
           format?.includes('random') // always grab the first preset in randoms
-            || (downloadUsageStats && prioritizeUsageStats && formatId(p.name) === 'showdownusage')
-            || (format?.includes(p.format) && formatId(p.name) !== 'showdownusage')
+          || (downloadUsageStats && prioritizeUsageStats && formatId(p.name) === 'showdownusage')
+          || (format?.includes(p.format) && formatId(p.name) !== 'showdownusage')
         )
-    )) || presets?.[0];
+      )) || presets?.[0];
+    }
 
     if (!initialPreset) {
       // it's likely that the Pokemon has no EVs/IVs set, so show the EVs/IVs if they're hidden
