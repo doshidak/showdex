@@ -1,6 +1,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/device';
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
@@ -11,6 +12,11 @@
   // (also + 1px for the border-width)
   @include position.absolute($top: 0, $right: 0, $bottom: 0, $left: 640px + 1px);
   z-index: 5;
+
+  @include device.for-mobile {
+    right: 0;
+    left: 0;
+  }
 }
 
 .container {
