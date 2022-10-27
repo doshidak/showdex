@@ -705,8 +705,24 @@ export interface CalcdexPokemonPreset {
    */
   name?: string;
 
+  /**
+   * Generation that this preset applies to.
+   *
+   * @example 8
+   * @since 0.1.0
+   */
   gen?: GenerationNum;
+
+  /**
+   * Format that this preset applies to.
+   *
+   * * Does not include the gen number!
+   *
+   * @example 'ou'
+   * @since 0.1.0
+   */
   format?: string;
+
   speciesForme?: string;
   level?: number;
   gender?: Showdown.GenderName;
