@@ -4,6 +4,11 @@
 @use 'mixins/spacing';
 @use 'mixins/transition';
 
+.nativeContainer {
+  position: relative;
+  overflow-y: auto;
+}
+
 // derived from:
 // https://github.com/Grsmto/simplebar/blob/master/packages/simplebar/src/simplebar.css
 
