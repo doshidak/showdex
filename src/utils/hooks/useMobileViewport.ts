@@ -5,7 +5,7 @@ import * as React from 'react';
  *
  * @since 1.0.5
  */
-export const useMobile = (
+export const useMobileViewport = (
   threshold = 576,
 ): boolean => {
   const [mobile, setMobile] = React.useState(false);

@@ -1,2 +1,2 @@
-export * from './useMobile';
+export * from './useMobileViewport';
 export * from './useThunkyReducer';
