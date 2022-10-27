@@ -21,6 +21,7 @@ export interface ButtonProps<
   tooltipDisabled?: boolean;
   highlight?: boolean;
   absoluteHover?: boolean;
+  childrenFirst?: boolean;
 }
 
 /* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
@@ -41,6 +42,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   tooltipDisabled,
   highlight,
   absoluteHover,
+  childrenFirst,
   disabled,
   children,
   ...props
@@ -69,6 +71,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         aria-label={label}
         disabled={disabled}
       >
+        {childrenFirst && children}
+
         <label
           className={cx(styles.label, labelClassName)}
           style={labelStyle}
@@ -76,7 +80,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
           {label}
         </label>
 
-        {children}
+        {!childrenFirst && children}
       </BaseButton>
 
       <Tooltip
