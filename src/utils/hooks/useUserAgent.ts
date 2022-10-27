@@ -136,18 +136,17 @@ import UaParser from 'ua-parser-js';
  * @since 1.0.5
  */
 export const useUserAgent = (): DeepPartial<UaParser.IResult> => {
-  const prevUserAgent = React.useRef<string>(null);
-  const [parsedAgent, setParsedAgent] = React.useState<DeepPartial<UaParser.IResult>>({});
+  const { userAgent = null } = navigator || {};
 
-  const { userAgent } = navigator || {};
+  const prevUserAgent = React.useRef<string>(userAgent);
+  const [parsedAgent, setParsedAgent] = React.useState<DeepPartial<UaParser.IResult>>(UaParser(userAgent));
 
   React.useEffect(() => {
     if (!userAgent || prevUserAgent.current === userAgent) {
       return;
     }
 
-    const parser = new UaParser(userAgent);
-    const parsed = parser.getResult();
+    const parsed = UaParser(userAgent);
 
     if (parsed?.ua !== userAgent) {
       return;
