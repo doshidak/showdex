@@ -1,0 +1,24 @@
+@use 'config/fonts';
+@use 'mixins/font';
+@use 'mixins/spacing';
+
+.container {
+  width: 100%;
+  @include spacing.padding-xy($x: 15px, $y: 5px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+}
+
+.icon {
+  // width: 24px;
+  // min-width: 24px;
+  // height: 24px;
+  // min-height: 24px;
+  @include spacing.margin($right: 3px, $bottom: 1px);
+  font-size: 14px;
+}
+
+.label {
+  // font-size: 12px;
+  // color: inherit;
+  text-transform: uppercase;
+}
