@@ -125,7 +125,10 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
 
   const colorScheme = useColorScheme();
 
-  if (shouldRenderNative) {
+  // prevent the custom scrollbar from rendering (which sets the containerRef, letting SimpleBar instantiate)
+  // if we haven't received anything back from the useUserAgent() hook
+  // (something SHOULD be returned from the hook, even if the parsed properties are undefined)
+  if (shouldRenderNative || !Object.keys(userAgent || {}).length) {
     return (
       <div
         ref={scrollRef}
