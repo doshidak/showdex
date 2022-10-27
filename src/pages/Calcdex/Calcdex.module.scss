@@ -23,9 +23,9 @@
   @include position.absolute-fill;
   overflow: hidden;
 
-  &, *, *::before, *::after {
-    box-sizing: border-box;
-  }
+  // &, *, *::before, *::after {
+  //   box-sizing: border-box;
+  // }
 
   // initially added this as a potential fix for the closing dropdown bug on mouse-up,
   // but turns out it was an issue with the .singleValue, which I just added pointer-events: none;,
@@ -110,5 +110,13 @@
 }
 
 .opponentCalc {
+  @include spacing.margin($top: 10px);
+}
+
+.topCloseButton {
+  @include spacing.margin($bottom: 5px);
+}
+
+.bottomCloseButton {
   @include spacing.margin($top: 10px);
 }

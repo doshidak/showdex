@@ -5,6 +5,8 @@ import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 // import { logger } from '@showdex/utils/debug';
+import { useMobileViewport } from '@showdex/utils/hooks';
+import { CloseCalcdexButton } from './CloseCalcdexButton';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -14,6 +16,7 @@ interface CalcdexProps {
   battle?: Showdown.Battle;
   battleId?: string;
   request?: Showdown.BattleRequest;
+  onRequestOverlayClose?: () => void;
 }
 
 // const l = logger('@showdex/pages/Calcdex/Calcdex');
@@ -22,6 +25,7 @@ export const Calcdex = ({
   battle,
   battleId: battleIdFromProps,
   request,
+  onRequestOverlayClose,
 }: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -48,6 +52,8 @@ export const Calcdex = ({
     battleId: battleIdFromProps,
     request,
   });
+
+  const mobile = useMobileViewport();
 
   if (!shouldRender) {
     return null;
@@ -100,6 +106,14 @@ export const Calcdex = ({
           <BuildInfo
             position="top-right"
           />
+
+          {
+            (renderAsOverlay && mobile) &&
+            <CloseCalcdexButton
+              className={styles.topCloseButton}
+              onPress={onRequestOverlayClose}
+            />
+          }
 
           <PlayerCalc
             gen={gen}
@@ -155,6 +169,14 @@ export const Calcdex = ({
               autoSelect,
             )}
           />
+
+          {
+            (renderAsOverlay && mobile) &&
+            <CloseCalcdexButton
+              className={styles.bottomCloseButton}
+              onPress={onRequestOverlayClose}
+            />
+          }
         </Scrollable>
       }
     </div>
