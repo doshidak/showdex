@@ -40,7 +40,9 @@ export const mergeRevealedMoves = (
   }
 
   // then, find the revealed moves to process
-  const mergeableMoveNames = revealedMoves.filter((m) => !moves.includes(m));
+  // (using some() here for 'Hidden Power', so an existing move like 'Hidden Power Electric' should match,
+  // therefore, filtered out of this list; otherwise, 'Hidden Power' will replace another move!)
+  const mergeableMoveNames = revealedMoves.filter((m) => !moves.some((n) => n.startsWith(m)));
 
   if (!mergeableMoveNames.length) {
     return moves;
