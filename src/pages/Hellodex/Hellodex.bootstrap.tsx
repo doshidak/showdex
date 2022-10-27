@@ -108,7 +108,7 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
         calcdexReactRoot,
         store,
         battleRoom?.battle || battleId,
-        battleRoom?.request,
+        battleRoom,
       );
 
       // if the battleRoom exists, attach the created room and ReactDOM root to the battle object
