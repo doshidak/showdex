@@ -38,7 +38,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   tooltipOffset = [0, 10],
   tooltipDelay = [1000, 50],
   tooltipTrigger = 'mouseenter',
-  tooltipTouch = 'hold',
+  tooltipTouch = ['hold', 500],
   tooltipDisabled,
   highlight,
   absoluteHover,

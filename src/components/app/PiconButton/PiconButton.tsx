@@ -33,7 +33,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
   tooltipOffset = [0, 5],
   tooltipDelay = [150, 50],
   tooltipTrigger = 'mouseenter',
-  tooltipTouch = 'hold',
+  tooltipTouch = ['hold', 500],
   tooltipDisabled,
   hoverScale = 1,
   activeScale = 0.95,

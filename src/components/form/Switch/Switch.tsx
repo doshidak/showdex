@@ -252,7 +252,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({
         offset={[0, 10]}
         delay={[1000, 150]}
         trigger="mouseenter"
-        touch="hold"
+        touch={['hold', 500]}
         disabled={!tooltip || disabled}
       />
     </>

@@ -634,7 +634,7 @@ export const PokeInfo = ({
                 offset={[0, 10]}
                 delay={[250, 50]}
                 trigger="mouseenter"
-                touch="hold"
+                touch={['hold', 500]}
                 disabled={!maxHp}
               >
                 <div className={styles.hpPercentage}>

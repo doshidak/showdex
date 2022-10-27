@@ -152,7 +152,7 @@ export const PokeStats = ({
             offset={[0, 10]}
             delay={[1000, 50]}
             trigger="mouseenter"
-            touch="hold"
+            touch={['hold', 500]}
             disabled={!missingIvs}
           >
             <TableGridItem
@@ -257,7 +257,7 @@ export const PokeStats = ({
             offset={[0, 10]}
             delay={[1000, 50]}
             trigger="mouseenter"
-            touch="hold"
+            touch={['hold', 500]}
             disabled={!missingEvs && (format?.includes('random') || totalEvs === maxLegalEvs) && evsLegal}
           >
             <TableGridItem
