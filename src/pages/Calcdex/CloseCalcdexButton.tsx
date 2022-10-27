@@ -4,7 +4,7 @@ import { Button } from '@showdex/components/ui';
 import type { ButtonElement, ButtonProps } from '@showdex/components/ui';
 import styles from './CloseCalcdexButton.module.scss';
 
-export type CloseCalcdexButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' | 'children'>;
+export type CloseCalcdexButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' | 'absoluteHover' | 'children'>;
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -37,6 +37,7 @@ export const CloseCalcdexButton = React.forwardRef<ButtonElement, CloseCalcdexBu
     display="block"
     label="Close Calcdex"
     hoverScale={1}
+    absoluteHover
     childrenFirst
   >
     <i

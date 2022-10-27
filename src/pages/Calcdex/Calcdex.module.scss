@@ -113,10 +113,11 @@
   @include spacing.margin($top: 10px);
 }
 
-.topCloseButton {
-  @include spacing.margin($bottom: 5px);
+div.topCloseButton {
+  justify-content: flex-start;
+  @include spacing.margin($top: 3px, $bottom: 5px);
 }
 
-.bottomCloseButton {
-  @include spacing.margin($top: 10px);
+div.bottomCloseButton {
+  @include spacing.margin($top: 10px, $bottom: 3px);
 }
