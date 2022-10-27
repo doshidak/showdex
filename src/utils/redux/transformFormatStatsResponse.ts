@@ -70,7 +70,7 @@ export const transformFormatStatsResponse = (
 
       name: 'Showdown Usage',
       gen,
-      format: args?.format,
+      format: args?.format?.replace(`gen${gen}`, ''),
       speciesForme,
     };
 
