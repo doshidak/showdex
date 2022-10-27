@@ -4,7 +4,7 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
-import { useCalcdexState, useColorScheme } from '@showdex/redux/store';
+import { useCalcdexSettings, useCalcdexState, useColorScheme } from '@showdex/redux/store';
 import { getAuthUsername, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { FooterButton } from './FooterButton';
@@ -39,6 +39,10 @@ export const Hellodex = ({
   const inBattle = contentWidth < 650;
 
   const authName = getAuthUsername();
+
+  const calcdexSettings = useCalcdexSettings();
+  const neverOpens = calcdexSettings?.openOnStart === 'never';
+
   const calcdexState = useCalcdexState();
   const instancesEmpty = !Object.keys(calcdexState).length;
 
@@ -147,30 +151,68 @@ export const Hellodex = ({
               <div className={styles.empty}>
                 <Svg
                   className={styles.emptyIcon}
-                  description="Info Circle Icon"
-                  src={getResourceUrl('info-circle.svg')}
+                  description={neverOpens ? 'Error Circle Icon' : 'Info Circle Icon'}
+                  src={getResourceUrl(neverOpens ? 'error-circle.svg' : 'info-circle.svg')}
                 />
 
                 <div className={styles.emptyLabel}>
-                  Calculator will automatically open when you
-                  {' '}
-                  <strong>play</strong>
-                  {' '}or{' '}
-                  {/* <strong>spectate</strong> */}
-                  <Button
-                    className={cx(
-                      styles.spectateButton,
-                      typeof app === 'undefined' && styles.disabled,
-                    )}
-                    labelClassName={styles.spectateButtonLabel}
-                    label="spectate"
-                    tooltip="View Active Battles"
-                    hoverScale={1}
-                    absoluteHover
-                    disabled={typeof app === 'undefined'}
-                    onPress={() => app.joinRoom('battles', 'battles')}
-                  />
-                  {' '}a battle.
+                  {neverOpens ? (
+                    <>
+                      Calculator will never open based on your configured
+                      {' '}
+                      <Button
+                        className={styles.spectateButton}
+                        labelClassName={styles.spectateButtonLabel}
+                        label="settings"
+                        tooltip="Open Settings"
+                        hoverScale={1}
+                        absoluteHover
+                        onPress={() => setSettingsVisible(true)}
+                      />
+                      .
+                    </>
+                  ) : (
+                    <>
+                      Calculator will automatically open when you
+
+                      {
+                        ['always', 'playing'].includes(calcdexSettings?.openOnStart) &&
+                        <>
+                          {' '}
+                          <strong>play</strong>
+                        </>
+                      }
+
+                      {
+                        calcdexSettings?.openOnStart === 'always' &&
+                        <>
+                          {' '}or
+                        </>
+                      }
+
+                      {
+                        ['always', 'spectating'].includes(calcdexSettings?.openOnStart) &&
+                        <>
+                          {' '}
+                          <Button
+                            className={cx(
+                              styles.spectateButton,
+                              typeof app === 'undefined' && styles.disabled,
+                            )}
+                            labelClassName={styles.spectateButtonLabel}
+                            label="spectate"
+                            tooltip="View Active Battles"
+                            hoverScale={1}
+                            absoluteHover
+                            disabled={typeof app === 'undefined'}
+                            onPress={() => app.joinRoom('battles', 'battles')}
+                          />
+                        </>
+                      }
+
+                      {' '}a battle.
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
