@@ -56,11 +56,11 @@ const packageInfo = [
 (async () => {
   // yeet the `build` dir, if it exists
   const buildDirPath = path.join(__dirname, 'build');
-  const buildDirExists = await fs.pathExists(buildDirPath);
+  // const buildDirExists = await fs.pathExists(buildDirPath);
 
-  if (buildDirExists) {
-    await fs.remove(buildDirPath);
-  }
+  // if (buildDirExists) {
+  //   await fs.remove(buildDirPath);
+  // }
 
   const server = new WebpackDevServer({
     host: hostname,
