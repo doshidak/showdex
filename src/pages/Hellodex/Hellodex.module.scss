@@ -13,9 +13,9 @@
   @include transition.apply(background-color);
   overflow: hidden;
 
-  &, *, *::before, *::after {
-    box-sizing: border-box;
-  }
+  // &, *, *::before, *::after {
+  //   box-sizing: border-box;
+  // }
 
   &.light {
     color: colors.$black;
@@ -60,8 +60,8 @@
 }
 
 .showdexIcon {
-  @include position.absolute-anchor($x: 50%, $y: -6em, $y-prop: bottom);
-  width: 24em;
+  @include position.absolute-anchor($x: 50%, $y: -5em, $y-prop: bottom);
+  width: 22em;
   @include transition.apply(opacity);
   pointer-events: none;
 

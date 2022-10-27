@@ -17,9 +17,9 @@ $close-icon-size: 28px;
   overflow: hidden;
   z-index: 1;
 
-  &, *, *::before, *::after {
-    box-sizing: border-box;
-  }
+  // &, *, *::before, *::after {
+  //   box-sizing: border-box;
+  // }
 
   &.light {
     color: colors.$black;
