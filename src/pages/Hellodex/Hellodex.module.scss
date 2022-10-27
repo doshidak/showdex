@@ -141,10 +141,10 @@
   background: linear-gradient(65deg, #4A9AC7 1%, #F148CC 99%) 0 0 / 100% 100%;
   background-clip: text;
   @include transition.apply(
-    (margin-right, 5s),
-    (letter-spacing, 5s),
-    (background-position, 5s),
-    (background-size, 5s),
+    (margin-right, 10s),
+    (letter-spacing, 10s),
+    (background-position, 10s),
+    (background-size, 10s),
   );
   // user-select: none;
   // z-index: 1;
