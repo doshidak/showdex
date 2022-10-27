@@ -62,23 +62,41 @@ export interface CalcdexPresetsHookInterface {
 const sortPresets = (
   genlessFormat?: string,
 ): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => (a, b) => {
-  // if (a.name.startsWith(formatSearchString)) {
-  //   return -1;
-  // }
-
   if (!genlessFormat) {
     return 0;
   }
 
-  if (a.format.includes(genlessFormat)) {
+  // first, hard match the genless formats
+  const matchesA = a.format === genlessFormat;
+  const matchesB = b.format === genlessFormat;
+
+  if (matchesA) {
+    // no need to repeat this case below since this only occurs when `a` and `b` both match
+    if (matchesB) {
+      if (formatId(a.name) === 'showdownusage') {
+        return 1;
+      }
+
+      if (formatId(b.name) === 'showdownusage') {
+        return -1;
+      }
+    }
+
     return -1;
   }
 
-  // if (b.name.startsWith(formatSearchString)) {
-  //   return 1;
-  // }
+  if (matchesB) {
+    return 1;
+  }
 
-  if (b.format.includes(genlessFormat)) {
+  // at this point, we should've gotten all the hard matches, so we can do partial matching
+  // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
+  // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
+  if (a.format.endsWith(genlessFormat)) {
+    return -1;
+  }
+
+  if (b.format.endsWith(genlessFormat)) {
     return 1;
   }
 
@@ -192,11 +210,11 @@ export const usePresets = ({
 
   const presets = React.useMemo(() => [
     ...((!!pokemon?.presets?.length && pokemon.presets) || []),
-    ...[
-      ...((!randomsFormat && !!gensPresets?.length && gensPresets) || []),
-      ...((!randomsFormat && !!statsPresets?.length && statsPresets) || []),
-      ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
-    ].filter(Boolean).sort(sortPresets(genlessFormat)),
+    ...((!randomsFormat && [
+      ...((!!gensPresets?.length && gensPresets) || []),
+      ...((!!statsPresets?.length && statsPresets) || []),
+    ]) || []).filter(Boolean).sort(sortPresets(genlessFormat)),
+    ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
   ].filter(Boolean), [
     genlessFormat,
     gensPresets,
