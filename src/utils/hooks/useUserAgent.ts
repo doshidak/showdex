@@ -158,7 +158,5 @@ export const useUserAgent = (): DeepPartial<UaParser.IResult> => {
     userAgent,
   ]);
 
-  console.log('parsedAgent:', parsedAgent);
-
   return parsedAgent;
 };
