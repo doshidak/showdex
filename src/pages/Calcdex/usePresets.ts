@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PokemonUsageFuckedFormes } from '@showdex/consts/pokemon';
 import {
   usePokemonFormatStatsQuery,
   usePokemonPresetQuery,
@@ -111,6 +112,7 @@ const selectPresetsFromResult = (
     return [];
   }
 
+  // attempt to find presets of speciesFormes that match exactly with the firstForme
   const [firstForme] = formes;
   const firstFormePresets = presets
     .filter((p) => !!p?.speciesForme && formatId(p.speciesForme) === firstForme);
@@ -119,6 +121,12 @@ const selectPresetsFromResult = (
     return firstFormePresets;
   }
 
+  // if only 1 forme was provided, just return an empty array
+  if (formes.length === 1) {
+    return [];
+  }
+
+  // return any preset assigned to the current speciesForme (which at this point won't exist, probably) and baseForme
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
@@ -145,14 +153,21 @@ export const usePresets = ({
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
-  const shouldSkip = disabled || !format || !gen || !genlessFormat;
-
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme;
+  const baseForme = speciesForme?.includes('-') // e.g., 'Keldeo-Resolute'
+    ? dex?.species.get(speciesForme)?.baseSpecies // e.g., 'Keldeo'
+    : null;
+
   const formes = Array.from(new Set([
     speciesForme,
-    speciesForme?.includes('-') && dex?.species.get(speciesForme)?.baseSpecies,
+    !!baseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme,
     randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`,
   ].filter(Boolean))).map((f) => formatId(f));
+
+  const shouldSkip = disabled
+    || !format
+    || !gen
+    || !genlessFormat;
 
   const {
     gensPresets,
