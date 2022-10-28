@@ -1,5 +1,5 @@
 import * as React from 'react';
-import useSize from '@react-hook/size';
+// import useSize from '@react-hook/size';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
@@ -7,6 +7,7 @@ import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
 import { useCalcdexSettings, useCalcdexState, useColorScheme } from '@showdex/redux/store';
 import { getAuthUsername, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
+import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
 import { FooterButton } from './FooterButton';
 import { InstanceButton } from './InstanceButton';
 import { SettingsPane } from './SettingsPane';
@@ -29,16 +30,16 @@ export const Hellodex = ({
 }: HellodexProps): JSX.Element => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  const [contentWidth] = useSize(contentRef, {
+  const { size } = useElementSize(contentRef, {
     initialWidth: 400,
-
-    // still need to specify this due to the typedef even tho we're not reading height lol
     initialHeight: 700,
   });
 
-  const inBattle = contentWidth < 650;
-
   const authName = getAuthUsername();
+
+  // globally listen for left/right key presses to mimic native keyboard navigation behaviors
+  // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
+  useRoomNavigation();
 
   const calcdexSettings = useCalcdexSettings();
   const neverOpens = calcdexSettings?.openOnStart === 'never';
@@ -90,13 +91,13 @@ export const Hellodex = ({
         ref={contentRef}
         className={cx(
           styles.content,
-          inBattle && styles.inBattle,
+          ['xs', 'sm'].includes(size) && styles.verySmol,
         )}
       >
         {
           settingsVisible &&
           <SettingsPane
-            inBattle={inBattle}
+            inBattle={['xs', 'sm'].includes(size)}
             onRequestClose={() => setSettingsVisible(false)}
           />
         }
@@ -378,7 +379,7 @@ export const Hellodex = ({
           </div>
 
           <BaseButton
-            className={cx(styles.tizeButton, styles.hideInBattle)}
+            className={cx(styles.tizeButton, styles.hideWhenSmol)}
             aria-label="Tize.io"
             onPress={() => window.open('https://tize.io', '_blank')}
           >
@@ -389,7 +390,7 @@ export const Hellodex = ({
             />
           </BaseButton>
 
-          <div className={cx(styles.credits, styles.hideInBattle)}>
+          <div className={cx(styles.credits, styles.hideWhenSmol)}>
             created with &hearts; by
             <br />
             sumfuk/doshidak &amp; camdawgboi

@@ -533,10 +533,10 @@ export const SettingsPane = ({
                       styles.field,
                       !inBattle && styles.singleColumn,
                     )}
-                    label="Open When Battle Starts"
+                    label="Open When"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
-                      label: 'Always',
+                      label: 'Both',
                       tooltip: 'Always open in all battles.',
                       value: 'always',
                     }, {
