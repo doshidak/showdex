@@ -5,10 +5,14 @@
 @use 'mixins/spacing';
 
 .container {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
   column-gap: 10px;
 
-  &.doubles {
+  &.veryThicc {
+    grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.3fr);
+  }
+
+  &:not(.veryThicc).doubles {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 5px;
   }
@@ -26,26 +30,30 @@
     @include spacing.margin($left: 3px);
   }
 
-  .doubles & {
+  .doubles:not(.veryThicc) & {
     grid-area: 1 / 1;
   }
 }
 
 .leftFieldInput {
-  .doubles & {
+  .doubles:not(.veryThicc) & {
     grid-area: 2 / 1;
   }
 }
 
 .weatherLabel {
-  .doubles & {
+  .veryThicc & {
+    @include spacing.margin($bottom: 3px);
+  }
+
+  .doubles:not(.veryThicc) & {
     grid-area: 3 / 1;
     @include spacing.margin($top: 7px, $bottom: 3px);
   }
 }
 
 .weatherInput {
-  .doubles & {
+  .doubles:not(.veryThicc) & {
     grid-area: 4 / 1;
     @include spacing.margin-xy($x: 15px);
 
@@ -56,14 +64,18 @@
 }
 
 .terrainLabel {
-  .doubles & {
+  .veryThicc & {
+    @include spacing.margin($bottom: 3px);
+  }
+
+  .doubles:not(.veryThicc) & {
     grid-area: 3 / 2;
     @include spacing.margin($top: 7px, $bottom: 3px);
   }
 }
 
 .terrainInput {
-  .doubles & {
+  .doubles:not(.veryThicc) & {
     grid-area: 4 / 2;
     @include spacing.margin-xy($x: 15px);
 
@@ -80,13 +92,13 @@
     @include spacing.margin($right: 3px);
   }
 
-  .doubles & {
+  .doubles:not(.veryThicc) & {
     grid-area: 1 / 2;
   }
 }
 
 .rightFieldInput {
-  .doubles & {
+  .doubles:not(.veryThicc) & {
     grid-area: 2 / 2;
   }
 }

@@ -20,6 +20,11 @@
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
   }
 
+  // &.veryThicc {
+  //   max-width: 500px;
+  //   @include spacing.margin-xy($x: auto);
+  // }
+
   &.light {
     background-color: color.alpha(colors.$white, 0.6);
     box-shadow: (

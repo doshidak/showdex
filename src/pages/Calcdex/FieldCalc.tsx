@@ -149,6 +149,7 @@ export const FieldCalc = ({
         styles.container,
         doubles && styles.doubles,
         containerSize === 'xs' && styles.verySmol,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}

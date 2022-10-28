@@ -119,6 +119,7 @@ export const Calcdex = ({
           }
 
           <PlayerCalc
+            className={styles.section}
             gen={gen}
             format={format}
             rules={rules}
@@ -140,7 +141,7 @@ export const Calcdex = ({
           />
 
           <FieldCalc
-            className={styles.fieldCalc}
+            className={cx(styles.section, styles.fieldCalc)}
             battleId={battleId}
             gen={gen}
             format={format}
@@ -153,7 +154,7 @@ export const Calcdex = ({
           />
 
           <PlayerCalc
-            className={styles.opponentCalc}
+            className={cx(styles.section, styles.opponentCalc)}
             gen={gen}
             format={format}
             rules={rules}

@@ -85,24 +85,28 @@
   // overflow: hidden auto;
   overflow-x: hidden;
 
-  hr {
-    width: 100%;
-    height: 1px;
-    @include spacing.margin-xy($y: 5px);
-    margin-block-start: 0;
-    margin-block-end: 0;
-    border: none;
-    outline: none;
-    user-select: none;
-  }
+  // hr {
+  //   width: 100%;
+  //   height: 1px;
+  //   @include spacing.margin-xy($y: 5px);
+  //   margin-block-start: 0;
+  //   margin-block-end: 0;
+  //   border: none;
+  //   outline: none;
+  //   user-select: none;
+  // }
 
-  .light & hr {
-    background-color: color.alpha(colors.$black, 0.15);
-  }
+  // .light & hr {
+  //   background-color: color.alpha(colors.$black, 0.15);
+  // }
 
-  .dark & hr {
-    background-color: color.alpha(colors.$white, 0.15);
-  }
+  // .dark & hr {
+  //   background-color: color.alpha(colors.$white, 0.15);
+  // }
+}
+
+.section {
+  max-width: 700px;
 }
 
 .fieldCalc {

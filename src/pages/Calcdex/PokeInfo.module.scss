@@ -76,6 +76,10 @@ button.toggleButton {
 .infoContainer {
   flex: 1.25;
   max-width: calc((100% - 40px - 6em) * math.div(5, 8));
+
+  .veryThicc & {
+    max-width: none;
+  }
 }
 
 button.nameButton {
@@ -182,6 +186,10 @@ button.nameButton {
 
   .verySmol & {
     min-width: auto;
+  }
+
+  .veryThicc & {
+    max-width: 225px;
   }
 }
 

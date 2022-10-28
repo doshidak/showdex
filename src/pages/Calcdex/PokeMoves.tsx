@@ -121,6 +121,7 @@ export const PokeMoves = ({
       className={cx(
         styles.container,
         containerSize === 'xs' && styles.verySmol,
+        // ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}

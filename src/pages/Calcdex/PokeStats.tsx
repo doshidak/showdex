@@ -88,6 +88,7 @@ export const PokeStats = ({
         styles.container,
         gen === 1 && styles.legacySpc,
         containerSize === 'xs' && styles.verySmol,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
