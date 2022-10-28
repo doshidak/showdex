@@ -46,6 +46,16 @@ button.usernameButton {
   .dark & {
     color: color.alpha(colors.$white, 0.75);
   }
+
+  &.tester {
+    .light & {
+      color: color.alpha(#009688, 0.8);
+    }
+
+    .dark & {
+      color: color.alpha(color.tint(#009688, 15%), 0.8);
+    }
+  }
 }
 
 .usernameButtonLabel {
@@ -55,22 +65,14 @@ button.usernameButton {
   overflow: hidden;
 }
 
-// button.toggleButton {
-//   font-size: 8px;
-// }
-
-// .toggleButtonLabel {
-//   font-size: 8px;
-//   text-transform: uppercase;
-//
-//   .light &.inactive {
-//     color: colors.$black;
-//   }
-//
-//   .dark &.inactive {
-//     color: colors.$white;
-//   }
-// }
+.usernameButtonIcon {
+  width: 12px;
+  min-width: 12px;
+  height: 12px;
+  min-height: 12px;
+  @include spacing.margin($left: 1px);
+  color: inherit;
+}
 
 .playerActions {
   @include flex.row($align: center);
