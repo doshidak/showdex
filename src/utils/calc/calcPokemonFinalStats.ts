@@ -368,7 +368,7 @@ export const calcPokemonFinalStats = (
       speedMods.push(0.5);
     }
 
-    if (ability === 'unburden' && !item && 'itemremoved' in pokemon.volatiles) {
+    if (ability === 'unburden' || !item || 'itemremoved' in pokemon.volatiles) {
       speedMods.push(2);
     }
 
