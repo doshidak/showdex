@@ -364,12 +364,13 @@ export const PokeInfo = ({
     applyPreset(preset);
   };
 
-  const abilityOptions = React.useMemo(() => buildAbilityOptions(
+  const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
     format,
     pokemon,
     settings?.showAllOptions,
-  ), [
+  )), [
     format,
+    legacy,
     pokemon,
     settings,
   ]);
@@ -395,16 +396,21 @@ export const PokeInfo = ({
     }),
   });
 
-  const itemOptions = React.useMemo(() => buildItemOptions(
+  const itemOptions = React.useMemo(() => (legacy ? [] : buildItemOptions(
     format,
     pokemon,
     // settings?.showAllOptions,
     true, // fuck it w/e lol
-  ), [
+  )), [
     format,
+    legacy,
     pokemon,
     // settings,
   ]);
+
+  const showResetItem = !!pokemon?.dirtyItem
+    && (!!pokemon?.item || !!pokemon?.prevItem)
+    && (pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem;
 
   // handle cycling through the Pokemon's available alternative formes, if any
   // (disabled for legacy gens -- this is enough since nextForme will be null if legacy)
@@ -671,194 +677,202 @@ export const PokeInfo = ({
         </div>
       </div>
 
-      <div
-        className={styles.row}
-        style={{ alignItems: 'flex-start' }}
-      >
-        <div className={styles.rowItem}>
-          <div className={cx(styles.label, styles.dropdownLabel)}>
-            Ability
+      {
+        gen > 1 &&
+        <div
+          className={styles.row}
+          style={{ alignItems: 'flex-start' }}
+        >
+          <div className={styles.rowItem}>
+            <div className={cx(styles.label, styles.dropdownLabel)}>
+              Ability
 
-            {
-              pokemon?.abilityToggleable &&
-              <ToggleButton
-                className={styles.toggleButton}
-                label="Active"
-                tooltip={(
-                  <div className={styles.tooltipContent}>
-                    {pokemon.abilityToggled ? 'Deactivate' : 'Activate'}{' '}
-                    {abilityName ? (
-                      <strong>{abilityName}</strong>
-                    ) : 'Ability'}
-                  </div>
-                )}
-                tooltipDisabled={!settings?.showUiTooltips}
-                absoluteHover
-                active={pokemon.abilityToggled}
-                onPress={() => onPokemonChange?.({
-                  abilityToggled: !pokemon.abilityToggled,
-                })}
-              />
-            }
+              {
+                pokemon?.abilityToggleable &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Active"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      {pokemon.abilityToggled ? 'Deactivate' : 'Activate'}{' '}
+                      {abilityName ? (
+                        <strong>{abilityName}</strong>
+                      ) : 'Ability'}
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  active={pokemon.abilityToggled}
+                  onPress={() => onPokemonChange?.({
+                    abilityToggled: !pokemon.abilityToggled,
+                  })}
+                />
+              }
 
-            {
-              showResetAbility &&
-              <ToggleButton
-                className={styles.toggleButton}
-                label="Reset"
-                tooltip={(
-                  <div className={styles.tooltipContent}>
-                    Reset to Revealed
-                    {' '}
-                    {pokemon?.ability ? (
-                      <strong>{pokemon.ability}</strong>
-                    ) : 'Ability'}
-                  </div>
-                )}
-                tooltipDisabled={!settings?.showUiTooltips}
-                absoluteHover
-                active
-                onPress={handleAbilityReset}
-              />
-            }
+              {
+                showResetAbility &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Reset"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Reset to Revealed
+                      {' '}
+                      {pokemon?.ability ? (
+                        <strong>{pokemon.ability}</strong>
+                      ) : 'Ability'}
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  active
+                  onPress={handleAbilityReset}
+                />
+              }
+            </div>
+
+            <Dropdown
+              aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
+              hint={legacy ? 'N/A' : '???'}
+              // tooltip={abilityDescription ? (
+              //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+              //     {abilityDescription}
+              //   </div>
+              // ) : null}
+              // optionTooltip={abilityOptionTooltip}
+              optionTooltip={PokeAbilityOptionTooltip}
+              optionTooltipProps={{
+                format,
+                hidden: !settings?.showAbilityTooltip,
+              }}
+              input={{
+                name: `PokeInfo:Ability:${pokemonKey}:Dropdown`,
+                value: abilityName,
+                onChange: handleAbilityChange,
+              }}
+              options={abilityOptions}
+              noOptionsMessage="No Abilities"
+              clearable={false}
+              disabled={legacy || !pokemon?.speciesForme}
+            />
           </div>
 
-          <Dropdown
-            aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
-            hint={legacy ? 'N/A' : '???'}
-            // tooltip={abilityDescription ? (
-            //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-            //     {abilityDescription}
-            //   </div>
-            // ) : null}
-            // optionTooltip={abilityOptionTooltip}
-            optionTooltip={PokeAbilityOptionTooltip}
-            optionTooltipProps={{
-              format,
-              hidden: !settings?.showAbilityTooltip,
-            }}
-            input={{
-              name: `PokeInfo:Ability:${pokemonKey}:Dropdown`,
-              value: abilityName,
-              onChange: handleAbilityChange,
-            }}
-            options={abilityOptions}
-            noOptionsMessage="No Abilities"
-            clearable={false}
-            disabled={legacy || !pokemon?.speciesForme}
-          />
-        </div>
+          <div className={styles.rowItem}>
+            <div className={cx(styles.label, styles.dropdownLabel)}>
+              Nature
+            </div>
 
-        <div className={styles.rowItem}>
-          <div className={cx(styles.label, styles.dropdownLabel)}>
-            Nature
+            <Dropdown
+              aria-label={`Available Natures for Pokemon ${friendlyPokemonName}`}
+              hint={legacy ? 'N/A' : '???'}
+              input={{
+                name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
+                value: pokemon?.nature,
+                onChange: (name: Showdown.PokemonNature) => onPokemonChange?.({
+                  nature: name,
+                }),
+              }}
+              options={PokemonCommonNatures.map((name) => ({
+                label: name,
+                rightLabel: PokemonNatureBoosts[name]?.length ? [
+                  !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
+                  !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
+                ].filter(Boolean).join(' ') : 'Neutral',
+                value: name,
+              }))}
+              noOptionsMessage="No Natures"
+              clearable={false}
+              // hideSelections
+              disabled={legacy || !pokemon?.speciesForme}
+            />
           </div>
 
-          <Dropdown
-            aria-label={`Available Natures for Pokemon ${friendlyPokemonName}`}
-            hint={legacy ? 'N/A' : '???'}
-            input={{
-              name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
-              value: pokemon?.nature,
-              onChange: (name: Showdown.PokemonNature) => onPokemonChange?.({
-                nature: name,
-              }),
-            }}
-            options={PokemonCommonNatures.map((name) => ({
-              label: name,
-              rightLabel: PokemonNatureBoosts[name]?.length ? [
-                !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
-                !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
-              ].filter(Boolean).join(' ') : 'Neutral',
-              value: name,
-            }))}
-            noOptionsMessage="No Natures"
-            clearable={false}
-            // hideSelections
-            disabled={legacy || !pokemon?.speciesForme}
-          />
-        </div>
+          <div className={styles.rowItem}>
+            <div className={cx(styles.label, styles.dropdownLabel)}>
+              Item
 
-        <div className={styles.rowItem}>
-          <div className={cx(styles.label, styles.dropdownLabel)}>
-            Item
+              {
+                showResetItem &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Reset"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Reset to
+                      {' '}
+                      {(
+                        pokemon?.prevItemEffect
+                          || pokemon?.itemEffect
+                      )?.split(' ').map((w) => capitalize(w)).join('-') || 'Revealed'}
+                      {' '}
+                      {pokemon?.prevItem || pokemon?.item ? (
+                        <>
+                          <br />
+                          <strong>{pokemon.prevItem || pokemon.item}</strong>
+                        </>
+                      ) : 'Item'}
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  active
+                  onPress={() => onPokemonChange?.({
+                    dirtyItem: null,
+                  })}
+                />
+              }
+            </div>
 
-            {
-              // (!!pokemon?.dirtyItem || (pokemon?.dirtyItem === '' && !!pokemon?.item)) &&
-              (!!pokemon?.dirtyItem && (!!pokemon?.item || !!pokemon?.prevItem) && ((pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem)) &&
-              <ToggleButton
-                className={styles.toggleButton}
-                label="Reset"
-                tooltip={(
-                  <div className={styles.tooltipContent}>
-                    Reset to
-                    {' '}
-                    {(
-                      pokemon?.prevItemEffect
-                        || pokemon?.itemEffect
-                    )?.split(' ').map((w) => capitalize(w)).join('-') || 'Revealed'}
-                    {' '}
-                    {pokemon?.prevItem || pokemon?.item ? (
-                      <>
-                        <br />
-                        <strong>{pokemon.prevItem || pokemon.item}</strong>
-                      </>
-                    ) : 'Item'}
-                  </div>
-                )}
-                tooltipDisabled={!settings?.showUiTooltips}
-                absoluteHover
-                active
-                onPress={() => onPokemonChange?.({
-                  dirtyItem: null,
-                })}
-              />
-            }
-          </div>
-
-          <Dropdown
-            aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
-            hint={gen === 1 ? 'N/A' : 'None'}
-            tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
-              <div className={cx(styles.tooltipContent, styles.descTooltip, styles.itemTooltip)}>
-                {
-                  !!pokemon?.itemEffect &&
-                  <div className={styles.itemEffect}>
-                    {pokemon.itemEffect}
-                  </div>
-                }
-                {
-                  !!pokemon?.prevItem &&
-                  <>
+            <Dropdown
+              aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
+              hint={gen === 1 ? 'N/A' : 'None'}
+              tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
+                <div
+                  className={cx(
+                    styles.tooltipContent,
+                    styles.descTooltip,
+                    styles.itemTooltip,
+                  )}
+                >
+                  {
+                    !!pokemon?.itemEffect &&
                     <div className={styles.itemEffect}>
-                      {pokemon.prevItemEffect || 'Previous'}
+                      {pokemon.itemEffect}
                     </div>
-                    <div className={styles.itemName}>
-                      {pokemon.prevItem}
-                    </div>
-                  </>
-                }
-              </div>
-            ) : null}
-            // optionTooltip={itemOptionTooltip}
-            optionTooltip={PokeItemOptionTooltip}
-            optionTooltipProps={{
-              format,
-              hidden: !settings?.showItemTooltip,
-            }}
-            input={{
-              name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
-              value: itemName,
-              onChange: (name: ItemName) => onPokemonChange?.({
-                dirtyItem: name ?? ('' as ItemName),
-              }),
-            }}
-            options={itemOptions}
-            noOptionsMessage="No Items"
-            disabled={gen === 1 || !pokemon?.speciesForme}
-          />
+                  }
+                  {
+                    !!pokemon?.prevItem &&
+                    <>
+                      <div className={styles.itemEffect}>
+                        {pokemon.prevItemEffect || 'Previous'}
+                      </div>
+                      <div className={styles.itemName}>
+                        {pokemon.prevItem}
+                      </div>
+                    </>
+                  }
+                </div>
+              ) : null}
+              // optionTooltip={itemOptionTooltip}
+              optionTooltip={PokeItemOptionTooltip}
+              optionTooltipProps={{
+                format,
+                hidden: !settings?.showItemTooltip,
+              }}
+              input={{
+                name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
+                value: itemName,
+                onChange: (name: ItemName) => onPokemonChange?.({
+                  dirtyItem: name ?? ('' as ItemName),
+                }),
+              }}
+              options={itemOptions}
+              noOptionsMessage="No Items"
+              disabled={gen === 1 || !pokemon?.speciesForme}
+            />
+          </div>
         </div>
-      </div>
+      }
     </div>
   );
 };
