@@ -228,6 +228,13 @@ export const FieldCalc = ({
                 label={label}
                 tooltip={effectDescription ? (
                   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+                    {
+                      !!dexFieldEffect.name &&
+                      <>
+                        <strong>{dexFieldEffect.name}</strong>
+                        <br />
+                      </>
+                    }
                     {effectDescription}
                   </div>
                 ) : null}
@@ -329,6 +336,13 @@ export const FieldCalc = ({
                 label={label}
                 tooltip={effectDescription ? (
                   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+                    {
+                      !!dexFieldEffect.name &&
+                      <>
+                        <strong>{dexFieldEffect.name}</strong>
+                        <br />
+                      </>
+                    }
                     {effectDescription}
                   </div>
                 ) : null}
