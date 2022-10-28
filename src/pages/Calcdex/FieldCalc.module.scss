@@ -5,20 +5,101 @@
 @use 'mixins/spacing';
 
 .container {
-  grid-template-columns: 1fr 1.1fr 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
   column-gap: 10px;
+
+  &.veryThicc {
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.5fr);
+  }
+
+  &:not(.veryThicc).doubles {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 5px;
+  }
 }
 
 .label {
   @include spacing.margin($bottom: 1px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
+}
 
-  &.leftScreens {
-    @include spacing.margin($left: 7px);
+.leftFieldLabel {
+  @include spacing.margin($left: 7px);
+
+  &.spectating {
+    @include spacing.margin($left: 3px);
   }
 
-  &.rightScreens {
-    @include spacing.margin($right: 7px);
+  .doubles:not(.veryThicc) & {
+    grid-area: 1 / 1;
+  }
+}
+
+.leftFieldInput {
+  .doubles:not(.veryThicc) & {
+    grid-area: 2 / 1;
+  }
+}
+
+.weatherLabel {
+  .veryThicc & {
+    @include spacing.margin($bottom: 3px);
+  }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 3 / 1;
+    @include spacing.margin($top: 7px, $bottom: 3px);
+  }
+}
+
+.weatherInput {
+  .doubles:not(.veryThicc) & {
+    grid-area: 4 / 1;
+    @include spacing.margin-xy($x: 15px);
+
+    .verySmol & {
+      @include spacing.margin-xy($x: 10px);
+    }
+  }
+}
+
+.terrainLabel {
+  .veryThicc & {
+    @include spacing.margin($bottom: 3px);
+  }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 3 / 2;
+    @include spacing.margin($top: 7px, $bottom: 3px);
+  }
+}
+
+.terrainInput {
+  .doubles:not(.veryThicc) & {
+    grid-area: 4 / 2;
+    @include spacing.margin-xy($x: 15px);
+
+    .verySmol & {
+      @include spacing.margin-xy($x: 10px);
+    }
+  }
+}
+
+.rightFieldLabel {
+  @include spacing.margin($right: 7px);
+
+  &.spectating {
+    @include spacing.margin($right: 3px);
+  }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 1 / 2;
+  }
+}
+
+.rightFieldInput {
+  .doubles:not(.veryThicc) & {
+    grid-area: 2 / 2;
   }
 }
 
@@ -27,6 +108,10 @@ button.toggleButton {
   @include spacing.margin-all(1px);
   font-size: 10px;
   text-transform: none;
+
+  .doubles & {
+    min-width: 58px;
+  }
 }
 
 // button.toggleButton {

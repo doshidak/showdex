@@ -47,7 +47,7 @@ export const renderCalcdex = (
   dom: ReactDOM.Root,
   store: RootStore,
   battle?: Showdown.Battle | string,
-  request?: Showdown.BattleRequest,
+  battleRoom?: Showdown.BattleRoom,
 ): void => dom.render((
   <ReduxProvider store={store}>
     <ErrorBoundary
@@ -57,7 +57,8 @@ export const renderCalcdex = (
       <Calcdex
         battle={typeof battle === 'string' ? undefined : battle}
         battleId={typeof battle === 'string' ? battle : undefined}
-        request={request}
+        request={battleRoom?.request}
+        onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
       />
     </ErrorBoundary>
   </ReduxProvider>
@@ -425,8 +426,34 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         }
       }
 
-      battleRoom.updateControls(); // most BattleRoom button callbacks seem to do this at the end lol
-      battle.subscription('callback'); // re-render the Calcdex React root
+      // for mobile (no effect on desktops), prevent pinch zooming and zooming on input focus
+      if (battle.calcdexOverlayVisible) {
+        const $existingMeta = $('meta[data-calcdex*="no-mobile-zoom"]');
+
+        if ($existingMeta.length) {
+          $existingMeta.attr('content', 'width=device-width, initial-scale=1, maximum-scale=1');
+        } else {
+          $('head').append(`
+            <meta
+              data-calcdex="no-mobile-zoom"
+              name="viewport"
+              content="width=device-width, initial-scale=1, maximum-scale=1"
+            />
+          `);
+        }
+      } else {
+        // allow pinch zooming again once the Calcdex is closed
+        // (warning: not enough to just remove the meta tag as the browser will continue to enforce the no pinch zoom!)
+        $('meta[data-calcdex*="no-mobile-zoom"]').attr('content', 'width=device-width, user-scalable=yes');
+      }
+
+      // re-render the Calcdex React root only when opening
+      if (battle.calcdexOverlayVisible) {
+        battle.subscription('callback');
+      }
+
+      // most BattleRoom button callbacks seem to do this at the end lol
+      battleRoom.updateControls();
     };
 
     // render the $rootContainer in the entire battleRoom itself
@@ -756,7 +783,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       battle.calcdexReactRoot,
       store,
       battle,
-      battleRoom.request,
+      battleRoom,
     );
   });
 

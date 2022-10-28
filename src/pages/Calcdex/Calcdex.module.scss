@@ -1,6 +1,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/device';
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
@@ -11,15 +12,20 @@
   // (also + 1px for the border-width)
   @include position.absolute($top: 0, $right: 0, $bottom: 0, $left: 640px + 1px);
   z-index: 5;
+
+  @include device.for-mobile {
+    right: 0;
+    left: 0;
+  }
 }
 
 .container {
   @include position.absolute-fill;
   overflow: hidden;
 
-  &, *, *::before, *::after {
-    box-sizing: border-box;
-  }
+  // &, *, *::before, *::after {
+  //   box-sizing: border-box;
+  // }
 
   // initially added this as a potential fix for the closing dropdown bug on mouse-up,
   // but turns out it was an issue with the .singleValue, which I just added pointer-events: none;,
@@ -79,24 +85,28 @@
   // overflow: hidden auto;
   overflow-x: hidden;
 
-  hr {
-    width: 100%;
-    height: 1px;
-    @include spacing.margin-xy($y: 5px);
-    margin-block-start: 0;
-    margin-block-end: 0;
-    border: none;
-    outline: none;
-    user-select: none;
-  }
+  // hr {
+  //   width: 100%;
+  //   height: 1px;
+  //   @include spacing.margin-xy($y: 5px);
+  //   margin-block-start: 0;
+  //   margin-block-end: 0;
+  //   border: none;
+  //   outline: none;
+  //   user-select: none;
+  // }
 
-  .light & hr {
-    background-color: color.alpha(colors.$black, 0.15);
-  }
+  // .light & hr {
+  //   background-color: color.alpha(colors.$black, 0.15);
+  // }
 
-  .dark & hr {
-    background-color: color.alpha(colors.$white, 0.15);
-  }
+  // .dark & hr {
+  //   background-color: color.alpha(colors.$white, 0.15);
+  // }
+}
+
+.section {
+  max-width: 650px;
 }
 
 .fieldCalc {
@@ -105,4 +115,13 @@
 
 .opponentCalc {
   @include spacing.margin($top: 10px);
+}
+
+div.topCloseButton {
+  justify-content: flex-start;
+  @include spacing.margin($top: 3px, $bottom: 5px);
+}
+
+div.bottomCloseButton {
+  @include spacing.margin($top: 10px, $bottom: 3px);
 }

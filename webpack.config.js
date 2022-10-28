@@ -72,7 +72,7 @@ if (buildTarget === 'firefox') {
 const output = {
   path: path.join(__dirname, __DEV__ ? 'build' : 'dist', buildTarget),
   filename: '[name].js',
-  clean: true, // clean output.path dir before emitting files
+  clean: false, // clean output.path dir before emitting files (update: cleaning it up ourselves via rimraf)
   publicPath: 'auto',
 };
 

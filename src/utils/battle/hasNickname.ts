@@ -25,7 +25,8 @@ export const hasNickname = (
   //   ...(dexSpecies?.cosmeticFormes || []),
   // ].filter(Boolean).map((s) => formatId(s)).includes(formatId(pokemon.name));
 
-  return !pokemon.speciesForme.endsWith('-*')
+  return !pokemon.name.endsWith('-*')
+    && !pokemon.speciesForme.endsWith('-*')
     && pokemon.name !== dexSpecies?.baseSpecies
     && pokemon.name !== pokemon.speciesForme;
 };

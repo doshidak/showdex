@@ -13,9 +13,9 @@
   @include transition.apply(background-color);
   overflow: hidden;
 
-  &, *, *::before, *::after {
-    box-sizing: border-box;
-  }
+  // &, *, *::before, *::after {
+  //   box-sizing: border-box;
+  // }
 
   &.light {
     color: colors.$black;
@@ -55,13 +55,13 @@
   z-index: 1;
 }
 
-.inBattle .hideInBattle {
+.verySmol .hideWhenSmol {
   display: none;
 }
 
 .showdexIcon {
-  @include position.absolute-anchor($x: 50%, $y: -6em, $y-prop: bottom);
-  width: 24em;
+  @include position.absolute-anchor($x: 50%, $y: -5em, $y-prop: bottom);
+  width: 22em;
   @include transition.apply(opacity);
   pointer-events: none;
 
@@ -141,10 +141,10 @@
   background: linear-gradient(65deg, #4A9AC7 1%, #F148CC 99%) 0 0 / 100% 100%;
   background-clip: text;
   @include transition.apply(
-    (margin-right, 5s),
-    (letter-spacing, 5s),
-    (background-position, 5s),
-    (background-size, 5s),
+    (margin-right, 10s),
+    (letter-spacing, 10s),
+    (background-position, 10s),
+    (background-size, 10s),
   );
   // user-select: none;
   // z-index: 1;
@@ -236,7 +236,7 @@
   // overflow: hidden auto;
   // z-index: 1;
 
-  .inBattle & {
+  .verySmol & {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -393,7 +393,7 @@ button.spectateButton {
   @include transition.apply(background-color, border-top-color);
   z-index: 1;
 
-  .inBattle & {
+  .verySmol & {
     justify-content: center;
   }
 
@@ -417,6 +417,10 @@ button.spectateButton {
 
   & > .linkButton:not(.forumButton):not(:last-child) {
     @include spacing.margin($right: 7px);
+
+    .verySmol & {
+      @include spacing.margin($right: 2px);
+    }
   }
 }
 
@@ -424,10 +428,18 @@ button.spectateButton {
   width: 48px;
   height: 45px;
   @include spacing.margin($right: 20px);
+
+  .verySmol & {
+    @include spacing.margin($right: 12px);
+  }
 }
 
 .forumButton {
   @include spacing.margin($right: 15px);
+
+  .verySmol & {
+    @include spacing.margin($right: 7px);
+  }
 }
 
 .linkButton {

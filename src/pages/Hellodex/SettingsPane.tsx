@@ -254,7 +254,7 @@ export const SettingsPane = ({
         offset={[0, 10]}
         delay={[1000, 50]}
         trigger="mouseenter"
-        touch="hold"
+        touch={['hold', 500]}
       >
         <BaseButton
           className={styles.closeButton}
@@ -533,10 +533,10 @@ export const SettingsPane = ({
                       styles.field,
                       !inBattle && styles.singleColumn,
                     )}
-                    label="Open When Battle Starts"
+                    label="Open When"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
-                      label: 'Always',
+                      label: 'Both',
                       tooltip: 'Always open in all battles.',
                       value: 'always',
                     }, {

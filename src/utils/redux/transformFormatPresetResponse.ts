@@ -66,7 +66,7 @@ export const transformFormatPresetResponse = (
 
         name: presetName, // e.g., 'Defensive Pivot'
         gen,
-        format: args?.format, // 'nationaldex'
+        format: args?.format?.replace(`gen${gen}`, ''), // 'nationaldex'
         speciesForme, // do not sanitize
 
         ability: Array.isArray(ability) ? ability[0] : ability,

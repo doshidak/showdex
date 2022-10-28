@@ -12,10 +12,23 @@
   column-gap: 5px;
   // row-gap: 3px;
 
+  &.verySmol {
+    grid-template-columns: minmax(0, 1fr) repeat(6, minmax(0, 1.25fr));
+  }
+
+  &.veryThicc {
+    max-width: 450px;
+    @include spacing.margin-xy($x: auto);
+  }
+
   // in gen 1, there's one less column since SPD isn't a thing (and SPA is called SPC).
   // gen 2 has SPD, so this should only be applied for gen 1.
   &.legacySpc {
     grid-template-columns: minmax(35px, 1fr) repeat(5, minmax(45px, 1.25fr));
+
+    &.verySmol {
+      grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));
+    }
   }
 }
 

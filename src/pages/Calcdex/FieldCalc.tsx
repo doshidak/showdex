@@ -18,6 +18,7 @@ import type { GenerationNum } from '@smogon/calc';
 import type { Weather } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
+import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
@@ -29,6 +30,7 @@ interface FieldCalcProps {
   authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
   field?: CalcdexBattleField;
+  containerSize?: ElementSizeLabel;
   disabled?: boolean;
   onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
 }
@@ -37,6 +39,25 @@ const PlayerSideScreensMap: Record<string, keyof CalcdexPlayerSide> = {
   Light: 'isLightScreen',
   Reflect: 'isReflect',
   Aurora: 'isAuroraVeil',
+};
+
+const PlayerSideDoublesMap: Record<string, keyof CalcdexPlayerSide> = {
+  Hand: 'isHelpingHand',
+  Guard: 'isFriendGuard',
+  Battery: 'isBattery',
+  Power: 'isPowerSpot',
+  Twind: 'isTailwind',
+};
+
+const PlayerSideFieldDexMap: Partial<Record<keyof CalcdexPlayerSide, 'abilities' | 'moves'>> = {
+  isLightScreen: 'moves',
+  isReflect: 'moves',
+  isAuroraVeil: 'moves',
+  isHelpingHand: 'moves',
+  isFriendGuard: 'abilities',
+  isBattery: 'abilities',
+  isPowerSpot: 'abilities',
+  isTailwind: 'moves',
 };
 
 export const FieldCalc = ({
@@ -48,6 +69,7 @@ export const FieldCalc = ({
   authPlayerKey,
   playerKey = 'p1',
   field,
+  containerSize,
   disabled,
   onFieldChange,
 }: FieldCalcProps): JSX.Element => {
@@ -98,11 +120,19 @@ export const FieldCalc = ({
   ]);
 
   const {
+    gameType,
     weather,
     terrain,
     attackerSide: p1Side,
     defenderSide: p2Side,
   } = field || {};
+
+  const doubles = gameType === 'Doubles';
+
+  const sideFieldMap = {
+    ...PlayerSideScreensMap,
+    ...(doubles && PlayerSideDoublesMap),
+  };
 
   // const p1Attacker = [authPlayerKey, playerKey].filter(Boolean).includes('p1');
   const p1Attacker = playerKey === 'p1';
@@ -117,6 +147,9 @@ export const FieldCalc = ({
     <TableGrid
       className={cx(
         styles.container,
+        doubles && styles.doubles,
+        containerSize === 'xs' && styles.verySmol,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -124,54 +157,71 @@ export const FieldCalc = ({
     >
       {/* table headers */}
       <TableGridItem
-        className={cx(styles.label, styles.leftScreens)}
+        className={cx(
+          styles.label,
+          styles.leftFieldLabel,
+          !authPlayerKey && styles.spectating,
+        )}
         align="left"
         header
       >
         {/* p1 screens header */}
         {authPlayerKey ? (
           authPlayerKey === playerKey ? 'Yours' : 'Theirs'
-        ) : <>&uarr; Screens</>}
+        ) : <>&uarr; {doubles ? 'Field' : 'Screens'}</>}
       </TableGridItem>
       <TableGridItem
-        className={styles.label}
+        className={cx(styles.label, styles.weatherLabel)}
         header
       >
         Weather
       </TableGridItem>
       <TableGridItem
-        className={styles.label}
+        className={cx(styles.label, styles.terrainLabel)}
         header
       >
         Terrain
       </TableGridItem>
       <TableGridItem
-        className={cx(styles.label, styles.rightScreens)}
+        className={cx(
+          styles.label,
+          styles.rightFieldLabel,
+          !authPlayerKey && styles.spectating,
+        )}
         align="right"
         header
       >
         {/* p2 screens header */}
         {authPlayerKey ? (
           authPlayerKey === playerKey ? 'Theirs' : 'Yours'
-        ) : <>Screens &darr;</>}
-        {/* Screens */}
-        {/* {!authPlayerKey && <> &darr;</>} */}
+        ) : <>{doubles ? 'Field' : 'Screens'} &darr;</>}
       </TableGridItem>
 
       {/* p1 screens */}
-      <TableGridItem align="left">
-        {Object.entries(PlayerSideScreensMap).map(([
+      <TableGridItem
+        className={styles.leftFieldInput}
+        align="left"
+      >
+        {Object.entries(sideFieldMap).map(([
           label,
           sideKey,
-        ], i) => {
+        ]) => {
           // e.g., 'isAuroraVeil' -> 'AuroraVeil' -> formatId() -> 'auroraveil'
           const screenMoveId = formatId(sideKey.replace('is', ''));
+          const dexMapping = PlayerSideFieldDexMap[sideKey];
 
-          const dexScreenMove = screenMoveId && settings?.showFieldTooltips
-            ? dex.moves.get(screenMoveId)
+          const dexFieldEffect = screenMoveId && settings?.showFieldTooltips
+            ? dex[dexMapping].get(screenMoveId)
             : null;
 
-          const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
+          const notAvailable = gen < (dexFieldEffect?.gen || 0);
+
+          if (notAvailable) {
+            return null;
+          }
+
+          const effectDescription = (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
+            ?.replace("This Pokemon's allies", 'Allies');
 
           return (
             <React.Fragment
@@ -180,9 +230,16 @@ export const FieldCalc = ({
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}
-                tooltip={screenDescription ? (
+                tooltip={effectDescription ? (
                   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-                    {screenDescription}
+                    {
+                      !!dexFieldEffect.name &&
+                      <>
+                        <strong>{dexFieldEffect.name}</strong>
+                        <br />
+                      </>
+                    }
+                    {effectDescription}
                   </div>
                 ) : null}
                 primary
@@ -196,23 +253,18 @@ export const FieldCalc = ({
                 })}
               />
 
-              {i < Object.keys(PlayerSideScreensMap).length - 1 && ' '}
+              {/* {i < Object.keys(sideFieldMap).length - 1 && ' '} */}
             </React.Fragment>
           );
         })}
       </TableGridItem>
 
       {/* weather */}
-      <TableGridItem>
+      <TableGridItem className={styles.weatherInput}>
         <Dropdown
           style={{ textAlign: 'left' }}
           aria-label="Field Weather"
           hint={gen === 1 ? 'N/A' : 'None'}
-          // tooltip={weather && settings?.showFieldTooltips && WeatherDescriptions[weather]?.shortDesc ? (
-          //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-          //     {WeatherDescriptions[weather].shortDesc}
-          //   </div>
-          // ) : null}
           optionTooltip={weatherTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
@@ -235,16 +287,11 @@ export const FieldCalc = ({
       </TableGridItem>
 
       {/* terrain */}
-      <TableGridItem>
+      <TableGridItem className={styles.terrainInput}>
         <Dropdown
           style={{ textAlign: 'left' }}
           aria-label="Field Terrain"
           hint={gen < 6 ? 'N/A' : 'None'}
-          // tooltip={terrain && settings?.showFieldTooltips && TerrainDescriptions[terrain]?.shortDesc ? (
-          //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-          //     {TerrainDescriptions[terrain].shortDesc}
-          //   </div>
-          // ) : null}
           optionTooltip={terrainTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
@@ -264,18 +311,29 @@ export const FieldCalc = ({
       </TableGridItem>
 
       {/* opponent's screens */}
-      <TableGridItem align="right">
-        {Object.entries(PlayerSideScreensMap).map(([
+      <TableGridItem
+        className={styles.rightFieldInput}
+        align="right"
+      >
+        {Object.entries(sideFieldMap).map(([
           label,
           sideKey,
-        ], i) => {
+        ]) => {
           const screenMoveId = formatId(sideKey.replace('is', ''));
+          const dexMapping = PlayerSideFieldDexMap[sideKey];
 
-          const dexScreenMove = screenMoveId && settings?.showFieldTooltips
-            ? dex.moves.get(screenMoveId)
+          const dexFieldEffect = screenMoveId && settings?.showFieldTooltips
+            ? dex[dexMapping].get(screenMoveId)
             : null;
 
-          const screenDescription = dexScreenMove?.shortDesc || dexScreenMove?.desc;
+          const notAvailable = gen < (dexFieldEffect?.gen || 0);
+
+          if (notAvailable) {
+            return null;
+          }
+
+          const effectDescription = (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
+            ?.replace("This Pokemon's allies", 'Allies');
 
           return (
             <React.Fragment
@@ -284,9 +342,16 @@ export const FieldCalc = ({
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}
-                tooltip={screenDescription ? (
+                tooltip={effectDescription ? (
                   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-                    {screenDescription}
+                    {
+                      !!dexFieldEffect.name &&
+                      <>
+                        <strong>{dexFieldEffect.name}</strong>
+                        <br />
+                      </>
+                    }
+                    {effectDescription}
                   </div>
                 ) : null}
                 primary
@@ -300,7 +365,7 @@ export const FieldCalc = ({
                 })}
               />
 
-              {i < Object.keys(PlayerSideScreensMap).length - 1 && ' '}
+              {/* {i < Object.keys(sideFieldMap).length - 1 && ' '} */}
             </React.Fragment>
           );
         })}

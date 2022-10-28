@@ -2,12 +2,28 @@ import * as React from 'react';
 import SimpleBar from 'simplebar';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/app';
+import { useUserAgent } from '@showdex/utils/hooks';
 // import type { Options as SimpleBarOptions } from 'simplebar';
 import styles from './Scrollable.module.scss';
 
 export interface ScrollableProps extends Omit<JSX.IntrinsicElements['div'], 'ref'> {
+  /**
+   * Refers to the scrollable container on Windows/Linux and the root `<div>` container on any other OS.
+   *
+   * * In other words, the custom scrollbar is only rendered on non-macOS and non-mobile installations.
+   *
+   * @since 1.0.5
+   */
   scrollRef?: React.Ref<HTMLDivElement>;
+
+  /**
+   * Only used on non-macOS and non-mobile devices!
+   *
+   * @since 1.0.5
+   */
   contentRef?: React.Ref<HTMLDivElement>;
+
   className?: string;
   style?: React.CSSProperties;
   children?: React.ReactNode;
@@ -39,6 +55,10 @@ export interface ScrollableProps extends Omit<JSX.IntrinsicElements['div'], 'ref
  *     custom `classNames` under its `options` constructor argument, `simplebar-react`
  *     does not take these into account, resulting in double-rendered `SimpleBar`s.
  *   - Link below shows the hardcoded class names in `simplebar-react`.
+ * * As of v1.0.5, the custom scrollbar will only appear on non-macOS and non-mobile devices.
+ *   - For better scrolling performance, we should opt to use the native scrollbar on macOS and mobile devices.
+ *   - In other words, Windows and Linux both show a disgusting scrollbar that takes up space on the DOM,
+ *     hence the custom scrollbar will be rendered then.
  *
  * @see https://github.com/Grsmto/simplebar/blob/dba7414fe04ee70dca781b7b28557f65d3c204b6/packages/simplebar-react/index.js#L100-L129
  * @since 1.0.2
@@ -60,8 +80,12 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   React.useImperativeHandle(scrollRefFromProps, () => scrollRef.current);
   React.useImperativeHandle(contentRefFromProps, () => contentRef.current);
 
+  const userAgent = useUserAgent();
+  const shouldRenderNative = formatId(userAgent?.os?.name) === 'macos'
+    || userAgent?.device?.type === 'mobile';
+
   React.useEffect(() => {
-    if (!containerRef.current) {
+    if (shouldRenderNative || !containerRef.current) {
       return;
     }
 
@@ -95,9 +119,30 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
     // contentRef.current = simpleBarRef.current.getContentElement() as HTMLDivElement;
 
     return () => simpleBarRef.current?.unMount();
-  }, []);
+  }, [
+    shouldRenderNative,
+  ]);
 
   const colorScheme = useColorScheme();
+
+  // prevent the custom scrollbar from rendering (which sets the containerRef, letting SimpleBar instantiate)
+  // if we haven't received anything back from the useUserAgent() hook
+  // (something SHOULD be returned from the hook, even if the parsed properties are undefined)
+  if (shouldRenderNative || !Object.keys(userAgent || {}).length) {
+    return (
+      <div
+        ref={scrollRef}
+        {...props}
+        className={cx(
+          styles.nativeContainer,
+          className,
+        )}
+        style={style}
+      >
+        {children}
+      </div>
+    );
+  }
 
   // SimpleBar lets you define your own divs, as long as the classNames match up.
   // we just have to pass the refs to the scrolableNode and contentNode options.
@@ -155,38 +200,4 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
       </div>
     </div>
   );
-
-  // return (
-  //   <SimpleBar
-  //     ref={simpleBarRef}
-  //     {...props}
-  //     className={cx(
-  //       !!colorScheme && styles[colorScheme],
-  //       className,
-  //     )}
-  //     classNames={{
-  //       contentEl: styles.content,
-  //       contentWrapper: styles.contentWrapper,
-  //       offset: styles.offset,
-  //       mask: styles.mask,
-  //       wrapper: styles.wrapper,
-  //       placeholder: styles.placeholder,
-  //       scrollbar: styles.scrollbar,
-  //       track: styles.track,
-  //       heightAutoObserverWrapperEl: styles.heightObserverWrapper,
-  //       heightAutoObserverEl: styles.heightObserver,
-  //       visible: styles.visible,
-  //       horizontal: styles.horizontal,
-  //       vertical: styles.vertical,
-  //       hover: styles.hover,
-  //       dragging: styles.dragging,
-  //     }}
-  //     // scrollableNodeProps={{
-  //     //   ...scrollableNodeProps,
-  //     //   ref: forwardedRef,
-  //     // }}
-  //   >
-  //     {children}
-  //   </SimpleBar>
-  // );
 });

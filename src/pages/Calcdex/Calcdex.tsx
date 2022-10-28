@@ -1,10 +1,12 @@
 import * as React from 'react';
-import useSize from '@react-hook/size';
+// import useSize from '@react-hook/size';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 // import { logger } from '@showdex/utils/debug';
+import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
+import { CloseCalcdexButton } from './CloseCalcdexButton';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import { useCalcdex } from './useCalcdex';
@@ -14,6 +16,7 @@ interface CalcdexProps {
   battle?: Showdown.Battle;
   battleId?: string;
   request?: Showdown.BattleRequest;
+  onRequestOverlayClose?: () => void;
 }
 
 // const l = logger('@showdex/pages/Calcdex/Calcdex');
@@ -22,15 +25,19 @@ export const Calcdex = ({
   battle,
   battleId: battleIdFromProps,
   request,
+  onRequestOverlayClose,
 }: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const [containerWidth] = useSize(containerRef, {
+  // const [containerWidth] = useSize(containerRef, {
+  //   initialWidth: 400,
+  //   initialHeight: 700,
+  // });
+
+  const { size } = useElementSize(containerRef, {
     initialWidth: 400,
     initialHeight: 700,
   });
-
-  const inBattle = containerWidth < 550;
 
   const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
@@ -48,6 +55,8 @@ export const Calcdex = ({
     battleId: battleIdFromProps,
     request,
   });
+
+  const mobile = useMobileViewport();
 
   if (!shouldRender) {
     return null;
@@ -101,7 +110,16 @@ export const Calcdex = ({
             position="top-right"
           />
 
+          {
+            (renderAsOverlay && mobile) &&
+            <CloseCalcdexButton
+              className={styles.topCloseButton}
+              onPress={onRequestOverlayClose}
+            />
+          }
+
           <PlayerCalc
+            className={styles.section}
             gen={gen}
             format={format}
             rules={rules}
@@ -110,7 +128,7 @@ export const Calcdex = ({
             opponent={opponent}
             field={field}
             defaultName="Player 1"
-            inBattle={inBattle}
+            containerSize={size}
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
               topKey,
@@ -123,19 +141,20 @@ export const Calcdex = ({
           />
 
           <FieldCalc
-            className={styles.fieldCalc}
+            className={cx(styles.section, styles.fieldCalc)}
             battleId={battleId}
             gen={gen}
             format={format}
             authPlayerKey={authPlayerKey}
             playerKey={topKey}
             field={field}
+            containerSize={size}
             disabled={!p1?.pokemon?.length || !p2?.pokemon?.length}
             onFieldChange={updateField}
           />
 
           <PlayerCalc
-            className={styles.opponentCalc}
+            className={cx(styles.section, styles.opponentCalc)}
             gen={gen}
             format={format}
             rules={rules}
@@ -144,7 +163,7 @@ export const Calcdex = ({
             opponent={player}
             field={field}
             defaultName="Player 2"
-            inBattle={inBattle}
+            containerSize={size}
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
               bottomKey,
@@ -155,6 +174,14 @@ export const Calcdex = ({
               autoSelect,
             )}
           />
+
+          {
+            (renderAsOverlay && mobile) &&
+            <CloseCalcdexButton
+              className={styles.bottomCloseButton}
+              onPress={onRequestOverlayClose}
+            />
+          }
         </Scrollable>
       }
     </div>

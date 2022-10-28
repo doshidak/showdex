@@ -213,7 +213,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
         offset={[0, 10]}
         delay={[1000, 50]}
         trigger="mouseenter"
-        touch="hold"
+        touch={['hold', 500]}
         disabled={disabled || !tooltip}
       />
     </>

@@ -8,13 +8,22 @@
 @use 'mixins/transition';
 
 .container {
-  grid-template-columns: minmax(150px, 1.25fr) 1.15fr 1fr;
+  grid-template-columns: minmax(150px, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
   column-gap: 10px;
   row-gap: 3px;
   @include spacing.margin($top: 15px);
   @include spacing.padding($top: 8px, $right: 10px, $bottom: 10px, $left: 10px);
   border-radius: 10px;
   @include transition.apply(background-color, box-shadow);
+
+  &.verySmol {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+
+  // &.veryThicc {
+  //   max-width: 500px;
+  //   @include spacing.margin-xy($x: auto);
+  // }
 
   &.light {
     background-color: color.alpha(colors.$white, 0.6);

@@ -26,6 +26,7 @@ export const createCalcdexRoom = (
   const calcdexRoom = createSideRoom(getCalcdexRoomId(battleId), 'Calcdex', {
     icon: 'calculator',
     focus,
+    maxWidth: 650,
   });
 
   if (!calcdexRoom?.el) {

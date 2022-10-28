@@ -1,12 +1,13 @@
 import * as React from 'react';
-import useSize from '@react-hook/size';
+// import useSize from '@react-hook/size';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
-import { useCalcdexState, useColorScheme } from '@showdex/redux/store';
+import { useCalcdexSettings, useCalcdexState, useColorScheme } from '@showdex/redux/store';
 import { getAuthUsername, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
+import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
 import { FooterButton } from './FooterButton';
 import { InstanceButton } from './InstanceButton';
 import { SettingsPane } from './SettingsPane';
@@ -29,16 +30,20 @@ export const Hellodex = ({
 }: HellodexProps): JSX.Element => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  const [contentWidth] = useSize(contentRef, {
+  const { size } = useElementSize(contentRef, {
     initialWidth: 400,
-
-    // still need to specify this due to the typedef even tho we're not reading height lol
     initialHeight: 700,
   });
 
-  const inBattle = contentWidth < 650;
-
   const authName = getAuthUsername();
+
+  // globally listen for left/right key presses to mimic native keyboard navigation behaviors
+  // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
+  useRoomNavigation();
+
+  const calcdexSettings = useCalcdexSettings();
+  const neverOpens = calcdexSettings?.openOnStart === 'never';
+
   const calcdexState = useCalcdexState();
   const instancesEmpty = !Object.keys(calcdexState).length;
 
@@ -86,13 +91,13 @@ export const Hellodex = ({
         ref={contentRef}
         className={cx(
           styles.content,
-          inBattle && styles.inBattle,
+          ['xs', 'sm'].includes(size) && styles.verySmol,
         )}
       >
         {
           settingsVisible &&
           <SettingsPane
-            inBattle={inBattle}
+            inBattle={['xs', 'sm'].includes(size)}
             onRequestClose={() => setSettingsVisible(false)}
           />
         }
@@ -147,30 +152,68 @@ export const Hellodex = ({
               <div className={styles.empty}>
                 <Svg
                   className={styles.emptyIcon}
-                  description="Info Circle Icon"
-                  src={getResourceUrl('info-circle.svg')}
+                  description={neverOpens ? 'Error Circle Icon' : 'Info Circle Icon'}
+                  src={getResourceUrl(neverOpens ? 'error-circle.svg' : 'info-circle.svg')}
                 />
 
                 <div className={styles.emptyLabel}>
-                  Calculator will automatically open when you
-                  {' '}
-                  <strong>play</strong>
-                  {' '}or{' '}
-                  {/* <strong>spectate</strong> */}
-                  <Button
-                    className={cx(
-                      styles.spectateButton,
-                      typeof app === 'undefined' && styles.disabled,
-                    )}
-                    labelClassName={styles.spectateButtonLabel}
-                    label="spectate"
-                    tooltip="View Active Battles"
-                    hoverScale={1}
-                    absoluteHover
-                    disabled={typeof app === 'undefined'}
-                    onPress={() => app.joinRoom('battles', 'battles')}
-                  />
-                  {' '}a battle.
+                  {neverOpens ? (
+                    <>
+                      Calculator will never open based on your configured
+                      {' '}
+                      <Button
+                        className={styles.spectateButton}
+                        labelClassName={styles.spectateButtonLabel}
+                        label="settings"
+                        tooltip="Open Settings"
+                        hoverScale={1}
+                        absoluteHover
+                        onPress={() => setSettingsVisible(true)}
+                      />
+                      .
+                    </>
+                  ) : (
+                    <>
+                      Calculator will automatically open when you
+
+                      {
+                        ['always', 'playing'].includes(calcdexSettings?.openOnStart) &&
+                        <>
+                          {' '}
+                          <strong>play</strong>
+                        </>
+                      }
+
+                      {
+                        calcdexSettings?.openOnStart === 'always' &&
+                        <>
+                          {' '}or
+                        </>
+                      }
+
+                      {
+                        ['always', 'spectating'].includes(calcdexSettings?.openOnStart) &&
+                        <>
+                          {' '}
+                          <Button
+                            className={cx(
+                              styles.spectateButton,
+                              typeof app === 'undefined' && styles.disabled,
+                            )}
+                            labelClassName={styles.spectateButtonLabel}
+                            label="spectate"
+                            tooltip="View Active Battles"
+                            hoverScale={1}
+                            absoluteHover
+                            disabled={typeof app === 'undefined'}
+                            onPress={() => app.joinRoom('battles', 'battles')}
+                          />
+                        </>
+                      }
+
+                      {' '}a battle.
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
@@ -336,7 +379,7 @@ export const Hellodex = ({
           </div>
 
           <BaseButton
-            className={cx(styles.tizeButton, styles.hideInBattle)}
+            className={cx(styles.tizeButton, styles.hideWhenSmol)}
             aria-label="Tize.io"
             onPress={() => window.open('https://tize.io', '_blank')}
           >
@@ -347,7 +390,7 @@ export const Hellodex = ({
             />
           </BaseButton>
 
-          <div className={cx(styles.credits, styles.hideInBattle)}>
+          <div className={cx(styles.credits, styles.hideWhenSmol)}>
             created with &hearts; by
             <br />
             sumfuk/doshidak &amp; camdawgboi

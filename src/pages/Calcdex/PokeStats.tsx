@@ -20,6 +20,7 @@ import { env } from '@showdex/utils/core';
 import { pluralize } from '@showdex/utils/humanize';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
+import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
@@ -30,7 +31,8 @@ export interface PokeStatsProps {
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
-  playerKey?: CalcdexPlayerKey,
+  playerKey?: CalcdexPlayerKey;
+  containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -43,6 +45,7 @@ export const PokeStats = ({
   opponentPokemon,
   field,
   playerKey,
+  containerSize,
   onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
   const settings = useCalcdexSettings();
@@ -84,6 +87,8 @@ export const PokeStats = ({
       className={cx(
         styles.container,
         gen === 1 && styles.legacySpc,
+        containerSize === 'xs' && styles.verySmol,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -152,7 +157,7 @@ export const PokeStats = ({
             offset={[0, 10]}
             delay={[1000, 50]}
             trigger="mouseenter"
-            touch="hold"
+            touch={['hold', 500]}
             disabled={!missingIvs}
           >
             <TableGridItem
@@ -257,7 +262,7 @@ export const PokeStats = ({
             offset={[0, 10]}
             delay={[1000, 50]}
             trigger="mouseenter"
-            touch="hold"
+            touch={['hold', 500]}
             disabled={!missingEvs && (format?.includes('random') || totalEvs === maxLegalEvs) && evsLegal}
           >
             <TableGridItem

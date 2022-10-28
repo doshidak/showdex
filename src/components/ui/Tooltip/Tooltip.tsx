@@ -113,10 +113,10 @@ export const Tooltip = ({
       animation
       popperOptions={{
         ...popperOptions,
-        modifiers: [...popperModifiers, {
+        modifiers: [...popperModifiers, mounted && !!arrow && {
           name: 'arrow',
           options: { element: arrow },
-        }],
+        }].filter(Boolean),
       }}
       trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
       zIndex={99}

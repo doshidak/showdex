@@ -63,7 +63,7 @@ export const sanitizePlayerSide = (
 
   // check whether we should apply any Spikes and Stealth Rocks
   const applyFieldHazards = gen > 1
-    && !!currentPokemon?.speciesForme
+    // && !!currentPokemon?.speciesForme // no reason to check this lol
     && selectionIndex > -1
     // && activeIndex !== selectionIndex;
     && !activeIndices.includes(selectionIndex);

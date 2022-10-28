@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PokemonUsageFuckedFormes } from '@showdex/consts/pokemon';
 import {
   usePokemonFormatStatsQuery,
   usePokemonPresetQuery,
@@ -62,23 +63,41 @@ export interface CalcdexPresetsHookInterface {
 const sortPresets = (
   genlessFormat?: string,
 ): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => (a, b) => {
-  // if (a.name.startsWith(formatSearchString)) {
-  //   return -1;
-  // }
-
   if (!genlessFormat) {
     return 0;
   }
 
-  if (a.format.includes(genlessFormat)) {
+  // first, hard match the genless formats
+  const matchesA = a.format === genlessFormat;
+  const matchesB = b.format === genlessFormat;
+
+  if (matchesA) {
+    // no need to repeat this case below since this only occurs when `a` and `b` both match
+    if (matchesB) {
+      if (formatId(a.name) === 'showdownusage') {
+        return 1;
+      }
+
+      if (formatId(b.name) === 'showdownusage') {
+        return -1;
+      }
+    }
+
     return -1;
   }
 
-  // if (b.name.startsWith(formatSearchString)) {
-  //   return 1;
-  // }
+  if (matchesB) {
+    return 1;
+  }
 
-  if (b.format.includes(genlessFormat)) {
+  // at this point, we should've gotten all the hard matches, so we can do partial matching
+  // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
+  // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
+  if (a.format.endsWith(genlessFormat)) {
+    return -1;
+  }
+
+  if (b.format.endsWith(genlessFormat)) {
     return 1;
   }
 
@@ -93,6 +112,7 @@ const selectPresetsFromResult = (
     return [];
   }
 
+  // attempt to find presets of speciesFormes that match exactly with the firstForme
   const [firstForme] = formes;
   const firstFormePresets = presets
     .filter((p) => !!p?.speciesForme && formatId(p.speciesForme) === firstForme);
@@ -101,6 +121,12 @@ const selectPresetsFromResult = (
     return firstFormePresets;
   }
 
+  // if only 1 forme was provided, just return an empty array
+  if (formes.length === 1) {
+    return [];
+  }
+
+  // return any preset assigned to the current speciesForme (which at this point won't exist, probably) and baseForme
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
@@ -127,14 +153,21 @@ export const usePresets = ({
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
-  const shouldSkip = disabled || !format || !gen || !genlessFormat;
-
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme;
+  const baseForme = speciesForme?.includes('-') // e.g., 'Keldeo-Resolute'
+    ? dex?.species.get(speciesForme)?.baseSpecies // e.g., 'Keldeo'
+    : null;
+
   const formes = Array.from(new Set([
     speciesForme,
-    speciesForme?.includes('-') && dex?.species.get(speciesForme)?.baseSpecies,
+    !!baseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme,
     randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`,
   ].filter(Boolean))).map((f) => formatId(f));
+
+  const shouldSkip = disabled
+    || !format
+    || !gen
+    || !genlessFormat;
 
   const {
     gensPresets,
@@ -192,11 +225,11 @@ export const usePresets = ({
 
   const presets = React.useMemo(() => [
     ...((!!pokemon?.presets?.length && pokemon.presets) || []),
-    ...[
-      ...((!randomsFormat && !!gensPresets?.length && gensPresets) || []),
-      ...((!randomsFormat && !!statsPresets?.length && statsPresets) || []),
-      ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
-    ].filter(Boolean).sort(sortPresets(genlessFormat)),
+    ...((!randomsFormat && [
+      ...((!!gensPresets?.length && gensPresets) || []),
+      ...((!!statsPresets?.length && statsPresets) || []),
+    ]) || []).filter(Boolean).sort(sortPresets(genlessFormat)),
+    ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
   ].filter(Boolean), [
     genlessFormat,
     gensPresets,

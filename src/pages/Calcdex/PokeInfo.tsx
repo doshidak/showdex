@@ -38,6 +38,7 @@ import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 // import type { DropdownOption } from '@showdex/components/form';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
 import { usePresets } from './usePresets';
@@ -49,6 +50,7 @@ export interface PokeInfoProps {
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
+  containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -60,6 +62,7 @@ export const PokeInfo = ({
   gen,
   format,
   pokemon,
+  containerSize,
   onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
   const settings = useCalcdexSettings();
@@ -136,10 +139,12 @@ export const PokeInfo = ({
     }
 
     // check if we already have revealed moves (typical of spectating or replaying a battle)
-    mutation.moves = mergeRevealedMoves({
-      ...pokemon,
-      moves: mutation.moves,
-    });
+    mutation.moves = pokemon.transformedForme && pokemon.transformedMoves?.length
+      ? [...pokemon.transformedMoves]
+      : mergeRevealedMoves({
+        ...pokemon,
+        moves: mutation.moves,
+      });
 
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
@@ -223,7 +228,7 @@ export const PokeInfo = ({
     }
 
     const existingPreset = pokemon.preset && presets?.length
-      ? presets.find((p) => p.calcdexId === pokemon.preset && (
+      ? presets.find((p) => p?.calcdexId === pokemon.preset && (
         !pokemon.transformedForme
           || formatId(p.name) !== 'yours'
           || appliedTransformedPreset.current
@@ -241,28 +246,35 @@ export const PokeInfo = ({
 
     // Setup the initial preset.
     // If we are playing random battles, grab the appropriate randombattles set.
-    let initialPreset: CalcdexPokemonPreset;
-    if (format.includes('random')) {
-      initialPreset = presets.find((p) => (
-        (p.format === format)
-      ));
-    } else if (downloadUsageStats && prioritizeUsageStats) {
+    let initialPreset: CalcdexPokemonPreset = presets[0]; // presets[0] as the default case
+
+    // update (2022/10/27): will always be first preset in randoms
+    // if (format.includes('random')) {
+    //   initialPreset = presets.find((p) => (
+    //     (p.format === format)
+    //   ));
+    // } else if (downloadUsageStats && prioritizeUsageStats) {
+
+    // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
+    // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
+    // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
+    if (pokemon.transformedForme && presets[1]) {
+      [, initialPreset] = presets; // readability 100
+      appliedTransformedPreset.current = true;
+    }
+
+    if (downloadUsageStats && prioritizeUsageStats) {
       // If we aren't in a random battle, check if we should prioritize
       // the showdown usage stats.
-      initialPreset = presets.find((p) => (
-        (p.format === format && formatId(p.name) === 'showdownusage')
+      const usagePreset = presets.find((p) => (
+        (p.format === format?.replace(/^gen\d/, '') && formatId(p.name) === 'showdownusage')
       ));
-    } else {
-      // Follow the original algorithm for preset setting if neither of
-      // the above cases are true.
-      initialPreset = presets?.find?.((p) => (
-        (!pokemon.transformedForme || formatId(p.name) !== 'yours')
-        && (
-          format?.includes('random') // always grab the first preset in randoms
-          || (downloadUsageStats && prioritizeUsageStats && formatId(p.name) === 'showdownusage')
-          || (format?.includes(p.format) && formatId(p.name) !== 'showdownusage')
-        )
-      )) || presets?.[0];
+
+      // only update if we found a Showdown Usage preset for the format
+      // (otherwise, no set would apply, despite the Pokemon having sets, albeit from other formats, potentially)
+      if (usagePreset) {
+        initialPreset = usagePreset;
+      }
     }
 
     if (!initialPreset) {
@@ -278,10 +290,6 @@ export const PokeInfo = ({
       }
 
       return;
-    }
-
-    if (!appliedTransformedPreset.current) {
-      appliedTransformedPreset.current = true;
     }
 
     // l.debug(
@@ -339,12 +347,7 @@ export const PokeInfo = ({
   ) * (shouldDmaxHp ? 2 : 1);
 
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
-  // const dexAbility = abilityName ? dex?.abilities.get(abilityName) : null;
-  // const abilityDescription = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
-
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
-  // const dexItem = itemName ? dex?.items.get(itemName) : null;
-  // const itemDescription = formatDexDescription(dexItem?.shortDesc || dexItem?.desc);
 
   const presetOptions = React.useMemo(
     () => buildPresetOptions(presets),
@@ -361,37 +364,16 @@ export const PokeInfo = ({
     applyPreset(preset);
   };
 
-  const abilityOptions = React.useMemo(() => buildAbilityOptions(
+  const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
     format,
     pokemon,
     settings?.showAllOptions,
-  ), [
+  )), [
     format,
+    legacy,
     pokemon,
     settings,
   ]);
-
-  // const abilityOptionTooltip = React.useCallback((option: DropdownOption<AbilityName>) => {
-  //   if (!option?.value || !settings?.showAbilityTooltip) {
-  //     return null;
-  //   }
-  //
-  //   const dexAbility = dex?.abilities.get(option.value);
-  //   const description = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
-  //
-  //   if (!description) {
-  //     return null;
-  //   }
-  //
-  //   return (
-  //     <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-  //       {description}
-  //     </div>
-  //   );
-  // }, [
-  //   dex?.abilities,
-  //   settings,
-  // ]);
 
   const showResetAbility = !!pokemon?.dirtyAbility
     && !pokemon.transformedForme
@@ -414,38 +396,21 @@ export const PokeInfo = ({
     }),
   });
 
-  const itemOptions = React.useMemo(() => buildItemOptions(
+  const itemOptions = React.useMemo(() => (legacy ? [] : buildItemOptions(
     format,
     pokemon,
     // settings?.showAllOptions,
     true, // fuck it w/e lol
-  ), [
+  )), [
     format,
+    legacy,
     pokemon,
     // settings,
   ]);
 
-  // const itemOptionTooltip = React.useCallback((option: DropdownOption<ItemName>) => {
-  //   if (!option?.value || !settings?.showItemTooltip) {
-  //     return null;
-  //   }
-  //
-  //   const dexItem = dex?.items.get(option.value);
-  //   const description = formatDexDescription(dexItem?.shortDesc || dexItem?.desc);
-  //
-  //   if (!description) {
-  //     return null;
-  //   }
-  //
-  //   return (
-  //     <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-  //       {description}
-  //     </div>
-  //   );
-  // }, [
-  //   dex?.items,
-  //   settings,
-  // ]);
+  const showResetItem = !!pokemon?.dirtyItem
+    && (!!pokemon?.item || !!pokemon?.prevItem)
+    && (pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem;
 
   // handle cycling through the Pokemon's available alternative formes, if any
   // (disabled for legacy gens -- this is enough since nextForme will be null if legacy)
@@ -541,6 +506,8 @@ export const PokeInfo = ({
     <div
       className={cx(
         styles.container,
+        containerSize === 'xs' && styles.verySmol,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -634,7 +601,7 @@ export const PokeInfo = ({
                 offset={[0, 10]}
                 delay={[250, 50]}
                 trigger="mouseenter"
-                touch="hold"
+                touch={['hold', 500]}
                 disabled={!maxHp}
               >
                 <div className={styles.hpPercentage}>
@@ -710,194 +677,202 @@ export const PokeInfo = ({
         </div>
       </div>
 
-      <div
-        className={styles.row}
-        style={{ alignItems: 'flex-start' }}
-      >
-        <div className={styles.rowItem}>
-          <div className={cx(styles.label, styles.dropdownLabel)}>
-            Ability
+      {
+        gen > 1 &&
+        <div
+          className={styles.row}
+          style={{ alignItems: 'flex-start' }}
+        >
+          <div className={styles.rowItem}>
+            <div className={cx(styles.label, styles.dropdownLabel)}>
+              Ability
 
-            {
-              pokemon?.abilityToggleable &&
-              <ToggleButton
-                className={styles.toggleButton}
-                label="Active"
-                tooltip={(
-                  <div className={styles.tooltipContent}>
-                    {pokemon.abilityToggled ? 'Deactivate' : 'Activate'}{' '}
-                    {abilityName ? (
-                      <strong>{abilityName}</strong>
-                    ) : 'Ability'}
-                  </div>
-                )}
-                tooltipDisabled={!settings?.showUiTooltips}
-                absoluteHover
-                active={pokemon.abilityToggled}
-                onPress={() => onPokemonChange?.({
-                  abilityToggled: !pokemon.abilityToggled,
-                })}
-              />
-            }
+              {
+                pokemon?.abilityToggleable &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Active"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      {pokemon.abilityToggled ? 'Deactivate' : 'Activate'}{' '}
+                      {abilityName ? (
+                        <strong>{abilityName}</strong>
+                      ) : 'Ability'}
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  active={pokemon.abilityToggled}
+                  onPress={() => onPokemonChange?.({
+                    abilityToggled: !pokemon.abilityToggled,
+                  })}
+                />
+              }
 
-            {
-              showResetAbility &&
-              <ToggleButton
-                className={styles.toggleButton}
-                label="Reset"
-                tooltip={(
-                  <div className={styles.tooltipContent}>
-                    Reset to Revealed
-                    {' '}
-                    {pokemon?.ability ? (
-                      <strong>{pokemon.ability}</strong>
-                    ) : 'Ability'}
-                  </div>
-                )}
-                tooltipDisabled={!settings?.showUiTooltips}
-                absoluteHover
-                active
-                onPress={handleAbilityReset}
-              />
-            }
+              {
+                showResetAbility &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Reset"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Reset to Revealed
+                      {' '}
+                      {pokemon?.ability ? (
+                        <strong>{pokemon.ability}</strong>
+                      ) : 'Ability'}
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  active
+                  onPress={handleAbilityReset}
+                />
+              }
+            </div>
+
+            <Dropdown
+              aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
+              hint={legacy ? 'N/A' : '???'}
+              // tooltip={abilityDescription ? (
+              //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+              //     {abilityDescription}
+              //   </div>
+              // ) : null}
+              // optionTooltip={abilityOptionTooltip}
+              optionTooltip={PokeAbilityOptionTooltip}
+              optionTooltipProps={{
+                format,
+                hidden: !settings?.showAbilityTooltip,
+              }}
+              input={{
+                name: `PokeInfo:Ability:${pokemonKey}:Dropdown`,
+                value: abilityName,
+                onChange: handleAbilityChange,
+              }}
+              options={abilityOptions}
+              noOptionsMessage="No Abilities"
+              clearable={false}
+              disabled={legacy || !pokemon?.speciesForme}
+            />
           </div>
 
-          <Dropdown
-            aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
-            hint={legacy ? 'N/A' : '???'}
-            // tooltip={abilityDescription ? (
-            //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-            //     {abilityDescription}
-            //   </div>
-            // ) : null}
-            // optionTooltip={abilityOptionTooltip}
-            optionTooltip={PokeAbilityOptionTooltip}
-            optionTooltipProps={{
-              format,
-              hidden: !settings?.showAbilityTooltip,
-            }}
-            input={{
-              name: `PokeInfo:Ability:${pokemonKey}:Dropdown`,
-              value: abilityName,
-              onChange: handleAbilityChange,
-            }}
-            options={abilityOptions}
-            noOptionsMessage="No Abilities"
-            clearable={false}
-            disabled={legacy || !pokemon?.speciesForme}
-          />
-        </div>
+          <div className={styles.rowItem}>
+            <div className={cx(styles.label, styles.dropdownLabel)}>
+              Nature
+            </div>
 
-        <div className={styles.rowItem}>
-          <div className={cx(styles.label, styles.dropdownLabel)}>
-            Nature
+            <Dropdown
+              aria-label={`Available Natures for Pokemon ${friendlyPokemonName}`}
+              hint={legacy ? 'N/A' : '???'}
+              input={{
+                name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
+                value: pokemon?.nature,
+                onChange: (name: Showdown.PokemonNature) => onPokemonChange?.({
+                  nature: name,
+                }),
+              }}
+              options={PokemonCommonNatures.map((name) => ({
+                label: name,
+                rightLabel: PokemonNatureBoosts[name]?.length ? [
+                  !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
+                  !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
+                ].filter(Boolean).join(' ') : 'Neutral',
+                value: name,
+              }))}
+              noOptionsMessage="No Natures"
+              clearable={false}
+              // hideSelections
+              disabled={legacy || !pokemon?.speciesForme}
+            />
           </div>
 
-          <Dropdown
-            aria-label={`Available Natures for Pokemon ${friendlyPokemonName}`}
-            hint={legacy ? 'N/A' : '???'}
-            input={{
-              name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
-              value: pokemon?.nature,
-              onChange: (name: Showdown.PokemonNature) => onPokemonChange?.({
-                nature: name,
-              }),
-            }}
-            options={PokemonCommonNatures.map((name) => ({
-              label: name,
-              rightLabel: PokemonNatureBoosts[name]?.length ? [
-                !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
-                !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
-              ].filter(Boolean).join(' ') : 'Neutral',
-              value: name,
-            }))}
-            noOptionsMessage="No Natures"
-            clearable={false}
-            // hideSelections
-            disabled={legacy || !pokemon?.speciesForme}
-          />
-        </div>
+          <div className={styles.rowItem}>
+            <div className={cx(styles.label, styles.dropdownLabel)}>
+              Item
 
-        <div className={styles.rowItem}>
-          <div className={cx(styles.label, styles.dropdownLabel)}>
-            Item
+              {
+                showResetItem &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label="Reset"
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Reset to
+                      {' '}
+                      {(
+                        pokemon?.prevItemEffect
+                          || pokemon?.itemEffect
+                      )?.split(' ').map((w) => capitalize(w)).join('-') || 'Revealed'}
+                      {' '}
+                      {pokemon?.prevItem || pokemon?.item ? (
+                        <>
+                          <br />
+                          <strong>{pokemon.prevItem || pokemon.item}</strong>
+                        </>
+                      ) : 'Item'}
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  active
+                  onPress={() => onPokemonChange?.({
+                    dirtyItem: null,
+                  })}
+                />
+              }
+            </div>
 
-            {
-              // (!!pokemon?.dirtyItem || (pokemon?.dirtyItem === '' && !!pokemon?.item)) &&
-              (!!pokemon?.dirtyItem && (!!pokemon?.item || !!pokemon?.prevItem) && ((pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem)) &&
-              <ToggleButton
-                className={styles.toggleButton}
-                label="Reset"
-                tooltip={(
-                  <div className={styles.tooltipContent}>
-                    Reset to
-                    {' '}
-                    {(
-                      pokemon?.prevItemEffect
-                        || pokemon?.itemEffect
-                    )?.split(' ').map((w) => capitalize(w)).join('-') || 'Revealed'}
-                    {' '}
-                    {pokemon?.prevItem || pokemon?.item ? (
-                      <>
-                        <br />
-                        <strong>{pokemon.prevItem || pokemon.item}</strong>
-                      </>
-                    ) : 'Item'}
-                  </div>
-                )}
-                tooltipDisabled={!settings?.showUiTooltips}
-                absoluteHover
-                active
-                onPress={() => onPokemonChange?.({
-                  dirtyItem: null,
-                })}
-              />
-            }
-          </div>
-
-          <Dropdown
-            aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
-            hint={gen === 1 ? 'N/A' : 'None'}
-            tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
-              <div className={cx(styles.tooltipContent, styles.descTooltip, styles.itemTooltip)}>
-                {
-                  !!pokemon?.itemEffect &&
-                  <div className={styles.itemEffect}>
-                    {pokemon.itemEffect}
-                  </div>
-                }
-                {
-                  !!pokemon?.prevItem &&
-                  <>
+            <Dropdown
+              aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
+              hint={gen === 1 ? 'N/A' : 'None'}
+              tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
+                <div
+                  className={cx(
+                    styles.tooltipContent,
+                    styles.descTooltip,
+                    styles.itemTooltip,
+                  )}
+                >
+                  {
+                    !!pokemon?.itemEffect &&
                     <div className={styles.itemEffect}>
-                      {pokemon.prevItemEffect || 'Previous'}
+                      {pokemon.itemEffect}
                     </div>
-                    <div className={styles.itemName}>
-                      {pokemon.prevItem}
-                    </div>
-                  </>
-                }
-              </div>
-            ) : null}
-            // optionTooltip={itemOptionTooltip}
-            optionTooltip={PokeItemOptionTooltip}
-            optionTooltipProps={{
-              format,
-              hidden: !settings?.showItemTooltip,
-            }}
-            input={{
-              name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
-              value: itemName,
-              onChange: (name: ItemName) => onPokemonChange?.({
-                dirtyItem: name ?? ('' as ItemName),
-              }),
-            }}
-            options={itemOptions}
-            noOptionsMessage="No Items"
-            disabled={gen === 1 || !pokemon?.speciesForme}
-          />
+                  }
+                  {
+                    !!pokemon?.prevItem &&
+                    <>
+                      <div className={styles.itemEffect}>
+                        {pokemon.prevItemEffect || 'Previous'}
+                      </div>
+                      <div className={styles.itemName}>
+                        {pokemon.prevItem}
+                      </div>
+                    </>
+                  }
+                </div>
+              ) : null}
+              // optionTooltip={itemOptionTooltip}
+              optionTooltip={PokeItemOptionTooltip}
+              optionTooltipProps={{
+                format,
+                hidden: !settings?.showItemTooltip,
+              }}
+              input={{
+                name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
+                value: itemName,
+                onChange: (name: ItemName) => onPokemonChange?.({
+                  dirtyItem: name ?? ('' as ItemName),
+                }),
+              }}
+              options={itemOptions}
+              noOptionsMessage="No Items"
+              disabled={gen === 1 || !pokemon?.speciesForme}
+            />
+          </div>
         </div>
-      </div>
+      }
     </div>
   );
 };
