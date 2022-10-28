@@ -6,21 +6,47 @@
   <code>showdex</code>
 </h1>
 
-&nbsp;&nbsp;Current&nbsp;&nbsp;<br>[v1.0.4](https://github.com/doshidak/showdex/releases/tag/v1.0.4) | Install on<br>[Chrome · Opera · Edge](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | Discuss on<br>[Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/) | &nbsp;What's Cookin'&nbsp;<br>[Features](https://github.com/users/doshidak/projects/1) · [Bugs](https://github.com/users/doshidak/projects/2) | [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
---- | --- | --- | --- | ---
+Current [v1.0.5](https://github.com/doshidak/showdex/releases/tag/v1.0.5) | Install on [Chrome · Opera · Edge](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/)
+--- | --- | ---
 
 <br>
 
-**Showdex** is a browser extension for [Pokémon Showdown](https://pokemonshowdown.com) that brings the [Damage Calculator](https://calc.pokemonshowdown.com) you know and love right into your battle! Automatically syncs all Pokémon and field conditions as you play, so you can spend *less time* shitting brix and *more time* [hitting kicks](https://www.smogon.com/dex/ss/moves/high-jump-kick).
+**Showdex** is a browser extension for [Pokémon Showdown](https://pokemonshowdown.com) that brings the [Damage Calculator](https://calc.pokemonshowdown.com) you know & love right into your battle! Automatically syncs all Pokémon & field conditions as you play, so you can spend *less time* shitting brix & *more time* [hitting kicks](https://www.smogon.com/dex/ss/moves/high-jump-kick).
+
+<br>
 
 Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (+ any native [**Chromium**](https://www.chromium.org/Home) browser, like **Opera**, **Edge** & **Brave**) & [**Firefox**](https://addons.mozilla.org/en-US/firefox/addon/showdex/).
 
-> **Note**  
-> Unfortunately, we don't ever plan on supporting **Safari** since [Apple requires us to shell out $100/year for the Apple Developer Program](https://developer.apple.com/documentation/safariservices/safari_web_extensions) just to distribute a singular *free* extension on the App Store. Alternative would be to manually distribute the extension, but there's the potential issue of codesigning, making for a very unpleasant installation process. Thanks Tim!
+<details>
+  <summary>
+    <strong>
+      &nbsp;&nbsp;༼ つ ಥ_ಥ ༽つ&nbsp;&nbsp;Safari
+    </strong>
+    &nbsp;...?
+  </summary>
+
+  ---
+  Unfortunately, we don't ~~ever~~ plan on supporting **Safari** since [Apple requires us to shell out $100/year for the Apple Developer Program](https://developer.apple.com/documentation/safariservices/safari_web_extensions) just to distribute a singular *free* extension on the App Store.
+  
+  Alternative would be to manually distribute the extension, but there's the potential issue of codesigning, making for a very unpleasant installation process.
+  
+  Thanks Tim!
+
+  [Would you like to know more?](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/post-9368925)
+  | --- |
+  ---
+</details>
 
 <br>
 
-## Developer Zone
+### Navigation
+
+[Report a Bug](#issues) | [Known Bugs](https://github.com/users/doshidak/projects/2) | [Planned Features](https://github.com/users/doshidak/projects/1) | [Submit a PR](#prs)
+--- | --- | --- | ---
+
+<br>
+
+# Developer Zone
 
 > **Warning**  
 > You are about to get in the zone, the developer zone.  
@@ -28,7 +54,7 @@ Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpna
 
 <br>
 
-### Developer SparkNotes™
+## Developer SparkNotes™
 
 > **Note**  
 > This section is a work-in-progress.
@@ -42,7 +68,27 @@ This extension is written in **TypeScript**, which is essentially JavaScript on 
 * **ESLint** for *suggestive* code linting, and
 * **webpack** for chunking & bundling.
 
-<br>
+<details>
+  <summary>
+    <table>
+      <thead>
+        <tr>
+          <th>&nbsp;How It's Made™&nbsp;</tm>
+        </tr>
+      </thead>
+    </table>
+  </summary>
+
+  ---
+
+  > **Note**  
+  > This section is a work-in-progress.
+
+  [uhhhhhhhhh](https://youtube.com/watch?v=GcSfbaac9eg&t=29s)
+
+  ---
+  <br>
+</details>
 
 ### Requirements
 
@@ -52,7 +98,7 @@ This extension is written in **TypeScript**, which is essentially JavaScript on 
 
 <br>
 
-### Setup
+## ①&nbsp;&nbsp;Setup
 
 > **Note**  
 > If your browser is already configured for extension development, you can skip this part.
@@ -61,7 +107,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
 <details>
   <summary>
-    <strong>Google Chrome</strong>
+    &nbsp;<strong>Google Chrome</strong>
   </summary>
 
   1. Navigate to the **Chrome extensions** page (`chrome://extensions`).
@@ -71,7 +117,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
 <details>
   <summary>
-    <strong>Mozilla Firefox</strong>
+    &nbsp;<strong>Mozilla Firefox</strong>
   </summary>
 
   1. Navigate to the **Advanced Preferences** page (`about:config`).
@@ -84,7 +130,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
 <br>
 
-### Installation
+## ②&nbsp;&nbsp;Installation
 
 > **Note**  
 > These instructions are for building the extension from **source**.  
@@ -96,7 +142,13 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
 <details>
   <summary>
-    <strong>Info</strong> &mdash; Post-Installation Scripts
+    <table>
+      <thead>
+        <tr>
+          <th>&nbsp;Post-Installation Scripts&nbsp;</th>
+        </tr>
+      </thead>
+    </table>
   </summary>
 
   ---
@@ -133,10 +185,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
 <br>
 
-### Development
-
-> **Warning**  
-> Although this project makes use of TypeScript & ESLint, they are only used *suggestively*. In other words, your code will still compile even if you have errors!
+## ③&nbsp;&nbsp;Development
 
 > **Note**  
 > `yarn dev` is an alias of `yarn dev:chrome`.
@@ -144,11 +193,16 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 1. `cd showdex`
 2. `yarn dev:chrome` or `yarn dev:firefox`
 
+<br>
+
+> **Warning**  
+> Although this project makes use of TypeScript & ESLint, they are only used *suggestively*. In other words, your code will still compile even if you have errors!
+
 Built contents will be dumped into a **`build` directory** in the project root (will be created if it doesn't exist).
 
 <details>
   <summary>
-    <strong>Google Chrome</strong>
+    &nbsp;<strong>Google Chrome</strong>
   </summary>
 
   ---
@@ -161,12 +215,11 @@ Built contents will be dumped into a **`build` directory** in the project root (
   6. Play or spectate a battle.
 
   ---
-  <br>
 </details>
 
 <details>
   <summary>
-    <strong>Mozilla Firefox</strong>
+    &nbsp;<strong>Mozilla Firefox</strong>
   </summary>
 
   ---
@@ -179,12 +232,19 @@ Built contents will be dumped into a **`build` directory** in the project root (
   6. Play or spectate a battle.
 
   ---
-  <br>
 </details>
+
+<br>
 
 <details>
   <summary>
-    <strong>Info</strong> &mdash; Hot-Reloading
+    <table>
+      <thead>
+        <tr>
+          <th>&nbsp;"Hot" Reloading&nbsp;</th>
+        </tr>
+      </thead>
+    </table>
   </summary>
 
   ---
@@ -198,21 +258,22 @@ Built contents will be dumped into a **`build` directory** in the project root (
   * For **Firefox**, you'll need to **Reload** the extension in the **Debugging** page (`about:debugging`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
 
   ---
-  <br>
 </details>
 
 <br>
 
-### Building
-
-> **Warning**  
-> As mentioned in the [**Development**](#development) section, TypeScript & ESLint are configured to be *suggestive*, so your code will still compile even if you have errors!
+## ④&nbsp;&nbsp;Building
 
 > **Note**  
 > `yarn build` is an alias of `yarn build:chrome && yarn build:firefox`.
 
 1. `cd showdex`
 2. `yarn build:chrome` or `yarn build:firefox`
+
+<br>
+
+> **Warning**  
+> As mentioned in the [**Development**](#development) section, TypeScript & ESLint are configured to be *suggestive*, so your code will still compile even if you have errors!
 
 Built contents will be dumped into a **`dist` directory** in the project root (will be created if it doesn't exist).
 
@@ -221,62 +282,169 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 * For **Chrome**, a packaged extension under `showdex-...chrome.zip` in `dist`, and
 * For **Firefox**, a packaged extension under `showdex-...firefox.xpi` in `dist`.
 
-> **Note**  
-> Courtesy of [AMO by Mozilla](https://addons.mozilla.org), every build now comes with its very own bundle size pie chart, showing you exactly which unchunked packages in the bundle are too **thicc**. AMO enforces a 5 MB size limit per file.  
+<details>
+  <summary>
+    <table>
+      <thead>
+        <tr>
+          <th>&nbsp;What's the HTML file?&nbsp;</th>
+        </tr>
+      </thead>
+    </table>
+  </summary>
+
+  ---
+  Builds for each target come with their very own bundle size pie chart, showing you exactly which modules in the bundle are too **thicc**. Particularly useful for finding modules to [chunk](https://webpack.js.org/guides/code-splitting), especially since [AMO](https://addons.mozilla.org) enforces a 5 MB size limit per file.
+
+  * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
+  ---
+</details>
+
+<br>
+
+# Contributing
+
+<p align="center">
+  <strong>
+    (ﾉ◕ヮ◕)ﾉ* :･ﾟ✧&nbsp;&nbsp;Issues & PRs (Pull Requests) are <em>very</em> welcome!&nbsp;&nbsp;✧ﾟ･: *ヽ(◕ヮ◕ヽ)
+  </strong>
+</p>
+
+<br>
+
+## Issues
+
+**Found a bug? · Got a cool idea? · Have suggestions? · Hate these questions & demand answers?**
+
+> I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of.
 >
-> * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
+> If possible, including the following would be **immensely** helpful!
+>
+> * **Browser** (e.g., Chrome, Firefox, etc.)
+> * **Showdex Version** (e.g., v1.0.4)
+> * **Format**, if applicable (e.g., Gen 8 National Dex)
 
 <br>
 
-### Contributing
-
-**(ﾉ◕ヮ◕)ﾉ\*:･ﾟ✧ Issues & PRs (Pull Requests) are *very* welcome! ✧ﾟ･: \*ヽ(◕ヮ◕ヽ)**
-
-#### Issues
-
-I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of.
-
-If possible, including the following would be **immensely** helpful!
-
-* **Browser** (e.g., Chrome, Firefox, etc.)
-* **Showdex Version** (e.g., v1.0.2)
-* **Format**, if applicable (e.g., gen8nationaldex)
-
-#### PRs
-
-> **Note**  
-> This repo doesn't have any fancy CI integrations at the moment.
-
-* **Fork** this repo and **commit** changes to your fork,
-* **Style** your code according to the [**ESLint rules**](./.eslintrc.json),
-* **Create** a PR from your fork to this repo, and
-* **Provide** a brief description of your changes in your PR.
-
-Thanks! &hearts;
+&nbsp;[Create a New Issue](https://github.com/doshidak/showdex/issues/new)&nbsp;
+--- |
 
 <br>
 
-## How It's Made™
+## PRs
 
-> **Note**  
-> This section is a work-in-progress.
+**Fixed a bug? · Added something cool?**
 
-uhhhhhhhhh
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
+
+> Not a stickler with these either, but at the very least, please:
+>
+> * **Fork** this repo & **commit** changes to your fork,
+> * **Style** your code according to the [**ESLint rules**](./.eslintrc.json),
+> * **Create** a PR from your fork to this repo, and
+> * **Provide** a brief description of your changes in your PR.
+>
+> Although this project makes use of [**Commitizen**](http://commitizen.github.io/cz-cli), you don't need to format your commit messages this way. Use whatever you're comfortable with!
+>
+> Additionally, I don't make use of any fancy automations like CI (Continuous Integration), so each PR will be manually reviewed. Your patience is greatly appreciated!
 
 <br>
 
-## Credits
+&nbsp;[Fork Me on GitHub](https://github.com/doshidak/showdex/fork)&nbsp;
+--- |
 
-> **Note**  
-> This section is a work-in-progress.
+<br>
+
+# Credits
 
 big thank to:
 
-* [**camdawgboi**](https://pokemonshowdown.com/users/camdawgboi) for the idea and UI/UX design,
-* [**ttoki**](https://pokemonshowdown.com/users/ttoki) for being our first tester,
-* [**pkmn.cc**](https://pkmn.cc) for keeping the Smogon sets hot and fresh and downloadable,
-* **Austin** for the endorsement and support,
-* **Honko** for the original damage calculator,
-* **Zarel** and the [**Showdown Staff & Contributors**](https://pokemonshowdown.com/credits) for this would literally be nothing without them,
-* **Game Freak** and **Nintendo** for good game (plz don't sue us lol), and
-* [**sumfuk**](https://pokemonshowdown.com/users/sumfuk) ???
+* [**camdawgboi**](https://smogon.com/forums/members/camboi.435338) for the idea & UI/UX design,
+* [**ttoki**](https://smogon.com/forums/members/ttoki.606212) for being our first tester,
+* [**Smogon Dev Team**](https://github.com/smogon) & the [**`@smogon/calc` Maintainers & Contributors**](https://github.com/smogon/damage-calc) for the sauce,
+* [**pre**](https://smogon.com/forums/members/pre.10544) & [**pkmn.cc**](https://pkmn.cc) for keeping the Smogon sets hot, fresh & downloadable,
+* [**Austin**](https://smogon.com/forums/members/austin.231659) for the endorsement & support,
+* [**Honko**](https://smogon.com/forums/members/honko.42413) for the original damage calculator,
+* [**Zarel**](https://smogon.com/forums/members/zarel.102803) & the [**Showdown Staff & Contributors**](https://pokemonshowdown.com/credits) for this would literally be nothing without them,
+* **Game Freak** & **Nintendo** for good game (plz don't sue us lol), and
+* [**sumfuk**](https://smogon.com/forums/members/bot-keith.580065) ???
+
+<br>
+
+## Donators
+
+big sparkly thank to this fine individual for their generous support!
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+
+&nbsp;&nbsp;**(づ￣ ³￣)づ**
+
+<br>
+
+## Contributors
+
+another big thank to these fine people for helping with development!
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center">&nbsp;<a href="https://github.com/SpiffyTheSpaceman"><strong>SpiffyTheSpaceman</strong></a>&nbsp;</td>
+      <td align="center">&nbsp;<a href="https://smogon.com/forums/members/malaow3.507739"><strong>malaow3</strong></a> · <a href="https://github.com/malaow3">GitHub</a>&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+
+...and finally, big thank to these fine people who helped improve **Showdex**!
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/85percent.457453"><strong>85percent</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/aim.53807"><strong>aim</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/baloor.342365"><strong>Baloor</strong></a></td>
+      <td align="center"><a href="https://www.smogon.com/forums/members/chrispbacon.544502"><strong>ChrisPBacon</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/clastia.545372"><strong>Clastia</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/darkphoenix911.247845"><strong>DarkPhoenix911</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/dex.277988"><strong>dex</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/ducky.525446"><strong>Ducky</strong></a></td>
+      <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0yafl"><strong>Fitah_</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/furret4ssb.518775"><strong>Furret4ssb</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://www.smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/kibo.552274"><strong>Kibo</strong></a></td>
+      <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/lighthouse64.322009"><strong>lighthouse64</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/maxouille.390049"><strong>Maxouille</strong></a> · <a href="https://github.com/Maxouille64">GH</a></td>
+      <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0zpcd"><strong>mdragon13</strong></a></td>
+      <td align="center"><a href="https://github.com/mpique"><strong>mpique</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/nails.51373"><strong>Nails</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/runoisch.568189"><strong>Runoisch</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/shiox.495116"><strong>Shiox</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GH</a></td>
+      <td align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GH</a></td>
+    </tr>
+  </tbody>
+</table>
+
+&nbsp;&nbsp;**\ (•◡•) \/**
