@@ -20,7 +20,7 @@ export const mergeRevealedMoves = (
   } = pokemon || {};
 
   if (!moves?.length) {
-    return [];
+    return revealedMoves?.length ? revealedMoves : [];
   }
 
   const dex = getDexForFormat();
@@ -36,6 +36,13 @@ export const mergeRevealedMoves = (
 
   // don't do anything if there are no more non-revealed moves
   if (!nonRevealedMoves.length) {
+    /**
+     * @todo Needs to be updated once we support more than 4 moves.
+     */
+    if (moves.length < 4) {
+      return Array.from(new Set([...moves, ...revealedMoves])).slice(0, 4);
+    }
+
     return moves;
   }
 
