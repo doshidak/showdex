@@ -1,4 +1,5 @@
 export * from './abilities';
+export * from './formes';
 export * from './items';
 export * from './moves';
 export * from './natures';
