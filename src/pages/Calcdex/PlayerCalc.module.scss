@@ -14,6 +14,11 @@
 .playerBar {
   @include flex.row($justify: space-between);
   width: 100%;
+
+  &.verySmol {
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 .playerInfo {
@@ -22,6 +27,11 @@
   @include spacing.margin($top: 7px);
   width: 100%;
   max-width: 33%;
+
+  .verySmol & {
+    max-width: none;
+    @include flex.row($align: center);
+  }
 }
 
 button.usernameButton {
@@ -67,6 +77,10 @@ button.usernameButton {
   @include spacing.margin($top: 2px);
   font-size: 8px;
 
+  .verySmol & {
+    @include spacing.margin($top: 0, $left: 10px);
+  }
+
   button.toggleButton {
     font-size: inherit;
   }
@@ -95,6 +109,11 @@ button.usernameButton {
   // grid-template-columns: repeat(6, min-content); // inline style now
   // column-gap: 3px;
   // flex: 0 0 auto;
+
+  .verySmol & {
+    justify-content: center;
+    @include spacing.margin($top: 3px);
+  }
 }
 
 .piconButton {

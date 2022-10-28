@@ -1,11 +1,11 @@
 import * as React from 'react';
-import useSize from '@react-hook/size';
+// import useSize from '@react-hook/size';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 // import { logger } from '@showdex/utils/debug';
-import { useMobileViewport } from '@showdex/utils/hooks';
+import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
 import { CloseCalcdexButton } from './CloseCalcdexButton';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
@@ -29,12 +29,15 @@ export const Calcdex = ({
 }: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const [containerWidth] = useSize(containerRef, {
+  // const [containerWidth] = useSize(containerRef, {
+  //   initialWidth: 400,
+  //   initialHeight: 700,
+  // });
+
+  const { size } = useElementSize(containerRef, {
     initialWidth: 400,
     initialHeight: 700,
   });
-
-  const inBattle = containerWidth < 550;
 
   const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
@@ -124,7 +127,7 @@ export const Calcdex = ({
             opponent={opponent}
             field={field}
             defaultName="Player 1"
-            inBattle={inBattle}
+            containerSize={size}
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
               topKey,
@@ -144,6 +147,7 @@ export const Calcdex = ({
             authPlayerKey={authPlayerKey}
             playerKey={topKey}
             field={field}
+            containerSize={size}
             disabled={!p1?.pokemon?.length || !p2?.pokemon?.length}
             onFieldChange={updateField}
           />
@@ -158,7 +162,7 @@ export const Calcdex = ({
             opponent={player}
             field={field}
             defaultName="Player 2"
-            inBattle={inBattle}
+            containerSize={size}
             onPokemonChange={updatePokemon}
             onIndexSelect={(index) => setSelectionIndex(
               bottomKey,

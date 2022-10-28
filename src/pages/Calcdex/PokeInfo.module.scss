@@ -179,6 +179,10 @@ button.nameButton {
   flex: 1;
   min-width: 140px;
   @include spacing.margin($left: 1em);
+
+  .verySmol & {
+    min-width: auto;
+  }
 }
 
 // .toggleButton {

@@ -8,6 +8,7 @@ import { openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
 // import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
+import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import type {
   CalcdexBattleField,
   CalcdexBattleRules,
@@ -29,7 +30,7 @@ interface PlayerCalcProps {
   opponent: CalcdexPlayer;
   field?: CalcdexBattleField;
   defaultName?: string;
-  inBattle?: boolean;
+  containerSize?: ElementSizeLabel;
   onPokemonChange?: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
   onIndexSelect?: (index: number) => void;
   onAutoSelectChange?: (autoSelect: boolean) => void;
@@ -46,7 +47,7 @@ export const PlayerCalc = ({
   opponent,
   field,
   defaultName = '--',
-  inBattle,
+  containerSize,
   onPokemonChange,
   onIndexSelect,
   onAutoSelectChange,
@@ -85,7 +86,12 @@ export const PlayerCalc = ({
       )}
       style={style}
     >
-      <div className={styles.playerBar}>
+      <div
+        className={cx(
+          styles.playerBar,
+          containerSize === 'xs' && styles.verySmol,
+        )}
+      >
         <div className={styles.playerInfo}>
           <Button
             className={styles.usernameButton}
@@ -136,7 +142,9 @@ export const PlayerCalc = ({
 
         <div
           className={styles.teamList}
-          style={{ gridTemplateColumns: `repeat(${inBattle ? 6 : 12}, min-content)` }}
+          style={{
+            gridTemplateColumns: `repeat(${['xs', 'sm'].includes(containerSize) ? 6 : 12}, min-content)`,
+          }}
         >
           {Array(player?.maxPokemon || 0).fill(null).map((_, i) => {
             const mon = pokemon?.[i];
@@ -228,6 +236,7 @@ export const PlayerCalc = ({
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
           defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
         }}
+        containerSize={containerSize}
         onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
       />
     </div>

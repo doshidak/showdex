@@ -14,6 +14,7 @@ import {
 } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
+import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import {
   CalcdexBattleField,
   CalcdexBattleRules,
@@ -38,6 +39,7 @@ interface PokeCalcProps {
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
+  containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
@@ -53,6 +55,7 @@ export const PokeCalc = ({
   playerPokemon,
   opponentPokemon,
   field,
+  containerSize,
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
   const settings = useCalcdexSettings();
@@ -199,6 +202,7 @@ export const PokeCalc = ({
         gen={gen}
         format={format}
         pokemon={playerPokemon}
+        containerSize={containerSize}
         onPokemonChange={handlePokemonChange}
       />
 
@@ -209,6 +213,7 @@ export const PokeCalc = ({
         format={format}
         rules={rules}
         pokemon={playerPokemon}
+        containerSize={containerSize}
         calculateMatchup={calculateMatchup}
         onPokemonChange={handlePokemonChange}
       />
@@ -222,6 +227,7 @@ export const PokeCalc = ({
         opponentPokemon={opponentPokemon}
         field={field}
         playerKey={playerKey}
+        containerSize={containerSize}
         onPokemonChange={handlePokemonChange}
       />
     </div>
