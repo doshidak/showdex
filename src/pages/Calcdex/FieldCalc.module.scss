@@ -9,7 +9,7 @@
   column-gap: 10px;
 
   &.veryThicc {
-    grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.3fr);
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.5fr);
   }
 
   &:not(.veryThicc).doubles {

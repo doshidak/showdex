@@ -214,10 +214,14 @@ export const FieldCalc = ({
             ? dex[dexMapping].get(screenMoveId)
             : null;
 
+          const notAvailable = gen < (dexFieldEffect?.gen || 0);
+
+          if (notAvailable) {
+            return null;
+          }
+
           const effectDescription = (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
             ?.replace("This Pokemon's allies", 'Allies');
-
-          const notAvailable = gen < (dexFieldEffect?.gen || 0);
 
           return (
             <React.Fragment
@@ -240,7 +244,7 @@ export const FieldCalc = ({
                 ) : null}
                 primary
                 active={!!attackerSide?.[sideKey]}
-                disabled={disabled || !battleId || !attackerSideKey || !attackerSide || notAvailable}
+                disabled={disabled || !battleId || !attackerSideKey || !attackerSide}
                 onPress={() => onFieldChange?.({
                   [attackerSideKey]: {
                     ...attackerSide,
@@ -322,10 +326,14 @@ export const FieldCalc = ({
             ? dex[dexMapping].get(screenMoveId)
             : null;
 
+          const notAvailable = gen < (dexFieldEffect?.gen || 0);
+
+          if (notAvailable) {
+            return null;
+          }
+
           const effectDescription = (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
             ?.replace("This Pokemon's allies", 'Allies');
-
-          const notAvailable = gen < (dexFieldEffect?.gen || 0);
 
           return (
             <React.Fragment
@@ -348,7 +356,7 @@ export const FieldCalc = ({
                 ) : null}
                 primary
                 active={!!defenderSide?.[sideKey]}
-                disabled={disabled || !battleId || !defenderSideKey || !defenderSide || notAvailable}
+                disabled={disabled || !battleId || !defenderSideKey || !defenderSide}
                 onPress={() => onFieldChange?.({
                   [defenderSideKey]: {
                     ...defenderSide,
