@@ -17,10 +17,23 @@ export interface SideRoomOptions {
    * @since 0.1.0
    */
   focus?: boolean;
-}
 
-const minWidth = 320;
-const maxWidth = 1024;
+  /**
+   * Minimum width of the room, in **pixels**, presumably.
+   *
+   * @default 320
+   * @since 1.0.5
+   */
+  minWidth?: number;
+
+  /**
+   * Maxmimum width of the room, in **pixels**, presumably.
+   *
+   * @default 1024
+   * @since 1.0.5
+   */
+  maxWidth?: number;
+}
 
 const l = logger('@src/utils/app/createSideRoom');
 
@@ -41,6 +54,8 @@ export const createSideRoom = (
   const {
     icon,
     focus,
+    minWidth = 320,
+    maxWidth = 1024,
   } = options || {};
 
   let room: Showdown.HtmlRoom;
@@ -70,13 +85,16 @@ export const createSideRoom = (
   }
 
   // double-check the room's width params
-  if (room.minWidth !== minWidth) {
-    room.minWidth = minWidth;
-  }
+  // if (room.minWidth !== minWidth) {
+  //   room.minWidth = minWidth;
+  // }
 
-  if (room.maxWidth !== maxWidth) {
-    room.maxWidth = maxWidth;
-  }
+  // if (room.maxWidth !== maxWidth) {
+  //   room.maxWidth = maxWidth;
+  // }
+
+  room.minWidth = minWidth;
+  room.maxWidth = maxWidth;
 
   if (icon) {
     // hook directly into renderRoomTab(), which is hacky as hell, but necessary since it gets called pretty frequently
