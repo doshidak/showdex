@@ -1,4 +1,4 @@
-import { bullop } from '@showdex/consts/core';
+// import { bullop } from '@showdex/consts/core';
 import { percentage } from '@showdex/utils/humanize';
 
 /**
@@ -23,13 +23,13 @@ export interface DamageAmountFormatterOptions {
    *
    * * Provided number is inclusive.
    * * Any `damageAmounts` whose number of uniques is above this provided number
-   *   (or the default value of `5`) will not be formatted.
+   *   (or the default value of `7`) will not be formatted.
    *
    * @default
    * ```ts
    * // no longer shows the percentages if there are 6 or more unique damage amounts
    * // (this is a completely arbitrary default btw)
-   * 5
+   * 7
    * ```
    * @since 1.0.4
    */
@@ -38,7 +38,7 @@ export interface DamageAmountFormatterOptions {
   /**
    * Characters used to separate each damage amount and its corresponding percentage.
    *
-   * @default '·'
+   * @default ': '
    * @since 1.0.4
    */
   amountDelimiter?: string;
@@ -94,7 +94,7 @@ export interface DamageAmountFormatterOptions {
  *   '10, 10, 10, 10, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13',
  * ); // 16 outputs
  *
- * '10·25%, 12·31.25%, 13·6.25%'
+ * '10: 25%, 12: 31.25%, 13: 6.25%'
  * ```
  * @since 1.0.4
  */
@@ -104,8 +104,8 @@ export const formatDamageAmounts = (
 ): string => {
   const {
     inputDelimiter = ', ',
-    formatThreshold = 5,
-    amountDelimiter = bullop,
+    formatThreshold = 7,
+    amountDelimiter = ': ',
     precision = 2,
     prefix,
     suffix = '%',
