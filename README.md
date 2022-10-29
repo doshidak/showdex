@@ -6,8 +6,15 @@
   <code>showdex</code>
 </h1>
 
-Current [v1.0.5](https://github.com/doshidak/showdex/releases/tag/v1.0.5) | Install on [Chrome · Opera · Edge](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/showdex/) | Discuss on [Smogon](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) · [Reddit](https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/)
---- | --- | ---
+<table align="center">
+  <thead>
+    <tr>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.0.5">v1.0.5</a>&nbsp;</th>
+      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Opera · Edge · Brave</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a>&nbsp;</th>
+      <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built">Reddit</a>&nbsp;</th>
+    </tr>
+  </thead>
+</table>
 
 <br>
 
@@ -39,14 +46,35 @@ Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpna
 
 <br>
 
-### Navigation
+<h3 align="center">
+  Navigation
+</h3>
 
-[Report a Bug](#issues) | [Known Bugs](https://github.com/users/doshidak/projects/2) | [Planned Features](https://github.com/users/doshidak/projects/1) | [Submit a PR](#prs)
---- | --- | --- | ---
+<table align="center">
+  <thead>
+    <tr>
+      <th>&nbsp;<a href="https://github.com/users/doshidak/projects/1">Planned Features</a>&nbsp;</th>
+      <th>&nbsp;<a href="https://github.com/users/doshidak/projects/2">Known Bugs</a>&nbsp;</th>
+    </tr>
+  </thead>
+</table>
+
+<table align="center">
+  <thead>
+    <tr>
+      <th>&nbsp;<a href="#issues">Suggest a Feature</a>&nbsp;</th>
+      <th>&nbsp;<a href="#issues">Report a Bug</a>&nbsp;</th>
+      <th>&nbsp;<a href="#prs">Contribute Code</a>&nbsp;</th>
+    </tr>
+  </thead>
+</table>
 
 <br>
+<br>
 
-# Developer Zone
+<h1 align="center">
+  Developer Zone
+</h1>
 
 > **Warning**  
 > You are about to get in the zone, the developer zone.  
@@ -82,7 +110,7 @@ This extension is written in **TypeScript**, which is essentially JavaScript on 
   ---
 
   > **Note**  
-  > This section is a work-in-progress.
+  > More information coming soon!
 
   [uhhhhhhhhh](https://youtube.com/watch?v=GcSfbaac9eg&t=29s)
 
@@ -126,6 +154,22 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
   4. Navigate to the **Debugging** page (`about:debugging`).
   5. Select **This Firefox** on the left-hand panel.
   6. Verify that the **Temporary Extensions** section and the **Load Temporary Add-on...** option are available.
+</details>
+
+<details>
+  <summary>
+    &nbsp;<strong>Mozilla Firefox for Android</strong>
+  </summary>
+
+  ---
+
+  > **Note**  
+  > More information coming soon!  
+  > Though instructions aren't currently provided, this project supports [developing on **Firefox for Android Nightly**](https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android).
+
+  For now, see [these instructions from Mozilla](https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android/#set-up-your-computer-and-android-emulator-or-device) for setting up your Android device and **Firefox for Android Nightly** installation for extension development.
+
+  ---
 </details>
 
 <br>
@@ -234,6 +278,22 @@ Built contents will be dumped into a **`build` directory** in the project root (
   ---
 </details>
 
+<details>
+  <summary>
+    &nbsp;<strong>Mozilla Firefox for Android</strong>
+  </summary>
+
+  ---
+
+  > **Note**  
+  > More information coming soon!  
+  > Though instructions aren't currently provided, this project supports [developing on **Firefox for Android Nightly**](https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android).
+
+  For now, see [these instructions from Mozilla](https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android/#install-and-run-your-extension-in-firefox-for-android) for running the extension on your Android's **Firefox for Android Nightly** installation.
+
+  ---
+</details>
+
 <br>
 
 <details>
@@ -256,6 +316,27 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
   * For **Chrome**, you'll need to select the **reload icon** button in the **Chrome extensions** page (`chrome://extensions`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
   * For **Firefox**, you'll need to **Reload** the extension in the **Debugging** page (`about:debugging`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
+
+  ---
+</details>
+
+<details>
+  <summary>
+    <table>
+      <thead>
+        <tr>
+          <th>&nbsp;Environment Variables&nbsp;</th>
+        </tr>
+      </thead>
+    </table>
+  </summary>
+
+  ---
+
+  > **Note**  
+  > More information coming soon!
+
+  uhhhhhh for now, check the [`.env`](./.env)
 
   ---
 </details>
@@ -302,7 +383,9 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 <br>
 
-# Contributing
+<h1 align="center">
+  Contributing
+</h1>
 
 <p align="center">
   <strong>
@@ -355,7 +438,9 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 <br>
 
-# Credits
+<h1 align="center">
+  Credits
+</h1>
 
 big thank to:
 
@@ -436,10 +521,11 @@ another big thank to these fine people for helping with development!
       <td align="center"><a href="https://smogon.com/forums/members/runoisch.568189"><strong>Runoisch</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/shiox.495116"><strong>Shiox</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GH</a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GH</a></td>
       <td align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GH</a></td>
