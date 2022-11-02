@@ -26,7 +26,7 @@ $type-colors: (
   fairy: #E76D88,
 );
 
-$type-color-light-tint: 10%;
+$type-color-light-shade: 10%;
 
 $label-light-opacity: 1;
 $label-dark-opacity: 1;
@@ -58,15 +58,17 @@ $background-opacity-dark: 0.5;
   }
 
   @each $type, $color in $type-colors {
-    &.light.type-#{$type} {
-      background-color: color.alpha(
-        color.tint($color, $type-color-light-tint),
-        $background-opacity-light,
-      );
-    }
+    &.type-#{$type} {
+      &.light {
+        background-color: color.alpha(
+          color.shade($color, $type-color-light-shade),
+          $background-opacity-light,
+        );
+      }
 
-    &.dark.type-#{$type} {
-      background-color: color.alpha($color, $background-opacity-dark);
+      &.dark {
+        background-color: color.alpha($color, $background-opacity-dark);
+      }
     }
   }
 }
