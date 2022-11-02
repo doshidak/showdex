@@ -24,6 +24,7 @@ export const PokemonTypes: Showdown.TypeName[] = [
   'Psychic',
   'Ghost',
   'Dragon',
+  'Dark',
   'Steel',
   'Fairy',
   '???',
