@@ -1,0 +1,248 @@
+@use 'sass:map';
+// @use 'sass:math';
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$container: (
+  padding-x: 3px,
+  padding-y: 3px,
+  border-radius: 8px,
+  opacity-disabled: 0.3,
+
+  background-color: (
+    default: (
+      light: colors.$transparent,
+      dark: colors.$transparent,
+    ),
+
+    hover: (
+      light: color.alpha(colors.$black, 0.05),
+      dark: color.alpha(colors.$white, 0.075),
+    ),
+
+    // active: (
+    //   light: color.alpha(colors.$black, 0.065),
+    //   dark: color.alpha(colors.$white, 0.09),
+    // ),
+  ),
+);
+
+$options-tooltip: (
+  grid-columns: 3,
+  column-gap: 4px,
+  row-gap: 4px,
+);
+
+// note: color schemes are reversed for tooltips!
+$type-option-button: (
+  padding-x: 2px,
+  padding-y: 2px,
+  border-radius: 7px,
+
+  background-color: (
+    default: (
+      light: colors.$transparent,
+      dark: colors.$transparent,
+    ),
+
+    hover: (
+      light: color.alpha(colors.$white, 0.075),
+      dark: color.alpha(colors.$black, 0.05),
+    ),
+
+    selected: (
+      light: color.alpha(colors.$blue, 0.15),
+      dark: color.alpha(colors.$blue, 0.2),
+    ),
+  ),
+
+  box-shadow: (
+    selected: (
+      light: (
+        0 0 1px color.alpha(colors.$blue, 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.75),
+      ),
+
+      dark: (
+        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.75),
+      ),
+    ),
+  ),
+
+  // grayscale: (
+  //   default: 0.95,
+  //   hover: 0.3,
+  //   selected: 0,
+  //   disabled: 1,
+  // ),
+
+  opacity: (
+    default: 0.9,
+    hover: 0.95,
+    selected: 1,
+    disabled: 0.5,
+  ),
+);
+
+$type-option: (
+  background-color: (
+    default: (
+      light: color.alpha(colors.$white, 0.4),
+      dark: color.alpha(colors.$black, 0.4),
+    ),
+  ),
+);
+
+$type-value: (
+  spacing: 2px,
+);
+
+.container {
+  position: relative;
+  @include transition.apply(opacity);
+
+  &::before {
+    content: '';
+    @include position.absolute-xy($x: -(map.get($container, padding-x)), $y: -(map.get($container, padding-y)));
+    border-radius: map.get($container, border-radius);
+    @include transition.apply(background-color);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &.light::before {
+    background-color: map.get($container, background-color, default, light);
+  }
+
+  &.dark::before {
+    background-color: map.get($container, background-color, default, dark);
+  }
+
+  &:hover {
+    &.light::before {
+      background-color: map.get($container, background-color, hover, light);
+    }
+
+    &.dark::before {
+      background-color: map.get($container, background-color, hover, dark);
+    }
+  }
+
+  // &:active {
+  //   &.light::before {
+  //     background-color: map.get($container, background-color, active, light);
+  //   }
+  //
+  //   &.dark::before {
+  //     background-color: map.get($container, background-color, active, dark);
+  //   }
+  // }
+
+  &.readOnly, &.disabled {
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &.disabled {
+    opacity: map.get($container, opacity-disabled);
+  }
+}
+
+.optionsTooltip {
+  // @include spacing.padding-none;
+  @include spacing.padding-xy($x: map.get($options-tooltip, column-gap) * 2, $y: map.get($options-tooltip, row-gap) * 2);
+}
+
+.optionsTooltipContent {
+  display: grid;
+  grid-template-columns: repeat(map.get($options-tooltip, grid-columns), minmax(0, 1fr));
+  column-gap: map.get($options-tooltip, column-gap);
+  row-gap: map.get($options-tooltip, row-gap);
+  // @include spacing.margin-xy($x: math.div(map.get($options-tooltip, column-gap), 2), $y: map.get($options-tooltip, row-gap));
+}
+
+.typeOptionButton {
+  position: relative;
+  // filter: grayscale(map.get($type-option-button, grayscale, default));
+  opacity: map.get($type-option-button, opacity, default);
+  @include transition.apply(opacity);
+  z-index: 1;
+
+  &::before {
+    content: '';
+    @include position.absolute-xy($x: -(map.get($type-option-button, padding-x)), $y: -(map.get($type-option-button, padding-y)));
+    border-radius: map.get($type-option-button, border-radius);
+    @include transition.apply(background-color, box-shadow);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light &::before {
+    background-color: map.get($type-option-button, background-color, default, light);
+  }
+
+  .dark &::before {
+    background-color: map.get($type-option-button, background-color, default, dark);
+  }
+
+  &:hover {
+    // filter: grayscale(map.get($type-option-button, grayscale, hover));
+    opacity: map.get($type-option-button, opacity, hover);
+
+    .light &::before {
+      background-color: map.get($type-option-button, background-color, hover, light);
+    }
+
+    .dark &::before {
+      background-color: map.get($type-option-button, background-color, hover, dark);
+    }
+  }
+
+  &.selected {
+    // filter: grayscale(map.get($type-option-button, grayscale, selected));
+    opacity: map.get($type-option-button, opacity, selected);
+
+    .light &::before {
+      background-color: map.get($type-option-button, background-color, selected, light);
+      box-shadow: map.get($type-option-button, box-shadow, selected, light);
+    }
+
+    .dark &::before {
+      background-color: map.get($type-option-button, background-color, selected, dark);
+      box-shadow: map.get($type-option-button, box-shadow, selected, dark);
+    }
+  }
+
+  &.disabled {
+    // filter: grayscale(map.get($type-option-button, grayscale, disabled));
+    opacity: map.get($type-option-button, opacity, disabled);
+  }
+}
+
+.typeOption {
+  grid-area: span 1 / span 1;
+  @include transition.apply(background-color);
+  z-index: 1;
+
+  .typeOptionButton:not(.selected):not(.hover) & {
+  // .typeOptionButton.disabled & {
+    .light & {
+      background-color: map.get($type-option, background-color, default, light);
+    }
+
+    .dark & {
+      background-color: map.get($type-option, background-color, default, dark);
+    }
+  }
+}
+
+.typeValue {
+  &:not(:last-child) {
+    @include spacing.margin($right: map.get($type-value, spacing));
+  }
+}
