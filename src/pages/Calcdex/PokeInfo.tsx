@@ -4,9 +4,9 @@ import {
   PiconButton,
   PokeHpBar,
   PokeStatus,
-  PokeType,
+  // PokeType,
 } from '@showdex/components/app';
-import { Dropdown } from '@showdex/components/form';
+import { Dropdown, PokeTypeField } from '@showdex/components/form';
 import {
   Badge,
   Button,
@@ -561,7 +561,7 @@ export const PokeInfo = ({
               </div>
             }
 
-            {
+            {/*
               !!pokemon?.types?.length &&
               <div className={styles.types}>
                 {pokemon.types.map((type, i) => (
@@ -572,7 +572,36 @@ export const PokeInfo = ({
                   />
                 ))}
               </div>
-            }
+            */}
+
+            <PokeTypeField
+              className={styles.typesField}
+              label={`Types for Pokemon ${friendlyPokemonName}`}
+              // tooltip={(
+              //   <div className={styles.tooltipContent}>
+              //     Change{' '}
+              //     {
+              //       !!pokemon?.speciesForme &&
+              //       <>
+              //         <strong>
+              //           {pokemon.speciesForme}
+              //         </strong>'s
+              //         {' '}
+              //       </>
+              //     }
+              //     Types
+              //   </div>
+              // )}
+              // tooltipDisabled={!settings?.showUiTooltips}
+              multi
+              input={{
+                value: [...(pokemon?.types || [])],
+                onChange: (types: Showdown.TypeName[]) => onPokemonChange?.({
+                  types: [...(types || [])],
+                }),
+              }}
+              disabled={!pokemon?.speciesForme}
+            />
           </div>
 
           <div className={styles.secondLine}>
