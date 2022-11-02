@@ -13,19 +13,34 @@
  * @since 1.0.5
  */
 export const PokemonUsageFuckedFormes: string[] = [
-  'Basculegion',
-  'Gastrodon',
-  'Keldeo',
-  'Magearna',
-  'Meowstic',
-  'Mimikyu',
-  'Minior',
-  'Morpeko',
-  'Oricorio',
-  'Pikachu',
-  'Polteageist',
-  'Sinistea',
-  'Toxtricity',
-  'Vivillon',
-  'Zarude',
+  'Basculin', // -> Basculin-Blue-Striped -> Basculin-White-Striped
+  // 'Basculegion', // -> Basculegion-F (technically a Hisuian Pokemon--only available in PLA)
+  'Castform', // -> Castform-Rainy -> Castform-Snowy -> Castform-Sunny
+  'Cherrim', // -> Cherrim-Sunshine
+  'Cramorant', // -> Cramorant-Gorging -> Cramorant-Gulping
+  'Darmanitan', // -> Darmanitan-Zen (via battleOnly from dex.species.get())
+  'Darmanitan-Galar', // -> Darmanitan-Galar-Zen (via battleOnly from dex.species.get())
+  'Eevee', // -> Eevee-Starter
+  'Eiscue', // -> Eiscue-Noice
+  // 'Gourgeist', // -> Gourgeist-Large -> Gourgeist-Small -> Gourgeist-Super (other formes have their own sets)
+  'Gastrodon', // -> Gastrodon-East
+  // 'Greninja', // -> Greninja-Ash (other formes have their own sets)
+  // 'Indeedee', // -> Indeedee-F (other formes have their own sets)
+  'Keldeo', // -> Keldeo-Resolute
+  'Magearna', // -> Magearna-Original
+  'Meloetta', // -> Meloetta-Pirouette
+  'Meowstic', // -> Meowstic-F
+  'Mimikyu', // -> Mimikyu-Busted
+  'Minior', // -> Minior-Meteor
+  'Morpeko', // -> Morpeko-Hangry
+  'Necrozma-Dawn-Wings', // -> Necrozma-Ultra (via battleOnly from dex.species.get())
+  'Necrozma-Dusk-Mane', // -> Necrozma-Ultra (via battleOnly from dex.species.get())
+  // 'Oricorio', // -> Oricorio-Pa'u -> Oricorio-Pom-Pom -> Oricorio-Sensu (other formes have their own sets)
+  'Pikachu', // -> Pikachu-Alola -> Pikachu-Hoenn -> Pikachu-Kalos -> Pikachu-Original -> Pikachu-Partner -> Pikachu-Sinnoh -> Pikachu-Unova -> Pikachu-World -> Pikachu-Starter
+  'Polteageist', // -> Polteageist-Antique
+  'Sinistea', // -> Sinistea-Antique
+  'Toxtricity', // -> Toxtricity-Low-Key
+  'Vivillon', // -> Vivillon-Fancy -> Vivillon-Pokeball
+  'Wishiwashi', // -> Wishiwashi-School
+  'Zarude', // -> Zarude-Dada
 ];
