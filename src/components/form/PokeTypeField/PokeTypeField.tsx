@@ -180,10 +180,10 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       // visible={optionsVisible ? true : undefined}
       visible={optionsVisible}
       interactive={optionsVisible}
-      placement="auto-start"
+      placement="top-start"
       // trigger="mouseenter"
       // delay={[1000, 50]}
-      offset={[-10, 10]}
+      offset={[0, 10]}
       // disabled={optionsVisible ? undefined : disabled}
       onClickOutside={() => setOptionsVisible(false)}
     >
