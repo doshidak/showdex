@@ -61,3 +61,35 @@ export const laquo = '\u00AB';
  * @since 1.0.4
  */
 export const raquo = '\u00BB';
+
+/**
+ * Up-left arrow (not an HTML entity), represented as `U+2196`.
+ *
+ * @example '↖'
+ * @since 1.0.6
+ */
+export const ularr = '\u2196';
+
+/**
+ * Up-right arrow (not an HTML entity), represented as `U+2197`.
+ *
+ * @example '↗'
+ * @since 1.0.6
+ */
+export const urarr = '\u2197';
+
+/**
+ * Down-right arrow (not an HTML entity), represented as `U+2198`.
+ *
+ * @example '↘'
+ * @since 1.0.6
+ */
+export const drarr = '\u2198';
+
+/**
+ * Down-left arrow (not an HTML entity), represented as `U+2199'
+ *
+ * @example '↙'
+ * @since 1.0.6
+ */
+export const dlarr = '\u2199';
