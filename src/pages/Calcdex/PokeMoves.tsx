@@ -15,7 +15,7 @@ import { upsizeArray } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexBattleRules, CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleRules, CalcdexMoveOverride, CalcdexPokemon } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
@@ -72,15 +72,11 @@ export const PokeMoves = ({
     pokemon,
   ]);
 
-  const showZToggle = !pokemon?.showMoveOverrides
-    && (
-      format?.includes('nationaldex')
-        || gen === 6
-        || gen === 7
-    );
+  const showZToggle = format?.includes('nationaldex')
+    || gen === 6
+    || gen === 7;
 
-  const showMaxToggle = !pokemon?.showMoveOverrides
-    && !rules?.dynamax
+  const showMaxToggle = !rules?.dynamax
     && (
       format?.includes('nationaldex')
         || (gen === 8 && !format?.includes('bdsp'))
@@ -183,7 +179,7 @@ export const PokeMoves = ({
           className={cx(
             styles.toggleButton,
             styles.editButton,
-            pokemon?.showMoveOverrides && styles.hideButton,
+            // pokemon?.showMoveOverrides && styles.hideButton,
           )}
           label={pokemon?.showMoveOverrides ? 'Hide' : 'Edit'}
           tooltip={`${pokemon?.showMoveOverrides ? 'Close' : 'Open'} Move Editor`}
@@ -262,11 +258,14 @@ export const PokeMoves = ({
         // const moveName = calcMove?.name;
         const moveName = pokemon?.moves?.[i] || calcMove?.name;
 
+        const moveOverrideDefaults = (
+          pokemon?.showMoveOverrides
+            && getMoveOverrideDefaults(pokemon, moveName, format)
+        ) || {};
+
         const moveOverrides = {
-          ...(pokemon?.showMoveOverrides && {
-            ...getMoveOverrideDefaults(pokemon, moveName, format),
-            ...pokemon?.moveOverrides?.[moveName],
-          }),
+          ...moveOverrideDefaults,
+          ...pokemon?.moveOverrides?.[moveName],
         };
 
         const nonStatusMove = [
@@ -276,6 +275,20 @@ export const PokeMoves = ({
 
         const hasOverrides = pokemon?.showMoveOverrides
           && hasMoveOverrides(pokemon, moveName, format);
+
+        const basePowerKey: keyof CalcdexMoveOverride = pokemon?.useZ
+          ? 'zBasePower'
+          : pokemon?.useMax
+            ? 'maxBasePower'
+            : 'basePower';
+
+        const fallbackBasePower = (
+          pokemon?.useZ
+            ? moveOverrideDefaults.zBasePower
+            : pokemon?.useMax
+              ? moveOverrideDefaults.maxBasePower
+              : null
+        ) || calcMove?.bp;
 
         const showDamageAmounts = !pokemon?.showMoveOverrides
           && !!description?.damageAmounts
@@ -428,8 +441,8 @@ export const PokeMoves = ({
                           className={styles.valueField}
                           label={`Base Power Override for ${moveName} of Pokemon ${friendlyPokemonName}`}
                           hideLabel
-                          hint={moveOverrides.basePower?.toString() || 0}
-                          fallbackValue={calcMove?.bp}
+                          hint={moveOverrides[basePowerKey]?.toString() || 0}
+                          fallbackValue={fallbackBasePower}
                           min={0}
                           max={999} // hmm...
                           step={1}
@@ -437,16 +450,18 @@ export const PokeMoves = ({
                           clearOnFocus
                           absoluteHover
                           input={{
-                            value: moveOverrides.basePower,
+                            value: moveOverrides[basePowerKey],
                             onChange: (value: number) => onPokemonChange?.({
                               moveOverrides: {
-                                [moveName]: { basePower: Math.max(value, 0) },
+                                [moveName]: { [basePowerKey]: Math.max(value, 0) },
                               },
                             }),
                           }}
                         />
 
                         <div className={styles.propertyName}>
+                          {pokemon?.useZ && !pokemon?.useMax && 'Z '}
+                          {pokemon?.useMax && 'Max '}
                           BP
                         </div>
                       </div>
