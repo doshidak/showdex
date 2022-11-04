@@ -63,33 +63,67 @@ export const laquo = '\u00AB';
 export const raquo = '\u00BB';
 
 /**
- * Up-left arrow (not an HTML entity), represented as `U+2196`.
+ * HTML `&larr;` entity, represented as `U+2190`.
+ *
+ * @example '←'
+ * @since 1.0.6
+ */
+export const larr = '\u2190';
+
+/**
+ * HTML `&uarr;` entity, represented as `U+2191`.
+ *
+ * @example '↑'
+ * @since 1.0.6
+ */
+export const uarr = '\u2191';
+
+/**
+ * HTML `&rarr;` entity, represented as `U+2192`.
+ *
+ * * rawr XD
+ *
+ * @example '→'
+ * @since 1.0.6
+ */
+export const rarr = '\u2192';
+
+/**
+ * HTML `&darr;` entity, represented as `U+2193`.
+ *
+ * @example '↓'
+ * @since 1.0.6
+ */
+export const darr = '\u2193';
+
+/**
+ * HTML `&nwarr;` entity, represented as `U+2196`.
  *
  * @example '↖'
  * @since 1.0.6
  */
-export const ularr = '\u2196';
+export const nwarr = '\u2196';
 
 /**
- * Up-right arrow (not an HTML entity), represented as `U+2197`.
+ * HTML `&nearr;` entity, represented as `U+2197`.
  *
  * @example '↗'
  * @since 1.0.6
  */
-export const urarr = '\u2197';
+export const nearr = '\u2197';
 
 /**
- * Down-right arrow (not an HTML entity), represented as `U+2198`.
+ * HTML `&searr;` entity, represented as `U+2198`.
  *
  * @example '↘'
  * @since 1.0.6
  */
-export const drarr = '\u2198';
+export const searr = '\u2198';
 
 /**
- * Down-left arrow (not an HTML entity), represented as `U+2199'
+ * HTML `&swarr;` entity, represented as `U+2199'
  *
  * @example '↙'
  * @since 1.0.6
  */
-export const dlarr = '\u2199';
+export const swarr = '\u2199';
