@@ -76,6 +76,8 @@ export const createSmogonMove = (
     type: typeOverride,
     category: categoryOverride,
     basePower: basePowerOverride,
+    zBasePower: zBasePowerOverride,
+    maxBasePower: maxBasePowerOverride,
     alwaysCriticalHits: criticalHitOverride,
     defensiveStat: defensiveStatOverride,
     offensiveStat: offensiveStatOverride,
@@ -108,8 +110,42 @@ export const createSmogonMove = (
     overrides.overrideOffensiveStat = offensiveStatOverride;
   }
 
-  return new SmogonMove(dex, moveName, {
+  const smogonMove = new SmogonMove(dex, moveName, {
     ...options,
     overrides,
   });
+
+  // for Z/Max base powers, SmogonMove performs a lookup with dex.moves.get(),
+  // which is too much work to override, so we'll directly update the move's `bp` property
+  const overrideUltBp = (move: SmogonMove) => {
+    if (options.useZ && typeof zBasePowerOverride === 'number') {
+      move.bp = Math.max(zBasePowerOverride, 0);
+    } else if (options.useMax && typeof maxBasePowerOverride === 'number') {
+      move.bp = Math.max(maxBasePowerOverride, 0);
+    }
+  };
+
+  // note: this directly modifies the passed-in smogonMove (hence no return value)
+  overrideUltBp(smogonMove);
+
+  // mechanics file will call clone() somewhere, which will remove our `bp` overrides since
+  // the SmogonMove constructor will recalculate the `bp` value again!
+  smogonMove.clone = () => {
+    const clonedMove = new SmogonMove(dex, moveName, {
+      ...options,
+
+      // not sure if these will change later
+      hits: smogonMove.hits,
+      timesUsed: smogonMove.timesUsed,
+      timesUsedWithMetronome: smogonMove.timesUsedWithMetronome,
+
+      overrides,
+    });
+
+    overrideUltBp(clonedMove);
+
+    return clonedMove;
+  };
+
+  return smogonMove;
 };
