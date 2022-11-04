@@ -647,6 +647,8 @@ export interface CalcdexMoveOverride {
   type?: Showdown.TypeName;
   category?: Showdown.MoveCategory;
   basePower?: number;
+  zBasePower?: number;
+  maxBasePower?: number;
   alwaysCriticalHits?: boolean;
   offensiveStat?: Showdown.StatNameNoHp;
   defensiveStat?: Showdown.StatNameNoHp | 'ignore';
