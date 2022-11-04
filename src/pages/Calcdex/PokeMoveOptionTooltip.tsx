@@ -2,9 +2,9 @@ import * as React from 'react';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
 // import { useCalcdexSettings } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/battle';
-import { calcHiddenPower } from '@showdex/utils/calc';
+import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { SelectOptionTooltipProps } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
@@ -14,6 +14,7 @@ export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<Mov
   className?: string;
   style?: React.CSSProperties;
   format?: string;
+  label?: MoveName;
   pokemon?: DeepPartial<CalcdexPokemon>;
 }
 
@@ -37,11 +38,18 @@ export const PokeMoveOptionTooltip = ({
     return null;
   }
 
-  const basePower = formatId(label).includes('hiddenpower')
-    ? calcHiddenPower(format, pokemon)
-    : dexMove?.basePower || 0;
+  // const basePower = formatId(label).includes('hiddenpower')
+  //   ? calcHiddenPower(format, pokemon)
+  //   : dexMove?.basePower || 0;
 
   const description = formatDexDescription(dexMove.shortDesc || dexMove.desc);
+
+  const moveOverrides = {
+    ...getMoveOverrideDefaults(pokemon, label, format),
+    ...pokemon?.moveOverrides?.[label],
+  };
+
+  const hasOverrides = hasMoveOverrides(pokemon, label, format);
 
   // Z/Max/G-Max moves bypass the original move's accuracy
   // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
@@ -66,26 +74,40 @@ export const PokeMoveOptionTooltip = ({
         </div>
       }
 
+      {
+        hasOverrides &&
+        <div
+          className={styles.moveProperties}
+          style={{ marginBottom: 3 }}
+        >
+          <div className={styles.moveProperty}>
+            <div className={styles.propertyName}>
+              Edited
+            </div>
+          </div>
+        </div>
+      }
+
       <div className={styles.moveProperties}>
         <PokeType
           className={styles.moveType}
-          type={dexMove.type}
+          type={moveOverrides.type}
           reverseColorScheme
         />
 
         {
-          !!dexMove.category &&
+          !!moveOverrides.category &&
           <div className={styles.moveProperty}>
             <div className={styles.propertyName}>
-              {dexMove.category.slice(0, 4)}
+              {moveOverrides.category.slice(0, 4)}
             </div>
 
             {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
             {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
             {
-              basePower > 2 &&
+              moveOverrides.basePower > 2 &&
               <div className={styles.propertyValue}>
-                {basePower}
+                {moveOverrides.basePower}
               </div>
             }
           </div>

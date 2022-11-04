@@ -14,10 +14,12 @@ import {
 } from '@showdex/utils/calc';
 // import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import {
   CalcdexBattleField,
   CalcdexBattleRules,
+  CalcdexMoveOverride,
   CalcdexPlayerKey,
   CalcdexPokemon,
   useCalcdexSettings,
@@ -163,6 +165,20 @@ export const PokeCalc = ({
       if (Object.keys(baseStats || {}).length) {
         payload.baseStats = { ...baseStats };
       }
+    }
+
+    // individually spread each overridden move w/ the move's defaults, if any
+    if ('moveOverrides' in payload) {
+      (Object.entries(payload.moveOverrides || {}) as [MoveName, CalcdexMoveOverride][]).forEach(([
+        moveName,
+        overrides,
+      ]) => {
+        // clear all the overrides if we didn't get an object or we have an empty object
+        payload.moveOverrides[moveName] = Object.keys(overrides || {}).length ? {
+          ...playerPokemon.moveOverrides[moveName],
+          ...overrides,
+        } : {};
+      });
     }
 
     // recalculate the stats with the updated EVs/IVs
