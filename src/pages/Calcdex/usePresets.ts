@@ -157,6 +157,8 @@ export const usePresets = ({
   const dexForme = speciesForme?.includes('-') ? dex?.species.get(speciesForme) : null;
 
   const baseForme = dexForme?.baseSpecies; // e.g., 'Necrozma'
+  const checkBaseForme = !!baseForme && baseForme !== speciesForme;
+
   const battleFormes = Array.isArray(dexForme?.battleOnly)
     ? dexForme.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Wings']
     : [dexForme?.battleOnly].filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
@@ -164,7 +166,7 @@ export const usePresets = ({
   const formes = Array.from(new Set([
     speciesForme, // e.g., 'Necrozma-Ultra' (typically wouldn't have any sets)
     !!battleFormes.length && battleFormes.find((f) => PokemonUsageFuckedFormes.includes(f)), // e.g., 'Necrozma-Dawn-Wings' (sets would match this forme)
-    !battleFormes.length && !!baseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
+    !battleFormes.length && checkBaseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
     randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`, // e.g., (for some other Pokemon) 'Gengar-Gmax'
   ].filter(Boolean))).map((f) => formatId(f));
 
