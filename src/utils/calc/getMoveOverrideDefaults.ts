@@ -30,6 +30,8 @@ export const getMoveOverrideDefaults = (
     type,
     category,
     basePower: basePowerFromDex,
+    zMove,
+    maxMove,
   } = dex?.moves.get(moveName) || {};
 
   const basePower = formatId(moveName).includes('hiddenpower')
@@ -48,6 +50,8 @@ export const getMoveOverrideDefaults = (
     type,
     category,
     basePower,
+    zBasePower: zMove?.basePower,
+    maxBasePower: maxMove?.basePower,
     alwaysCriticalHits: criticalHit,
     defensiveStat: ignoreDefensive ? 'ignore' : overrideDefensiveStat,
     offensiveStat: overrideOffensiveStat,
