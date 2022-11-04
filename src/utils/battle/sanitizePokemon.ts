@@ -155,6 +155,9 @@ export const sanitizePokemon = (
     // returns moveTrack and revealedMoves (guaranteed to be empty arrays, at the very least)
     ...sanitizeMoveTrack(pokemon, format),
 
+    showMoveOverrides: ('showMoveOverrides' in pokemon && pokemon.showMoveOverrides) || false,
+    moveOverrides: { ...('moveOverrides' in pokemon && pokemon.moveOverrides) },
+
     // moveState: {
     //   revealed: ('moveState' in pokemon && pokemon.moveState?.revealed) || [],
     //   learnset: ('moveState' in pokemon && pokemon.moveState?.learnset) || [],
