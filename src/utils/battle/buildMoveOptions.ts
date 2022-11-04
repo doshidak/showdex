@@ -1,3 +1,4 @@
+import { uarr } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
@@ -65,10 +66,16 @@ export const buildMoveOptions = (
 
     options.push({
       label: 'Z',
-      options: zMoves.map((name) => ({
-        label: getZMove(name, item),
-        value: name,
-      })),
+      options: zMoves.map((name) => {
+        const zMove = getZMove(name, item) || name;
+
+        return {
+          label: zMove,
+          rightLabel: findUsagePercent(name),
+          subLabel: zMove === name ? null : `${uarr} ${name}`,
+          value: name,
+        };
+      }),
     });
 
     filterMoves.push(...zMoves);
@@ -78,11 +85,16 @@ export const buildMoveOptions = (
   if (useMax && moves?.length) {
     options.push({
       label: 'Max',
-      options: moves.map((name) => ({
-        label: getMaxMove(name, ability, speciesForme) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
+      options: moves.map((name) => {
+        const maxMove = getMaxMove(name, ability, speciesForme) || name;
+
+        return {
+          label: maxMove,
+          rightLabel: findUsagePercent(name),
+          subLabel: maxMove === name ? null : `${uarr} ${name}`,
+          value: name,
+        };
+      }),
     });
 
     filterMoves.push(...moves);
