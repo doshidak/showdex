@@ -313,6 +313,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * Whether to show the EV/IV rows in the `PokeStats` table.
    *
    * * If `false`, an edit button should be shown to allow the user to set this value to `true`.
+   * * Applies to this specific Pokemon only.
    *
    * @default true
    * @since 1.0.3
@@ -414,6 +415,26 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   moveState?: CalcdexMoveState;
+
+  /**
+   * Whether to show editing controls for overriding moves.
+   *
+   * * Applies to this specific Pokemon only.
+   *
+   * @default false
+   * @since 1.0.6
+   */
+  showMoveOverrides?: boolean;
+
+  /**
+   * Overridden move properties by the user for the Pokemon.
+   *
+   * * Key refers to the move name with its value referring to the overridden properties.
+   * * Any overrides here pertain to the current Pokemon only.
+   *
+   * @since 1.0.6
+   */
+  moveOverrides?: Record<MoveName, CalcdexMoveOverride>;
 
   /**
    * Stage boosts of the Pokemon.
@@ -611,6 +632,24 @@ export interface CalcdexMoveState {
    * @since 0.1.0
    */
   other?: (MoveName | string)[];
+}
+
+/**
+ * Move overrides set by the user.
+ *
+ * * Any property not defined here should default to the move's default value.
+ * * Should be the value of an object, where the key is the move name itself.
+ *   - Hence why the move name is not specified here.
+ *
+ * @since 1.0.6
+ */
+export interface CalcdexMoveOverride {
+  type?: Showdown.TypeName;
+  category?: Showdown.MoveCategory;
+  basePower?: number;
+  alwaysCriticalHits?: boolean;
+  offensiveStat?: Showdown.StatNameNoHp;
+  defensiveStat?: Showdown.StatNameNoHp | 'ignore';
 }
 
 /**
