@@ -14,7 +14,6 @@ export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<Mov
   className?: string;
   style?: React.CSSProperties;
   format?: string;
-  label?: MoveName;
   pokemon?: DeepPartial<CalcdexPokemon>;
 }
 
@@ -24,32 +23,46 @@ export const PokeMoveOptionTooltip = ({
   format,
   pokemon,
   label,
+  value,
   hidden,
 }: PokeMoveOptionTooltipProps): JSX.Element => {
   // using label here instead of value since the move can turn into a Z or Max move
-  if (!label || hidden) {
+  if (!value || hidden) {
     return null;
   }
 
   const dex = getDexForFormat(format);
-  const dexMove = dex?.moves.get(label);
+  const dexMove = dex?.moves.get(value);
 
   if (!dexMove?.type) {
     return null;
   }
 
-  // const basePower = formatId(label).includes('hiddenpower')
-  //   ? calcHiddenPower(format, pokemon)
-  //   : dexMove?.basePower || 0;
+  const dexUltMove = pokemon?.useZ || pokemon?.useMax
+    ? dex?.moves.get(label)
+    : null;
 
-  const description = formatDexDescription(dexMove.shortDesc || dexMove.desc);
+  const description = formatDexDescription(
+    dexUltMove?.shortDesc
+      || dexUltMove?.desc
+      || dexMove.shortDesc
+      || dexMove.desc,
+  );
 
   const moveOverrides = {
-    ...getMoveOverrideDefaults(pokemon, label, format),
-    ...pokemon?.moveOverrides?.[label],
+    ...getMoveOverrideDefaults(pokemon, value, format),
+    ...pokemon?.moveOverrides?.[value],
   };
 
-  const hasOverrides = hasMoveOverrides(pokemon, label, format);
+  const hasOverrides = hasMoveOverrides(pokemon, value, format);
+
+  const basePower = (
+    pokemon?.useZ
+      ? moveOverrides?.zBasePower
+      : pokemon?.useMax
+        ? moveOverrides?.maxBasePower
+        : null
+  ) || moveOverrides?.basePower;
 
   // Z/Max/G-Max moves bypass the original move's accuracy
   // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
@@ -105,9 +118,9 @@ export const PokeMoveOptionTooltip = ({
             {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
             {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
             {
-              moveOverrides.basePower > 2 &&
+              basePower > 1 &&
               <div className={styles.propertyValue}>
-                {moveOverrides.basePower}
+                {basePower}
               </div>
             }
           </div>
