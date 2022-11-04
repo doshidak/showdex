@@ -43,4 +43,5 @@ export const PokemonUsageFuckedFormes: string[] = [
   'Vivillon', // -> Vivillon-Fancy -> Vivillon-Pokeball
   'Wishiwashi', // -> Wishiwashi-School
   'Zarude', // -> Zarude-Dada
+  'Zygarde', // -> Zygarde-Complete
 ];
