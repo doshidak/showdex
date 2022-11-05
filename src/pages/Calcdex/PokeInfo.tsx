@@ -463,7 +463,7 @@ export const PokeInfo = ({
       {
         !!pokemon?.speciesForme &&
         <>
-          {' '}For
+          {' '}for
           <br />
           <strong>{pokemon.speciesForme}</strong>
         </>
@@ -529,7 +529,7 @@ export const PokeInfo = ({
             tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
             tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
             shadow
-            disabled={settings?.reverseIconName ? !nextForme : !pokemon?.speciesForme}
+            disabled={settings?.reverseIconName ? !nextForme : !settings?.openSmogonPage || !pokemon?.speciesForme}
             onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
           />
         </div>
@@ -550,7 +550,7 @@ export const PokeInfo = ({
               tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
               hoverScale={1}
               // absoluteHover
-              disabled={settings?.reverseIconName ? !pokemon?.speciesForme : !nextForme}
+              disabled={settings?.reverseIconName ? !settings?.openSmogonPage || !pokemon?.speciesForme : !nextForme}
               onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
             />
 
