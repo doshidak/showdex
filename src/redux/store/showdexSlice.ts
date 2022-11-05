@@ -230,6 +230,16 @@ export interface ShowdexCalcdexSettings {
   reverseIconName: boolean;
 
   /**
+   * Whether to open the Pokemon's *Smogon Univeristy* page when the configured button is clicked on.
+   *
+   * * Configured button depends on `reverseIconName`.
+   *
+   * @default true
+   * @since 1.0.6
+   */
+  openSmogonPage: boolean;
+
+  /**
    * Whether to allow all possible formes to be switched to, if any, even if a forme is revealed.
    *
    * @default true

@@ -92,6 +92,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       authPosition: 'top',
       showNicknames: false,
       reverseIconName: false,
+      openSmogonPage: true,
       showAllFormes: true,
       showAllOptions: false,
       showNonDamageRanges: true,
