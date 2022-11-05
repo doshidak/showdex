@@ -961,17 +961,15 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['showNicknames']>
-                    name="calcdex.showNicknames"
+                  <Field<ShowdexSettings['calcdex']['openSmogonPage']>
+                    name="calcdex.openSmogonPage"
                     component={Switch}
                     className={styles.field}
-                    label={`Show Pok${eacute}mon Nicknames`}
+                    label="Open Smogon When Clicked"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
-                        <br />
-                        <br />
-                        ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
+                        Opens the Pok&eacute;mon's Smogon page when the configured button is
+                        clicked on, depending on <em>Swap Icon/Name Behavior</em>.
                       </div>
                     )}
                   />
@@ -987,6 +985,21 @@ export const SettingsPane = ({
                         (depending on <em>Swap Icon/Name Behavior</em>),
                         all possible formes will be cycled through,
                         even if its current, non-base forme is revealed.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showNicknames']>
+                    name="calcdex.showNicknames"
+                    component={Switch}
+                    className={styles.field}
+                    label={`Show Pok${eacute}mon Nicknames`}
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
+                        <br />
+                        <br />
+                        ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
                       </div>
                     )}
                   />
