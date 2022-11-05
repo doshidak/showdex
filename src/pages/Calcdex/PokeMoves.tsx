@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
-import { buildMoveOptions } from '@showdex/utils/battle';
+import { buildMoveOptions, legalLockedFormat } from '@showdex/utils/battle';
 import { formatDamageAmounts, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
@@ -53,7 +53,7 @@ export const PokeMoves = ({
 
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const moveOptions = React.useMemo(
@@ -81,6 +81,9 @@ export const PokeMoves = ({
       format?.includes('nationaldex')
         || (gen === 8 && !format?.includes('bdsp'))
     );
+
+  const showEditButton = settings?.showMoveEditor === 'always'
+    || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format));
 
   const handleMoveChange = (name: MoveName, index: number) => {
     const moves = [...(pokemon?.moves || [] as MoveName[])];
@@ -175,22 +178,25 @@ export const PokeMoves = ({
           />
         }
 
-        <ToggleButton
-          className={cx(
-            styles.toggleButton,
-            styles.editButton,
-            // pokemon?.showMoveOverrides && styles.hideButton,
-          )}
-          label={pokemon?.showMoveOverrides ? 'Hide' : 'Edit'}
-          tooltip={`${pokemon?.showMoveOverrides ? 'Close' : 'Open'} Move Editor`}
-          tooltipDisabled={!settings?.showUiTooltips}
-          primary={pokemon?.showMoveOverrides}
-          // active={pokemon?.showMoveOverrides}
-          disabled={!pokemon?.speciesForme}
-          onPress={() => onPokemonChange?.({
-            showMoveOverrides: !pokemon?.showMoveOverrides,
-          })}
-        />
+        {
+          showEditButton &&
+          <ToggleButton
+            className={cx(
+              styles.toggleButton,
+              styles.editButton,
+              // pokemon?.showMoveOverrides && styles.hideButton,
+            )}
+            label={pokemon?.showMoveOverrides ? 'Hide' : 'Edit'}
+            tooltip={`${pokemon?.showMoveOverrides ? 'Close' : 'Open'} Move Editor`}
+            tooltipDisabled={!settings?.showUiTooltips}
+            primary={pokemon?.showMoveOverrides}
+            // active={pokemon?.showMoveOverrides}
+            disabled={!pokemon?.speciesForme}
+            onPress={() => onPokemonChange?.({
+              showMoveOverrides: !pokemon?.showMoveOverrides,
+            })}
+          />
+        }
       </TableGridItem>
 
       {pokemon?.showMoveOverrides ? (
