@@ -507,15 +507,18 @@ export const SettingsPane = ({
                     name="hellodex.focusRoomsRoom"
                     component={Switch}
                     className={styles.field}
-                    label="Show Chatrooms Panel"
+                    label="Focus When Showdown Starts"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Miss Showdown's chatrooms panel when it first opens?
+                        Miss the default chatrooms panel when Showdown first starts?
+                        Disabling this won't auto-focus the Hellodex tab.
                         <br />
                         <br />
                         This does not affect <em>Single Panel</em> users.
                       </div>
                     )}
+                    format={(value) => !value}
+                    parse={(value) => !value}
                   />
                 </div>
               </div>
@@ -937,22 +940,7 @@ export const SettingsPane = ({
                     label="Show Players' ELO Ratings"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Shows each player's ELO rating, if available, underneath their username.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showNicknames']>
-                    name="calcdex.showNicknames"
-                    component={Switch}
-                    className={styles.field}
-                    label={`Show Pok${eacute}mon Nicknames`}
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
-                        <br />
-                        <br />
-                        ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
+                        Shows each player's ELO rating, if available, by their username.
                       </div>
                     )}
                   />
@@ -969,6 +957,21 @@ export const SettingsPane = ({
                         <br />
                         By default (off), clicking on the icon will open its Smogon page &amp;
                         clicking on the name will switch its forme, if any.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showNicknames']>
+                    name="calcdex.showNicknames"
+                    component={Switch}
+                    className={styles.field}
+                    label={`Show Pok${eacute}mon Nicknames`}
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
+                        <br />
+                        <br />
+                        ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
                       </div>
                     )}
                   />
@@ -1037,6 +1040,61 @@ export const SettingsPane = ({
                         Disabling this will prevent the Matchup Tooltip from showing (if on).
                       </div>
                     )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showMoveEditor']>
+                    name="calcdex.showMoveEditor"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label="Editable Moves"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
+                          <br />
+                          <br />
+                          While editing, you can edit the move's type, category (if damaging), &amp;
+                          BP (including separate BPs for Z &amp; Max moves, if active).
+                          Edits are applied on a <em>per-move</em>, <em>per-Pok&eacute;mon</em> basis.
+                          <br />
+                          <br />
+                          Additionally, if space permits, you can override the attacking stat (ATK/SPA)
+                          &amp; the defending stat (DEF/SPD). Defending stat can also be ignored/bypassed.
+                          <br />
+                          <br />
+                          (Note: There's currently no setting to show stat overrides on smaller screens.)
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only show the <em>Edit</em> button for nonstandard metagame formats
+                          in the moves table.
+                          <br />
+                          <br />
+                          Hover over the <strong>Always</strong> option to learn more about move editing.
+                          <br />
+                          <br />
+                          <em>This option is not affiliated with Meta, the Social Metaverse Company.</em>
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
                   />
 
                   <div
