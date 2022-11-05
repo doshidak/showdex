@@ -282,7 +282,7 @@ $close-icon-size: 28px;
   }
 
   &.top {
-    @include spacing.margin($bottom: 10px);
+    @include spacing.margin($bottom: 5px);
   }
 
   &.right {
@@ -290,7 +290,7 @@ $close-icon-size: 28px;
   }
 
   &.bottom {
-    @include spacing.margin($top: 10px);
+    @include spacing.margin($top: 5px);
   }
 
   &.left {
