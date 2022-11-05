@@ -369,6 +369,19 @@ export interface ShowdexCalcdexSettings {
   defaultShowGenetics: Record<'auth' | CalcdexPlayerKey, boolean>;
 
   /**
+   * When to show the *Edit* button in the moves table.
+   *
+   * * `'always'` will always show the *Edit* button.
+   * * `'meta'` will only show the *Edit* button in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never show the *Edit* button.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  showMoveEditor: 'always' | 'meta' | 'never';
+
+  /**
    * Whether to show UI tooltips.
    *
    * @default true

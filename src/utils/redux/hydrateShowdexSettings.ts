@@ -122,6 +122,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
+      showMoveEditor: 'meta',
       showUiTooltips: true,
       showAbilityTooltip: true,
       showItemTooltip: true,
@@ -173,9 +174,11 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
 
   dehydratedSettings.forEach((dehydratedSetting) => {
     const [
-      dehydratedKey,
+      rawDehydratedKey,
       dehydratedValue,
     ] = dehydratedSetting?.split(':') || [];
+
+    const dehydratedKey = rawDehydratedKey?.toLowerCase();
 
     if (!dehydratedKey || IgnoredDehydratedShowdexKeys.includes(dehydratedKey)) {
       return;
@@ -191,9 +194,11 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
 
         dehydratedHellodexSettings.forEach((dehydratedHellodexSetting) => {
           const [
-            dehydratedHellodexKey,
+            rawDehydratedHellodexKey,
             ...dehydratedHellodexValues
           ] = dehydratedHellodexSetting?.split('~') || [];
+
+          const dehydratedHellodexKey = rawDehydratedHellodexKey?.toLowerCase();
 
           if (!dehydratedHellodexKey) {
             return;
@@ -224,9 +229,11 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
 
         dehydratedCalcdexSettings.forEach((dehydratedCalcdexSetting) => {
           const [
-            dehydratedCalcdexKey,
+            rawDehydratedCalcdexKey,
             ...dehydratedCalcdexValues
           ] = dehydratedCalcdexSetting?.split('~') || [];
+
+          const dehydratedCalcdexKey = rawDehydratedCalcdexKey?.toLowerCase();
 
           if (!dehydratedCalcdexKey) {
             return;
