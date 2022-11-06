@@ -479,6 +479,11 @@ export const PokeInfo = ({
     format,
   );
 
+  const formeDisabled = !nextForme;
+  const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
+  const piconDisabled = settings?.reverseIconName ? formeDisabled : smogonDisabled;
+  const nameDisabled = settings?.reverseIconName ? smogonDisabled : formeDisabled;
+
   const editableTypes = settings?.editPokemonTypes === 'always'
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
 
@@ -533,7 +538,7 @@ export const PokeInfo = ({
             tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
             tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
             shadow
-            disabled={settings?.reverseIconName ? !nextForme : !settings?.openSmogonPage || !pokemon?.speciesForme}
+            disabled={piconDisabled}
             onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
           />
         </div>
@@ -545,7 +550,7 @@ export const PokeInfo = ({
               className={cx(
                 styles.nameButton,
                 !pokemon?.speciesForme && styles.missingForme,
-                !nextForme && styles.disabled,
+                nameDisabled && styles.disabled,
               )}
               labelClassName={styles.nameLabel}
               label={nickname || pokemon?.speciesForme || 'MissingNo.'}
@@ -554,7 +559,7 @@ export const PokeInfo = ({
               tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
               hoverScale={1}
               // absoluteHover
-              disabled={settings?.reverseIconName ? !settings?.openSmogonPage || !pokemon?.speciesForme : !nextForme}
+              disabled={nameDisabled}
               onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
             />
 
