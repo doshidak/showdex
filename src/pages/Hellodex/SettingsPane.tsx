@@ -965,7 +965,7 @@ export const SettingsPane = ({
                     name="calcdex.openSmogonPage"
                     component={Switch}
                     className={styles.field}
-                    label="Open Smogon When Clicked"
+                    label={`Open Pok${eacute}mon Smogon Pages`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Opens the Pok&eacute;mon's Smogon page when the configured button is
@@ -1055,6 +1055,46 @@ export const SettingsPane = ({
                     )}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['editPokemonTypes']>
+                    name="calcdex.editPokemonTypes"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label={`Editable Pok${eacute}mon Types`}
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always allow the Pok{eacute}mon's types to be edited when clicked on.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only allow the Pok{eacute}mon's types to be edited in nonstandard metagame
+                          formats when clicked on.
+                          <br />
+                          <br />
+                          <em>This option is not affiliated with Meta, the Social Metaverse Company.</em>
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never allow the Pok{eacute}mon's types to be edited.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['showMoveEditor']>
                     name="calcdex.showMoveEditor"
                     component={Segmented}
@@ -1062,7 +1102,7 @@ export const SettingsPane = ({
                       styles.field,
                       !inBattle && styles.singleColumn,
                     )}
-                    label="Editable Moves"
+                    label="Editable Move Properties"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Always',
@@ -1071,13 +1111,13 @@ export const SettingsPane = ({
                           Always show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
                           <br />
                           <br />
-                          While editing, you can edit the move's type, category (if damaging), &amp;
-                          BP (including separate BPs for Z &amp; Max moves, if active).
-                          Edits are applied on a <em>per-move</em>, <em>per-Pok&eacute;mon</em> basis.
+                          You can edit the move's type, category (if damaging) &amp;
+                          BP (including separate BPs for Z &amp; Max moves when activated).
+                          Edits are unique to each move of the Pok{eacute}mon.
                           <br />
                           <br />
                           Additionally, if space permits, you can override the attacking stat (ATK/SPA)
-                          &amp; the defending stat (DEF/SPD). Defending stat can also be ignored/bypassed.
+                          &amp; the defending stat (DEF/SPD).
                           <br />
                           <br />
                           (Note: There's currently no setting to show stat overrides on smaller screens.)
@@ -1095,7 +1135,7 @@ export const SettingsPane = ({
                           Hover over the <strong>Always</strong> option to learn more about move editing.
                           <br />
                           <br />
-                          <em>This option is not affiliated with Meta, the Social Metaverse Company.</em>
+                          <em>This option is definitely not affiliated with Meta, the Social Metaverse Company.</em>
                         </div>
                       ),
                       value: 'meta',
