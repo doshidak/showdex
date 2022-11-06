@@ -132,9 +132,9 @@ button.editButton {
   // @include spacing.margin($right: -3px, $left: 2px);
   @include spacing.margin($left: 2px);
 
-  &.hideButton {
-    @include spacing.margin($left: 3px);
-  }
+  // &.hideButton {
+  //   @include spacing.margin($left: 3px);
+  // }
 }
 
 button.ultButton {
@@ -222,6 +222,7 @@ button.damageButton {
 
 button.editorButton {
   font-size: 8px;
+  @include transition.apply(color, background-color, box-shadow, opacity);
 
   &.readOnly {
     user-select: none;
