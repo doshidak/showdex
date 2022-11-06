@@ -111,7 +111,8 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         // (something's terribly wrong if index 0 is '???' here, probably about to have an empty array!)
         const unknownTypeIndex = updatedValue.findIndex((t) => t === '???');
 
-        if (unknownTypeIndex > 0) {
+        // update (2022/11/06): no longer sorting, so '???' at index 0 is ok
+        if (unknownTypeIndex > -1) {
           updatedValue.splice(unknownTypeIndex, 1);
         }
       } else {
