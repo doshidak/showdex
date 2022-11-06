@@ -123,6 +123,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
+      editPokemonTypes: 'meta',
       showMoveEditor: 'meta',
       showUiTooltips: true,
       showAbilityTooltip: true,
