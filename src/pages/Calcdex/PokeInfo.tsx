@@ -28,6 +28,7 @@ import {
   // getDexForFormat,
   // hasMegaForme,
   hasNickname,
+  legalLockedFormat,
   mergeRevealedMoves,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
@@ -313,7 +314,7 @@ export const PokeInfo = ({
   // const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(gen);
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nickname = hasNickname(pokemon) && settings?.showNicknames
@@ -478,6 +479,9 @@ export const PokeInfo = ({
     format,
   );
 
+  const editableTypes = settings?.editPokemonTypes === 'always'
+    || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
+
   const copiedRef = React.useRef<BadgeInstance>(null);
 
   const pokePaste = React.useMemo(
@@ -561,19 +565,6 @@ export const PokeInfo = ({
               </div>
             }
 
-            {/*
-              !!pokemon?.types?.length &&
-              <div className={styles.types}>
-                {pokemon.types.map((type, i) => (
-                  <PokeType
-                    key={`PokeInfo:Types:${pokemonKey}:PokeType:${i}`}
-                    style={pokemon.types.length > 1 && i === 0 ? { marginRight: 2 } : null}
-                    type={type}
-                  />
-                ))}
-              </div>
-            */}
-
             <PokeTypeField
               className={styles.typesField}
               label={`Types for Pokemon ${friendlyPokemonName}`}
@@ -600,6 +591,7 @@ export const PokeInfo = ({
                   types: [...(types || [])],
                 }),
               }}
+              readOnly={!editableTypes}
               disabled={!pokemon?.speciesForme}
             />
           </div>
