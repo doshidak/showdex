@@ -100,8 +100,11 @@ export const createSmogonMove = (
     options.isCrit = criticalHitOverride;
   }
 
+  // update (2022/11/04): ignoreDefensive doesn't seem to do anything here;
+  // will leave this in, but won't allow the user to select 'ignore' in PokeMoves for now
   if (defensiveStatOverride === 'ignore') {
     overrides.ignoreDefensive = true;
+    overrides.overrideDefensiveStat = null;
   } else if (defensiveStatOverride) {
     overrides.overrideDefensiveStat = defensiveStatOverride;
   }
@@ -128,8 +131,8 @@ export const createSmogonMove = (
   // note: this directly modifies the passed-in smogonMove (hence no return value)
   overrideUltBp(smogonMove);
 
-  // mechanics file will call clone() somewhere, which will remove our `bp` overrides since
-  // the SmogonMove constructor will recalculate the `bp` value again!
+  // calculate() from @smogon/calc will clone() the move before it's passed to the mechanics function,
+  // which will remove our `bp` overrides since the SmogonMove constructor will recalculate the `bp` value again!
   smogonMove.clone = () => {
     const clonedMove = new SmogonMove(dex, moveName, {
       ...options,
