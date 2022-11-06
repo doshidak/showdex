@@ -92,8 +92,8 @@ $type-option-button: (
 $type-option: (
   background-color: (
     default: (
-      light: color.alpha(colors.$white, 0.4),
-      dark: color.alpha(colors.$black, 0.4),
+      light: color.alpha(colors.$white, 0.5),
+      dark: color.alpha(colors.$black, 0.5),
     ),
   ),
 );
