@@ -406,6 +406,19 @@ export interface ShowdexCalcdexSettings {
   showMoveEditor: 'always' | 'meta' | 'never';
 
   /**
+   * Whether to allow the Pokemon's base stats to be edited in the stats table.
+   *
+   * * `'always'` will always show the base stats.
+   * * `'meta'` will only show the base stats in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never show the base stats.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  showBaseStats: 'always' | 'meta' | 'never';
+
+  /**
    * Whether to show UI tooltips.
    *
    * @default true
