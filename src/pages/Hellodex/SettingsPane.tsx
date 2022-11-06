@@ -31,6 +31,13 @@ const DehydratedRegex = /^v:\d+\.\d+\.\d+;[a-z]{1,3}:/;
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
 
+/**
+ * Showdex settings UI.
+ *
+ * @todo This file is gross. It's over 1500 lines.
+ * @warning Also a warning lol.
+ * @since 1.0.3
+ */
 export const SettingsPane = ({
   className,
   style,
@@ -1055,6 +1062,190 @@ export const SettingsPane = ({
                     )}
                   />
 
+                  <div className={styles.settingsGroupTitle}>
+                    Tooltips
+                  </div>
+
+                  <Field<ShowdexSettings['calcdex']['showUiTooltips']>
+                    name="calcdex.showUiTooltips"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show UI Help Tooltips"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows explainer tooltips for buttons in the UI when hovered over.
+                        <br />
+                        <br />
+                        Disable this if you're a Calcdex pro and know what everything does already.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
+                    name="calcdex.showFieldTooltips"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Field Tooltips"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows short descriptions when hovering over screens, weather &amp; terrain
+                        in the field section located in the middle.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showAbilityTooltip']>
+                    name="calcdex.showAbilityTooltip"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Ability Tooltip"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows a short description of the hovered ability in the dropdown list.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showItemTooltip']>
+                    name="calcdex.showItemTooltip"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Item Tooltip"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows a short description of the hovered item in the dropdown list.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showMoveTooltip']>
+                    name="calcdex.showMoveTooltip"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Move Tooltip"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows a short description &amp; quick stats (e.g., type, category, BP)
+                        of the hovered move in the dropdown list.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showMatchupTooltip']>
+                    name="calcdex.showMatchupTooltip"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Matchup Tooltip"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows a description of the move's matchup from the original
+                        Damage Calculator when hovering over its damage range.
+                      </div>
+                    )}
+                  />
+
+                  <div className={styles.settingsGroupTitle}>
+                    Advanced
+                  </div>
+
+                  <Field<ShowdexSettings['calcdex']['prettifyMatchupDescription']>
+                    name="calcdex.prettifyMatchupDescription"
+                    component={Switch}
+                    className={styles.field}
+                    label="Prettify Matchup Description"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Makes the matchup description easier to quickly scan
+                        by applying some gentle formatting &amp; spacing.
+                      </div>
+                    )}
+                    format={(value) => (!values.calcdex?.showMatchupTooltip ? false : value)}
+                    disabled={!values.calcdex?.showMatchupTooltip}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['copyMatchupDescription']>
+                    name="calcdex.copyMatchupDescription"
+                    component={Switch}
+                    className={styles.field}
+                    label="Copy Matchup When Clicked"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Clicking on the damage range will copy the <em>unprettied</em> (if on)
+                        matchup description to your clipboard.
+                        <br />
+                        <br />
+                        Disable this if you like to highlight what you're reading on screen.
+                      </div>
+                    )}
+                    format={(value) => (!values.calcdex?.showMatchupTooltip ? false : value)}
+                    disabled={!values.calcdex?.showMatchupTooltip}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showMatchupDamageAmounts']>
+                    name="calcdex.showMatchupDamageAmounts"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label="Show Possible Damage Amounts"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Possible damage amounts will always be shown in the Matchup Tooltip.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'NFE',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Possible damage amounts will only be shown against <em>NFE</em>{' '}
+                          (Not Fully Evolved) Pok&eacute;mon in the Matchup Tooltip.
+                        </div>
+                      ),
+                      value: 'nfe',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Possible damage amounts will never be shown in the Matchup Tooltip.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                    format={(value) => (!values.calcdex?.showMatchupTooltip ? 'never' : value)}
+                    disabled={!values.calcdex?.showMatchupTooltip}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['formatMatchupDamageAmounts']>
+                    name="calcdex.formatMatchupDamageAmounts"
+                    component={Switch}
+                    className={styles.field}
+                    label="Percentify Damage Amounts"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Combines the list of damage amounts into unique amounts with percentages.
+                        <br />
+                        <br />
+                        If there are more than 5 unique damage amounts, no percentages will be shown
+                        to avoid lengthy lists.
+                      </div>
+                    )}
+                    format={(value) => (
+                      !values.calcdex?.showMatchupTooltip
+                        || values.calcdex?.showMatchupDamageAmounts === 'never'
+                        ? false
+                        : value
+                    )}
+                    disabled={(
+                      !values.calcdex?.showMatchupTooltip
+                      || values.calcdex?.showMatchupDamageAmounts === 'never'
+                    )}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['editPokemonTypes']>
                     name="calcdex.editPokemonTypes"
                     component={Segmented}
@@ -1128,14 +1319,10 @@ export const SettingsPane = ({
                       label: 'Meta',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Only show the <em>Edit</em> button for nonstandard metagame formats
-                          in the moves table.
+                          Only show the <em>Edit</em> button in nonstandard metagame formats.
                           <br />
                           <br />
                           Hover over the <strong>Always</strong> option to learn more about move editing.
-                          <br />
-                          <br />
-                          <em>This option is definitely not affiliated with Meta, the Social Metaverse Company.</em>
                         </div>
                       ),
                       value: 'meta',
@@ -1144,6 +1331,50 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Never show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showBaseStats']>
+                    name="calcdex.showBaseStats"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label="Editable Base Stats"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always show the Pok{eacute}mon's base stats in its stats table,
+                          allowing its values to be edited.
+                          <br />
+                          <br />
+                          Lowest possible base stat value is <strong>1</strong> &amp;
+                          highest is arbitrarily set at <strong>999</strong>.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only show the Pok{eacute}mon's base stats in nonstandard metagame formats.
+                          <br />
+                          <br />
+                          Hover over the <strong>Always</strong> option to learn more about base stat editing.
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never show the Pok{eacute}mon's base stats.
                         </div>
                       ),
                       value: 'never',
@@ -1274,185 +1505,8 @@ export const SettingsPane = ({
                     }
                   </div>
 
-                  <div className={styles.settingsGroupTitle}>
-                    Tooltips
-                  </div>
-
-                  <Field<ShowdexSettings['calcdex']['showUiTooltips']>
-                    name="calcdex.showUiTooltips"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show UI Help Tooltips"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows explainer tooltips for buttons in the UI when hovered over.
-                        <br />
-                        <br />
-                        Disable this if you're a Calcdex pro and know what everything does already.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
-                    name="calcdex.showFieldTooltips"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Field Tooltips"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows short descriptions when hovering over screens, weather &amp; terrain
-                        in the field section located in the middle.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showAbilityTooltip']>
-                    name="calcdex.showAbilityTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Ability Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a short description of the hovered ability in the dropdown list.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showItemTooltip']>
-                    name="calcdex.showItemTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Item Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a short description of the hovered item in the dropdown list.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showMoveTooltip']>
-                    name="calcdex.showMoveTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Move Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a short description &amp; quick stats (e.g., type, category, BP)
-                        of the hovered move in the dropdown list.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showMatchupTooltip']>
-                    name="calcdex.showMatchupTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Matchup Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a description of the move's matchup from the original
-                        Damage Calculator when hovering over its damage range.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['prettifyMatchupDescription']>
-                    name="calcdex.prettifyMatchupDescription"
-                    component={Switch}
-                    className={styles.field}
-                    label="Prettify Matchup Description"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Makes the matchup description easier to quickly scan
-                        by applying some gentle formatting &amp; spacing.
-                      </div>
-                    )}
-                    format={(value) => (!values.calcdex?.showMatchupTooltip ? false : value)}
-                    disabled={!values.calcdex?.showMatchupTooltip}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['copyMatchupDescription']>
-                    name="calcdex.copyMatchupDescription"
-                    component={Switch}
-                    className={styles.field}
-                    label="Copy Matchup When Clicked"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Clicking on the damage range will copy the <em>unprettied</em> (if on)
-                        matchup description to your clipboard.
-                        <br />
-                        <br />
-                        Disable this if you like to highlight what you're reading on screen.
-                      </div>
-                    )}
-                    format={(value) => (!values.calcdex?.showMatchupTooltip ? false : value)}
-                    disabled={!values.calcdex?.showMatchupTooltip}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showMatchupDamageAmounts']>
-                    name="calcdex.showMatchupDamageAmounts"
-                    component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
-                    label="Show Possible Damage Amounts"
-                    labelPosition={inBattle ? 'top' : 'left'}
-                    options={[{
-                      label: 'Always',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Possible damage amounts will always be shown in the Matchup Tooltip.
-                        </div>
-                      ),
-                      value: 'always',
-                    }, {
-                      label: 'NFE',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Possible damage amounts will only be shown against <em>NFE</em>{' '}
-                          (Not Fully Evolved) Pok&eacute;mon in the Matchup Tooltip.
-                        </div>
-                      ),
-                      value: 'nfe',
-                    }, {
-                      label: 'Never',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Possible damage amounts will never be shown in the Matchup Tooltip.
-                        </div>
-                      ),
-                      value: 'never',
-                    }]}
-                    format={(value) => (!values.calcdex?.showMatchupTooltip ? 'never' : value)}
-                    disabled={!values.calcdex?.showMatchupTooltip}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['formatMatchupDamageAmounts']>
-                    name="calcdex.formatMatchupDamageAmounts"
-                    component={Switch}
-                    className={styles.field}
-                    label="Percentify Damage Amounts"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Combines the list of damage amounts into unique amounts with percentages.
-                        <br />
-                        <br />
-                        If there are more than 5 unique damage amounts, no percentages will be shown
-                        to avoid lengthy lists.
-                      </div>
-                    )}
-                    format={(value) => (
-                      !values.calcdex?.showMatchupTooltip
-                        || values.calcdex?.showMatchupDamageAmounts === 'never'
-                        ? false
-                        : value
-                    )}
-                    disabled={(
-                      !values.calcdex?.showMatchupTooltip
-                        || values.calcdex?.showMatchupDamageAmounts === 'never'
-                    )}
-                  />
+                  {/* temporary spacer cause too lazy to do it in CSS lol */}
+                  <div style={{ height: 5 }} />
                 </div>
               </div>
 
