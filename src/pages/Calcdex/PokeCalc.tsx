@@ -143,6 +143,28 @@ export const PokeCalc = ({
       payload.dirtyItem = null;
     }
 
+    // update (2022/11/06): now allowing base stat editing as a setting lul
+    if ('dirtyBaseStats' in payload) {
+      payload.dirtyBaseStats = {
+        ...payload.dirtyBaseStats,
+      };
+
+      // remove any dirtyBaseStat entry that matches its original value
+      Object.entries(payload.dirtyBaseStats).forEach(([
+        stat,
+        value,
+      ]: [
+        Showdown.StatName,
+        number,
+      ]) => {
+        const baseValue = playerPokemon.baseStats?.[stat] ?? -1;
+
+        if (baseValue === value) {
+          delete payload.dirtyBaseStats[stat];
+        }
+      });
+    }
+
     // check for any possible abilities, base stat & type updates due to speciesForme changes
     if ('speciesForme' in payload && payload.speciesForme !== playerPokemon.speciesForme) {
       const {
@@ -187,10 +209,15 @@ export const PokeCalc = ({
       };
     }
 
-    // recalculate the stats with the updated EVs/IVs
+    // recalculate the stats with the updated base stats/EVs/IVs
     payload.spreadStats = calcPokemonSpreadStats(format, {
       ...playerPokemon,
       ...payload,
+
+      baseStats: {
+        ...playerPokemon.baseStats,
+        ...payload.dirtyBaseStats,
+      },
     });
 
     // clear any dirtyBoosts that match the current boosts
