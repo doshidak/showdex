@@ -56,8 +56,14 @@ export const PokeStats = ({
   const statNames = PokemonStatNames.filter((stat) => gen > 1 || stat !== 'spd');
   const boostNames = PokemonBoostNames.filter((stat) => gen > 1 || stat !== 'spd');
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
+
+  const shouldShowBaseStats = settings?.showBaseStats === 'always'
+    || (settings?.showBaseStats === 'meta' && !legalLockedFormat(format));
+
+  const hasDirtyBaseStats = Object.values(pokemon?.dirtyBaseStats || {})
+    .some((n) => typeof n === 'number' && n > -1);
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs');
@@ -102,6 +108,7 @@ export const PokeStats = ({
           tooltip={(
             <div className={styles.tooltipContent}>
               {pokemon?.showGenetics ? 'Hide' : 'Edit'}{' '}
+              {shouldShowBaseStats && 'Base/'}
               {legacy ? 'DVs' : 'EVs/IVs'}
             </div>
           )}
@@ -143,6 +150,80 @@ export const PokeStats = ({
           </TableGridItem>
         );
       })}
+
+      {/* base stats */}
+      {
+        (pokemon?.showGenetics && shouldShowBaseStats) &&
+        <>
+          <TableGridItem
+            className={styles.header}
+            align="right"
+            header
+          >
+            <Button
+              className={cx(
+                styles.boostButton,
+                styles.boostBaseStatButton,
+                !hasDirtyBaseStats && styles.pristine,
+                !hasDirtyBaseStats && styles.disabled, // intentionally keeping them separate
+              )}
+              labelClassName={styles.boostButtonLabel}
+              label="Base"
+              tooltip="Reset All Modified Stats"
+              tooltipDisabled={!settings?.showUiTooltips || !hasDirtyBaseStats}
+              highlight={hasDirtyBaseStats}
+              hoverScale={1}
+              absoluteHover
+              disabled={!pokemon?.speciesForme || !hasDirtyBaseStats}
+              onPress={() => onPokemonChange?.({
+                dirtyBaseStats: null,
+              })}
+            />
+          </TableGridItem>
+
+          {statNames.map((stat) => {
+            const baseStat = pokemon?.dirtyBaseStats?.[stat] ?? pokemon?.baseStats?.[stat];
+            const pristine = typeof pokemon?.dirtyBaseStats?.[stat] !== 'number';
+            const disabled = !pokemon?.speciesForme;
+
+            return (
+              <TableGridItem
+                key={`PokeStats:BaseStats:${pokemonKey}:${stat}`}
+                className={styles.valueFieldContainer}
+              >
+                <ValueField
+                  className={cx(
+                    styles.valueField,
+                    styles.baseStatField,
+                    pristine && styles.pristine,
+                    disabled && styles.disabled,
+                  )}
+                  inputClassName={styles.valueFieldInput}
+                  label={`${stat.toUpperCase()} Base Stat for ${friendlyPokemonName}`}
+                  hideLabel
+                  hint={baseStat?.toString() || 1}
+                  fallbackValue={1}
+                  min={1}
+                  max={999}
+                  step={1}
+                  shiftStep={10}
+                  loop
+                  loopStepsOnly
+                  clearOnFocus
+                  absoluteHover
+                  input={{
+                    value: baseStat,
+                    onChange: (value: number) => onPokemonChange?.({
+                      dirtyBaseStats: { [stat]: value },
+                    }),
+                  }}
+                  disabled={disabled}
+                />
+              </TableGridItem>
+            );
+          })}
+        </>
+      }
 
       {/* IVs */}
       {
@@ -189,7 +270,8 @@ export const PokeStats = ({
             const value = legacy ? convertIvToLegacyDv(iv) : iv;
 
             const disabled = !pokemon?.speciesForme
-              || (legacy && stat === 'hp') || (gen === 2 && stat === 'spd');
+              || (legacy && stat === 'hp')
+              || (gen === 2 && stat === 'spd');
 
             return (
               <TableGridItem
@@ -391,7 +473,7 @@ export const PokeStats = ({
               onPress={() => onPokemonChange?.({
                 // resets the dirty boost, in which a re-render will re-sync w/
                 // the actual boost from the battle state
-                dirtyBoosts: { [stat]: undefined },
+                dirtyBoosts: { [stat]: null },
               })}
             />
 
