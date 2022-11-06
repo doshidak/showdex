@@ -40,6 +40,18 @@ export const getMoveOverrideDefaults = (
 
   const criticalHit = alwaysCriticalHits(moveName, format);
 
+  const defaultDefensiveStat: Showdown.StatNameNoHp = category === 'Physical'
+    ? 'def'
+    : category === 'Special'
+      ? 'spd'
+      : null;
+
+  const defaultOffensiveStat: Showdown.StatNameNoHp = category === 'Physical'
+    ? 'atk'
+    : category === 'Special'
+      ? 'spa'
+      : null;
+
   const {
     ignoreDefensive,
     overrideDefensiveStat,
@@ -53,7 +65,7 @@ export const getMoveOverrideDefaults = (
     zBasePower: zMove?.basePower,
     maxBasePower: maxMove?.basePower,
     alwaysCriticalHits: criticalHit,
-    defensiveStat: ignoreDefensive ? 'ignore' : overrideDefensiveStat,
-    offensiveStat: overrideOffensiveStat,
+    defensiveStat: (ignoreDefensive ? 'ignore' : overrideDefensiveStat) || defaultDefensiveStat,
+    offensiveStat: overrideOffensiveStat || defaultOffensiveStat,
   };
 };
