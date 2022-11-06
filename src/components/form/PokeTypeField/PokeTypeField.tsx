@@ -35,7 +35,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   // tooltip,
   // tooltipDisabled,
   multi,
-  maxMultiTypes = 3,
+  maxMultiTypes = 2,
   input,
   readOnly,
   disabled,
@@ -100,12 +100,12 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       }
 
       if (updatedValue.length) {
-        updatedValue.sort((a, b) => {
-          const indexA = PokemonTypes.findIndex((t) => t === a);
-          const indexB = PokemonTypes.findIndex((t) => t === b);
-
-          return indexA - indexB;
-        });
+        // updatedValue.sort((a, b) => {
+        //   const indexA = PokemonTypes.findIndex((t) => t === a);
+        //   const indexB = PokemonTypes.findIndex((t) => t === b);
+        //
+        //   return indexA - indexB;
+        // });
 
         // if sorting worked properly, should always be last in the array
         // (something's terribly wrong if index 0 is '???' here, probably about to have an empty array!)
@@ -125,7 +125,10 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
 
     const currentValue = (input?.value as Showdown.TypeName) || '???';
 
+    // allow the singular type to be "toggled" off
     if (currentValue === value) {
+      input?.onChange?.('???');
+
       return;
     }
 
