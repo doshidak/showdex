@@ -179,6 +179,12 @@ export const PokeCalc = ({
           ...overrides,
         } : {};
       });
+
+      // this is the crucial bit, otherwise we'll remove any existing overrides
+      payload.moveOverrides = {
+        ...playerPokemon.moveOverrides,
+        ...payload.moveOverrides,
+      };
     }
 
     // recalculate the stats with the updated EVs/IVs
