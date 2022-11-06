@@ -136,12 +136,21 @@ export const sanitizePokemon = (
       spe: typeof pokemon?.boosts?.spe === 'number' ? pokemon.boosts.spe : 0,
     },
 
+    /** @todo clean this up lol */
     dirtyBoosts: {
-      atk: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.atk) || undefined,
-      def: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.def) || undefined,
-      spa: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spa) || undefined,
-      spd: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spd) || undefined,
-      spe: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spe) || undefined,
+      atk: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.atk) || null,
+      def: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.def) || null,
+      spa: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spa) || null,
+      spd: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spd) || null,
+      spe: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spe) || null,
+    },
+
+    dirtyBaseStats: {
+      atk: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.atk) || null,
+      def: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.def) || null,
+      spa: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spa) || null,
+      spd: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spd) || null,
+      spe: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spe) || null,
     },
 
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
@@ -156,13 +165,9 @@ export const sanitizePokemon = (
     ...sanitizeMoveTrack(pokemon, format),
 
     showMoveOverrides: ('showMoveOverrides' in pokemon && pokemon.showMoveOverrides) || false,
-    moveOverrides: { ...('moveOverrides' in pokemon && pokemon.moveOverrides) },
-
-    // moveState: {
-    //   revealed: ('moveState' in pokemon && pokemon.moveState?.revealed) || [],
-    //   learnset: ('moveState' in pokemon && pokemon.moveState?.learnset) || [],
-    //   // other: ('moveState' in pokemon && pokemon.moveState?.other) || [],
-    // },
+    moveOverrides: {
+      ...('moveOverrides' in pokemon && pokemon.moveOverrides),
+    },
 
     criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
 
