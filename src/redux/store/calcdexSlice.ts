@@ -456,7 +456,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @default
    * ```ts
-   * {}
+   * { hp: null, atk: null, def: null, spa: null, spd: null, spe: null }
    * ```
    * @since 0.1.0
    */
@@ -472,6 +472,21 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   baseStats?: Showdown.StatsTable;
+
+  /**
+   * Keeps track of user-modified base stats as to not modify the actual base stats.
+   *
+   * * This is spread over the `overrides.baseStats` in `createSmogonPokemon()`, leaving the original `baseStats` intact.
+   *   - "Resetting" the stat to its original value is also made easy by setting its corresponding value here to `null`.
+   * * Recalculating the base stats again to find out if `baseStats` has been modified sounded like a lot of work lol.
+   *
+   * @default
+   * ```ts
+   * { hp: null, atk: null, def: null, spa: null, spd: null, spe: null }
+   * ```
+   * @since 1.0.6
+   */
+  dirtyBaseStats?: Showdown.StatsTable;
 
   /**
    * Base stats of the `transformedForme`.
