@@ -126,6 +126,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       editPokemonTypes: 'meta',
       showMoveEditor: 'meta',
       showBaseStats: 'meta',
+      allowIllegalSpreads: 'meta',
       showUiTooltips: true,
       showAbilityTooltip: true,
       showItemTooltip: true,

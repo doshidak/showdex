@@ -419,6 +419,20 @@ export interface ShowdexCalcdexSettings {
   showBaseStats: 'always' | 'meta' | 'never';
 
   /**
+   * Whether to allow illegal EV/IV values.
+   *
+   * * `'always'` will always allow illegal EV/IV values, up to 999.
+   *   - Note: 999 is arbitrarily set.
+   * * `'meta'` will only allow illegal EV/IV values in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never allow illegal EV/IV values.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  allowIllegalSpreads: 'always' | 'meta' | 'never';
+
+  /**
    * Whether to show UI tooltips.
    *
    * @default true
