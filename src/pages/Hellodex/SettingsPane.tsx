@@ -1259,7 +1259,7 @@ export const SettingsPane = ({
                       label: 'Always',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Always allow the Pok{eacute}mon's types to be edited when clicked on.
+                          Always allow the Pok&eacute;mon's types to be edited when clicked on.
                         </div>
                       ),
                       value: 'always',
@@ -1267,7 +1267,7 @@ export const SettingsPane = ({
                       label: 'Meta',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Only allow the Pok{eacute}mon's types to be edited in nonstandard metagame
+                          Only allow the Pok&eacute;mon's types to be edited in nonstandard metagame
                           formats when clicked on.
                           <br />
                           <br />
@@ -1279,7 +1279,7 @@ export const SettingsPane = ({
                       label: 'Never',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Never allow the Pok{eacute}mon's types to be edited.
+                          Never allow the Pok&eacute;mon's types to be edited.
                         </div>
                       ),
                       value: 'never',
@@ -1304,7 +1304,7 @@ export const SettingsPane = ({
                           <br />
                           You can edit the move's type, category (if damaging) &amp;
                           BP (including separate BPs for Z &amp; Max moves when activated).
-                          Edits are unique to each move of the Pok{eacute}mon.
+                          Edits are unique to each move of the Pok&eacute;mon.
                           <br />
                           <br />
                           Additionally, if space permits, you can override the attacking stat (ATK/SPA)
@@ -1350,7 +1350,7 @@ export const SettingsPane = ({
                       label: 'Always',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Always show the Pok{eacute}mon's base stats in its stats table,
+                          Always show the Pok&eacute;mon's base stats in its stats table,
                           allowing its values to be edited.
                           <br />
                           <br />
@@ -1363,7 +1363,7 @@ export const SettingsPane = ({
                       label: 'Meta',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Only show the Pok{eacute}mon's base stats in nonstandard metagame formats.
+                          Only show the Pok&eacute;mon's base stats in nonstandard metagame formats.
                           <br />
                           <br />
                           Hover over the <strong>Always</strong> option to learn more about base stat editing.
@@ -1374,7 +1374,54 @@ export const SettingsPane = ({
                       label: 'Never',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Never show the Pok{eacute}mon's base stats.
+                          Never show the Pok&eacute;mon's base stats.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['allowIllegalSpreads']>
+                    name="calcdex.allowIllegalSpreads"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label="Allow Illegal Spreads"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always allow illegal values for a Pok&eacute;mon's EVs/IVs.
+                          <br />
+                          <br />
+                          Lowest possible EV/IV value is <strong>0</strong> &amp;
+                          highest is arbitrarily set at <strong>999</strong>.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only allow illegal values for a Pok&eacute;mon's EVs/IVs in nonstandard metagame formats.
+                          <br />
+                          <br />
+                          Hover over the <strong>Always</strong> option to learn more about illegal EV/IV values.
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never allow illegal values for a Pok&eacute;mon's EVs/IVs.
+                          <br />
+                          <br />
+                          Lowest possible EV/IV value is <strong>0</strong> &amp;
+                          highest is <strong>252</strong> for EVs &amp; <strong>31</strong> for IVs.
                         </div>
                       ),
                       value: 'never',
