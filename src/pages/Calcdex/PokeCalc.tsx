@@ -145,9 +145,11 @@ export const PokeCalc = ({
 
     // update (2022/11/06): now allowing base stat editing as a setting lul
     if ('dirtyBaseStats' in payload) {
-      payload.dirtyBaseStats = {
+      // if we receive nothing valid in payload.dirtyBaseStats, means all dirty values should be cleared
+      payload.dirtyBaseStats = Object.keys(payload.dirtyBaseStats || {}).length ? {
+        ...playerPokemon?.dirtyBaseStats,
         ...payload.dirtyBaseStats,
-      };
+      } : {};
 
       // remove any dirtyBaseStat entry that matches its original value
       Object.entries(payload.dirtyBaseStats).forEach(([
@@ -157,7 +159,7 @@ export const PokeCalc = ({
         Showdown.StatName,
         number,
       ]) => {
-        const baseValue = playerPokemon.baseStats?.[stat] ?? -1;
+        const baseValue = playerPokemon?.baseStats?.[stat] ?? -1;
 
         if (baseValue === value) {
           delete payload.dirtyBaseStats[stat];
@@ -166,7 +168,7 @@ export const PokeCalc = ({
     }
 
     // check for any possible abilities, base stat & type updates due to speciesForme changes
-    if ('speciesForme' in payload && payload.speciesForme !== playerPokemon.speciesForme) {
+    if ('speciesForme' in payload && payload.speciesForme !== playerPokemon?.speciesForme) {
       const {
         abilities,
         baseStats,
@@ -197,14 +199,14 @@ export const PokeCalc = ({
       ]) => {
         // clear all the overrides if we didn't get an object or we have an empty object
         payload.moveOverrides[moveName] = Object.keys(overrides || {}).length ? {
-          ...playerPokemon.moveOverrides[moveName],
+          ...playerPokemon?.moveOverrides[moveName],
           ...overrides,
         } : {};
       });
 
       // this is the crucial bit, otherwise we'll remove any existing overrides
       payload.moveOverrides = {
-        ...playerPokemon.moveOverrides,
+        ...playerPokemon?.moveOverrides,
         ...payload.moveOverrides,
       };
     }
@@ -215,7 +217,7 @@ export const PokeCalc = ({
       ...payload,
 
       baseStats: {
-        ...playerPokemon.baseStats,
+        ...playerPokemon?.baseStats,
         ...payload.dirtyBaseStats,
       },
     });
