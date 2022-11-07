@@ -65,10 +65,13 @@ export const PokeStats = ({
   const hasDirtyBaseStats = Object.values(pokemon?.dirtyBaseStats || {})
     .some((n) => typeof n === 'number' && n > -1);
 
+  const allowIllegalSpreads = settings?.allowIllegalSpreads === 'always'
+    || (settings?.allowIllegalSpreads === 'meta' && !legalLockedFormat(format));
+
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
-  const evsLegal = !legalLockedFormat(format) || totalEvs <= maxLegalEvs + transformedLegalEvs;
+  const evsLegal = allowIllegalSpreads || totalEvs <= maxLegalEvs + transformedLegalEvs;
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
@@ -169,7 +172,7 @@ export const PokeStats = ({
               )}
               labelClassName={styles.boostButtonLabel}
               label="Base"
-              tooltip="Reset All Modified Stats"
+              tooltip="Reset All Modified Base Stats"
               tooltipDisabled={!settings?.showUiTooltips || !hasDirtyBaseStats}
               highlight={hasDirtyBaseStats}
               hoverScale={1}
@@ -292,7 +295,7 @@ export const PokeStats = ({
                   hint={value.toString() || (legacy ? '15' : '31')}
                   fallbackValue={legacy ? 15 : 31}
                   min={0}
-                  max={legacy ? 15 : 31}
+                  max={allowIllegalSpreads ? 999 : (legacy ? 15 : 31)}
                   step={1}
                   shiftStep={legacy ? 3 : 5}
                   loop
@@ -384,7 +387,7 @@ export const PokeStats = ({
                   hint={ev.toString() || '252'}
                   fallbackValue={0}
                   min={0}
-                  max={252}
+                  max={allowIllegalSpreads ? 999 : 252}
                   step={4}
                   shiftStep={16}
                   loop
