@@ -77,6 +77,14 @@ export interface ShowdexHellodexSettings {
    * @since 1.0.3
    */
   focusRoomsRoom: boolean;
+
+  /**
+   * Whether to show the win/loss counter.
+   *
+   * @default true
+   * @since 1.0.6
+   */
+  showBattleRecord: boolean;
 }
 
 /**

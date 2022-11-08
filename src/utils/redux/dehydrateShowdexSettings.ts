@@ -34,6 +34,7 @@ export const DehydratedShowdexSettingsMap: Record<'packageVersion' | keyof Showd
 export const DehydratedHellodexSettingsMap: Record<keyof ShowdexHellodexSettings, string> = {
   openOnStart: 'oos',
   focusRoomsRoom: 'frr',
+  showBattleRecord: 'sbr',
 };
 
 /**

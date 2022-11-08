@@ -69,6 +69,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
     hellodex: {
       openOnStart: true,
       focusRoomsRoom: false,
+      showBattleRecord: true,
     },
 
     calcdex: {
@@ -105,14 +106,10 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
 
       defaultAutoMoves: {
         auth: false,
-        // p1: true,
-        // p2: true,
-        // p3: true,
-        // p4: true,
-        p1: false,
-        p2: false,
-        p3: false,
-        p4: false,
+        p1: true,
+        p2: true,
+        p3: true,
+        p4: true,
       },
 
       defaultShowGenetics: {
