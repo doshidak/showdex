@@ -276,6 +276,13 @@ export const syncPokemon = (
 
         if (!transformedPokemon && formeChange) {
           syncedPokemon.speciesForme = formeChange;
+
+          // update the Pokemon's types to match its new forme types
+          const formeTypes = dex.species.get(formeChange)?.types;
+
+          if (formeTypes?.length) {
+            syncedPokemon.types = [...formeTypes];
+          }
         }
 
         // note: if the target Pokemon transforms (e.g., Necrozma-Dusk-Mane -> Necrozma-Ultra)
