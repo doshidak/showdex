@@ -527,6 +527,26 @@ export const SettingsPane = ({
                     format={(value) => !value}
                     parse={(value) => !value}
                   />
+
+                  <Field<ShowdexSettings['hellodex']['showBattleRecord']>
+                    name="hellodex.showBattleRecord"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Win/Loss Counter"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Displays a Win/Loss counter in the Hellodex for <em>funsies</em>.
+                        <br />
+                        <br />
+                        Only records games that you've played (i.e., ignores spectating games).
+                        Won't appear if there are no recorded wins or losses.
+                        <br />
+                        <br />
+                        Recorded amounts don't persist between sessions; i.e., will reset back to 0W-0L
+                        as soon as you refresh the page.
+                      </div>
+                    )}
+                  />
                 </div>
               </div>
 
@@ -886,7 +906,6 @@ export const SettingsPane = ({
                           If you're <em>Player 1</em>,
                           your Pok&eacute;mon will be located in the top half,
                           otherwise, in the bottom half.
-                          (You'll typically be <em>Player 1</em>, unless challenged by someone.)
                           <br />
                           <br />
                           This is the default behavior if spectating.
