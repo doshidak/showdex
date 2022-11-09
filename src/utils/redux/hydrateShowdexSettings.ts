@@ -120,7 +120,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
-      editPokemonTypes: 'meta',
+      editPokemonTypes: 'always',
       showMoveEditor: 'meta',
       showBaseStats: 'meta',
       allowIllegalSpreads: 'meta',
