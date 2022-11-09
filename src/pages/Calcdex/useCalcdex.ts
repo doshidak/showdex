@@ -6,6 +6,7 @@ import {
   useCalcdexSettings,
   useDispatch,
 } from '@showdex/redux/store';
+import { getAuthUsername } from '@showdex/utils/app';
 import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateCalcdex } from '@showdex/utils/redux';
@@ -48,6 +49,7 @@ export const useCalcdex = ({
   request,
 }: CalcdexHookOptions = {}): CalcdexHookInterface => {
   const battleId = battle?.id || manualBattleId;
+  const authUser = getAuthUsername();
 
   const settings = useCalcdexSettings();
   const battleState = useCalcdexBattleState(battleId);
@@ -132,6 +134,9 @@ export const useCalcdex = ({
         '\n', 'battleState', battleState,
       );
 
+      const p1Name = battle.p1?.name;
+      const p2Name = battle.p2?.name;
+
       dispatch(calcdexSlice.actions.init({
         battleId,
         battleNonce: battle.nonce,
@@ -140,8 +145,22 @@ export const useCalcdex = ({
         turn: battle.turn || 0,
         active: !battle.ended,
         renderMode: renderAsOverlay ? 'overlay' : 'panel',
-        p1: { name: battle.p1?.name, rating: battle.p1?.rating },
-        p2: { name: battle.p2?.name, rating: battle.p2?.rating },
+
+        p1: {
+          name: p1Name,
+          rating: battle.p1?.rating,
+          autoSelect: !!authUser && p1Name === authUser
+            ? settings.defaultAutoSelect?.auth
+            : settings.defaultAutoSelect?.p1,
+        },
+
+        p2: {
+          name: p2Name,
+          rating: battle.p2?.rating,
+          autoSelect: !!authUser && p2Name === authUser
+            ? settings.defaultAutoSelect?.auth
+            : settings.defaultAutoSelect?.p2,
+        },
       }));
     } else if (!battleState?.battleNonce || battle.nonce !== battleState.battleNonce) {
       l.debug(
@@ -166,6 +185,7 @@ export const useCalcdex = ({
     //   '\n', 'battleState', battleState,
     // );
   }, [
+    authUser,
     battle,
     battleId,
     battle?.nonce,
@@ -174,6 +194,7 @@ export const useCalcdex = ({
     renderAsOverlay,
     request,
     request?.rqid,
+    settings,
   ]);
 
   return {
