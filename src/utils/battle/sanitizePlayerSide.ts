@@ -96,6 +96,7 @@ export const sanitizePlayerSide = (
     isForesight: volatileNames.includes('foresight'),
     isTailwind: sideConditionNames.includes('tailwind'),
     isHelpingHand: turnStatusNames.includes('helpinghand'),
+    isFlowerGift: turnStatusNames.includes('flowergift'), // not sure if Showdown has Flower Gift in pokemon.turnstatuses
     // isFriendGuard: turnStatusNames.includes('friendguard'), // can't find in battle.js
     // isBattery: null,
     // isPowerSpot: null,
