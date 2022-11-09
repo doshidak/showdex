@@ -13,6 +13,8 @@ import { determineMoveTargets } from './determineMoveTargets';
  * * `pokemon` argument is only used to pass into `determineMoveTargets()`.
  * * If any of the arguments are invalid, `null` will be returned.
  *
+ * @todo Fix *Photon Geyser*, which requires reading from the Pokemon's final stats, which isn't available in `pokemon` atm.
+ *   Definitely a thinky boi.
  * @since 1.0.6
  */
 export const getMoveOverrideDefaults = (
