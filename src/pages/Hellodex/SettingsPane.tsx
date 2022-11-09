@@ -879,7 +879,7 @@ export const SettingsPane = ({
                       styles.field,
                       !inBattle && styles.singleColumn,
                     )}
-                    label={`Your Pok${eacute}mon's Location`}
+                    label={`My Pok${eacute}mon's Location`}
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Top',
@@ -915,11 +915,52 @@ export const SettingsPane = ({
                     }]}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['defaultAutoSelect']['auth']>
+                    name="calcdex.defaultAutoSelect.auth"
+                    component={Switch}
+                    className={styles.field}
+                    label="Auto-Select My Team"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Auto-selects your Pok&eacute;mon that's currently active on the field.
+                        <br />
+                        <br />
+                        Disabling this does not prevent auto-selection from being re-enabled,
+                        just initially disables the auto-selection until toggled on.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['defaultAutoSelect'], HTMLInputElement, boolean>
+                    name="calcdex.defaultAutoSelect"
+                    component={Switch}
+                    className={styles.field}
+                    label="Auto-Select Opponent's Team"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Auto-selects your opponent's (or spectating players') Pok&eacute;mon that's
+                        currently active on the field.
+                        <br />
+                        <br />
+                        Disabling this does not prevent auto-selection from being re-enabled,
+                        just initially disables the auto-selection until toggled on.
+                      </div>
+                    )}
+                    parse={(value) => ({
+                      auth: values?.calcdex?.defaultAutoSelect?.auth,
+                      p1: value,
+                      p2: value,
+                      p3: value,
+                      p4: value,
+                    })}
+                    format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
                     name="calcdex.defaultShowGenetics.auth"
                     component={Switch}
                     className={styles.field}
-                    label={`Show My Pok${eacute}mon's EVs/IVs`}
+                    label={`Show My Pok${eacute}mon's Spread`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Shows your Pok&eacute;mon's EVs &amp; IVs/DVs underneath its moves,
@@ -937,7 +978,7 @@ export const SettingsPane = ({
                     name="calcdex.defaultShowGenetics"
                     component={Switch}
                     className={styles.field}
-                    label="Show Opponent's EVs/IVs"
+                    label="Show Opponent's Spread"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Shows your opponent's (or spectating players') Pok&eacute;mon's
@@ -1070,10 +1111,11 @@ export const SettingsPane = ({
                     name="calcdex.showNonDamageRanges"
                     component={Switch}
                     className={styles.field}
-                    label={'Show "N/A" Damage Ranges'}
+                    label="Show Non-Damaging Ranges"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Shows damage ranges that are "N/A", which are typical of status moves.
+                        Shows damage ranges that do no damage, which are typical of status moves &amp;
+                        damaging moves that the defending Pok&eacute;mon is immune to.
                         <br />
                         <br />
                         Disabling this will prevent the Matchup Tooltip from showing (if on).
