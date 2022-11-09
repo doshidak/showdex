@@ -1,8 +1,8 @@
 // import * as React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 
-const l = logger('@showdex/utils/hooks/useRoomNavigation');
+// const l = logger('@showdex/utils/hooks/useRoomNavigation');
 
 /**
  * Mimics the room navigation functionality when hitting the left/right arrow keys.
@@ -17,13 +17,13 @@ const l = logger('@showdex/utils/hooks/useRoomNavigation');
  */
 export const useRoomNavigation = (): void => {
   useHotkeys('left, right', (e, handler) => {
-    l.debug('handler.key', handler.key);
+    // l.debug('handler.key', handler.key);
 
     const currentRoom = app.curSideRoom || app.curRoom;
 
     switch (handler.key) {
       case 'left': {
-        l.debug('focusing room by -1 from', currentRoom);
+        // l.debug('focusing room by -1 from', currentRoom);
 
         if (!app.focusRoomBy(currentRoom, -1)) {
           return;
@@ -33,7 +33,7 @@ export const useRoomNavigation = (): void => {
       }
 
       case 'right': {
-        l.debug('focusing room by 1 from', currentRoom);
+        // l.debug('focusing room by 1 from', currentRoom);
 
         if (!app.focusRoomBy(currentRoom, 1)) {
           return;
