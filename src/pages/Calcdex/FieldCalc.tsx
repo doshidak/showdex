@@ -43,6 +43,7 @@ const PlayerSideScreensMap: Record<string, keyof CalcdexPlayerSide> = {
 
 const PlayerSideDoublesMap: Record<string, keyof CalcdexPlayerSide> = {
   Hand: 'isHelpingHand',
+  Gift: 'isFlowerGift',
   Guard: 'isFriendGuard',
   Battery: 'isBattery',
   Power: 'isPowerSpot',
@@ -55,6 +56,7 @@ const PlayerSideFieldDexMap: Partial<Record<keyof CalcdexPlayerSide, 'abilities'
   isAuroraVeil: 'moves',
   isHelpingHand: 'moves',
   isFriendGuard: 'abilities',
+  isFlowerGift: 'abilities',
   isBattery: 'abilities',
   isPowerSpot: 'abilities',
   isTailwind: 'moves',
