@@ -115,7 +115,10 @@ export const Tooltip = ({
         ...popperOptions,
         modifiers: [...popperModifiers, {
           name: 'arrow',
-          options: { element: arrow },
+          options: {
+            element: arrow,
+            padding: 15,
+          },
         }],
       }}
       trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
