@@ -42,6 +42,10 @@ export const getDexForFormat = (format?: string | GenerationNum): Showdown.Modde
 
   const formatAsId = formatId(format);
 
+  if (formatAsId.includes('letsgo')) {
+    return Dex.mod('gen7letsgo');
+  }
+
   if (formatAsId.includes('bdsp')) {
     return Dex.mod('gen8bdsp');
   }
