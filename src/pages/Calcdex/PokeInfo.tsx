@@ -397,14 +397,15 @@ export const PokeInfo = ({
     }),
   });
 
-  const itemOptions = React.useMemo(() => (legacy ? [] : buildItemOptions(
+  const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
     format,
     pokemon,
     // settings?.showAllOptions,
     true, // fuck it w/e lol
   )), [
     format,
-    legacy,
+    gen,
+    // legacy,
     pokemon,
     // settings,
   ]);
