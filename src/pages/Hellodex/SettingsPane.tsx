@@ -1247,9 +1247,9 @@ export const SettingsPane = ({
                     component={Segmented}
                     className={cx(
                       styles.field,
-                      !inBattle && styles.singleColumn,
+                      // !inBattle && styles.singleColumn,
                     )}
-                    label="Show Possible Damage Amounts"
+                    label="Show Damage Amounts"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Always',
@@ -1263,7 +1263,7 @@ export const SettingsPane = ({
                       label: 'NFE',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Possible damage amounts will only be shown against <em>NFE</em>{' '}
+                          Possible damage amounts will only be shown against NFE{' '}
                           (Not Fully Evolved) Pok&eacute;mon in the Matchup Tooltip.
                         </div>
                       ),
