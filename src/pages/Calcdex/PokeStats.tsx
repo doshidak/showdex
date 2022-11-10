@@ -75,7 +75,7 @@ export const PokeStats = ({
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
-  const missingEvs = !!pokemon?.speciesForme && !totalEvs;
+  const missingEvs = !!pokemon?.speciesForme && gen > 2 && !totalEvs;
 
   const finalStats = React.useMemo(() => (pokemon?.speciesForme ? calcPokemonFinalStats(
     gen,
@@ -295,7 +295,7 @@ export const PokeStats = ({
                   hint={value.toString() || (legacy ? '15' : '31')}
                   fallbackValue={legacy ? 15 : 31}
                   min={0}
-                  max={allowIllegalSpreads ? 999 : (legacy ? 15 : 31)}
+                  max={legacy ? 15 : (allowIllegalSpreads ? 999 : 31)}
                   step={1}
                   shiftStep={legacy ? 3 : 5}
                   loop
