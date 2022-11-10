@@ -134,8 +134,12 @@ export const useCalcdex = ({
         '\n', 'battleState', battleState,
       );
 
-      const p1Name = battle.p1?.name;
-      const p2Name = battle.p2?.name;
+      const joinedUsers = battle.stepQueue
+        ?.filter?.((q) => q?.startsWith('|j|☆'))
+        .map((q) => q.replace('|j|☆', ''));
+
+      const p1Name = battle.p1?.name || joinedUsers?.[0];
+      const p2Name = battle.p2?.name || joinedUsers?.[1];
 
       dispatch(calcdexSlice.actions.init({
         battleId,
