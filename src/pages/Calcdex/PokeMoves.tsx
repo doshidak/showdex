@@ -369,8 +369,10 @@ export const PokeMoves = ({
 
         // checking if a damaging move has non-0 BP (would be 'N/A' for status moves)
         // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
-        const parsedDamageRange = damageRange
-          || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '?');
+        const parsedDamageRange = moveName
+          ? damageRange
+            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '?')
+          : null;
 
         const hasDamageRange = !!parsedDamageRange
           && !['IMMUNE', 'N/A', '?'].includes(parsedDamageRange);
