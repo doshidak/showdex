@@ -11,7 +11,7 @@
   // (except for bottom: 40px cause it'll overlay on top of the .battle-log-add)
   // (also + 1px for the border-width)
   @include position.absolute($top: 0, $right: 0, $bottom: 0, $left: 640px + 1px);
-  z-index: 5;
+  z-index: 15;
 
   @include device.for-mobile {
     right: 0;
@@ -22,6 +22,7 @@
 .container {
   @include position.absolute-fill;
   overflow: hidden;
+  z-index: 15; // z-index of the close buttons in the tabs is 11 lol
 
   // &, *, *::before, *::after {
   //   box-sizing: border-box;
@@ -35,6 +36,7 @@
     @include position.unset-all;
     width: 100%;
     height: 100%;
+    z-index: unset;
   }
 
   &.light {
