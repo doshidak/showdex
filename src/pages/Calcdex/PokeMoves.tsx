@@ -264,17 +264,18 @@ export const PokeMoves = ({
         // const moveName = calcMove?.name;
         const moveName = pokemon?.moves?.[i] || calcMove?.name;
 
-        const moveOverrideDefaults = (
-          pokemon?.showMoveOverrides
-            && getMoveOverrideDefaults(pokemon, moveName, format)
-        ) || {};
+        // getMoveOverrideDefaults() could return null, so spreading here to avoid a "Cannot read properties of null" error
+        // (could make it not return null, but too lazy atm lol)
+        const moveOverrideDefaults = {
+          ...getMoveOverrideDefaults(pokemon, moveName, format),
+        };
 
         const moveOverrides = {
           ...moveOverrideDefaults,
           ...pokemon?.moveOverrides?.[moveName],
         };
 
-        const nonStatusMove = [
+        const damagingMove = [
           'Physical',
           'Special',
         ].includes(moveOverrides.category);
@@ -366,6 +367,12 @@ export const PokeMoves = ({
           </div>
         ) : null;
 
+        const hasDamageRange = !!damageRange && damageRange !== 'N/A';
+
+        const parsedDamageRange = damagingMove
+          ? (damageRange || 'IMMUNE')
+          : damageRange; // probably 'N/A' here
+
         return (
           <React.Fragment
             key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}
@@ -415,7 +422,7 @@ export const PokeMoves = ({
                     tooltip={(
                       <div className={styles.descTooltip}>
                         {
-                          nonStatusMove &&
+                          damagingMove &&
                           <>
                             Switch to{' '}
                             <em>{moveOverrides.category === 'Physical' ? 'Special' : 'Physical'}</em>
@@ -427,8 +434,8 @@ export const PokeMoves = ({
                       </div>
                     )}
                     tooltipDisabled={!settings?.showUiTooltips}
-                    primary={nonStatusMove}
-                    onPress={nonStatusMove ? () => onPokemonChange?.({
+                    primary={damagingMove}
+                    onPress={damagingMove ? () => onPokemonChange?.({
                       moveOverrides: {
                         [moveName]: {
                           category: moveOverrides.category === 'Physical'
@@ -440,7 +447,7 @@ export const PokeMoves = ({
                   />
 
                   {
-                    nonStatusMove &&
+                    damagingMove &&
                     <>
                       <div className={styles.moveProperty}>
                         <ValueField
@@ -608,7 +615,7 @@ export const PokeMoves = ({
                 <TableGridItem>
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
-                  {(!!damageRange && (settings?.showNonDamageRanges || damageRange !== 'N/A')) ? (
+                  {(settings?.showNonDamageRanges || hasDamageRange) ? (
                     settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
                       <Button
                         className={cx(
@@ -617,10 +624,10 @@ export const PokeMoves = ({
                         )}
                         labelClassName={cx(
                           styles.damageButtonLabel,
-                          damageRange === 'N/A' && styles.noDamage,
+                          !hasDamageRange && styles.noDamage,
                         )}
                         tabIndex={-1} // not ADA compliant, obviously lol
-                        label={damageRange}
+                        label={parsedDamageRange}
                         tooltip={matchupTooltip}
                         tooltipTrigger="mouseenter"
                         hoverScale={1}
@@ -646,10 +653,10 @@ export const PokeMoves = ({
                           className={cx(
                             styles.damageButtonLabel,
                             styles.noCopy,
-                            damageRange === 'N/A' && styles.noDamage,
+                            !hasDamageRange && styles.noDamage,
                           )}
                         >
-                          {damageRange}
+                          {parsedDamageRange}
                         </div>
                       </Tooltip>
                     )
