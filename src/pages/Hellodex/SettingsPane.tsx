@@ -514,7 +514,7 @@ export const SettingsPane = ({
                     name="hellodex.focusRoomsRoom"
                     component={Switch}
                     className={styles.field}
-                    label="Focus When Showdown Starts"
+                    label="Show Chatrooms Panel"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Miss the default chatrooms panel when Showdown first starts?
@@ -524,8 +524,6 @@ export const SettingsPane = ({
                         This does not affect <em>Single Panel</em> users.
                       </div>
                     )}
-                    format={(value) => !value}
-                    parse={(value) => !value}
                   />
 
                   <Field<ShowdexSettings['hellodex']['showBattleRecord']>
@@ -919,10 +917,10 @@ export const SettingsPane = ({
                     name="calcdex.defaultAutoSelect.auth"
                     component={Switch}
                     className={styles.field}
-                    label="Auto-Select My Team"
+                    label={`Auto-Swap My Pok${eacute}mon`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Auto-selects your Pok&eacute;mon that's currently active on the field.
+                        Auto-swaps to your Pok&eacute;mon that's currently active on the field.
                         <br />
                         <br />
                         Disabling this does not prevent auto-selection from being re-enabled,
@@ -935,10 +933,10 @@ export const SettingsPane = ({
                     name="calcdex.defaultAutoSelect"
                     component={Switch}
                     className={styles.field}
-                    label="Auto-Select Opponent's Team"
+                    label={`Auto-Swap Opponent's Pok${eacute}mon`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Auto-selects your opponent's (or spectating players') Pok&eacute;mon that's
+                        Auto-swaps to your opponent's (or spectating players') Pok&eacute;mon that's
                         currently active on the field.
                         <br />
                         <br />
@@ -960,7 +958,7 @@ export const SettingsPane = ({
                     name="calcdex.defaultShowGenetics.auth"
                     component={Switch}
                     className={styles.field}
-                    label={`Show My Pok${eacute}mon's Spread`}
+                    label={`Show My Pok${eacute}mon's EVs/IVs`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Shows your Pok&eacute;mon's EVs &amp; IVs/DVs underneath its moves,
@@ -978,7 +976,7 @@ export const SettingsPane = ({
                     name="calcdex.defaultShowGenetics"
                     component={Switch}
                     className={styles.field}
-                    label="Show Opponent's Spread"
+                    label="Show Opponent's EVs/IVs"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Shows your opponent's (or spectating players') Pok&eacute;mon's
