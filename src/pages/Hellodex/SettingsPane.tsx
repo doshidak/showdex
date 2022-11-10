@@ -1454,6 +1454,7 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always allow illegal values for a Pok&eacute;mon's EVs/IVs.
+                          This does not lift the DV limit of 15 in Gen 1 &amp; 2 battles.
                           <br />
                           <br />
                           Lowest possible EV/IV value is <strong>0</strong> &amp;
