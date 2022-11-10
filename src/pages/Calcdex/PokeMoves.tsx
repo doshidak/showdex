@@ -295,7 +295,7 @@ export const PokeMoves = ({
             : pokemon?.useMax
               ? moveOverrideDefaults.maxBasePower
               : null
-        ) || calcMove?.bp;
+        ) || calcMove?.bp || 0;
 
         const showDamageAmounts = !pokemon?.showMoveOverrides
           && !!description?.damageAmounts
@@ -367,11 +367,15 @@ export const PokeMoves = ({
           </div>
         ) : null;
 
-        const hasDamageRange = !!damageRange && damageRange !== 'N/A';
-
         const parsedDamageRange = damagingMove
-          ? (damageRange || 'IMMUNE')
+          ? damageRange
+            // checking if the damaging move has non-0 BP
+            // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
+            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '?')
           : damageRange; // probably 'N/A' here
+
+        const hasDamageRange = !!parsedDamageRange
+          && !['IMMUNE', 'N/A', '?'].includes(parsedDamageRange);
 
         return (
           <React.Fragment
@@ -630,10 +634,10 @@ export const PokeMoves = ({
                         label={parsedDamageRange}
                         tooltip={matchupTooltip}
                         tooltipTrigger="mouseenter"
+                        tooltipTouch={['hold', 500]}
+                        tooltipDisabled={!showMatchupTooltip}
                         hoverScale={1}
-                        // activeScale={damageButtonDisabled ? 1 : undefined}
                         absoluteHover
-                        // disabled={!settings?.showMatchupTooltip || !settings?.copyMatchupDescription || !description?.raw}
                         disabled={!description?.raw}
                         onPress={() => handleDamagePress(i, [
                           description.raw,
@@ -647,7 +651,7 @@ export const PokeMoves = ({
                         delay={[1000, 50]}
                         trigger="mouseenter"
                         touch={['hold', 500]}
-                        disabled={!settings?.showMatchupTooltip}
+                        disabled={!showMatchupTooltip}
                       >
                         <div
                           className={cx(
