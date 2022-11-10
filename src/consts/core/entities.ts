@@ -61,3 +61,69 @@ export const laquo = '\u00AB';
  * @since 1.0.4
  */
 export const raquo = '\u00BB';
+
+/**
+ * HTML `&larr;` entity, represented as `U+2190`.
+ *
+ * @example '←'
+ * @since 1.0.6
+ */
+export const larr = '\u2190';
+
+/**
+ * HTML `&uarr;` entity, represented as `U+2191`.
+ *
+ * @example '↑'
+ * @since 1.0.6
+ */
+export const uarr = '\u2191';
+
+/**
+ * HTML `&rarr;` entity, represented as `U+2192`.
+ *
+ * * rawr XD
+ *
+ * @example '→'
+ * @since 1.0.6
+ */
+export const rarr = '\u2192';
+
+/**
+ * HTML `&darr;` entity, represented as `U+2193`.
+ *
+ * @example '↓'
+ * @since 1.0.6
+ */
+export const darr = '\u2193';
+
+/**
+ * HTML `&nwarr;` entity, represented as `U+2196`.
+ *
+ * @example '↖'
+ * @since 1.0.6
+ */
+export const nwarr = '\u2196';
+
+/**
+ * HTML `&nearr;` entity, represented as `U+2197`.
+ *
+ * @example '↗'
+ * @since 1.0.6
+ */
+export const nearr = '\u2197';
+
+/**
+ * HTML `&searr;` entity, represented as `U+2198`.
+ *
+ * @example '↘'
+ * @since 1.0.6
+ */
+export const searr = '\u2198';
+
+/**
+ * HTML `&swarr;` entity, represented as `U+2199'
+ *
+ * @example '↙'
+ * @since 1.0.6
+ */
+export const swarr = '\u2199';

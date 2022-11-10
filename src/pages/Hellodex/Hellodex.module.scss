@@ -184,6 +184,10 @@
 
 .instancesContainer {
   position: relative;
+}
+
+.instancesContent {
+  position: relative;
   width: 100%;
   height: 30vh;
   @include spacing.margin-xy($y: 25px);
@@ -208,6 +212,10 @@
       0 0 15px color.alpha(colors.$black, 0.5),
     );
   }
+}
+
+.battleRecord {
+  @include position.absolute-anchor($x: 50%, $y: -18px, $y-prop: bottom);
 }
 
 .scrollableInstances {
@@ -243,6 +251,15 @@
 
 .instanceButton {
   grid-area: span 1 / span 1;
+}
+
+.battleRecordSpacer {
+  grid-area: span 1 / span 3;
+  height: 20px;
+
+  .verySmol & {
+    grid-area: span 1 / span 1;
+  }
 }
 
 .empty {
@@ -291,6 +308,10 @@ button.spectateButton {
   text-align: center;
   user-select: none;
   // z-index: 1;
+
+  &.withBattleRecord {
+    @include spacing.margin($top: 40px);
+  }
 }
 
 .donateButton {

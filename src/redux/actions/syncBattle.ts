@@ -21,7 +21,7 @@ export interface SyncBattlePayload {
 
 export const SyncBattleActionType = 'calcdex:sync';
 
-const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
+const defaultMinPokemon = env.int('calcdex-player-min-pokemon', 0);
 const l = logger('@showdex/redux/actions/syncBattle');
 
 /**
@@ -166,7 +166,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine the max amount of Pokemon
-      const maxPokemon = player?.totalPokemon || defaultMaxPokemon;
+      const maxPokemon = Math.max(player?.totalPokemon || 0, defaultMinPokemon);
 
       if (playerState.maxPokemon !== maxPokemon) {
         playerState.maxPokemon = maxPokemon;

@@ -77,6 +77,14 @@ export interface ShowdexHellodexSettings {
    * @since 1.0.3
    */
   focusRoomsRoom: boolean;
+
+  /**
+   * Whether to show the win/loss counter.
+   *
+   * @default true
+   * @since 1.0.6
+   */
+  showBattleRecord: boolean;
 }
 
 /**
@@ -230,6 +238,16 @@ export interface ShowdexCalcdexSettings {
   reverseIconName: boolean;
 
   /**
+   * Whether to open the Pokemon's *Smogon Univeristy* page when the configured button is clicked on.
+   *
+   * * Configured button depends on `reverseIconName`.
+   *
+   * @default true
+   * @since 1.0.6
+   */
+  openSmogonPage: boolean;
+
+  /**
    * Whether to allow all possible formes to be switched to, if any, even if a forme is revealed.
    *
    * @default true
@@ -367,6 +385,60 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.3
    */
   defaultShowGenetics: Record<'auth' | CalcdexPlayerKey, boolean>;
+
+  /**
+   * When to allow the Pokemon's types to be edited when clicked on.
+   *
+   * * `'always'` will always allow the types to be edited.
+   * * `'meta'` will only show the *Edit* button in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never allow the types to be edited.
+   *   - Types cannot be clicked on when this is selected.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  editPokemonTypes: 'always' | 'meta' | 'never';
+
+  /**
+   * When to show the *Edit* button in the moves table.
+   *
+   * * `'always'` will always show the *Edit* button.
+   * * `'meta'` will only show the *Edit* button in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never show the *Edit* button.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  showMoveEditor: 'always' | 'meta' | 'never';
+
+  /**
+   * Whether to allow the Pokemon's base stats to be edited in the stats table.
+   *
+   * * `'always'` will always show the base stats.
+   * * `'meta'` will only show the base stats in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never show the base stats.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  showBaseStats: 'always' | 'meta' | 'never';
+
+  /**
+   * Whether to allow illegal EV/IV values.
+   *
+   * * `'always'` will always allow illegal EV/IV values, up to 999.
+   *   - Note: 999 is arbitrarily set.
+   * * `'meta'` will only allow illegal EV/IV values in nonstandard metagame formats.
+   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
+   * * `'never'` will never allow illegal EV/IV values.
+   *
+   * @default 'meta'
+   * @since 1.0.6
+   */
+  allowIllegalSpreads: 'always' | 'meta' | 'never';
 
   /**
    * Whether to show UI tooltips.

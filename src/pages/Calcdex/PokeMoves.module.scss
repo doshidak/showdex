@@ -60,6 +60,10 @@
   @include flex.row-center;
 }
 
+.editorHeader {
+  grid-area: span 1 / span 2;
+}
+
 .label {
   font-weight: 500;
   text-transform: uppercase;
@@ -109,7 +113,7 @@
   }
 
   .propertyValue {
-    @include spacing.padding($left: 0.5em);
+    @include spacing.margin($left: 0.5em);
     @include font.apply(fonts.$mono);
     font-size: 10px;
   }
@@ -124,22 +128,14 @@ button.toggleButton {
   }
 }
 
-// .toggleButtonLabel {
-//   font-size: 8px;
-//   text-transform: uppercase;
-//
-//   .light &.inactive {
-//     color: colors.$black;
-//   }
-//
-//   .dark &.inactive {
-//     color: colors.$white;
-//   }
-// }
+button.editButton {
+  // @include spacing.margin($right: -3px, $left: 2px);
+  @include spacing.margin($left: 2px);
 
-// button.autoButton {
-//   @include spacing.margin($left: 2px, $right: -3px);
-// }
+  // &.hideButton {
+  //   @include spacing.margin($left: 3px);
+  // }
+}
 
 button.ultButton {
   min-width: 25px;
@@ -187,28 +183,55 @@ button.damageButton {
   white-space: normal;
   user-select: none;
 
-  // .copied {
-  //   @include position.absolute($top: -18px, $left: 50%);
-  //   @include spacing.padding-xy($x: 10px, $y: 3px);
-  //   @include font.apply(fonts.$primary, ( font-weight: 500 ));
-  //   font-size: 10px;
-  //   text-transform: uppercase;
-  //   background-color: color.alpha(color.shade(colors.$green, 15%), 0.85);
-  //   border-radius: 50px;
-  //   box-shadow: 0 0 3px color.alpha(colors.$black, 0.3);
-  //   opacity: 0;
-  //   transform: translate(-50%, 5px);
-  //   @include transition.apply(opacity, transform);
-  //   user-select: none;
-  //   pointer-events: none;
-  //
-  //   &.copiedVisible {
-  //     opacity: 1;
-  //     transform: translate(-50%, 0);
-  //   }
-  // }
-
   .copiedBadge {
     @include position.absolute($top: -16px, $left: 50%);
   }
+}
+
+.editorItem {
+  grid-area: span 1 / span 2;
+  @include flex.row-between;
+  @include spacing.margin($left: 5px);
+
+  .moveProperty {
+    font-size: 8px;
+    user-select: none;
+  }
+
+  .valueField {
+    max-width: 22px;
+    @include spacing.margin($right: 0.8em);
+
+    &::before {
+      @include position.absolute-xy($x: -3px, $y: 0); // remove "padding" from absoluteHover
+    }
+  }
+
+  // .valueFieldInput {
+  //   font-size: 8px;
+  // }
+}
+
+.editorLeft {
+  @include flex.row($align: center);
+}
+
+.editorRight {
+  text-align: right;
+}
+
+button.editorButton {
+  font-size: 8px;
+  @include transition.apply(color, background-color, box-shadow, opacity);
+
+  &.readOnly {
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+button.categoryButton {
+  width: 32px;
+  @include spacing.margin-xy($x: 0.8em);
+  font-weight: 500;
 }

@@ -141,7 +141,7 @@ const resolve = {
 
 const copyPatterns = [{
   // fill in fields from package.json into manifest and transform it depending on the buildTarget
-  from: `src/manifest.json`,
+  from: 'src/manifest.json',
   to: 'manifest.json',
 
   transform: (content) => {

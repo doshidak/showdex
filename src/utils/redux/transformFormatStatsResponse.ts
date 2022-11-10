@@ -5,6 +5,7 @@ import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
+import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import type { CalcdexPokemonPreset, CalcdexPokemonUsageAlt } from '@showdex/redux/store';
 
@@ -89,6 +90,17 @@ export const transformFormatStatsResponse = (
     }
 
     if (altMoves.length) {
+      // apparently a bug with Showdown Usage where these two Pokemon will have "Iron Head" instead of
+      // "Behemoth Blade" (for Zacian-Crowned) or "Behemoth Bash" (for Zamazenta-Crowned) lol
+      if (['zaciancrowned', 'zamazentacrowned'].includes(formatId(speciesForme))) {
+        const targetMove = <MoveName> (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade');
+        const ironHeadIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ironhead');
+
+        if (ironHeadIndex > -1) {
+          altMoves[ironHeadIndex][0] = targetMove;
+        }
+      }
+
       preset.altMoves = altMoves;
       preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
     }

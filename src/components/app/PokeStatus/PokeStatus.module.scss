@@ -13,7 +13,7 @@ $status-colors: (
   fnt: #607883,
 );
 
-$status-color-light-tint: 10%;
+$status-color-light-shade: 10%;
 
 $label-opacity-light: 1;
 $label-opacity-dark: 1;
@@ -48,15 +48,17 @@ $background-opacity-fnt-dark: 0.3;
     $light-opacity: if($status == 'fnt', $background-opacity-fnt-light, $background-opacity-light);
     $dark-opacity: if($status == 'fnt', $background-opacity-fnt-dark, $background-opacity-dark);
 
-    &.light.#{$status} {
-      background-color: color.alpha(
-        color.tint($color, $status-color-light-tint),
-        $light-opacity,
-      );
-    }
+    &.#{$status} {
+      &.light {
+        background-color: color.alpha(
+          color.shade($color, $status-color-light-shade),
+          $light-opacity,
+        );
+      }
 
-    &.dark.#{$status} {
-      background-color: color.alpha($color, $dark-opacity);
+      &.dark {
+        background-color: color.alpha($color, $dark-opacity);
+      }
     }
   }
 }

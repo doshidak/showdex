@@ -4,10 +4,16 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
-import { useCalcdexSettings, useCalcdexState, useColorScheme } from '@showdex/redux/store';
+import {
+  useCalcdexSettings,
+  useCalcdexState,
+  useColorScheme,
+  useHellodexSettings,
+} from '@showdex/redux/store';
 import { getAuthUsername, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
+import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
 import { InstanceButton } from './InstanceButton';
 import { SettingsPane } from './SettingsPane';
@@ -41,6 +47,7 @@ export const Hellodex = ({
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
   useRoomNavigation();
 
+  const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
   const neverOpens = calcdexSettings?.openOnStart === 'never';
 
@@ -148,109 +155,128 @@ export const Hellodex = ({
           </div>
 
           <div className={styles.instancesContainer}>
-            {instancesEmpty ? (
-              <div className={styles.empty}>
-                <Svg
-                  className={styles.emptyIcon}
-                  description={neverOpens ? 'Error Circle Icon' : 'Info Circle Icon'}
-                  src={getResourceUrl(neverOpens ? 'error-circle.svg' : 'info-circle.svg')}
-                />
+            <div className={styles.instancesContent}>
+              {instancesEmpty ? (
+                <div className={styles.empty}>
+                  <Svg
+                    className={styles.emptyIcon}
+                    description={neverOpens ? 'Error Circle Icon' : 'Info Circle Icon'}
+                    src={getResourceUrl(neverOpens ? 'error-circle.svg' : 'info-circle.svg')}
+                  />
 
-                <div className={styles.emptyLabel}>
-                  {neverOpens ? (
-                    <>
-                      Calculator will never open based on your configured
-                      {' '}
-                      <Button
-                        className={styles.spectateButton}
-                        labelClassName={styles.spectateButtonLabel}
-                        label="settings"
-                        tooltip="Open Settings"
-                        hoverScale={1}
-                        absoluteHover
-                        onPress={() => setSettingsVisible(true)}
+                  <div className={styles.emptyLabel}>
+                    {neverOpens ? (
+                      <>
+                        Calculator will never open based on your configured
+                        {' '}
+                        <Button
+                          className={styles.spectateButton}
+                          labelClassName={styles.spectateButtonLabel}
+                          label="settings"
+                          tooltip="Open Settings"
+                          hoverScale={1}
+                          absoluteHover
+                          onPress={() => setSettingsVisible(true)}
+                        />
+                        .
+                      </>
+                    ) : (
+                      <>
+                        Calculator will automatically open when you
+
+                        {
+                          ['always', 'playing'].includes(calcdexSettings?.openOnStart) &&
+                          <>
+                            {' '}
+                            <strong>play</strong>
+                          </>
+                        }
+
+                        {
+                          calcdexSettings?.openOnStart === 'always' &&
+                          <>
+                            {' '}or
+                          </>
+                        }
+
+                        {
+                          ['always', 'spectating'].includes(calcdexSettings?.openOnStart) &&
+                          <>
+                            {' '}
+                            <Button
+                              className={cx(
+                                styles.spectateButton,
+                                typeof app === 'undefined' && styles.disabled,
+                              )}
+                              labelClassName={styles.spectateButtonLabel}
+                              label="spectate"
+                              tooltip="View Active Battles"
+                              hoverScale={1}
+                              absoluteHover
+                              disabled={typeof app === 'undefined'}
+                              onPress={() => app.joinRoom('battles', 'battles')}
+                            />
+                          </>
+                        }
+
+                        {' '}a battle.
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <Scrollable className={styles.scrollableInstances}>
+                  <div className={styles.instances}>
+                    {Object.values(calcdexState).reverse().filter((b) => !!b?.battleId).map(({
+                      battleId,
+                      format,
+                      active,
+                      p1,
+                      p2,
+                    }) => (
+                      <InstanceButton
+                        key={`Hellodex:InstanceButton:${battleId}`}
+                        className={styles.instanceButton}
+                        format={format}
+                        authName={authName}
+                        playerName={p1?.name}
+                        opponentName={p2?.name}
+                        active={active}
+                        // onPress={() => handleInstancePress(battle.battleId)}
+                        onPress={() => openCalcdexInstance?.(battleId)}
                       />
-                      .
-                    </>
-                  ) : (
-                    <>
-                      Calculator will automatically open when you
+                    ))}
 
-                      {
-                        ['always', 'playing'].includes(calcdexSettings?.openOnStart) &&
-                        <>
-                          {' '}
-                          <strong>play</strong>
-                        </>
-                      }
+                    {
+                      settings?.showBattleRecord &&
+                      <div className={styles.battleRecordSpacer} />
+                    }
+                  </div>
+                </Scrollable>
+              )}
+            </div>
 
-                      {
-                        calcdexSettings?.openOnStart === 'always' &&
-                        <>
-                          {' '}or
-                        </>
-                      }
-
-                      {
-                        ['always', 'spectating'].includes(calcdexSettings?.openOnStart) &&
-                        <>
-                          {' '}
-                          <Button
-                            className={cx(
-                              styles.spectateButton,
-                              typeof app === 'undefined' && styles.disabled,
-                            )}
-                            labelClassName={styles.spectateButtonLabel}
-                            label="spectate"
-                            tooltip="View Active Battles"
-                            hoverScale={1}
-                            absoluteHover
-                            disabled={typeof app === 'undefined'}
-                            onPress={() => app.joinRoom('battles', 'battles')}
-                          />
-                        </>
-                      }
-
-                      {' '}a battle.
-                    </>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <Scrollable className={styles.scrollableInstances}>
-                <div className={styles.instances}>
-                  {Object.values(calcdexState).reverse().filter((b) => !!b?.battleId).map(({
-                    battleId,
-                    format,
-                    active,
-                    p1,
-                    p2,
-                  }) => (
-                    <InstanceButton
-                      key={`Hellodex:InstanceButton:${battleId}`}
-                      className={styles.instanceButton}
-                      format={format}
-                      authName={authName}
-                      playerName={p1?.name}
-                      opponentName={p2?.name}
-                      active={active}
-                      // onPress={() => handleInstancePress(battle.battleId)}
-                      onPress={() => openCalcdexInstance?.(battleId)}
-                    />
-                  ))}
-                </div>
-              </Scrollable>
-            )}
+            {
+              settings?.showBattleRecord &&
+              <BattleRecord
+                className={styles.battleRecord}
+              />
+            }
           </div>
 
           {
             donationUrl?.startsWith('https://') &&
-            <div className={styles.donations}>
+            <div
+              className={cx(
+                styles.donations,
+                settings?.showBattleRecord && styles.withBattleRecord,
+              )}
+            >
               <BaseButton
                 className={styles.donateButton}
                 aria-label="Donate via PayPal"
                 // disabled={!donationUrl}
-                onPress={() => window.open(donationUrl, '_blank', 'noopener,noreferrer')}
+                onPress={() => window.open(donationUrl, '_blank')}
               >
                 <span className={styles.labelAction}>
                   Donate

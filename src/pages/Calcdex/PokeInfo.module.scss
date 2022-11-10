@@ -120,11 +120,11 @@ button.nameButton {
   user-select: none;
 }
 
-.types {
-  @include flex.row($align: center);
+.typesField {
+  // @include flex.row($align: center);
   flex: 0 0 auto;
   @include spacing.margin($left: 0.5em);
-  user-select: none;
+  // user-select: none;
 }
 
 // .toggleButtonLabel {

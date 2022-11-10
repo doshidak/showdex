@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="showdex-icon" width="275px" src="./src/assets/favicons/showdex-1024.png">
+  <img alt="showdex-icon" width="250px" src="./src/assets/favicons/showdex-1024.png">
 </p>
 
 <h1 align="center">
@@ -9,7 +9,7 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.0.5">v1.0.5</a>&nbsp;</th>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.0.6">v1.0.6</a>&nbsp;</th>
       <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Opera · Edge · Brave</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a>&nbsp;</th>
       <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built">Reddit</a>&nbsp;</th>
     </tr>
@@ -211,10 +211,6 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
   > This runs [**`patch-package`**](https://github.com/ds300/patch-package), which reads from the [**`patches`**](./patches) directory and applies the `diff` to the corresponding package in *your* `node_modules`.
   >
-  > [Patch for `@smogon/calc`](./patches/%40smogon%2Bcalc%2B0.6.0.patch), which is the library responsible for performing the monster mathematics to produce the displayed damage ranges (and also the same library used in the [O.G. Damage Calculator](https://calc.pokemonshowdown.com)), brings the [outdated v0.6.0 release on npm](https://www.npmjs.com/package/@smogon/calc/v/0.6.0) (published on October 2020) up-to-speed by applying 2 years worth of updates from the [latest `efa6fe7` commit](https://github.com/smogon/damage-calc/tree/efa6fe7c9d9f8415ea0d1bab17f95d7bcfbf617f/calc) (as of September 2022).
-  >
-  > Most notable change is the fix for conditionally-defensive moves like *Psyshock* and *Photon Geyser*. Using v0.6.0 from npm would produce incorrect damage ranges as it considers the wrong defensive stat of the opposing Pokémon (e.g., *Psyshock*, a Special move, should calculate against the opposing Pokémon's DEF stat [cause that's [what it does](https://www.smogon.com/dex/ss/moves/psyshock)], but in v0.6.0, calculates against the SPD stat).
-  >
   > [Patch for `react-select`](./patches/react-select%2B5.4.0.patch) wraps the [`scrollIntoView()` call in the `componentDidUpdate()` of the `Select` component](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/Select.tsx#L735-L743) in a `setTimeout()` so that the internal [`menuListRef`](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/Select.tsx#L1928-L1931) is available when the menu first opens.
   >
   > [`scrollIntoView()`](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/utils.ts#L234-L259) is responsible for auto-scrolling the `MenuList` to the focused option that is overflowed (i.e., out of view). It's also responsible for auto-scrolling to the selected option when the `MenuList` first opens. When used in conjunction with [`simplebar`](https://github.com/Grsmto/simplebar) (via [`Scrollable`](./src/components/ui/Scrollable/Scrollable.tsx)), the `scrollRef` of `Scrollable` may not be available as soon as it mounts, so the `setTimeout()` gives the `menuListRef` time to set (by placing the `scrollIntoView()` call at the top of the call stack).
@@ -399,17 +395,39 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 **Found a bug? · Got a cool idea? · Have suggestions? · Hate these questions & demand answers?**
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](.github/CODE_OF_CONDUCT.md)
+
+> Thanks for your help in making Showdex better for everyone!
+>
 > I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of.
 >
 > If possible, including the following would be **immensely** helpful!
 >
 > * **Browser** (e.g., Chrome, Firefox, etc.)
-> * **Showdex Version** (e.g., v1.0.4)
+> * **Showdex Version** (e.g., v1.0.6)
 > * **Format**, if applicable (e.g., Gen 8 National Dex)
+>
+> If you would like to be [credited for your contribution](#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
+
+&nbsp;[Create a GitHub Issue](https://github.com/doshidak/showdex/issues/new)&nbsp;
+--- |
 
 <br>
 
-&nbsp;[Create a New Issue](https://github.com/doshidak/showdex/issues/new)&nbsp;
+> **No GitHub?** No problem!
+>
+> We're also listening for feedback & bug reports on our Showdex thread on Smogon Forums.
+
+&nbsp;[Post on Smogon Forums](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265)&nbsp;
+--- |
+
+<br>
+
+> **Not on Smogon Forums?** Still, no problem!
+>
+> Feel free to contact me directly via email.
+
+&nbsp;[Slide Into My Inbox](mailto:keith@tize.io)&nbsp;
 --- |
 
 <br>
@@ -430,8 +448,6 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 > Although this project makes use of [**Commitizen**](http://commitizen.github.io/cz-cli), you don't need to format your commit messages this way. Use whatever you're comfortable with!
 >
 > Additionally, I don't make use of any fancy automations like CI (Continuous Integration), so each PR will be manually reviewed. Your patience is greatly appreciated!
-
-<br>
 
 &nbsp;[Fork Me on GitHub](https://github.com/doshidak/showdex/fork)&nbsp;
 --- |
@@ -458,11 +474,12 @@ big thank to:
 
 ## Donators
 
-big sparkly thank to this fine individual for their generous support!
+big sparkly thank to these fine individuals for their generous support!
 
 <table>
   <tbody>
     <tr>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
@@ -504,29 +521,34 @@ another big thank to these fine people for helping with development!
       <td align="center"><a href="https://smogon.com/forums/members/furret4ssb.518775"><strong>Furret4ssb</strong></a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://www.smogon.com/forums/members/ihatepasswords.611420"><strong>IHatePasswords</strong></a></td>
+      <td align="center"><a href="https://www.smogon.com/forums/members/iodyne.567157"><strong>Iodyne</strong></a></td>
       <td align="center"><a href="https://www.smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/kibo.552274"><strong>Kibo</strong></a></td>
       <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/lighthouse64.322009"><strong>lighthouse64</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/lighthouse64.322009"><strong>lighthouse64</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/maxouille.390049"><strong>Maxouille</strong></a> · <a href="https://github.com/Maxouille64">GH</a></td>
       <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0zpcd"><strong>mdragon13</strong></a></td>
       <td align="center"><a href="https://github.com/mpique"><strong>mpique</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/nails.51373"><strong>Nails</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/nails.51373"><strong>Nails</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/runoisch.568189"><strong>Runoisch</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/shiox.495116"><strong>Shiox</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GH</a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GH</a></td>
-      <td align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://www.smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a>
+      <td align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GH</a></td>
+      <td align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
+    </tr>
+    <tr>
       <td align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GH</a></td>
     </tr>

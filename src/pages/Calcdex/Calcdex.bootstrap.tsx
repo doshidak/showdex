@@ -2,11 +2,12 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ErrorBoundary } from '@showdex/components/debug';
-import { calcdexSlice } from '@showdex/redux/store';
+import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
   // createSideRoom,
   // getActiveBattle,
+  getAuthUsername,
   getBattleRoom,
   getCalcdexRoomId,
   // getCalcdexRoomId,
@@ -41,8 +42,6 @@ export interface BattleRoomOverride<
   native: TFunc;
 }
 
-const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
-
 export const renderCalcdex = (
   dom: ReactDOM.Root,
   store: RootStore,
@@ -63,6 +62,48 @@ export const renderCalcdex = (
     </ErrorBoundary>
   </ReduxProvider>
 ));
+
+/**
+ * Determines if the auth user has won/loss, then increments the win/loss counter.
+ *
+ * * Specify the `forceResult` argument when you know the `battle` object might not be available.
+ *   - `battle` wouldn't be typically available in a `ForfeitPopup`, for instance.
+ *
+ * @since 1.0.6
+ */
+const updateBattleRecord = (
+  store: RootStore,
+  battle: Showdown.Battle,
+  forceResult?: 'win' | 'loss',
+): void => {
+  const authUser = getAuthUsername();
+
+  if (!authUser || (!battle?.id && !forceResult) || typeof store?.dispatch !== 'function') {
+    return;
+  }
+
+  const playerNames = [
+    battle?.p1?.name,
+    battle?.p2?.name,
+    battle?.p3?.name,
+    battle?.p4?.name,
+  ].filter(Boolean);
+
+  const winStep = battle?.stepQueue?.find((s) => s?.startsWith('|win|'));
+  const winUser = winStep?.replace?.('|win|', ''); // e.g., '|win|sumfuk' -> 'sumfuk'
+
+  // don't update if we couldn't find the "win" step queue or a forced result wasn't provided
+  if ((playerNames.length && !playerNames.includes(authUser)) || (!winUser && !forceResult)) {
+    return;
+  }
+
+  const didWin = forceResult === 'win' || winUser === authUser;
+  const reducerName = didWin ? 'recordWin' : 'recordLoss';
+
+  store.dispatch(hellodexSlice.actions[reducerName]());
+};
+
+const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
 export const calcdexBootstrapper: ShowdexBootstrapper = (
   store,
@@ -240,6 +281,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
               // which may destroy the state depending on the user's settings
               app.leaveRoom(calcdexRoomId);
             }
+
+            updateBattleRecord(store, battleRoom?.battle, 'loss');
 
             // call ForfeitPopup's original submit() handler
             submitForfeit(data);
@@ -484,6 +527,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
           forfeitPopup.submit = (data) => {
             store.dispatch(calcdexSlice.actions.destroy(roomid));
+            updateBattleRecord(store, battleRoom?.battle, 'loss');
             submitForfeit(data);
           };
         }
@@ -743,6 +787,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         battleNonce: battle.nonce,
         active: false,
       }));
+
+      updateBattleRecord(store, battle);
 
       // only close the calcdexRoom if configured to
       // (here, it's only on 'battle-end' since we're specifically handling that scenario rn)

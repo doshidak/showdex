@@ -235,7 +235,7 @@ $close-icon-size: 28px;
 
   .settingsGroupTitle {
     grid-area: span 1 / span 2;
-    @include spacing.margin-xy($y: 7px);
+    @include spacing.margin($top: 15px, $bottom: 5px);
     @include spacing.padding-xy($x: 0);
     font-size: 12px;
 
@@ -282,7 +282,7 @@ $close-icon-size: 28px;
   }
 
   &.top {
-    @include spacing.margin($bottom: 10px);
+    @include spacing.margin($bottom: 3px);
   }
 
   &.right {
@@ -290,7 +290,7 @@ $close-icon-size: 28px;
   }
 
   &.bottom {
-    @include spacing.margin($top: 10px);
+    @include spacing.margin($top: 3px);
   }
 
   &.left {

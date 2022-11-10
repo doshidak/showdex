@@ -4,9 +4,9 @@ import {
   PiconButton,
   PokeHpBar,
   PokeStatus,
-  PokeType,
+  // PokeType,
 } from '@showdex/components/app';
-import { Dropdown } from '@showdex/components/form';
+import { Dropdown, PokeTypeField } from '@showdex/components/form';
 import {
   Badge,
   Button,
@@ -28,6 +28,7 @@ import {
   // getDexForFormat,
   // hasMegaForme,
   hasNickname,
+  legalLockedFormat,
   mergeRevealedMoves,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
@@ -313,7 +314,7 @@ export const PokeInfo = ({
   // const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(gen);
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nickname = hasNickname(pokemon) && settings?.showNicknames
@@ -396,14 +397,15 @@ export const PokeInfo = ({
     }),
   });
 
-  const itemOptions = React.useMemo(() => (legacy ? [] : buildItemOptions(
+  const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
     format,
     pokemon,
     // settings?.showAllOptions,
     true, // fuck it w/e lol
   )), [
     format,
-    legacy,
+    gen,
+    // legacy,
     pokemon,
     // settings,
   ]);
@@ -463,7 +465,7 @@ export const PokeInfo = ({
       {
         !!pokemon?.speciesForme &&
         <>
-          {' '}For
+          {' '}for
           <br />
           <strong>{pokemon.speciesForme}</strong>
         </>
@@ -477,6 +479,14 @@ export const PokeInfo = ({
     pokemon?.speciesForme,
     format,
   );
+
+  const formeDisabled = !nextForme;
+  const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
+  const piconDisabled = settings?.reverseIconName ? formeDisabled : smogonDisabled;
+  const nameDisabled = settings?.reverseIconName ? smogonDisabled : formeDisabled;
+
+  const editableTypes = settings?.editPokemonTypes === 'always'
+    || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
 
   const copiedRef = React.useRef<BadgeInstance>(null);
 
@@ -529,7 +539,7 @@ export const PokeInfo = ({
             tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
             tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
             shadow
-            disabled={settings?.reverseIconName ? !nextForme : !pokemon?.speciesForme}
+            disabled={piconDisabled}
             onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
           />
         </div>
@@ -541,7 +551,7 @@ export const PokeInfo = ({
               className={cx(
                 styles.nameButton,
                 !pokemon?.speciesForme && styles.missingForme,
-                !nextForme && styles.disabled,
+                nameDisabled && styles.disabled,
               )}
               labelClassName={styles.nameLabel}
               label={nickname || pokemon?.speciesForme || 'MissingNo.'}
@@ -550,7 +560,7 @@ export const PokeInfo = ({
               tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
               hoverScale={1}
               // absoluteHover
-              disabled={settings?.reverseIconName ? !pokemon?.speciesForme : !nextForme}
+              disabled={nameDisabled}
               onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
             />
 
@@ -561,18 +571,35 @@ export const PokeInfo = ({
               </div>
             }
 
-            {
-              !!pokemon?.types?.length &&
-              <div className={styles.types}>
-                {pokemon.types.map((type, i) => (
-                  <PokeType
-                    key={`PokeInfo:Types:${pokemonKey}:PokeType:${i}`}
-                    style={pokemon.types.length > 1 && i === 0 ? { marginRight: 2 } : null}
-                    type={type}
-                  />
-                ))}
-              </div>
-            }
+            <PokeTypeField
+              className={styles.typesField}
+              label={`Types for Pokemon ${friendlyPokemonName}`}
+              // tooltip={(
+              //   <div className={styles.tooltipContent}>
+              //     Change{' '}
+              //     {
+              //       !!pokemon?.speciesForme &&
+              //       <>
+              //         <strong>
+              //           {pokemon.speciesForme}
+              //         </strong>'s
+              //         {' '}
+              //       </>
+              //     }
+              //     Types
+              //   </div>
+              // )}
+              // tooltipDisabled={!settings?.showUiTooltips}
+              multi
+              input={{
+                value: [...(pokemon?.types || [])],
+                onChange: (types: Showdown.TypeName[]) => onPokemonChange?.({
+                  types: [...(types || [])],
+                }),
+              }}
+              readOnly={!editableTypes}
+              disabled={!pokemon?.speciesForme}
+            />
           </div>
 
           <div className={styles.secondLine}>

@@ -39,7 +39,7 @@ export const buildPresetOptions = (
         label,
         plusLabel,
         subLabel,
-      ] = /([\w'\s]+)\s+(?:\+\s+(\w[\w\s]*)|\((\w[\w\s]*)\))$/.exec(option.label) || [];
+      ] = /([\w"'-\s]+)\s+(?:\+\s+(\w[\w\s]*)|\((\w[\w\s]*)\))$/.exec(option.label) || [];
 
       // it'll be one or the other since the capture groups are alternatives in a non-capturing group
       const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;

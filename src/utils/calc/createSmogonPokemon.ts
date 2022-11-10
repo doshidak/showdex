@@ -163,12 +163,32 @@ export const createSmogonPokemon = (
     },
 
     overrides: {
+      // update (2022/11/06): now allowing base stat editing as a setting
+      baseStats: {
+        ...(<Required<Showdown.StatsTable>> pokemon.baseStats),
+
+        // only spread non-negative numerical values
+        ...Object.entries(pokemon.dirtyBaseStats || {}).reduce((prev, [stat, value]) => {
+          if (typeof value !== 'number' || value < 0) {
+            return prev;
+          }
+
+          prev[stat] = value;
+
+          return prev;
+        }, {}),
+      },
+
       // note: there's a cool utility called expand() that merges two objects together,
       // which also merges array values, keeping the array length of the source object.
       // for instance, Greninja, who has the types ['Water', 'Dark'] and the Protean ability
       // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
       // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
-      types: <SmogonPokemonOverrides['types']> [...pokemon.types, null].slice(0, 2),
+      types: <SmogonPokemonOverrides['types']> [
+        ...pokemon.types,
+        null,
+        null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
+      ].slice(0, 3),
     },
   };
 

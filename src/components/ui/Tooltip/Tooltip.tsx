@@ -113,14 +113,17 @@ export const Tooltip = ({
       animation
       popperOptions={{
         ...popperOptions,
-        modifiers: [...popperModifiers, mounted && !!arrow && {
+        modifiers: [...popperModifiers, {
           name: 'arrow',
-          options: { element: arrow },
-        }].filter(Boolean),
+          options: {
+            element: arrow,
+            padding: 15,
+          },
+        }],
       }}
       trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
       zIndex={99}
-      render={(attributes, renderContent) => (mounted ? (
+      render={(attributes, renderContent) => (
         <animated.div
           className={cx(
             styles.container,
@@ -130,12 +133,12 @@ export const Tooltip = ({
           style={{
             ...style,
             ...animationStyles,
+            ...(!mounted && { display: 'none' }),
           }}
           tabIndex={-1}
           {...attributes}
         >
-          {/* {renderContent || (typeof content === 'function' ? content() : content)} */}
-          {renderContent || content}
+          {mounted && (renderContent || content)}
 
           <div
             ref={setArrow}
@@ -146,7 +149,7 @@ export const Tooltip = ({
             style={arrowStyle}
           />
         </animated.div>
-      ) : null)}
+      )}
       onMount={handleMount}
       onHide={handleHide}
       onHidden={handleHidden}

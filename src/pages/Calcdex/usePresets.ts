@@ -153,15 +153,21 @@ export const usePresets = ({
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
-  const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme;
-  const baseForme = speciesForme?.includes('-') // e.g., 'Keldeo-Resolute'
-    ? dex?.species.get(speciesForme)?.baseSpecies // e.g., 'Keldeo'
-    : null;
+  const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
+  const dexForme = speciesForme?.includes('-') ? dex?.species.get(speciesForme) : null;
+
+  const baseForme = dexForme?.baseSpecies; // e.g., 'Necrozma'
+  const checkBaseForme = !!baseForme && baseForme !== speciesForme;
+
+  const battleFormes = Array.isArray(dexForme?.battleOnly)
+    ? dexForme.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Wings']
+    : [dexForme?.battleOnly].filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
 
   const formes = Array.from(new Set([
-    speciesForme,
-    !!baseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme,
-    randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`,
+    speciesForme, // e.g., 'Necrozma-Ultra' (typically wouldn't have any sets)
+    !!battleFormes.length && battleFormes.find((f) => PokemonUsageFuckedFormes.includes(f)), // e.g., 'Necrozma-Dawn-Wings' (sets would match this forme)
+    !battleFormes.length && checkBaseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
+    randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`, // e.g., (for some other Pokemon) 'Gengar-Gmax'
   ].filter(Boolean))).map((f) => formatId(f));
 
   const shouldSkip = disabled
