@@ -253,6 +253,15 @@
   grid-area: span 1 / span 1;
 }
 
+.battleRecordSpacer {
+  grid-area: span 1 / span 3;
+  height: 20px;
+
+  .verySmol & {
+    grid-area: span 1 / span 1;
+  }
+}
+
 .empty {
   @include position.absolute-fill;
   @include flex.column-center;

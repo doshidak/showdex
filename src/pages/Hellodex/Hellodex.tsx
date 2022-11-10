@@ -246,6 +246,11 @@ export const Hellodex = ({
                         onPress={() => openCalcdexInstance?.(battleId)}
                       />
                     ))}
+
+                    {
+                      settings?.showBattleRecord &&
+                      <div className={styles.battleRecordSpacer} />
+                    }
                   </div>
                 </Scrollable>
               )}
