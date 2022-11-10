@@ -276,7 +276,7 @@ export const Hellodex = ({
                 className={styles.donateButton}
                 aria-label="Donate via PayPal"
                 // disabled={!donationUrl}
-                onPress={() => window.open(donationUrl, '_blank', 'noopener,noreferrer')}
+                onPress={() => window.open(donationUrl, '_blank')}
               >
                 <span className={styles.labelAction}>
                   Donate
