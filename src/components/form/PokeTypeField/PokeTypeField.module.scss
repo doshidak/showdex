@@ -8,6 +8,7 @@
 @use 'mixins/transition';
 
 $container: (
+  min-width: 32px,
   padding-x: 3px,
   padding-y: 3px,
   border-radius: 8px,
@@ -104,6 +105,7 @@ $type-value: (
 
 .container {
   position: relative;
+  min-width: map.get($container, min-width);
   @include transition.apply(opacity);
 
   &::before {

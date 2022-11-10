@@ -1,9 +1,12 @@
 import * as React from 'react';
+// import { sticky } from 'tippy.js';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
 import { BaseButton, Tooltip } from '@showdex/components/ui';
 import { PokemonTypes } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/app';
+import { useUserAgent } from '@showdex/utils/hooks';
 import type { FieldRenderProps } from 'react-final-form';
 import type { ButtonElement } from '@showdex/components/ui';
 import styles from './PokeTypeField.module.scss';
@@ -46,6 +49,10 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
     forwardedRef,
     () => containerRef.current,
   );
+
+  // detect non-macOS cause the Tippy's positioning is really fucked on Windows (and probably Linux)
+  const userAgent = useUserAgent();
+  const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   // keep track of whether the options tooltip is open
   const [optionsVisible, setOptionsVisible] = React.useState(false);
@@ -183,11 +190,15 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       )}
       // visible={optionsVisible ? true : undefined}
       visible={optionsVisible}
-      interactive={optionsVisible}
-      placement="top"
+      // interactive={optionsVisible}
+      interactive
+      popperOptions={nonMacOS ? { strategy: 'fixed' } : undefined}
+      placement="top-start"
       // trigger="mouseenter"
       // delay={[1000, 50]}
       offset={[0, 10]}
+      // plugins={[sticky]}
+      // sticky="popper"
       // disabled={optionsVisible ? undefined : disabled}
       onClickOutside={() => setOptionsVisible(false)}
     >
