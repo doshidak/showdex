@@ -75,7 +75,7 @@ export const PokeStats = ({
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
-  const missingEvs = !!pokemon?.speciesForme && gen > 2 && !totalEvs;
+  const missingEvs = !!pokemon?.speciesForme && !legacy && !totalEvs;
 
   const finalStats = React.useMemo(() => (pokemon?.speciesForme ? calcPokemonFinalStats(
     gen,
