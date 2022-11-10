@@ -367,12 +367,10 @@ export const PokeMoves = ({
           </div>
         ) : null;
 
-        const parsedDamageRange = damagingMove
-          ? damageRange
-            // checking if the damaging move has non-0 BP
-            // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
-            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '?')
-          : damageRange; // probably 'N/A' here
+        // checking if a damaging move has non-0 BP (would be 'N/A' for status moves)
+        // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
+        const parsedDamageRange = damageRange
+          || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '?');
 
         const hasDamageRange = !!parsedDamageRange
           && !['IMMUNE', 'N/A', '?'].includes(parsedDamageRange);
@@ -624,7 +622,7 @@ export const PokeMoves = ({
                       <Button
                         className={cx(
                           styles.damageButton,
-                          // damageButtonDisabled && styles.disabled,
+                          !showMatchupTooltip && styles.disabled,
                         )}
                         labelClassName={cx(
                           styles.damageButtonLabel,
@@ -638,7 +636,7 @@ export const PokeMoves = ({
                         tooltipDisabled={!showMatchupTooltip}
                         hoverScale={1}
                         absoluteHover
-                        disabled={!description?.raw}
+                        disabled={!showMatchupTooltip}
                         onPress={() => handleDamagePress(i, [
                           description.raw,
                           showDamageAmounts && `(${description.damageAmounts})`,
