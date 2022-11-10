@@ -109,16 +109,16 @@ export const CalcdexError = ({
             }
 
             <div className={styles.subtitle}>
-              Calcdex has encountered a problem and needs to close.
+              Calcdex has failed <em>successfully</em> and needs to close.
               <br />
               We are sorry for the inconvenience.
             </div>
 
-            <div className={styles.description}>
+            {/* <div className={styles.description}>
               If you were in the middle of something,
               <br />
               the information you were working on might be lost.
-            </div>
+            </div> */}
           </div>
 
           <Scrollable className={styles.errorStackContainer}>

@@ -11,8 +11,10 @@
   @include font.apply(fonts.$mono);
   font-size: 10px;
   color: colors.$red;
+  // color: colors.$green;
   // background-color: color.alpha(colors.$red, 0.15);
-  background-color: #F0D8D9;
+  // background-color: #F0D8D9;
+  background-color: color.tint(colors.$green, 85%);
   overflow: hidden;
 
   &, *, *::before, *::after {
