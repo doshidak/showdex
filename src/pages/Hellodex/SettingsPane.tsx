@@ -1002,10 +1002,10 @@ export const SettingsPane = ({
                     name="calcdex.showPlayerRatings"
                     component={Switch}
                     className={styles.field}
-                    label="Show Players' ELO Ratings"
+                    label="Show Players' Elo Ratings"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Shows each player's ELO rating, if available, by their username.
+                        Shows each player's Elo rating, if available, by their username.
                       </div>
                     )}
                   />
