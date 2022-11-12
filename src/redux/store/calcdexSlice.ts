@@ -1475,8 +1475,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce: battleNonce || currentState.battleNonce,
         gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
         format: format || currentState.format,
-        active: typeof active === 'boolean' ? active : currentState.active,
+        // active: typeof active === 'boolean' ? active : currentState.active,
       };
+
+      // for the active state, only update if previously true and the new value is false
+      // as we don't want the HellodexBattleRecord to record replays or battle re-inits
+      if (currentState.active && typeof active === 'boolean' && !active) {
+        state[battleId].active = active;
+      }
 
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',

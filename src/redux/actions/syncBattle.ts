@@ -103,8 +103,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // update the current turn number
     battleState.turn = turn || 0;
 
-    // update the battle's active state
-    battleState.active = !ended;
+    // update the battle's active state, but only allow it to go from true -> false
+    // as to avoid updating the HellodexBattleRecord from replays and battle re-inits)
+    if (battleState.active && typeof ended === 'boolean' && ended) {
+      battleState.active = !ended;
+    }
 
     // find out which side myPokemon belongs to
     const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
