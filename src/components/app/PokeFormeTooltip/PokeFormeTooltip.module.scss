@@ -1,0 +1,142 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$tooltip-container: (
+  padding: 7px,
+);
+
+$container: (
+  // columns: 5, // determined programatically now (up to maxColumns prop)
+  // column-width: 45px, // set via columnWidth prop
+  column-gap: 5px,
+  row-gap: 5px,
+);
+
+$forme-button: (
+  padding-x: 0,
+  padding-y: 3px,
+  border-radius: 7px,
+
+  color: (
+    default: (
+      light: color.alpha(colors.$white, 0.65),
+      dark: color.alpha(colors.$black, 0.65),
+    ),
+
+    selected: (
+      light: colors.$blue,
+      dark: color.shade(colors.$blue, 15%),
+    ),
+  ),
+
+  background-color: (
+    default: (
+      light: colors.$transparent,
+      dark: colors.$transparent,
+    ),
+
+    hover: (
+      light: color.alpha(colors.$white, 0.1),
+      dark: color.alpha(colors.$black, 0.1),
+    ),
+
+    selected: (
+      light: color.alpha(colors.$blue, 0.2),
+      dark: color.alpha(color.shade(colors.$blue, 15%), 0.2),
+    ),
+  ),
+
+  box-shadow: (
+    selected: (
+      light: (
+        0 0 1px color.alpha(colors.$blue, 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.5),
+      ),
+
+      dark: (
+        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.5),
+      ),
+    ),
+  ),
+);
+
+$picon-label: (
+  // spacing: 3px,
+  padding-x: 1px,
+  font-size: 8px,
+);
+
+.tooltipContainer {
+  @include spacing.padding-all(map.get($tooltip-container, padding));
+  z-index: 99;
+}
+
+.container {
+  display: grid;
+  // grid-template-columns: repeat(map.get($container, columns), map.get($container, column-width));
+  column-gap: map.get($container, column-gap);
+  row-gap: map.get($container, row-gap);
+  z-index: map.get($container, z-index);
+}
+
+.formeButton {
+  @include flex.column($align: center);
+  grid-area: span 1 / span 1;
+  @include spacing.padding-xy($x: map.get($forme-button, padding-x), $y: map.get($forme-button, padding-y));
+  border-radius: map.get($forme-button, border-radius);
+  @include transition.apply(color, background-color, box-shadow);
+  z-index: 1;
+
+  .light & {
+    color: map.get($forme-button, color, default, light);
+    background-color: map.get($forme-button, background-color, default, light);
+  }
+
+  .dark & {
+    color: map.get($forme-button, color, default, dark);
+    background-color: map.get($forme-button, background-color, default, dark);
+  }
+
+  &:hover {
+    .light & {
+      background-color: map.get($forme-button, background-color, hover, light);
+    }
+
+    .dark & {
+      background-color: map.get($forme-button, background-color, hover, dark);
+    }
+  }
+
+  &.selected {
+    .light & {
+      color: map.get($forme-button, color, selected, light);
+      background-color: map.get($forme-button, background-color, selected, light);
+      box-shadow: map.get($forme-button, box-shadow, selected, light);
+    }
+
+    .dark & {
+      color: map.get($forme-button, color, selected, dark);
+      background-color: map.get($forme-button, background-color, selected, dark);
+      box-shadow: map.get($forme-button, box-shadow, selected, dark);
+    }
+  }
+}
+
+.piconLabel {
+  // @include spacing.margin($top: map.get($picon-label, spacing));
+  @include spacing.padding-xy($x: map.get($picon-label, padding-x));
+  font-size: map.get($picon-label, font-size);
+  text-align: center;
+  text-transform: uppercase;
+  white-space: normal;
+  user-select: none;
+
+  .selected & {
+    font-weight: 500;
+  }
+}
