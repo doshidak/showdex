@@ -1129,7 +1129,7 @@ export const SettingsPane = ({
                     name="calcdex.showUiTooltips"
                     component={Switch}
                     className={styles.field}
-                    label="Show UI Help Tooltips"
+                    label="Show UI Info Tooltips"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Shows explainer tooltips for buttons in the UI when hovered over.
@@ -1454,7 +1454,9 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always allow illegal values for a Pok&eacute;mon's EVs/IVs.
-                          This does not lift the DV limit of 15 in Gen 1 &amp; 2 battles.
+                          <br />
+                          <br />
+                          This does not apply to DVs in legacy gens, where a limit of 15 will still be enforced.
                           <br />
                           <br />
                           Lowest possible EV/IV value is <strong>0</strong> &amp;
@@ -1576,6 +1578,7 @@ export const SettingsPane = ({
                       ))}
                     </div>
 
+                    {/** @todo clean this up; use CSS for handling inBattle overflow instead of this dumb af copy paste */}
                     {
                       inBattle &&
                       <div className={cx(styles.customFieldRow, styles.centered)}>
