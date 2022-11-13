@@ -2,6 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import {
   PiconButton,
+  PokeFormeTooltip,
   PokeHpBar,
   PokeStatus,
   // PokeType,
@@ -416,48 +417,52 @@ export const PokeInfo = ({
 
   // handle cycling through the Pokemon's available alternative formes, if any
   // (disabled for legacy gens -- this is enough since nextForme will be null if legacy)
-  const formeIndex = !legacy && pokemon?.altFormes?.length
-    ? pokemon.altFormes.findIndex((f) => [
-      pokemon.speciesForme,
-      pokemon.transformedForme,
-    ].filter(Boolean).includes(f))
-    : -1;
+  // const formeIndex = !legacy && pokemon?.altFormes?.length
+  //   ? pokemon.altFormes.findIndex((f) => [
+  //     pokemon.speciesForme,
+  //     pokemon.transformedForme,
+  //   ].filter(Boolean).includes(f))
+  //   : -1;
 
-  const nextFormeIndex = formeIndex > -1
-    ? formeIndex + 1 > pokemon.altFormes.length - 1
-      ? 0
-      : formeIndex + 1
-    : -1;
+  // const nextFormeIndex = formeIndex > -1
+  //   ? formeIndex + 1 > pokemon.altFormes.length - 1
+  //     ? 0
+  //     : formeIndex + 1
+  //   : -1;
 
-  const nextForme = nextFormeIndex > -1
-    ? pokemon.altFormes[nextFormeIndex]
-    : null;
+  // const nextForme = nextFormeIndex > -1
+  //   ? pokemon.altFormes[nextFormeIndex]
+  //   : null;
 
-  const switchToNextForme = React.useCallback(() => {
-    if (!nextForme) {
-      return;
-    }
+  // const switchToNextForme = React.useCallback(() => {
+  //   if (!nextForme) {
+  //     return;
+  //   }
+  //
+  //   onPokemonChange?.({
+  //     [pokemon?.transformedForme ? 'transformedForme' : 'speciesForme']: nextForme,
+  //   });
+  // }, [
+  //   nextForme,
+  //   onPokemonChange,
+  //   pokemon,
+  // ]);
 
-    onPokemonChange?.({
-      [pokemon?.transformedForme ? 'transformedForme' : 'speciesForme']: nextForme,
-    });
-  }, [
-    nextForme,
-    onPokemonChange,
-    pokemon,
-  ]);
+  // const nextFormeTooltip = nextForme ? (
+  //   <div className={styles.tooltipContent}>
+  //     <div>
+  //       Switch to{' '}
+  //       <em>{nextForme}</em>
+  //     </div>
+  //     <div>
+  //       <strong>{pokemon.speciesForme}</strong>
+  //     </div>
+  //   </div>
+  // ) : null;
 
-  const nextFormeTooltip = nextForme ? (
-    <div className={styles.tooltipContent}>
-      <div>
-        Switch to{' '}
-        <em>{nextForme}</em>
-      </div>
-      <div>
-        <strong>{pokemon.speciesForme}</strong>
-      </div>
-    </div>
-  ) : null;
+  const [formesVisible, setFormesVisible] = React.useState(false);
+  const toggleFormesTooltip = () => setFormesVisible(!formesVisible);
+  const closeFormesTooltip = () => setFormesVisible(false);
 
   const smogonPageTooltip = (
     <div className={styles.tooltipContent}>
@@ -480,7 +485,8 @@ export const PokeInfo = ({
     format,
   );
 
-  const formeDisabled = !nextForme;
+  // const formeDisabled = !nextForme;
+  const formeDisabled = !pokemon?.altFormes?.length;
   const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
   const piconDisabled = settings?.reverseIconName ? formeDisabled : smogonDisabled;
   const nameDisabled = settings?.reverseIconName ? smogonDisabled : formeDisabled;
@@ -525,44 +531,67 @@ export const PokeInfo = ({
     >
       <div className={styles.row}>
         <div className={styles.piconContainer}>
-          <PiconButton
-            piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
-            pokemon={{
-              ...pokemon,
-              speciesForme: (
-                pokemon?.transformedForme
-                  || pokemon?.speciesForme
-              )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
-              item: itemName,
-            }}
-            tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
-            tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
-            tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
-            shadow
-            disabled={piconDisabled}
-            onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
-          />
+          <PokeFormeTooltip
+            pokemon={pokemon}
+            visible={formesVisible}
+            disabled={!settings?.reverseIconName}
+            onPokemonChange={onPokemonChange}
+            onRequestClose={closeFormesTooltip}
+          >
+            <PiconButton
+              piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
+              pokemon={{
+                ...pokemon,
+                speciesForme: (
+                  pokemon?.transformedForme
+                    || pokemon?.speciesForme
+                )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
+                item: itemName,
+              }}
+              // tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
+              tooltip={settings?.reverseIconName ? undefined : smogonPageTooltip}
+              // tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
+              tooltipDelay={[1000, 50]}
+              // tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
+              tooltipDisabled={settings?.reverseIconName || !settings?.showUiTooltips}
+              shadow
+              disabled={piconDisabled}
+              // onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
+              onPress={settings?.reverseIconName ? toggleFormesTooltip : openSmogonPage}
+            />
+          </PokeFormeTooltip>
         </div>
 
         <div className={styles.infoContainer}>
           <div className={styles.firstLine}>
-            {/* no nicknames, as requested by camdawgboi lol */}
-            <Button
-              className={cx(
-                styles.nameButton,
-                !pokemon?.speciesForme && styles.missingForme,
-                nameDisabled && styles.disabled,
-              )}
-              labelClassName={styles.nameLabel}
-              label={nickname || pokemon?.speciesForme || 'MissingNo.'}
-              tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
-              tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
-              tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
-              hoverScale={1}
-              // absoluteHover
-              disabled={nameDisabled}
-              onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
-            />
+            <PokeFormeTooltip
+              pokemon={pokemon}
+              visible={formesVisible}
+              disabled={settings?.reverseIconName}
+              onPokemonChange={onPokemonChange}
+              onRequestClose={closeFormesTooltip}
+            >
+              <Button
+                className={cx(
+                  styles.nameButton,
+                  !pokemon?.speciesForme && styles.missingForme,
+                  nameDisabled && styles.disabled,
+                )}
+                labelClassName={styles.nameLabel}
+                label={nickname || pokemon?.speciesForme || 'MissingNo.'}
+                // tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
+                tooltip={settings?.reverseIconName ? smogonPageTooltip : undefined}
+                // tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
+                tooltipDelay={[1000, 50]}
+                // tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
+                tooltipDisabled={settings?.reverseIconName && !settings?.showUiTooltips}
+                hoverScale={1}
+                // absoluteHover
+                disabled={nameDisabled}
+                // onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
+                onPress={settings?.reverseIconName ? openSmogonPage : toggleFormesTooltip}
+              />
+            </PokeFormeTooltip>
 
             {
               (typeof pokemon?.level === 'number' && pokemon.level !== 100) &&

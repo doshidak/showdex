@@ -71,6 +71,7 @@ button.toggleButton {
 .piconContainer {
   flex: 0 0 40px;
   transform: translateY(-2px);
+  z-index: 1;
 }
 
 .infoContainer {
@@ -89,6 +90,7 @@ button.nameButton {
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
   color: inherit;
   overflow-x: hidden;
+  z-index: 1;
 
   &.missingForme {
     font-weight: 400;
