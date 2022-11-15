@@ -17,6 +17,7 @@ export interface SegmentedOption<TValue extends TextFieldValue = string> {
 
   className?: string;
   style?: React.CSSProperties;
+  labelStyle?: React.CSSProperties;
 
   label: string;
   tooltip?: React.ReactNode;
@@ -62,6 +63,7 @@ export interface SegmentedProps<
 
   options?: SegmentedOption<TValue>[];
   multi?: Multi;
+  unique?: boolean;
   disabled?: boolean;
 }
 
@@ -82,6 +84,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
   tooltip,
   options,
   multi,
+  unique,
   input,
   disabled,
 }: SegmentedProps<TValue, Multi>, forwardedRef: React.ForwardedRef<HTMLDivElement>): JSX.Element => {
@@ -100,7 +103,10 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
     }
 
     if (!multi) {
-      input.onChange(value);
+      // don't fire the input.onChange() callback if the value didn't change
+      if (input.value !== value) {
+        input.onChange(value);
+      }
 
       return;
     }
@@ -115,7 +121,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
       values.push(value);
     }
 
-    input.onChange(values);
+    input.onChange(unique ? Array.from(new Set(values)) : values);
   };
 
   return (
@@ -161,6 +167,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
                 key: optionKey,
                 className: classNameFromOption,
                 style: styleFromOption,
+                labelStyle,
                 label: optionLabel,
                 tooltip: optionTooltip,
                 value: optionValue,
@@ -172,11 +179,10 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
 
               // not checking with !!input?.value in case input.value is purposefully some falsy value,
               // like 0 or `''` (empty string)
-              const selected = 'value' in (input || {})
-                && (
-                  (!multi && (input.value as TValue) === optionValue)
-                    || (multi && ((input.value as TValue[])?.includes(optionValue)))
-                );
+              const selected = 'value' in (input || {}) && (
+                (!multi && (input.value as TValue) === optionValue)
+                  || (multi && ((input.value as TValue[])?.includes?.(optionValue)))
+              );
 
               return (
                 <ToggleButton
@@ -188,6 +194,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
                     classNameFromOption,
                   )}
                   style={styleFromOption}
+                  labelStyle={labelStyle}
                   label={optionLabel}
                   tooltip={optionTooltip}
                   primary
@@ -195,11 +202,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
                   hoverScale={selected ? 1 : undefined}
                   activeScale={selected ? 0.98 : undefined}
                   disabled={disabled || optionDisabled}
-                  onPress={() => {
-                    if (!selected) {
-                      handleChange(optionValue);
-                    }
-                  }}
+                  onPress={() => handleChange(optionValue)}
                 />
               );
             })}
