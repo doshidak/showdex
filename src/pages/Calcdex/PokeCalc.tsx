@@ -37,6 +37,7 @@ interface PokeCalcProps {
   gen?: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
+  authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
@@ -53,6 +54,7 @@ export const PokeCalc = ({
   gen,
   format,
   rules,
+  authPlayerKey,
   playerKey,
   playerPokemon,
   opponentPokemon,
@@ -277,6 +279,7 @@ export const PokeCalc = ({
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={field}
+        authPlayerKey={authPlayerKey}
         playerKey={playerKey}
         containerSize={containerSize}
         onPokemonChange={handlePokemonChange}
