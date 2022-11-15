@@ -31,6 +31,7 @@ export interface PokeStatsProps {
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
   field?: CalcdexBattleField;
+  authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
   containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
@@ -44,6 +45,7 @@ export const PokeStats = ({
   playerPokemon: pokemon,
   opponentPokemon,
   field,
+  authPlayerKey,
   playerKey,
   containerSize,
   onPokemonChange,
@@ -61,6 +63,30 @@ export const PokeStats = ({
 
   const shouldShowBaseStats = settings?.showBaseStats === 'always'
     || (settings?.showBaseStats === 'meta' && !legalLockedFormat(format));
+
+  const geneticsKey = authPlayerKey === playerKey ? 'auth' : playerKey;
+  const lockedVisibilities = settings?.lockGeneticsVisibility?.[geneticsKey] || [];
+
+  const defaultShowBehavior = !lockedVisibilities?.length || [
+    shouldShowBaseStats && 'base',
+    'iv',
+    !legacy && 'ev',
+  ].filter(Boolean).every((
+    k: 'base' | 'iv' | 'ev',
+  ) => lockedVisibilities.includes(k));
+
+  const showBaseRow = shouldShowBaseStats && (
+    pokemon?.showGenetics
+      || (!defaultShowBehavior && lockedVisibilities.includes('base'))
+  );
+
+  const showIvsRow = pokemon?.showGenetics
+    || (!defaultShowBehavior && lockedVisibilities.includes('iv'));
+
+  const showEvsRow = !legacy && (
+    pokemon?.showGenetics
+      || (!defaultShowBehavior && lockedVisibilities.includes('ev'))
+  );
 
   const hasDirtyBaseStats = Object.values(pokemon?.dirtyBaseStats || {})
     .some((n) => typeof n === 'number' && n > -1);
@@ -111,8 +137,11 @@ export const PokeStats = ({
           tooltip={(
             <div className={styles.tooltipContent}>
               {pokemon?.showGenetics ? 'Hide' : 'Edit'}{' '}
-              {shouldShowBaseStats && 'Base/'}
-              {legacy ? 'DVs' : 'EVs/IVs'}
+              {[
+                shouldShowBaseStats && (defaultShowBehavior || !lockedVisibilities.includes('base')) && 'Base',
+                (defaultShowBehavior || !lockedVisibilities.includes('iv')) && (legacy ? 'DVs' : 'IVs'),
+                !legacy && (defaultShowBehavior || !lockedVisibilities.includes('ev')) && 'EVs',
+              ].filter(Boolean).join('/')}
             </div>
           )}
           tooltipDisabled={!settings?.showUiTooltips}
@@ -156,7 +185,7 @@ export const PokeStats = ({
 
       {/* base stats */}
       {
-        (pokemon?.showGenetics && shouldShowBaseStats) &&
+        showBaseRow &&
         <>
           <TableGridItem
             className={styles.header}
@@ -230,7 +259,7 @@ export const PokeStats = ({
 
       {/* IVs */}
       {
-        pokemon?.showGenetics &&
+        showIvsRow &&
         <>
           <Tooltip
             content={missingIvs ? (
@@ -320,7 +349,7 @@ export const PokeStats = ({
 
       {/* EVs */}
       {
-        (!legacy && pokemon?.showGenetics) &&
+        showEvsRow &&
         <>
           <Tooltip
             content={totalEvs < maxLegalEvs || !evsLegal ? (
