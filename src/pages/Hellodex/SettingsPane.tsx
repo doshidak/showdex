@@ -954,7 +954,7 @@ export const SettingsPane = ({
                     format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
+                  {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
                     name="calcdex.defaultShowGenetics.auth"
                     component={Switch}
                     className={styles.field}
@@ -970,9 +970,9 @@ export const SettingsPane = ({
                         the EVs &amp; IVs will be shown regardless of this setting.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['defaultShowGenetics'], HTMLInputElement, boolean>
+                  {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics'], HTMLInputElement, boolean>
                     name="calcdex.defaultShowGenetics"
                     component={Switch}
                     className={styles.field}
@@ -996,7 +996,7 @@ export const SettingsPane = ({
                       p4: value,
                     })}
                     format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
-                  />
+                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['showPlayerRatings']>
                     name="calcdex.showPlayerRatings"
@@ -1399,10 +1399,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['showBaseStats']>
                     name="calcdex.showBaseStats"
                     component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
+                    className={styles.field}
                     label="Editable Base Stats"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
@@ -1443,10 +1440,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['allowIllegalSpreads']>
                     name="calcdex.allowIllegalSpreads"
                     component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
+                    className={styles.field}
                     label="Allow Illegal Spreads"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
@@ -1488,6 +1482,118 @@ export const SettingsPane = ({
                       ),
                       value: 'never',
                     }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['lockGeneticsVisibility']['auth']>
+                    name="calcdex.lockGeneticsVisibility.auth"
+                    component={Segmented}
+                    className={styles.field}
+                    label={`Show My Pok${eacute}mon's Stats`}
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Base',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your Pok&eacute;mon's base stats.
+                          <br />
+                          <br />
+                          Disabling this will cause the base stats row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'base',
+                      disabled: values.calcdex.showBaseStats === 'never',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'IVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your Pok&eacute;mon's IVs.
+                          Applies to DVs in legacy gens as well.
+                          <br />
+                          <br />
+                          Disabling this will cause the IVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'iv',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'EVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your Pok&eacute;mon's EVs.
+                          Has no effect in legacy gens.
+                          <br />
+                          <br />
+                          Disabling this will cause the EVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'ev',
+                    }]}
+                    multi
+                    unique
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['lockGeneticsVisibility'], HTMLDivElement, ShowdexSettings['calcdex']['lockGeneticsVisibility']['p1']>
+                    name="calcdex.lockGeneticsVisibility"
+                    component={Segmented}
+                    className={styles.field}
+                    label="Show Opponent's Stats"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Base',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your opponent's (or spectating players') Pok&eacute;mon's base stats.
+                          <br />
+                          <br />
+                          Disabling this will cause the base stats row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'base',
+                      disabled: values.calcdex.showBaseStats === 'never',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'IVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your opponent's (or spectating players') Pok&eacute;mon's IVs.
+                          Applies to DVs in legacy gens as well.
+                          <br />
+                          <br />
+                          Disabling this will cause the IVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'iv',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'EVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your opponent's (or spectating players') Pok&eacute;mon's EVs.
+                          Has no effect in legacy gens.
+                          <br />
+                          <br />
+                          Disabling this will cause the EVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'ev',
+                    }]}
+                    multi
+                    unique
+                    parse={(value) => ({
+                      ...values.calcdex.lockGeneticsVisibility,
+                      p1: value,
+                      p2: value,
+                      p3: value,
+                      p4: value,
+                    })}
+                    format={(value) => [...(value?.p1 || [])]}
                   />
 
                   <div
