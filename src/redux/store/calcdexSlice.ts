@@ -315,7 +315,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * If `false`, an edit button should be shown to allow the user to set this value to `true`.
    * * Applies to this specific Pokemon only.
    *
-   * @default true
+   * @default false
    * @since 1.0.3
    */
   showGenetics?: boolean;
