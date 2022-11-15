@@ -1,30 +1,13 @@
 import { PokemonNatures } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
-import { sortUsageAlts } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import type { CalcdexPokemonPreset, CalcdexPokemonUsageAlt } from '@showdex/redux/store';
-
-/* eslint-disable @typescript-eslint/indent */
-
-/**
- * Converts and sorts alternative abilities/items/moves for the usage stats of a single Pokemon.
- *
- * @since 1.0.3
- */
-const processUsageAlts = <
-  T extends string,
->(
-  stats: Record<T, number>,
-): CalcdexPokemonUsageAlt<T>[] => (<CalcdexPokemonUsageAlt<T>[]> Object.entries(stats || {}))
-  .filter(([value]) => !!value && formatId(value) !== 'nothing')
-    .sort(sortUsageAlts);
-
-/* eslint-enable @typescript-eslint/indent */
+import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { processUsageAlts } from './processUsageAlts';
 
 /**
  * Transforms the JSON response from the Gen Format Stats API by converting the object into an array of `CalcdexPokemonPreset`s.

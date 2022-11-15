@@ -6,6 +6,8 @@ export * from './dehydrateShowdexSettings';
 export * from './dehydrators';
 export * from './hydrateShowdexSettings';
 export * from './hydrators';
+export * from './processUsageAlts';
+export * from './sortUsageAlts';
 export * from './transformFormatPresetResponse';
 export * from './transformFormatStatsResponse';
 export * from './transformPresetResponse';
