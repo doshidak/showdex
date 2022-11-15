@@ -106,16 +106,33 @@ export const dehydrateFieldSide = (
  *   p2: true,
  *   p3: true,
  *   p4: true,
- * })
+ * });
  *
  * 'n/y/y/y/y'
+ * ```
+ * @example
+ * ```ts
+ * dehydratePerSide({
+ *   auth: [],
+ *   p1: ['iv', 'ev'],
+ *   p2: ['iv', 'ev'],
+ *   p3: ['iv', 'ev'],
+ *   p4: ['iv', 'ev'],
+ * });
+ *
+ * '/iv,ev/iv,ev/iv,ev/iv,ev'
  * ```
  * @since 1.0.3
  */
 export const dehydratePerSide = (
-  value: Record<'auth' | CalcdexPlayerKey, boolean>,
+  value: Record<'auth' | CalcdexPlayerKey, unknown>,
   delimiter = '/',
+  arrayDelimiter = ',',
 ): string => Object.keys(value || {})
   .sort()
-  .map((key: 'auth' | CalcdexPlayerKey) => dehydrateBoolean(value[key]))
+  .map((key: 'auth' | CalcdexPlayerKey) => (
+    Array.isArray(value[key])
+      ? dehydrateArray(<unknown[]> value[key], arrayDelimiter)
+      : dehydrateValue(value[key])
+  ))
   .join(delimiter);
