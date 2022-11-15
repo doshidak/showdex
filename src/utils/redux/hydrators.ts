@@ -97,14 +97,19 @@ export const hydrateFieldSide = (
 export const hydratePerSide = (
   value: string,
   delimiter = '/',
-): Record<'auth' | CalcdexPlayerKey, boolean> => {
+  arrayDelimiter = ',',
+): Record<'auth' | CalcdexPlayerKey, unknown> => {
   const [
     auth,
     p1,
     p2,
     p3,
     p4,
-  ] = value?.split(delimiter).map((v) => hydrateBoolean(v)) || [];
+  ] = value?.split(delimiter).map((v) => (
+    v?.includes(arrayDelimiter)
+      ? hydrateArray(v, arrayDelimiter)
+      : hydrateBoolean(v)
+  )) || [];
 
   return {
     auth,
