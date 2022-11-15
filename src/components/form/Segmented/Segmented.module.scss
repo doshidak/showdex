@@ -107,6 +107,7 @@ $option: (
     font-weight: 400;
     font-size: map.get($option, font-size);
     color: inherit;
+    @include transition.apply(color, background-color, box-shadow, opacity);
 
     &:hover {
       .light & {
