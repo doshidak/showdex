@@ -52,6 +52,20 @@ export const PokeFormeTooltip = ({
   } = pokemon || {};
 
   const altFormesCount = altFormes?.length || 0;
+  const formeKey = transformedForme ? 'transformedForme' : 'speciesForme';
+
+  const handleFormePress = (forme: string) => {
+    const currentForme = transformedForme || speciesForme;
+
+    // don't fire the callback if the forme is the same
+    if (currentForme === forme) {
+      return;
+    }
+
+    // make sure to close the tooltip once the forme is selected for that good good UX
+    onPokemonChange?.({ [formeKey]: forme });
+    onRequestClose?.();
+  };
 
   return (
     <Tooltip
@@ -71,7 +85,6 @@ export const PokeFormeTooltip = ({
         >
           {altFormes?.map((altForme) => {
             const dexForme = dex?.species.get(altForme);
-            const formeKey = transformedForme ? 'transformedForme' : 'speciesForme';
             const selected = (transformedForme || speciesForme) === altForme;
 
             return (
@@ -84,9 +97,7 @@ export const PokeFormeTooltip = ({
                 display="block"
                 hoverScale={1}
                 activeScale={selected ? 0.98 : undefined}
-                onPress={() => (selected ? null : onPokemonChange?.({
-                  [formeKey]: altForme,
-                }))}
+                onPress={() => handleFormePress(altForme)}
               >
                 <Picon
                   // className={styles.picon}
