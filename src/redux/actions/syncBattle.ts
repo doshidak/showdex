@@ -2,7 +2,9 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
+  detectLegacyGen,
   detectPlayerKeyFromBattle,
+  legalLockedFormat,
   sanitizePokemon,
   sanitizeVolatiles,
   syncField,
@@ -561,7 +563,24 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             ? 'auth'
             : playerKey;
 
-          syncedPokemon.showGenetics = settings?.defaultShowGenetics?.[geneticsKey] ?? true;
+          // update (2022/11/14): defaultShowGenetics has been deprecated in favor of lockGeneticsVisibility
+          // syncedPokemon.showGenetics = settings?.defaultShowGenetics?.[geneticsKey] ?? true;
+
+          const showBaseStats = settings?.showBaseStats === 'always'
+            || (settings?.showBaseStats === 'meta' && !legalLockedFormat(battleState.format));
+
+          // handles 3 cases:
+          // (1) user selected all stats, so we should set this to true to initially show all rows, then allow them to be hidden
+          // (2) user selected only some stats, so this becomes initially false so PokeStats can show the rows they've selected
+          // (3) user selected no stats, so this becomes initially false, then allow them to all be shown
+          // (note: hydrator may rehydrate an empty array as `false`, hence why we're checking if the value is an array first!)
+          syncedPokemon.showGenetics = Array.isArray(settings?.lockGeneticsVisibility?.[geneticsKey]) && [
+            showBaseStats && 'base',
+            'iv',
+            !detectLegacyGen(battleState.gen) && 'ev',
+          ].filter(Boolean).every((
+            k: 'base' | 'iv' | 'ev',
+          ) => settings.lockGeneticsVisibility[geneticsKey].includes(k));
 
           playerState.pokemon.push(syncedPokemon);
 
