@@ -66,10 +66,11 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   includeTeambuilder: 'itb',
   autoExportOpponent: 'aeo',
   defaultAutoMoves: 'dam',
-  defaultShowGenetics: 'dsg',
+  // defaultShowGenetics: 'dsg',
   editPokemonTypes: 'ept',
   showMoveEditor: 'sme',
   showBaseStats: 'sbs',
+  lockGeneticsVisibility: 'lgv',
   allowIllegalSpreads: 'ais',
   showUiTooltips: 'sut',
   showAbilityTooltip: 'sat',
@@ -143,8 +144,9 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
  * ITB~{includeTeambuilder}|
  * AEO~{autoExportOpponent}|
  * DAM~{defaultAutoMoves}|
- * DSG~{defaultShowGenetics}|
  * SME~{showMoveEditor}|
+ * SBS~{showBaseStats}|
+ * LGV~{lockGeneticsVisibility}|
  * SAT~{showAbilityTooltip}|
  * SIT~{showItemTooltip}|
  * SMV~{showMoveTooltip}|

@@ -112,17 +112,26 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
-      defaultShowGenetics: {
-        auth: false,
-        p1: true,
-        p2: true,
-        p3: true,
-        p4: true,
-      },
+      // defaultShowGenetics: {
+      //   auth: false,
+      //   p1: true,
+      //   p2: true,
+      //   p3: true,
+      //   p4: true,
+      // },
 
       editPokemonTypes: 'always',
       showMoveEditor: 'meta',
       showBaseStats: 'meta',
+
+      lockGeneticsVisibility: {
+        auth: [],
+        p1: ['iv', 'ev'],
+        p2: ['iv', 'ev'],
+        p3: ['iv', 'ev'],
+        p4: ['iv', 'ev'],
+      },
+
       allowIllegalSpreads: 'meta',
       showUiTooltips: true,
       showAbilityTooltip: true,
@@ -260,9 +269,10 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
             : [
               DehydratedCalcdexSettingsMap.defaultAutoSelect,
               DehydratedCalcdexSettingsMap.defaultAutoMoves,
-              DehydratedCalcdexSettingsMap.defaultShowGenetics,
+              // DehydratedCalcdexSettingsMap.defaultShowGenetics,
+              DehydratedCalcdexSettingsMap.lockGeneticsVisibility,
             ].includes(dehydratedCalcdexKey)
-              ? hydratePerSide(dehydratedCalcdexValue)
+              ? (<ShowdexCalcdexSettings[typeof hydratedCalcdexKey]> hydratePerSide(dehydratedCalcdexValue))
               : ['y', 'n'].includes(dehydratedCalcdexValue)
                 ? hydrateBoolean(dehydratedCalcdexValue)
                 : <ShowdexCalcdexSettings[typeof hydratedCalcdexKey]> hydrateString(dehydratedCalcdexValue);
