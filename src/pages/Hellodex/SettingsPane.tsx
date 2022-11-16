@@ -799,11 +799,15 @@ export const SettingsPane = ({
                     name="calcdex.downloadUsageStats"
                     component={Switch}
                     className={styles.field}
-                    label="Download Showdown Usage Sets"
+                    label="Download Usage Stats"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Downloads freshly updated Showdown Usage stats, which will be converted
-                        into a set called <em>Showdown Usage</em>, in non-Randoms formats.
+                        Downloads freshly updated Showdown usage stats, which will display probabilities
+                        for abilities, items &amp; moves.
+                        <br />
+                        <br />
+                        In non-Randoms formats, an additional set called <em>Showdown Usage</em> will be
+                        available, converted from the usage stats.
                         <br />
                         <br />
                         Disabling this may <em>slightly</em> improve performance on lower-spec machines.
@@ -815,7 +819,7 @@ export const SettingsPane = ({
                     name="calcdex.prioritizeUsageStats"
                     component={Switch}
                     className={styles.field}
-                    label="Apply Showdown Usage Sets First"
+                    label="Apply Usage Sets First"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Prioritizes applying the <em>Showdown Usage</em> set, if available,
