@@ -1,10 +1,11 @@
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { AbilityName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import type { DropdownOption } from '@showdex/components/form';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
+import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
@@ -19,6 +20,7 @@ export type PokemonAbilityOption = DropdownOption<AbilityName>;
 export const buildAbilityOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  usage?: CalcdexPokemonPreset,
   showAll?: boolean,
 ): PokemonAbilityOption[] => {
   const options: PokemonAbilityOption[] = [];
@@ -47,8 +49,16 @@ export const buildAbilityOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
 
+  // prioritize using usage stats from the current set first,
+  // then fallback to using the stats from the supplied `usage` set, if any
+  const usageAltSource = detectUsageAlt(altAbilities?.[0])
+    ? altAbilities
+    : detectUsageAlt(usage?.altAbilities?.[0])
+      ? usage.altAbilities
+      : null;
+
   // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(altAbilities, true);
+  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
 
   // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
   if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
@@ -98,7 +108,7 @@ export const buildAbilityOptions = (
       label: 'Pool',
       options: poolAbilities.map((alt) => ({
         label: flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });

@@ -3,8 +3,9 @@ import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
+import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
 import { getMaxMove } from './getMaxMove';
@@ -23,6 +24,7 @@ export type PokemonMoveOption = DropdownOption<MoveName>;
 export const buildMoveOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  usage?: CalcdexPokemonPreset,
   showAll?: boolean,
 ): PokemonMoveOption[] => {
   const options: PokemonMoveOption[] = [];
@@ -55,8 +57,16 @@ export const buildMoveOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
+  // prioritize using usage stats from the current set first,
+  // then fallback to using the stats from the supplied `usage` set, if any
+  const usageAltSource = detectUsageAlt(altMoves?.[0])
+    ? altMoves
+    : detectUsageAlt(usage?.altMoves?.[0])
+      ? usage.altMoves
+      : null;
+
   // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(altMoves, true);
+  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
 
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
@@ -162,7 +172,7 @@ export const buildMoveOptions = (
       label: 'Pool',
       options: poolMoves.map((alt) => ({
         label: flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });
