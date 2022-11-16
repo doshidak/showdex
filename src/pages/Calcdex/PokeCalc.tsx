@@ -27,6 +27,7 @@ import {
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
 import { PokeStats } from './PokeStats';
+import { usePresets } from './usePresets';
 import { useSmogonMatchup } from './useSmogonMatchup';
 import styles from './PokeCalc.module.scss';
 
@@ -63,6 +64,15 @@ export const PokeCalc = ({
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
   const settings = useCalcdexSettings();
+
+  const {
+    loading: presetsLoading,
+    presets,
+    usage,
+  } = usePresets({
+    format,
+    pokemon: playerPokemon,
+  });
 
   const calculateMatchup = useSmogonMatchup(
     format,
@@ -255,6 +265,9 @@ export const PokeCalc = ({
         gen={gen}
         format={format}
         pokemon={playerPokemon}
+        presets={presets}
+        usage={usage}
+        presetsLoading={presetsLoading}
         containerSize={containerSize}
         onPokemonChange={handlePokemonChange}
       />
@@ -266,6 +279,7 @@ export const PokeCalc = ({
         format={format}
         rules={rules}
         pokemon={playerPokemon}
+        usage={usage}
         containerSize={containerSize}
         calculateMatchup={calculateMatchup}
         onPokemonChange={handlePokemonChange}
