@@ -15,7 +15,12 @@ import { upsizeArray } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexBattleRules, CalcdexMoveOverride, CalcdexPokemon } from '@showdex/redux/store';
+import type {
+  CalcdexBattleRules,
+  CalcdexMoveOverride,
+  CalcdexPokemon,
+  CalcdexPokemonPreset,
+} from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
@@ -28,6 +33,7 @@ export interface PokeMovesProps {
   format?: string;
   rules?: CalcdexBattleRules;
   pokemon: CalcdexPokemon;
+  usage?: CalcdexPokemonPreset;
   movesCount?: number;
   containerSize?: ElementSizeLabel;
   calculateMatchup: SmogonMatchupHookCalculator;
@@ -41,6 +47,7 @@ export const PokeMoves = ({
   format,
   rules,
   pokemon,
+  usage,
   movesCount = 4,
   containerSize,
   calculateMatchup,
@@ -56,10 +63,17 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const moveOptions = React.useMemo(
-    () => buildMoveOptions(format, pokemon, settings?.showAllOptions),
-    [format, pokemon, settings],
-  );
+  const moveOptions = React.useMemo(() => buildMoveOptions(
+    format,
+    pokemon,
+    usage,
+    settings?.showAllOptions,
+  ), [
+    format,
+    pokemon,
+    settings,
+    usage,
+  ]);
 
   const matchups = React.useMemo(() => upsizeArray(
     pokemon?.moves || [],

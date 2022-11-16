@@ -43,7 +43,6 @@ import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store'
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
-import { usePresets } from './usePresets';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeInfoProps {
@@ -52,6 +51,9 @@ export interface PokeInfoProps {
   gen?: GenerationNum;
   format?: string;
   pokemon: CalcdexPokemon;
+  presets?: CalcdexPokemonPreset[];
+  usage?: CalcdexPokemonPreset;
+  presetsLoading?: boolean;
   containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
@@ -64,19 +66,14 @@ export const PokeInfo = ({
   gen,
   format,
   pokemon,
+  presets,
+  usage,
+  presetsLoading,
   containerSize,
   onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
   const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
-
-  const {
-    presets,
-    presetsLoading,
-  } = usePresets({
-    format,
-    pokemon,
-  });
 
   const applyPreset = React.useCallback((preset: CalcdexPokemonPreset) => {
     const mutation: DeepPartial<CalcdexPokemon> = {
@@ -201,16 +198,18 @@ export const PokeInfo = ({
     }
 
     // apply the defaultShowGenetics setting if the Pokemon is serverSourced
-    if (pokemon.serverSourced) {
-      mutation.showGenetics = settings?.defaultShowGenetics?.auth;
-    }
+    // update (2022/11/15): defaultShowGenetics is deprecated in favor of lockGeneticsVisibility;
+    // showGenetics's initial value is set in syncBattle() when the Pokemon is first init'd into Redux
+    // if (pokemon.serverSourced) {
+    //   mutation.showGenetics = settings?.defaultShowGenetics?.auth;
+    // }
 
     // spreadStats will be recalculated in `onPokemonChange()` from `PokeCalc`
     onPokemonChange?.(mutation);
   }, [
     onPokemonChange,
     pokemon,
-    settings,
+    // settings,
   ]);
 
   // this will allow the user to switch back to the "Yours" preset for a transformed Pokemon
@@ -369,12 +368,14 @@ export const PokeInfo = ({
   const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
     format,
     pokemon,
+    usage,
     settings?.showAllOptions,
   )), [
     format,
     legacy,
     pokemon,
     settings,
+    usage,
   ]);
 
   const showResetAbility = !!pokemon?.dirtyAbility
@@ -401,14 +402,16 @@ export const PokeInfo = ({
   const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
     format,
     pokemon,
+    usage,
     // settings?.showAllOptions,
-    true, // fuck it w/e lol
+    true, // fuck it w/e lol (instead of using settings.showAllOptions)
   )), [
     format,
     gen,
     // legacy,
     pokemon,
     // settings,
+    usage,
   ]);
 
   const showResetItem = !!pokemon?.dirtyItem
