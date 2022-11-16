@@ -7,5 +7,6 @@ export * from './getExtensionProtocol';
 export * from './getResourceUrl';
 export * from './reverseObjectKv';
 export * from './runtimeFetch';
+export * from './safeJsonParse';
 export * from './storage';
 export * from './upsizeArray';
