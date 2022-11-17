@@ -38,3 +38,4 @@ export * from './syncField';
 export * from './syncPokemon';
 export * from './toggleableAbility';
 export * from './usageAltPercentFinder';
+export * from './usageAltPercentSorter';
