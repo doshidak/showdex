@@ -11,8 +11,8 @@ $container: (
 
   color: (
     hover: (
-      light: color.shade(colors.$blue, 15%),
-      dark: colors.$blue,
+      light: color.alpha(color.shade(colors.$blue, 15%), 0.75),
+      dark: color.alpha(colors.$blue, 0.75),
     ),
   ),
 
