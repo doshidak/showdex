@@ -133,10 +133,10 @@ export const PokeStats = ({
       <TableGridItem align="right" header>
         <ToggleButton
           className={styles.small}
-          label={pokemon?.showGenetics ? 'Hide' : 'Edit'}
+          label={pokemon?.showGenetics ? 'Hide' : 'Show'}
           tooltip={(
             <div className={styles.tooltipContent}>
-              {pokemon?.showGenetics ? 'Hide' : 'Edit'}{' '}
+              {pokemon?.showGenetics ? 'Hide' : 'Show'}{' '}
               {[
                 shouldShowBaseStats && (defaultShowBehavior || !lockedVisibilities.includes('base')) && 'Base',
                 (defaultShowBehavior || !lockedVisibilities.includes('iv')) && (legacy ? 'DVs' : 'IVs'),
