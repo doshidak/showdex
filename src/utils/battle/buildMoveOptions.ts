@@ -13,6 +13,7 @@ import { getZMove } from './getZMove';
 import { getPokemonLearnset } from './getPokemonLearnset';
 import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
+import { usageAltPercentSorter } from './usageAltPercentSorter';
 
 export type PokemonMoveOption = DropdownOption<MoveName>;
 
@@ -67,12 +68,15 @@ export const buildMoveOptions = (
 
   // create usage percent finder (to show them in any of the option groups)
   const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
+  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
   if (useZ && !useMax && moves?.length) {
-    const zMoves = moves.filter((n) => !!n && (getZMove(n, item) || n) !== n);
+    const zMoves = moves
+      .filter((n) => !!n && (getZMove(n, item) || n) !== n)
+      .sort(usageSorter);
 
     options.push({
       label: 'Z',
@@ -93,9 +97,11 @@ export const buildMoveOptions = (
 
   // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
   if (useMax && moves?.length) {
+    const sortedMoves = [...moves].sort(usageSorter);
+
     options.push({
       label: 'Max',
-      options: moves.map((name) => {
+      options: sortedMoves.map((name) => {
         const maxMove = getMaxMove(name, ability, speciesForme) || name;
 
         return {
@@ -107,11 +113,13 @@ export const buildMoveOptions = (
       }),
     });
 
-    filterMoves.push(...moves);
+    filterMoves.push(...sortedMoves);
   }
 
   if (serverSourced && serverMoves?.length) {
-    const filteredServerMoves = serverMoves.filter((n) => !!n && !filterMoves.includes(n));
+    const filteredServerMoves = serverMoves
+      .filter((n) => !!n && !filterMoves.includes(n))
+      .sort(usageSorter);
 
     options.push({
       label: transformedForme ? 'Pre-Transform' : 'Current',
@@ -127,7 +135,8 @@ export const buildMoveOptions = (
 
   if (transformedForme && transformedMoves?.length) {
     const filteredTransformedMoves = transformedMoves
-      .filter((n) => !!n && !filterMoves.includes(n));
+      .filter((n) => !!n && !filterMoves.includes(n))
+      .sort(usageSorter);
 
     options.unshift({
       label: 'Transformed',
@@ -143,7 +152,8 @@ export const buildMoveOptions = (
 
   if (revealedMoves?.length) {
     const filteredRevealedMoves = revealedMoves
-      .filter((n) => !!n && !filterMoves.includes(n));
+      .filter((n) => !!n && !filterMoves.includes(n))
+      .sort(usageSorter);
 
     options.push({
       label: 'Revealed',
@@ -165,8 +175,8 @@ export const buildMoveOptions = (
       .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
     const poolMoves = hasUsageStats
-      ? unsortedPoolMoves
-      : flattenAlts(unsortedPoolMoves).sort();
+      ? unsortedPoolMoves // should be sorted already (despite the name)
+      : flattenAlts(unsortedPoolMoves).sort(usageSorter);
 
     options.push({
       label: 'Pool',
@@ -189,7 +199,7 @@ export const buildMoveOptions = (
   if (learnset.length) {
     const learnsetMoves = Array.from(new Set(learnset))
       .filter((n) => !!n && !formatId(n).startsWith('hiddenpower') && !filterMoves.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     options.push({
       label: 'Learnset',
@@ -212,7 +222,7 @@ export const buildMoveOptions = (
       .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
 
     // using a Set makes sure we have no duplicate entries in the array
-    const hpMoves = Array.from(new Set(unsortedHpMoves)).sort();
+    const hpMoves = Array.from(new Set(unsortedHpMoves)).sort(usageSorter);
 
     options.push({
       label: 'Hidden Power',
@@ -231,7 +241,7 @@ export const buildMoveOptions = (
     const otherMoves = Object.keys(BattleMovedex || {})
       .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
       .filter((n) => !!n && !/^(?:G-)?Max\s+/i.test(n) && !filterMoves.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     // note: since we need to filter out HP moves, but keep the group last, this is the workaround.
     // splice() will insert at the provided start index, even if an element exists at that index.

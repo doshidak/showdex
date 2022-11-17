@@ -9,6 +9,7 @@ import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
+import { usageAltPercentSorter } from './usageAltPercentSorter';
 
 export type PokemonAbilityOption = DropdownOption<AbilityName>;
 
@@ -59,6 +60,7 @@ export const buildAbilityOptions = (
 
   // create usage percent finder (to show them in any of the option groups)
   const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
+  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
   if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
@@ -79,7 +81,7 @@ export const buildAbilityOptions = (
       // filter out "revealed" abilities with parentheses, like "(suppressed)"
       serverSourced && !/^\([\w\s]+\)$/.test(ability) && ability,
       ...transformedAbilities,
-    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort();
+    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 
     options.push({
       label: 'Transformed',
@@ -101,8 +103,8 @@ export const buildAbilityOptions = (
       .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
     const poolAbilities = hasUsageStats
-      ? filteredPoolAbilities
-      : flattenAlts(filteredPoolAbilities).sort();
+      ? filteredPoolAbilities // should be sorted already (despite the name)
+      : flattenAlts(filteredPoolAbilities).sort(usageSorter);
 
     options.push({
       label: 'Pool',
@@ -119,7 +121,7 @@ export const buildAbilityOptions = (
   if (abilities?.length) {
     const legalAbilities = abilities
       .filter((n) => !!n && !filterAbilities.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     options.push({
       label: 'Legal',
@@ -139,7 +141,7 @@ export const buildAbilityOptions = (
     const otherAbilities = Object.values(BattleAbilities || {})
       .map((a) => <AbilityName> a?.name)
       .filter((n) => !!n && formatId(n) !== 'noability' && !filterAbilities.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     options.push({
       label: 'All',
