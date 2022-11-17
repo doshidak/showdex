@@ -33,7 +33,7 @@ export const usageAltPercentFinder = <
   return (name) => {
     const nameId = formatId(name);
     const [, usage] = nameId
-      ? usageAlts.find((a) => formatId(a[0]) === nameId) || []
+      ? usageAlts.find((a) => formatId(a?.[0]) === nameId) || []
       : [];
 
     if (!usage) {
