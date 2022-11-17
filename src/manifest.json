@@ -27,6 +27,7 @@
   ],
 
   "host_permissions": [
+    "https://play.pokemonshowdown.com/*",
     "https://pkmn.github.io/*"
   ],
 
