@@ -227,7 +227,7 @@ export const FieldCalc = ({
 
           return (
             <React.Fragment
-              key={`FieldCalc:${battleId || '???'}:${attackerSideKey}:${label}:ToggleButton`}
+              key={`FieldCalc:${battleId || '?'}:${attackerSideKey}:${label}:ToggleButton`}
             >
               <ToggleButton
                 className={styles.toggleButton}
@@ -270,7 +270,7 @@ export const FieldCalc = ({
           optionTooltip={weatherTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
-            name: `FieldCalc:${battleId || '???'}:Weather:Dropdown`,
+            name: `FieldCalc:${battleId || '?'}:Weather:Dropdown`,
             value: weather,
             onChange: (updatedWeather: CalcdexBattleField['weather']) => onFieldChange?.({
               weather: updatedWeather,
@@ -284,6 +284,7 @@ export const FieldCalc = ({
             value: name,
           }))}
           noOptionsMessage="No Weather"
+          highlight={!!weather}
           disabled={disabled || !battleId || gen === 1}
         />
       </TableGridItem>
@@ -297,7 +298,7 @@ export const FieldCalc = ({
           optionTooltip={terrainTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
-            name: `FieldCalc:${battleId || '???'}:Terrain:Dropdown`,
+            name: `FieldCalc:${battleId || '?'}:Terrain:Dropdown`,
             value: terrain,
             onChange: (updatedTerrain: CalcdexBattleField['terrain']) => onFieldChange?.({
               terrain: updatedTerrain,
@@ -308,6 +309,7 @@ export const FieldCalc = ({
             value: name,
           }))}
           noOptionsMessage="No Terrain"
+          highlight={!!terrain}
           disabled={disabled || !battleId || gen < 6}
         />
       </TableGridItem>
@@ -339,7 +341,7 @@ export const FieldCalc = ({
 
           return (
             <React.Fragment
-              key={`FieldCalc:${battleId || '???'}:${defenderSideKey}:${label}:ToggleButton`}
+              key={`FieldCalc:${battleId || '?'}:${defenderSideKey}:${label}:ToggleButton`}
             >
               <ToggleButton
                 className={styles.toggleButton}
