@@ -43,6 +43,7 @@ import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store'
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
+import { useUsageAltSorter } from './useUsageAltSorter';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeInfoProps {
@@ -74,6 +75,11 @@ export const PokeInfo = ({
 }: PokeInfoProps): JSX.Element => {
   const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
+
+  // not sorted in usePresets() since the usage stats may not be available there
+  const abilityUsageSorter = useUsageAltSorter(usage?.altAbilities);
+  const itemUsageSorter = useUsageAltSorter(usage?.altItems);
+  const moveUsageSorter = useUsageAltSorter(usage?.altMoves);
 
   const applyPreset = React.useCallback((preset: CalcdexPokemonPreset) => {
     const mutation: DeepPartial<CalcdexPokemon> = {
@@ -127,14 +133,47 @@ export const PokeInfo = ({
 
     if (preset.altAbilities?.length) {
       mutation.altAbilities = [...preset.altAbilities];
+
+      // apply the top usage ability (if available)
+      if (typeof abilityUsageSorter === 'function' && mutation.altAbilities.length > 1) {
+        const [topAbility] = flattenAlts(mutation.altAbilities).sort(abilityUsageSorter);
+
+        if (topAbility && mutation.dirtyAbility !== topAbility) {
+          mutation.dirtyAbility = topAbility;
+        }
+      }
     }
 
     if (preset.altItems?.length) {
       mutation.altItems = [...preset.altItems];
+
+      // apply the top usage item (if available)
+      if (typeof itemUsageSorter === 'function' && mutation.altItems.length > 1) {
+        const [topItem] = flattenAlts(mutation.altItems).sort(itemUsageSorter);
+
+        if (topItem && mutation.dirtyItem !== topItem) {
+          mutation.dirtyItem = topItem;
+        }
+      }
     }
 
     if (preset.altMoves?.length) {
       mutation.altMoves = [...preset.altMoves];
+
+      // sort the moves by their usage stats (if available) and apply the top 4 moves
+      // (otherwise, just apply the moves from the preset)
+      if (typeof moveUsageSorter === 'function' && mutation.altMoves.length > 1) {
+        /**
+         * @todo Needs to be updated once we support more than 4 moves.
+         */
+        const sortedMoves = flattenAlts(mutation.altMoves)
+          .sort(moveUsageSorter)
+          .slice(0, 4);
+
+        if (sortedMoves.length) {
+          mutation.moves = sortedMoves;
+        }
+      }
     }
 
     // check if we already have revealed moves (typical of spectating or replaying a battle)
@@ -207,6 +246,9 @@ export const PokeInfo = ({
     // spreadStats will be recalculated in `onPokemonChange()` from `PokeCalc`
     onPokemonChange?.(mutation);
   }, [
+    abilityUsageSorter,
+    itemUsageSorter,
+    moveUsageSorter,
     onPokemonChange,
     pokemon,
     // settings,
