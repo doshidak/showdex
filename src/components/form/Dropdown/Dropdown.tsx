@@ -77,6 +77,7 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   tabSelectsValue?: boolean;
   hideSelections?: boolean;
   autoFocus?: boolean;
+  highlight?: boolean;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -111,6 +112,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   tabSelectsValue = true,
   hideSelections,
   autoFocus,
+  highlight,
   loading,
   input,
   meta,
@@ -230,6 +232,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
             styles.selectContainer,
             hasValue && styles.hasValue,
             (meta?.active || active) && styles.active,
+            highlight && styles.highlight,
             disabled && styles.disabled,
             className,
           )}

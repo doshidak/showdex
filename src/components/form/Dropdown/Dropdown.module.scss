@@ -33,6 +33,11 @@ $background-color: (
     light: color.alpha(colors.$white, 0.9),
     dark: color.alpha(colors.$white, 0.1),
   ),
+
+  highlight: (
+    light: color.alpha(colors.$blue, 0.2),
+    dark: color.alpha(colors.$blue, 0.15),
+  ),
 );
 
 // $border-width: 0.5px;
@@ -64,17 +69,56 @@ $box-shadow: (
       0 0 2px color.alpha(colors.$blue, 0.3),
     ),
   ),
+
+  highlight: (
+    light: (
+      0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
+      0 0 3px color.alpha(colors.$blue, 0.5),
+    ),
+
+    dark: (
+      0 0 1px color.alpha(colors.$blue, 0.95),
+      0 0 3px color.alpha(colors.$blue, 0.5),
+    ),
+  ),
 );
 
+/// @todo finish cleaning this up lol
 $opacity-disabled: 0.3;
 
-$value-font-size: 10px;
-$value-light-color: colors.$black;
-$value-dark-color: colors.$white;
-$value-light-color-hover: color.shade(colors.$blue, 15%);
-$value-dark-color-hover:colors.$blue;
-$value-light-color-active: color.alpha(colors.$black, 0.5);
-$value-dark-color-active: color.alpha(colors.$white, 0.5);
+// $value-font-size: 10px;
+// $value-light-color: colors.$black;
+// $value-dark-color: colors.$white;
+// $value-light-color-hover: color.shade(colors.$blue, 15%);
+// $value-dark-color-hover: colors.$blue;
+// $value-light-color-active: color.alpha(colors.$black, 0.5);
+// $value-dark-color-active: color.alpha(colors.$white, 0.5);
+
+$value: (
+  font-size: 10px,
+
+  color: (
+    default: (
+      light: colors.$black,
+      dark: colors.$white,
+    ),
+
+    hover: (
+      light: color.alpha(color.shade(colors.$blue, 15%), 0.75),
+      dark: color.alpha(colors.$blue, 0.75),
+    ),
+
+    active: (
+      light: color.alpha(colors.$black, 0.5),
+      dark: color.alpha(colors.$white, 0.5),
+    ),
+
+    highlight: (
+      light: color.shade(colors.$blue, 15%),
+      dark: colors.$blue,
+    ),
+  ),
+);
 
 $multi-value-padding-x: 2px;
 $multi-value-padding-y: 1px;
@@ -83,8 +127,8 @@ $multi-value-dark-border-color: color.alpha(colors.$white, 0.15);
 
 $placeholder-light-color: color.alpha(colors.$black, 0.3);
 $placeholder-dark-color: color.alpha(colors.$white, 0.3);
-$placeholder-light-color-hover: $value-light-color-hover;
-$placeholder-dark-color-hover: $value-dark-color-hover;
+$placeholder-light-color-hover: map.get($value, color, hover, light);
+$placeholder-dark-color-hover: map.get($value, color, hover, dark);
 $placeholder-light-color-active: color.alpha(colors.$black, 0.5);
 $placeholder-dark-color-active: color.alpha(colors.$white, 0.5);
 
@@ -202,6 +246,18 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
     }
   }
 
+  &.highlight {
+    .light & {
+      background-color: map.get($background-color, highlight, light);
+      box-shadow: map.get($box-shadow, highlight, light);
+    }
+
+    .dark & {
+      background-color: map.get($background-color, highlight, dark);
+      box-shadow: map.get($box-shadow, highlight, dark);
+    }
+  }
+
   &.rtl {
     direction: rtl;
   }
@@ -238,30 +294,40 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   cursor: text;
 
   .light & {
-    color: $value-light-color;
+    color: map.get($value, color, default, light);
   }
 
   .dark & {
-    color: $value-dark-color;
+    color: map.get($value, color, default, dark);
   }
 
   .selectContainer:not(.active):hover & {
     .light & {
-      color: $value-light-color-hover;
+      color: map.get($value, color, hover, light);
     }
 
     .dark & {
-      color: $value-dark-color-hover;
+      color: map.get($value, color, hover, dark);
     }
   }
 
   .selectContainer.active &.menuOpen {
     .light & {
-      color: $value-light-color-active;
+      color: map.get($value, color, active, light);
     }
 
     .dark & {
-      color: $value-dark-color-active;
+      color: map.get($value, color, active, dark);
+    }
+  }
+
+  .selectContainer.highlight & {
+    .light & {
+      color: map.get($value, color, highlight, light);
+    }
+
+    .dark & {
+      color: map.get($value, color, highlight, dark);
     }
   }
 }
@@ -283,7 +349,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .placeholder {
   @include position.absolute-anchor($y: 50%);
-  font-size: $value-font-size;
+  font-size: map.get($value, font-size);
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -349,18 +415,18 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   @include spacing.margin-none;
   @include spacing.padding-none;
   @include font.apply(fonts.$mono);
-  font-size: $value-font-size;
+  font-size: map.get($value, font-size);
   background: none;
   border: none;
   outline: none;
   opacity: 1;
 
   .light & {
-    color: $value-light-color;
+    color: map.get($value, color, default, light);
   }
 
   .dark & {
-    color: $value-dark-color;
+    color: map.get($value, color, default, dark);
   }
 
   &.hidden {
@@ -402,11 +468,15 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .singleValue {
   @include position.absolute-anchor($y: 50%);
   max-width: 98%;
-  font-size: $value-font-size;
+  font-size: map.get($value, font-size);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   // pointer-events: none; // strangely causes the dropdown to close on mouse up in the Calcdex overlay
+
+  .highlight & {
+    font-weight: 500;
+  }
 }
 
 // SelectMultiValue
@@ -414,7 +484,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .mutliValue {
   @include flex.row-center;
   @include spacing.margin-xy($multi-value-padding-x, $multi-value-padding-y);
-  font-size: $value-font-size - ($multi-value-padding-y * 2);
+  font-size: map.get($value, font-size) - ($multi-value-padding-y * 2);
   border: 1px solid colors.$transparent;
 
   .light & {
@@ -428,7 +498,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .valueLabel {
   @include spacing.padding-xy($multi-value-padding-x, $multi-value-padding-y);
-  font-size: $value-font-size - ($multi-value-padding-y * 2);
+  font-size: map.get($value, font-size) - ($multi-value-padding-y * 2);
   white-space: nowrap;
   overflow: hidden;
 
@@ -621,7 +691,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   @include flex.column;
   width: 100%;
   @include spacing.padding-xy($option-padding-x, $option-padding-y);
-  font-size: $value-font-size;
+  font-size: map.get($value, font-size);
   @include transition.apply(background-color);
   user-select: none;
   cursor: pointer;
@@ -771,7 +841,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 
 .notice {
   @include spacing.padding-xy($notice-padding-x, $notice-padding-y);
-  font-size: $value-font-size;
+  font-size: map.get($value, font-size);
   text-align: center;
   user-select: none;
 
