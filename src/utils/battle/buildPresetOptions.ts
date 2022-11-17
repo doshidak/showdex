@@ -51,9 +51,12 @@ export const buildPresetOptions = (
         const loudSubLabel = actualSubLabel.toUpperCase(); // lol
 
         // remove the '+' (if any) if we're assigning it to the rightLabel
-        option[longSubLabel ? 'subLabel' : 'rightLabel'] = longSubLabel
-          ? loudSubLabel
-          : loudSubLabel.replace(/^\+\s+/, '');
+        // update (2022/11/16): nvm put it back lmao
+        // option[longSubLabel ? 'subLabel' : 'rightLabel'] = longSubLabel
+        //   ? loudSubLabel
+        //   : loudSubLabel.replace(/^\+\s+/, '');
+
+        option[longSubLabel ? 'subLabel' : 'rightLabel'] = loudSubLabel;
       }
     }
 
