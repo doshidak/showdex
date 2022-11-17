@@ -2,11 +2,12 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { PiconButton } from '@showdex/components/app';
-import { Button, ToggleButton } from '@showdex/components/ui';
+import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { ShowdexVerifiedTesters } from '@showdex/consts/app';
 import { eacute } from '@showdex/consts/core';
+import { useUserLadderQuery } from '@showdex/redux/services';
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
-import { openUserPopup } from '@showdex/utils/app';
+import { formatId, openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
 import { getResourceUrl } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
@@ -62,7 +63,7 @@ export const PlayerCalc = ({
   const {
     sideid: playerSideId,
     name,
-    rating,
+    rating: ratingFromBattle,
     pokemon,
     // pokemonOrder,
     // activeIndex,
@@ -70,6 +71,35 @@ export const PlayerCalc = ({
     selectionIndex: playerIndex,
     autoSelect,
   } = player || {};
+
+  const playerId = formatId(name);
+
+  // only fetch the rating if the battle didn't provide it to us
+  const {
+    ladder,
+  } = useUserLadderQuery(playerId, {
+    skip: !settings?.showPlayerRatings
+      || !playerId
+      || !format
+      || !!ratingFromBattle,
+
+    selectFromResult: ({ data }) => ({
+      // map 'gen8unratedrandombattle' (for instance) to 'gen8randombattle'
+      ladder: data?.find?.((d) => (
+        d?.userid === playerId
+          && d.formatid === format.replace('unrated', '')
+      )),
+    }),
+  });
+
+  const rating = ratingFromBattle
+    || (!!ladder?.elo && Math.round(parseFloat(ladder.elo)));
+
+  const additionalRatings = {
+    gxe: ladder?.gxe ? `${ladder.gxe}%` : null,
+    glicko1Rating: ladder?.rpr ? Math.round(parseFloat(ladder.rpr)) : null,
+    glicko1Deviation: ladder?.rprd ? Math.round(parseFloat(ladder.rprd)) : null,
+  };
 
   const {
     // sideid: opponentSideId,
@@ -152,13 +182,73 @@ export const PlayerCalc = ({
 
             {
               (settings?.showPlayerRatings && !!rating) &&
-              <div className={styles.rating}>
-                <span className={styles.ratingSeparator}>
-                  &bull;
-                </span>
+              <Tooltip
+                content={(
+                  <div className={styles.tooltipContent}>
+                    {
+                      !!ladder?.formatid &&
+                      <div className={styles.ladderFormat}>
+                        {ladder.formatid}
+                      </div>
+                    }
 
-                {rating} ELO
-              </div>
+                    <div className={styles.ladderStats}>
+                      {
+                        !!additionalRatings.gxe &&
+                        <>
+                          <div className={styles.ladderStatLabel}>
+                            GXE
+                          </div>
+                          <div className={styles.ladderStatValue}>
+                            {additionalRatings.gxe}
+                          </div>
+                        </>
+                      }
+
+                      {
+                        !!additionalRatings.glicko1Rating &&
+                        <>
+                          <div className={styles.ladderStatLabel}>
+                            Glicko-1
+                          </div>
+                          <div className={styles.ladderStatValue}>
+                            {additionalRatings.glicko1Rating}
+                            {
+                              !!additionalRatings.glicko1Deviation &&
+                              <span style={{ opacity: 0.65 }}>
+                                &plusmn;{additionalRatings.glicko1Deviation}
+                              </span>
+                            }
+                          </div>
+                        </>
+                      }
+                    </div>
+                  </div>
+                )}
+                offset={[0, 10]}
+                delay={[1000, 50]}
+                trigger="mouseenter"
+                touch={['hold', 500]}
+                disabled={!ladder?.id}
+              >
+                <div
+                  className={cx(
+                    styles.rating,
+                    !!rating && styles.visible,
+                  )}
+                >
+                  {
+                    !!rating &&
+                    <>
+                      <span className={styles.ratingSeparator}>
+                        &bull;
+                      </span>
+
+                      {rating} ELO
+                    </>
+                  }
+                </div>
+              </Tooltip>
             }
           </div>
         </div>
