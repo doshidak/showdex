@@ -70,6 +70,9 @@ export const transformRandomsPresetResponse = (
       item: items?.[0],
       altItems: items,
 
+      /**
+       * @todo Needs to be updated once we support more than 4 moves.
+       */
       moves: moves?.slice(0, 4),
       altMoves: moves,
 

@@ -77,6 +77,10 @@ export const transformFormatPresetResponse = (
         item: Array.isArray(item) ? item[0] : item,
         altItems: Array.isArray(item) ? item : [item].filter(Boolean),
 
+        /**
+         * @todo Needs to be updated once we support more than 4 moves.
+         *   Schema is formatted for 4 moves, so replace the current `moves` value with `flatMoves`.
+         */
         moves: moves?.map((move) => (Array.isArray(move) ? move[0] : move)) ?? [],
         altMoves: flatMoves.filter((m, i) => !flatMoves.includes(m, i + 1)), // remove dupe moves
 

@@ -85,6 +85,10 @@ export const transformFormatStatsResponse = (
       }
 
       preset.altMoves = altMoves;
+
+      /**
+       * @todo Needs to be updated once we support more than 4 moves.
+       */
       preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
     }
 
