@@ -280,6 +280,10 @@ export const usePresets = ({
   //   [usages],
   // );
 
+  const usage = settings?.downloadUsageStats
+    ? usages[0]
+    : null;
+
   const loading = React.useMemo(() => (
     formatLoading
       || formatStatsLoading
@@ -297,12 +301,12 @@ export const usePresets = ({
   //   '\n', 'speciesForme', speciesForme, 'formes', formes,
   //   '\n', 'loading', loading,
   //   '\n', 'presets', presets,
-  //   '\n', 'usages', usages,
+  //   '\n', 'usage', usage,
   // );
 
   return {
     loading,
     presets,
-    usage: usages[0],
+    usage,
   };
 };
