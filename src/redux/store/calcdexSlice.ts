@@ -708,6 +708,24 @@ export type CalcdexPokemonUsageAlt<
 ];
 
 /**
+ * Source of the Calcdex Pokemon set (preset).
+ *
+ * * `'import'` refers to any preset imported from the user's clipboard.
+ * * `'server'` refers to any preset provided by the Showdown server, typically for the logged-in user's Pokemon.
+ * * `'smogon'` refers to any preset that has been downloaded, though typically from the Smogon dex.
+ * * `'storage'` refers to any preset locally saved in the user's browser, typically stored by the Teambuilder.
+ * * `'usage'` refers to any preset from Showdown usage stats.
+ *
+ * @since 1.0.7
+ */
+export type CalcdexPokemonPresetSource =
+  | 'import'
+  | 'server'
+  | 'smogon'
+  | 'storage'
+  | 'usage';
+
+/**
  * Pokemon set, ~~basically~~ probably.
  *
  * * Types for some properties are more specifically typed,
@@ -741,6 +759,14 @@ export interface CalcdexPokemonPreset {
    * @since 0.1.3
    */
   id?: string;
+
+  /**
+   * Source of the preset.
+   *
+   * @example 'server'
+   * @since 1.0.7
+   */
+  source?: CalcdexPokemonPresetSource;
 
   /**
    * Name of the preset.
