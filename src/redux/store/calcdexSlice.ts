@@ -779,6 +779,14 @@ export interface CalcdexPokemonPreset {
    */
   format?: string;
 
+  /**
+   * Nickname of the Pokemon.
+   *
+   * @example 'Smogonbirb'
+   * @since 1.0.7
+   */
+  nickname?: string;
+
   speciesForme?: string;
   level?: number;
   gender?: Showdown.GenderName;
