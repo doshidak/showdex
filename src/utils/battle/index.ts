@@ -26,6 +26,7 @@ export * from './getPokemonLearnset';
 export * from './getTypesDex';
 export * from './hasMegaForme';
 export * from './hasNickname';
+export * from './importPokePaste';
 export * from './legalLockedFormat';
 export * from './mergeRevealedMoves';
 export * from './notFullyEvolved';
