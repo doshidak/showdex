@@ -29,10 +29,12 @@ import {
   // getDexForFormat,
   // hasMegaForme,
   hasNickname,
+  importPokePaste,
   legalLockedFormat,
   mergeRevealedMoves,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
+import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { capitalize } from '@showdex/utils/humanize';
 import type { GenerationNum } from '@smogon/calc';
@@ -540,29 +542,82 @@ export const PokeInfo = ({
   const editableTypes = settings?.editPokemonTypes === 'always'
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
 
-  const copiedRef = React.useRef<BadgeInstance>(null);
+  const importBadgeRef = React.useRef<BadgeInstance>(null);
+  const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
+  const [importFailedReason, setImportFailedReason] = React.useState('Failed');
+
+  const handlePokePasteImport = () => void (async () => {
+    if (typeof onPokemonChange !== 'function') {
+      return;
+    }
+
+    try {
+      const data = await readClipboardText();
+      const preset = importPokePaste(data, format);
+
+      if (!preset?.calcdexId || !formatId(pokemon.speciesForme).includes(formatId(preset.speciesForme))) {
+        setImportFailedReason(!preset?.calcdexId ? 'Bad Syntax' : 'Mismatch');
+        importFailedBadgeRef.current?.show();
+
+        return;
+      }
+
+      const currentPresets = [...pokemon.presets];
+      const existingImportIndex = currentPresets.findIndex((p) => p.source === 'import');
+
+      if (existingImportIndex > -1) {
+        currentPresets.splice(existingImportIndex, 1, preset);
+      } else {
+        currentPresets.push(preset);
+      }
+
+      onPokemonChange({ presets: currentPresets });
+      applyPreset(preset);
+      importBadgeRef.current?.show();
+    } catch (error) {
+      // if (__DEV__) {
+      //   l.error(
+      //     'Failed to import the set for', pokemon.speciesForme, 'from clipboard:',
+      //     '\n', error,
+      //     '\n', '(You will only see this error on development.)',
+      //   );
+      // }
+
+      setImportFailedReason('Failed');
+      importFailedBadgeRef.current?.show();
+    }
+  })();
+
+  const exportBadgeRef = React.useRef<BadgeInstance>(null);
+  const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
 
   const pokePaste = React.useMemo(
     () => exportPokePaste(pokemon, format),
     [format, pokemon],
   );
 
-  const handlePokePasteCopy = () => {
-    if (typeof navigator === 'undefined' || !pokePaste) {
+  const handlePokePasteExport = () => void (async () => {
+    if (!pokePaste) {
       return;
     }
 
-    void (async () => {
-      try {
-        await navigator.clipboard.writeText(pokePaste);
+    try {
+      // await navigator.clipboard.writeText(pokePaste);
+      await writeClipboardText(pokePaste);
 
-        copiedRef.current?.show();
-      } catch (error) {
-        // no-op when an error is thrown while writing to the user's clipboard
-        (() => {})();
-      }
-    })();
-  };
+      exportBadgeRef.current?.show();
+    } catch (error) {
+      // if (__DEV__) {
+      //   l.error(
+      //     'Failed to export the set for', pokemon.speciesForme, 'to clipboard:',
+      //     '\n', error,
+      //     '\n', '(You will only see this error on development.)',
+      //   );
+      // }
+
+      exportFailedBadgeRef.current?.show();
+    }
+  })();
 
   return (
     <div
@@ -741,15 +796,73 @@ export const PokeInfo = ({
             />
 
             <ToggleButton
+              className={cx(
+                styles.toggleButton,
+                styles.importButton,
+                !settings?.showUiTooltips && styles.floatingBadges,
+              )}
+              label="Import"
+              tooltip={(
+                <div className={styles.tooltipContent}>
+                  <Badge
+                    ref={importBadgeRef}
+                    className={styles.importBadge}
+                    label="Imported"
+                    color="blue"
+                  />
+
+                  <Badge
+                    ref={importFailedBadgeRef}
+                    className={styles.importBadge}
+                    label={importFailedReason}
+                    color="red"
+                  />
+
+                  Import Pok&eacute;Paste from Clipboard
+                </div>
+              )}
+              tooltipDisabled={!settings?.showUiTooltips}
+              absoluteHover
+              disabled={!pokemon?.speciesForme || typeof onPokemonChange !== 'function'}
+              onPress={handlePokePasteImport}
+            >
+              {
+                !settings?.showUiTooltips &&
+                <>
+                  <Badge
+                    ref={importBadgeRef}
+                    className={cx(styles.importBadge, styles.floating)}
+                    label="Imported"
+                    color="blue"
+                  />
+
+                  <Badge
+                    ref={importFailedBadgeRef}
+                    className={cx(styles.importBadge, styles.floating)}
+                    label={importFailedReason}
+                    color="red"
+                  />
+                </>
+              }
+            </ToggleButton>
+
+            <ToggleButton
               className={styles.toggleButton}
-              label="Copy"
+              label="Export"
               tooltip={pokePaste ? (
                 <div className={styles.pokePasteTooltip}>
                   <Badge
-                    ref={copiedRef}
-                    className={styles.copiedBadge}
+                    ref={exportBadgeRef}
+                    className={styles.importBadge}
                     label="Copied!"
                     color="green"
+                  />
+
+                  <Badge
+                    ref={exportFailedBadgeRef}
+                    className={styles.importBadge}
+                    label="Failed"
+                    color="red"
                   />
 
                   {pokePaste}
@@ -757,7 +870,7 @@ export const PokeInfo = ({
               ) : null}
               absoluteHover
               disabled={!pokePaste}
-              onPress={handlePokePasteCopy}
+              onPress={handlePokePasteExport}
             />
           </div>
 
