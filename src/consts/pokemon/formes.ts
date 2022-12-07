@@ -52,6 +52,7 @@ export const PokemonUsageFuckedFormes: string[] = [
   'Toxtricity', // -> Toxtricity-Low-Key
   'Vivillon', // -> Vivillon-Fancy -> Vivillon-Pokeball
   'Wishiwashi', // -> Wishiwashi-School
+  'Xerneas', // -> Xerneas-Neutral
   'Zarude', // -> Zarude-Dada
   'Zygarde', // -> Zygarde-Complete
 ];
