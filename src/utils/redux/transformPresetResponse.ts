@@ -76,12 +76,12 @@ export const transformPresetResponse = (
         const preset: CalcdexPokemonPreset = {
           calcdexId: null, // we'll hash this after we build the object
           id: null, // will equal calcdexId, so the same applies as above
-
+          source: 'smogon',
           name: presetName, // e.g., 'Defensive Pivot'
           gen,
           format, // 'ou'
-          speciesForme, // do not sanitize
 
+          speciesForme, // do not sanitize
           ability: Array.isArray(ability) ? ability[0] : ability,
           altAbilities: Array.isArray(ability) ? ability : [ability].filter(Boolean),
 

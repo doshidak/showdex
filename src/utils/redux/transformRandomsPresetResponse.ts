@@ -53,10 +53,11 @@ export const transformRandomsPresetResponse = (
     const preset: CalcdexPokemonPreset = {
       calcdexId: null, // we'll hash this after we build the object
       id: null, // will equal calcdexId, so the same applies as above
-
+      source: 'smogon',
       name: 'Randoms',
       gen,
       format: args?.format ?? `gen${gen}randombattle`, // e.g., 'gen8randombattle'
+
       speciesForme, // do not sanitize
       level,
 
