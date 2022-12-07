@@ -13,7 +13,12 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useColorScheme, useShowdexSettings, useUpdateSettings } from '@showdex/redux/store';
-import { dispatchShowdexEvent, env, getResourceUrl } from '@showdex/utils/core';
+import {
+  env,
+  getResourceUrl,
+  readClipboardText,
+  writeClipboardText,
+} from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateShowdexSettings, hydrateShowdexSettings } from '@showdex/utils/redux';
 import type { BadgeInstance, BaseButtonProps } from '@showdex/components/ui';
@@ -75,136 +80,126 @@ export const SettingsPane = ({
   const [prevSettings, setPrevSettings] = React.useState<string>(null);
   const importUndoTimeout = React.useRef<NodeJS.Timeout>(null);
 
-  const handleSettingsImport = () => {
-    if (typeof navigator === 'undefined') {
-      return;
-    }
+  const handleSettingsImport = () => void (async () => {
+    l.debug(
+      'Attempting to import settings from clipboard...',
+      '\n', 'build-target', env('build-target'),
+      // '\n', 'browser global available?', typeof browser !== 'undefined',
+    );
 
-    void (async () => {
-      l.debug(
-        'Attempting to import settings from clipboard...',
-        '\n', 'build-target', env('build-target'),
-        // '\n', 'browser global available?', typeof browser !== 'undefined',
-      );
+    try {
+      if (DehydratedRegex.test(prevSettings)) {
+        const rehydratedPrev = hydrateShowdexSettings(prevSettings);
 
-      try {
-        if (DehydratedRegex.test(prevSettings)) {
-          const rehydratedPrev = hydrateShowdexSettings(prevSettings);
-
-          if (importUndoTimeout.current) {
-            clearTimeout(importUndoTimeout.current);
-            importUndoTimeout.current = null;
-          }
-
-          updateSettings(rehydratedPrev);
-          setPrevSettings(null);
-
-          return;
+        if (importUndoTimeout.current) {
+          clearTimeout(importUndoTimeout.current);
+          importUndoTimeout.current = null;
         }
 
-        const importedSettings = env('build-target') === 'firefox'
-          // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
-          ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
-          : await navigator.clipboard.readText();
+        updateSettings(rehydratedPrev);
+        setPrevSettings(null);
 
+        return;
+      }
+
+      // const importedSettings = env('build-target') === 'firefox'
+      //   // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
+      //   ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
+      //   : await navigator.clipboard.readText();
+      const importedSettings = await readClipboardText();
+
+      l.debug(
+        'Received dehydrated settings from clipboard',
+        '\n', 'importedSettings', importedSettings,
+      );
+
+      if (!DehydratedRegex.test(importedSettings)) {
         l.debug(
-          'Received dehydrated settings from clipboard',
+          'Failed the dehydrated settings regex test!',
           '\n', 'importedSettings', importedSettings,
         );
 
-        if (!DehydratedRegex.test(importedSettings)) {
-          l.debug(
-            'Failed the dehydrated settings regex test!',
-            '\n', 'importedSettings', importedSettings,
-          );
+        importFailedBadgeRef.current?.show();
 
-          importFailedBadgeRef.current?.show();
+        return;
+      }
 
-          return;
+      const dehydratedCurrent = dehydrateShowdexSettings(settings);
+
+      if (DehydratedRegex.test(dehydratedCurrent)) {
+        setPrevSettings(dehydratedCurrent);
+
+        if (importUndoTimeout.current) {
+          clearTimeout(importUndoTimeout.current);
         }
 
-        const dehydratedCurrent = dehydrateShowdexSettings(settings);
+        importUndoTimeout.current = setTimeout(() => {
+          setPrevSettings(null);
+          importUndoTimeout.current = null;
+        }, 5000);
+      }
 
-        if (DehydratedRegex.test(dehydratedCurrent)) {
-          setPrevSettings(dehydratedCurrent);
+      const hydratedSettings = hydrateShowdexSettings(importedSettings);
 
-          if (importUndoTimeout.current) {
-            clearTimeout(importUndoTimeout.current);
-          }
-
-          importUndoTimeout.current = setTimeout(() => {
-            setPrevSettings(null);
-            importUndoTimeout.current = null;
-          }, 5000);
-        }
-
-        const hydratedSettings = hydrateShowdexSettings(importedSettings);
-
-        if (!hydratedSettings) {
-          l.debug(
-            'Got no hydratedSettings back for some reason :o',
-            '\n', 'importedSettings', importedSettings,
-          );
-
-          importFailedBadgeRef.current?.show();
-
-          return;
-        }
-
-        updateSettings(hydratedSettings);
-        importBadgeRef.current?.show();
-      } catch (error) {
-        if (__DEV__) {
-          l.error(
-            'Failed to import dehydrated settings from clipboard:',
-            '\n', error,
-            '\n', '(You will only see this error on development.)',
-          );
-        }
+      if (!hydratedSettings) {
+        l.debug(
+          'Got no hydratedSettings back for some reason :o',
+          '\n', 'importedSettings', importedSettings,
+        );
 
         importFailedBadgeRef.current?.show();
+
+        return;
       }
-    })();
-  };
+
+      updateSettings(hydratedSettings);
+      importBadgeRef.current?.show();
+    } catch (error) {
+      if (__DEV__) {
+        l.error(
+          'Failed to import dehydrated settings from clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+
+      importFailedBadgeRef.current?.show();
+    }
+  })();
 
   const exportBadgeRef = React.useRef<BadgeInstance>(null);
   const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
 
-  const handleSettingsExport = () => {
-    if (typeof navigator === 'undefined') {
-      return;
-    }
+  const handleSettingsExport = () => void (async () => {
+    try {
+      const dehydratedSettings = dehydrateShowdexSettings(settings);
 
-    void (async () => {
-      try {
-        const dehydratedSettings = dehydrateShowdexSettings(settings);
-
-        if (!DehydratedRegex.test(dehydratedSettings)) {
-          l.debug(
-            'Failed the dehydrated settings regex test!',
-            '\n', 'dehydratedSettings', dehydratedSettings,
-          );
-
-          exportFailedBadgeRef.current?.show();
-
-          return;
-        }
-
-        await navigator.clipboard.writeText(dehydratedSettings);
-        exportBadgeRef.current?.show();
-      } catch (error) {
-        if (__DEV__) {
-          l.error(
-            'Failed to export dehydrated settings to clipboard:',
-            '\n', error,
-            '\n', '(You will only see this error on development.)',
-          );
-        }
+      if (!DehydratedRegex.test(dehydratedSettings)) {
+        l.debug(
+          'Failed the dehydrated settings regex test!',
+          '\n', 'dehydratedSettings', dehydratedSettings,
+        );
 
         exportFailedBadgeRef.current?.show();
+
+        return;
       }
-    })();
-  };
+
+      // await navigator.clipboard.writeText(dehydratedSettings);
+      await writeClipboardText(dehydratedSettings);
+      exportBadgeRef.current?.show();
+    } catch (error) {
+      if (__DEV__) {
+        l.error(
+          'Failed to export dehydrated settings to clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+
+      exportFailedBadgeRef.current?.show();
+    }
+  })();
 
   const defaultsBadgeRef = React.useRef<BadgeInstance>(null);
   const defaultsFailedBadgeRef = React.useRef<BadgeInstance>(null);
@@ -365,7 +360,7 @@ export const SettingsPane = ({
                         <Badge
                           ref={exportBadgeRef}
                           className={styles.importBadge}
-                          label="Exported"
+                          label="Copied!"
                           color="green"
                         />
 
