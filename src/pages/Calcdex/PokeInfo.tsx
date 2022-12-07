@@ -273,7 +273,8 @@ export const PokeInfo = ({
     const existingPreset = pokemon.preset && presets?.length
       ? presets.find((p) => p?.calcdexId === pokemon.preset && (
         !pokemon.transformedForme
-          || formatId(p.name) !== 'yours'
+          // || formatId(p.name) !== 'yours'
+          || p.source !== 'server' // i.e., the 'Yours' preset
           || appliedTransformedPreset.current
       ))
       : null;
