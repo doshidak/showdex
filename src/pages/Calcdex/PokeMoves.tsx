@@ -11,7 +11,7 @@ import {
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions, legalLockedFormat } from '@showdex/utils/battle';
 import { formatDamageAmounts, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
-import { upsizeArray } from '@showdex/utils/core';
+import { upsizeArray, writeClipboardText } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
@@ -123,7 +123,8 @@ export const PokeMoves = ({
     // wrapped in an unawaited async in order to handle any thrown errors
     void (async () => {
       try {
-        await navigator.clipboard.writeText(description);
+        // await navigator.clipboard.writeText(description);
+        await writeClipboardText(description);
 
         copiedRefs.current?.[index]?.show();
       } catch (error) {
