@@ -41,7 +41,6 @@ const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
  * * Supports up to 3 moves per move line.
  *   - e.g., `'- Volt Switch / Surf / Volt Tackle'` is an acceptable move line.
  *   - Extraneous moves will be added to `altMoves` once `moves` fills up to its maximum length (e.g., `4`).
- * * If no `pokePaste` was provided or the `speciesForme` couldn't be determined, `null` will be returned.
  * * `null` will be returned on the following conditions:
  *   - No `pokePaste` was provided,
  *   - `speciesForme` couldn't be determined, or
@@ -170,8 +169,6 @@ export const importPokePaste = (
     if (!key || typeof regex?.exec !== 'function') {
       return;
     }
-
-    console.log('found line for key', key, '\n', line);
 
     switch (key) {
       // also handles: nickname, gender, item
