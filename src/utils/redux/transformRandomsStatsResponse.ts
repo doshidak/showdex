@@ -47,10 +47,11 @@ export const transformRandomsStatsResponse = (
     const preset: CalcdexPokemonPreset = {
       calcdexId: null,
       id: null,
-
+      source: 'usage',
       name: 'Showdown Usage',
       gen,
       format: args?.format ?? `gen${gen}randombattle`,
+
       speciesForme,
       level,
       nature: 'Hardy',

@@ -51,7 +51,7 @@ export const transformFormatStatsResponse = (
     const preset: CalcdexPokemonPreset = {
       calcdexId: null,
       id: null,
-
+      source: 'usage',
       name: 'Showdown Usage',
       gen,
       format: args?.format?.replace(`gen${gen}`, ''),
