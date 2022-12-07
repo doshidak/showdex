@@ -131,6 +131,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       return;
     }
 
+    // note: at this point, we should be in singular type mode (i.e., `multi` is false)
     const currentValue = (input?.value as Showdown.TypeName) || '???';
 
     // allow the singular type to be "toggled" off
@@ -140,7 +141,9 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       return;
     }
 
+    // only close the tooltip if an actual type (not '???') has been selected
     input?.onChange?.(value);
+    setOptionsVisible(false);
   };
 
   // not scoped w/ handleChange() to avoid the dumbest type assertions

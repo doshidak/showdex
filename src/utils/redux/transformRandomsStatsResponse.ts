@@ -1,30 +1,24 @@
-import { PokemonNatures } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-// import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
+import type { PkmnSmogonPresetRequest, PkmnSmogonRandomsStatsResponse } from '@showdex/redux/services';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import { processUsageAlts } from './processUsageAlts';
 
 /**
- * Transforms the JSON response from the Gen Format Stats API by converting the object into an array of `CalcdexPokemonPreset`s.
+ * Transforms the JSON response from the pkmn Randoms Stats API by converting the object into an array of `CalcdexPokemonPreset`s.
  *
  * * Meant to be passed directly into the `transformResponse` option of an RTK Query API endpoint.
  *   - Nothing stopping you from using it directly, though.
  *
- * @since 1.0.3
+ * @since 1.0.7
  */
-export const transformFormatStatsResponse = (
-  response: PkmnSmogonFormatStatsResponse,
+export const transformRandomsStatsResponse = (
+  response: PkmnSmogonRandomsStatsResponse,
   _meta: unknown,
   args: Omit<PkmnSmogonPresetRequest, 'formatOnly'>,
 ): CalcdexPokemonPreset[] => {
-  const { pokemon: pokemonStats } = response || {};
-
-  if (!Object.keys(pokemonStats || {}).length) {
+  if (!Object.keys(response || {}).length) {
     return [];
   }
 
@@ -33,7 +27,7 @@ export const transformFormatStatsResponse = (
 
   const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
 
-  Object.entries(pokemonStats).forEach(([
+  Object.entries(response).forEach(([
     speciesForme,
     usageStats,
   ]) => {
@@ -42,10 +36,12 @@ export const transformFormatStatsResponse = (
     }
 
     const {
+      level,
       abilities,
       items,
       moves,
-      spreads,
+      ivs,
+      evs,
     } = usageStats;
 
     const preset: CalcdexPokemonPreset = {
@@ -54,8 +50,29 @@ export const transformFormatStatsResponse = (
       source: 'usage',
       name: 'Showdown Usage',
       gen,
-      format: args?.format?.replace(`gen${gen}`, ''),
+      format: args?.format ?? `gen${gen}randombattle`,
+
       speciesForme,
+      level,
+      nature: 'Hardy',
+
+      ivs: {
+        hp: ivs?.hp ?? 31,
+        atk: ivs?.atk ?? 31,
+        def: ivs?.def ?? 31,
+        spa: ivs?.spa ?? 31,
+        spd: ivs?.spd ?? 31,
+        spe: ivs?.spe ?? 31,
+      },
+
+      evs: {
+        hp: evs?.hp ?? 84,
+        atk: evs?.atk ?? 84,
+        def: evs?.def ?? 84,
+        spa: evs?.spa ?? 84,
+        spd: evs?.spd ?? 84,
+        spe: evs?.spe ?? 84,
+      },
     };
 
     const altAbilities = processUsageAlts(abilities);
@@ -73,42 +90,12 @@ export const transformFormatStatsResponse = (
     }
 
     if (altMoves.length) {
-      // apparently a bug with Showdown Usage where these two Pokemon will have "Iron Head" instead of
-      // "Behemoth Blade" (for Zacian-Crowned) or "Behemoth Bash" (for Zamazenta-Crowned) lol
-      if (['zaciancrowned', 'zamazentacrowned'].includes(formatId(speciesForme))) {
-        const targetMove = <MoveName> (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade');
-        const ironHeadIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ironhead');
-
-        if (ironHeadIndex > -1) {
-          altMoves[ironHeadIndex][0] = targetMove;
-        }
-      }
-
       preset.altMoves = altMoves;
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.
        */
       preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
-    }
-
-    const [topSpread] = processUsageAlts(spreads);
-    const [nature, evSpread] = <[Showdown.NatureName, string]> topSpread?.[0]?.split(':') || [];
-    const [hpEv, atkEv, defEv, spaEv, spdEv, speEv] = evSpread?.split('/') || [];
-
-    if (nature && PokemonNatures.includes(nature)) {
-      preset.nature = nature;
-    }
-
-    if (evSpread && evSpread.includes('/')) {
-      preset.evs = {
-        hp: parseInt(hpEv, 10) || 0,
-        atk: parseInt(atkEv, 10) || 0,
-        def: parseInt(defEv, 10) || 0,
-        spa: parseInt(spaEv, 10) || 0,
-        spd: parseInt(spdEv, 10) || 0,
-        spe: parseInt(speEv, 10) || 0,
-      };
     }
 
     preset.calcdexId = calcPresetCalcdexId(preset);

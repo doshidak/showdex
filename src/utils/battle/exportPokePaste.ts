@@ -1,5 +1,5 @@
 import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
-import type { GenerationNum } from '@smogon/calc';
+// import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from './getDexForFormat';
 import { hasNickname } from './hasNickname';
@@ -84,7 +84,7 @@ const exportStatsTable = (
  */
 export const exportPokePaste = (
   pokemon: DeepPartial<CalcdexPokemon>,
-  format?: string | GenerationNum,
+  format?: string,
 ): string => {
   if (!pokemon?.speciesForme) {
     return null;
@@ -118,8 +118,20 @@ export const exportPokePaste = (
   // (line 1) <name | speciesForme> [(<speciesForme>)] [(<gender>)] [@ <item>]
   const dexCurrentForme = dex?.species.get(speciesForme);
 
-  if (dexCurrentForme?.name && dexCurrentForme.name !== output[0]) {
-    output[0] = dexCurrentForme.name;
+  const battleOnlyFormes = Array.isArray(dexCurrentForme?.battleOnly)
+    ? [...dexCurrentForme.battleOnly]
+    : [dexCurrentForme.battleOnly].filter(Boolean);
+
+  const actualForme = battleOnlyFormes[0] || dexCurrentForme.name;
+
+  if (actualForme && actualForme !== output[0]) {
+    output[0] = actualForme;
+  }
+
+  const hasGmaxForme = output[0].endsWith('-Gmax');
+
+  if (hasGmaxForme) {
+    output[0] = output[0].replace('-Gmax', '');
   }
 
   if (hasNickname(pokemon)) {
@@ -146,6 +158,10 @@ export const exportPokePaste = (
 
   if (currentAbility) {
     output.push(`Ability: ${currentAbility}`);
+  }
+
+  if (hasGmaxForme) {
+    output.push('Gigantamax: Yes');
   }
 
   // (line 4?) Level: <value> (where <value> is not 100)

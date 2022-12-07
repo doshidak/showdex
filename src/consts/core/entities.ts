@@ -7,6 +7,14 @@
 export const times = '\u00D7';
 
 /**
+ * HTML `&plusmn;` entity, represented as `U+00B1`.
+ *
+ * @example '±'
+ * @since 1.0.7
+ */
+export const plusmn = '\u00B1';
+
+/**
  * HTML `&eacute;` entity, represented as `U+00E9`.
  *
  * @example 'é'

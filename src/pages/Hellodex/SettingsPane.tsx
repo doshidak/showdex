@@ -13,7 +13,12 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useColorScheme, useShowdexSettings, useUpdateSettings } from '@showdex/redux/store';
-import { dispatchShowdexEvent, env, getResourceUrl } from '@showdex/utils/core';
+import {
+  env,
+  getResourceUrl,
+  readClipboardText,
+  writeClipboardText,
+} from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateShowdexSettings, hydrateShowdexSettings } from '@showdex/utils/redux';
 import type { BadgeInstance, BaseButtonProps } from '@showdex/components/ui';
@@ -75,136 +80,126 @@ export const SettingsPane = ({
   const [prevSettings, setPrevSettings] = React.useState<string>(null);
   const importUndoTimeout = React.useRef<NodeJS.Timeout>(null);
 
-  const handleSettingsImport = () => {
-    if (typeof navigator === 'undefined') {
-      return;
-    }
+  const handleSettingsImport = () => void (async () => {
+    l.debug(
+      'Attempting to import settings from clipboard...',
+      '\n', 'build-target', env('build-target'),
+      // '\n', 'browser global available?', typeof browser !== 'undefined',
+    );
 
-    void (async () => {
-      l.debug(
-        'Attempting to import settings from clipboard...',
-        '\n', 'build-target', env('build-target'),
-        // '\n', 'browser global available?', typeof browser !== 'undefined',
-      );
+    try {
+      if (DehydratedRegex.test(prevSettings)) {
+        const rehydratedPrev = hydrateShowdexSettings(prevSettings);
 
-      try {
-        if (DehydratedRegex.test(prevSettings)) {
-          const rehydratedPrev = hydrateShowdexSettings(prevSettings);
-
-          if (importUndoTimeout.current) {
-            clearTimeout(importUndoTimeout.current);
-            importUndoTimeout.current = null;
-          }
-
-          updateSettings(rehydratedPrev);
-          setPrevSettings(null);
-
-          return;
+        if (importUndoTimeout.current) {
+          clearTimeout(importUndoTimeout.current);
+          importUndoTimeout.current = null;
         }
 
-        const importedSettings = env('build-target') === 'firefox'
-          // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
-          ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
-          : await navigator.clipboard.readText();
+        updateSettings(rehydratedPrev);
+        setPrevSettings(null);
 
+        return;
+      }
+
+      // const importedSettings = env('build-target') === 'firefox'
+      //   // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
+      //   ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
+      //   : await navigator.clipboard.readText();
+      const importedSettings = await readClipboardText();
+
+      l.debug(
+        'Received dehydrated settings from clipboard',
+        '\n', 'importedSettings', importedSettings,
+      );
+
+      if (!DehydratedRegex.test(importedSettings)) {
         l.debug(
-          'Received dehydrated settings from clipboard',
+          'Failed the dehydrated settings regex test!',
           '\n', 'importedSettings', importedSettings,
         );
 
-        if (!DehydratedRegex.test(importedSettings)) {
-          l.debug(
-            'Failed the dehydrated settings regex test!',
-            '\n', 'importedSettings', importedSettings,
-          );
+        importFailedBadgeRef.current?.show();
 
-          importFailedBadgeRef.current?.show();
+        return;
+      }
 
-          return;
+      const dehydratedCurrent = dehydrateShowdexSettings(settings);
+
+      if (DehydratedRegex.test(dehydratedCurrent)) {
+        setPrevSettings(dehydratedCurrent);
+
+        if (importUndoTimeout.current) {
+          clearTimeout(importUndoTimeout.current);
         }
 
-        const dehydratedCurrent = dehydrateShowdexSettings(settings);
+        importUndoTimeout.current = setTimeout(() => {
+          setPrevSettings(null);
+          importUndoTimeout.current = null;
+        }, 5000);
+      }
 
-        if (DehydratedRegex.test(dehydratedCurrent)) {
-          setPrevSettings(dehydratedCurrent);
+      const hydratedSettings = hydrateShowdexSettings(importedSettings);
 
-          if (importUndoTimeout.current) {
-            clearTimeout(importUndoTimeout.current);
-          }
-
-          importUndoTimeout.current = setTimeout(() => {
-            setPrevSettings(null);
-            importUndoTimeout.current = null;
-          }, 5000);
-        }
-
-        const hydratedSettings = hydrateShowdexSettings(importedSettings);
-
-        if (!hydratedSettings) {
-          l.debug(
-            'Got no hydratedSettings back for some reason :o',
-            '\n', 'importedSettings', importedSettings,
-          );
-
-          importFailedBadgeRef.current?.show();
-
-          return;
-        }
-
-        updateSettings(hydratedSettings);
-        importBadgeRef.current?.show();
-      } catch (error) {
-        if (__DEV__) {
-          l.error(
-            'Failed to import dehydrated settings from clipboard:',
-            '\n', error,
-            '\n', '(You will only see this error on development.)',
-          );
-        }
+      if (!hydratedSettings) {
+        l.debug(
+          'Got no hydratedSettings back for some reason :o',
+          '\n', 'importedSettings', importedSettings,
+        );
 
         importFailedBadgeRef.current?.show();
+
+        return;
       }
-    })();
-  };
+
+      updateSettings(hydratedSettings);
+      importBadgeRef.current?.show();
+    } catch (error) {
+      if (__DEV__) {
+        l.error(
+          'Failed to import dehydrated settings from clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+
+      importFailedBadgeRef.current?.show();
+    }
+  })();
 
   const exportBadgeRef = React.useRef<BadgeInstance>(null);
   const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
 
-  const handleSettingsExport = () => {
-    if (typeof navigator === 'undefined') {
-      return;
-    }
+  const handleSettingsExport = () => void (async () => {
+    try {
+      const dehydratedSettings = dehydrateShowdexSettings(settings);
 
-    void (async () => {
-      try {
-        const dehydratedSettings = dehydrateShowdexSettings(settings);
-
-        if (!DehydratedRegex.test(dehydratedSettings)) {
-          l.debug(
-            'Failed the dehydrated settings regex test!',
-            '\n', 'dehydratedSettings', dehydratedSettings,
-          );
-
-          exportFailedBadgeRef.current?.show();
-
-          return;
-        }
-
-        await navigator.clipboard.writeText(dehydratedSettings);
-        exportBadgeRef.current?.show();
-      } catch (error) {
-        if (__DEV__) {
-          l.error(
-            'Failed to export dehydrated settings to clipboard:',
-            '\n', error,
-            '\n', '(You will only see this error on development.)',
-          );
-        }
+      if (!DehydratedRegex.test(dehydratedSettings)) {
+        l.debug(
+          'Failed the dehydrated settings regex test!',
+          '\n', 'dehydratedSettings', dehydratedSettings,
+        );
 
         exportFailedBadgeRef.current?.show();
+
+        return;
       }
-    })();
-  };
+
+      // await navigator.clipboard.writeText(dehydratedSettings);
+      await writeClipboardText(dehydratedSettings);
+      exportBadgeRef.current?.show();
+    } catch (error) {
+      if (__DEV__) {
+        l.error(
+          'Failed to export dehydrated settings to clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+
+      exportFailedBadgeRef.current?.show();
+    }
+  })();
 
   const defaultsBadgeRef = React.useRef<BadgeInstance>(null);
   const defaultsFailedBadgeRef = React.useRef<BadgeInstance>(null);
@@ -365,7 +360,7 @@ export const SettingsPane = ({
                         <Badge
                           ref={exportBadgeRef}
                           className={styles.importBadge}
-                          label="Exported"
+                          label="Copied!"
                           color="green"
                         />
 
@@ -799,11 +794,15 @@ export const SettingsPane = ({
                     name="calcdex.downloadUsageStats"
                     component={Switch}
                     className={styles.field}
-                    label="Download Showdown Usage Sets"
+                    label="Download Usage Stats"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Downloads freshly updated Showdown Usage stats, which will be converted
-                        into a set called <em>Showdown Usage</em>, in non-Randoms formats.
+                        Downloads freshly updated Showdown usage stats, which will display probabilities
+                        for abilities, items &amp; moves.
+                        <br />
+                        <br />
+                        In non-Randoms formats, an additional set called <em>Showdown Usage</em> will be
+                        available, converted from the usage stats.
                         <br />
                         <br />
                         Disabling this may <em>slightly</em> improve performance on lower-spec machines.
@@ -815,7 +814,7 @@ export const SettingsPane = ({
                     name="calcdex.prioritizeUsageStats"
                     component={Switch}
                     className={styles.field}
-                    label="Apply Showdown Usage Sets First"
+                    label="Apply Usage Sets First"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Prioritizes applying the <em>Showdown Usage</em> set, if available,
@@ -954,7 +953,7 @@ export const SettingsPane = ({
                     format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
+                  {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
                     name="calcdex.defaultShowGenetics.auth"
                     component={Switch}
                     className={styles.field}
@@ -970,9 +969,9 @@ export const SettingsPane = ({
                         the EVs &amp; IVs will be shown regardless of this setting.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['defaultShowGenetics'], HTMLInputElement, boolean>
+                  {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics'], HTMLInputElement, boolean>
                     name="calcdex.defaultShowGenetics"
                     component={Switch}
                     className={styles.field}
@@ -996,16 +995,16 @@ export const SettingsPane = ({
                       p4: value,
                     })}
                     format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
-                  />
+                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['showPlayerRatings']>
                     name="calcdex.showPlayerRatings"
                     component={Switch}
                     className={styles.field}
-                    label="Show Players' ELO Ratings"
+                    label="Show Players' Elo Ratings"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Shows each player's ELO rating, if available, by their username.
+                        Shows each player's Elo rating, if available, by their username.
                       </div>
                     )}
                   />
@@ -1129,7 +1128,7 @@ export const SettingsPane = ({
                     name="calcdex.showUiTooltips"
                     component={Switch}
                     className={styles.field}
-                    label="Show UI Help Tooltips"
+                    label="Show UI Info Tooltips"
                     tooltip={(
                       <div className={styles.tooltipContent}>
                         Shows explainer tooltips for buttons in the UI when hovered over.
@@ -1399,10 +1398,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['showBaseStats']>
                     name="calcdex.showBaseStats"
                     component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
+                    className={styles.field}
                     label="Editable Base Stats"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
@@ -1443,10 +1439,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['allowIllegalSpreads']>
                     name="calcdex.allowIllegalSpreads"
                     component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
+                    className={styles.field}
                     label="Allow Illegal Spreads"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
@@ -1454,7 +1447,9 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always allow illegal values for a Pok&eacute;mon's EVs/IVs.
-                          This does not lift the DV limit of 15 in Gen 1 &amp; 2 battles.
+                          <br />
+                          <br />
+                          This does not apply to DVs in legacy gens, where a limit of 15 will still be enforced.
                           <br />
                           <br />
                           Lowest possible EV/IV value is <strong>0</strong> &amp;
@@ -1486,6 +1481,118 @@ export const SettingsPane = ({
                       ),
                       value: 'never',
                     }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['lockGeneticsVisibility']['auth']>
+                    name="calcdex.lockGeneticsVisibility.auth"
+                    component={Segmented}
+                    className={styles.field}
+                    label={`Show My Pok${eacute}mon's Stats`}
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Base',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your Pok&eacute;mon's base stats.
+                          <br />
+                          <br />
+                          Disabling this will cause the base stats row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'base',
+                      disabled: values.calcdex.showBaseStats === 'never',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'IVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your Pok&eacute;mon's IVs.
+                          Applies to DVs in legacy gens as well.
+                          <br />
+                          <br />
+                          Disabling this will cause the IVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'iv',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'EVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your Pok&eacute;mon's EVs.
+                          Has no effect in legacy gens.
+                          <br />
+                          <br />
+                          Disabling this will cause the EVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'ev',
+                    }]}
+                    multi
+                    unique
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['lockGeneticsVisibility'], HTMLDivElement, ShowdexSettings['calcdex']['lockGeneticsVisibility']['p1']>
+                    name="calcdex.lockGeneticsVisibility"
+                    component={Segmented}
+                    className={styles.field}
+                    label="Show Opponent's Stats"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Base',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your opponent's (or spectating players') Pok&eacute;mon's base stats.
+                          <br />
+                          <br />
+                          Disabling this will cause the base stats row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'base',
+                      disabled: values.calcdex.showBaseStats === 'never',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'IVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your opponent's (or spectating players') Pok&eacute;mon's IVs.
+                          Applies to DVs in legacy gens as well.
+                          <br />
+                          <br />
+                          Disabling this will cause the IVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'iv',
+                    }, {
+                      labelStyle: { textTransform: 'none' },
+                      label: 'EVs',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always shows your opponent's (or spectating players') Pok&eacute;mon's EVs.
+                          Has no effect in legacy gens.
+                          <br />
+                          <br />
+                          Disabling this will cause the EVs row to remain hidden
+                          until you click on <em>Edit</em>.
+                        </div>
+                      ),
+                      value: 'ev',
+                    }]}
+                    multi
+                    unique
+                    parse={(value) => ({
+                      ...values.calcdex.lockGeneticsVisibility,
+                      p1: value,
+                      p2: value,
+                      p3: value,
+                      p4: value,
+                    })}
+                    format={(value) => [...(value?.p1 || [])]}
                   />
 
                   <div
@@ -1576,6 +1683,7 @@ export const SettingsPane = ({
                       ))}
                     </div>
 
+                    {/** @todo clean this up; use CSS for handling inBattle overflow instead of this dumb af copy paste */}
                     {
                       inBattle &&
                       <div className={cx(styles.customFieldRow, styles.centered)}>

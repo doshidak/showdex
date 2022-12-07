@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { PokemonUsageFuckedFormes } from '@showdex/consts/pokemon';
 import {
+  usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
-  usePokemonPresetQuery,
   usePokemonRandomsPresetQuery,
+  usePokemonRandomsStatsQuery,
 } from '@showdex/redux/services';
 import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
@@ -54,11 +55,10 @@ export interface CalcdexPresetsHookOptions {
  * @since 1.0.3
  */
 export interface CalcdexPresetsHookInterface {
+  loading: boolean;
   presets: CalcdexPokemonPreset[];
-  presetsLoading: boolean;
+  usage: CalcdexPokemonPreset;
 }
-
-// const l = logger('@showdex/pages/Calcdex/usePresets');
 
 const sortPresets = (
   genlessFormat?: string,
@@ -130,6 +130,8 @@ const selectPresetsFromResult = (
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
+// const l = logger('@showdex/pages/Calcdex/usePresets');
+
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
  *
@@ -176,9 +178,9 @@ export const usePresets = ({
     || !genlessFormat;
 
   const {
-    gensPresets,
-    isLoading: gensLoading,
-  } = usePokemonPresetQuery({
+    formatPresets,
+    isLoading: formatLoading,
+  } = usePokemonFormatPresetQuery({
     gen,
     format,
     formatOnly: genlessFormat.includes('bdsp'),
@@ -187,7 +189,7 @@ export const usePresets = ({
     skip: shouldSkip || randomsFormat || !settings?.downloadSmogonPresets,
 
     selectFromResult: ({ data, isLoading }) => ({
-      gensPresets: selectPresetsFromResult(data, formes),
+      formatPresets: selectPresetsFromResult(data, formes),
       isLoading,
     }),
   });
@@ -200,8 +202,8 @@ export const usePresets = ({
   // );
 
   const {
-    statsPresets,
-    isLoading: statsLoading,
+    formatStatsPresets,
+    isLoading: formatStatsLoading,
   } = usePokemonFormatStatsQuery({
     gen,
     format,
@@ -209,7 +211,7 @@ export const usePresets = ({
     skip: shouldSkip || randomsFormat || !settings?.downloadUsageStats,
 
     selectFromResult: ({ data, isLoading }) => ({
-      statsPresets: selectPresetsFromResult(data, formes),
+      formatStatsPresets: selectPresetsFromResult(data, formes),
       isLoading,
     }),
   });
@@ -229,29 +231,82 @@ export const usePresets = ({
     }),
   });
 
+  const {
+    randomsStatsPresets,
+    isLoading: randomsStatsLoading,
+  } = usePokemonRandomsStatsQuery({
+    gen,
+    format, // supplying both this and `gen`, but `format` will take precedence over `gen`
+  }, {
+    skip: shouldSkip || !randomsFormat || !settings?.downloadUsageStats,
+
+    selectFromResult: ({ data, isLoading }) => ({
+      randomsStatsPresets: selectPresetsFromResult(data, formes),
+      isLoading,
+    }),
+  });
+
   const presets = React.useMemo(() => [
     ...((!!pokemon?.presets?.length && pokemon.presets) || []),
     ...((!randomsFormat && [
-      ...((!!gensPresets?.length && gensPresets) || []),
-      ...((!!statsPresets?.length && statsPresets) || []),
+      ...((!!formatPresets?.length && formatPresets) || []),
+      ...((!!formatStatsPresets?.length && formatStatsPresets) || []),
     ]) || []).filter(Boolean).sort(sortPresets(genlessFormat)),
     ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
   ].filter(Boolean), [
     genlessFormat,
-    gensPresets,
+    formatPresets,
+    formatStatsPresets,
     pokemon,
     randomsFormat,
     randomsPresets,
-    statsPresets,
   ]);
 
-  const presetsLoading = React.useMemo(
-    () => gensLoading || statsLoading || randomsLoading,
-    [gensLoading, randomsLoading, statsLoading],
-  );
+  // note: randoms usage set, though a proper CalcdexPokemonPreset, is only used to access its usage stats data
+  // (i.e., it's not included in `presets`; only the 'Randoms' preset is available [in addition to 'Yours', if applicable])
+  const usages = React.useMemo(() => [
+    ...((!randomsFormat && !!formatStatsPresets?.length && formatStatsPresets) || []),
+    ...((randomsFormat && !!randomsStatsPresets?.length && randomsStatsPresets) || []),
+  ].filter(Boolean), [
+    formatStatsPresets,
+    randomsFormat,
+    randomsStatsPresets,
+  ]);
+
+  // note: the usage stats presets are called 'Showdown Usage', for both formats and randoms
+  // (preset names are populated via transformFormatStatsResponse() and transformRandomsStatsResponse(), respectively)
+  // const usage = React.useMemo(
+  //   () => usages.find((p) => formatId(p?.name) === 'showdownusage'),
+  //   [usages],
+  // );
+
+  const usage = settings?.downloadUsageStats
+    ? usages[0]
+    : null;
+
+  const loading = React.useMemo(() => (
+    formatLoading
+      || formatStatsLoading
+      || randomsLoading
+      || randomsStatsLoading
+  ), [
+    formatLoading,
+    formatStatsLoading,
+    randomsLoading,
+    randomsStatsLoading,
+  ]);
+
+  // l.debug(
+  //   'gen', gen, 'format', format,
+  //   '\n', 'speciesForme', speciesForme, 'formes', formes,
+  //   '\n', 'loading', loading,
+  //   '\n', 'presets', presets,
+  //   '\n', 'usage', usage,
+  // );
 
   return {
+    loading,
     presets,
-    presetsLoading,
+    usage,
   };
 };

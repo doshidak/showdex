@@ -2,13 +2,15 @@ import { eacute } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { ItemName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import type { DropdownOption } from '@showdex/components/form';
+import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
-import { guessTableFormatKey } from './guessTableFormatKey';
-import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { getDexForFormat } from './getDexForFormat';
+import { guessTableFormatKey } from './guessTableFormatKey';
 import { legalLockedFormat } from './legalLockedFormat';
+import { usageAltPercentFinder } from './usageAltPercentFinder';
+import { usageAltPercentSorter } from './usageAltPercentSorter';
 
 export type PokemonItemOption = DropdownOption<ItemName>;
 
@@ -65,6 +67,7 @@ const findItemGroupIndices = (
 export const buildItemOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  usage?: CalcdexPokemonPreset,
   showAll?: boolean,
 ): PokemonItemOption[] => {
   const options: PokemonItemOption[] = [];
@@ -82,22 +85,31 @@ export const buildItemOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
 
+  // prioritize using usage stats from the current set first,
+  // then fallback to using the stats from the supplied `usage` set, if any
+  const usageAltSource = detectUsageAlt(altItems?.[0])
+    ? altItems
+    : detectUsageAlt(usage?.altItems?.[0])
+      ? usage.altItems
+      : null;
+
   // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(altItems, true);
+  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
+  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   if (altItems?.length) {
     const hasUsageStats = altItems
       .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
     const poolItems = hasUsageStats
-      ? altItems
-      : flattenAlts(altItems).sort();
+      ? altItems // should be sorted already (despite the name)
+      : flattenAlts(altItems).sort(usageSorter);
 
     options.push({
       label: 'Pool',
       options: poolItems.map((alt) => ({
         label: flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });
@@ -113,7 +125,7 @@ export const buildItemOptions = (
     const allItems = Object.values(BattleItems || {})
       .map((item) => <ItemName> item?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (allItems.length) {
       options.push({
@@ -149,7 +161,7 @@ export const buildItemOptions = (
       .slice(popularStartIndex, popularEndIndex + 1)
       .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (popularItems.length) {
       options.push({
@@ -170,7 +182,7 @@ export const buildItemOptions = (
       .slice(itemsStartIndex, itemsEndIndex + 1)
       .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (itemsItems.length) {
       options.push({
@@ -191,7 +203,7 @@ export const buildItemOptions = (
       .slice(specificStartIndex, specificEndIndex + 1)
       .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (specificItems.length) {
       options.push({
@@ -212,7 +224,7 @@ export const buildItemOptions = (
       .slice(usuallyUselessStartIndex, usuallyUselessEndIndex + 1)
       .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (usuallyUselessItems.length) {
       options.push({
@@ -233,7 +245,7 @@ export const buildItemOptions = (
       .slice(uselessStartIndex, uselessEndIndex + 1)
       .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (uselessItems.length) {
       options.push({
@@ -253,7 +265,7 @@ export const buildItemOptions = (
     const otherItems = Object.values(BattleItems || {})
       .map((item) => <ItemName> item?.name)
       .filter((n) => !!n && !filterItems.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     if (otherItems.length) {
       options.push({

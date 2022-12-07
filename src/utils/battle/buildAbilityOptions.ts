@@ -1,13 +1,15 @@
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
 import type { AbilityName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import type { DropdownOption } from '@showdex/components/form';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
+import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
+import { usageAltPercentSorter } from './usageAltPercentSorter';
 
 export type PokemonAbilityOption = DropdownOption<AbilityName>;
 
@@ -19,6 +21,7 @@ export type PokemonAbilityOption = DropdownOption<AbilityName>;
 export const buildAbilityOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
+  usage?: CalcdexPokemonPreset,
   showAll?: boolean,
 ): PokemonAbilityOption[] => {
   const options: PokemonAbilityOption[] = [];
@@ -47,8 +50,17 @@ export const buildAbilityOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
 
+  // prioritize using usage stats from the current set first,
+  // then fallback to using the stats from the supplied `usage` set, if any
+  const usageAltSource = detectUsageAlt(altAbilities?.[0])
+    ? altAbilities
+    : detectUsageAlt(usage?.altAbilities?.[0])
+      ? usage.altAbilities
+      : null;
+
   // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(altAbilities, true);
+  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
+  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
   if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
@@ -69,7 +81,7 @@ export const buildAbilityOptions = (
       // filter out "revealed" abilities with parentheses, like "(suppressed)"
       serverSourced && !/^\([\w\s]+\)$/.test(ability) && ability,
       ...transformedAbilities,
-    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort();
+    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 
     options.push({
       label: 'Transformed',
@@ -91,14 +103,14 @@ export const buildAbilityOptions = (
       .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
     const poolAbilities = hasUsageStats
-      ? filteredPoolAbilities
-      : flattenAlts(filteredPoolAbilities).sort();
+      ? filteredPoolAbilities // should be sorted already (despite the name)
+      : flattenAlts(filteredPoolAbilities).sort(usageSorter);
 
     options.push({
       label: 'Pool',
       options: poolAbilities.map((alt) => ({
         label: flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : null,
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });
@@ -109,7 +121,7 @@ export const buildAbilityOptions = (
   if (abilities?.length) {
     const legalAbilities = abilities
       .filter((n) => !!n && !filterAbilities.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     options.push({
       label: 'Legal',
@@ -129,7 +141,7 @@ export const buildAbilityOptions = (
     const otherAbilities = Object.values(BattleAbilities || {})
       .map((a) => <AbilityName> a?.name)
       .filter((n) => !!n && formatId(n) !== 'noability' && !filterAbilities.includes(n))
-      .sort();
+      .sort(usageSorter);
 
     options.push({
       label: 'All',

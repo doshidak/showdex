@@ -86,15 +86,20 @@ button.usernameButton {
   button.toggleButton {
     font-size: inherit;
   }
+}
 
-  .rating {
+.rating {
+  opacity: 0;
+  @include transition.apply(opacity);
+
+  &.visible {
     opacity: 0.65;
+  }
 
-    .ratingSeparator {
-      display: inline-block;
-      @include spacing.margin-xy($x: 0.5em);
-      user-select: none;
-    }
+  .ratingSeparator {
+    display: inline-block;
+    @include spacing.margin-xy($x: 0.5em);
+    user-select: none;
   }
 }
 
@@ -103,6 +108,41 @@ button.usernameButton {
   text-align: center;
   white-space: normal;
   user-select: none;
+}
+
+.ladderFormat {
+  @include spacing.margin($bottom: 2px);
+  font-size: 8px;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.ladderStats {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.5em;
+}
+
+// .ladderStat {
+//   @include flex.row-center;
+// }
+
+.ladderStatLabel {
+  grid-area: span 1 / span 1;
+  // @include spacing.margin($left: 5px);
+  font-weight: 500;
+  font-size: 8px;
+  text-align: right;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.ladderStatValue {
+  grid-area: span 1 / span 1;
+  @include font.apply(fonts.$mono);
+  font-size: 10px;
+  text-align: left;
 }
 
 .teamList {

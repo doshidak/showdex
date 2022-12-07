@@ -480,6 +480,7 @@ big sparkly thank to these fine individuals for their generous support!
   <tbody>
     <tr>
       <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>

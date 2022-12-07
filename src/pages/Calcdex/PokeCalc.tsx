@@ -27,6 +27,7 @@ import {
 import { PokeInfo } from './PokeInfo';
 import { PokeMoves } from './PokeMoves';
 import { PokeStats } from './PokeStats';
+import { usePresets } from './usePresets';
 import { useSmogonMatchup } from './useSmogonMatchup';
 import styles from './PokeCalc.module.scss';
 
@@ -37,6 +38,7 @@ interface PokeCalcProps {
   gen?: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
+  authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
@@ -53,6 +55,7 @@ export const PokeCalc = ({
   gen,
   format,
   rules,
+  authPlayerKey,
   playerKey,
   playerPokemon,
   opponentPokemon,
@@ -61,6 +64,15 @@ export const PokeCalc = ({
   onPokemonChange,
 }: PokeCalcProps): JSX.Element => {
   const settings = useCalcdexSettings();
+
+  const {
+    loading: presetsLoading,
+    presets,
+    usage,
+  } = usePresets({
+    format,
+    pokemon: playerPokemon,
+  });
 
   const calculateMatchup = useSmogonMatchup(
     format,
@@ -253,6 +265,9 @@ export const PokeCalc = ({
         gen={gen}
         format={format}
         pokemon={playerPokemon}
+        presets={presets}
+        usage={usage}
+        presetsLoading={presetsLoading}
         containerSize={containerSize}
         onPokemonChange={handlePokemonChange}
       />
@@ -264,6 +279,7 @@ export const PokeCalc = ({
         format={format}
         rules={rules}
         pokemon={playerPokemon}
+        usage={usage}
         containerSize={containerSize}
         calculateMatchup={calculateMatchup}
         onPokemonChange={handlePokemonChange}
@@ -277,6 +293,7 @@ export const PokeCalc = ({
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
         field={field}
+        authPlayerKey={authPlayerKey}
         playerKey={playerKey}
         containerSize={containerSize}
         onPokemonChange={handlePokemonChange}

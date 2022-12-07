@@ -124,7 +124,9 @@ export const sanitizePokemon = (
       spe: ('evs' in pokemon && pokemon.evs?.spe) || 0,
     } : {},
 
-    showGenetics: ('showGenetics' in pokemon && pokemon.showGenetics) || true,
+    // update (2022/11/14): defaultShowGenetics setting is now deprecated in favor of lockGeneticsVisibility,
+    // so this should be its new default, false (was previously true)
+    showGenetics: ('showGenetics' in pokemon && pokemon.showGenetics) || false,
 
     boosts: {
       atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,

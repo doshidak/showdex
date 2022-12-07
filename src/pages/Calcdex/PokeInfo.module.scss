@@ -71,6 +71,7 @@ button.toggleButton {
 .piconContainer {
   flex: 0 0 40px;
   transform: translateY(-2px);
+  z-index: 1;
 }
 
 .infoContainer {
@@ -89,6 +90,7 @@ button.nameButton {
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
   color: inherit;
   overflow-x: hidden;
+  z-index: 1;
 
   &.missingForme {
     font-weight: 400;
@@ -206,19 +208,31 @@ button.nameButton {
 // }
 
 .tooltipContent {
+  position: relative;
   text-align: center;
   white-space: normal;
   user-select: none;
+}
+
+.importButton {
+  &.floatingBadges {
+    z-index: 10;
+  }
+}
+
+.importBadge {
+  @include position.absolute($top: -16px, $left: 50%);
+
+  &.floating {
+    top: -22px;
+    white-space: nowrap;
+  }
 }
 
 .pokePasteTooltip {
   position: relative;
   max-width: 200px;
   white-space: pre-wrap;
-
-  .copiedBadge {
-    @include position.absolute($top: -16px, $left: 50%);
-  }
 }
 
 .descTooltip {

@@ -1,3 +1,5 @@
+import { HttpMethod } from '@showdex/consts/core';
+
 // note: this is only used on Chrome -- Firefox should not include this with the bundle
 
 interface BackgroundFetchMessage extends Record<string, unknown> {
@@ -19,7 +21,7 @@ const handleFetchMessage = (
       void (async () => {
         try {
           const response = await fetch(message.url, {
-            method: 'GET',
+            method: HttpMethod.GET,
             ...message?.options,
             headers: {
               Accept: 'application/json',
@@ -27,28 +29,19 @@ const handleFetchMessage = (
             },
           });
 
-          const json = await <Promise<Record<string, unknown>>> response.json();
+          const value = await response.text();
 
           // console.log('response.json()', json);
 
           send({
             ok: response.ok,
             status: response.status,
-            jsonValue: json,
+            value,
           });
         } catch (error) {
           send(error);
         }
       })();
-
-      // fetch(<string> message?.url, {
-      //   method: 'GET',
-      //   ...(<Record<string, unknown>> message?.options),
-      //   headers: {
-      //     Accept: 'application/json',
-      //     ...(<Record<string, unknown>> (<Record<string, unknown>> message?.options)?.headers),
-      //   },
-      // }).then((response) => sendResponse(response)).catch((error) => sendResponse(error));
 
       return true; // for Chrome: use `sendResponse` asynchronously
     }
@@ -64,22 +57,3 @@ if (typeof chrome !== 'undefined') {
     sendResponse,
   ) => handleFetchMessage(message, sendResponse));
 }
-// } else {
-//   // note: while implemented, this would only apply for Firefox, where we can access fetch() directly,
-//   // so in other words, this is pretty much unused lmao
-//   // (for other browsers like Opera GX, `chrome.runtime` should be available)
-//   // browser.runtime.onMessageExternal.addListener((
-//   //   message: Record<string, unknown>,
-//   //   // _sender,
-//   // ) => new Promise((resolve, reject) => {
-//   //   handleFetchMessage(message, (payload) => {
-//   //     if (payload instanceof Error) {
-//   //       reject(payload);
-//   //     } else {
-//   //       resolve(payload);
-//   //     }
-//   //   });
-//   // }));
-// }
-
-export {};

@@ -315,7 +315,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * If `false`, an edit button should be shown to allow the user to set this value to `true`.
    * * Applies to this specific Pokemon only.
    *
-   * @default true
+   * @default false
    * @since 1.0.3
    */
   showGenetics?: boolean;
@@ -708,6 +708,24 @@ export type CalcdexPokemonUsageAlt<
 ];
 
 /**
+ * Source of the Calcdex Pokemon set (preset).
+ *
+ * * `'import'` refers to any preset imported from the user's clipboard.
+ * * `'server'` refers to any preset provided by the Showdown server, typically for the logged-in user's Pokemon.
+ * * `'smogon'` refers to any preset that has been downloaded, though typically from the Smogon dex.
+ * * `'storage'` refers to any preset locally saved in the user's browser, typically stored by the Teambuilder.
+ * * `'usage'` refers to any preset from Showdown usage stats.
+ *
+ * @since 1.0.7
+ */
+export type CalcdexPokemonPresetSource =
+  | 'import'
+  | 'server'
+  | 'smogon'
+  | 'storage'
+  | 'usage';
+
+/**
  * Pokemon set, ~~basically~~ probably.
  *
  * * Types for some properties are more specifically typed,
@@ -741,6 +759,14 @@ export interface CalcdexPokemonPreset {
    * @since 0.1.3
    */
   id?: string;
+
+  /**
+   * Source of the preset.
+   *
+   * @example 'server'
+   * @since 1.0.7
+   */
+  source?: CalcdexPokemonPresetSource;
 
   /**
    * Name of the preset.
@@ -778,6 +804,14 @@ export interface CalcdexPokemonPreset {
    * @since 0.1.0
    */
   format?: string;
+
+  /**
+   * Nickname of the Pokemon.
+   *
+   * @example 'Smogonbirb'
+   * @since 1.0.7
+   */
+  nickname?: string;
 
   speciesForme?: string;
   level?: number;
@@ -1475,8 +1509,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce: battleNonce || currentState.battleNonce,
         gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
         format: format || currentState.format,
-        active: typeof active === 'boolean' ? active : currentState.active,
+        // active: typeof active === 'boolean' ? active : currentState.active,
       };
+
+      // for the active state, only update if previously true and the new value is false
+      // as we don't want the HellodexBattleRecord to record replays or battle re-inits
+      if (currentState.active && typeof active === 'boolean' && !active) {
+        state[battleId].active = active;
+      }
 
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',

@@ -388,6 +388,7 @@ export const syncPokemon = (
 
     // build a preset around the serverPokemon
     const serverPreset: CalcdexPokemonPreset = {
+      source: 'server',
       name: 'Yours',
       gen,
       format,
@@ -431,7 +432,8 @@ export const syncPokemon = (
       // technically, this should be a one-time thing, but if not, we'll at least want only have 1 'Yours' preset
       const serverPresetIndex = syncedPokemon.presets
         // .findIndex((p) => p.calcdexId === serverPreset.calcdexId);
-        .findIndex((p) => p.name === 'Yours');
+        // .findIndex((p) => p.name === 'Yours');
+        .findIndex((p) => p.source === 'server');
 
       if (serverPresetIndex > -1) {
         syncedPokemon.presets[serverPresetIndex] = serverPreset;

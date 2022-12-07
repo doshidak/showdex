@@ -1,3 +1,4 @@
+import { PokemonPivotMoves } from '@showdex/consts/pokemon';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from './getDexForFormat';
@@ -59,7 +60,14 @@ export const mergeRevealedMoves = (
     ...moves,
   ];
 
-  for (const mergeableMove of mergeableMoveNames) {
+  for (const mergeableMoveName of mergeableMoveNames) {
+    const mergeableMove = dex.moves.get(mergeableMoveName);
+
+    // HUH
+    if (!mergeableMove?.exists) {
+      continue;
+    }
+
     // look for status moves
     const statusMoveIndex = nonRevealedMoves.findIndex((m) => m?.category === 'Status');
 
@@ -68,12 +76,33 @@ export const mergeRevealedMoves = (
       const moveIndex = output.findIndex((m) => m === statusMoveName);
 
       if (moveIndex > -1) {
-        output[moveIndex] = mergeableMove;
+        output[moveIndex] = mergeableMoveName;
+        nonRevealedMoves.splice(statusMoveIndex, 1);
+
+        continue;
       }
+    }
 
-      nonRevealedMoves.splice(statusMoveIndex, 1);
+    // look for damaging STAB moves (except pivot moves like U-turn),
+    // but only if the current mergeableMove is damaging
+    if (mergeableMove.category !== 'Status' && types.includes(mergeableMove.type)) {
+      const stabMoveIndex = nonRevealedMoves.findIndex((m) => (
+        (!!m?.category && m.category !== 'Status')
+          && types.includes(m.type)
+          && !PokemonPivotMoves.includes(<MoveName> m.name)
+      ));
 
-      continue;
+      if (stabMoveIndex > -1) {
+        const { name: stabMoveName } = nonRevealedMoves[stabMoveIndex];
+        const moveIndex = output.findIndex((m) => m === stabMoveName);
+
+        if (moveIndex > -1) {
+          output[moveIndex] = mergeableMoveName;
+          nonRevealedMoves.splice(stabMoveIndex, 1);
+
+          continue;
+        }
+      }
     }
 
     // look for non-STAB moves
@@ -86,12 +115,11 @@ export const mergeRevealedMoves = (
       const moveIndex = output.findIndex((m) => m === nonStabMoveName);
 
       if (moveIndex > -1) {
-        output[moveIndex] = mergeableMove;
+        output[moveIndex] = mergeableMoveName;
+        nonRevealedMoves.splice(nonStabMoveIndex, 1);
+
+        continue;
       }
-
-      nonRevealedMoves.splice(nonStabMoveIndex, 1);
-
-      continue;
     }
 
     if (!nonRevealedMoves.length) {
@@ -105,10 +133,9 @@ export const mergeRevealedMoves = (
       const moveIndex = output.findIndex((m) => m === nextMoveName);
 
       if (moveIndex > -1) {
-        output[moveIndex] = mergeableMove;
+        output[moveIndex] = mergeableMoveName;
+        nonRevealedMoves.splice(0, 1);
       }
-
-      nonRevealedMoves.splice(0, 1);
     }
   }
 

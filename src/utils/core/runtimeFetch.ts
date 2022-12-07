@@ -1,5 +1,7 @@
+import { HttpMethod } from '@showdex/consts/core';
 import { logger } from '@showdex/utils/debug';
 import { getExtensionId } from './getExtensionId';
+import { safeJsonParse } from './safeJsonParse';
 
 interface RuntimeFetchMessage {
   type?: 'fetch';
@@ -7,15 +9,16 @@ interface RuntimeFetchMessage {
   options?: RequestInit;
 }
 
-interface RuntimeFetchMessageResponse<T = unknown> {
+interface RuntimeFetchMessageResponse {
   ok: boolean;
   status: number;
-  jsonValue: T;
+  value: string;
 }
 
 interface RuntimeFetchResponse<T = unknown> {
   ok: boolean;
   status: number;
+  text: () => string;
   json: () => T;
 }
 
@@ -37,7 +40,7 @@ const sendFetchMessage = async <T = unknown>(
 ): Promise<RuntimeFetchResponse<T>> => {
   if (typeof chrome !== 'undefined') {
     return new Promise<RuntimeFetchResponse<T>>((resolve, reject) => {
-      chrome.runtime.sendMessage<RuntimeFetchMessage, RuntimeFetchMessageResponse<T>>(extensionId, {
+      chrome.runtime.sendMessage<RuntimeFetchMessage, RuntimeFetchMessageResponse>(extensionId, {
         type: 'fetch',
         ...message,
       }, (response) => {
@@ -55,7 +58,8 @@ const sendFetchMessage = async <T = unknown>(
           resolve({
             ok: response.ok,
             status: response.status,
-            json: () => response.jsonValue,
+            text: () => response.value,
+            json: () => safeJsonParse<T>(response.value),
           });
         }
       });
@@ -68,7 +72,7 @@ const sendFetchMessage = async <T = unknown>(
 
   // const response = <RuntimeFetchMessageResponse<T>> await browser.runtime.sendMessage(extensionId, message);
   const response = await fetch(message?.url, {
-    method: 'GET',
+    method: HttpMethod.GET,
     ...message?.options,
     headers: {
       Accept: 'application/json',
@@ -76,7 +80,7 @@ const sendFetchMessage = async <T = unknown>(
     },
   });
 
-  const jsonValue = <T> await response.json();
+  const value = await response.text();
 
   // l.debug(
   //   'runtimeFetch() <- browser.runtime.sendMessage() <- fetch()',
@@ -89,7 +93,8 @@ const sendFetchMessage = async <T = unknown>(
   return {
     ok: response.ok,
     status: response.status,
-    json: () => jsonValue,
+    text: () => value,
+    json: () => safeJsonParse<T>(value),
   };
 };
 
