@@ -158,6 +158,13 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   types?: Showdown.TypeName[];
 
   /**
+   * Terastallizing type that the terastallizable Pokemon can terastallizingly terastallize into during terastallization.
+   *
+   * @since 1.1.0
+   */
+  teraType?: Showdown.TypeName;
+
+  /**
    * Ability of the Pokemon.
    *
    * @since 0.1.0
@@ -335,6 +342,22 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   useMax?: boolean;
 
   /**
+   * Whether the Pokemon has terastallized.
+   *
+   * * Can be determined from the client by verifying if the Pokemon's `teraType` in the battle state has a value
+   *   and there exists a `typechange` in its `volatiles` object.
+   *   - Both conditions must be satisfied as the lack of a `typechange` volatile with the presence of a `teraType`
+   *     indicates that the terastallized Pokemon is not active.
+   * * Note that this is a separate property to independently keep track of the Pokemon's `teraType` value, even when not terastallized.
+   *   - (In case if you're thinking that we could achieve the same effect by only setting the `teraType` when terastallized, just like the client.)
+   *   - This property would determine whether we specify the `teraType` property to the `calculate()` function of `@smogon/calc`.
+   *   - Additionally, this property allows the user to independently toggle the Pokemon's terastallized state to run calcs.
+   *
+   * @since 1.1.0
+   */
+  terastallized?: boolean;
+
+  /**
    * Moves currently assigned to the Pokemon.
    *
    * * Typically contains moves set via user input or Smogon sets.
@@ -404,17 +427,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.0.3
    */
   revealedMoves?: MoveName[];
-
-  /**
-   * Categorized moves of the Pokemon.
-   *
-   * @deprecated As of v1.0.3, this is no longer being used.
-   *   For `moveState.revealed`, use the `revealedMoves` property.
-   *   `moveState.learnset` and `moveState.other` are no longer used in favor of on-demand population
-   *   via `getPokemonLearnset()` and `BattleMovedex`, respectively, in `buildMoveOptions()`.
-   * @since 0.1.0
-   */
-  moveState?: CalcdexMoveState;
 
   /**
    * Whether to show editing controls for overriding moves.
@@ -550,15 +562,38 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   criticalHit?: boolean;
 
   /**
-   * Remaining number of turns the Pokemon is poisoned for.
+   * Number of turns the Pokemon was asleep for.
+   *
+   * * As of v1.1.0, this exists since we're not copying `statusData` from the client battle state anymore.
+   * * Not sure what this is being used for (if at all) atm.
+   *
+   * @default 0
+   * @since 1.1.0
+   */
+  sleepCounter?: number;
+
+  /**
+   * Number of turns the Pokemon was *badly* poisoned for.
    *
    * * This property is only used by `calculate()` in `@smogon/calc`.
-   * * Value of `0` means the Pokemon is not poisoned.
+   * * Value of `0` means the Pokemon is not badly poisoned (and probably not regular poisoned).
    *
    * @default 0
    * @since 0.1.0
    */
   toxicCounter?: number;
+
+  /**
+   * Number of times the Pokemon was hit.
+   *
+   * * Kept track by the client under the `timesAttacked` property in `Showdown.Pokemon`.
+   * * Probably for moves like *Rage Fist* in Gen 9, which increases in BP each time it takes a hit.
+   *   - ...ayy lmao
+   *
+   * @default 0
+   * @since 1.1.0
+   */
+  hitCounter?: number;
 
   /**
    * Preset that's currently being applied to the Pokemon.
@@ -591,62 +626,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   autoPreset?: boolean;
-}
-
-/**
- * @deprecated As of v1.0.3, this is no longer being used.
- *   See deprecation information in `CalcdexPokemon['moveState']`.
- */
-export interface CalcdexMoveState {
-  /**
-   * Should only consist of moves that were revealed during the battle.
-   *
-   * * These moves should have the highest render priority
-   *   (i.e., should be at the top of the list).
-   * * This is usually accessible within the client `Showdown.Pokemon` object,
-   *   under the `moveTrack` property.
-   *
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @deprecated As of v1.0.3, this is no longer being used.
-   *   Use `CalcdexPokemon['revealedMoves']` instead.
-   * @since 0.1.0
-   */
-  revealed: (MoveName | string)[];
-
-  /**
-   * Should only consist of moves that the Pokemon can legally learn.
-   *
-   * * These moves should be rendered after those in `revealed`.
-   * * Moves that exist in `revealed` should be filtered out.
-   *
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @deprecated As of v1.0.3, this is no longer being used.
-   *   Populated on-demand via `getPokemonLearnset()` in `buildMoveOptions()`.
-   * @since 0.1.0
-   */
-  learnset: (MoveName | string)[];
-
-  /**
-   * Optional moves, including potentially illegal ones for formats like `gen8anythinggoes` (I think lmao).
-   *
-   * * These moves, if specified, should be rendered last.
-   * * Moves that exist in `revealed` and `learnsets` should be filtered out.
-   *
-   * @default
-   * ```ts
-   * []
-   * ```
-   * @deprecated As of v1.0.1, this is no longer being used.
-   *   Populated on-demand via `BattleMovedex` in `buildMoveOptions()`.
-   * @since 0.1.0
-   */
-  other?: (MoveName | string)[];
 }
 
 /**
