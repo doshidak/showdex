@@ -940,6 +940,42 @@ export interface CalcdexBattleField extends SmogonState.Field {
   isDarkAura?: boolean;
   attackerSide: CalcdexPlayerSide;
   defenderSide: CalcdexPlayerSide;
+
+  /**
+   * Number of active Pokemon with the *Beads of Ruin* ability.
+   *
+   * * Used to determine toggle state of `isBeadsOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinBeadsCount?: number;
+
+  /**
+   * Number of active Pokemon with the *Sword of Ruin* ability.
+   *
+   * * Used to determine the toggle state of `isSwordOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinSwordCount?: number;
+
+  /**
+   * Number of active Pokemon with the *Tablets of Ruin* ability.
+   *
+   * * Used to determine the toggle state of `isTabletsOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinTabletsCount?: number;
+
+  /**
+   * Number of active Pokemon with the *Vessel of Ruin* ability.
+   *
+   * * Used to determine the toggle state of `isVesselOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinVesselCount?: number;
 }
 
 /**
