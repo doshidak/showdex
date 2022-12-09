@@ -23,7 +23,7 @@ const SmogonUniversityGenSlugs: string[] = [
   'xy', // gen 6: x/y
   'sm', // gen 7: sun/moon
   'ss', // gen 8: sword/shield
-  // 'sv', // gen 9: scarlet/violet (TBD)
+  'sv', // gen 9: scarlet/violet
 ];
 
 const SmogonUniversityFormatSlugs: Record<string, string> = {
@@ -56,6 +56,7 @@ const SmogonUniversityFormatSlugs: Record<string, string> = {
   vgc2020: 'vgc20',
   vgc2021: 'vgc21',
   vgc2022: 'vgc22',
+  vgc2023: 'vgc23',
   zu: 'zu',
 };
 
