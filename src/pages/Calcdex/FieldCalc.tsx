@@ -86,7 +86,8 @@ export const FieldCalc = ({
       return null;
     }
 
-    const description = WeatherDescriptions[option.value]?.shortDesc;
+    const value = gen > 8 && option.value === 'Hail' ? 'Snow' : option.value;
+    const description = WeatherDescriptions[value]?.shortDesc;
 
     if (!description) {
       return null;
@@ -98,6 +99,7 @@ export const FieldCalc = ({
       </div>
     );
   }, [
+    gen,
     settings,
   ]);
 
@@ -280,7 +282,14 @@ export const FieldCalc = ({
             ...LegacyWeatherNames,
             gen > 2 && WeatherMap.hail,
           ].filter(Boolean)).map((name: Weather) => ({
-            label: WeatherDescriptions[name]?.label || name,
+            /**
+             * @todo hmm kinda gross no? lol
+             */
+            label: (
+              gen > 8 && name === 'Hail' // for gen 9, but > 8 for posterity lol
+                ? 'Snow' // `value` would still be 'Hail' btw
+                : WeatherDescriptions[name]?.label
+            ) || name,
             value: name,
           }))}
           noOptionsMessage="No Weather"
