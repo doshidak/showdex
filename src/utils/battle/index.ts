@@ -12,6 +12,7 @@ export * from './detectStatBoostDelta';
 export * from './detectToggledAbility';
 export * from './detectUsageAlt';
 export * from './exportPokePaste';
+export * from './findHighestStat';
 export * from './flattenAlts';
 export * from './formatDexDescription';
 export * from './formatStatBoost';
