@@ -1,4 +1,4 @@
-import { PokemonNatures } from '@showdex/consts/pokemon';
+import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env } from '@showdex/utils/core';
@@ -17,6 +17,7 @@ const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> 
   happiness: /^\s*Happiness:\s*(\d+)$/i,
   // dynamaxLevel: /^\s*Dynamax Level:\s*(\d+)$/i, // unsupported
   gigantamax: /^\s*Gigantamax:\s*([A-Z]+)$/i,
+  teraType: /^\s*Tera\s*Type:\s*([A-Z]+)$/i,
   ivs: /^\s*IVs:\s*(\d.+)$/i,
   evs: /^\s*EVs:\s*(\d.+)$/i,
   nature: /^\s*([A-Z]+)\s+Nature$/i,
@@ -318,6 +319,27 @@ export const importPokePaste = (
         }
 
         preset.gigantamax = gigantamax; // always true lol
+
+        break;
+      }
+
+      case 'teraType': {
+        const [
+          ,
+          value,
+        ] = regex.exec(line) || [];
+
+        if (!value) {
+          break;
+        }
+
+        const detectedType = <Showdown.TypeName> capitalize(value);
+
+        if (!PokemonTypes.includes(detectedType) || detectedType === '???') {
+          break;
+        }
+
+        preset.teraType = detectedType;
 
         break;
       }
