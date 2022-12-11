@@ -9,6 +9,7 @@ import {
   sanitizeVolatiles,
   syncField,
   syncPokemon,
+  toggleRuinAbilities,
 } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
@@ -378,12 +379,20 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           basePokemon,
           clientPokemon,
           serverPokemon,
-          battleState.format,
+          battleState,
+          // battleState.field,
+          // battleState.format,
           settings?.showAllFormes,
           (!isMyPokemonSide || !hasMyPokemon)
             && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey ? 'auth' : playerKey],
         );
 
+        // update the syncedPokemon's playerKey, if falsy or mismatched
+        if (!syncedPokemon.playerKey || syncedPokemon.playerKey !== playerKey) {
+          syncedPokemon.playerKey = playerKey;
+        }
+
+        // extract Gmax/Tera info from the BattleRoom's `request` object, if available
         if (request?.requestType === 'move' && request.side?.id === playerKey) {
           const {
             active,
@@ -399,18 +408,22 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               details: reqDetails,
             } = side.pokemon?.[j] || {};
 
-            const shouldIgnore = !moveData?.maxMoves?.gigantamax
+            const hasGmaxData = !!moveData?.maxMoves?.gigantamax;
+            const hasTeraData = !!moveData?.canTerastallize && moveData.canTerastallize !== '???';
+
+            const shouldIgnore = (!hasGmaxData && !hasTeraData)
               || (!reqIdent && !reqDetails)
               || (!!reqCalcdexId && syncedPokemon.calcdexId !== reqCalcdexId)
-              || (syncedPokemon.ident !== reqIdent && syncedPokemon.details !== reqDetails)
-              || !syncedPokemon.altFormes.some((f) => f.endsWith('-Gmax'));
+              || (syncedPokemon.ident !== reqIdent && syncedPokemon.details !== reqDetails);
+              // || !syncedPokemon.altFormes.some((f) => f.endsWith('-Gmax'));
 
             l.debug(
               'Processing move request for', reqIdent || reqDetails,
-              'with G-Max move?', moveData?.maxMoves?.gigantamax, // ? = partial, i.e., could be null/undefined
               '\n', 'battleId', battleId,
               '\n', 'shouldIgnore?', shouldIgnore,
               '\n', 'moveData', moveData,
+              '\n', 'Gmax?', moveData?.maxMoves?.gigantamax, // ? = partial, i.e., could be null/undefined
+              '\n', 'Tera?', moveData?.canTerastallize,
               '\n', 'sidePokemon', side.pokemon?.[j],
               '\n', 'request', request,
               '\n', 'battle', battle,
@@ -420,11 +433,17 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               continue;
             }
 
-            syncedPokemon.dmaxable = true; // if not already
-            syncedPokemon.gmaxable = true;
+            if (hasGmaxData) {
+              syncedPokemon.dmaxable = true; // if not already
+              syncedPokemon.gmaxable = true;
 
-            if (!syncedPokemon.speciesForme.endsWith('-Gmax')) {
-              syncedPokemon.speciesForme += '-Gmax';
+              if (!syncedPokemon.speciesForme.endsWith('-Gmax')) {
+                syncedPokemon.speciesForme += '-Gmax';
+              }
+            }
+
+            if (hasTeraData) {
+              syncedPokemon.teraType = moveData.canTerastallize;
             }
 
             break;
@@ -616,15 +635,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
       }
 
-      // obtain the calcdexId of the active Pokemon, if any
-      // const [activePokemon] = player.active || [];
+      // keep track of which calcdexId's we've added so far (for myPokemon in Doubles)
+      const processedIds: string[] = [];
 
       playerState.activeIndices = player.active?.map((activePokemon) => {
         // checking myPokemon first (if it's available) for Illusion/Zoroark
         const activeId = (
           isMyPokemonSide
             && hasMyPokemon
-            && myPokemon.find((p) => p?.active)?.calcdexId
+            && myPokemon.find((p) => p?.active && !processedIds.includes(p?.calcdexId))?.calcdexId
         )
           || activePokemon?.calcdexId
           || player.pokemon.find((p) => p === activePokemon)?.calcdexId;
@@ -636,19 +655,35 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
           : -1;
 
-        if (activeIndex > -1) {
+        // l.debug(
+        //   'Building activeIndices for player', playerKey,
+        //   '\n', 'activeId', activeId,
+        //   '\n', 'activeIndex', activeIndex,
+        //   '\n', 'activePokemon', activePokemon,
+        //   '\n', 'player.active', player.active,
+        //   '\n', `${playerKey}.pokemon`, playerState.pokemon,
+        // );
+
+        if (activeIndex > -1 && !processedIds.includes(activeId)) {
           // playerState.activeIndex = activeIndex;
 
           // if (playerState.autoSelect) {
           //   playerState.selectionIndex = activeIndex;
           // }
 
+          processedIds.push(activeId);
+
           return activeIndex;
         }
 
         if (activePokemon && __DEV__) {
           l.warn(
-            'Could not find activeIndex with activeId', activeId, 'for player', playerKey,
+            ...(activeId && processedIds.includes(activeId) ? [
+              'Attempted to add existing activeId', activeId, 'for player', playerKey,
+              '\n', 'processedIds', processedIds,
+            ] : [
+              'Could not find activeIndex with activeId', activeId, 'for player', playerKey,
+            ]),
             '\n', 'battleId', battleId,
             '\n', 'activePokemon', activePokemon,
             '\n', 'playerPokemon', playerPokemon,
@@ -665,6 +700,16 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       if (playerState.activeIndices?.length && playerState.autoSelect) {
         [playerState.selectionIndex] = playerState.activeIndices;
+      }
+
+      // update Ruin abilities (gen 9), if any, before syncing the field
+      if (battleState.gen > 8) {
+        toggleRuinAbilities(
+          playerState,
+          null,
+          battleState.field?.gameType,
+          true, // update the selected Pokemon's abilityToggled value too
+        );
       }
     }
 
