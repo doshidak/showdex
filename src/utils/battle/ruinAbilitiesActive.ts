@@ -1,4 +1,5 @@
 import type { CalcdexBattleField } from '@showdex/redux/store';
+import { countRuinAbilities } from './countRuinAbilities';
 
 /**
  * Checks if any *Ruin* abilities are active on the `field`.
@@ -15,9 +16,5 @@ import type { CalcdexBattleField } from '@showdex/redux/store';
  */
 export const ruinAbilitiesActive = (
   field: CalcdexBattleField,
-): boolean => !!field?.gameType && !!(<(keyof CalcdexBattleField)[]> [
-  'ruinBeadsCount',
-  'ruinSwordCount',
-  'ruinTabletsCount',
-  'ruinVesselCount',
-]).reduce((sum, key) => sum + (<number> field[key] || 0), 0);
+): boolean => !!field?.gameType
+  && !!Object.values(countRuinAbilities(field)).reduce((sum, count) => sum + count, 0);
