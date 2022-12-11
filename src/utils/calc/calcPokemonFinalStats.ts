@@ -109,10 +109,6 @@ export const calcPokemonFinalStats = (
     ...pokemon.spreadStats,
   };
 
-  // find out what the highest stat is (excluding HP) for use in some abilities,
-  // particularly Protosynthesis and Quark Drive (gen 9)
-  const highestStat = findHighestStat(currentStats);
-
   const hasFormeChange = 'formechange' in pokemon.volatiles;
   const speciesForme = hasTransform && hasFormeChange
     ? pokemon.volatiles.formechange[1]
@@ -130,33 +126,24 @@ export const calcPokemonFinalStats = (
   const item = id(pokemon.dirtyItem ?? pokemon.item);
   const ignoreItem = shouldIgnoreItem(pokemon, field);
 
+  // keeps track of all speed modifiers
+  // (the product of all number elements will be multiplied with SPE at the end)
   const speedMods: number[] = [];
 
-  // apply stat-wide effects (also our final return value)
-  const finalStats: Showdown.StatsTable = PokemonStatNames.reduce((stats, stat) => {
+  // swap ATK and DEF if the move "Power Trick" was used
+  if ('powertrick' in pokemon.volatiles) {
+    const { atk, def } = currentStats;
+
+    currentStats.atk = def;
+    currentStats.def = atk;
+  }
+
+  // apply stat boosts
+  const boostedStats: Showdown.StatsTable = PokemonStatNames.reduce((stats, stat) => {
     // apply effects to non-HP stats
     if (stat === 'hp') {
       return stats;
     }
-
-    // swap ATK and DEF if the move "Power Trick" was used
-    if ('powertrick' in pokemon.volatiles) {
-      stats[stat] = currentStats[stat === 'atk' ? 'def' : 'atk'] || 0;
-    }
-
-    // apply proto/quark stat boosts (gen 9)
-    // update: better to reimplement the conditionals than relying on the volatiles
-    // to allow the user to better control when the boost applies (implemented wayyy down below)
-    // if (!legacy && ability && /^(?:proto|quark)/i.test(ability)) {
-    //   // 30% stat boost (or 1.5x modifier for SPE) if either "Protosynthesis" or "Quark Drive" was activated
-    //   if ([`protosynthesis${stat}`, `quarkdrive${stat}`].some((v) => v in pokemon.volatiles)) {
-    //     if (stat === 'spe') {
-    //       speedMods.push(1.5);
-    //     } else {
-    //       stats[stat] = Math.floor(stats[stat] * 1.3);
-    //     }
-    //   }
-    // }
 
     // apply stat boosts if not 0 (cause it'd do nothing)
     const stage = boosts[stat];
@@ -170,6 +157,14 @@ export const calcPokemonFinalStats = (
 
     return stats;
   }, { ...currentStats });
+
+  // find out what the highest *boosted* stat is (excluding HP) for use in some abilities,
+  // particularly Protosynthesis & Quark Drive (gen 9),
+  // which will boost the highest stat after stage boosts are applied
+  const highestBoostedStat = findHighestStat(boostedStats);
+
+  // this will be our final return value
+  const finalStats: Showdown.StatsTable = { ...boostedStats };
 
   // apply status condition effects
   if (pokemon.status) {
@@ -498,11 +493,11 @@ export const calcPokemonFinalStats = (
      */
 
     // 30% highest stat boost (or 1.5x SPE modifier) if ability is "Protosynthesis" or "Quark Drive"
-    if (['protosynthesis', 'quarkdrive'].includes(ability) && highestStat) {
-      if (highestStat === 'spe') {
+    if (['protosynthesis', 'quarkdrive'].includes(ability) && highestBoostedStat) {
+      if (highestBoostedStat === 'spe') {
         speedMods.push(1.5);
       } else {
-        finalStats[highestStat] = Math.floor(finalStats[highestStat] * 1.3);
+        finalStats[highestBoostedStat] = Math.floor(finalStats[highestBoostedStat] * 1.3);
       }
     }
   }
