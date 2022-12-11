@@ -11,6 +11,8 @@ import type { CalcdexPlayer } from '@showdex/redux/store';
  *   when determining the user's currently selected Pokemon.
  * * `updateSelection` must be explicitly set to `true` for this utility to set the
  *   `abilityToggled` state for the Pokemon at `index`.
+ *   - This argument is only used when `gameType` is `'Doubles'`.
+ *   - i.e., Has no effect when `gameType` is `'Singles'` (default).
  *
  * @since 1.1.0
  */
