@@ -5,6 +5,7 @@ import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexMoveOverride } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
 import { calcHiddenPower } from './calcHiddenPower';
+import { calcRageFist } from './calcRageFist';
 import { determineMoveTargets } from './determineMoveTargets';
 
 /**
@@ -29,6 +30,8 @@ export const getMoveOverrideDefaults = (
   const dex = getDexForFormat(format);
 
   const {
+    id,
+    name,
     type,
     category,
     basePower: basePowerFromDex,
@@ -36,9 +39,13 @@ export const getMoveOverrideDefaults = (
     maxMove,
   } = dex?.moves.get(moveName) || {};
 
-  const basePower = formatId(moveName).includes('hiddenpower')
+  const moveId = id || formatId(name || moveName);
+
+  const basePower = moveId.startsWith('hiddenpower')
     ? calcHiddenPower(format, pokemon)
-    : basePowerFromDex;
+    : moveId === 'ragefist'
+      ? calcRageFist(pokemon)
+      : basePowerFromDex;
 
   const criticalHit = alwaysCriticalHits(moveName, format);
 

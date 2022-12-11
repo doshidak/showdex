@@ -12,6 +12,7 @@ import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 // import { alwaysCriticalHits } from './alwaysCriticalHits';
 import { calcHiddenPower } from './calcHiddenPower';
+import { calcRageFist } from './calcRageFist';
 import { determineCriticalHit } from './determineCriticalHit';
 import { determineMoveTargets } from './determineMoveTargets';
 
@@ -40,6 +41,8 @@ export const createSmogonMove = (
     return null;
   }
 
+  const moveId = formatId(moveName);
+
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
 
@@ -66,9 +69,13 @@ export const createSmogonMove = (
     ...determineMoveTargets(pokemon, moveName, format),
   };
 
-  // recalculate the base power if the move is Hidden Power
-  if (formatId(moveName).includes('hiddenpower')) {
+  // recalculate the base power if the move is Hidden Power (gens 2+) or Rage Fist (gen 9)
+  if (moveId.startsWith('hiddenpower')) {
     overrides.basePower = calcHiddenPower(format, pokemon);
+  }
+
+  if (moveId === 'ragefist') {
+    overrides.basePower = calcRageFist(pokemon);
   }
 
   // check if the user specified any overrides for this move
