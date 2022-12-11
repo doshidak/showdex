@@ -8,7 +8,7 @@ import {
   notFullyEvolved,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Specie } from '@smogon/calc/dist/data/interface';
+import type { ItemName, Specie } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -41,9 +41,7 @@ export const createSmogonPokemon = (
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
-  const item = gen > 1
-    ? pokemon.dirtyItem ?? pokemon.item
-    : null;
+  const item = (gen > 1 && (pokemon.dirtyItem ?? pokemon.item)) || null;
 
   // megas require special handling (like for the item), so make sure we detect these
   // const isMega = hasMegaForme(pokemon.speciesForme);
@@ -80,16 +78,23 @@ export const createSmogonPokemon = (
     ? pokemon.status === '???' ? null : pokemon.status
     : null;
 
-  const ability = !legacy
-    ? pokemon.dirtyAbility ?? pokemon.ability
-    : null;
+  const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
+  const abilityId = formatId(ability);
 
-  // note: Multiscale is in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
-  // we only allow it to be toggled on/off since it works like a Focus Sash (i.e., depends on the Pokemon's HP).
-  // (to calculate() of `smogon/calc`, it'll have no idea since we'll be passing no ability if toggled off)
-  const hasMultiscale = !!ability && ['multiscale', 'shadowshield'].includes(formatId(ability));
+  // note: these are in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
+  // but we're allowing the effects of these abilities to be toggled on/off
+  const pseudoToggleAbility = !!ability && [
+    'beadsofruin',
+    'multiscale',
+    'protosynthesis',
+    'quarkdrive',
+    'shadowshield',
+    'swordofruin',
+    'tabletsofruin',
+    'vesselofruin',
+  ].includes(abilityId);
 
-  const shouldMultiscale = hasMultiscale
+  const pseudoToggled = pseudoToggleAbility
     && pokemon.abilityToggleable
     && pokemon.abilityToggled;
 
@@ -101,15 +106,14 @@ export const createSmogonPokemon = (
     // also note: seems that maxhp is internally calculated in the instance's rawStats.hp,
     // so we can't specify it here
     curHP: (() => { // js wizardry
+      const shouldMultiscale = pseudoToggled
+        && ['multiscale', 'shadowshield'].includes(abilityId);
+
       // note that spreadStats may not be available yet, hence the fallback object
       const { hp: maxHp } = pokemon.spreadStats
         || { hp: pokemon.maxhp || 100 };
 
       if (pokemon.serverSourced) {
-        // const hp = !pokemon.hp || pokemon.hp === maxHp // check 0% or 100% HP for Multiscale
-        //   ? Math.floor((pokemon.hp || maxHp) * (!hasMultiscale || shouldMultiscale ? 1 : 0.99))
-        //   : (shouldMultiscale ? maxHp : pokemon.hp);
-
         return shouldMultiscale && !pokemon.hp ? maxHp : pokemon.hp;
       }
 
@@ -122,6 +126,8 @@ export const createSmogonPokemon = (
 
     level: pokemon.level,
     gender: pokemon.gender,
+
+    teraType: (pokemon.terastallized && pokemon.teraType) || null,
     status,
     toxicCounter: pokemon.toxicCounter,
 
@@ -130,10 +136,10 @@ export const createSmogonPokemon = (
     isDynamaxed: pokemon.useMax,
 
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
-    ability: hasMultiscale && !shouldMultiscale ? 'Pressure' : ability,
-    abilityOn: pokemon.abilityToggleable && !hasMultiscale ? pokemon.abilityToggled : undefined,
+    ability: pseudoToggleAbility && !pseudoToggled ? 'Pressure' : ability,
+    abilityOn: pseudoToggled,
     item,
-    nature: legacy ? undefined : pokemon.nature,
+    nature: legacy ? null : pokemon.nature,
     moves: pokemon.moves,
 
     ivs: {
@@ -191,6 +197,12 @@ export const createSmogonPokemon = (
       ].slice(0, 3),
     },
   };
+
+  // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
+  // unfortunately, we must forcibly set the item to Booster Energy to "activate" these abilities
+  if (pseudoToggled && ['protosynthesis', 'quarkdrive'].includes(abilityId) && !options.item) {
+    options.item = <ItemName> 'Booster Energy';
+  }
 
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
   // so we won't report these abilities to the calc to avoid unintentional double boostage
