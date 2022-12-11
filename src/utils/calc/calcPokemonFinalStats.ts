@@ -5,10 +5,14 @@ import {
 } from '@showdex/consts/pokemon';
 import { formatId as id } from '@showdex/utils/app';
 import {
+  countRuinAbilities,
   detectGenFromFormat,
+  detectLegacyGen,
+  findHighestStat,
   getDexForFormat,
-  hasMegaForme,
   notFullyEvolved,
+  ruinAbilitiesActive,
+  shouldIgnoreItem,
 } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -66,14 +70,15 @@ export const calcPokemonFinalStats = (
     ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
     : format;
 
-  const hpPercentage = calcPokemonHp(pokemon);
+  const legacy = detectLegacyGen(gen);
 
+  const hpPercentage = calcPokemonHp(pokemon);
   const ability = id(pokemon.dirtyAbility ?? pokemon.ability);
   const opponentAbility = id(opponentPokemon.dirtyAbility ?? opponentPokemon.ability);
 
-  const boostTable = gen > 2
-    ? [1, 1.5, 2, 2.5, 3, 3.5, 4]
-    : [1, 100 / 66, 2, 2.5, 100 / 33, 100 / 28, 4];
+  const boostTable = legacy
+    ? [1, 100 / 66, 2, 2.5, 100 / 33, 100 / 28, 4]
+    : [1, 1.5, 2, 2.5, 3, 3.5, 4];
 
   const boosts: Showdown.StatsTable = {
     atk: (pokemon?.dirtyBoosts?.atk ?? pokemon?.boosts?.atk) || 0,
@@ -104,8 +109,11 @@ export const calcPokemonFinalStats = (
     ...pokemon.spreadStats,
   };
 
-  const hasFormeChange = 'formechange' in pokemon.volatiles;
+  // find out what the highest stat is (excluding HP) for use in some abilities,
+  // particularly Protosynthesis and Quark Drive (gen 9)
+  const highestStat = findHighestStat(currentStats);
 
+  const hasFormeChange = 'formechange' in pokemon.volatiles;
   const speciesForme = hasTransform && hasFormeChange
     ? pokemon.volatiles.formechange[1]
     : pokemon.speciesForme;
@@ -113,87 +121,93 @@ export const calcPokemonFinalStats = (
   const species = dex.species.get(speciesForme);
   const baseForme = id(species?.baseSpecies);
 
-  const hasPowerTrick = 'powertrick' in pokemon.volatiles; // this is a move btw, not an ability!
-  const hasEmbargo = 'embargo' in pokemon.volatiles; // this is also a move
-  const hasGuts = ability === 'guts';
-  const hasQuickFeet = ability === 'quickfeet';
+  const types = pokemon.terastallized && pokemon.teraType
+    ? [pokemon.teraType]
+    : pokemon.types;
 
+  // note: using optional chaining here (over logical OR) in case the user clears the item on purpose
+  // (in which case the value of dirtyItem becomes an empty string, i.e., `''`)
   const item = id(pokemon.dirtyItem ?? pokemon.item);
+  const ignoreItem = shouldIgnoreItem(pokemon, field);
 
-  const ignoreItem = hasEmbargo
-    || hasMegaForme(speciesForme)
-    || field.isMagicRoom
-    || (ability === 'klutz' && !PokemonSpeedReductionItems.map((i) => id(i)).includes(item));
+  const speedMods: number[] = [];
 
+  // apply stat-wide effects (also our final return value)
   const finalStats: Showdown.StatsTable = PokemonStatNames.reduce((stats, stat) => {
     // apply effects to non-HP stats
-    if (stat !== 'hp') {
-      // swap ATK and DEF if "Power Trick" was used
-      if (hasPowerTrick) {
-        stats[stat] = currentStats[stat === 'atk' ? 'def' : 'atk'] || 0;
-      }
-
-      // apply stat boosts if not 0 (cause it'd do nothing)
-      const stage = boosts[stat];
-
-      if (stage) {
-        const boostValue = boostTable[Math.abs(stage)];
-        const boostMultiplier = stage > 0 ? boostValue : 1 / boostValue;
-
-        stats[stat] = Math.floor(stats[stat] * boostMultiplier);
-      }
-
-      // apply status condition effects
-      if (pokemon.status) {
-        if (gen > 2 && ((stat === 'atk' && hasGuts) || (stat === 'spe' && hasQuickFeet))) {
-          // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
-          // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)
-          stats[stat] = Math.floor(stats[stat] * 1.5);
-        } else {
-          switch (pokemon.status) {
-            case 'brn': {
-              if (stat === 'atk') {
-                // 50% ATK reduction (all gens... probably)
-                stats[stat] = Math.floor(stats[stat] * 0.5);
-              }
-
-              break;
-            }
-
-            case 'par': {
-              if (stat === 'spe' && (gen < 4 || !hasQuickFeet)) {
-                // 75% SPE reduction if gen < 7 (i.e., gens 1-6), otherwise 50% SPE reduction
-                // (reduction is negated if ability is "Quick Feet", which is only available gen 4+)
-                stats[stat] = Math.floor(stats[stat] * (gen < 7 ? 0.25 : 0.5));
-              }
-
-              break;
-            }
-
-            default: {
-              break;
-            }
-          }
-        }
-      }
+    if (stat === 'hp') {
+      return stats;
     }
 
-    if (gen <= 1) {
-      stats[stat] = Math.min(stats[stat], 999);
+    // swap ATK and DEF if the move "Power Trick" was used
+    if ('powertrick' in pokemon.volatiles) {
+      stats[stat] = currentStats[stat === 'atk' ? 'def' : 'atk'] || 0;
+    }
+
+    // apply proto/quark stat boosts (gen 9)
+    // update: better to reimplement the conditionals than relying on the volatiles
+    // to allow the user to better control when the boost applies (implemented wayyy down below)
+    // if (!legacy && ability && /^(?:proto|quark)/i.test(ability)) {
+    //   // 30% stat boost (or 1.5x modifier for SPE) if either "Protosynthesis" or "Quark Drive" was activated
+    //   if ([`protosynthesis${stat}`, `quarkdrive${stat}`].some((v) => v in pokemon.volatiles)) {
+    //     if (stat === 'spe') {
+    //       speedMods.push(1.5);
+    //     } else {
+    //       stats[stat] = Math.floor(stats[stat] * 1.3);
+    //     }
+    //   }
+    // }
+
+    // apply stat boosts if not 0 (cause it'd do nothing)
+    const stage = boosts[stat];
+
+    if (stage) {
+      const boostValue = boostTable[Math.abs(stage)];
+      const multiplier = stage > 0 ? boostValue : (1 / boostValue);
+
+      stats[stat] = Math.floor(stats[stat] * multiplier);
     }
 
     return stats;
   }, { ...currentStats });
 
-  // gen 1 doesn't support items
+  // apply status condition effects
+  if (pokemon.status) {
+    if (!legacy && ['guts', 'quickfeet'].includes(ability)) {
+      // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
+      if (ability === 'guts') {
+        finalStats.atk = Math.floor(finalStats.atk * 1.5);
+      }
+
+      // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)
+      if (ability === 'quickfeet') {
+        finalStats.spe = Math.floor(finalStats.spe * 1.5);
+      }
+    } else {
+      // 50% ATK reduction when burned (all gens... probably)
+      if (pokemon.status === 'brn') {
+        finalStats.atk = Math.floor(finalStats.atk * 0.5);
+      }
+
+      // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
+      if (pokemon.status === 'par') {
+        finalStats.spe = Math.floor(finalStats.spe * (gen < 7 ? 0.25 : 0.5));
+      }
+    }
+  }
+
+  // finished gen 1 since it doesn't support items
   if (gen <= 1) {
+    // gen 1 stats are capped to 999
+    Object.entries(finalStats)
+      .filter(([, value]) => value > 999)
+      .forEach(([stat]) => { finalStats[stat] = 999; });
+
     return finalStats;
   }
 
   // apply gen 2-compatible item effects
   // (at this point, we should at least be gen 2)
-  const speedMods: number[] = [];
-
   if (baseForme === 'pikachu' && !ignoreItem && item === 'lightball') {
     if (gen > 4) {
       // 100% ATK boost if "Light Ball" is held by a Pikachu (gen 5+)
@@ -233,21 +247,21 @@ export const calcPokemonFinalStats = (
   const hasDynamax = 'dynamax' in pokemon.volatiles
     || pokemon.useMax;
 
+  // 100% (2x) HP boost when Dynamaxed
   if (hasDynamax) {
-    // 100% (2x) HP boost when Dynamaxed
     finalStats.hp *= 2;
   }
 
   // apply more item effects
   // (at this point, we should at least be gen 3)
   if (!ignoreItem) {
+    // 50% ATK boost if "Choice Band" is held
     if (item === 'choiceband' && !hasDynamax) {
-      // 50% ATK boost if "Choice Band" is held
       finalStats.atk = Math.floor(finalStats.atk * 1.5);
     }
 
+    // 50% SPA boost if "Choice Specs" is held
     if (item === 'choicespecs' && !hasDynamax) {
-      // 50% SPA boost if "Choice Specs" is held
       finalStats.spa = Math.floor(finalStats.spa * 1.5);
     }
 
@@ -255,13 +269,13 @@ export const calcPokemonFinalStats = (
       speedMods.push(1.5);
     }
 
+    // 50% SPA boost if "Assault Vest" is held
     if (item === 'assaultvest') {
-      // 50% SPA boost if "Assault Vest" is held
       finalStats.spd = Math.floor(finalStats.spd * 1.5);
     }
 
+    // 100% DEF boost if "Fur Coat" is held
     if (item === 'furcoat') {
-      // 100% DEF boost if "Fur Coat" is held
       finalStats.def = Math.floor(finalStats.def * 2);
     }
 
@@ -291,14 +305,47 @@ export const calcPokemonFinalStats = (
     }
   }
 
+  // 100% ATK boost if ability is "Pure Power" or "Huge Power"
   if (['purepower', 'hugepower'].includes(ability)) {
-    // 100% ATK boost if ability is "Pure Power" or "Huge Power"
     finalStats.atk = Math.floor(finalStats.atk * 2);
   }
 
+  // 50% ATK boost if ability is "Hustle" or "Gorilla Tactics" (and not dynamaxed, for the latter only)
   if (ability === 'hustle' || (ability === 'gorillatactics' && !hasDynamax)) {
-    // 50% ATK boost if ability is "Hustle" or "Gorilla Tactics" (and not dynamaxed, for the latter only)
     finalStats.atk = Math.floor(finalStats.atk * 1.5);
+  }
+
+  // apply "Ruin" ability effects that'll ruin me (gen 9)
+  if (ruinAbilitiesActive(field)) {
+    const ruinCounts = countRuinAbilities(field);
+
+    // 25% SPD reduction for each active Pokemon with the "Beads of Ruin" ability (excluding this `pokemon`)
+    const ruinBeadsCount = Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? 1 : 0), 0);
+
+    if (ruinBeadsCount) {
+      finalStats.spd = Math.floor(finalStats.spd * (0.75 ** ruinBeadsCount));
+    }
+
+    // 25% DEF reduction for each active Pokemon with the "Sword of Ruin" ability (excluding this `pokemon`)
+    const ruinSwordCount = Math.max(ruinCounts.sword - (ability === 'swordofruin' ? 1 : 0), 0);
+
+    if (ruinSwordCount) {
+      finalStats.def = Math.floor(finalStats.def * (0.75 ** ruinSwordCount));
+    }
+
+    // 25% ATK reduction for each active Pokemon with the "Tablets of Ruin" ability (excluding this `pokemon`)
+    const ruinTabletsCount = Math.max(ruinCounts.tablets - (ability === 'tabletsofruin' ? 1 : 0), 0);
+
+    if (ruinTabletsCount) {
+      finalStats.atk = Math.floor(finalStats.atk * (0.75 ** ruinTabletsCount));
+    }
+
+    // 25% SPA reduction for each active Pokemon with the "Vessel of Ruin" ability (excluding this `pokemon`)
+    const ruinVesselCount = Math.max(ruinCounts.vessel - (ability === 'vesselofruin' ? 1 : 0), 0);
+
+    if (ruinVesselCount) {
+      finalStats.spa = Math.floor(finalStats.spa * (0.75 ** ruinVesselCount));
+    }
   }
 
   // apply weather effects
@@ -313,69 +360,70 @@ export const calcPokemonFinalStats = (
     // note: see WeatherMap in weather consts for the sanitized value
     // (e.g., `weather` will be `'sand'`, not `'sandstorm'`)
     if (weather === 'sand') {
-      if (pokemon.types.includes('Rock')) {
-        // 50% SPD boost if Rock type w/ darude sandstorm
+      // 50% SPD boost if Rock type w/ darude sandstorm
+      if (types.includes('Rock')) {
         finalStats.spd = Math.floor(finalStats.spd * 1.5);
       }
 
+      // 2x SPE modifier if ability is "Sand Rush" w/ sarude dandstorm
       if (ability === 'sandrush') {
         speedMods.push(2);
       }
     }
 
-    if (ability === 'slushrush' && weather === 'hail') {
-      speedMods.push(2);
+    // note: snow in gen 9 will still be 'hail' in the data, just displayed as "Snow" in the UI lmao
+    if (weather === 'hail') {
+      // 50% DEF boost if Ice type w/ "snow" only (gen 9)
+      if (gen > 8 && types.includes('Ice')) {
+        finalStats.def = Math.floor(finalStats.def * 1.5);
+      }
+
+      // 2x SPE modifier if ability is "Slush Rush" w/ hail/"snow"
+      if (ability === 'slushrush') {
+        speedMods.push(2);
+      }
     }
 
     if (ignoreItem || item !== 'utilityumbrella') {
       if (['sun', 'harshsunshine'].includes(weather)) {
+        // 50% SPA boost if ability is "Solar Power", sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
         if (ability === 'solarpower') {
-          // 50% SPA boost if ability is "Solar Power", sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
           finalStats.spa = Math.floor(finalStats.spa * 1.5);
-        } else if (ability === 'chlorophyll') {
+        }
+
+        // 2x SPE modifier if ability is "Chlorophyll", sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
+        if (ability === 'chlorophyll') {
           speedMods.push(2);
+        }
+
+        // 30% ATK boost if ability is "Orichal Cumpulse" (hehe), sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
+        if (ability === 'orichalcumpulse') { // "...uhm but actually, it's Orichalcum Pulse"
+          finalStats.atk = Math.floor(finalStats.atk * 1.3);
         }
 
         /**
          * @todo *Properly* implement support for ally Pokemon, notably Cherrim's "Flower Gift".
          * @see https://github.com/smogon/pokemon-showdown-client/blob/master/src/battle-tooltips.ts#L1098-L1109
          */
+        // 50% ATK/SPD boost if ability is "Flower Gift" and sunny/desolate
         if (ability === 'flowergift' && (gen <= 4 || baseForme === 'cherrim')) {
-          // 50% ATK/SPD boost if ability is "Flower Gift" and sunny/desolate
           finalStats.atk = Math.floor(finalStats.atk * 1.5);
           finalStats.spd = Math.floor(finalStats.spd * 1.5);
         }
       }
     }
 
+    // 2x SPE modifier if ability is "Swift Swim" and rain/primordial
     if (['rain', 'heavyrain'].includes(weather) && ability === 'swiftswim') {
       speedMods.push(2);
     }
   }
 
+  // 50% ATK/SPA reduction if ability is "Defeatist" and HP is 50% or less
   // yoo when tf did they make me into an ability lmaooo
   if (ability === 'defeatist' && hpPercentage <= 0.5) {
-    // 50% ATK/SPA reduction if ability is "Defeatist" and HP is 50% or less
     finalStats.atk = Math.floor(finalStats.atk * 0.5);
     finalStats.spa = Math.floor(finalStats.spa * 0.5);
-  }
-
-  // apply toggleable abilities
-  if (pokemon.abilityToggled) {
-    if (ability === 'slowstart' || 'slowstart' in pokemon.volatiles) {
-      // 50% ATK/SPE reduction if ability is "Slow Start"
-      finalStats.atk = Math.floor(finalStats.atk * 0.5);
-      speedMods.push(0.5);
-    }
-
-    if (ability === 'unburden' || !item || 'itemremoved' in pokemon.volatiles) {
-      speedMods.push(2);
-    }
-
-    /**
-     * @todo Implement ally Pokemon support for "Minus" and "Plus" toggleable abilities.
-     * @see https://github.com/smogon/pokemon-showdown-client/blob/master/src/battle-tooltips.ts#L1159-L1172
-     */
   }
 
   // apply additional status effects
@@ -387,18 +435,11 @@ export const calcPokemonFinalStats = (
   }
 
   // apply NFE (not fully evolved) effects
-  // const nfe = species?.evos?.some((evo) => {
-  //   const evoSpecies = dex.species.get(evo);
-  //
-  //   return !evoSpecies?.isNonstandard
-  //     || evoSpecies?.isNonstandard === species.isNonstandard;
-  // });
-
   const nfe = notFullyEvolved(species);
 
   if (nfe) {
+    // 50% DEF/SPD boost if "Eviolite" is held by an NFE Pokemon
     if (!ignoreItem && item === 'eviolite') {
-      // 50% DEF/SPD boost if "Eviolite" is held by an NFE Pokemon
       finalStats.def = Math.floor(finalStats.def * 1.5);
       finalStats.spd = Math.floor(finalStats.spd * 1.5);
     }
@@ -407,23 +448,63 @@ export const calcPokemonFinalStats = (
   // apply terrain effects
   const terrain = id(field.terrain);
 
+  // 50% DEF boost if ability is "Grass Pelt" w/ terrain of the grassy nature
   if (ability === 'grasspelt' && terrain === 'grassy') {
-    // 50% DEF boost if ability is "Grass Pelt" and terrain is of the grassy nature
     finalStats.def = Math.floor(finalStats.def * 1.5);
-  } else if (ability === 'surgesurfer' && terrain === 'electric') {
-    speedMods.push(2);
+  }
+
+  if (terrain === 'electric') {
+    // 2x SPE modifier if ability is "Surge Surfer" w/ electric terrain
+    if (ability === 'surgesurfer') {
+      speedMods.push(2);
+    }
+
+    // 30% SPA boost if ability is "Hadron Engine" w/ electric terrain
+    if (ability === 'hadronengine') {
+      finalStats.spa = Math.floor(finalStats.spa * 1.3);
+    }
   }
 
   // apply player side conditions
   const fieldSideKey = playerKey === 'p1' ? 'attackerSide' : 'defenderSide';
   const playerSide = field[fieldSideKey];
 
+  // 2x SPE modifier if "Tailwind" is active on the field
   if (playerSide?.isTailwind) {
     speedMods.push(2);
   }
 
+  // 0.25x SPE modifier if "Grass Pledge" is active on the field
   if (playerSide?.isGrassPledge) {
     speedMods.push(0.25);
+  }
+
+  // apply toggleable abilities
+  if (pokemon.abilityToggled) {
+    // 50% ATK/SPE reduction if ability is "Slow Start"
+    if (ability === 'slowstart') {
+      finalStats.atk = Math.floor(finalStats.atk * 0.5);
+      speedMods.push(0.5);
+    }
+
+    // 2x SPE modifier if ability is "Unburden" and item was removed
+    if (ability === 'unburden') {
+      speedMods.push(2);
+    }
+
+    /**
+     * @todo Implement ally Pokemon support for "Minus" and "Plus" toggleable abilities.
+     * @see https://github.com/smogon/pokemon-showdown-client/blob/master/src/battle-tooltips.ts#L1159-L1172
+     */
+
+    // 30% highest stat boost (or 1.5x SPE modifier) if ability is "Protosynthesis" or "Quark Drive"
+    if (['protosynthesis', 'quarkdrive'].includes(ability) && highestStat) {
+      if (highestStat === 'spe') {
+        speedMods.push(1.5);
+      } else {
+        finalStats[highestStat] = Math.floor(finalStats[highestStat] * 1.3);
+      }
+    }
   }
 
   // calculate the product of all the speedMods
