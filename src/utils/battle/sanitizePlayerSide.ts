@@ -75,6 +75,12 @@ export const sanitizePlayerSide = (
     ...(gen > 1 ? ['\n', 'applyFieldHazards?', applyFieldHazards] : []),
   );
 
+  // count how many Pokemon have an activated Ruin ability (gen 9)
+  const activeRuinAbilities = playerPokemon
+    ?.filter((p) => formatId(p?.dirtyAbility || p?.ability)?.endsWith('ofruin') && p.abilityToggled)
+    .map((p) => formatId(p.dirtyAbility || p.ability))
+    || [];
+
   return {
     // conditionally remove Spikes & Stealth Rocks from the calc if the Pokemon is
     // already on the field (don't want the hazard damage to re-apply)
@@ -104,6 +110,11 @@ export const sanitizePlayerSide = (
     isFirePledge: sideConditionNames.includes('firepledge'),
     isGrassPledge: sideConditionNames.includes('grasspledge'),
     isWaterPledge: sideConditionNames.includes('waterpledge'),
+
+    ruinBeadsCount: activeRuinAbilities.filter((a) => a === 'beadsofruin').length,
+    ruinSwordCount: activeRuinAbilities.filter((a) => a === 'swordofruin').length,
+    ruinTabletsCount: activeRuinAbilities.filter((a) => a === 'tabletsofruin').length,
+    ruinVesselCount: activeRuinAbilities.filter((a) => a === 'vesselofruin').length,
 
     // isSwitching: player?.active?.[0]?.ident === player?.pokemon?.[activeIndex]?.ident ? 'out' : 'in',
   };

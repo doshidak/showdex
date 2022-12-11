@@ -138,11 +138,7 @@ export const calcSmogonMatchup = (
   matchup.move = createSmogonMove(format, playerPokemon, playerMove);
   matchup.defender = createSmogonPokemon(format, opponentPokemon);
 
-  const smogonField = createSmogonField({
-    ...field,
-    attackerSide: playerKey === 'p1' ? field?.attackerSide : field?.defenderSide,
-    defenderSide: playerKey === 'p1' ? field?.defenderSide : field?.attackerSide,
-  });
+  const smogonField = createSmogonField(field, playerPokemon, playerKey);
 
   try {
     const result = calculate(

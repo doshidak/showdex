@@ -1,6 +1,6 @@
 import { Field as SmogonField } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
-import { ruinAbilitiesActive } from '@showdex/utils/battle';
+import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 
 export const createSmogonField = (
@@ -26,6 +26,8 @@ export const createSmogonField = (
   // note that this will apply for the playerPokemon only to calculate the current matchup
   // (specifically the playerPokemon's playerMove in calcSmogonMatchup())
   if (hasActiveRuin) {
+    const ruinCounts = countRuinAbilities(field);
+
     // reduce the number of a Ruin ability by 1 if the playerPokemon has it
     // (for singles, if the count is 1 [from the playerPokemon, for instance], subtracting 1 would result in 0 -> false)
     // (for doubles, if the count is 2, subtracting 1 would result in 1 -> true)
@@ -33,10 +35,11 @@ export const createSmogonField = (
 
     // though the reductions from the Ruin abilities stack (which could be possible in, say, doubles),
     // we unfortunately cannot specify how many reductions to make; we can only toggle them on/off
-    processedField.isBeadsOfRuin = !!Math.max(field.ruinBeadsCount - (ability === 'beadsofruin' ? 1 : 0), 0);
-    processedField.isSwordOfRuin = !!Math.max(field.ruinSwordCount - (ability === 'swordofruin' ? 1 : 0), 0);
-    processedField.isTabletsOfRuin = !!Math.max(field.ruinTabletsCount - (ability === 'tabletsofruin' ? 1 : 0), 0);
-    processedField.isVesselOfRuin = !!Math.max(field.ruinVesselCount - (ability === 'vesselofruin' ? 1 : 0), 0);
+    // (determined these abilities to stack based on the calculateModifiedStats() implementation in pokemon-showdown-client)
+    processedField.isBeadsOfRuin = !!Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? 0 : 1), 0);
+    processedField.isSwordOfRuin = !!Math.max(ruinCounts.sword - (ability === 'swordofruin' ? 0 : 1), 0);
+    processedField.isTabletsOfRuin = !!Math.max(ruinCounts.tablets - (ability === 'tabletsofruin' ? 1 : 0), 0);
+    processedField.isVesselOfRuin = !!Math.max(ruinCounts.vessel - (ability === 'vesselofruin' ? 1 : 0), 0);
   }
 
   // setting this as a variable in case I need to manipulate the instantiated class after

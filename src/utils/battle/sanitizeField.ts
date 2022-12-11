@@ -2,7 +2,6 @@ import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/field';
 import { formatId } from '@showdex/utils/app';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexBattleState } from '@showdex/redux/store';
-import { detectLegacyGen } from './detectLegacyGen';
 import { sanitizePlayerSide } from './sanitizePlayerSide';
 
 /**
@@ -44,7 +43,6 @@ export const sanitizeField = (
   } = state || {};
 
   const gen = genFromState || <GenerationNum> genFromBattle;
-  const legacy = detectLegacyGen(gen);
 
   const pseudoWeatherMoveNames = pseudoWeather
     ?.map((weatherState) => formatId(weatherState?.[0]))
@@ -66,19 +64,6 @@ export const sanitizeField = (
     isWonderRoom: pseudoWeatherMoveNames.includes('wonderroom'),
     isGravity: pseudoWeatherMoveNames.includes('gravity'),
 
-    // these values will be updated if applicable to the current battle below
-    ruinBeadsCount: 0,
-    ruinSwordCount: 0,
-    ruinTabletsCount: 0,
-    ruinVesselCount: 0,
-
-    // these values are set in createSmogonField() -- do not set them in this file!
-    // (handled on a per-Pokemon basis when calculating the matchup in calcSmogonMatchup())
-    isBeadsOfRuin: false,
-    isSwordOfRuin: false,
-    isTabletsOfRuin: false,
-    isVesselOfRuin: false,
-
     attackerSide: !ignoreP1Side
       ? sanitizePlayerSide(gen, battleP1, stateP1)
       : null,
@@ -87,28 +72,6 @@ export const sanitizeField = (
       ? sanitizePlayerSide(gen, battleP2, stateP2)
       : null,
   };
-
-  // count the number of active Ruin abilities (gen 9)
-  // (actual values for isBeadsOfRuin, isSwordOfRuin, etc. is set in createSmogonField() to be on a per-Pokemon basis)
-  if (!legacy && (stateP1?.activeIndices?.length || stateP2?.activeIndices?.length)) {
-    const activeP1 = stateP1.activeIndices.map((i) => stateP1.pokemon[i]).filter((p) => p?.dirtyAbility || p?.ability);
-    const activeP2 = stateP2.activeIndices.map((i) => stateP2.pokemon[i]).filter((p) => p?.dirtyAbility || p?.ability);
-
-    // const activeP1Abilities = activeP1.map((p) => p.dirtyAbility || p.ability).map(formatId);
-    // const activeP2Abilities = activeP2.map((p) => p.dirtyAbility || p.ability).map(formatId);
-    // const activeAbilities = [...activeP1Abilities, ...activeP2Abilities];
-
-    const activeAbilities = [
-      ...activeP1,
-      ...activeP2,
-    ].map((p) => formatId(p.dirtyAbility || p.ability));
-
-    // 25% stat reduction stacks, which can apply in doubles, for instance
-    sanitizedField.ruinBeadsCount = activeAbilities.filter((a) => a === 'beadsofruin').length;
-    sanitizedField.ruinSwordCount = activeAbilities.filter((a) => a === 'swordofruin').length;
-    sanitizedField.ruinTabletsCount = activeAbilities.filter((a) => a === 'tabletsofruin').length;
-    sanitizedField.ruinVesselCount = activeAbilities.filter((a) => a === 'vesselofruin').length;
-  }
 
   // in case this is spread with an existing field,
   // we don't want to overwrite the existing side if falsy
