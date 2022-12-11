@@ -41,7 +41,13 @@ import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 // import type { DropdownOption } from '@showdex/components/form';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import type {
+  CalcdexBattleField,
+  CalcdexPlayerKey,
+  CalcdexPlayerSide,
+  CalcdexPokemon,
+  CalcdexPokemonPreset,
+} from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
@@ -53,10 +59,13 @@ export interface PokeInfoProps {
   style?: React.CSSProperties;
   gen?: GenerationNum;
   format?: string;
+  playerKey?: CalcdexPlayerKey;
   pokemon: CalcdexPokemon;
   presets?: CalcdexPokemonPreset[];
   usage?: CalcdexPokemonPreset;
   presetsLoading?: boolean;
+  // active?: boolean;
+  field?: CalcdexBattleField;
   containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
@@ -68,10 +77,13 @@ export const PokeInfo = ({
   style,
   gen,
   format,
+  playerKey,
   pokemon,
   presets,
   usage,
   presetsLoading,
+  // active,
+  field,
   containerSize,
   onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
@@ -422,6 +434,38 @@ export const PokeInfo = ({
     settings,
     usage,
   ]);
+
+  // for Ruin abilities (gen 9), only show the ability toggle in Doubles
+  const showAbilityToggle = pokemon?.abilityToggleable
+    && (
+      !formatId(abilityName)?.endsWith('ofruin')
+        || field?.gameType === 'Doubles'
+    );
+
+  const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
+    ? 'defenderSide'
+    : 'attackerSide';
+
+  // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
+  const disableAbilityToggle = pokemon?.abilityToggleable
+    && formatId(abilityName)?.endsWith('ofruin')
+    && field?.gameType === 'Doubles'
+    // && !active
+    && !pokemon.abilityToggled
+    // && (
+    //   (abilityName === 'beadsofruin' && field?.[fieldKey]?.ruinBeadsCount)
+    //     || (abilityName === 'swordofruin' && field?.[fieldKey]?.ruinSwordCount)
+    //     || (abilityName === 'tabletsofruin' && field?.[fieldKey]?.ruinTabletsCount)
+    //     || (abilityName === 'vesselofruin' && field?.[fieldKey]?.ruinVesselCount)
+    //     || 0
+    // ) >= 2;
+    && ([
+      'ruinBeadsCount',
+      'ruinSwordCount',
+      'ruinTabletsCount',
+      'ruinVesselCount',
+    ] as (keyof CalcdexPlayerSide)[])
+      .reduce((sum, key) => sum + ((field[fieldKey]?.[key] as number) || 0), 0) >= 2;
 
   const showResetAbility = !!pokemon?.dirtyAbility
     && !pokemon.transformedForme
@@ -903,7 +947,7 @@ export const PokeInfo = ({
               Ability
 
               {
-                pokemon?.abilityToggleable &&
+                showAbilityToggle &&
                 <ToggleButton
                   className={styles.toggleButton}
                   label="Active"
@@ -918,6 +962,7 @@ export const PokeInfo = ({
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
                   active={pokemon.abilityToggled}
+                  disabled={disableAbilityToggle}
                   onPress={() => onPokemonChange?.({
                     abilityToggled: !pokemon.abilityToggled,
                   })}

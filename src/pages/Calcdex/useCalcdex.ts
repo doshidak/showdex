@@ -7,7 +7,12 @@ import {
   useDispatch,
 } from '@showdex/redux/store';
 import { getAuthUsername } from '@showdex/utils/app';
-import { sanitizeField } from '@showdex/utils/battle';
+import {
+  detectToggledAbility,
+  sanitizeField,
+  toggleableAbility,
+  toggleRuinAbilities,
+} from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateCalcdex } from '@showdex/utils/redux';
 import type { GenerationNum } from '@smogon/calc';
@@ -221,11 +226,75 @@ export const useCalcdex = ({
     renderAsOverlay,
     shouldRender,
 
-    updatePokemon: (playerKey, pokemon) => dispatch(calcdexSlice.actions.updatePokemon({
-      battleId,
-      playerKey,
-      pokemon,
-    })),
+    updatePokemon: (playerKey, pokemon) => {
+      const updatedBattleState = structuredClone(battleState);
+      const updatedPlayerState = updatedBattleState[playerKey];
+
+      const pokemonIndex = updatedPlayerState.pokemon
+        ?.findIndex((p) => p?.calcdexId === pokemon?.calcdexId)
+        ?? -1;
+
+      if (pokemonIndex < 0) {
+        return;
+      }
+
+      updatedPlayerState.pokemon[pokemonIndex] = {
+        ...updatedPlayerState.pokemon[pokemonIndex],
+        ...pokemon,
+      };
+
+      const updatedPokemon = updatedPlayerState.pokemon[pokemonIndex];
+
+      // recheck for toggleable abilities if changed
+      if ('ability' in pokemon || 'dirtyAbility' in pokemon) {
+        updatedPokemon.abilityToggleable = toggleableAbility(updatedPokemon);
+
+        if (updatedPokemon.abilityToggleable) {
+          updatedPokemon.abilityToggled = detectToggledAbility(updatedPokemon, updatedBattleState);
+        }
+      }
+
+      // smart toggle Ruin abilities (gen 9), but only when abilityToggled was not explicitly updated
+      if (updatedBattleState.gen > 8 && !('abilityToggled' in pokemon)) {
+        toggleRuinAbilities(
+          updatedPlayerState,
+          pokemonIndex,
+          updatedBattleState.field?.gameType,
+        );
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        battleId,
+        [playerKey]: updatedPlayerState,
+      }));
+
+      // handle recounting Ruin abilities when something changes of the Pokemon
+      if (updatedBattleState.gen > 8) {
+        const {
+          attackerSide,
+          defenderSide,
+        } = sanitizeField(battle, updatedBattleState);
+
+        dispatch(calcdexSlice.actions.updateField({
+          battleId,
+          field: {
+            attackerSide: {
+              ruinBeadsCount: attackerSide.ruinBeadsCount,
+              ruinSwordCount: attackerSide.ruinSwordCount,
+              ruinTabletsCount: attackerSide.ruinTabletsCount,
+              ruinVesselCount: attackerSide.ruinVesselCount,
+            },
+
+            defenderSide: {
+              ruinBeadsCount: defenderSide.ruinBeadsCount,
+              ruinSwordCount: defenderSide.ruinSwordCount,
+              ruinTabletsCount: defenderSide.ruinTabletsCount,
+              ruinVesselCount: defenderSide.ruinVesselCount,
+            },
+          },
+        }));
+      }
+    },
 
     updateField: (field) => dispatch(calcdexSlice.actions.updateField({
       battleId,
@@ -243,18 +312,32 @@ export const useCalcdex = ({
     })),
 
     setSelectionIndex: (playerKey, selectionIndex) => {
-      dispatch(calcdexSlice.actions.updatePlayer({
-        battleId,
-        [playerKey]: { selectionIndex },
-      }));
+      if (selectionIndex < 0) {
+        return;
+      }
 
       const updatedBattleState = structuredClone(battleState);
+      const updatedPlayerState = updatedBattleState[playerKey];
 
       // purposefully made fatal (from "selectionIndex of null/undefined" errors) cause it shouldn't be
       // null/undefined by the time this helper function is invoked
-      if (updatedBattleState[playerKey].selectionIndex !== selectionIndex) {
-        updatedBattleState[playerKey].selectionIndex = selectionIndex;
+      if (updatedPlayerState.selectionIndex !== selectionIndex) {
+        updatedPlayerState.selectionIndex = selectionIndex;
       }
+
+      // smart toggle Ruin abilities (gen 9)
+      if (updatedBattleState.gen > 8) {
+        toggleRuinAbilities(
+          updatedPlayerState,
+          selectionIndex,
+          updatedBattleState.field?.gameType,
+        );
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        battleId,
+        [playerKey]: updatedPlayerState,
+      }));
 
       // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
       // the Pokemon itself, not in the Side, which is the case for gen 2+.
