@@ -72,6 +72,15 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   serverSourced?: boolean;
 
   /**
+   * Player key (or "side ID", as it's referred to in the client) that the Pokemon belongs to.
+   *
+   * @example 'p1'
+   * @default null
+   * @since 1.1.0
+   */
+  playerKey?: CalcdexPlayerKey;
+
+  /**
    * Whether the Pokemon can Dynamax.
    *
    * * In addition to the Dynamax clause (and whether the gen supports D-maxing),
@@ -795,7 +804,11 @@ export interface CalcdexPokemonPreset {
   speciesForme?: string;
   level?: number;
   gender?: Showdown.GenderName;
+  hpType?: string;
+  teraType?: Showdown.TypeName;
   shiny?: boolean;
+  happiness?: number;
+  gigantamax?: boolean;
   ability?: AbilityName;
   altAbilities?: CalcdexPokemonAlt<AbilityName>[];
   item?: ItemName;
@@ -805,10 +818,7 @@ export interface CalcdexPokemonPreset {
   nature?: Showdown.PokemonNature;
   ivs?: Showdown.StatsTable;
   evs?: Showdown.StatsTable;
-  happiness?: number;
   pokeball?: string;
-  hpType?: string;
-  gigantamax?: boolean;
 }
 
 /* eslint-disable @typescript-eslint/indent */
@@ -940,42 +950,6 @@ export interface CalcdexBattleField extends SmogonState.Field {
   isDarkAura?: boolean;
   attackerSide: CalcdexPlayerSide;
   defenderSide: CalcdexPlayerSide;
-
-  /**
-   * Number of active Pokemon with the *Beads of Ruin* ability.
-   *
-   * * Used to determine toggle state of `isBeadsOfRuin` in `State.Side`.
-   *
-   * @since 1.1.0
-   */
-  ruinBeadsCount?: number;
-
-  /**
-   * Number of active Pokemon with the *Sword of Ruin* ability.
-   *
-   * * Used to determine the toggle state of `isSwordOfRuin` in `State.Side`.
-   *
-   * @since 1.1.0
-   */
-  ruinSwordCount?: number;
-
-  /**
-   * Number of active Pokemon with the *Tablets of Ruin* ability.
-   *
-   * * Used to determine the toggle state of `isTabletsOfRuin` in `State.Side`.
-   *
-   * @since 1.1.0
-   */
-  ruinTabletsCount?: number;
-
-  /**
-   * Number of active Pokemon with the *Vessel of Ruin* ability.
-   *
-   * * Used to determine the toggle state of `isVesselOfRuin` in `State.Side`.
-   *
-   * @since 1.1.0
-   */
-  ruinVesselCount?: number;
 }
 
 /**
@@ -1015,6 +989,42 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    * @since 0.1.3
    */
   isWaterPledge?: boolean;
+
+  /**
+   * Number of Pokemon with an activated *Beads of Ruin* ability.
+   *
+   * * Used to determine toggle state of `isBeadsOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinBeadsCount?: number;
+
+  /**
+   * Number of Pokemon with an activated *Sword of Ruin* ability.
+   *
+   * * Used to determine the toggle state of `isSwordOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinSwordCount?: number;
+
+  /**
+   * Number of Pokemon with an activated *Tablets of Ruin* ability.
+   *
+   * * Used to determine the toggle state of `isTabletsOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinTabletsCount?: number;
+
+  /**
+   * Number of Pokemon with an activated *Vessel of Ruin* ability.
+   *
+   * * Used to determine the toggle state of `isVesselOfRuin` in `State.Side`.
+   *
+   * @since 1.1.0
+   */
+  ruinVesselCount?: number;
 }
 
 /**
@@ -1446,7 +1456,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           sideid: 'p1',
           name: null,
           rating: null,
-          activeIndex: -1,
+          // activeIndex: -1,
           activeIndices: [],
           selectionIndex: 0,
           autoSelect: true,
@@ -1460,7 +1470,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           sideid: 'p2',
           name: null,
           rating: null,
-          activeIndex: -1,
+          // activeIndex: -1,
           activeIndices: [],
           selectionIndex: 0,
           autoSelect: true,
