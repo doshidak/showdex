@@ -61,3 +61,34 @@ export const PokemonTypeAbbreviations: Record<Showdown.TypeName, string> = {
   Dark: 'DARK',
   Fairy: 'FAIRY',
 };
+
+/**
+ * Shorter Pokemon type abbreviations.
+ *
+ * * *Shorter* in that the abbreviations have a max of 4 characters.
+ * * Like the `PokemonTypeAbbreviations` counterpart, these values are only meant to be rendered directly to the DOM.
+ * * Fun fact: this exists to make room for the Gen 9 Tera typing in the UI.
+ *
+ * @since 1.1.0
+ */
+export const PokemonTypeShortAbbreviations: Record<Showdown.TypeName, string> = {
+  '???': '???',
+  Normal: 'NRML',
+  Fighting: 'FGHT',
+  Flying: 'FLY',
+  Poison: 'PSN',
+  Ground: 'GRND',
+  Rock: 'ROCK',
+  Bug: 'BUG',
+  Ghost: 'GHST',
+  Steel: 'STL',
+  Fire: 'FIRE',
+  Water: 'WATR',
+  Grass: 'GRSS',
+  Electric: 'ELCR',
+  Psychic: 'PSYC',
+  Ice: 'ICE',
+  Dragon: 'DRGN',
+  Dark: 'DARK',
+  Fairy: 'FARY',
+};
