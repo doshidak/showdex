@@ -48,8 +48,11 @@ export const calcPokemonStat = (
     : format;
 
   const legacy = detectLegacyGen(gen);
+  const supportsAvs = typeof format === 'string' && format.includes('letsgo');
+  // const supportsEvs = !legacy && !supportsAvs;
 
-  const actualEv = !ev && legacy ? 252 : ev || 0;
+  const actualIv = clamp(0, legacy ? iv - (iv % 2 === 1 ? 1 : 0) : iv);
+  const actualEv = clamp(0, legacy ? 252 : ev || 0);
   const actualLevel = clamp(0, level, 100);
 
   if (stat === 'hp') {
@@ -57,22 +60,26 @@ export const calcPokemonStat = (
       return base;
     }
 
-    return tr(tr(2 * base + iv + tr(actualEv / 4) + 100) * (actualLevel / 100) + 10);
+    return supportsAvs
+      ? tr(tr(2 * base + actualIv + 100) * (actualLevel / 100) + 10) + actualEv
+      : tr(tr(2 * base + actualIv + tr(actualEv / 4) + 100) * (actualLevel / 100) + 10);
   }
 
-  const value = tr(tr(2 * base + iv + tr(actualEv / 4)) * (actualLevel / 100) + 5);
+  const value = tr(tr(2 * base + actualIv + tr(actualEv / 4)) * (actualLevel / 100) + 5);
 
-  const [
-    plus,
-    minus,
-  ] = PokemonNatureBoosts[nature] || [];
+  if (!legacy && nature && nature in PokemonNatureBoosts) {
+    const [
+      plus,
+      minus,
+    ] = PokemonNatureBoosts[nature];
 
-  if (plus && stat === plus) {
-    return tr(tr(value * 110, 16) / 100);
-  }
+    if (plus && stat === plus) {
+      return tr(tr(value * 110, 16) / 100);
+    }
 
-  if (minus && stat === minus) {
-    return tr(tr(value * 90, 16) / 100);
+    if (minus && stat === minus) {
+      return tr(tr(value * 90, 16) / 100);
+    }
   }
 
   return value;
