@@ -168,6 +168,7 @@ export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName
  * @since 1.0.3
  */
 export const PokemonCriticalHitMoves: MoveName[] = [
+  <MoveName> 'Flower Trick',
   <MoveName> 'Frost Breath',
   <MoveName> 'Storm Throw',
   <MoveName> 'Surging Strikes',
