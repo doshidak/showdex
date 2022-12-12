@@ -1,6 +1,7 @@
 import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
 // import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectLegacyGen } from './detectLegacyGen';
 import { getDexForFormat } from './getDexForFormat';
 import { hasNickname } from './hasNickname';
 
@@ -91,6 +92,7 @@ export const exportPokePaste = (
   }
 
   const dex = getDexForFormat(format);
+  const legacy = detectLegacyGen(format);
 
   const {
     name,
@@ -191,7 +193,7 @@ export const exportPokePaste = (
     }
   }
 
-  if (Object.keys(evs || {}).length) {
+  if (!legacy && Object.keys(evs || {}).length) {
     const exportedEvs = exportStatsTable(evs, 0);
 
     if (exportedEvs) {
