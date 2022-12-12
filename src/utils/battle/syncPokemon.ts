@@ -21,6 +21,7 @@ import type {
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 // import { detectToggledAbility } from './detectToggledAbility';
+import { flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
 import { mergeRevealedMoves } from './mergeRevealedMoves';
 import { sanitizePokemon } from './sanitizePokemon';
@@ -604,6 +605,34 @@ export const syncPokemon = (
     } else {
       // clear the list of transformed moves since the Pokemon is no longer transformed
       syncedPokemon.transformedMoves = [];
+    }
+  }
+
+  // exhibit the big smart sync technology by utilizing the power of hardcoded game sense
+  // for the Protosynthesis/Quark Drive abilities (gen 9)
+  if (state?.gen > 8) {
+    const ability = formatId(syncedPokemon.dirtyAbility || syncedPokemon.ability);
+    const dirtyItem = formatId(syncedPokemon.dirtyItem);
+
+    // determine if we should remove the dirty "Booster Energy" item
+    if (['protosynthesis', 'quarkdrive'].includes(ability) && dirtyItem === 'boosterenergy') {
+      const hasBoosterVolatile = Object.keys(syncedPokemon.volatiles)
+        .some((k) => /^(?:proto|quark)/i.test(k));
+
+      const removeDirtyBooster = !hasBoosterVolatile && (
+        (ability === 'protosynthesis' && state.field?.weather !== 'Sun')
+          || (ability === 'quarkdrive' && state.field?.terrain !== 'Electric')
+      );
+
+      if (removeDirtyBooster) {
+        // altItems could be potentially sorted by usage stats from the Calcdex
+        syncedPokemon.dirtyItem = (
+          !!syncedPokemon.altItems?.length
+            && flattenAlts(syncedPokemon.altItems).find((i) => !!i && formatId(i) !== 'boosterenergy')
+        ) || null;
+
+        syncedPokemon.abilityToggled = false;
+      }
     }
   }
 

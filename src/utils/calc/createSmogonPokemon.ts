@@ -9,7 +9,7 @@ import {
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { ItemName, Specie } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
@@ -29,6 +29,7 @@ export const createSmogonPokemon = (
   format: string,
   pokemon: CalcdexPokemon,
   // moveName?: MoveName,
+  field?: CalcdexBattleField,
 ): SmogonPokemon => {
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
@@ -200,8 +201,19 @@ export const createSmogonPokemon = (
 
   // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
   // unfortunately, we must forcibly set the item to Booster Energy to "activate" these abilities
-  if (pseudoToggled && ['protosynthesis', 'quarkdrive'].includes(abilityId) && !options.item) {
-    options.item = <ItemName> 'Booster Energy';
+  if (pseudoToggled && ['protosynthesis', 'quarkdrive'].includes(abilityId) && options.item !== 'Booster Energy') {
+    const {
+      weather,
+      terrain,
+    } = field || {};
+
+    // update (2022/12/11): no need to forcibly set the item if the field conditions activate the abilities
+    const fieldActivated = (abilityId === 'protosynthesis' && weather === 'Sun')
+      || (abilityId === 'quarkdrive' && terrain === 'Electric');
+
+    if (!fieldActivated) {
+      options.item = <ItemName> 'Booster Energy';
+    }
   }
 
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,

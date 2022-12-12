@@ -134,9 +134,9 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  matchup.attacker = createSmogonPokemon(format, playerPokemon);
+  matchup.attacker = createSmogonPokemon(format, playerPokemon, field);
   matchup.move = createSmogonMove(format, playerPokemon, playerMove);
-  matchup.defender = createSmogonPokemon(format, opponentPokemon);
+  matchup.defender = createSmogonPokemon(format, opponentPokemon, field);
 
   const smogonField = createSmogonField(field, playerPokemon, playerKey);
 
