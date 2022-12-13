@@ -605,6 +605,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   hitCounter?: number;
 
   /**
+   * Number of fainted Pokemon on the side that this Pokemon belongs to.
+   *
+   * * Kept track by the client under the `faintCounter` property in `Showdown.Side`.
+   * * Note that all Pokemon on a given side will have the same value for this property.
+   *   - Redundantly done this way to keep the codebase a bit less messier.
+   *   - Otherwise, I'd have to pass the `field` state to a bunch of functions.
+   *   - (Although, it's kinda already like that... LOL)
+   *
+   * @default 0
+   * @since 1.1.0
+   */
+  faintCounter?: number;
+
+  /**
    * Preset that's currently being applied to the Pokemon.
    *
    * * Could use the preset's `name`, but you may run into some issues with uniqueness.
@@ -991,16 +1005,6 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    * @since 0.1.3
    */
   isWaterPledge?: boolean;
-
-  /**
-   * Number of fainted Pokemon.
-   *
-   * * Reported by the client as `faintCounter` for each `Showdown.Side`.
-   * * Hmm... this entire `CalcdexPlayerSide` should be refactored under `CalcdexPlayer` tho.
-   *
-   * @since 1.1.0
-   */
-  faintedCount?: number;
 
   /**
    * Number of Pokemon with an activated *Beads of Ruin* ability.

@@ -450,6 +450,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
         }
 
+        // update the faintCounter from the player side if not fainted (or prev value is 0)
+        if (player.faintCounter > -1 && (syncedPokemon.hp > 0 || !syncedPokemon.faintCounter)) {
+          const reloadOffset = !syncedPokemon.hp && !syncedPokemon.faintCounter ? 1 : 0;
+          const value = Math.max(player.faintCounter - reloadOffset);
+
+          syncedPokemon.faintCounter = value;
+        }
+
         l.debug(
           'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
           '\n', 'battleId', battleId,
@@ -578,9 +586,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
 
           // set the initial showGenetics value from the settings if this is serverSourced
-          const geneticsKey = playerKey === battleState.authPlayerKey
-            ? 'auth'
-            : playerKey;
+          const geneticsKey = playerKey === battleState.authPlayerKey ? 'auth' : playerKey;
 
           // update (2022/11/14): defaultShowGenetics has been deprecated in favor of lockGeneticsVisibility
           // syncedPokemon.showGenetics = settings?.defaultShowGenetics?.[geneticsKey] ?? true;
