@@ -8,7 +8,7 @@ import {
 } from '@showdex/utils/battle';
 // import { env } from '@showdex/utils/core';
 // import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
+import type { ID, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 // import { alwaysCriticalHits } from './alwaysCriticalHits';
 import { calcHiddenPower } from './calcHiddenPower';
@@ -32,6 +32,7 @@ export const createSmogonMove = (
   format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
+  basePowerMods?: number[],
 ): SmogonMove => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
@@ -57,11 +58,6 @@ export const createSmogonMove = (
     useMax: pokemon.useMax,
 
     // for moves that always crit, we need to make sure the crit doesn't apply when Z/Max'd
-    // isCrit: (
-    //   alwaysCriticalHits(moveName, format)
-    //   && (!pokemon.useZ || !getZMove(moveName, item))
-    //   && (!pokemon.useMax || !getMaxMove(moveName, ability, pokemon.speciesForme))
-    // ) || pokemon.criticalHit,
     isCrit: determineCriticalHit(pokemon, moveName, format),
   };
 
@@ -102,6 +98,26 @@ export const createSmogonMove = (
     overrides.basePower = Math.max(basePowerOverride, 0);
   }
 
+  if (basePowerMods?.length) {
+    const basePower = typeof overrides.basePower === 'number'
+      ? overrides.basePower
+      : dex.moves.get(<ID> moveName)?.basePower;
+
+    if (basePower > 0) {
+      if (typeof overrides.basePower !== 'number') {
+        overrides.basePower = basePower;
+      }
+
+      basePowerMods.forEach((mod) => {
+        if (typeof mod !== 'number' || mod < 0) {
+          return;
+        }
+
+        overrides.basePower = Math.floor(overrides.basePower * mod);
+      });
+    }
+  }
+
   // only supply this if it's true (otherwise, use the pre-determined value)
   if (criticalHitOverride) {
     options.isCrit = criticalHitOverride;
@@ -118,6 +134,10 @@ export const createSmogonMove = (
 
   if (offensiveStatOverride) {
     overrides.overrideOffensiveStat = offensiveStatOverride;
+  }
+
+  if (ability === 'Supreme Overlord') {
+    console.log(moveName, 'overrides', overrides, 'options', options, 'basePowerMods', basePowerMods);
   }
 
   const smogonMove = new SmogonMove(dex, moveName, {
@@ -156,6 +176,10 @@ export const createSmogonMove = (
 
     return clonedMove;
   };
+
+  if (ability === 'Supreme Overlord') {
+    console.log('smogonMove', smogonMove, 'basePowerMods', basePowerMods);
+  }
 
   return smogonMove;
 };
