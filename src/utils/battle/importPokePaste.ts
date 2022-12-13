@@ -22,7 +22,8 @@ const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> 
   evs: /^\s*EVs:\s*(\d.+)$/i,
   nature: /^\s*([A-Z]+)\s+Nature$/i,
   moves: /^\s*-\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]])(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?$/i,
-  speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9-]{2,})\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9-\x20]+[A-Z0-9]))?$/i,
+  name: /^=+\s*(?:\[([A-Z0-9]+)\]\s*)(.+[^\s])\s*={3}$/i,
+  speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9\-]{2,})\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9\-\x20]+[A-Z0-9]))?$/i,
 };
 
 const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
@@ -43,9 +44,8 @@ const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
  *   - e.g., `'- Volt Switch / Surf / Volt Tackle'` is an acceptable move line.
  *   - Extraneous moves will be added to `altMoves` once `moves` fills up to its maximum length (e.g., `4`).
  * * `null` will be returned on the following conditions:
- *   - No `pokePaste` was provided,
- *   - `speciesForme` couldn't be determined, or
- *   - preset has no `moves`.
+ *   - No `pokePaste` was provided, or
+ *   - `speciesForme` couldn't be determined.
  *
  * @example
  * ```ts
@@ -113,6 +113,7 @@ export const importPokePaste = (
   }
 
   const dex = getDexForFormat(format);
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // this will be our final return value
   const preset: CalcdexPokemonPreset = {
@@ -120,7 +121,7 @@ export const importPokePaste = (
     id: null,
     source: 'import',
     name,
-    gen: detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen')),
+    gen,
     format,
 
     speciesForme: null,
@@ -152,7 +153,8 @@ export const importPokePaste = (
   };
 
   // first, split the pokePaste by newlines for easier line-by-line processing
-  const lines = pokePaste.split('\n').filter(Boolean);
+  // (trim()ing here since Teambuilder adds a bunch of spaces at the end of each line)
+  const lines = pokePaste.split(/\r?\n/).filter(Boolean).map((l) => l.trim());
 
   // process each line by matching regex (performance 100 ... /s)
   lines.forEach((line) => {
@@ -449,7 +451,7 @@ export const importPokePaste = (
           const dexMoveName = dexMoveNames[i];
 
           // determine whether we're adding these move(s) to the preset's `moves` or `altMoves`
-          const movesSource = addedToMoves || preset.moves.length > maxPresetMoves - 1
+          const movesSource = addedToMoves || preset.moves.length + 1 > maxPresetMoves
             ? preset.altMoves
             : preset.moves;
 
@@ -467,14 +469,40 @@ export const importPokePaste = (
         break;
       }
 
+      case 'name': {
+        const [
+          ,
+          detectedFormat,
+          detectedName,
+        ] = regex.exec(line) || [];
+
+        if (detectGenFromFormat(detectedFormat) > 0) {
+          preset.format = detectedFormat.trim();
+        }
+
+        if (detectedName) {
+          preset.name = detectedName?.trim() || name;
+        }
+
+        break;
+      }
+
       default: {
         break;
       }
     }
   });
 
-  if (!preset.speciesForme || !preset.moves.length) {
+  if (!preset.speciesForme) {
     return null;
+  }
+
+  if (gen > 8 && !preset.teraType) {
+    const speciesTypes = dex.species.get(preset.speciesForme)?.types;
+
+    if (speciesTypes?.[0]) {
+      [preset.teraType] = speciesTypes;
+    }
   }
 
   preset.calcdexId = calcPresetCalcdexId(preset);
