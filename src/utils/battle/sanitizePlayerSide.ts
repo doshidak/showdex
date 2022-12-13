@@ -22,6 +22,7 @@ export const sanitizePlayerSide = (
   const {
     active: activePokemon,
     sideConditions,
+    faintCounter,
   } = battleSide || {};
 
   const {
@@ -110,6 +111,8 @@ export const sanitizePlayerSide = (
     isFirePledge: sideConditionNames.includes('firepledge'),
     isGrassPledge: sideConditionNames.includes('grasspledge'),
     isWaterPledge: sideConditionNames.includes('waterpledge'),
+
+    faintedCount: faintCounter || 0, // lol
 
     ruinBeadsCount: activeRuinAbilities.filter((a) => a === 'beadsofruin').length,
     ruinSwordCount: activeRuinAbilities.filter((a) => a === 'swordofruin').length,
