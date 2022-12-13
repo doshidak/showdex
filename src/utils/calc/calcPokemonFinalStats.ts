@@ -55,11 +55,9 @@ export const calcPokemonFinalStats = (
 
   const dex = getDexForFormat(format);
 
-  // if (typeof dex?.stats?.calc !== 'function' || typeof dex?.species?.get !== 'function') {
   if (!dex) {
     if (__DEV__) {
       l.warn(
-        // 'Cannot calculate stats since dex.stats.calc() and/or dex.species.get() are not available.',
         'Global Dex is unavailable for format', format,
         '\n', 'pokemon', pokemon,
         '\n', 'field', field,
@@ -82,26 +80,6 @@ export const calcPokemonFinalStats = (
   const opponentAbility = id(opponentPokemon.dirtyAbility ?? opponentPokemon.ability);
 
   const hasTransform = 'transform' in pokemon.volatiles;
-
-  // const serverStats = {
-  //   ...(!hasTransform && pokemon.serverStats),
-  //   hp: pokemon.serverStats?.hp,
-  // };
-
-  // if (!serverStats.hp) {
-  //   delete serverStats.hp;
-  // }
-
-  // const currentStats: Showdown.StatsTable = {
-  //   ...PokemonInitialStats,
-  //   ...pokemon.baseStats,
-  //   ...(hasTransform && pokemon.transformedBaseStats),
-  //   ...serverStats,
-  //
-  //   // this recalculates based on changes in the UI, so should be last!
-  //   ...pokemon.spreadStats,
-  // };
-
   const hasFormeChange = 'formechange' in pokemon.volatiles;
   const speciesForme = hasTransform && hasFormeChange
     ? pokemon.volatiles.formechange[1]
@@ -119,16 +97,8 @@ export const calcPokemonFinalStats = (
   const item = id(pokemon.dirtyItem ?? pokemon.item);
   const ignoreItem = shouldIgnoreItem(pokemon, field);
 
-  // keeps track of all speed modifiers
-  // (the product of all number elements will be multiplied with SPE at the end)
-  // const speedMods: number[] = [];
-
   // swap ATK and DEF if the move "Power Trick" was used
   if ('powertrick' in pokemon.volatiles) {
-    // const { atk, def } = currentStats;
-
-    // currentStats.atk = def;
-    // currentStats.def = atk;
     record.swap('atk', 'def', 'move', 'Power Trick');
   }
 
@@ -167,33 +137,26 @@ export const calcPokemonFinalStats = (
   // which will boost the highest stat after stage boosts are applied
   const highestBoostedStat = findHighestStat(record.stats());
 
-  // this will be our final return value
-  // const finalStats: Showdown.StatsTable = { ...boostedStats };
-
   // apply status condition effects
   if (pokemon.status) {
     if (!legacy && ['guts', 'quickfeet'].includes(ability)) {
       // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
       if (ability === 'guts') {
-        // finalStats.atk = Math.floor(finalStats.atk * 1.5);
         record.apply('atk', 1.5, 'ability', 'Guts');
       }
 
       // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)
       if (ability === 'quickfeet') {
-        // finalStats.spe = Math.floor(finalStats.spe * 1.5);
         record.apply('spe', 1.5, 'ability', 'Quick Feet');
       }
     } else {
       // 50% ATK reduction when burned (all gens... probably)
       if (pokemon.status === 'brn') {
-        // finalStats.atk = Math.floor(finalStats.atk * 0.5);
         record.apply('atk', 0.5, 'status', 'Burn');
       }
 
       // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
       if (pokemon.status === 'par') {
-        // finalStats.spe = Math.floor(finalStats.spe * (gen < 7 ? 0.25 : 0.5));
         record.apply('spe', gen < 7 ? 0.25 : 0.5, 'status', 'Paralysis');
       }
     }
@@ -202,9 +165,6 @@ export const calcPokemonFinalStats = (
   // finished gen 1 since it doesn't support items
   if (gen <= 1) {
     // gen 1 stats are capped to 999
-    // Object.entries(finalStats)
-    //   .filter(([, value]) => value > 999)
-    //   .forEach(([stat]) => { finalStats[stat] = 999; });
     record.cap(999);
 
     return record.export();
@@ -215,35 +175,28 @@ export const calcPokemonFinalStats = (
   if (baseForme === 'pikachu' && !ignoreItem && item === 'lightball') {
     if (gen > 4) {
       // 100% ATK boost if "Light Ball" is held by a Pikachu (gen 5+)
-      // finalStats.atk = Math.floor(finalStats.atk * 2);
       record.apply('atk', 2, 'item', 'Light Ball');
     }
 
     // 100% SPA boost if "Light Ball" is held by a Pikachu
-    // finalStats.spa = Math.floor(finalStats.spa * 2);
     record.apply('spa', 2, 'item', 'Light Ball');
   }
 
   if (['marowak', 'cubone'].includes(baseForme) && !ignoreItem && item === 'thickclub') {
     // 100% ATK boost if "Thick Club" is held by a Marowak/Cubone
-    // finalStats.atk = Math.floor(finalStats.atk * 2);
     record.apply('atk', 2, 'item', 'Thick Club');
   }
 
   if (baseForme === 'ditto' && !hasTransform && !ignoreItem) {
     if (item === 'quickpowder') {
-      // speedMods.push(2);
       record.apply('spe', 2, 'item', 'Quick Powder');
     } else if (item === 'metalpowder') {
       if (gen === 2) {
         // 50% DEF/SPD boost if "Metal Powder" is held by a Ditto (gen 2)
-        // finalStats.def = Math.floor(finalStats.def * 1.5);
-        // finalStats.spd = Math.floor(finalStats.spd * 1.5);
         record.apply('def', 1.5, 'item', 'Metal Powder');
         record.apply('spd', 1.5, 'item', 'Metal Powder');
       } else {
         // 100% DEF boost if "Metal Powder" is held by a Ditto (gen 3+)
-        // finalStats.def = Math.floor(finalStats.def * 2);
         record.apply('def', 2, 'item', 'Metal Powder');
       }
     }
@@ -260,7 +213,6 @@ export const calcPokemonFinalStats = (
 
   // 100% (2x) HP boost when Dynamaxed
   if (hasDynamax) {
-    // finalStats.hp *= 2;
     record.apply('hp', 2, 'ultimate', 'Dynamax');
   }
 
@@ -269,49 +221,40 @@ export const calcPokemonFinalStats = (
   if (!ignoreItem) {
     // 50% ATK boost if "Choice Band" is held
     if (item === 'choiceband' && !hasDynamax) {
-      // finalStats.atk = Math.floor(finalStats.atk * 1.5);
       record.apply('atk', 1.5, 'item', 'Choice Band');
     }
 
     // 50% SPA boost if "Choice Specs" is held
     if (item === 'choicespecs' && !hasDynamax) {
-      // finalStats.spa = Math.floor(finalStats.spa * 1.5);
       record.apply('spa', 1.5, 'item', 'Choice Specs');
     }
 
     if (item === 'choicescarf' && !hasDynamax) {
-      // speedMods.push(1.5);
       record.apply('spe', 1.5, 'item', 'Choice Scarf');
     }
 
     // 50% SPA boost if "Assault Vest" is held
     if (item === 'assaultvest') {
-      // finalStats.spd = Math.floor(finalStats.spd * 1.5);
       record.apply('spd', 1.5, 'item', 'Assault Vest');
     }
 
     // 100% DEF boost if "Fur Coat" is held
     if (item === 'furcoat') {
-      // finalStats.def = Math.floor(finalStats.def * 2);
       record.apply('def', 2, 'item', 'Fur Coat');
     }
 
     if (baseForme === 'clamperl') {
       if (item === 'deepseatooth') {
         // 100% SPA boost if "Deep Sea Tooth" is held by a Clamperl
-        // finalStats.spa = Math.floor(finalStats.spa * 2);
         record.apply('spa', 2, 'item', 'Deep Sea Tooth');
       } else if (item === 'deepseascale') {
         // 100% SPD boost if "Deep Sea Scale" is held by a Clamperl
-        // finalStats.spd = Math.floor(finalStats.spd * 2);
         record.apply('spd', 2, 'item', 'Deep Sea Scale');
       }
     }
 
     if (item === 'souldew' && gen < 7 && ['latios', 'latias'].includes(baseForme)) {
       // 50% SPA/SPD boost if "Soul Dew" is held by a Latios/Latias (gens 3-6)
-      // finalStats.spa = Math.floor(finalStats.spa * 1.5);
-      // finalStats.spd = Math.floor(finalStats.spd * 1.5);
       record.apply('spa', 1.5, 'item', 'Soul Dew');
       record.apply('spd', 1.5, 'item', 'Soul Dew');
     }
@@ -322,20 +265,17 @@ export const calcPokemonFinalStats = (
     ];
 
     if (speedReductionItems.includes(item)) {
-      // speedMods.push(0.5);
       record.apply('spe', 0.5, 'item', dex.items.get(item)?.name || item);
     }
   }
 
   // 100% ATK boost if ability is "Pure Power" or "Huge Power"
   if (['purepower', 'hugepower'].includes(ability)) {
-    // finalStats.atk = Math.floor(finalStats.atk * 2);
     record.apply('atk', 2, 'ability', dex.abilities.get(ability)?.name || ability);
   }
 
   // 50% ATK boost if ability is "Hustle" or "Gorilla Tactics" (and not dynamaxed, for the latter only)
   if (ability === 'hustle' || (ability === 'gorillatactics' && !hasDynamax)) {
-    // finalStats.atk = Math.floor(finalStats.atk * 1.5);
     record.apply('atk', 1.5, 'ability', dex.abilities.get(ability)?.name || ability);
   }
 
@@ -347,7 +287,6 @@ export const calcPokemonFinalStats = (
     const ruinBeadsCount = Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? 1 : 0), 0);
 
     if (ruinBeadsCount) {
-      // finalStats.spd = Math.floor(finalStats.spd * (0.75 ** ruinBeadsCount));
       record.apply(
         'spd',
         0.75 ** ruinBeadsCount,
@@ -360,7 +299,6 @@ export const calcPokemonFinalStats = (
     const ruinSwordCount = Math.max(ruinCounts.sword - (ability === 'swordofruin' ? 1 : 0), 0);
 
     if (ruinSwordCount) {
-      // finalStats.def = Math.floor(finalStats.def * (0.75 ** ruinSwordCount));
       record.apply(
         'def',
         0.75 ** ruinSwordCount,
@@ -373,7 +311,6 @@ export const calcPokemonFinalStats = (
     const ruinTabletsCount = Math.max(ruinCounts.tablets - (ability === 'tabletsofruin' ? 1 : 0), 0);
 
     if (ruinTabletsCount) {
-      // finalStats.atk = Math.floor(finalStats.atk * (0.75 ** ruinTabletsCount));
       record.apply(
         'atk',
         0.75 ** ruinTabletsCount,
@@ -386,7 +323,6 @@ export const calcPokemonFinalStats = (
     const ruinVesselCount = Math.max(ruinCounts.vessel - (ability === 'vesselofruin' ? 1 : 0), 0);
 
     if (ruinVesselCount) {
-      // finalStats.spa = Math.floor(finalStats.spa * (0.75 ** ruinVesselCount));
       record.apply(
         'spa',
         0.75 ** ruinVesselCount,
@@ -410,13 +346,11 @@ export const calcPokemonFinalStats = (
     if (weather === 'sand') {
       // 50% SPD boost if Rock type w/ darude sandstorm
       if (types.includes('Rock')) {
-        // finalStats.spd = Math.floor(finalStats.spd * 1.5);
         record.apply('spd', 1.5, 'field', 'Darude Sandstorm');
       }
 
       // 2x SPE modifier if ability is "Sand Rush" w/ sarude dandstorm
       if (ability === 'sandrush') {
-        // speedMods.push(2);
         record.apply('spe', 2, 'ability', 'Sand Rush');
       }
     }
@@ -425,13 +359,11 @@ export const calcPokemonFinalStats = (
     if (weather === 'hail') {
       // 50% DEF boost if Ice type w/ "snow" only (gen 9)
       if (gen > 8 && types.includes('Ice')) {
-        // finalStats.def = Math.floor(finalStats.def * 1.5);
         record.apply('def', 1.5, 'field', 'Snow');
       }
 
       // 2x SPE modifier if ability is "Slush Rush" w/ hail/"snow"
       if (ability === 'slushrush') {
-        // speedMods.push(2);
         record.apply('spe', 2, 'ability', 'Slush Rush');
       }
     }
@@ -440,19 +372,16 @@ export const calcPokemonFinalStats = (
       if (['sun', 'harshsunshine'].includes(weather)) {
         // 50% SPA boost if ability is "Solar Power", sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
         if (ability === 'solarpower') {
-          // finalStats.spa = Math.floor(finalStats.spa * 1.5);
           record.apply('spa', 1.5, 'ability', 'Solar Power');
         }
 
         // 2x SPE modifier if ability is "Chlorophyll", sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
         if (ability === 'chlorophyll') {
-          // speedMods.push(2);
           record.apply('spe', 2, 'ability', 'Chlorophyll');
         }
 
         // 30% ATK boost if ability is "Orichal Cumpulse" (hehe), sunny/desolate, and Pokemon is NOT holding "Utility Umbrella"
         if (ability === 'orichalcumpulse') { // "...uhm but actually, it's Orichalcum Pulse"
-          // finalStats.atk = Math.floor(finalStats.atk * 1.3);
           record.apply('atk', 1.3, 'ability', 'Orichalcum Pulse');
         }
 
@@ -462,8 +391,6 @@ export const calcPokemonFinalStats = (
          */
         // 50% ATK/SPD boost if ability is "Flower Gift" and sunny/desolate
         if (ability === 'flowergift' && (gen <= 4 || baseForme === 'cherrim')) {
-          // finalStats.atk = Math.floor(finalStats.atk * 1.5);
-          // finalStats.spd = Math.floor(finalStats.spd * 1.5);
           record.apply('atk', 1.5, 'ability', 'Flower Gift');
         }
       }
@@ -471,7 +398,6 @@ export const calcPokemonFinalStats = (
 
     // 2x SPE modifier if ability is "Swift Swim" and rain/primordial
     if (['rain', 'heavyrain'].includes(weather) && ability === 'swiftswim') {
-      // speedMods.push(2);
       record.apply('spe', 2, 'ability', 'Swift Swim');
     }
   }
@@ -479,8 +405,6 @@ export const calcPokemonFinalStats = (
   // 50% ATK/SPA reduction if ability is "Defeatist" and HP is 50% or less
   // yoo when tf did they make me into an ability lmaooo
   if (ability === 'defeatist' && hpPercentage <= 0.5) {
-    // finalStats.atk = Math.floor(finalStats.atk * 0.5);
-    // finalStats.spa = Math.floor(finalStats.spa * 0.5);
     record.apply('atk', 0.5, 'ability', 'Defeatist');
     record.apply('spa', 0.5, 'ability', 'Defeatist');
   }
@@ -488,8 +412,6 @@ export const calcPokemonFinalStats = (
   // apply additional status effects
   if (pokemon.status) {
     if (ability === 'marvelscale') {
-      // 50% DEF boost if ability is "Marvel Scale" and Pokemon is statused
-      // finalStats.def = Math.floor(finalStats.def * 1.5);
       record.apply('def', 1.5, 'ability', 'Marvel Scale');
     }
   }
@@ -500,8 +422,6 @@ export const calcPokemonFinalStats = (
   if (nfe) {
     // 50% DEF/SPD boost if "Eviolite" is held by an NFE Pokemon
     if (!ignoreItem && item === 'eviolite') {
-      // finalStats.def = Math.floor(finalStats.def * 1.5);
-      // finalStats.spd = Math.floor(finalStats.spd * 1.5);
       record.apply('def', 1.5, 'item', 'Eviolite');
       record.apply('spd', 1.5, 'item', 'Eviolite');
     }
@@ -512,20 +432,17 @@ export const calcPokemonFinalStats = (
 
   // 50% DEF boost if ability is "Grass Pelt" w/ terrain of the grassy nature
   if (ability === 'grasspelt' && terrain === 'grassy') {
-    // finalStats.def = Math.floor(finalStats.def * 1.5);
     record.apply('def', 1.5, 'ability', 'Grass Pelt');
   }
 
   if (terrain === 'electric') {
     // 2x SPE modifier if ability is "Surge Surfer" w/ electric terrain
     if (ability === 'surgesurfer') {
-      // speedMods.push(2);
       record.apply('spe', 2, 'ability', 'Surge Surfer');
     }
 
     // 30% SPA boost if ability is "Hadron Engine" w/ electric terrain
     if (ability === 'hadronengine') {
-      // finalStats.spa = Math.floor(finalStats.spa * 1.3);
       record.apply('spa', 1.3, 'ability', 'Hadron Engine');
     }
   }
@@ -536,29 +453,35 @@ export const calcPokemonFinalStats = (
 
   // 2x SPE modifier if "Tailwind" is active on the field
   if (playerSide?.isTailwind) {
-    // speedMods.push(2);
     record.apply('spe', 2, 'field', 'Tailwind');
   }
 
   // 0.25x SPE modifier if "Grass Pledge" is active on the field
   if (playerSide?.isGrassPledge) {
-    // speedMods.push(0.25);
     record.apply('spe', 0.25, 'field', 'Grass Pledge');
   }
+
+  // 10% ATK/SPA boost for each fainted Pokemon if ability is "Supreme Overlord" (gen 9)
+  // update: whoops, it's actually a base power mod >:(
+  // if (ability === 'supremeoverlord' && playerSide?.faintedCount > 0) {
+  //   const { faintedCount } = playerSide;
+  //   const modifier = 1 + (0.1 * faintedCount);
+  //   const label = `Supreme Overlord ${faintedCount > 1 ? `${times}${faintedCount}` : ''}`;
+  //
+  //   record.apply('atk', modifier, 'ability', label);
+  //   record.apply('spa', modifier, 'ability', label);
+  // }
 
   // apply toggleable abilities
   if (pokemon.abilityToggled) {
     // 50% ATK/SPE reduction if ability is "Slow Start"
     if (ability === 'slowstart') {
-      // finalStats.atk = Math.floor(finalStats.atk * 0.5);
-      // speedMods.push(0.5);
       record.apply('atk', 0.5, 'ability', 'Slow Start');
       record.apply('spe', 0.5, 'ability', 'Slow Start');
     }
 
     // 2x SPE modifier if ability is "Unburden" and item was removed
     if (ability === 'unburden') {
-      // speedMods.push(2);
       record.apply('spe', 2, 'ability', 'Unburden');
     }
 
@@ -569,27 +492,20 @@ export const calcPokemonFinalStats = (
 
     // 30% highest stat boost (or 1.5x SPE modifier) if ability is "Protosynthesis" or "Quark Drive"
     if (['protosynthesis', 'quarkdrive'].includes(ability) && highestBoostedStat) {
-      // if (highestBoostedStat === 'spe') {
-      //   speedMods.push(1.5);
-      // } else {
-      //   finalStats[highestBoostedStat] = Math.floor(finalStats[highestBoostedStat] * 1.3);
-      // }
+      // if the Pokemon has a booster volatile, use its reported stat
+      // e.g., 'protosynthesisatk' -> boosterVolatileStat = 'atk'
+      const boosterVolatile = Object.keys(pokemon.volatiles || {}).find((k) => /^(?:proto|quark)/i.test(k));
+      const boosterVolatileStat = <Showdown.StatNameNoHp> boosterVolatile?.replace(/(?:protosynthesis|quarkdrive)/i, '');
+      const stat = boosterVolatileStat || highestBoostedStat;
+
       record.apply(
-        highestBoostedStat,
-        highestBoostedStat === 'spe' ? 1.5 : 1.3,
+        stat,
+        stat === 'spe' ? 1.5 : 1.3,
         'ability',
         dex.abilities.get(ability)?.name || ability,
       );
     }
   }
-
-  // calculate the product of all the speedMods
-  // const speedMod = speedMods.reduce((acc, mod) => acc * mod, 1);
-
-  // apply the speedMod, rounding down on 0.5 and below
-  // (unlike Math.round(), which rounds up on 0.5 and above)
-  // finalStats.spe *= speedMod;
-  // finalStats.spe = finalStats.spe % 1 > 0.5 ? Math.ceil(finalStats.spe) : Math.floor(finalStats.spe);
 
   return record.export();
 };

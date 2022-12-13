@@ -216,6 +216,24 @@ export const createSmogonPokemon = (
     }
   }
 
+  // also in gen 9, Supreme Overlord! (tf who named these lol)
+  // (workaround cause @smogon/damage-calc doesn't support this ability yet)
+  // update: whoops nvm, looks like Showdown applies it to the move's BP instead
+  // if (abilityId === 'supremeoverlord' && field?.attackerSide) {
+  //   const fieldKey: keyof CalcdexBattleField = pokemon.playerKey === 'p2' ? 'defenderSide' : 'attackerSide';
+  //   const { faintedCount = 0 } = field[fieldKey] || {};
+  //
+  //   // Supreme Overlord boosts the ATK & SPA by 10% for each fainted teammate
+  //   if (faintedCount > 0) {
+  //     const { atk, spa } = options.overrides.baseStats;
+  //     const modifier = 1 + (0.1 * faintedCount);
+  //
+  //     /** @todo my lazy ass should just fix the typing at this point lol */
+  //     (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats.atk = Math.floor(atk * modifier);
+  //     (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats.spa = Math.floor(spa * modifier);
+  //   }
+  // }
+
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
   // so we won't report these abilities to the calc to avoid unintentional double boostage
   if (['intrepidsword', 'download'].includes(formatId(ability))) {
@@ -228,7 +246,7 @@ export const createSmogonPokemon = (
     const {
       baseStats,
       transformedBaseStats,
-    } = pokemon || {};
+    } = pokemon;
 
     (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats = {
       ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
