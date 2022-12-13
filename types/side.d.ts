@@ -70,6 +70,11 @@ declare namespace Showdown {
     /**
      * @default 0
      */
+    faintCounter: number;
+
+    /**
+     * @default 0
+     */
     x: number;
 
     /**
