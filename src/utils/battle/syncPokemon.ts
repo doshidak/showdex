@@ -64,6 +64,7 @@ export const syncPokemon = (
     'prevItem',
     'prevItemEffect',
     // 'moves', // warning: do not sync unless you want to overwrite the (Calcdex) user's moves
+    'lastMove',
     'moveTrack',
     'volatiles',
     'turnstatuses',
@@ -124,10 +125,12 @@ export const syncPokemon = (
       case 'teraType': {
         // replace a potentially empty string (or something potentially invalid like `false`) with null
         // (also no point storing a '???' type; null is perfectly acceptable since the UI should show '???' for falsy values)
+        // update (2022/12/12): don't sync falsy values; clears your Pokemon's Tera types! LOL
         if (!value || value === '???') {
-          value = null;
+          // value = null;
 
-          break;
+          // break;
+          return;
         }
 
         // make sure we got a valid type (just in case)
@@ -258,6 +261,21 @@ export const syncPokemon = (
       //   break;
       // }
 
+      case 'lastMove': {
+        // allowing falsy values to enable clearing the lastMove
+        if (!value) {
+          break;
+        }
+
+        const dexMove = dex.moves.get(<string> value);
+
+        if (dexMove?.exists) {
+          value = dexMove.name;
+        }
+
+        break;
+      }
+
       case 'moveTrack': {
         const {
           moveTrack,
@@ -283,22 +301,23 @@ export const syncPokemon = (
         // sync the Pokemon's dynamax state
         syncedPokemon.useMax = 'dynamax' in volatiles;
 
+        // check for type changes (and apply only when not terastallized)
+        // (client reports a 'typechange' volatile when a Pokemon terastallizes)
+        const changedTypes = (
+          'typechange' in volatiles
+            && <Showdown.TypeName[]>volatiles.typechange[1]?.split?.('/') // 'Psychic/Ice' -> ['Psychic', 'Ice']
+        ) || [];
+
         // sync the Pokemon's terastallization state
         // (teraType should've been synced and sanitized from `pokemon` by this point)
         syncedPokemon.terastallized = 'typechange' in volatiles
           && !!syncedPokemon.teraType
           && syncedPokemon.teraType !== '???' // just in case lol
-          && PokemonTypes.includes(syncedPokemon.teraType);
+          && PokemonTypes.includes(syncedPokemon.teraType)
+          && changedTypes.length === 1
+          && changedTypes[0] === syncedPokemon.teraType;
 
-        // check for type changes (and apply only when not terastallized)
-        // (client reports a 'typechange' volatile when a Pokemon terastallizes)
-        const changedTypes = (
-          'typechange' in volatiles
-            && !syncedPokemon.terastallized
-            && <Showdown.TypeName[]> volatiles.typechange[1]?.split?.('/') // 'Psychic/Ice' -> ['Psychic', 'Ice']
-        ) || [];
-
-        if (changedTypes.length) { // would be empty if terastallized
+        if (changedTypes.length && !syncedPokemon.terastallized) {
           syncedPokemon.types = [...changedTypes];
         }
 
