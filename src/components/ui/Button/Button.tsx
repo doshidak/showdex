@@ -14,6 +14,7 @@ export interface ButtonProps<
   labelStyle?: React.CSSProperties;
   label?: string;
   tooltip?: React.ReactNode;
+  tooltipPlacement?: TooltipProps['placement'];
   tooltipOffset?: TooltipProps['offset'];
   tooltipDelay?: TooltipProps['delay'];
   tooltipTrigger?: TooltipProps['trigger'];
@@ -35,6 +36,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   labelStyle,
   label,
   tooltip,
+  tooltipPlacement = 'top',
   tooltipOffset = [0, 10],
   tooltipDelay = [1000, 50],
   tooltipTrigger = 'mouseenter',
@@ -86,6 +88,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
       <Tooltip
         reference={ref}
         content={tooltip}
+        placement={tooltipPlacement}
         offset={tooltipOffset}
         delay={tooltipDelay}
         trigger={tooltipTrigger}
