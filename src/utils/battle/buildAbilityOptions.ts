@@ -135,6 +135,19 @@ export const buildAbilityOptions = (
     filterAbilities.push(...legalAbilities);
   }
 
+  if (!filterAbilities.includes(ability)) {
+    options.unshift({
+      label: 'Inherited',
+      options: [{
+        label: ability,
+        rightLabel: findUsagePercent(ability),
+        value: ability,
+      }],
+    });
+
+    filterAbilities.push(ability);
+  }
+
   // show all possible abilities if format is not provided, is not legal-locked, or
   // no legal abilities are available (probably because the Pokemon doesn't exist in the `dex`'s gen)
   if (showAll || !legalLockedFormat(format) || !abilities?.length) {
