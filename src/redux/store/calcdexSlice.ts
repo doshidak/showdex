@@ -959,6 +959,8 @@ export interface CalcdexBattleField extends SmogonState.Field {
  * * Additional properties that will be unused by the `Side` constructor are included
  *   as they may be used in Pokemon stat calculations.
  *
+ * @todo get rid of `attackerSide` and `defenderSide` in `CalcdexBattleField` and merge this entire
+ *   interface with `CalcdexPlayer` or something.
  * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L84-L102
  * @since 0.1.3
  */
@@ -989,6 +991,16 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    * @since 0.1.3
    */
   isWaterPledge?: boolean;
+
+  /**
+   * Number of fainted Pokemon.
+   *
+   * * Reported by the client as `faintCounter` for each `Showdown.Side`.
+   * * Hmm... this entire `CalcdexPlayerSide` should be refactored under `CalcdexPlayer` tho.
+   *
+   * @since 1.1.0
+   */
+  faintedCount?: number;
 
   /**
    * Number of Pokemon with an activated *Beads of Ruin* ability.
