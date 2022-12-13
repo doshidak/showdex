@@ -155,15 +155,10 @@ export const sanitizePokemon = (
     status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
     turnstatuses: pokemon?.turnstatuses,
 
-    sleepCounter: ('sleepCounter' in pokemon && pokemon.sleepCounter)
-      || pokemon?.statusData?.sleepTurns
-      || 0,
-    toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter)
-      || pokemon?.statusData?.toxicTurns
-      || 0,
-    hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter)
-      || pokemon?.timesAttacked
-      || 0,
+    sleepCounter: ('sleepCounter' in pokemon && pokemon.sleepCounter) || pokemon?.statusData?.sleepTurns || 0,
+    toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter) || pokemon?.statusData?.toxicTurns || 0,
+    hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter) || pokemon?.timesAttacked || 0,
+    faintCounter: ('faintCounter' in pokemon && pokemon.faintCounter) || 0,
 
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
     useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
@@ -289,6 +284,11 @@ export const sanitizePokemon = (
       sanitizedPokemon.types = [
         ...(<Showdown.TypeName[]> (transformedSpecies || species).types),
       ];
+    }
+
+    // if no teraType in gen 9, default to the Pokemon's first type
+    if (gen > 8 && !sanitizedPokemon.teraType && sanitizedPokemon.types[0]) {
+      [sanitizedPokemon.teraType] = sanitizedPokemon.types;
     }
 
     // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
