@@ -24,14 +24,10 @@ export const PokeType = ({
   highlight = true,
 }: PokeTypeProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
-
-  const colorScheme = currentColorScheme
-    ? reverseColorScheme
-      ? currentColorScheme === 'dark'
-        ? 'light'
-        : 'dark'
-      : currentColorScheme
-    : null;
+  const colorScheme = (!reverseColorScheme && currentColorScheme)
+    || (reverseColorScheme && currentColorScheme === 'light' && 'dark')
+    || (reverseColorScheme && currentColorScheme === 'dark' && 'light')
+    || null;
 
   const abbreviations = shorterAbbreviations
     ? PokemonTypeShortAbbreviations
