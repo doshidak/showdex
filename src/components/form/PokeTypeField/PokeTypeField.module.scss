@@ -8,7 +8,7 @@
 @use 'mixins/transition';
 
 $container: (
-  min-width: 32px,
+  min-width: 28px,
   padding-x: 3px,
   padding-y: 3px,
   border-radius: 8px,
@@ -36,6 +36,18 @@ $options-tooltip: (
   grid-columns: 3,
   column-gap: 4px,
   row-gap: 4px,
+);
+
+$options-tooltip-title: (
+  spacing: 3px,
+  spacing-offset: -3px,
+  font-weight: 600,
+  font-size: 8px,
+
+  color: (
+    light: color.alpha(colors.$white, 0.65),
+    dark: color.alpha(colors.$black, 0.65),
+  ),
 );
 
 // note: color schemes are reversed for tooltips!
@@ -160,6 +172,27 @@ $type-value: (
   @include spacing.padding-xy($x: map.get($options-tooltip, column-gap) * 2, $y: map.get($options-tooltip, row-gap) * 2);
 }
 
+.optionsTooltipTitle {
+  @include spacing.margin(
+    $top: map.get($options-tooltip-title, spacing-offset),
+    $bottom: map.get($options-tooltip-title, spacing),
+  );
+  font-weight: map.get($options-tooltip-title, font-weight);
+  font-size: map.get($options-tooltip-title, font-size);
+  text-align: center;
+  text-transform: uppercase;
+  @include transition.apply(color);
+  user-select: none;
+
+  .light & {
+    color: map.get($options-tooltip-title, color, light);
+  }
+
+  .dark & {
+    color: map.get($options-tooltip-title, color, dark);
+  }
+}
+
 .optionsTooltipContent {
   display: grid;
   grid-template-columns: repeat(map.get($options-tooltip, grid-columns), minmax(0, 1fr));
@@ -228,7 +261,7 @@ $type-value: (
 
 .typeOption {
   grid-area: span 1 / span 1;
-  @include transition.apply(background-color);
+  // @include transition.apply(background-color);
   z-index: 1;
 
   .typeOptionButton:not(.selected):not(.hover) & {

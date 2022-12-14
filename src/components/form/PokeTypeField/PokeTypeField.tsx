@@ -18,10 +18,15 @@ export interface PokeTypeFieldProps<
   style?: React.CSSProperties;
   tabIndex?: number;
   label?: string;
+  title?: string;
   // tooltip?: React.ReactNode; // needs extra work lol
   // tooltipDisabled?: boolean;
   multi?: boolean;
   maxMultiTypes?: number;
+  defaultTypeLabel?: string;
+  // teraTyping?: boolean;
+  shorterAbbreviations?: boolean;
+  highlight?: boolean;
   readOnly?: boolean;
   disabled?: boolean;
 }
@@ -35,10 +40,15 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   style,
   tabIndex = 0,
   label,
+  title,
   // tooltip,
   // tooltipDisabled,
   multi,
   maxMultiTypes = 2,
+  defaultTypeLabel,
+  // teraTyping,
+  shorterAbbreviations,
+  highlight = true,
   input,
   readOnly,
   disabled,
@@ -157,38 +167,47 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       content={disabled || readOnly ? null : (
         <div
           className={cx(
-            styles.optionsTooltipContent,
+            styles.optionsTooltipContainer,
             !!colorScheme && styles[colorScheme],
           )}
         >
-          {PokemonTypes.map((pokemonType, i) => {
-            if (pokemonType === '???') {
-              return null;
-            }
+          {
+            !!title &&
+            <div className={styles.optionsTooltipTitle}>
+              {title}
+            </div>
+          }
 
-            const optionDisabled = value.length > (Math.max(maxMultiTypes, 1) - 1)
-              && !value.includes(pokemonType);
+          <div className={styles.optionsTooltipContent}>
+            {PokemonTypes.map((pokemonType, i) => {
+              if (pokemonType === '???') {
+                return null;
+              }
 
-            return (
-              <BaseButton
-                key={`PokeTypeField:${input?.name || '?'}:Option:${i}:${pokemonType || '?'}`}
-                className={cx(
-                  styles.typeOptionButton,
-                  value.includes(pokemonType) && styles.selected,
-                  optionDisabled && styles.disabled,
-                )}
-                hoverScale={1}
-                disabled={optionDisabled}
-                onPress={() => handleChange(pokemonType)}
-              >
-                <PokeType
-                  className={styles.typeOption}
-                  type={pokemonType}
-                  reverseColorScheme
-                />
-              </BaseButton>
-            );
-          })}
+              const optionDisabled = value.length > (Math.max(maxMultiTypes, 1) - 1)
+                && !value.includes(pokemonType);
+
+              return (
+                <BaseButton
+                  key={`PokeTypeField:${input?.name || '?'}:Option:${i}:${pokemonType || '?'}`}
+                  className={cx(
+                    styles.typeOptionButton,
+                    value.includes(pokemonType) && styles.selected,
+                    optionDisabled && styles.disabled,
+                  )}
+                  hoverScale={1}
+                  disabled={optionDisabled}
+                  onPress={() => handleChange(pokemonType)}
+                >
+                  <PokeType
+                    className={styles.typeOption}
+                    type={pokemonType}
+                    reverseColorScheme
+                  />
+                </BaseButton>
+              );
+            })}
+          </div>
         </div>
       )}
       // visible={optionsVisible ? true : undefined}
@@ -210,6 +229,8 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         className={cx(
           styles.container,
           !!colorScheme && styles[colorScheme],
+          // teraTyping && styles.teraTyping,
+          highlight && styles.highlight,
           readOnly && styles.readOnly,
           disabled && styles.disabled,
           className,
@@ -226,7 +247,10 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
             key={`PokeTypeField:${input?.name || '?'}:Value:${i}:${typeValue || '?'}`}
             className={styles.typeValue}
             type={typeValue}
+            defaultLabel={defaultTypeLabel}
             // reverseColorScheme
+            shorterAbbreviations={shorterAbbreviations}
+            highlight={highlight}
           />
         ))}
       </BaseButton>
