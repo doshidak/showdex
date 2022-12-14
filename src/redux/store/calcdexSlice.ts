@@ -573,6 +573,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Number of turns the Pokemon was asleep for.
    *
+   * * Kept track by the client under the `statusData.sleepTurns` property in `Showdown.Pokemon`.
    * * As of v1.1.0, this exists since we're not copying `statusData` from the client battle state anymore.
    * * Not sure what this is being used for (if at all) atm.
    *
@@ -584,6 +585,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Number of turns the Pokemon was *badly* poisoned for.
    *
+   * * Kept track by the client under the `statusData.toxicTurns` property in `Showdown.Pokemon`.
    * * This property is only used by `calculate()` in `@smogon/calc`.
    * * Value of `0` means the Pokemon is not badly poisoned (and probably not regular poisoned).
    *
@@ -596,8 +598,9 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * Number of times the Pokemon was hit.
    *
    * * Kept track by the client under the `timesAttacked` property in `Showdown.Pokemon`.
-   * * Probably for moves like *Rage Fist* in Gen 9, which increases in BP each time it takes a hit.
-   *   - ...ayy lmao
+   * * Note that this value should persist even if the Pokemon faints, especially since Pokemon can now
+   *   be revived with *Revival Blessing*, a move introduced in Gen 9.
+   * * Primarily used for calculating the base power of *Rage Fist*, a move introduced in Gen 9.
    *
    * @default 0
    * @since 1.1.0
@@ -608,10 +611,15 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * Number of fainted Pokemon on the side that this Pokemon belongs to.
    *
    * * Kept track by the client under the `faintCounter` property in `Showdown.Side`.
-   * * Note that all Pokemon on a given side will have the same value for this property.
+   * * ~~Note that all Pokemon on a given side will have the same value for this property.~~
    *   - Redundantly done this way to keep the codebase a bit less messier.
    *   - Otherwise, I'd have to pass the `field` state to a bunch of functions.
    *   - (Although, it's kinda already like that... LOL)
+   * * Update (2022/12/13): This value won't be synced once the Pokemon faints.
+   *   - For example, when *Kingambit* faints with a prior `faintCounter` of `2`, the value won't be
+   *     updated on subsequent faints from other Pokemon (i.e., will remain at `2`).
+   *   - When refreshing the page on a completed battle, this value will be set to the reported
+   *     `faintCounter` minus `1` (minimum `0`) to account for this Pokemon if it were still alive.
    *
    * @default 0
    * @since 1.1.0
