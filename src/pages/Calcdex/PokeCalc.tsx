@@ -66,11 +66,22 @@ export const PokeCalc = ({
   const {
     loading: presetsLoading,
     presets,
-    usage,
+    usages,
   } = usePresets({
     format,
     pokemon: playerPokemon,
   });
+
+  // note: `preset` is confusingly the `calcdexId` of the preset
+  // (there's a todo for `preset` to update its name lol)
+  const presetName = (playerPokemon?.preset ? [
+    ...presets,
+    ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
+  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset)?.name;
+
+  const usage = (usages?.length === 1 && usages[0])
+    || (!!presetName && usages?.find((p) => p?.source === 'usage' && p.name?.includes(presetName)))
+    || usages?.find((p) => p?.source === 'usage');
 
   const calculateMatchup = useSmogonMatchup(
     format,
@@ -91,21 +102,14 @@ export const PokeCalc = ({
 
       calcdexId: playerPokemon?.calcdexId,
 
-      ivs: {
-        ...playerPokemon?.ivs,
-        ...mutation?.ivs,
-      },
-
-      evs: {
-        ...playerPokemon?.evs,
-        ...mutation?.evs,
-      },
-
-      dirtyBoosts: {
-        ...playerPokemon?.dirtyBoosts,
-        ...mutation?.dirtyBoosts,
-      },
+      ivs: { ...playerPokemon?.ivs, ...mutation?.ivs },
+      evs: { ...playerPokemon?.evs, ...mutation?.evs },
+      dirtyBoosts: { ...playerPokemon?.dirtyBoosts, ...mutation?.dirtyBoosts },
     };
+
+    if (!payload.calcdexId) {
+      return;
+    }
 
     // perform special processing for IVs if we're in a legacy gen
     if (legacy) {
@@ -277,6 +281,7 @@ export const PokeCalc = ({
         pokemon={playerPokemon}
         presets={presets}
         usage={usage}
+        usages={usages}
         presetsLoading={presetsLoading}
         // active={active}
         field={field}
@@ -290,7 +295,8 @@ export const PokeCalc = ({
         gen={gen}
         format={format}
         rules={rules}
-        pokemon={playerPokemon}
+        playerPokemon={playerPokemon}
+        opponentPokemon={opponentPokemon}
         usage={usage}
         containerSize={containerSize}
         calculateMatchup={calculateMatchup}
