@@ -1,4 +1,4 @@
-import { times } from '@showdex/consts/core';
+// import { times } from '@showdex/consts/core';
 import {
   // PokemonInitialStats,
   PokemonSpeedReductionItems,
@@ -280,6 +280,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply "Ruin" ability effects that'll ruin me (gen 9)
+  // update (2022/12/14): Showdown fixed the Ruin stacking bug, so apply only once now
   if (ruinAbilitiesActive(field)) {
     const ruinCounts = countRuinAbilities(field);
 
@@ -287,48 +288,52 @@ export const calcPokemonFinalStats = (
     const ruinBeadsCount = Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? 1 : 0), 0);
 
     if (ruinBeadsCount) {
-      record.apply(
-        'spd',
-        0.75 ** ruinBeadsCount,
-        'ability',
-        `Beads of Ruin ${ruinBeadsCount > 1 ? `${times}${ruinBeadsCount}` : ''}`,
-      );
+      // record.apply(
+      //   'spd',
+      //   0.75 ** ruinBeadsCount,
+      //   'ability',
+      //   `Beads of Ruin ${ruinBeadsCount > 1 ? `${times}${ruinBeadsCount}` : ''}`,
+      // );
+      record.apply('spd', 0.75, 'ability', 'Beads of Ruin');
     }
 
     // 25% DEF reduction for each active Pokemon with the "Sword of Ruin" ability (excluding this `pokemon`)
     const ruinSwordCount = Math.max(ruinCounts.sword - (ability === 'swordofruin' ? 1 : 0), 0);
 
     if (ruinSwordCount) {
-      record.apply(
-        'def',
-        0.75 ** ruinSwordCount,
-        'ability',
-        `Sword of Ruin ${ruinSwordCount > 1 ? `${times}${ruinSwordCount}` : ''}`,
-      );
+      // record.apply(
+      //   'def',
+      //   0.75 ** ruinSwordCount,
+      //   'ability',
+      //   `Sword of Ruin ${ruinSwordCount > 1 ? `${times}${ruinSwordCount}` : ''}`,
+      // );
+      record.apply('def', 0.75, 'ability', 'Sword of Ruin');
     }
 
     // 25% ATK reduction for each active Pokemon with the "Tablets of Ruin" ability (excluding this `pokemon`)
     const ruinTabletsCount = Math.max(ruinCounts.tablets - (ability === 'tabletsofruin' ? 1 : 0), 0);
 
     if (ruinTabletsCount) {
-      record.apply(
-        'atk',
-        0.75 ** ruinTabletsCount,
-        'ability',
-        `Tablets of Ruin ${ruinTabletsCount > 1 ? `${times}${ruinTabletsCount}` : ''}`,
-      );
+      // record.apply(
+      //   'atk',
+      //   0.75 ** ruinTabletsCount,
+      //   'ability',
+      //   `Tablets of Ruin ${ruinTabletsCount > 1 ? `${times}${ruinTabletsCount}` : ''}`,
+      // );
+      record.apply('atk', 0.75, 'ability', 'Tablets of Ruin');
     }
 
     // 25% SPA reduction for each active Pokemon with the "Vessel of Ruin" ability (excluding this `pokemon`)
     const ruinVesselCount = Math.max(ruinCounts.vessel - (ability === 'vesselofruin' ? 1 : 0), 0);
 
     if (ruinVesselCount) {
-      record.apply(
-        'spa',
-        0.75 ** ruinVesselCount,
-        'ability',
-        `Vessel of Ruin ${ruinVesselCount > 1 ? `${times}${ruinVesselCount}` : ''}`,
-      );
+      // record.apply(
+      //   'spa',
+      //   0.75 ** ruinVesselCount,
+      //   'ability',
+      //   `Vessel of Ruin ${ruinVesselCount > 1 ? `${times}${ruinVesselCount}` : ''}`,
+      // );
+      record.apply('spa', 0.75, 'ability', 'Vessel of Ruin');
     }
   }
 
