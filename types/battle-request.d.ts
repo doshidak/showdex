@@ -48,6 +48,7 @@ declare namespace Showdown {
     canGigantamax?: boolean;
     canMegaEvo?: boolean;
     canUltraBurst?: boolean;
+    canTerastallize?: TypeName;
     trapped?: boolean;
     maybeTrapped?: boolean;
   }

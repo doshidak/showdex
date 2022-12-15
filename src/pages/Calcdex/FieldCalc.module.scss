@@ -31,13 +31,17 @@
   }
 
   .doubles:not(.veryThicc) & {
-    grid-area: 1 / 1;
+    // grid-area: 1 / 1;
+    grid-area: 3 / 1;
+    @include spacing.margin($top: 3px);
   }
 }
 
 .leftFieldInput {
   .doubles:not(.veryThicc) & {
-    grid-area: 2 / 1;
+    // grid-area: 2 / 1;
+    grid-area: 4 / 1;
+    @include spacing.margin($top: 1px);
   }
 }
 
@@ -47,15 +51,18 @@
   }
 
   .doubles:not(.veryThicc) & {
-    grid-area: 3 / 1;
-    @include spacing.margin($top: 7px, $bottom: 3px);
+    // grid-area: 3 / 1;
+    grid-area: 1 / 1;
+    // @include spacing.margin($top: 7px, $bottom: 3px);
   }
 }
 
 .weatherInput {
   .doubles:not(.veryThicc) & {
-    grid-area: 4 / 1;
-    @include spacing.margin-xy($x: 15px);
+    // grid-area: 4 / 1;
+    grid-area: 2 / 1;
+    // @include spacing.margin-xy($x: 15px);
+    @include spacing.margin($top: 3px, $right: 20px, $bottom: 10px, $left: 20px);
 
     .verySmol & {
       @include spacing.margin-xy($x: 10px);
@@ -69,15 +76,18 @@
   }
 
   .doubles:not(.veryThicc) & {
-    grid-area: 3 / 2;
-    @include spacing.margin($top: 7px, $bottom: 3px);
+    // grid-area: 3 / 2;
+    grid-area: 1 / 2;
+    // @include spacing.margin($top: 7px, $bottom: 3px);
   }
 }
 
 .terrainInput {
   .doubles:not(.veryThicc) & {
-    grid-area: 4 / 2;
-    @include spacing.margin-xy($x: 15px);
+    // grid-area: 4 / 2;
+    grid-area: 2 / 2;
+    // @include spacing.margin-xy($x: 15px);
+    @include spacing.margin($top: 3px, $right: 20px, $bottom: 10px, $left: 20px);
 
     .verySmol & {
       @include spacing.margin-xy($x: 10px);
@@ -93,13 +103,17 @@
   }
 
   .doubles:not(.veryThicc) & {
-    grid-area: 1 / 2;
+    // grid-area: 1 / 2;
+    grid-area: 3 / 2;
+    @include spacing.margin($top: 3px);
   }
 }
 
 .rightFieldInput {
   .doubles:not(.veryThicc) & {
-    grid-area: 2 / 2;
+    // grid-area: 2 / 2;
+    grid-area: 4 / 2;
+    @include spacing.margin($top: 1px);
   }
 }
 

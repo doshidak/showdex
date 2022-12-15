@@ -11,7 +11,7 @@ import {
 import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
 import { buildMoveOptions, legalLockedFormat } from '@showdex/utils/battle';
 import { formatDamageAmounts, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
-import { upsizeArray, writeClipboardText } from '@showdex/utils/core';
+import { clamp, upsizeArray, writeClipboardText } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
@@ -32,7 +32,8 @@ export interface PokeMovesProps {
   gen: GenerationNum;
   format?: string;
   rules?: CalcdexBattleRules;
-  pokemon: CalcdexPokemon;
+  playerPokemon: CalcdexPokemon;
+  opponentPokemon?: CalcdexPokemon;
   usage?: CalcdexPokemonPreset;
   movesCount?: number;
   containerSize?: ElementSizeLabel;
@@ -46,7 +47,8 @@ export const PokeMoves = ({
   gen,
   format,
   rules,
-  pokemon,
+  playerPokemon: pokemon,
+  opponentPokemon,
   usage,
   movesCount = 4,
   containerSize,
@@ -90,11 +92,10 @@ export const PokeMoves = ({
     || gen === 6
     || gen === 7;
 
-  const showMaxToggle = !rules?.dynamax
-    && (
-      format?.includes('nationaldex')
-        || (gen === 8 && !format?.includes('bdsp'))
-    );
+  const showMaxToggle = !rules?.dynamax && gen < 9 && (
+    format?.includes('nationaldex')
+      || (gen === 8 && !format?.includes('bdsp'))
+  );
 
   const showEditButton = settings?.showMoveEditor === 'always'
     || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format));
@@ -156,9 +157,35 @@ export const PokeMoves = ({
         </div>
 
         {
-          showZToggle &&
+          gen > 8 &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
+            label="Tera"
+            tooltip={[
+              pokemon?.terastallized ? 'Revert' : 'Terastallize',
+              'to',
+              (pokemon?.terastallized ? pokemon?.types?.join('/') : pokemon?.teraType) || '???',
+            ].join(' ')}
+            tooltipDisabled={!settings?.showUiTooltips}
+            primary
+            active={pokemon?.terastallized}
+            disabled={!pokemon?.speciesForme || !pokemon.teraType || pokemon.teraType === '???'}
+            onPress={() => onPokemonChange?.({
+              terastallized: !pokemon?.terastallized,
+              useZ: false,
+              useMax: false,
+            })}
+          />
+        }
+
+        {
+          showZToggle &&
+          <ToggleButton
+            className={cx(
+              styles.toggleButton,
+              styles.ultButton,
+              gen > 8 && styles.lessSpacing,
+            )}
             label="Z"
             tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
             tooltipDisabled={!settings?.showUiTooltips}
@@ -166,6 +193,7 @@ export const PokeMoves = ({
             active={pokemon?.useZ}
             disabled={!pokemon?.speciesForme}
             onPress={() => onPokemonChange?.({
+              terastallized: false,
               useZ: !pokemon?.useZ,
               useMax: false,
             })}
@@ -187,6 +215,7 @@ export const PokeMoves = ({
             active={pokemon?.useMax}
             disabled={!pokemon?.speciesForme}
             onPress={() => onPokemonChange?.({
+              terastallized: false,
               useZ: false,
               useMax: !pokemon?.useMax,
             })}
@@ -281,12 +310,10 @@ export const PokeMoves = ({
 
         // getMoveOverrideDefaults() could return null, so spreading here to avoid a "Cannot read properties of null" error
         // (could make it not return null, but too lazy atm lol)
-        const moveOverrideDefaults = {
-          ...getMoveOverrideDefaults(pokemon, moveName, format),
-        };
+        const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon) };
 
         const moveOverrides = {
-          ...moveOverrideDefaults,
+          ...moveDefaults,
           ...pokemon?.moveOverrides?.[moveName],
         };
 
@@ -296,21 +323,16 @@ export const PokeMoves = ({
         ].includes(moveOverrides.category);
 
         const hasOverrides = pokemon?.showMoveOverrides
-          && hasMoveOverrides(pokemon, moveName, format);
+          && hasMoveOverrides(format, pokemon, moveName, opponentPokemon);
 
-        const basePowerKey: keyof CalcdexMoveOverride = pokemon?.useZ
-          ? 'zBasePower'
-          : pokemon?.useMax
-            ? 'maxBasePower'
-            : 'basePower';
+        const basePowerKey: keyof CalcdexMoveOverride = (pokemon?.useZ && 'zBasePower')
+          || (pokemon?.useMax && 'maxBasePower')
+          || 'basePower';
 
-        const fallbackBasePower = (
-          pokemon?.useZ
-            ? moveOverrideDefaults.zBasePower
-            : pokemon?.useMax
-              ? moveOverrideDefaults.maxBasePower
-              : null
-        ) || calcMove?.bp || 0;
+        const fallbackBasePower = (pokemon?.useZ && moveDefaults.zBasePower)
+          || (pokemon?.useMax && moveDefaults.maxBasePower)
+          || calcMove?.bp
+          || 0;
 
         const showDamageAmounts = !pokemon?.showMoveOverrides
           && !!description?.damageAmounts
@@ -386,11 +408,11 @@ export const PokeMoves = ({
         // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
         const parsedDamageRange = moveName
           ? damageRange
-            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '?')
+            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???')
           : null;
 
         const hasDamageRange = !!parsedDamageRange
-          && !['IMMUNE', 'N/A', '?'].includes(parsedDamageRange);
+          && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange);
 
         return (
           <React.Fragment
@@ -404,6 +426,7 @@ export const PokeMoves = ({
                 optionTooltipProps={{
                   format,
                   pokemon,
+                  opponentPokemon,
                   hidden: !settings?.showMoveTooltip,
                 }}
                 input={{
@@ -485,7 +508,7 @@ export const PokeMoves = ({
                             value: moveOverrides[basePowerKey],
                             onChange: (value: number) => onPokemonChange?.({
                               moveOverrides: {
-                                [moveName]: { [basePowerKey]: Math.max(value, 0) },
+                                [moveName]: { [basePowerKey]: clamp(0, value, 999) },
                               },
                             }),
                           }}

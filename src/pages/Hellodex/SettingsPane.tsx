@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import { Field, Form, FormSpy } from 'react-final-form';
+// import { useHotkeys } from 'react-hotkeys-hook';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Segmented, Switch, TextField } from '@showdex/components/form';
@@ -240,6 +241,24 @@ export const SettingsPane = ({
       }
     })();
   };
+
+  // const hotkeysRef = useHotkeys<HTMLDivElement>('esc', (e, handler) => {
+  //   e?.preventDefault?.();
+  //
+  //   switch (handler.key) {
+  //     case 'esc': {
+  //       onRequestClose?.(null);
+  //
+  //       break;
+  //     }
+  //
+  //     default: {
+  //       break;
+  //     }
+  //   }
+  // }, null, [
+  //   onRequestClose,
+  // ]);
 
   return (
     <div
@@ -1497,7 +1516,7 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           Disabling this will cause the base stats row to remain hidden
-                          until you click on <em>Edit</em>.
+                          until you click on <em>Show</em>.
                         </div>
                       ),
                       value: 'base',
@@ -1512,7 +1531,7 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           Disabling this will cause the IVs row to remain hidden
-                          until you click on <em>Edit</em>.
+                          until you click on <em>Show</em>.
                         </div>
                       ),
                       value: 'iv',
@@ -1526,7 +1545,7 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           Disabling this will cause the EVs row to remain hidden
-                          until you click on <em>Edit</em>.
+                          until you click on <em>Show</em>.
                         </div>
                       ),
                       value: 'ev',
@@ -1549,7 +1568,7 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           Disabling this will cause the base stats row to remain hidden
-                          until you click on <em>Edit</em>.
+                          until you click on <em>Show</em>.
                         </div>
                       ),
                       value: 'base',
@@ -1564,7 +1583,7 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           Disabling this will cause the IVs row to remain hidden
-                          until you click on <em>Edit</em>.
+                          until you click on <em>Show</em>.
                         </div>
                       ),
                       value: 'iv',
@@ -1578,7 +1597,7 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           Disabling this will cause the EVs row to remain hidden
-                          until you click on <em>Edit</em>.
+                          until you click on <em>Show</em>.
                         </div>
                       ),
                       value: 'ev',

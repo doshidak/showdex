@@ -1,3 +1,4 @@
+import { flattenAlts } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
@@ -25,7 +26,7 @@ export const transformRandomsStatsResponse = (
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
+  const gen = args?.gen || env.int<GenerationNum>('calcdex-default-gen');
 
   Object.entries(response).forEach(([
     speciesForme,
@@ -42,6 +43,7 @@ export const transformRandomsStatsResponse = (
       moves,
       ivs,
       evs,
+      roles,
     } = usageStats;
 
     const preset: CalcdexPokemonPreset = {
@@ -77,7 +79,6 @@ export const transformRandomsStatsResponse = (
 
     const altAbilities = processUsageAlts(abilities);
     const altItems = processUsageAlts(items);
-    const altMoves = processUsageAlts(moves);
 
     if (altAbilities.length) {
       preset.altAbilities = altAbilities;
@@ -89,25 +90,74 @@ export const transformRandomsStatsResponse = (
       [[preset.item]] = altItems;
     }
 
-    if (altMoves.length) {
-      preset.altMoves = altMoves;
+    if (Object.keys(roles || {}).length) {
+      Object.entries(roles).forEach(([
+        roleName,
+        roleStats,
+      ]) => {
+        if (!roleName || !Object.keys(roleStats?.moves || {}).length) {
+          return;
+        }
+
+        const rolePreset = { ...preset };
+
+        const {
+          weight,
+          teraTypes,
+          moves: roleMoves,
+        } = roleStats;
+
+        if (roleName) {
+          rolePreset.name = `${roleName} Usage`;
+        }
+
+        if ((weight || 0) > 0) {
+          rolePreset.usage = weight;
+        }
+
+        const altTeraTypes = processUsageAlts(teraTypes);
+
+        if (altTeraTypes.length) {
+          rolePreset.teraTypes = altTeraTypes;
+        }
+
+        rolePreset.altMoves = processUsageAlts(roleMoves);
+
+        /**
+         * @todo Needs to be updated once we support more than 4 moves.
+         */
+        rolePreset.moves = flattenAlts(rolePreset.altMoves.slice(0, 4));
+
+        rolePreset.calcdexId = calcPresetCalcdexId(rolePreset);
+        rolePreset.id = rolePreset.calcdexId;
+
+        const presetIndex = output.findIndex((p) => p.calcdexId === rolePreset.calcdexId);
+
+        if (presetIndex > -1) {
+          output[presetIndex] = rolePreset;
+        } else {
+          output.push(rolePreset);
+        }
+      });
+    } else if (Object.keys(moves || {})) {
+      preset.altMoves = processUsageAlts(moves);
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.
        */
-      preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
-    }
+      preset.moves = flattenAlts(preset.altMoves.slice(0, 4));
 
-    preset.calcdexId = calcPresetCalcdexId(preset);
-    preset.id = preset.calcdexId;
+      preset.calcdexId = calcPresetCalcdexId(preset);
+      preset.id = preset.calcdexId;
 
-    // shouldn't be the case, but check if the preset already exists in our output
-    const presetIndex = output.findIndex((p) => p.calcdexId === preset.calcdexId);
+      // shouldn't be the case, but check if the preset already exists in our output
+      const presetIndex = output.findIndex((p) => p.calcdexId === preset.calcdexId);
 
-    if (presetIndex > -1) {
-      output[presetIndex] = preset;
-    } else {
-      output.push(preset);
+      if (presetIndex > -1) {
+        output[presetIndex] = preset;
+      } else {
+        output.push(preset);
+      }
     }
   });
 

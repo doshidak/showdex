@@ -345,6 +345,7 @@ export const PlayerCalc = ({
         playerKey={playerKey}
         playerPokemon={playerPokemon}
         opponentPokemon={opponentPokemon}
+        // active={activeIndices?.includes(playerIndex)}
         field={{
           ...field,
           attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,

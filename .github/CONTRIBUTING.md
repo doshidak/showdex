@@ -20,9 +20,10 @@ I'm not a stickler for how these should be formatted; just make sure you provide
 
 If possible, including the following would be **immensely** helpful!
 
+* **OS** (e.g., Windows, macOS, Android, etc.)
 * **Browser** (e.g., Chrome, Firefox, etc.)
-* **Showdex Version** (e.g., v1.0.6)
-* **Format**, if applicable (e.g., Gen 8 National Dex)
+* **Showdex Version** (e.g., v1.1.0)
+* **Format**, if applicable (e.g., Gen 9 National Dex AG)
 
 If you would like to be [credited for your contribution](../README.md#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
 

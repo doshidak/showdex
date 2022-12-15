@@ -1,11 +1,7 @@
 import * as React from 'react';
 // import cx from 'classnames';
-import {
-  detectLegacyGen,
-  detectToggledAbility,
-  sanitizePokemon,
-  toggleableAbility,
-} from '@showdex/utils/battle';
+import { formatId } from '@showdex/utils/app';
+import { detectLegacyGen, sanitizePokemon } from '@showdex/utils/battle';
 import {
   calcLegacyHpDv,
   calcPokemonSpreadStats,
@@ -42,6 +38,7 @@ interface PokeCalcProps {
   playerKey?: CalcdexPlayerKey;
   playerPokemon: CalcdexPokemon;
   opponentPokemon: CalcdexPokemon;
+  // active?: boolean;
   field?: CalcdexBattleField;
   containerSize?: ElementSizeLabel;
   onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
@@ -59,6 +56,7 @@ export const PokeCalc = ({
   playerKey,
   playerPokemon,
   opponentPokemon,
+  // active,
   field,
   containerSize,
   onPokemonChange,
@@ -68,11 +66,22 @@ export const PokeCalc = ({
   const {
     loading: presetsLoading,
     presets,
-    usage,
+    usages,
   } = usePresets({
     format,
     pokemon: playerPokemon,
   });
+
+  // note: `preset` is confusingly the `calcdexId` of the preset
+  // (there's a todo for `preset` to update its name lol)
+  const presetName = (playerPokemon?.preset ? [
+    ...presets,
+    ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
+  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset)?.name;
+
+  const usage = (usages?.length === 1 && usages[0])
+    || (!!presetName && usages?.find((p) => p?.source === 'usage' && p.name?.includes(presetName)))
+    || usages?.find((p) => p?.source === 'usage');
 
   const calculateMatchup = useSmogonMatchup(
     format,
@@ -93,21 +102,14 @@ export const PokeCalc = ({
 
       calcdexId: playerPokemon?.calcdexId,
 
-      ivs: {
-        ...playerPokemon?.ivs,
-        ...mutation?.ivs,
-      },
-
-      evs: {
-        ...playerPokemon?.evs,
-        ...mutation?.evs,
-      },
-
-      dirtyBoosts: {
-        ...playerPokemon?.dirtyBoosts,
-        ...mutation?.dirtyBoosts,
-      },
+      ivs: { ...playerPokemon?.ivs, ...mutation?.ivs },
+      evs: { ...playerPokemon?.evs, ...mutation?.evs },
+      dirtyBoosts: { ...playerPokemon?.dirtyBoosts, ...mutation?.dirtyBoosts },
     };
+
+    if (!payload.calcdexId) {
+      return;
+    }
 
     // perform special processing for IVs if we're in a legacy gen
     if (legacy) {
@@ -132,27 +134,38 @@ export const PokeCalc = ({
     }
 
     // re-check for toggleable abilities in the mutation
-    if ('ability' in payload || 'dirtyAbility' in payload) {
-      const tempPokemon = {
-        ...playerPokemon,
-        ...payload,
-      };
-
-      payload.abilityToggleable = toggleableAbility(tempPokemon);
-
-      if (payload.abilityToggleable) {
-        payload.abilityToggled = detectToggledAbility(tempPokemon);
-      }
-    }
+    // update (2022/12/10): now being performed in updatePokemon() of useCalcdex()
+    // if ('ability' in payload || 'dirtyAbility' in payload) {
+    //   const tempPokemon = {
+    //     ...playerPokemon,
+    //     ...payload,
+    //   };
+    //
+    //   payload.abilityToggleable = toggleableAbility(tempPokemon);
+    //
+    //   if (payload.abilityToggleable) {
+    //     payload.abilityToggled = detectToggledAbility(tempPokemon);
+    //   }
+    // }
 
     // clear the dirtyAbility, if any, if it matches the ability
     if ('dirtyAbility' in payload && payload.dirtyAbility === playerPokemon?.ability) {
       payload.dirtyAbility = null;
     }
 
-    // clear the dirtyItem, if any, if it matches the item
-    if ('dirtyItem' in payload && payload.dirtyItem === playerPokemon?.item) {
-      payload.dirtyItem = null;
+    const ability = payload.dirtyAbility || playerPokemon.dirtyAbility || playerPokemon.ability;
+    const abilityId = formatId(ability);
+
+    if ('dirtyItem' in payload) {
+      // clear the dirtyItem, if any, if it matches the item
+      if (payload.dirtyItem === playerPokemon?.item) {
+        payload.dirtyItem = null;
+      }
+
+      // for Protosynthesis/Quark Drive (gen 9), if the user sets the item back to Booster Energy, toggle it back on
+      if (['protosynthesis', 'quarkdrive'].includes(abilityId)) {
+        payload.abilityToggled = formatId(payload.dirtyItem) === 'boosterenergy';
+      }
     }
 
     // update (2022/11/06): now allowing base stat editing as a setting lul
@@ -264,10 +277,14 @@ export const PokeCalc = ({
       <PokeInfo
         gen={gen}
         format={format}
+        playerKey={playerKey}
         pokemon={playerPokemon}
         presets={presets}
         usage={usage}
+        usages={usages}
         presetsLoading={presetsLoading}
+        // active={active}
+        field={field}
         containerSize={containerSize}
         onPokemonChange={handlePokemonChange}
       />
@@ -278,7 +295,8 @@ export const PokeCalc = ({
         gen={gen}
         format={format}
         rules={rules}
-        pokemon={playerPokemon}
+        playerPokemon={playerPokemon}
+        opponentPokemon={opponentPokemon}
         usage={usage}
         containerSize={containerSize}
         calculateMatchup={calculateMatchup}

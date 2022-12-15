@@ -1,10 +1,12 @@
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app';
 import { getDexForFormat } from '@showdex/utils/battle';
-import type { GenerationNum } from '@smogon/calc';
+// import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexMoveOverride } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
-import { calcHiddenPower } from './calcHiddenPower';
+// import { calcHiddenPower } from './calcHiddenPower';
+import { calcMoveBasePower } from './calcMoveBasePower';
+// import { calcRageFist } from './calcRageFist';
 import { determineMoveTargets } from './determineMoveTargets';
 
 /**
@@ -18,9 +20,10 @@ import { determineMoveTargets } from './determineMoveTargets';
  * @since 1.0.6
  */
 export const getMoveOverrideDefaults = (
+  format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
-  format: string | GenerationNum,
+  opponentPokemon?: CalcdexPokemon,
 ): CalcdexMoveOverride => {
   if (!pokemon?.speciesForme || !moveName || !format) {
     return null;
@@ -29,36 +32,39 @@ export const getMoveOverrideDefaults = (
   const dex = getDexForFormat(format);
 
   const {
+    // id,
+    // name,
     type,
     category,
-    basePower: basePowerFromDex,
+    // basePower: basePowerFromDex,
     zMove,
     maxMove,
   } = dex?.moves.get(moveName) || {};
 
-  const basePower = formatId(moveName).includes('hiddenpower')
-    ? calcHiddenPower(format, pokemon)
-    : basePowerFromDex;
+  // const moveId = id || formatId(name || moveName);
 
+  // const basePower = moveId.startsWith('hiddenpower')
+  //   ? calcHiddenPower(format, pokemon)
+  //   : moveId === 'ragefist'
+  //     ? calcRageFist(pokemon)
+  //     : basePowerFromDex;
+
+  const basePower = calcMoveBasePower(format, pokemon, moveName, opponentPokemon);
   const criticalHit = alwaysCriticalHits(moveName, format);
 
-  const defaultDefensiveStat: Showdown.StatNameNoHp = category === 'Physical'
-    ? 'def'
-    : category === 'Special'
-      ? 'spd'
-      : null;
+  const defaultDefensiveStat: Showdown.StatNameNoHp = (category === 'Physical' && 'def')
+    || (category === 'Special' && 'spd')
+    || null;
 
-  const defaultOffensiveStat: Showdown.StatNameNoHp = category === 'Physical'
-    ? 'atk'
-    : category === 'Special'
-      ? 'spa'
-      : null;
+  const defaultOffensiveStat: Showdown.StatNameNoHp = (category === 'Physical' && 'atk')
+    || (category === 'Special' && 'spa')
+    || null;
 
   const {
     ignoreDefensive,
     overrideDefensiveStat,
     overrideOffensiveStat,
-  } = determineMoveTargets(pokemon, moveName, format) || {};
+  } = determineMoveTargets(format, pokemon, moveName) || {};
 
   return {
     type,

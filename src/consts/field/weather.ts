@@ -66,6 +66,7 @@ export const LegacyWeatherNames: Weather[] = [
 export const WeatherMap: Record<string, Weather> = {
   ...LegacyWeatherMap,
   hail: 'Hail',
+  snow: 'Hail',
   deltastream: 'Strong Winds',
   desolateland: 'Harsh Sunshine',
   primordialsea: 'Heavy Rain',
@@ -92,7 +93,7 @@ export const WeatherNames: Weather[] = [
  * @see https://smogon.com/dex/ss
  * @since 1.0.3
  */
-export const WeatherDescriptions: Record<Weather, FieldConditionDescription> = {
+export const WeatherDescriptions: Record<Weather | 'Snow', FieldConditionDescription> = {
   Rain: {
     label: 'Rain',
     shortDesc: `For 5 turns (8 w/ Damp Rock), Water 1.5${times}, Fire 0.5${times}.`,
@@ -140,6 +141,18 @@ export const WeatherDescriptions: Record<Weather, FieldConditionDescription> = {
     //   + 'have the Ice Body, Magic Guard, Overcoat, or Snow Cloak abilities. '
     //   + 'Lasts for 8 turns if the user is holding Icy Rock. '
     //   + 'Fails if the current weather is Hail.',
+  },
+
+  // note: internally, this isn't used within the data layer since it's represented as `'Hail'`
+  // `'Snow'` only exists here for rendering this info the user.
+  Snow: {
+    label: 'Snow',
+    shortDesc: `For 5 turns (8 w/ Icy Rock), DEF 1.5${times} (Ice-types only).`,
+    // desc: 'For 5 turns, the weather becomes Snow. '
+    //   + 'During the effect, the Defense of Ice-type Pokemon is multiplied by 1.5 '
+    //   + 'when taking damage from a physical attack. '
+    //   + 'Lasts for 8 turns if the user is holding Icy Rock. '
+    //   + 'Fails if the current weather is Snow.',
   },
 
   'Harsh Sunshine': {

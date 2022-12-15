@@ -26,17 +26,15 @@ import type { SmogonMoveOverrides } from './createSmogonMove';
  * @since 1.0.6
  */
 export const determineMoveTargets = (
+  format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
-  format: string | GenerationNum,
 ): SmogonMoveOverrides => {
   if (!pokemon?.speciesForme || !moveName || !format) {
     return null;
   }
 
-  const gen = typeof format === 'string'
-    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
-    : format;
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // may need to perform an additional lookup using @smogon/calc's internal Generation dex
   // (which is used when passing in a type number for the first constructor parameter)

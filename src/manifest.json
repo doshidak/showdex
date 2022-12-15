@@ -20,10 +20,7 @@
 
   "permissions": [
     "*://play.pokemonshowdown.com/*",
-    "*://dawn.psim.us/*",
-    "*://rom.psim.us/*",
-    "*://smogtours.psim.us/*",
-    "*://sports.psim.us/*"
+    "*://*.psim.us/*"
   ],
 
   "host_permissions": [

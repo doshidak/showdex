@@ -87,8 +87,6 @@ export const Calcdex = ({
 
   const bottomKey = topKey === 'p1' ? 'p2' : 'p1';
 
-  // console.log('playerKey', playerKey, 'opponentKey', opponentKey, 'authPlayerKey', authPlayerKey, 'topKey', topKey, 'bottomKey', bottomKey);
-
   // map the sides as the player and opponent to track them easier
   const player = topKey === 'p1' ? p1 : p2;
   const opponent = bottomKey === 'p1' ? p1 : p2;

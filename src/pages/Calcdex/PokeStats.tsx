@@ -103,7 +103,7 @@ export const PokeStats = ({
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
   const missingEvs = !!pokemon?.speciesForme && !legacy && !totalEvs;
 
-  const finalStats = React.useMemo(() => (pokemon?.speciesForme ? calcPokemonFinalStats(
+  const statsRecord = React.useMemo(() => (pokemon?.speciesForme ? calcPokemonFinalStats(
     gen,
     pokemon,
     opponentPokemon,
@@ -116,6 +116,11 @@ export const PokeStats = ({
     playerKey,
     pokemon,
   ]);
+
+  const {
+    stats: finalStats,
+    ...statMods
+  } = (statsRecord || {}) as typeof statsRecord;
 
   return (
     <TableGrid
@@ -161,9 +166,7 @@ export const PokeStats = ({
         const boostUp = PokemonNatureBoosts[pokemon?.nature]?.[0] === stat;
         const boostDown = PokemonNatureBoosts[pokemon?.nature]?.[1] === stat;
 
-        const statName = gen === 1 && stat === 'spa'
-          ? 'spc'
-          : stat;
+        const statName = (gen === 1 && stat === 'spa' && 'spc') || stat;
 
         return (
           <TableGridItem
@@ -444,20 +447,54 @@ export const PokeStats = ({
         const finalStat = finalStats?.[stat] || 0;
         const formattedStat = formatStatBoost(finalStat) || '???';
         const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
+        const mods = statMods?.[stat];
 
         return (
-          <TableGridItem
+          <Tooltip
             key={`PokeStats:StatValue:${pokemonKey}:${stat}`}
-            className={cx(
-              styles.statValue,
-              styles.finalStat,
-              !!boostDelta && styles[boostDelta],
-              // boostDelta === 'positive' && styles.positive,
-              // boostDelta === 'negative' && styles.negative,
+            content={(
+              <div className={styles.statModsTable}>
+                {mods?.map((mod) => (
+                  <React.Fragment
+                    key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
+                  >
+                    <div
+                      className={cx(
+                        styles.statModValue,
+                        styles.statValue,
+                        mod?.modifier > 1 && styles.positive,
+                        mod?.modifier < 1 && styles.negative,
+                      )}
+                    >
+                      {mod?.modifier >= 0 ? (
+                        <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
+                      ) : <>&ndash;</>}
+                    </div>
+                    <div className={styles.statModLabel}>
+                      {mod?.label || '??? HUH'}
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
             )}
+            offset={[0, 10]}
+            delay={[1000, 50]}
+            trigger="mouseenter"
+            touch={['hold', 500]}
+            disabled={!mods?.length}
           >
-            {formattedStat}
-          </TableGridItem>
+            <TableGridItem
+              className={cx(
+                styles.statValue,
+                styles.finalStat,
+                !!boostDelta && styles[boostDelta],
+                // boostDelta === 'positive' && styles.positive,
+                // boostDelta === 'negative' && styles.negative,
+              )}
+            >
+              {formattedStat}
+            </TableGridItem>
+          </Tooltip>
         );
       })}
 

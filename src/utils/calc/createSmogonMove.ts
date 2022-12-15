@@ -1,5 +1,5 @@
 import { Move as SmogonMove } from '@smogon/calc';
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app';
 import {
   getGenDexForFormat,
   // getMaxMove,
@@ -7,11 +7,14 @@ import {
   // detectGenFromFormat,
 } from '@showdex/utils/battle';
 // import { env } from '@showdex/utils/core';
+import { clamp } from '@showdex/utils/core';
 // import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 // import { alwaysCriticalHits } from './alwaysCriticalHits';
-import { calcHiddenPower } from './calcHiddenPower';
+// import { calcHiddenPower } from './calcHiddenPower';
+import { calcMoveBasePower } from './calcMoveBasePower';
+// import { calcRageFist } from './calcRageFist';
 import { determineCriticalHit } from './determineCriticalHit';
 import { determineMoveTargets } from './determineMoveTargets';
 
@@ -31,6 +34,7 @@ export const createSmogonMove = (
   format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
+  opponentPokemon: CalcdexPokemon,
 ): SmogonMove => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
@@ -40,7 +44,9 @@ export const createSmogonMove = (
     return null;
   }
 
+  // const moveId = formatId(moveName);
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
+  // const abilityId = formatId(ability);
   const item = pokemon.dirtyItem ?? pokemon.item;
 
   const options: ConstructorParameters<typeof SmogonMove>[2] = {
@@ -54,22 +60,35 @@ export const createSmogonMove = (
     useMax: pokemon.useMax,
 
     // for moves that always crit, we need to make sure the crit doesn't apply when Z/Max'd
-    // isCrit: (
-    //   alwaysCriticalHits(moveName, format)
-    //   && (!pokemon.useZ || !getZMove(moveName, item))
-    //   && (!pokemon.useMax || !getMaxMove(moveName, ability, pokemon.speciesForme))
-    // ) || pokemon.criticalHit,
     isCrit: determineCriticalHit(pokemon, moveName, format),
   };
 
   const overrides: SmogonMoveOverrides = {
-    ...determineMoveTargets(pokemon, moveName, format),
+    ...determineMoveTargets(format, pokemon, moveName),
   };
 
-  // recalculate the base power if the move is Hidden Power
-  if (formatId(moveName).includes('hiddenpower')) {
-    overrides.basePower = calcHiddenPower(format, pokemon);
-  }
+  // recalculate the base power if the move is Hidden Power (gens 2+) or Rage Fist (gen 9)
+  // if (moveId.startsWith('hiddenpower')) {
+  //   overrides.basePower = calcHiddenPower(format, pokemon);
+  // }
+
+  // if (moveId === 'ragefist') {
+  //   overrides.basePower = calcRageFist(pokemon);
+  // }
+
+  // if (typeof overrides.basePower !== 'number') {
+  //   overrides.basePower = dex.moves.get(<ID> moveName)?.basePower || 0;
+  // }
+
+  // if (basePowerMods?.length) {
+  //   basePowerMods.forEach((mod) => {
+  //     if (typeof mod !== 'number' || mod < 0) {
+  //       return;
+  //     }
+  //
+  //     overrides.basePower = Math.floor(overrides.basePower * mod);
+  //   });
+  // }
 
   // check if the user specified any overrides for this move
   const {
@@ -87,12 +106,28 @@ export const createSmogonMove = (
     overrides.type = typeOverride;
   }
 
+  // if (['electromorphosis', 'windpower'].includes(abilityId) && 'charge' in (pokemon.volatiles || {}) && overrides.basePower > 0) {
+  //   const moveType = overrides.type || dex.moves.get(<ID> moveName)?.type;
+  //
+  //   if (moveType === 'Electric') {
+  //     overrides.basePower = Math.floor(overrides.basePower * 2);
+  //   }
+  // }
+
   if (categoryOverride) {
     overrides.category = categoryOverride;
   }
 
-  if (typeof basePowerOverride === 'number') {
-    overrides.basePower = Math.max(basePowerOverride, 0);
+  // if (typeof basePowerOverride === 'number') {
+  //   overrides.basePower = Math.max(basePowerOverride, 0);
+  // }
+
+  overrides.basePower = typeof basePowerOverride === 'number'
+    ? clamp(0, basePowerOverride)
+    : calcMoveBasePower(format, pokemon, moveName, opponentPokemon, overrides);
+
+  if (overrides.basePower < 1) {
+    delete overrides.basePower;
   }
 
   // only supply this if it's true (otherwise, use the pre-determined value)

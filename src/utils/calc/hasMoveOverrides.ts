@@ -1,4 +1,4 @@
-import type { GenerationNum } from '@smogon/calc';
+// import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
@@ -12,9 +12,10 @@ import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
  * @since 1.0.6
  */
 export const hasMoveOverrides = (
+  format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
-  format: string | GenerationNum,
+  opponentPokemon?: CalcdexPokemon,
 ): boolean => {
   if (!pokemon?.speciesForme || !moveName || !format) {
     return false;
@@ -24,7 +25,7 @@ export const hasMoveOverrides = (
     return false;
   }
 
-  const defaults = getMoveOverrideDefaults(pokemon, moveName, format) || {};
+  const defaults = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon) || {};
   const current = pokemon.moveOverrides[moveName] || {};
 
   // only compare overrides that currently exist, otherwise, this will frequently return true

@@ -1,6 +1,6 @@
 import { formatId } from '@showdex/utils/app';
 import { calcPokemonHp } from '@showdex/utils/calc';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleState, CalcdexPokemon } from '@showdex/redux/store';
 import { toggleableAbility } from './toggleableAbility';
 
 /**
@@ -10,31 +10,33 @@ import { toggleableAbility } from './toggleableAbility';
  *   - For instance, if Heatran's *Flash Fire* ability is activated, you'll see its `volatiles` object
  *     set to `{ flashfire: ['flashfire'] }` (at the time of writing this, of course).
  *   - Otherwise, its `ability` would still be `'Flash Fire'`, but `volatiles` would be an empty object, i.e., `{}`.
- * * Only exception is the *Multiscale* & *Shadow Shield* abilities, which is only active when the Pokemon's HP
- *   is at 100%, similar to how the *Focus Sash* item works.
- *   - Pretty sure `calculate()` from `@smogon/calc` doesn't care whether `abilityOn` (of `SmogonPokemon`)
- *     is `true` or `false`, but we keep track of it for visual purposes.
- *     - (Side note: `SmogonPokemon` mentioned above is an alias of the `Pokemon` class from `@smogon/calc`.)
+ * * Only exception is the *Multiscale* & *Shadow Shield* abilities, which is only active when the Pokemon's HP is at 100%.
  *   - Pokemon's HP value isn't currently editable, so there's no way to toggle *Multiscale* on/off
  *     (before the Pokemon takes any damage).
  *   - Additionally, if, say, Dragonite takes damage, this would return `false`, since its HP is no longer at 100%.
  *     In the case where Dragonite uses *Roost* and the opponent doesn't attack (e.g., switches out),
  *     resulting in Dragonite healing back to full health (i.e., 100%), this would return `true` again.
+ * * As of v1.1.0 when Gen 9 support was added, an optional `state` argument was added, which if provided,
+ *   will be used in determining the toggle state for the following abilities:
+ *   - *Beads of Ruin*
+ *   - *Protosynthesis*
+ *   - *Quark Drive*
+ *   - *Sword of Ruin*
+ *   - *Tablets of Ruin*
+ *   - *Vessel of Ruin*
  *
  * @returns `true` if the Pokemon's ability is *toggleable* and *active*, `false` otherwise.
  * @since 0.1.2
  */
 export const detectToggledAbility = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
+  pokemon: DeepPartial<CalcdexPokemon> = {},
+  state?: DeepPartial<CalcdexBattleState>,
 ): boolean => {
   if (!toggleableAbility(pokemon)) {
     return false;
   }
 
-  const ability = formatId(
-    ('dirtyAbility' in pokemon && (pokemon.dirtyAbility ?? pokemon.ability))
-      || pokemon.ability,
-  );
+  const ability = formatId(pokemon.dirtyAbility || pokemon.ability);
 
   // by this point, the Pokemon's HP is 0% or 100% so Multiscale should be "on"
   // (considering that we "reset" the HP to 100% if the Pokemon is dead, i.e., at 0% HP)
@@ -45,5 +47,58 @@ export const detectToggledAbility = (
     return !hpPercentage || hpPercentage === 1;
   }
 
-  return Object.keys(pokemon.volatiles || {}).includes(ability);
+  const volatilesKeys = Object.keys(pokemon.volatiles || {});
+
+  // handle Slow Start
+  if (ability === 'slowstart') {
+    return volatilesKeys.includes('slowstart');
+  }
+
+  const item = formatId(pokemon.dirtyItem ?? pokemon.item);
+
+  // handle Unburden
+  if (ability === 'Unburden') {
+    return !item || volatilesKeys.includes('itemremoved');
+  }
+
+  // handle Ruin abilities
+  // (note: smart Ruin ability toggling is done in setSelectionIndex() of useCalcdex())
+  if (ability.endsWith('ofruin') && pokemon.playerKey && state?.[pokemon.playerKey]?.sideid) {
+    const {
+      activeIndices,
+      selectionIndex,
+      pokemon: pokemonState,
+    } = state[pokemon.playerKey];
+
+    // fuck it, just turn it on if state is uninitialized lol
+    if (!pokemonState?.length) {
+      return true;
+    }
+
+    const pokemonIndex = pokemonState
+      ?.findIndex((p) => p?.calcdexId === pokemon.calcdexId)
+      ?? -1;
+
+    if (pokemonIndex < 0) {
+      return false;
+    }
+
+    // only initially activate if the Pokemon is selected or active on the field
+    if (state.field?.gameType === 'Singles') {
+      return selectionIndex > -1 && pokemonIndex === selectionIndex;
+    }
+
+    return activeIndices?.length && activeIndices.includes(pokemonIndex);
+  }
+
+  // handle Protosynthesis/Quark Drive
+  if (['protosynthesis', 'quarkdrive'].includes(ability)) {
+    return item === 'boosterenergy'
+      || (['Sun', 'Harsh Sunshine'].includes(state?.field?.weather) && ability === 'protosynthesis')
+      || (state?.field?.terrain === 'Electric' && ability === 'quarkdrive')
+      || volatilesKeys.some((k) => k?.startsWith(ability)); // e.g., 'protosynthesisatk' is a volatiles key
+  }
+
+  // last resort: look in the volatiles for the ability, maybe
+  return volatilesKeys.some((k) => k?.includes(ability));
 };

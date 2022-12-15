@@ -1,11 +1,13 @@
+@use 'sass:map';
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/font';
 @use 'mixins/spacing';
+@use 'mixins/transition';
 
-$type-unknown-color: #424242;
 $type-colors: (
+  unknown: #424242,
   normal: #90905D,
   fighting: #81201B,
   flying: #8563EA,
@@ -18,7 +20,7 @@ $type-colors: (
   fire: #DD6510,
   water: #3A6EEB,
   grass: #549B31,
-  electric: color.shade(#FDD835, 15%),
+  electric: color.shade(#FDD835, 10%),
   psychic: color.shade(#F62765, 10%),
   ice: color.shade(#73CACA, 10%),
   dragon: #4D09F4,
@@ -27,12 +29,16 @@ $type-colors: (
 );
 
 $type-color-light-shade: 10%;
+$type-color-dark-tint: 50%; // non-highlight only
 
-$label-light-opacity: 1;
-$label-dark-opacity: 1;
+$label-light-opacity: 0.75;
+$label-dark-opacity: 0.85;
+$label-highlight-light-opacity: 1;
+$label-highlight-dark-opacity: 1;
 $background-opacity-light: 0.85;
-$background-opacity-unknown-light: 0.5;
 $background-opacity-dark: 0.5;
+$background-opacity-unknown-light: 0.075;
+$background-opacity-unknown-dark: 0.1;
 
 .container {
   display: inline-block;
@@ -42,32 +48,73 @@ $background-opacity-dark: 0.5;
   font-size: 8px;
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
+  text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.1);
   border-radius: 5px;
   user-select: none;
   pointer-events: none;
+  @include transition.apply(width, color, text-shadow, background-color);
+
+  &.shorter {
+    width: 28px;
+  }
 
   &.light {
-    color: color.alpha(colors.$white, $label-light-opacity);
-    background-color: color.alpha($type-unknown-color, $background-opacity-unknown-light);
+    // color: color.alpha(map.get($type-colors, unknown), $label-light-opacity);
+    color: color.alpha(colors.$black, $label-light-opacity);
+    // background-color: color.alpha(color.shade(map.get($type-colors, unknown), $type-color-light-shade), $background-opacity-unknown-light);
+    background-color: color.alpha(colors.$black, $background-opacity-unknown-light);
   }
 
   &.dark {
+    // color: color.alpha(map.get($type-colors, unknown), $label-dark-opacity);
     color: color.alpha(colors.$white, $label-dark-opacity);
-    background-color: color.alpha($type-unknown-color, $background-opacity-dark);
+    // background-color: color.alpha(map.get($type-colors, unknown), $background-opacity-dark);
+    background-color: color.alpha(colors.$white, $background-opacity-unknown-dark);
+  }
+
+  &.highlight {
+    text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
+
+    &.light {
+      color: color.alpha(colors.$white, $label-highlight-light-opacity);
+      background-color: color.alpha(map.get($type-colors, unknown), $background-opacity-unknown-light);
+    }
+
+    &.dark {
+      color: color.alpha(colors.$white, $label-highlight-dark-opacity);
+      background-color: color.alpha(map.get($type-colors, unknown), $background-opacity-unknown-dark);
+    }
   }
 
   @each $type, $color in $type-colors {
-    &.type-#{$type} {
-      &.light {
-        background-color: color.alpha(
-          color.shade($color, $type-color-light-shade),
-          $background-opacity-light,
-        );
-      }
+    $light-color: color.shade($color, $type-color-light-shade);
+    $dark-color: color.tint($color, $type-color-dark-tint);
+    $dark-highlight-color: $color;
 
-      &.dark {
-        background-color: color.alpha($color, $background-opacity-dark);
+    @if $type != 'unknown' {
+      &.type-#{$type} {
+        &.light {
+          color: color.alpha($light-color, $label-light-opacity);
+        }
+
+        // Dark type on dark mode looks terrible
+        &.dark {
+          color: color.alpha($dark-color, $label-dark-opacity);
+        }
+
+        &.highlight {
+          // text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
+
+          &.light {
+            color: color.alpha(colors.$white, $label-highlight-light-opacity);
+            background-color: color.alpha($light-color, $background-opacity-light);
+          }
+
+          &.dark {
+            color: color.alpha(colors.$white, $label-highlight-dark-opacity);
+            background-color: color.alpha($dark-highlight-color, $background-opacity-dark);
+          }
+        }
       }
     }
   }

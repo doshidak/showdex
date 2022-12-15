@@ -116,6 +116,16 @@ declare namespace Showdown {
     | 'perish3'
     | 'perishsong'
     | 'powertrick'
+    | 'protosynthesisatk'
+    | 'protosynthesisdef'
+    | 'protosynthesisspa'
+    | 'protosynthesisspd'
+    | 'protosynthesisspe'
+    | 'quarkdriveatk'
+    | 'quarkdrivedef'
+    | 'quarkdrivespa'
+    | 'quarkdrivespd'
+    | 'quarkdrivespe'
     | 'reflect' // in gen 1 only
     | 'smackdown'
     | 'stockpile'
@@ -198,6 +208,9 @@ declare namespace Showdown {
 
     condition: string;
     active: boolean;
+    canGmax: boolean;
+    commanding: boolean;
+    reviving: boolean;
 
     /**
      * Unboosted stats.
@@ -340,6 +353,11 @@ declare namespace Showdown {
     gender: GenderName;
 
     /**
+     * @default ''
+     */
+    teraType: TypeName | '';
+
+    /**
      * @default false
      */
     shiny: boolean;
@@ -427,12 +445,23 @@ declare namespace Showdown {
     moveTrack: [string, number][];
 
     /**
-     * @default { sleepTurns: 0, toxicTurns: 0 }
+     * @default
+     * ```ts
+     * {
+     *   sleepTurns: 0,
+     *   toxicTurns: 0,
+     * }
+     * ```
      */
     statusData: {
       sleepTurns: number;
       toxicTurns: number;
     };
+
+    /**
+     * @default 0
+     */
+    timesAttacked: number;
 
     sprite: PokemonSprite;
 

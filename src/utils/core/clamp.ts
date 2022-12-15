@@ -7,4 +7,8 @@ export const clamp = (
   min: number,
   value: number,
   max?: number,
-): number => Math.max(Math.min(value, max ?? value), min);
+): number => (
+  typeof max === 'number' && max > min
+    ? Math.max(Math.min(value, max ?? value), min)
+    : Math.max(value, min ?? value)
+);

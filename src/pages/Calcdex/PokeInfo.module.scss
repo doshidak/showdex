@@ -127,6 +127,10 @@ button.nameButton {
   flex: 0 0 auto;
   @include spacing.margin($left: 0.5em);
   // user-select: none;
+
+  // .smol &.teraTypeField {
+  //   @include spacing.margin($left: 0.3em);
+  // }
 }
 
 // .toggleButtonLabel {
@@ -195,6 +199,19 @@ button.nameButton {
   }
 }
 
+.presetHeader {
+  @include flex.row-between;
+  width: 100%;
+}
+
+.presetHeaderPart {
+  @include flex.row($align: center);
+}
+
+.presetHeaderRight {
+  @include spacing.padding($right: 5px);
+}
+
 // .toggleButton {
 //   @include spacing.margin($bottom: 2px);
 // }
@@ -215,9 +232,7 @@ button.nameButton {
 }
 
 .importButton {
-  &.floatingBadges {
-    z-index: 10;
-  }
+  z-index: 3;
 }
 
 .importBadge {

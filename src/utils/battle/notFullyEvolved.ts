@@ -25,6 +25,9 @@ export const notFullyEvolved = (species: string | Showdown.Species): boolean => 
     const evoSpecies = dex.species.get(evo);
 
     return !evoSpecies?.isNonstandard
-      || evoSpecies?.isNonstandard === dexSpecies.isNonstandard;
+      || [
+        dexSpecies.isNonstandard,
+        'Unobtainable', // apparently a fix for Hisuian prevos
+      ].includes(evoSpecies?.isNonstandard);
   });
 };

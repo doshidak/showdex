@@ -6,6 +6,7 @@ import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/int
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
+import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
@@ -45,18 +46,19 @@ export const sanitizePokemon = (
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: ('calcdexId' in pokemon && pokemon.calcdexId) || null,
     // calcdexNonce: ('calcdexNonce' in pokemon && pokemon.calcdexNonce) || null,
+    serverSourced: ('serverSourced' in pokemon && pokemon.serverSourced) || null,
+    playerKey: ('playerKey' in pokemon && pokemon.playerKey)
+      || detectPlayerKeyFromPokemon(pokemon)
+      || null,
 
     slot: pokemon?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
     name: pokemon?.name,
-    details: pokemon?.details,
-    searchid: pokemon?.searchid,
+    details: pokemon?.details || null,
+    searchid: pokemon?.searchid || null,
 
     speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
-    dmaxable: ('dmaxable' in pokemon && pokemon.dmaxable) || false,
-    gmaxable: ('gmaxable' in pokemon && pokemon.gmaxable) || false,
     altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
-
     transformedForme: transformed
       ? typeof pokemon.volatiles.transform[1] === 'object'
         ? (<Showdown.Pokemon> <unknown> pokemon.volatiles.transform[1])?.speciesForme || null
@@ -65,24 +67,20 @@ export const sanitizePokemon = (
 
     level: pokemon?.level || 0,
     gender: pokemon?.gender || 'N',
-    shiny: pokemon?.shiny,
+
+    shiny: pokemon?.shiny || false,
+    dmaxable: ('dmaxable' in pokemon && pokemon.dmaxable) || false,
+    gmaxable: ('gmaxable' in pokemon && pokemon.gmaxable) || false,
 
     types: typeChanged
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
+    teraType: pokemon?.teraType || null,
+    altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
     hp: pokemon?.hp || 0,
     maxhp: pokemon?.maxhp || 1,
     fainted: pokemon?.fainted ?? !pokemon?.hp,
-
-    status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
-    turnstatuses: pokemon?.turnstatuses,
-    toxicCounter: pokemon?.statusData?.toxicTurns,
-
-    statusData: {
-      sleepTurns: pokemon?.statusData?.sleepTurns || 0,
-      toxicTurns: pokemon?.statusData?.toxicTurns || 0,
-    },
 
     ability: (!legacy && <AbilityName> pokemon?.ability) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
@@ -98,9 +96,9 @@ export const sanitizePokemon = (
 
     dirtyItem: ('dirtyItem' in pokemon && pokemon.dirtyItem) || null,
     altItems: (gen > 1 && 'altItems' in pokemon && pokemon.altItems) || [],
-    itemEffect: pokemon?.itemEffect,
-    prevItem: <ItemName> pokemon?.prevItem,
-    prevItemEffect: pokemon?.prevItemEffect,
+    itemEffect: pokemon?.itemEffect || null,
+    prevItem: <ItemName> pokemon?.prevItem || null,
+    prevItemEffect: pokemon?.prevItemEffect || null,
 
     nature: !legacy
       ? ('nature' in pokemon && pokemon.nature) || PokemonNatures[0]
@@ -155,23 +153,29 @@ export const sanitizePokemon = (
       spe: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spe) || null,
     },
 
+    status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
+    turnstatuses: pokemon?.turnstatuses,
+
+    sleepCounter: ('sleepCounter' in pokemon && pokemon.sleepCounter) || pokemon?.statusData?.sleepTurns || 0,
+    toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter) || pokemon?.statusData?.toxicTurns || 0,
+    hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter) || pokemon?.timesAttacked || 0,
+    faintCounter: ('faintCounter' in pokemon && pokemon.faintCounter) || 0,
+
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
     useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
+    terastallized: (!legacy && 'terastallized' in pokemon && pokemon.terastallized) || false,
+    criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
+
+    lastMove: <MoveName> pokemon?.lastMove || null,
     moves: <MoveName[]> pokemon?.moves || [],
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
-    lastMove: <MoveName> pokemon?.lastMove || null,
+    moveOverrides: { ...('moveOverrides' in pokemon && pokemon.moveOverrides) },
+    showMoveOverrides: ('showMoveOverrides' in pokemon && pokemon.showMoveOverrides) || false,
 
     // returns moveTrack and revealedMoves (guaranteed to be empty arrays, at the very least)
     ...sanitizeMoveTrack(pokemon, format),
-
-    showMoveOverrides: ('showMoveOverrides' in pokemon && pokemon.showMoveOverrides) || false,
-    moveOverrides: {
-      ...('moveOverrides' in pokemon && pokemon.moveOverrides),
-    },
-
-    criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
 
     preset: ('preset' in pokemon && pokemon.preset) || null,
     presets: ('presets' in pokemon && pokemon.presets) || [],
@@ -281,6 +285,11 @@ export const sanitizePokemon = (
       sanitizedPokemon.types = [
         ...(<Showdown.TypeName[]> (transformedSpecies || species).types),
       ];
+    }
+
+    // if no teraType in gen 9, default to the Pokemon's first type
+    if (gen > 8 && !sanitizedPokemon.teraType && sanitizedPokemon.types[0]) {
+      [sanitizedPokemon.teraType] = sanitizedPokemon.types;
     }
 
     // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)

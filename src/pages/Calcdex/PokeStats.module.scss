@@ -136,6 +136,41 @@
   }
 }
 
+.statModsTable {
+  display: grid;
+  grid-template-columns: min-content max-content;
+  grid-auto-rows: max-content;
+  column-gap: 5px;
+  row-gap: 2px;
+  align-items: center;
+  max-width: 200px;
+}
+
+.statModValue {
+  grid-area: span 1 / span 1;
+  align-self: center;
+  font-weight: 600;
+  font-size: 11px;
+  text-align: right;
+
+  .light & {
+    &.positive {
+      color: color.shade(colors.$green, 15%);
+    }
+
+    &.negative {
+      color: color.shade(colors.$red, 15%);
+    }
+  }
+}
+
+.statModLabel {
+  grid-area: span 1 / span 1;
+  align-self: center;
+  font-size: 10px;
+  opacity: 0.9;
+}
+
 .stageValue {
   @include flex.row-center;
 }
