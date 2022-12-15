@@ -119,6 +119,28 @@
   }
 }
 
+.deltaValue {
+  @include transition.apply(color);
+
+  &.positive {
+    color: colors.$green;
+  }
+
+  &.negative {
+    color: colors.$red;
+  }
+
+  &.dark {
+    &.positive {
+      color: color.shade(colors.$green, 10%);
+    }
+
+    &.negative {
+      color: color.shade(colors.$red, 10%);
+    }
+  }
+}
+
 button.toggleButton {
   @include spacing.margin($left: 0.5em);
   font-size: 8px;

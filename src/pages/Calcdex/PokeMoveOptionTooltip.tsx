@@ -4,10 +4,11 @@ import { PokeType } from '@showdex/components/app';
 // import { useCalcdexSettings } from '@showdex/redux/store';
 // import { formatId } from '@showdex/utils/app';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/battle';
-import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
+import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { SelectOptionTooltipProps } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { PokemonStatBoostDelta } from '@showdex/utils/battle';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<MoveName> {
@@ -15,6 +16,7 @@ export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<Mov
   style?: React.CSSProperties;
   format?: string;
   pokemon?: DeepPartial<CalcdexPokemon>;
+  opponentPokemon?: DeepPartial<CalcdexPokemon>;
 }
 
 export const PokeMoveOptionTooltip = ({
@@ -22,6 +24,7 @@ export const PokeMoveOptionTooltip = ({
   style,
   format,
   pokemon,
+  opponentPokemon,
   label,
   value,
   hidden,
@@ -34,7 +37,7 @@ export const PokeMoveOptionTooltip = ({
   const dex = getDexForFormat(format);
   const dexMove = dex?.moves.get(value);
 
-  if (!dexMove?.type) {
+  if (!dexMove?.exists) {
     return null;
   }
 
@@ -49,27 +52,46 @@ export const PokeMoveOptionTooltip = ({
       || dexMove.desc,
   );
 
-  const moveOverrides = {
-    ...getMoveOverrideDefaults(pokemon, value, format),
-    ...pokemon?.moveOverrides?.[value],
-  };
+  // const moveOverrides = {
+  //   ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon),
+  //   ...pokemon?.moveOverrides?.[value],
+  // };
 
-  const hasOverrides = hasMoveOverrides(pokemon, value, format);
+  const hasOverrides = hasMoveOverrides(format, pokemon, value, opponentPokemon);
+  const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon) };
+  const userOverrides = pokemon?.moveOverrides?.[value];
+  const moveOverrides = { ...moveDefaults, ...userOverrides };
 
-  const basePower = (
-    pokemon?.useZ
-      ? moveOverrides?.zBasePower
-      : pokemon?.useMax
-        ? moveOverrides?.maxBasePower
-        : null
-  ) || moveOverrides?.basePower;
+  // const basePower = (
+  //   pokemon?.useZ
+  //     ? moveOverrides?.zBasePower
+  //     : pokemon?.useMax
+  //       ? moveOverrides?.maxBasePower
+  //       : null
+  // ) || moveOverrides?.basePower;
+
+  const basePowerOverride = (pokemon?.useZ && userOverrides?.zBasePower)
+    || (pokemon?.useMax && userOverrides?.maxBasePower)
+    || userOverrides?.basePower
+    || 0;
+
+  const { basePower: dexBasePower } = dexMove;
+  const baseBasePower = dexMove.id.startsWith('hiddenpower') ? calcHiddenPower(format, pokemon) : dexBasePower;
+  const basePower = moveOverrides.basePower || dexBasePower || 0;
+
+  const basePowerDelta: PokemonStatBoostDelta = (
+    !basePowerOverride && (
+      (basePower > baseBasePower && 'positive')
+        || (basePower < baseBasePower && 'negative')
+    )
+  ) || null;
 
   // Z/Max/G-Max moves bypass the original move's accuracy
   // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
   // after using moves like Fly, Dig, Phantom Force, etc.)
   const showAccuracy = !pokemon?.useMax
     && typeof dexMove.accuracy !== 'boolean'
-    && (dexMove.accuracy || -1) > 0
+    && (dexMove.accuracy || 0) > 0
     && dexMove.accuracy !== 100;
 
   return (
@@ -120,7 +142,27 @@ export const PokeMoveOptionTooltip = ({
             {
               basePower > 1 &&
               <div className={styles.propertyValue}>
-                {basePower}
+                {
+                  !!basePowerDelta &&
+                  <>
+                    <span style={{ opacity: 0.65 }}>
+                      {baseBasePower}
+                    </span>
+                    <span style={{ display: 'inline-block', padding: '0 0.2em', opacity: 0.45 }}>
+                      &rarr;
+                    </span>
+                  </>
+                }
+
+                <span
+                  className={cx(
+                    styles.deltaValue,
+                    basePowerDelta === 'positive' && styles.positive,
+                    basePowerDelta === 'negative' && styles.negative,
+                  )}
+                >
+                  {basePower}
+                </span>
               </div>
             }
           </div>
