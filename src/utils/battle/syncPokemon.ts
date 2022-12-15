@@ -639,7 +639,7 @@ export const syncPokemon = (
         .some((k) => /^(?:proto|quark)/i.test(k));
 
       const removeDirtyBooster = !hasBoosterVolatile && (
-        (ability === 'protosynthesis' && state.field?.weather !== 'Sun')
+        (ability === 'protosynthesis' && ['Sun', 'Harsh Sunshine'].includes(state.field?.weather))
           || (ability === 'quarkdrive' && state.field?.terrain !== 'Electric')
       );
 

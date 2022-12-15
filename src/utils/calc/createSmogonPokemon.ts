@@ -208,7 +208,7 @@ export const createSmogonPokemon = (
     } = field || {};
 
     // update (2022/12/11): no need to forcibly set the item if the field conditions activate the abilities
-    const fieldActivated = (abilityId === 'protosynthesis' && weather === 'Sun')
+    const fieldActivated = (abilityId === 'protosynthesis' && ['Sun', 'Harsh Sunshine'].includes(weather))
       || (abilityId === 'quarkdrive' && terrain === 'Electric');
 
     if (!fieldActivated) {

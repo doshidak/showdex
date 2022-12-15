@@ -94,7 +94,7 @@ export const detectToggledAbility = (
   // handle Protosynthesis/Quark Drive
   if (['protosynthesis', 'quarkdrive'].includes(ability)) {
     return item === 'boosterenergy'
-      || (state?.field?.weather === 'Sun' && ability === 'protosynthesis')
+      || (['Sun', 'Harsh Sunshine'].includes(state?.field?.weather) && ability === 'protosynthesis')
       || (state?.field?.terrain === 'Electric' && ability === 'quarkdrive')
       || volatilesKeys.some((k) => k?.startsWith(ability)); // e.g., 'protosynthesisatk' is a volatiles key
   }
