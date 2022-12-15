@@ -17,7 +17,7 @@ const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> 
   happiness: /^\s*Happiness:\s*(\d+)$/i,
   // dynamaxLevel: /^\s*Dynamax Level:\s*(\d+)$/i, // unsupported
   gigantamax: /^\s*Gigantamax:\s*([A-Z]+)$/i,
-  teraType: /^\s*Tera\s*Type:\s*([A-Z]+)$/i,
+  teraTypes: /^\s*Tera\s*Type:\s*([A-Z]+)$/i,
   ivs: /^\s*IVs:\s*(\d.+)$/i,
   evs: /^\s*EVs:\s*(\d.+)$/i,
   nature: /^\s*([A-Z]+)\s+Nature$/i,
@@ -325,7 +325,7 @@ export const importPokePaste = (
         break;
       }
 
-      case 'teraType': {
+      case 'teraTypes': {
         const [
           ,
           value,
@@ -341,7 +341,7 @@ export const importPokePaste = (
           break;
         }
 
-        preset.teraType = detectedType;
+        preset.teraTypes = [detectedType];
 
         break;
       }
@@ -497,11 +497,11 @@ export const importPokePaste = (
     return null;
   }
 
-  if (gen > 8 && !preset.teraType) {
+  if (gen > 8 && !preset.teraTypes?.length) {
     const speciesTypes = dex.species.get(preset.speciesForme)?.types;
 
-    if (speciesTypes?.[0]) {
-      [preset.teraType] = speciesTypes;
+    if (speciesTypes?.length) {
+      preset.teraTypes = [...speciesTypes];
     }
   }
 
