@@ -57,7 +57,7 @@ export interface CalcdexPresetsHookOptions {
 export interface CalcdexPresetsHookInterface {
   loading: boolean;
   presets: CalcdexPokemonPreset[];
-  usage: CalcdexPokemonPreset;
+  usages: CalcdexPokemonPreset[];
 }
 
 const sortPresets = (
@@ -273,17 +273,6 @@ export const usePresets = ({
     randomsStatsPresets,
   ]);
 
-  // note: the usage stats presets are called 'Showdown Usage', for both formats and randoms
-  // (preset names are populated via transformFormatStatsResponse() and transformRandomsStatsResponse(), respectively)
-  // const usage = React.useMemo(
-  //   () => usages.find((p) => formatId(p?.name) === 'showdownusage'),
-  //   [usages],
-  // );
-
-  const usage = settings?.downloadUsageStats
-    ? usages[0]
-    : null;
-
   const loading = React.useMemo(() => (
     formatLoading
       || formatStatsLoading
@@ -307,6 +296,6 @@ export const usePresets = ({
   return {
     loading,
     presets,
-    usage,
+    usages,
   };
 };
