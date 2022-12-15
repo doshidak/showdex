@@ -50,6 +50,20 @@ export interface PkmnSmogonPresetRequest {
  * @since 0.1.0
  */
 export interface PkmnSmogonPreset {
+  /**
+   * Note that this key is purposefully all lowercase.
+   *
+   * @since 1.1.0
+   */
+  teratypes?: Showdown.TypeName | Showdown.TypeName[];
+
+  /**
+   * Note that this key exists in case the pkmn API changes the casing.
+   *
+   * @since 1.1.0
+   */
+  teraTypes?: Showdown.TypeName | Showdown.TypeName[];
+
   ability: AbilityName | AbilityName[];
   nature: Showdown.PokemonNature | Showdown.PokemonNature[];
   item: ItemName | ItemName[];
@@ -163,7 +177,13 @@ export interface PkmnSmogonRandomPreset {
   level: number;
   abilities: AbilityName[];
   items: ItemName[];
-  moves: MoveName[];
+
+  /**
+   * Won't exist in Gen 9 due to the introduction of the `roles` system.
+   *
+   * @since 0.1.0
+   */
+  moves?: MoveName[];
 
   /**
    * Unless specified, all IVs should default to `31`.
@@ -198,6 +218,18 @@ export interface PkmnSmogonRandomPreset {
    * @since 0.1.0
    */
   evs?: Showdown.StatsTable;
+
+  /**
+   * New roles system introduced for Gen 9 random battles.
+   *
+   * @since 1.1.0
+   */
+  roles?: {
+    [roleName: string]: {
+      teraTypes: Showdown.TypeName[];
+      moves: MoveName[];
+    };
+  };
 }
 
 /**
@@ -226,9 +258,16 @@ export interface PkmnSmogonRandomsStatsResponse {
     level: number;
     abilities: { [name: AbilityName]: number; };
     items: { [name: ItemName]: number; };
-    moves: { [name: MoveName]: number; };
+    moves?: { [name: MoveName]: number; };
     ivs?: Showdown.StatsTable;
     evs?: Showdown.StatsTable;
+    roles?: {
+      [roleName: string]: {
+        weight: number;
+        teraTypes: Record<Showdown.TypeName, number>;
+        moves: { [name: MoveName]: number; };
+      };
+    };
   };
 }
 
