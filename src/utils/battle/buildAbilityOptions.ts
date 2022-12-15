@@ -135,7 +135,7 @@ export const buildAbilityOptions = (
     filterAbilities.push(...legalAbilities);
   }
 
-  if (!filterAbilities.includes(ability)) {
+  if (ability && !filterAbilities.includes(ability)) {
     options.unshift({
       label: 'Inherited',
       options: [{
