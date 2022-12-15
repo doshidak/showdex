@@ -174,6 +174,13 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   teraType?: Showdown.TypeName;
 
   /**
+   * Alternative Tera types from the currently applied `preset`.
+   *
+   * @since 1.1.0
+   */
+  altTeraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
+
+  /**
    * Ability of the Pokemon.
    *
    * @since 0.1.0
@@ -823,11 +830,22 @@ export interface CalcdexPokemonPreset {
    */
   nickname?: string;
 
+  /**
+   * Usage percentage of the preset.
+   *
+   * * Primarily only available in Gen 9 Randoms with role-based sets.
+   *   - Side note: `usage` in Randoms would refer to probability of the set.
+   * * Value is a percentage represented as a decimal in the interval `[0, 1]`, both inclusive.
+   *
+   * @since 1.1.0
+   */
+  usage?: number;
+
   speciesForme?: string;
   level?: number;
   gender?: Showdown.GenderName;
   hpType?: string;
-  teraType?: Showdown.TypeName;
+  teraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
   shiny?: boolean;
   happiness?: number;
   gigantamax?: boolean;
