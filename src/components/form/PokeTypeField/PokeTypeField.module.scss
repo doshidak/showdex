@@ -1,8 +1,10 @@
 @use 'sass:map';
 // @use 'sass:math';
 @use 'config/colors';
+@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
+@use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
@@ -48,6 +50,10 @@ $options-tooltip-title: (
     light: color.alpha(colors.$white, 0.65),
     dark: color.alpha(colors.$black, 0.65),
   ),
+);
+
+$options-tooltip-usage-types: (
+  padding-y: 3px,
 );
 
 // note: color schemes are reversed for tooltips!
@@ -102,12 +108,35 @@ $type-option-button: (
   ),
 );
 
-$type-option: (
+$type-option-type: (
+  color: (
+    default: (
+      light: color.alpha(colors.$white, 0.65),
+      dark: color.alpha(colors.$black, 0.65),
+    ),
+  ),
+
   background-color: (
     default: (
-      light: color.alpha(colors.$white, 0.5),
-      dark: color.alpha(colors.$black, 0.5),
+      light: color.alpha(colors.$white, 0.15),
+      dark: color.alpha(colors.$black, 0.15),
     ),
+
+    highlighted: (
+      light: color.alpha(colors.$blue, 0.3),
+      dark: color.alpha(color.tint(colors.$blue, 30%), 0.3),
+    ),
+  ),
+);
+
+$type-option-usage: (
+  padding-top: 1px,
+  padding-bottom: 3px,
+  font-size: 8px,
+
+  color: (
+    light: color.alpha(colors.$white, 0.75),
+    dark: color.alpha(colors.$black, 0.75),
   ),
 );
 
@@ -201,6 +230,14 @@ $type-value: (
   // @include spacing.margin-xy($x: math.div(map.get($options-tooltip, column-gap), 2), $y: map.get($options-tooltip, row-gap));
 }
 
+.usageTypes {
+  @include spacing.padding-xy($y: map.get($options-tooltip-usage-types, padding-y));
+}
+
+.typeOption {
+  @include flex.column-center;
+}
+
 .typeOptionButton {
   position: relative;
   // filter: grayscale(map.get($type-option-button, grayscale, default));
@@ -259,20 +296,68 @@ $type-value: (
   }
 }
 
-.typeOption {
+.typeOptionType {
   grid-area: span 1 / span 1;
-  // @include transition.apply(background-color);
   z-index: 1;
 
-  .typeOptionButton:not(.selected):not(.hover) & {
-  // .typeOptionButton.disabled & {
+  .typeOptionButton:not(.selected):not(.withUsage) & {
     .light & {
-      background-color: map.get($type-option, background-color, default, light);
+      color: map.get($type-option-type, color, default, light);
     }
 
     .dark & {
-      background-color: map.get($type-option, background-color, default, dark);
+      color: map.get($type-option-type, color, default, dark);
     }
+  }
+
+  // .typeOptionButton:not(.selected).highlighted & {
+  //   .light & {
+  //     text-shadow: map.get($type-option-type, text-shadow, highlighted);
+  //   }
+  //
+  //   .dark & {
+  //     text-shadow: map.get($type-option-type, text-shadow, highlighted);
+  //   }
+  // }
+
+  .typeOptionButton:not(.selected):not(.withUsage):not(.hover) & {
+    .light & {
+      background-color: map.get($type-option-type, background-color, default, light);
+    }
+
+    .dark & {
+      background-color: map.get($type-option-type, background-color, default, dark);
+    }
+  }
+
+  .typeOptionButton:not(.selected):not(.withUsage):not(.hover).highlighted & {
+    .light & {
+      background-color: map.get($type-option-type, background-color, highlighted, light);
+    }
+
+    .dark & {
+      background-color: map.get($type-option-type, background-color, highlighted, dark);
+    }
+  }
+}
+
+.typeOptionUsage {
+  @include spacing.padding(
+    $top: map.get($type-option-usage, padding-top),
+    $bottom: map.get($type-option-usage, padding-bottom),
+  );
+  @include font.apply(fonts.$mono);
+  font-size: map.get($type-option-usage, font-size);
+  text-align: center;
+  user-select: none;
+  @include transition.apply(color);
+
+  .light & {
+    color: map.get($type-option-usage, color, light);
+  }
+
+  .dark & {
+    color: map.get($type-option-usage, color, dark);
   }
 }
 
