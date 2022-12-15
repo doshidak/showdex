@@ -76,6 +76,7 @@ export const sanitizePokemon = (
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
     teraType: pokemon?.teraType || null,
+    altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
     hp: pokemon?.hp || 0,
     maxhp: pokemon?.maxhp || 1,
