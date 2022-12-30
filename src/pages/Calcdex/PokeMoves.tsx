@@ -11,7 +11,7 @@ import {
 import { useColorScheme } from '@showdex/redux/store';
 import { legalLockedFormat } from '@showdex/utils/battle';
 import { formatDamageAmounts, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
-import { clamp, writeClipboardText } from '@showdex/utils/core';
+import { clamp, upsizeArray, writeClipboardText } from '@showdex/utils/core';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexMoveOverride } from '@showdex/redux/store';
@@ -66,7 +66,11 @@ export const PokeMoves = ({
     || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format));
 
   const handleMoveChange = (name: MoveName, index: number) => {
-    const moves = [...(pokemon?.moves || [] as MoveName[])];
+    const moves = upsizeArray(
+      [...(pokemon?.moves || [])],
+      matchups?.length,
+      null,
+    );
 
     if (!Array.isArray(moves) || (moves?.[index] && moves[index] === name)) {
       return;
