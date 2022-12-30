@@ -53,7 +53,7 @@ export const syncPokemon = (
     'speciesForme',
     'hp',
     'maxhp',
-    'teraType', // must be before 'volatiles' (in terms of array indices) !!!
+    'terastallized', // must be before 'volatiles' (in terms of array indices) !!!
     'status',
     'statusData',
     'timesAttacked',
@@ -122,12 +122,13 @@ export const syncPokemon = (
         break;
       }
 
-      case 'teraType': {
+      case 'terastallized': {
         // replace a potentially empty string (or something potentially invalid like `false`) with null
         // (also no point storing a '???' type; null is perfectly acceptable since the UI should show '???' for falsy values)
         // update (2022/12/12): don't sync falsy values; clears your Pokemon's Tera types! LOL
         if (!value || value === '???') {
           // value = null;
+          syncedPokemon.terastallized = false;
 
           // break;
           return;
@@ -136,12 +137,16 @@ export const syncPokemon = (
         // make sure we got a valid type (just in case)
         // (note: value can't be '???' here at this point)
         value = capitalize(<string> value);
+        syncedPokemon.terastallized = PokemonTypes.includes(<Showdown.TypeName> value);
 
-        if (!PokemonTypes.includes(<Showdown.TypeName> value)) {
+        if (!syncedPokemon.terastallized) {
           return;
         }
 
-        break;
+        syncedPokemon.teraType = <Showdown.TypeName> value;
+
+        // break;
+        return;
       }
 
       case 'status': {
@@ -310,12 +315,12 @@ export const syncPokemon = (
 
         // sync the Pokemon's terastallization state
         // (teraType should've been synced and sanitized from `pokemon` by this point)
-        syncedPokemon.terastallized = 'typechange' in volatiles
-          && !!syncedPokemon.teraType
-          && syncedPokemon.teraType !== '???' // just in case lol
-          && PokemonTypes.includes(syncedPokemon.teraType)
-          && changedTypes.length === 1
-          && changedTypes[0] === syncedPokemon.teraType;
+        // syncedPokemon.terastallized = 'typechange' in volatiles
+        //   && !!syncedPokemon.teraType
+        //   && syncedPokemon.teraType !== '???' // just in case lol
+        //   && PokemonTypes.includes(syncedPokemon.teraType)
+        //   && changedTypes.length === 1
+        //   && changedTypes[0] === syncedPokemon.teraType;
 
         if (changedTypes.length && !syncedPokemon.terastallized) {
           syncedPokemon.types = [...changedTypes];
@@ -411,6 +416,11 @@ export const syncPokemon = (
       }
     }
 
+    // check if the Tera type has been revealed
+    if (serverPokemon.teraType && serverPokemon.teraType !== '???') {
+      syncedPokemon.teraType = serverPokemon.teraType;
+    }
+
     // sometimes, the server may only provide the baseAbility (w/ an undefined ability)
     const serverAbility = serverPokemon.ability || serverPokemon.baseAbility;
 
@@ -477,6 +487,7 @@ export const syncPokemon = (
       speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
       level: syncedPokemon.level || serverPokemon.level,
       gender: syncedPokemon.gender || serverPokemon.gender || null,
+      teraTypes: <Showdown.TypeName[]> [serverPokemon.teraType].filter(Boolean),
       ability: syncedPokemon.ability,
       item: syncedPokemon.item,
       ...guessedSpread,
