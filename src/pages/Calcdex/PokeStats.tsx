@@ -9,17 +9,10 @@ import {
   PokemonStatNames,
 } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
-import {
-  // detectLegacyGen,
-  detectStatBoostDelta,
-  formatStatBoost,
-  legalLockedFormat,
-} from '@showdex/utils/battle';
+import { detectStatBoostDelta, formatStatBoost, legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { pluralize } from '@showdex/utils/humanize';
-// import type { GenerationNum } from '@smogon/calc';
-// import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import styles from './PokeStats.module.scss';
@@ -27,36 +20,18 @@ import styles from './PokeStats.module.scss';
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
-  // gen?: GenerationNum;
-  // format?: string;
-  // playerPokemon: CalcdexPokemon;
-  // opponentPokemon: CalcdexPokemon;
-  // field?: CalcdexBattleField;
-  // authPlayerKey?: CalcdexPlayerKey;
-  // playerKey?: CalcdexPlayerKey;
   containerSize?: ElementSizeLabel;
-  // onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeStats = ({
   className,
   style,
-  // gen,
-  // format,
-  // playerPokemon: pokemon,
-  // opponentPokemon,
-  // field,
-  // authPlayerKey,
-  // playerKey,
   containerSize,
-  // onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
   const {
     state,
     settings,
-    // player,
     playerPokemon: pokemon,
-    // opponent,
     opponentPokemon,
     playerKey, // don't use the one from state btw
     field, // don't use the one from state btw
@@ -70,23 +45,7 @@ export const PokeStats = ({
     authPlayerKey,
   } = state;
 
-  // const {
-  //   pokemon: playerParty,
-  //   selectionIndex: playerIndex,
-  // } = player;
-
-  // const {
-  //   pokemon: opponentParty,
-  //   selectionIndex: opponentIndex,
-  // } = opponent;
-
-  // const pokemon = playerParty?.[playerIndex];
-  // const opponentPokemon = opponentParty?.[opponentIndex];
-
-  // const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
-
-  // const legacy = detectLegacyGen(gen);
 
   const statNames = PokemonStatNames.filter((stat) => gen > 1 || stat !== 'spd');
   const boostNames = PokemonBoostNames.filter((stat) => gen > 1 || stat !== 'spd');

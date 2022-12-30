@@ -12,17 +12,10 @@ import { useColorScheme } from '@showdex/redux/store';
 import { legalLockedFormat } from '@showdex/utils/battle';
 import { formatDamageAmounts, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { clamp, writeClipboardText } from '@showdex/utils/core';
-// import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type {
-  // CalcdexBattleRules,
-  CalcdexMoveOverride,
-  // CalcdexPokemon,
-  // CalcdexPokemonPreset,
-} from '@showdex/redux/store';
+import type { CalcdexMoveOverride } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-// import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';
@@ -30,38 +23,18 @@ import styles from './PokeMoves.module.scss';
 export interface PokeMovesProps {
   className?: string;
   style?: React.CSSProperties;
-  // gen: GenerationNum;
-  // format?: string;
-  // rules?: CalcdexBattleRules;
-  // playerPokemon: CalcdexPokemon;
-  // opponentPokemon?: CalcdexPokemon;
-  // usage?: CalcdexPokemonPreset;
-  // movesCount?: number;
   containerSize?: ElementSizeLabel;
-  // calculateMatchup: SmogonMatchupHookCalculator;
-  // onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeMoves = ({
   className,
   style,
-  // gen,
-  // format,
-  // rules,
-  // playerPokemon: pokemon,
-  // opponentPokemon,
-  // usage,
-  // movesCount = 4,
   containerSize,
-  // calculateMatchup,
-  // onPokemonChange,
 }: PokeMovesProps): JSX.Element => {
   const {
     state,
     settings,
-    // player,
     playerPokemon: pokemon,
-    // opponent,
     opponentPokemon,
     moveOptions,
     matchups,
@@ -74,51 +47,11 @@ export const PokeMoves = ({
     rules,
   } = state;
 
-  // const {
-  //   pokemon: playerParty,
-  //   selectionIndex: playerIndex,
-  // } = player;
-
-  // const {
-  //   pokemon: opponentParty,
-  //   selectionIndex: opponentIndex,
-  // } = opponent;
-
-  // const pokemon = playerParty?.[playerIndex];
-  // const opponentPokemon = opponentParty?.[opponentIndex];
-
-  // const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
-
-  // const dex = getDexForFormat(format);
-
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
-
-  // const moveOptions = React.useMemo(() => buildMoveOptions(
-  //   format,
-  //   pokemon,
-  //   usage,
-  //   settings?.showAllOptions,
-  // ), [
-  //   format,
-  //   pokemon,
-  //   settings,
-  //   usage,
-  // ]);
-
-  // const matchups = React.useMemo(() => upsizeArray(
-  //   pokemon?.moves || [],
-  //   movesCount,
-  //   null,
-  //   true,
-  // ).map((moveName) => calculateMatchup?.(moveName) || null), [
-  //   calculateMatchup,
-  //   movesCount,
-  //   pokemon,
-  // ]);
 
   const showZToggle = format?.includes('nationaldex')
     || gen === 6

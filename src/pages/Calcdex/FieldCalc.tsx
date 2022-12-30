@@ -25,15 +25,8 @@ import styles from './FieldCalc.module.scss';
 interface FieldCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  // battleId?: string;
-  // gen?: GenerationNum;
-  // format?: string;
-  // authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
-  // field?: CalcdexBattleField;
   containerSize?: ElementSizeLabel;
-  // disabled?: boolean;
-  // onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
 }
 
 const PlayerSideScreensMap: Record<string, keyof CalcdexPlayerSide> = {
@@ -66,15 +59,8 @@ const PlayerSideFieldDexMap: Partial<Record<keyof CalcdexPlayerSide, 'abilities'
 export const FieldCalc = ({
   className,
   style,
-  // battleId,
-  // gen,
-  // format,
-  // authPlayerKey,
   playerKey = 'p1',
-  // field,
   containerSize,
-  // disabled,
-  // onFieldChange,
 }: FieldCalcProps): JSX.Element => {
   const {
     state,
@@ -100,11 +86,8 @@ export const FieldCalc = ({
     defenderSide: p2Side,
   } = field || {};
 
-  // const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
-
   const dex = getDexForFormat(format);
-  // const legacy = detectLegacyGen(gen);
 
   const weatherTooltip = React.useCallback((option: DropdownOption<CalcdexBattleField['weather']>) => {
     if (!option?.value || !settings?.showFieldTooltips) {
@@ -155,9 +138,7 @@ export const FieldCalc = ({
     ...(doubles && PlayerSideDoublesMap),
   };
 
-  // const p1Attacker = [authPlayerKey, playerKey].filter(Boolean).includes('p1');
   const p1Attacker = playerKey === 'p1';
-
   const attackerSide = p1Attacker ? p1Side : p2Side;
   const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
 

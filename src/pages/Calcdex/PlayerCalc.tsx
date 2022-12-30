@@ -10,15 +10,8 @@ import { useColorScheme } from '@showdex/redux/store';
 import { formatId, openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
 import { getResourceUrl } from '@showdex/utils/core';
-// import type { GenerationNum } from '@smogon/calc';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import type {
-  // CalcdexBattleField,
-  // CalcdexBattleRules,
-  // CalcdexPlayer,
-  CalcdexPlayerKey,
-  // CalcdexPokemon,
-} from '@showdex/redux/store';
+import type { CalcdexPlayerKey } from '@showdex/redux/store';
 import { CalcdexPokeProvider } from './CalcdexPokeProvider';
 import { useCalcdexContext } from './CalcdexProvider';
 import { PokeCalc } from './PokeCalc';
@@ -27,37 +20,17 @@ import styles from './PlayerCalc.module.scss';
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  // gen?: GenerationNum;
-  // format?: string;
-  // rules?: CalcdexBattleRules;
-  // authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
-  // player: CalcdexPlayer;
-  // opponent: CalcdexPlayer;
-  // field?: CalcdexBattleField;
   defaultName?: string;
   containerSize?: ElementSizeLabel;
-  // onPokemonChange?: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
-  // onIndexSelect?: (index: number) => void;
-  // onAutoSelectChange?: (autoSelect: boolean) => void;
 }
 
 export const PlayerCalc = ({
   className,
   style,
-  // gen,
-  // format,
-  // rules,
-  // authPlayerKey,
   playerKey = 'p1',
-  // player,
-  // opponent,
-  // field,
   defaultName = '--',
   containerSize,
-  // onPokemonChange,
-  // onIndexSelect,
-  // onAutoSelectChange,
 }: PlayerCalcProps): JSX.Element => {
   const {
     state,
@@ -66,20 +39,16 @@ export const PlayerCalc = ({
     setAutoSelect,
   } = useCalcdexContext();
 
-  // const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const { format } = state;
   const player = state[playerKey] || {};
 
   const {
-    // sideid: playerSideId,
     name,
     rating: ratingFromBattle,
     pokemon: playerParty,
-    // pokemonOrder,
     maxPokemon,
-    // activeIndex,
     activeIndices,
     selectionIndex: playerIndex,
     autoSelect,
@@ -114,16 +83,6 @@ export const PlayerCalc = ({
     glicko1Rating: ladder?.rpr ? Math.round(parseFloat(ladder.rpr)) : null,
     glicko1Deviation: ladder?.rprd ? Math.round(parseFloat(ladder.rprd)) : null,
   };
-
-  // const {
-  //   // sideid: opponentSideId,
-  //   pokemon: opponentPokemons,
-  //   selectionIndex: opponentIndex,
-  // } = opponent || {};
-
-  // const activePokemon = pokemon[activeIndex];
-  // const playerPokemon = pokemon[playerIndex];
-  // const opponentPokemon = opponentPokemons[opponentIndex];
 
   return (
     <div
@@ -353,21 +312,7 @@ export const PlayerCalc = ({
       <CalcdexPokeProvider playerKey={playerKey}>
         <PokeCalc
           className={styles.pokeCalc}
-          // gen={gen}
-          // format={format}
-          // rules={rules}
-          // authPlayerKey={authPlayerKey}
-          // playerKey={playerKey}
-          // playerPokemon={playerPokemon}
-          // opponentPokemon={opponentPokemon}
-          // active={activeIndices?.includes(playerIndex)}
-          // field={{
-          //   ...field,
-          //   attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
-          //   defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
-          // }}
           containerSize={containerSize}
-          // onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
         />
       </CalcdexPokeProvider>
     </div>
