@@ -124,6 +124,23 @@ export interface ShowdexCalcdexSettings {
   openAs: 'showdown' | CalcdexRenderMode;
 
   /**
+   * Which panel the Calcdex panel tab should open on in Left-Right panel mode.
+   *
+   * * `'showdown'` (default) will open the Calcdex panel tab depending on Showdown's battle settings.
+   *   - Battles opening on the left (default Showdown behavior) will use `'right'`.
+   *   - Battles opening on the right will use `'right'`.
+   * * `'left'` will always open the Calcdex panel tab on the left.
+   *   - Calcdex room will become the page URL, which will load an uninitialized Calcdex when the page is refreshed
+   *     with a battle on the right side.
+   * * `'right'` will always open the Calcdex panel tab on the right.
+   * * Has no effect if `openAs` is `'overlay'`.
+   *
+   * @default 'showdown'
+   * @since 1.1.1
+   */
+  openOnPanel: 'showdown' | 'left' | 'right';
+
+  /**
    * How the Calcdex panel tab automatically closes.
    *
    * * `'battle-end'` will close the Calcdex panel tab when the battle ends.

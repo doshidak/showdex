@@ -578,10 +578,6 @@ export const SettingsPane = ({
                     label="Open When"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
-                      label: 'Both',
-                      tooltip: 'Always open in all battles.',
-                      value: 'always',
-                    }, {
                       label: 'Playing',
                       tooltip: "Only open in battles you're playing.",
                       value: 'playing',
@@ -589,6 +585,10 @@ export const SettingsPane = ({
                       label: 'Spectating',
                       tooltip: "Only open in battles you're spectating.",
                       value: 'spectating',
+                    }, {
+                      label: 'Both',
+                      tooltip: 'Always open in all battles.',
+                      value: 'always',
                     }, {
                       label: 'Never',
                       tooltip: (
@@ -609,22 +609,9 @@ export const SettingsPane = ({
                       styles.field,
                       !inBattle && styles.singleColumn,
                     )}
-                    label="Open As"
+                    label="Open as"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
-                      label: 'Auto',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Uses the <strong>Tabbed Panel</strong> if your Showdown's layout has{' '}
-                          <em>Left-Right Panels</em> &amp; the{' '}
-                          <strong>Battle Overlay</strong> if it has a <em>Single Panel</em>.
-                          <br />
-                          <br />
-                          Hover over these options to learn more.
-                        </div>
-                      ),
-                      value: 'showdown',
-                    }, {
                       label: 'Tabbed Panel',
                       tooltip: (
                         <div className={styles.tooltipContent}>
@@ -656,7 +643,73 @@ export const SettingsPane = ({
                         </div>
                       ),
                       value: 'overlay',
+                    }, {
+                      label: 'Auto',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Uses the <strong>Tabbed Panel</strong> if your Showdown's layout has{' '}
+                          <em>Left-Right Panels</em> &amp; the{' '}
+                          <strong>Battle Overlay</strong> if it has a <em>Single Panel</em>.
+                          <br />
+                          <br />
+                          Hover over these options to learn more.
+                        </div>
+                      ),
+                      value: 'showdown',
                     }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['openOnPanel']>
+                    name="calcdex.openOnPanel"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label="Open Tab on"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Left Panel',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Opens the tabbed Calcdex panel on the <strong>Left</strong>,
+                          regardless of the side that the battle is configured to open on.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open as</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'left',
+                    }, {
+                      label: 'Right Panel',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Opens the tabbed Calcdex panel on the <strong>Right</strong>,
+                          regardless of the side that the battle is configured to open on.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open as</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'right',
+                    }, {
+                      label: 'Auto',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Opens the tabbed Calcdex panel on the <strong>Right</strong>{' '}
+                          if Showdown opens battles on the <em>left</em> (default),
+                          or vice versa, based on your battle options.
+                          <br />
+                          <br />
+                          This does not affect Calcdexes that <em>Open as</em> a{' '}
+                          <strong>Battle Overlay</strong>.
+                        </div>
+                      ),
+                      value: 'showdown',
+                    }]}
+                    disabled={values.calcdex?.openAs === 'overlay'}
                   />
 
                   <Field<ShowdexSettings['calcdex']['closeOn']>
@@ -679,7 +732,7 @@ export const SettingsPane = ({
                           the closed tab can be reopened from the Hellodex.
                           <br />
                           <br />
-                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          This does not affect Calcdexes that <em>Open as</em> a{' '}
                           <strong>Battle Overlay</strong>.
                         </div>
                       ),
@@ -695,7 +748,7 @@ export const SettingsPane = ({
                           the closed tab can be reopened from the Hellodex.
                           <br />
                           <br />
-                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          This does not affect Calcdexes that <em>Open as</em> a{' '}
                           <strong>Battle Overlay</strong>.
                         </div>
                       ),
@@ -714,7 +767,7 @@ export const SettingsPane = ({
                           the closed tab can be reopened from the Hellodex.
                           <br />
                           <br />
-                          This does not affect Calcdexes that <em>Open As</em> a{' '}
+                          This does not affect Calcdexes that <em>Open as</em> a{' '}
                           <strong>Battle Overlay</strong>.
                         </div>
                       ),
@@ -738,7 +791,7 @@ export const SettingsPane = ({
                         Enabling this may improve performance on lower-spec machines.
                         <br />
                         <br />
-                        This does not affect Calcdexes that <em>Open As</em> a{' '}
+                        This does not affect Calcdexes that <em>Open as</em> a{' '}
                         <strong>Battle Overlay</strong> as their memory is cleared as soon as
                         the battle's tab is closed.
                       </div>
@@ -763,7 +816,7 @@ export const SettingsPane = ({
                         but may cause slight delays when opening.
                         <br />
                         <br />
-                        This does not affect Calcdexes that <em>Open As</em> a{' '}
+                        This does not affect Calcdexes that <em>Open as</em> a{' '}
                         <strong>Tabbed Panel</strong> as they separately appear in their own panel.
                       </div>
                     )}

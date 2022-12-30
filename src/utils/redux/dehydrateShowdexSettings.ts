@@ -45,6 +45,7 @@ export const DehydratedHellodexSettingsMap: Record<keyof ShowdexHellodexSettings
 export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, string> = {
   openOnStart: 'oos',
   openAs: 'oas',
+  openOnPanel: 'oop',
   // forcedOpenAs: 'foa',
   // closeOnEnd: 'coe',
   closeOn: 'con',
