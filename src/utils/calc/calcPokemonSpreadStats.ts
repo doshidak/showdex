@@ -30,11 +30,11 @@ export const calcPokemonSpreadStats = (
   const legacy = detectLegacyGen(format);
 
   return PokemonStatNames.reduce((prev, stat) => {
-    const baseStat = stat === 'hp'
-      ? pokemon.baseStats[stat]
+    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? stat === 'hp'
+      ? pokemon.baseStats?.hp
       : pokemon.transformedForme
-        ? pokemon.transformedBaseStats?.[stat] ?? pokemon.baseStats[stat]
-        : pokemon.baseStats[stat];
+        ? pokemon.transformedBaseStats?.[stat] ?? pokemon.baseStats?.[stat]
+        : pokemon.baseStats?.[stat];
 
     prev[stat] = calcPokemonStat(
       format,
