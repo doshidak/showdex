@@ -15,7 +15,7 @@ import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { usageAltPercentSorter } from './usageAltPercentSorter';
 
-export type PokemonMoveOption = DropdownOption<MoveName>;
+export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
 
 /**
  * Builds the value for the `options` prop of the move `Dropdown` component in `PokeMoves`.
@@ -27,8 +27,8 @@ export const buildMoveOptions = (
   pokemon: DeepPartial<CalcdexPokemon>,
   usage?: CalcdexPokemonPreset,
   showAll?: boolean,
-): PokemonMoveOption[] => {
-  const options: PokemonMoveOption[] = [];
+): CalcdexPokemonMoveOption[] => {
+  const options: CalcdexPokemonMoveOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;

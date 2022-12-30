@@ -11,7 +11,7 @@ import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { usageAltPercentSorter } from './usageAltPercentSorter';
 
-export type PokemonAbilityOption = DropdownOption<AbilityName>;
+export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
 
 /**
  * Builds the value for the `options` prop of the abilities `Dropdown` component in `PokeInfo`.
@@ -23,8 +23,8 @@ export const buildAbilityOptions = (
   pokemon: DeepPartial<CalcdexPokemon>,
   usage?: CalcdexPokemonPreset,
   showAll?: boolean,
-): PokemonAbilityOption[] => {
-  const options: PokemonAbilityOption[] = [];
+): CalcdexPokemonAbilityOption[] => {
+  const options: CalcdexPokemonAbilityOption[] = [];
 
   // for legacy formats, the dex will return a 'No Ability' ability,
   // so make sure we return an empty array

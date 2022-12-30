@@ -12,7 +12,7 @@ import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { usageAltPercentSorter } from './usageAltPercentSorter';
 
-export type PokemonItemOption = DropdownOption<ItemName>;
+export type CalcdexPokemonItemOption = DropdownOption<ItemName>;
 
 /**
  * Local helper function that finds the indices after the `headerName` and before the next header.
@@ -69,8 +69,8 @@ export const buildItemOptions = (
   pokemon: DeepPartial<CalcdexPokemon>,
   usage?: CalcdexPokemonPreset,
   showAll?: boolean,
-): PokemonItemOption[] => {
-  const options: PokemonItemOption[] = [];
+): CalcdexPokemonItemOption[] => {
+  const options: CalcdexPokemonItemOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;
