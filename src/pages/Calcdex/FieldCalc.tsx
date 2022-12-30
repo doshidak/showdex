@@ -11,28 +11,29 @@ import {
   WeatherMap,
   WeatherNames,
 } from '@showdex/consts/field';
-import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
+import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { getDexForFormat } from '@showdex/utils/battle';
-import type { GenerationNum } from '@smogon/calc';
+// import type { GenerationNum } from '@smogon/calc';
 import type { Weather } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { useCalcdexContext } from './CalcdexProvider';
 import styles from './FieldCalc.module.scss';
 
 interface FieldCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  battleId?: string;
-  gen?: GenerationNum;
-  format?: string;
-  authPlayerKey?: CalcdexPlayerKey;
+  // battleId?: string;
+  // gen?: GenerationNum;
+  // format?: string;
+  // authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
-  field?: CalcdexBattleField;
+  // field?: CalcdexBattleField;
   containerSize?: ElementSizeLabel;
-  disabled?: boolean;
-  onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
+  // disabled?: boolean;
+  // onFieldChange?: (field: DeepPartial<CalcdexBattleField>) => void;
 }
 
 const PlayerSideScreensMap: Record<string, keyof CalcdexPlayerSide> = {
@@ -65,17 +66,41 @@ const PlayerSideFieldDexMap: Partial<Record<keyof CalcdexPlayerSide, 'abilities'
 export const FieldCalc = ({
   className,
   style,
-  battleId,
-  gen,
-  format,
-  authPlayerKey,
+  // battleId,
+  // gen,
+  // format,
+  // authPlayerKey,
   playerKey = 'p1',
-  field,
+  // field,
   containerSize,
-  disabled,
-  onFieldChange,
+  // disabled,
+  // onFieldChange,
 }: FieldCalcProps): JSX.Element => {
-  const settings = useCalcdexSettings();
+  const {
+    state,
+    settings,
+    updateField,
+  } = useCalcdexContext();
+
+  const {
+    battleId,
+    gen,
+    format,
+    authPlayerKey,
+    p1,
+    p2,
+    field,
+  } = state;
+
+  const {
+    gameType,
+    weather,
+    terrain,
+    attackerSide: p1Side,
+    defenderSide: p2Side,
+  } = field || {};
+
+  // const settings = useCalcdexSettings();
   const colorScheme = useColorScheme();
 
   const dex = getDexForFormat(format);
@@ -123,14 +148,6 @@ export const FieldCalc = ({
     settings,
   ]);
 
-  const {
-    gameType,
-    weather,
-    terrain,
-    attackerSide: p1Side,
-    defenderSide: p2Side,
-  } = field || {};
-
   const doubles = gameType === 'Doubles';
 
   const sideFieldMap = {
@@ -146,6 +163,9 @@ export const FieldCalc = ({
 
   const defenderSide = p1Attacker ? p2Side : p1Side;
   const defenderSideKey: keyof CalcdexBattleField = p1Attacker ? 'defenderSide' : 'attackerSide';
+
+  const disabled = !p1?.pokemon?.length
+    || !p2?.pokemon?.length;
 
   return (
     <TableGrid
@@ -249,7 +269,7 @@ export const FieldCalc = ({
                 primary
                 active={!!attackerSide?.[sideKey]}
                 disabled={disabled || !battleId || !attackerSideKey || !attackerSide}
-                onPress={() => onFieldChange?.({
+                onPress={() => updateField({
                   [attackerSideKey]: {
                     ...attackerSide,
                     [sideKey]: !attackerSide?.[sideKey],
@@ -274,7 +294,7 @@ export const FieldCalc = ({
           input={{
             name: `FieldCalc:${battleId || '?'}:Weather:Dropdown`,
             value: weather,
-            onChange: (updatedWeather: CalcdexBattleField['weather']) => onFieldChange?.({
+            onChange: (updatedWeather: CalcdexBattleField['weather']) => updateField({
               weather: updatedWeather,
             }),
           }}
@@ -309,7 +329,7 @@ export const FieldCalc = ({
           input={{
             name: `FieldCalc:${battleId || '?'}:Terrain:Dropdown`,
             value: terrain,
-            onChange: (updatedTerrain: CalcdexBattleField['terrain']) => onFieldChange?.({
+            onChange: (updatedTerrain: CalcdexBattleField['terrain']) => updateField({
               terrain: updatedTerrain,
             }),
           }}
@@ -370,7 +390,7 @@ export const FieldCalc = ({
                 primary
                 active={!!defenderSide?.[sideKey]}
                 disabled={disabled || !battleId || !defenderSideKey || !defenderSide}
-                onPress={() => onFieldChange?.({
+                onPress={() => updateField({
                   [defenderSideKey]: {
                     ...defenderSide,
                     [sideKey]: !defenderSide?.[sideKey],
