@@ -135,6 +135,7 @@ export const createSmogonPokemon = (
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
     isDynamaxed: pokemon.useMax,
+    isSaltCure: 'saltcure' in pokemon.volatiles,
 
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
     ability: pseudoToggleAbility && !pseudoToggled ? 'Pressure' : ability,
