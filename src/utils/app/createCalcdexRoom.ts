@@ -1,11 +1,11 @@
 import { calcdexSlice } from '@showdex/redux/store';
 import type { RootStore, ShowdexSliceState } from '@showdex/redux/store';
-import { createSideRoom } from './createSideRoom';
+import { createHtmlRoom } from './createHtmlRoom';
 import { getCalcdexRoomId } from './getCalcdexRoomId';
 import { getBattleRoom } from './getBattleRoom';
 
 /**
- * Creates an `HtmlRoom` via `createSideRoom()` specially made to house a `Calcdex`.
+ * Creates an `HtmlRoom` via `createHtmlRoom()` specially made to house a `Calcdex`.
  *
  * * Essentially exists to keep all the properties like the room name and icon consistent.
  * * Provide the optional Redux `store` argument to supply the room's `requestLeave()` handler,
@@ -23,7 +23,14 @@ export const createCalcdexRoom = (
     return null;
   }
 
-  const calcdexRoom = createSideRoom(getCalcdexRoomId(battleId), 'Calcdex', {
+  const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
+
+  // if the openOnPanel setting is falsy, default to the 'showdown' behavior
+  const side = settings?.openOnPanel === 'right'
+    || ((!settings?.openOnPanel || settings.openOnPanel === 'showdown') && !Dex?.prefs('rightpanelbattles'));
+
+  const calcdexRoom = createHtmlRoom(getCalcdexRoomId(battleId), 'Calcdex', {
+    side,
     icon: 'calculator',
     focus,
     maxWidth: 650,
@@ -36,7 +43,7 @@ export const createCalcdexRoom = (
   if (typeof store?.getState === 'function') {
     calcdexRoom.requestLeave = () => {
       // check if there's a corresponding BattleRoom for this Calcdex room
-      // (app should be available here; otherwise, createSideRoom() would've returned null)
+      // (app should be available here; otherwise, createHtmlRoom() would've returned null)
       const battle = getBattleRoom(battleId)?.battle;
 
       if (battle?.id) {
@@ -46,9 +53,9 @@ export const createCalcdexRoom = (
 
       // we need to grab a fresher version of the state when this function runs
       // (i.e., do NOT use calcdexSettings here! it may contain a stale version of the settings)
-      const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
+      const freshSettings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
 
-      if (settings?.destroyOnClose) {
+      if (freshSettings?.destroyOnClose) {
         store.dispatch(calcdexSlice.actions.destroy(battleId));
 
         if (battle?.id) {
