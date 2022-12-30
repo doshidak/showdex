@@ -1,11 +1,12 @@
 import * as React from 'react';
 import cx from 'classnames';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 import styles from './Picon.module.scss';
 
 export interface PiconProps {
   className?: string;
   style?: React.CSSProperties;
-  pokemon?: Partial<Showdown.Pokemon> | string;
+  pokemon?: Partial<Showdown.Pokemon> | Partial<CalcdexPokemon> | string;
   facingLeft?: boolean;
 }
 
@@ -22,7 +23,9 @@ export const Picon = ({
     return null;
   }
 
-  let [iconCss] = pokemon ? (Dex.getPokemonIcon(pokemon, facingLeft) || '').split(';') : [];
+  let [iconCss] = pokemon
+    ? (Dex.getPokemonIcon(pokemon, facingLeft) || '').split(';')
+    : [];
 
   if (!iconCss) {
     iconCss = Dex.getPokemonIcon('pokeball-none', facingLeft).split(';')?.[0];
@@ -32,7 +35,9 @@ export const Picon = ({
     iconCss = iconCss.slice(iconCssPrefix.length);
   }
 
-  let itemIconCss = typeof pokemon !== 'string' && pokemon?.item ? Dex.getItemIcon(pokemon.item) : null;
+  let itemIconCss = typeof pokemon !== 'string' && pokemon?.item
+    ? Dex.getItemIcon(pokemon.item)
+    : null;
 
   if (itemIconCss?.startsWith?.(iconCssPrefix)) {
     itemIconCss = itemIconCss.slice(iconCssPrefix.length);
