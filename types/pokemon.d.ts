@@ -247,6 +247,9 @@ declare namespace Showdown {
      * * Otherwise, `string` containing the full name of its G-Max move.
      */
     gigantamax: string | false;
+
+    teraType: TypeName | '';
+    terastallized: TypeName | '';
   }
 
   /**
@@ -355,7 +358,7 @@ declare namespace Showdown {
     /**
      * @default ''
      */
-    teraType: TypeName | '';
+    terastallized: TypeName | '';
 
     /**
      * @default false
