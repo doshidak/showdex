@@ -127,6 +127,7 @@ declare namespace Showdown {
     | 'quarkdrivespd'
     | 'quarkdrivespe'
     | 'reflect' // in gen 1 only
+    | 'saltcure'
     | 'smackdown'
     | 'stockpile'
     | 'stockpile1'
