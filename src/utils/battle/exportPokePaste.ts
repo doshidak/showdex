@@ -210,7 +210,7 @@ export const exportPokePaste = (
   if (moves?.length) {
     // e.g., 'Hidden Power Fire' -> 'Hidden Power [Fire]'
     // (though, the Teambuilder will accept the former, i.e., 'Hidden Power Fire')
-    output.push(...moves.map((moveName) => '- ' + (
+    output.push(...moves.filter(Boolean).map((moveName) => '- ' + (
       moveName?.includes('Hidden Power')
         ? moveName.replace(/(?<=Hidden\sPower\s)(\w+)$/, '[$1]')
         : moveName
