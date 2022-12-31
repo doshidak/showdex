@@ -23,7 +23,7 @@ const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> 
   nature: /^\s*([A-Z]+)\s+Nature$/i,
   moves: /^\s*-\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]])(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?$/i,
   name: /^=+\s*(?:\[([A-Z0-9]+)\]\s*)(.+[^\s])\s*={3}$/i,
-  speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9\-]{2,})\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9\-\x20]+[A-Z0-9]))?$/i,
+  speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9.':\-\x20]+[A-Z\xC0-\xFF0-9.%])\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9\-\x20]+[A-Z0-9]))?$/i,
 };
 
 const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
