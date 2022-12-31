@@ -63,6 +63,8 @@ export const transformPresetResponse = (
         }
 
         const {
+          teraTypes: presetTeraTypes,
+          teratypes: presetTeratypes,
           ability,
           nature,
           item,
@@ -106,6 +108,18 @@ export const transformPresetResponse = (
             ...evs,
           },
         };
+
+        // determine the Tera types (first from teraTypes [if the API fixes the casing], then teratypes)
+        // (note: this was straight up copied from transformFormatPresetResponse())
+        const teraTypes = (!!presetTeraTypes?.length && typeof presetTeraTypes === 'string' && [presetTeraTypes])
+          || (!!presetTeraTypes?.length && Array.isArray(presetTeraTypes) && presetTeraTypes)
+          || (!!presetTeratypes?.length && typeof presetTeratypes === 'string' && [presetTeratypes])
+          || (!!presetTeratypes?.length && Array.isArray(presetTeratypes) && presetTeratypes)
+          || [];
+
+        if (teraTypes.length) {
+          preset.teraTypes = [...teraTypes];
+        }
 
         preset.calcdexId = calcPresetCalcdexId(preset);
         preset.id = preset.calcdexId; // used by RTK Query for tagging
