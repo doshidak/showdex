@@ -13,6 +13,7 @@ import { sortUsageAlts } from '@showdex/utils/redux';
 import type { FieldRenderProps } from 'react-final-form';
 import type { ButtonElement, TooltipProps } from '@showdex/components/ui';
 import type { CalcdexPokemonUsageAlt } from '@showdex/redux/store';
+import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import styles from './PokeTypeField.module.scss';
 
 export interface PokeTypeFieldProps<
@@ -30,7 +31,7 @@ export interface PokeTypeFieldProps<
   maxMultiTypes?: number;
   defaultTypeLabel?: string;
   // teraTyping?: boolean;
-  shorterAbbreviations?: boolean;
+  containerSize?: ElementSizeLabel;
   highlight?: boolean;
   highlightTypes?: Showdown.TypeName[];
   typeUsages?: CalcdexPokemonUsageAlt<Showdown.TypeName>[];
@@ -55,7 +56,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   maxMultiTypes = 2,
   defaultTypeLabel,
   // teraTyping,
-  shorterAbbreviations,
+  containerSize,
   highlight = true,
   highlightTypes,
   typeUsages,
@@ -270,7 +271,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
             type={typeValue}
             defaultLabel={defaultTypeLabel}
             // reverseColorScheme
-            shorterAbbreviations={shorterAbbreviations}
+            containerSize={containerSize}
             highlight={highlight}
           />
         ))}
