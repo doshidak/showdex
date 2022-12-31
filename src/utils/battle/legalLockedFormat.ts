@@ -1,4 +1,5 @@
 import { LegalLockedFormats } from '@showdex/consts/battle';
+import { getGenlessFormat } from './getGenlessFormat';
 
 /**
  * Determines if the provided `format` should be locked to legal values.
@@ -8,5 +9,21 @@ import { LegalLockedFormats } from '@showdex/consts/battle';
  *
  * @since 1.0.3
  */
-export const legalLockedFormat = (format: string) => !!format
-  && LegalLockedFormats.some((f) => format.endsWith(f));
+export const legalLockedFormat = (format: string) => {
+  if (!format || !LegalLockedFormats.length) {
+    return false;
+  }
+
+  // e.g., 'gen9vgc2023series1' -> 'vgc2023series1'
+  const genlessFormat = getGenlessFormat(format);
+
+  return LegalLockedFormats.some((f) => {
+    // reject any formats that's just '//' lol
+    // '//'.slice(1, -1) -> '' (empty string) btw
+    if (f.startsWith('/') && f.endsWith('/') && f.slice(1, -1).length) {
+      return new RegExp(f.slice(1, -1), 'i').test(genlessFormat);
+    }
+
+    return genlessFormat.endsWith(f);
+  });
+};
