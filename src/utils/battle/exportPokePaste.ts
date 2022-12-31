@@ -1,6 +1,8 @@
 import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
+import { formatId } from '@showdex/utils/app';
 // import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { getDexForFormat } from './getDexForFormat';
 import { hasNickname } from './hasNickname';
@@ -26,22 +28,33 @@ import { hasNickname } from './hasNickname';
 const exportStatsTable = (
   table: Showdown.StatsTable,
   ignoreValue?: number,
-) => Object.entries(table || {}).reduce<string[]>((
-  prev,
-  [stat, value]: [Showdown.StatName, number],
-) => {
-  if (typeof value !== 'number' || (typeof ignoreValue === 'number' && value === ignoreValue)) {
+  ignoreStats?: Showdown.StatName | Showdown.StatName[],
+): string => {
+  const ignored = [
+    ...(Array.isArray(ignoreStats) ? ignoreStats : [ignoreStats]),
+  ].filter(Boolean);
+
+  return Object.entries(table || {}).reduce<string[]>((
+    prev,
+    [stat, value]: [Showdown.StatName, number],
+  ) => {
+    const shouldIgnore = ignored.includes(stat)
+      || typeof value !== 'number'
+      || (typeof ignoreValue === 'number' && value === ignoreValue);
+
+    if (shouldIgnore) {
+      return prev;
+    }
+
+    const statMapping = PokemonPokePasteStatMap[stat];
+
+    if (statMapping) {
+      prev.push(`${value} ${statMapping}`);
+    }
+
     return prev;
-  }
-
-  const statMapping = PokemonPokePasteStatMap[stat];
-
-  if (statMapping) {
-    prev.push(`${value} ${statMapping}`);
-  }
-
-  return prev;
-}, []).join(' / ');
+  }, []).join(' / ');
+};
 
 /**
  * Exports the passed-in `CalcdexPokemon` to a `string` in the Teambuilder/PokePaste syntax.
@@ -92,6 +105,7 @@ export const exportPokePaste = (
   }
 
   const dex = getDexForFormat(format);
+  const gen = detectGenFromFormat(format);
   const legacy = detectLegacyGen(format);
 
   const {
@@ -153,9 +167,10 @@ export const exportPokePaste = (
   }
 
   // Ability: <ability>
+  // (don't export "No Ability" though, even though Showdown does it)
   const currentAbility = dirtyAbility ?? ability;
 
-  if (currentAbility) {
+  if (currentAbility && formatId(currentAbility) !== 'noability') {
     output.push(`Ability: ${currentAbility}`);
   }
 
@@ -182,11 +197,17 @@ export const exportPokePaste = (
 
   // Happiness: <value> (where <value> is not 255)
 
-  // IVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 31)
-  // EVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 0)
+  // IVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 31 [or 30, if legacy])
+  // EVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 0) -- only in non-legacy
   // (where <stat> is HP, Atk, Def, SpA, SpD, or Spe)
   if (Object.keys(ivs || {}).length) {
-    const exportedIvs = exportStatsTable(ivs, 31);
+    // in legacy gens, max DV is 15, which equates to 30 IVs (NOT 31!)
+    // additionally in gen 1 only, Showdown exports SPC as SPA, so SPD is unused
+    const exportedIvs = exportStatsTable(
+      ivs,
+      legacy ? 30 : 31,
+      gen === 1 ? 'spd' : null,
+    );
 
     if (exportedIvs) {
       output.push(`IVs: ${exportedIvs}`);

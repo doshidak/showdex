@@ -182,6 +182,8 @@ export const CalcdexPokeProvider = ({
   const sortMovesByUsage = useUsageAltSorter(usage?.altMoves);
 
   // handle applying presets
+  const defaultIv = legacy ? 30 : 31;
+
   const applyPreset = React.useCallback<CalcdexPokeContextConsumables['applyPreset']>((
     presetOrId,
     additionalMutations,
@@ -206,22 +208,24 @@ export const CalcdexPokeProvider = ({
       dirtyItem: preset.item,
 
       ivs: {
-        hp: preset?.ivs?.hp ?? 31,
-        atk: preset?.ivs?.atk ?? 31,
-        def: preset?.ivs?.def ?? 31,
-        spa: preset?.ivs?.spa ?? 31,
-        spd: preset?.ivs?.spd ?? 31,
-        spe: preset?.ivs?.spe ?? 31,
+        hp: preset?.ivs?.hp ?? defaultIv,
+        atk: preset?.ivs?.atk ?? defaultIv,
+        def: preset?.ivs?.def ?? defaultIv,
+        spa: preset?.ivs?.spa ?? defaultIv,
+        spd: preset?.ivs?.spd ?? defaultIv,
+        spe: preset?.ivs?.spe ?? defaultIv,
       },
 
       // not specifying the 0's may cause any unspecified EVs to remain!
       evs: {
-        hp: preset.evs?.hp || 0,
-        atk: preset.evs?.atk || 0,
-        def: preset.evs?.def || 0,
-        spa: preset.evs?.spa || 0,
-        spd: preset.evs?.spd || 0,
-        spe: preset.evs?.spe || 0,
+        ...(!legacy && {
+          hp: preset.evs?.hp || 0,
+          atk: preset.evs?.atk || 0,
+          def: preset.evs?.def || 0,
+          spa: preset.evs?.spa || 0,
+          spd: preset.evs?.spd || 0,
+          spe: preset.evs?.spe || 0,
+        }),
       },
     };
 
@@ -397,6 +401,8 @@ export const CalcdexPokeProvider = ({
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
     updatePokemon(playerKey, mutation);
   }, [
+    defaultIv,
+    legacy,
     playerKey,
     playerPokemon,
     presets,

@@ -7,6 +7,7 @@ import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
+import { detectLegacyGen } from './detectLegacyGen';
 import { getDexForFormat } from './getDexForFormat';
 
 // note: speciesForme should be handled last since it will test() true against any line technically
@@ -114,6 +115,8 @@ export const importPokePaste = (
 
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
+  const legacy = detectLegacyGen(format);
+  const defaultIv = legacy ? 30 : 31;
 
   // this will be our final return value
   const preset: CalcdexPokemonPreset = {
@@ -129,21 +132,23 @@ export const importPokePaste = (
     shiny: false,
 
     ivs: {
-      hp: 31,
-      atk: 31,
-      def: 31,
-      spa: 31,
-      spd: 31,
-      spe: 31,
+      hp: defaultIv,
+      atk: defaultIv,
+      def: defaultIv,
+      spa: defaultIv,
+      spd: defaultIv,
+      spe: defaultIv,
     },
 
     evs: {
-      hp: 0,
-      atk: 0,
-      def: 0,
-      spa: 0,
-      spd: 0,
-      spe: 0,
+      ...(!legacy && {
+        hp: 0,
+        atk: 0,
+        def: 0,
+        spa: 0,
+        spd: 0,
+        spe: 0,
+      }),
     },
 
     nature: 'Hardy',
@@ -243,6 +248,10 @@ export const importPokePaste = (
       }
 
       case 'ability': {
+        if (legacy) {
+          break;
+        }
+
         const [
           ,
           detectedAbility,
@@ -348,6 +357,10 @@ export const importPokePaste = (
 
       case 'ivs':
       case 'evs': {
+        if (key === 'evs' && legacy) {
+          break;
+        }
+
         const [
           ,
           detectedSpread,
@@ -382,6 +395,10 @@ export const importPokePaste = (
       }
 
       case 'nature': {
+        if (legacy) {
+          break;
+        }
+
         const [
           ,
           detectedNature,
