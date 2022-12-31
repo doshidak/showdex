@@ -641,19 +641,22 @@ export const syncPokemon = (
   // exhibit the big smart sync technology by utilizing the power of hardcoded game sense
   // for the Protosynthesis/Quark Drive abilities (gen 9)
   if (state?.gen > 8) {
+    const { field } = state;
     const ability = formatId(syncedPokemon.dirtyAbility || syncedPokemon.ability);
     const dirtyItem = formatId(syncedPokemon.dirtyItem);
 
     // determine if we should remove the dirty "Booster Energy" item
     if (['protosynthesis', 'quarkdrive'].includes(ability) && dirtyItem === 'boosterenergy') {
       const hasBoosterVolatile = Object.keys(syncedPokemon.volatiles)
-        .some((k) => /^(?:proto|quark)/i.test(k));
+        .some((k) => /^proto|quark/i.test(k));
 
+      // only remove the item if the Pokemon does not have the volatile and the field conditions aren't met
       const removeDirtyBooster = !hasBoosterVolatile && (
-        (ability === 'protosynthesis' && ['Sun', 'Harsh Sunshine'].includes(state.field?.weather))
-          || (ability === 'quarkdrive' && state.field?.terrain !== 'Electric')
+        (ability === 'protosynthesis' && !['Sun', 'Harsh Sunshine'].includes(field?.weather))
+          || (ability === 'quarkdrive' && field?.terrain !== 'Electric')
       );
 
+      // if we should remove the item, select the next non-"Booster Energy" item
       if (removeDirtyBooster) {
         // altItems could be potentially sorted by usage stats from the Calcdex
         syncedPokemon.dirtyItem = (
@@ -661,6 +664,7 @@ export const syncPokemon = (
             && flattenAlts(syncedPokemon.altItems).find((i) => !!i && formatId(i) !== 'boosterenergy')
         ) || null;
 
+        // could've been previously toggled, so make sure the ability is toggled off
         syncedPokemon.abilityToggled = false;
       }
     }
