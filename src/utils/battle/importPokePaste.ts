@@ -1,4 +1,4 @@
-import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
+import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env } from '@showdex/utils/core';
@@ -397,7 +397,10 @@ export const importPokePaste = (
           break;
         }
 
-        preset.nature = parsedNature;
+        // set all netural natures to Hardy since that's the only option available in the Nature dropdown of PokeInfo
+        preset.nature = PokemonNeutralNatures.includes(parsedNature)
+          ? 'Hardy'
+          : parsedNature;
 
         break;
       }
