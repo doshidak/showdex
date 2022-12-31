@@ -6,116 +6,160 @@
 @use 'mixins/spacing';
 @use 'mixins/transition';
 
-$type-colors: (
-  unknown: #424242,
-  normal: #90905D,
-  fighting: #81201B,
-  flying: #8563EA,
-  poison: #7C317C,
-  ground: #D1A42B,
-  rock: #917E2C,
-  bug: #808D18,
-  ghost: #584578,
-  steel: #9999BC,
-  fire: #DD6510,
-  water: #3A6EEB,
-  grass: #549B31,
-  electric: color.shade(#FDD835, 10%),
-  psychic: color.shade(#F62765, 10%),
-  ice: color.shade(#73CACA, 10%),
-  dragon: #4D09F4,
-  dark: #41332A,
-  fairy: #E76D88,
+$types: (
+  // these are the default colors, not for a specific type
+  // (in case a specific type's styling hasn't been applied for whatever reason)
+  default-color: (
+    light: colors.$black,
+    dark: colors.$white,
+  ),
+
+  colors: (
+    unknown: #424242, // aka. the ??? type
+    normal: #90905D,
+    fighting: #81201B,
+    flying: #8563EA,
+    poison: #7C317C,
+    ground: #D1A42B,
+    rock: #917E2C,
+    bug: #808D18,
+    ghost: #584578,
+    steel: #9999BC,
+    fire: #DD6510,
+    water: #3A6EEB,
+    grass: #549B31,
+    electric: color.shade(#FDD835, 10%),
+    psychic: color.shade(#F62765, 10%),
+    ice: color.shade(#73CACA, 10%),
+    dragon: #4D09F4,
+    dark: #41332A,
+    fairy: #E76D88,
+  ),
+
+  adjustment: (
+    light: 10%, // shade (both highlight/non-highlight)
+    dark: 50%, // tint (for non-highlight only)
+  ),
 );
 
-$type-color-light-shade: 10%;
-$type-color-dark-tint: 50%; // non-highlight only
+$container: (
+  width: (
+    default: 36px,
+    sm: 28px,
+    xs: 22px,
+  ),
 
-$label-light-opacity: 0.75;
-$label-dark-opacity: 0.85;
-$label-highlight-light-opacity: 1;
-$label-highlight-dark-opacity: 1;
-$background-opacity-light: 0.85;
-$background-opacity-dark: 0.5;
-$background-opacity-unknown-light: 0.075;
-$background-opacity-unknown-dark: 0.1;
+  padding-y: 1px,
+  font-size: 8px,
+  border-radius: 5px,
+
+  text-shadow: (
+    default: 1px 1px 0 color.alpha(colors.$black, 0.1),
+    highlight: 1px 1px 0 color.alpha(colors.$black, 0.3),
+  ),
+
+  label-opacity: (
+    default: (
+      light: 0.75,
+      dark: 0.85,
+    ),
+
+    highlight: (
+      light: 1,
+      dark: 1,
+    ),
+  ),
+
+  background-opacity: (
+    // typically for the unknown/??? type
+    default: (
+      light: 0.075,
+      dark: 0.1,
+    ),
+
+    highlight: (
+      light: 0.85,
+      dark: 0.5,
+    ),
+  ),
+);
 
 .container {
   display: inline-block;
-  width: 36px;
-  @include spacing.padding-xy($y: 1px);
+  width: map.get($container, width, default);
+  @include spacing.padding-xy($y: map.get($container, padding-y));
   @include font.apply(fonts.$mono);
-  font-size: 8px;
+  font-size: map.get($container, font-size);
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.1);
-  border-radius: 5px;
+  text-shadow: map.get($container, text-shadow, default);
+  border-radius: map.get($container, border-radius);
   user-select: none;
   pointer-events: none;
   @include transition.apply(width, color, text-shadow, background-color);
+}
 
-  &.shorter {
-    width: 28px;
-  }
+.sm {
+  width: map.get($container, width, sm);
+}
+
+.xs {
+  width: map.get($container, width, xs);
+}
+
+.light {
+  color: color.alpha(map.get($types, default-color, light), map.get($container, label-opacity, default, light));
+  background-color: color.alpha(map.get($types, default-color, light), map.get($container, background-opacity, default, light));
+}
+
+.dark {
+  color: color.alpha(map.get($types, default-color, dark), map.get($container, label-opacity, default, dark));
+  background-color: color.alpha(map.get($types, default-color, dark), map.get($container, background-opacity, default, dark));
+}
+
+.highlight {
+  text-shadow: map.get($container, text-shadow, highlight);
 
   &.light {
-    // color: color.alpha(map.get($type-colors, unknown), $label-light-opacity);
-    color: color.alpha(colors.$black, $label-light-opacity);
-    // background-color: color.alpha(color.shade(map.get($type-colors, unknown), $type-color-light-shade), $background-opacity-unknown-light);
-    background-color: color.alpha(colors.$black, $background-opacity-unknown-light);
+    color: color.alpha(colors.$white, map.get($container, label-opacity, highlight, light));
+    background-color: color.alpha(map.get($types, colors, unknown), map.get($container, background-opacity, default, light));
   }
 
   &.dark {
-    // color: color.alpha(map.get($type-colors, unknown), $label-dark-opacity);
-    color: color.alpha(colors.$white, $label-dark-opacity);
-    // background-color: color.alpha(map.get($type-colors, unknown), $background-opacity-dark);
-    background-color: color.alpha(colors.$white, $background-opacity-unknown-dark);
+    color: color.alpha(colors.$white, map.get($container, label-opacity, highlight, dark));
+    background-color: color.alpha(map.get($types, colors, unknown), map.get($container, background-opacity, default, dark));
   }
+}
 
-  &.highlight {
-    text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
-
-    &.light {
-      color: color.alpha(colors.$white, $label-highlight-light-opacity);
-      background-color: color.alpha(map.get($type-colors, unknown), $background-opacity-unknown-light);
-    }
-
-    &.dark {
-      color: color.alpha(colors.$white, $label-highlight-dark-opacity);
-      background-color: color.alpha(map.get($type-colors, unknown), $background-opacity-unknown-dark);
-    }
-  }
-
-  @each $type, $color in $type-colors {
-    $light-color: color.shade($color, $type-color-light-shade);
-    $dark-color: color.tint($color, $type-color-dark-tint);
+@each $type, $color in map.get($types, colors) {
+  @if $type != unknown {
+    $light-color: color.shade($color, map.get($types, adjustment, light));
+    $light-highlight-color: $light-color;
+    $dark-color: color.tint($color, map.get($types, adjustment, dark));
     $dark-highlight-color: $color;
 
-    @if $type != 'unknown' {
-      &.type-#{$type} {
+    .type-#{$type} {
+      &:not(.highlight) {
         &.light {
-          color: color.alpha($light-color, $label-light-opacity);
+          color: color.alpha($light-color, map.get($container, label-opacity, default, light));
         }
 
-        // Dark type on dark mode looks terrible
         &.dark {
-          color: color.alpha($dark-color, $label-dark-opacity);
-        }
-
-        &.highlight {
-          // text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
-
-          &.light {
-            color: color.alpha(colors.$white, $label-highlight-light-opacity);
-            background-color: color.alpha($light-color, $background-opacity-light);
-          }
-
-          &.dark {
-            color: color.alpha(colors.$white, $label-highlight-dark-opacity);
-            background-color: color.alpha($dark-highlight-color, $background-opacity-dark);
-          }
+          color: color.alpha($dark-color, map.get($container, label-opacity, default, dark));
         }
       }
-    }
-  }
+
+      &.highlight {
+        &.light {
+          // color: color.alpha(colors.$white, map.get($container, label-opacity, highlight, light));
+          background-color: color.alpha($light-highlight-color, map.get($container, background-opacity, highlight, light));
+        }
+
+        &.dark {
+          // color: color.alpha(colors.$white, map.get($container, label-opacity, highlight, dark));
+          background-color: color.alpha($dark-highlight-color, map.get($container, background-opacity, highlight, dark));
+        }
+      } // end .highlight
+    } // end .type-#{$type}
+  } // end @if
 }
