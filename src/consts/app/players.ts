@@ -72,6 +72,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   userIds: [
     ['finchinator', 'Our Lord and Savior'],
     ['mudkipnerd', "What's a King to a God"],
+    ['nails', 'VGC Legend'],
   ],
 }, {
   title: 'Showdex Supporter',
