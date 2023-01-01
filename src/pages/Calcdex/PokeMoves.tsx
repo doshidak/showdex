@@ -50,7 +50,7 @@ export const PokeMoves = ({
   const colorScheme = useColorScheme();
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const showZToggle = format?.includes('nationaldex')
