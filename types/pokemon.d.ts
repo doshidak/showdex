@@ -127,6 +127,7 @@ declare namespace Showdown {
     | 'quarkdrivespd'
     | 'quarkdrivespe'
     | 'reflect' // in gen 1 only
+    | 'saltcure'
     | 'smackdown'
     | 'stockpile'
     | 'stockpile1'
@@ -247,6 +248,9 @@ declare namespace Showdown {
      * * Otherwise, `string` containing the full name of its G-Max move.
      */
     gigantamax: string | false;
+
+    teraType: TypeName | '';
+    terastallized: TypeName | '';
   }
 
   /**
@@ -355,7 +359,7 @@ declare namespace Showdown {
     /**
      * @default ''
      */
-    teraType: TypeName | '';
+    terastallized: TypeName | '';
 
     /**
      * @default false

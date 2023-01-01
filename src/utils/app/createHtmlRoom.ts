@@ -1,6 +1,13 @@
 import { logger } from '@showdex/utils/debug';
 
-export interface SideRoomOptions {
+export interface HtmlRoomOptions {
+  /**
+   * Whether to create a side room, which will appear on the right in left-right panel mode.
+   *
+   * @since 1.1.1
+   */
+  side?: boolean;
+
   /**
    * Name of icon from *Font Awesome* used in the tab.
    *
@@ -35,16 +42,24 @@ export interface SideRoomOptions {
   maxWidth?: number;
 }
 
-const l = logger('@src/utils/app/createSideRoom');
+const l = logger('@src/utils/app/createHtmlRoom');
 
-export const createSideRoom = (
+/**
+ * Abstraction that creates an `HtmlRoom` in the Showdown client.
+ *
+ * * As of v1.1.0, this has been renamed from `createSideRoom()` since there's a Calcdex setting
+ *   to open rooms on the left now (i.e., just regular rooms, not side rooms).
+ *
+ * @since 0.1.0
+ */
+export const createHtmlRoom = (
   id: string,
   title: string,
-  options?: SideRoomOptions,
+  options?: HtmlRoomOptions,
 ): Showdown.HtmlRoom => {
   if (typeof app?._addRoom !== 'function') {
     l.error(
-      'Cannot make side room since app._addRoom() is currently unavailable',
+      `Cannot make a ${options?.side ? 'side ' : ''}room since app._addRoom() is unavailable`,
       '\n', 'typeof app._addRoom', typeof app?._addRoom,
     );
 
@@ -52,6 +67,7 @@ export const createSideRoom = (
   }
 
   const {
+    side,
     icon,
     focus,
     minWidth = 320,
@@ -63,23 +79,25 @@ export const createSideRoom = (
   if (id in app.rooms) {
     room = <Showdown.HtmlRoom> app.rooms[id];
 
-    l.debug('Found existing side room with matching room.id', id);
+    // l.debug(`Found existing ${side ? 'side ' : ''}room with matching room.id`, id);
   } else {
-    // create a new side room
+    // create a new room (will add the new room to the app.roomList array)
     room = app._addRoom<Showdown.HtmlRoom>(id, 'html', true, title);
-    room.isSideRoom = true;
 
     // remove the initial "Page unavailable" HTML
     room.$el.html('');
 
-    // add the room to the sideRoomList (also in the app.rooms object)
-    app.sideRoomList.push(app.roomList.pop());
+    // if a side room, add the room to the sideRoomList (also in the app.rooms object)
+    if (side) {
+      room.isSideRoom = true;
+      app.sideRoomList.push(app.roomList.pop());
+    }
 
-    l.debug('Created side room with room.id', room.id, 'and room.type', room.type);
+    // l.debug(`Created ${side ? 'side ' : ''}room with room.id`, room.id, 'and room.type', room.type);
   }
 
   if (!room?.el) {
-    l.error('Couldn\'t find or make the side room for room.id', id);
+    l.error(`Couldn\'t find or make the ${side ? 'side ' : ''}room for room.id`, id);
 
     return null;
   }
@@ -116,7 +134,7 @@ export const createSideRoom = (
   }
 
   if (focus) {
-    app.focusRoomRight(room.id);
+    app[side ? 'focusRoomRight' : 'focusRoom'](room.id);
   }
 
   app.topbar.updateTabbar();

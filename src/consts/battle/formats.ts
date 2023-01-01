@@ -43,6 +43,7 @@ export const FormatLabels: Record<string, string> = {
   challengecup1v1: 'Challenge Cup 1v1',
   challengecup2v2: 'Challenge Cup 2v2',
   challengecup6v6: 'Challenge Cup 6v6',
+  computergeneratedteams: 'CG Teams',
   crossevolution: 'Cross Evo',
   customgame: 'Customs',
   doublescustomgame: 'Customs Doubles',
@@ -142,13 +143,17 @@ export const FormatLabels: Record<string, string> = {
 /**
  * Formats where abilities and moves should be locked to legal values.
  *
- * * Make sure to remove the gen before searching through this array.
- *   - e.g., `'gen8ou'` -> `'ou'`
+ * * Do not use this array directly; instead, use the `legalLockedFormat()` utility since some special
+ *   handling is required for some formats.
+ *   - As of v1.1.1, any format starting **and** ending with a forward-slash (`/`) will be converted
+ *     into a `RegExp` and `test()`'d.
+ *   - Otherwise, the format after stripping the `'gen#'` prefix will be tested with `endsWith()`.
  * * Formats not in this array should allow any illegal abilities and moves to be selected.
  *   - However, if no Pokemon legal abilities and/or moves are available,
  *     all abilities and/or moves will be shown, including illegal ones.
  *   - This case would most likely be caused by Pokemon not being present in the `dex`'s generation.
  *   - See `buildAbilityOptions()` and `buildMoveOptions()` for implementation details.
+ * * `showAllOptions` of `ShowdexCalcdexSettings` should take precedence over this behavior.
  * * Note that this list is not final and is subject to change in subsequent versions.
  *
  * @since 1.0.1
@@ -156,59 +161,69 @@ export const FormatLabels: Record<string, string> = {
 export const LegalLockedFormats: string[] = [
   '1v1',
   '2v2doubles',
-  'battlefactory',
-  'battlestadiumdoublesseries13',
-  'battlestadiumsingles',
-  'bdspbattlefestivaldoubles',
-  'bdspdoublesou',
-  'bdsplc',
-  'bdspmonotype',
-  'bdspnu',
-  'bdspou',
-  'bdsprandombattle',
-  'bdspru',
-  'bdspubers',
-  'bdspuu',
-  'bssfactory',
+  // 'battlefactory',
+  // 'battlestadiumdoublesseries13',
+  // 'battlestadiumsingles',
+  '/^battlespot/', // e.g., 'battlespotsingles', 'battlespotdoubles'
+  '/^battlestadium/', // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
+  // 'bdspbattlefestivaldoubles',
+  // 'bdspdoublesou',
+  // 'bdsplc',
+  // 'bdspmonotype',
+  // 'bdspnu',
+  // 'bdspou',
+  // 'bdsprandombattle',
+  // 'bdspru',
+  // 'bdspubers',
+  // 'bdspuu',
+  '/^bdsp/', // e.g., 'bdspou'
+  // 'bssfactory',
+  'computergeneratedteams',
   'doubleslc',
   'doublesou',
   'doublesubers',
   'doublesuu',
-  'freeforallrandombattle',
+  '/draft$/', // e.g., '6v6doublesdraft'
+  '/factory/', // e.g., 'battlefactory', 'bssfactory'
+  // 'freeforallrandombattle',
   'lc',
   'lcuu',
-  'letsgorandombattle',
+  // 'letsgorandombattle',
+  '/^letsgo/', // e.g., 'letsgorandombattle', 'letsgoou'
   'monotype',
-  'multirandombattle',
+  // 'multirandombattle',
   'nationaldex',
   'nationaldexmonotype',
   'nationaldexru',
   'nationaldexuu',
+  'nfe',
   'nu',
   'ou',
   'oublitz',
   'pu',
-  'randombattle',
-  'randombattleblitz',
-  'randomdoublesbattle',
+  // 'randombattle',
+  // 'randombattleblitz',
+  // 'randomdoublesbattle',
+  '/random/', // e.g., 'randombattle', 'unratedrandombattle', 'randombattleblitz'
   'ru',
   'ubers',
-  'unratedrandombattle',
+  // 'unratedrandombattle',
   'uu',
-  'vgc2009',
-  'vgc2010',
-  'vgc2011',
-  'vgc2012',
-  'vgc2013',
-  'vgc2014',
-  'vgc2015',
-  'vgc2016',
-  'vgc2017',
-  'vgc2018',
-  'vgc2019',
-  'vgc2020',
-  'vgc2021',
-  'vgc2022',
-  'vgc2023',
+  // 'vgc2009',
+  // 'vgc2010',
+  // 'vgc2011',
+  // 'vgc2012',
+  // 'vgc2013',
+  // 'vgc2014',
+  // 'vgc2015',
+  // 'vgc2016',
+  // 'vgc2017',
+  // 'vgc2018',
+  // 'vgc2019',
+  // 'vgc2020',
+  // 'vgc2021',
+  // 'vgc2022',
+  // 'vgc2023',
+  '/^vgc/', // e.g., 'vgc2022', 'vgc2023series1'
   'zu',
 ];

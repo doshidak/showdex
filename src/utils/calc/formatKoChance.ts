@@ -45,7 +45,7 @@ export const formatKoChance = (
       const decimalPlaces = ['0.0', '100.0'].includes(chancePercentage.toFixed(1)) ? 2 : 1;
       const fixedChance = chancePercentage.toFixed(decimalPlaces);
 
-      if (fixedChance !== '0.0' && fixedChance !== '100.0') {
+      if (fixedChance !== '0.00' && fixedChance !== '100.00') {
         // also truncate any trailing zeroes, e.g., 75.0% -> 75%
         output.unshift(`${fixedChance}%`.replace('.0%', '%'));
       }

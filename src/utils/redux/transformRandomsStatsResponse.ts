@@ -1,4 +1,4 @@
-import { flattenAlts } from '@showdex/utils/battle';
+import { detectLegacyGen, flattenAlts } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
@@ -27,6 +27,8 @@ export const transformRandomsStatsResponse = (
   const output: CalcdexPokemonPreset[] = [];
 
   const gen = args?.gen || env.int<GenerationNum>('calcdex-default-gen');
+  const legacy = detectLegacyGen(gen);
+  const defaultIv = legacy ? 30 : 31;
 
   Object.entries(response).forEach(([
     speciesForme,
@@ -59,21 +61,23 @@ export const transformRandomsStatsResponse = (
       nature: 'Hardy',
 
       ivs: {
-        hp: ivs?.hp ?? 31,
-        atk: ivs?.atk ?? 31,
-        def: ivs?.def ?? 31,
-        spa: ivs?.spa ?? 31,
-        spd: ivs?.spd ?? 31,
-        spe: ivs?.spe ?? 31,
+        hp: ivs?.hp ?? defaultIv,
+        atk: ivs?.atk ?? defaultIv,
+        def: ivs?.def ?? defaultIv,
+        spa: ivs?.spa ?? defaultIv,
+        spd: ivs?.spd ?? defaultIv,
+        spe: ivs?.spe ?? defaultIv,
       },
 
       evs: {
-        hp: evs?.hp ?? 84,
-        atk: evs?.atk ?? 84,
-        def: evs?.def ?? 84,
-        spa: evs?.spa ?? 84,
-        spd: evs?.spd ?? 84,
-        spe: evs?.spe ?? 84,
+        ...(!legacy && {
+          hp: evs?.hp ?? 84,
+          atk: evs?.atk ?? 84,
+          def: evs?.def ?? 84,
+          spa: evs?.spa ?? 84,
+          spd: evs?.spd ?? 84,
+          spe: evs?.spe ?? 84,
+        }),
       },
     };
 

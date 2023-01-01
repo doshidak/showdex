@@ -20,7 +20,8 @@
 
   "permissions": [
     "*://play.pokemonshowdown.com/*",
-    "*://*.psim.us/*"
+    "*://*.psim.us/*",
+    "*://play.radicalred.net/*"
   ],
 
   "host_permissions": [
@@ -66,12 +67,14 @@
         "clipboard-heart.svg",
         "close-circle.svg",
         "cog.svg",
+        "crown.svg",
         "error-circle.svg",
         "error-circle-outline.svg",
         "flask.svg",
         "github-face.svg",
         "info-circle.svg",
         "main.js",
+        "rabbit.svg",
         "remove-circle.svg",
         "showdex.svg",
         "signpost.svg",

@@ -48,6 +48,9 @@ const l = logger('@showdex/pages/Calcdex/useCalcdex');
 // const gens = new Generations(($.extend(true, PkmnDex, Dex) as unknown) as ModdedDex);
 // const gens = new Generations(PkmnDex);
 
+/**
+ * @deprecated As of v1.1.1, this has been deprecated in favor of `CalcdexProvider` and `CalcdexPokeProvider`.
+ */
 export const useCalcdex = ({
   battle,
   battleId: manualBattleId,
@@ -211,6 +214,7 @@ export const useCalcdex = ({
       battleId: null,
       gen: null,
       format: null,
+      legacy: false,
       rules: null,
       turn: 0,
       playerKey: 'p1',

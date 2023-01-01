@@ -15,7 +15,7 @@ import { legalLockedFormat } from './legalLockedFormat';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { usageAltPercentSorter } from './usageAltPercentSorter';
 
-export type PokemonMoveOption = DropdownOption<MoveName>;
+export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
 
 /**
  * Builds the value for the `options` prop of the move `Dropdown` component in `PokeMoves`.
@@ -27,8 +27,8 @@ export const buildMoveOptions = (
   pokemon: DeepPartial<CalcdexPokemon>,
   usage?: CalcdexPokemonPreset,
   showAll?: boolean,
-): PokemonMoveOption[] => {
-  const options: PokemonMoveOption[] = [];
+): CalcdexPokemonMoveOption[] => {
+  const options: CalcdexPokemonMoveOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;
@@ -214,7 +214,13 @@ export const buildMoveOptions = (
   }
 
   // Hidden Power moves were introduced in gen 2
-  if (gen > 1) {
+  const includeHiddenPower = gen > 1 && (
+    showAllMoves
+      || gen < 8 // Hidden Power natively exists in Gens 2-7
+      || /nat(?:ional)?dex/i.test(formatId(format))
+  );
+
+  if (includeHiddenPower) {
     // regex filters out 'hiddenpowerfighting70', which is 'hiddenpowerfighting' (BP 60),
     // but with a BP of 70 lol (don't care about the BP here though, we just need the name)
     const unsortedHpMoves = Object.keys(BattleMovedex || {})
@@ -240,13 +246,13 @@ export const buildMoveOptions = (
   if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
       .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
-      .filter((n) => !!n && !/^(?:G-)?Max\s+/i.test(n) && !filterMoves.includes(n))
+      .filter((n) => !!n && !/^(?:G-)?Max\s+|Hidden\s*Power/i.test(n) && !filterMoves.includes(n))
       .sort(usageSorter);
 
     // note: since we need to filter out HP moves, but keep the group last, this is the workaround.
     // splice() will insert at the provided start index, even if an element exists at that index.
     const hiddenPowerIndex = options.findIndex((o) => o.label === 'Hidden Power');
-    const insertionIndex = Math.max(hiddenPowerIndex, 0);
+    const insertionIndex = hiddenPowerIndex > -1 ? hiddenPowerIndex : options.length;
 
     // make sure this comes before the Hidden Power moves
     options.splice(insertionIndex, 0, {

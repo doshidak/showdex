@@ -14,403 +14,61 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
-import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
+import { useColorScheme } from '@showdex/redux/store';
 import { formatId, openSmogonUniversity } from '@showdex/utils/app';
 import {
-  buildAbilityOptions,
-  buildItemOptions,
-  buildPresetOptions,
-  detectLegacyGen,
   detectToggledAbility,
   detectUsageAlt,
   exportPokePaste,
-  flattenAlt,
   flattenAlts,
   hasNickname,
   importPokePaste,
   legalLockedFormat,
-  mergeRevealedMoves,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
-// import { logger } from '@showdex/utils/debug';
 import { capitalize } from '@showdex/utils/humanize';
-import { sortUsageAlts } from '@showdex/utils/redux';
-import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type {
-  CalcdexBattleField,
-  CalcdexPlayerKey,
-  CalcdexPlayerSide,
-  CalcdexPokemon,
-  CalcdexPokemonPreset,
-  CalcdexPokemonUsageAlt,
-} from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPlayerSide } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
-import { useUsageAltSorter } from './useUsageAltSorter';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
-  gen?: GenerationNum;
-  format?: string;
-  playerKey?: CalcdexPlayerKey;
-  pokemon: CalcdexPokemon;
-  presets?: CalcdexPokemonPreset[];
-  usage?: CalcdexPokemonPreset;
-  usages?: CalcdexPokemonPreset[];
-  presetsLoading?: boolean;
-  // active?: boolean;
-  field?: CalcdexBattleField;
   containerSize?: ElementSizeLabel;
-  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
-
-// const l = logger('@showdex/pages/Calcdex/PokeInfo');
 
 export const PokeInfo = ({
   className,
   style,
-  gen,
-  format,
-  playerKey,
-  pokemon,
-  presets,
-  usage,
-  usages,
-  presetsLoading,
-  // active,
-  field,
   containerSize,
-  onPokemonChange,
 }: PokeInfoProps): JSX.Element => {
-  const settings = useCalcdexSettings();
-  const colorScheme = useColorScheme();
-
-  // not sorted in usePresets() since the usage stats may not be available there
-  const abilityUsageSorter = useUsageAltSorter(usage?.altAbilities);
-  const itemUsageSorter = useUsageAltSorter(usage?.altItems);
-  const moveUsageSorter = useUsageAltSorter(usage?.altMoves);
-
-  const applyPreset = React.useCallback((
-    preset: CalcdexPokemonPreset,
-    additionalMutations?: DeepPartial<CalcdexPokemon>,
-  ) => {
-    const mutation: DeepPartial<CalcdexPokemon> = {
-      ...additionalMutations,
-
-      preset: preset.calcdexId,
-
-      moves: preset.moves,
-      nature: preset.nature,
-      dirtyAbility: preset.ability,
-      dirtyItem: preset.item,
-
-      ivs: {
-        hp: preset?.ivs?.hp ?? 31,
-        atk: preset?.ivs?.atk ?? 31,
-        def: preset?.ivs?.def ?? 31,
-        spa: preset?.ivs?.spa ?? 31,
-        spd: preset?.ivs?.spd ?? 31,
-        spe: preset?.ivs?.spe ?? 31,
-      },
-
-      // not specifying the 0's may cause any unspecified EVs to remain!
-      evs: {
-        hp: preset.evs?.hp || 0,
-        atk: preset.evs?.atk || 0,
-        def: preset.evs?.def || 0,
-        spa: preset.evs?.spa || 0,
-        spd: preset.evs?.spd || 0,
-        spe: preset.evs?.spe || 0,
-      },
-    };
-
-    const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
-
-    // check if we have Tera typing usage data
-    const detectedUsage = (usages?.length === 1 && usages[0])
-      || (!!preset.name && usages?.find((u) => u?.source === 'usage' && u.name?.includes(preset.name)))
-      || usage;
-
-    const teraTypesUsage = detectedUsage?.teraTypes?.filter(detectUsageAlt);
-
-    if (teraTypesUsage?.length) {
-      // mutation.altTeraTypes = flatAltTeraTypes
-      //   .map((t) => [t, teraTypesUsage.find((u) => u[0] === t)?.[1] || 0] as CalcdexPokemonUsageAlt<Showdown.TypeName>)
-      //   .sort(sortUsageAlts);
-      mutation.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
-
-      // update the teraType to the most likely one after sorting
-      [mutation.teraType] = mutation.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
-    } else if (altTeraTypes?.[0]) {
-      // apply the first teraType from the preset's teraTypes
-      [mutation.teraType] = flattenAlts(altTeraTypes);
-      mutation.altTeraTypes = altTeraTypes;
-    }
-
-    // don't apply the dirtyAbility/dirtyItem if we're applying the Pokemon's first preset and
-    // their abilility/item was already revealed or it matches the Pokemon's revealed ability/item
-    // const clearDirtyAbility = (!pokemon.preset && pokemon.ability)
-    //   || pokemon.ability === preset.ability;
-
-    // update (2022/10/07): don't apply the dirtyAbility/dirtyItem at all if their non-dirty
-    // counterparts are revealed already
-    const clearDirtyAbility = !!pokemon.ability && !pokemon.transformedForme;
-
-    if (clearDirtyAbility) {
-      mutation.dirtyAbility = null;
-    }
-
-    // const clearDirtyItem = (!pokemon.preset && pokemon.item && pokemon.item !== '(exists)')
-    //   || pokemon.item === preset.item
-    //   || (!pokemon.item && pokemon.prevItem && pokemon.prevItemEffect);
-    const clearDirtyItem = (pokemon.item && pokemon.item !== '(exists)')
-      || (pokemon.prevItem && pokemon.prevItemEffect);
-
-    if (clearDirtyItem) {
-      mutation.dirtyItem = null;
-    }
-
-    if (preset.altAbilities?.length) {
-      mutation.altAbilities = [...preset.altAbilities];
-
-      // apply the top usage ability (if available)
-      if (typeof abilityUsageSorter === 'function' && mutation.altAbilities.length > 1 && !clearDirtyAbility) {
-        const sortedAbilities = flattenAlts(mutation.altAbilities).sort(abilityUsageSorter);
-        const [topAbility] = sortedAbilities;
-
-        if (sortedAbilities.length === mutation.altAbilities.length) {
-          mutation.altAbilities = sortedAbilities;
-        }
-
-        if (topAbility && mutation.dirtyAbility !== topAbility) {
-          mutation.dirtyAbility = topAbility;
-        }
-      }
-    }
-
-    if (preset.altItems?.length) {
-      mutation.altItems = [...preset.altItems];
-
-      // apply the top usage item (if available)
-      if (typeof itemUsageSorter === 'function' && mutation.altItems.length > 1 && !clearDirtyItem) {
-        const sortedItems = flattenAlts(mutation.altItems).sort(itemUsageSorter);
-        const [topItem] = sortedItems;
-
-        if (sortedItems.length === mutation.altItems.length) {
-          mutation.altItems = sortedItems;
-        }
-
-        if (topItem && mutation.dirtyItem !== topItem) {
-          mutation.dirtyItem = topItem;
-        }
-      }
-    }
-
-    if (preset.altMoves?.length) {
-      mutation.altMoves = [...preset.altMoves];
-
-      // sort the moves by their usage stats (if available) and apply the top 4 moves
-      // (otherwise, just apply the moves from the preset)
-      if (typeof moveUsageSorter === 'function' && mutation.altMoves.length > 1) {
-        const sortedMoves = flattenAlts(mutation.altMoves).sort(moveUsageSorter);
-
-        if (sortedMoves.length) {
-          mutation.altMoves = sortedMoves;
-
-          /**
-           * @todo Needs to be updated once we support more than 4 moves.
-           */
-          mutation.moves = sortedMoves.slice(0, 4);
-        }
-      }
-    }
-
-    // check if we already have revealed moves (typical of spectating or replaying a battle)
-    mutation.moves = pokemon.transformedForme && pokemon.transformedMoves?.length
-      ? [...pokemon.transformedMoves]
-      : mergeRevealedMoves({ ...pokemon, moves: mutation.moves });
-
-    // only apply the ability/item (and remove their dirty counterparts) if there's only
-    // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
-    // update (2022/10/06): nvm on the setting the actual ability/item cause it's screwy when switching formes,
-    // so opting to use their dirty counterparts instead lol
-    if (preset.format?.includes('random')) {
-      // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
-      if (preset.speciesForme.endsWith('-Gmax')) {
-        mutation.speciesForme = preset.speciesForme;
-      }
-
-      if (!clearDirtyAbility && mutation.altAbilities?.length === 1) {
-        [mutation.dirtyAbility] = flattenAlts(mutation.altAbilities);
-        // mutation.dirtyAbility = null;
-      }
-
-      if (!pokemon.item && !pokemon.prevItem && mutation.altItems?.length === 1) {
-        [mutation.dirtyItem] = flattenAlts(mutation.altItems);
-        // mutation.dirtyItem = null;
-      }
-    }
-
-    // carefully apply the spread if Pokemon is transformed and a spread was already present prior
-    const shouldTransformSpread = !!pokemon.transformedForme
-      && !!pokemon.nature
-      && !!Object.values({ ...pokemon.ivs, ...pokemon.evs }).filter(Boolean).length;
-
-    if (shouldTransformSpread) {
-      // since transforms inherit the exact stats of the target Pokemon (except for HP),
-      // we actually need to copy the nature from the preset
-      // delete mutation.nature;
-
-      // we'll keep the original HP EVs/IVs (even if possibly illegal) since the max HP
-      // of a transformed Pokemon is preserved, which is based off of the HP's base, IV & EV
-      mutation.ivs.hp = pokemon.ivs.hp;
-      mutation.evs.hp = pokemon.evs.hp;
-
-      // if the Pokemon has an item set by a previous preset, ignore this preset's item
-      if (pokemon.dirtyItem || pokemon.item) {
-        delete mutation.dirtyItem;
-      }
-    }
-
-    // only remove the dirtyAbility/dirtyItem from the mutation if they're undefined (but not null)
-    // (means that the preset didn't define the ability/item, hence the undefined)
-    if (mutation.dirtyAbility === undefined) {
-      delete mutation.dirtyAbility;
-    }
-
-    if (mutation.dirtyItem === undefined) {
-      delete mutation.dirtyItem;
-    }
-
-    // apply the defaultShowGenetics setting if the Pokemon is serverSourced
-    // update (2022/11/15): defaultShowGenetics is deprecated in favor of lockGeneticsVisibility;
-    // showGenetics's initial value is set in syncBattle() when the Pokemon is first init'd into Redux
-    // if (pokemon.serverSourced) {
-    //   mutation.showGenetics = settings?.defaultShowGenetics?.auth;
-    // }
-
-    // spreadStats will be recalculated in `onPokemonChange()` from `PokeCalc`
-    onPokemonChange?.(mutation);
-  }, [
-    abilityUsageSorter,
-    itemUsageSorter,
-    moveUsageSorter,
-    onPokemonChange,
-    pokemon,
-    // settings,
-    usage,
-    usages,
-  ]);
-
-  // this will allow the user to switch back to the "Yours" preset for a transformed Pokemon
-  // (using a ref instead of state since we don't want to cause an unnecessary re-render)
-  const appliedTransformedPreset = React.useRef<boolean>(false);
-
-  // automatically apply the first preset if the Pokemon has no/invalid preset
-  // (invalid presets could be due to the forme changing, so new presets are loaded in)
-  React.useEffect(() => {
-    // if (!pokemon?.calcdexId || !pokemon.autoPreset || presetsLoading) {
-    if (!pokemon?.calcdexId || presetsLoading) {
-      return;
-    }
-
-    if (!pokemon.transformedForme && appliedTransformedPreset.current) {
-      appliedTransformedPreset.current = false;
-    }
-
-    const existingPreset = pokemon.preset && presets?.length
-      ? presets.find((p) => p?.calcdexId === pokemon.preset && (
-        !pokemon.transformedForme
-          // || formatId(p.name) !== 'yours'
-          || p.source !== 'server' // i.e., the 'Yours' preset
-          || appliedTransformedPreset.current
-      ))
-      : null;
-
-    if (existingPreset) {
-      return;
-    }
-
-    const {
-      downloadUsageStats,
-      prioritizeUsageStats,
-    } = settings || {};
-
-    // Setup the initial preset.
-    // If we are playing random battles, grab the appropriate randombattles set.
-    let initialPreset: CalcdexPokemonPreset = presets[0]; // presets[0] as the default case
-
-    // update (2022/10/27): will always be first preset in randoms
-    // if (format.includes('random')) {
-    //   initialPreset = presets.find((p) => (
-    //     (p.format === format)
-    //   ));
-    // } else if (downloadUsageStats && prioritizeUsageStats) {
-
-    // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
-    // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
-    // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
-    if (pokemon.transformedForme && presets[1]) {
-      [, initialPreset] = presets; // readability 100
-      appliedTransformedPreset.current = true;
-    }
-
-    if (downloadUsageStats && prioritizeUsageStats) {
-      // If we aren't in a random battle, check if we should prioritize
-      // the showdown usage stats.
-      // note: 'usage'-sourced sets won't exist in `presets` for Randoms formats
-      const usagePreset = presets.find((p) => (
-        // (p.format === format?.replace(/^gen\d/, '') && formatId(p.name) === 'showdownusage')
-        p?.source === 'usage' && (!format || format.includes(p.format))
-      ));
-
-      // only update if we found a Showdown Usage preset for the format
-      // (otherwise, no set would apply, despite the Pokemon having sets, albeit from other formats, potentially)
-      if (usagePreset) {
-        initialPreset = usagePreset;
-      }
-    }
-
-    if (!initialPreset) {
-      // it's likely that the Pokemon has no EVs/IVs set, so show the EVs/IVs if they're hidden
-      const forceShowGenetics = !pokemon.showGenetics && (
-        !Object.values(pokemon.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-          || !Object.values(pokemon.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
-      );
-
-      if (forceShowGenetics) {
-        onPokemonChange?.({ showGenetics: true });
-      }
-
-      return;
-    }
-
-    // l.debug(
-    //   'Applying preset to', pokemon.speciesForme,
-    //   '\n', 'initialPreset', initialPreset,
-    //   '\n', 'presets', presets,
-    //   '\n', 'settings.prioritizeUsageStats', prioritizeUsageStats,
-    // );
-
-    applyPreset(initialPreset);
-  }, [
-    applyPreset,
-    format,
-    pokemon,
-    onPokemonChange,
-    presets,
-    presetsLoading,
+  const {
+    state,
     settings,
-  ]);
+    playerKey,
+    playerPokemon: pokemon,
+    field, // don't use the one from state btw
+    presetsLoading,
+    abilityOptions,
+    itemOptions,
+    presetOptions,
+    applyPreset,
+    updatePokemon,
+  } = useCalcdexPokeContext();
 
-  // const dex = getDexForFormat(format);
-  const legacy = detectLegacyGen(gen);
+  const {
+    gen,
+    format,
+    legacy,
+  } = state;
+
+  const colorScheme = useColorScheme();
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
@@ -448,40 +106,11 @@ export const PokeInfo = ({
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
 
-  const presetOptions = React.useMemo(
-    () => buildPresetOptions(presets, usages),
-    [presets, usages],
-  );
-
-  const handlePresetChange = (calcdexId: string) => {
-    const preset = presets.find((p) => p?.calcdexId === calcdexId);
-
-    if (!preset) {
-      return;
-    }
-
-    applyPreset(preset);
-  };
-
-  const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
-    format,
-    pokemon,
-    usage,
-    settings?.showAllOptions,
-  )), [
-    format,
-    legacy,
-    pokemon,
-    settings,
-    usage,
-  ]);
-
   // for Ruin abilities (gen 9), only show the ability toggle in Doubles
-  const showAbilityToggle = pokemon?.abilityToggleable
-    && (
-      !formatId(abilityName)?.endsWith('ofruin')
-        || field?.gameType === 'Doubles'
-    );
+  const showAbilityToggle = pokemon?.abilityToggleable && (
+    !formatId(abilityName)?.endsWith('ofruin')
+      || field?.gameType === 'Doubles'
+  );
 
   const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
     ? 'defenderSide'
@@ -491,15 +120,7 @@ export const PokeInfo = ({
   const disableAbilityToggle = pokemon?.abilityToggleable
     && formatId(abilityName)?.endsWith('ofruin')
     && field?.gameType === 'Doubles'
-    // && !active
     && !pokemon.abilityToggled
-    // && (
-    //   (abilityName === 'beadsofruin' && field?.[fieldKey]?.ruinBeadsCount)
-    //     || (abilityName === 'swordofruin' && field?.[fieldKey]?.ruinSwordCount)
-    //     || (abilityName === 'tabletsofruin' && field?.[fieldKey]?.ruinTabletsCount)
-    //     || (abilityName === 'vesselofruin' && field?.[fieldKey]?.ruinVesselCount)
-    //     || 0
-    // ) >= 2;
     && ([
       'ruinBeadsCount',
       'ruinSwordCount',
@@ -513,7 +134,7 @@ export const PokeInfo = ({
     && !!pokemon.ability
     && pokemon.ability !== pokemon.dirtyAbility;
 
-  const handleAbilityChange = (name: AbilityName) => onPokemonChange?.({
+  const handleAbilityChange = (name: AbilityName) => updatePokemon({
     dirtyAbility: name,
     abilityToggled: detectToggledAbility({
       ...pokemon,
@@ -521,28 +142,13 @@ export const PokeInfo = ({
     }),
   });
 
-  const handleAbilityReset = () => onPokemonChange?.({
+  const handleAbilityReset = () => updatePokemon({
     dirtyAbility: null,
     abilityToggled: detectToggledAbility({
       ...pokemon,
       dirtyAbility: null,
     }),
   });
-
-  const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
-    format,
-    pokemon,
-    usage,
-    // settings?.showAllOptions,
-    true, // fuck it w/e lol (instead of using settings.showAllOptions)
-  )), [
-    format,
-    gen,
-    // legacy,
-    pokemon,
-    // settings,
-    usage,
-  ]);
 
   const showResetItem = !!pokemon?.dirtyItem
     && (!!pokemon?.item || !!pokemon?.prevItem)
@@ -573,7 +179,6 @@ export const PokeInfo = ({
     format,
   );
 
-  // const formeDisabled = !nextForme;
   const formeDisabled = !pokemon?.altFormes?.length;
   const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
   const piconDisabled = settings?.reverseIconName ? formeDisabled : smogonDisabled;
@@ -587,7 +192,7 @@ export const PokeInfo = ({
   const [importFailedReason, setImportFailedReason] = React.useState('Failed');
 
   const handlePokePasteImport = () => void (async () => {
-    if (typeof onPokemonChange !== 'function') {
+    if (typeof updatePokemon !== 'function') {
       return;
     }
 
@@ -616,7 +221,6 @@ export const PokeInfo = ({
         currentPresets.push(preset);
       }
 
-      // onPokemonChange({ presets: currentPresets });
       applyPreset(preset, {
         presets: currentPresets,
       });
@@ -650,7 +254,6 @@ export const PokeInfo = ({
     }
 
     try {
-      // await navigator.clipboard.writeText(pokePaste);
       await writeClipboardText(pokePaste);
 
       exportBadgeRef.current?.show();
@@ -685,7 +288,7 @@ export const PokeInfo = ({
             pokemon={pokemon}
             visible={formesVisible}
             disabled={!settings?.reverseIconName}
-            onPokemonChange={onPokemonChange}
+            onPokemonChange={updatePokemon}
             onRequestClose={closeFormesTooltip}
           >
             <PiconButton
@@ -718,7 +321,7 @@ export const PokeInfo = ({
               pokemon={pokemon}
               visible={formesVisible}
               disabled={settings?.reverseIconName}
-              onPokemonChange={onPokemonChange}
+              onPokemonChange={updatePokemon}
               onRequestClose={closeFormesTooltip}
             >
               <Button
@@ -773,12 +376,12 @@ export const PokeInfo = ({
               input={{
                 name: `PokeInfo:Types:${pokemonKey}`,
                 value: [...(pokemon?.types || [])],
-                onChange: (types: Showdown.TypeName[]) => onPokemonChange?.({
+                onChange: (types: Showdown.TypeName[]) => updatePokemon({
                   types: [...(types || [])],
                 }),
               }}
               tooltipPlacement="bottom-start"
-              shorterAbbreviations={gen > 8 && ['xs', 'sm'].includes(containerSize)}
+              containerSize={gen > 8 ? containerSize : null}
               highlight={gen < 9 || !pokemon?.terastallized}
               readOnly={!editableTypes}
               disabled={!pokemon?.speciesForme}
@@ -793,15 +396,15 @@ export const PokeInfo = ({
                 input={{
                   name: `PokeInfo:TeraType:${pokemonKey}`,
                   value: pokemon?.teraType || '???',
-                  onChange: (type: Showdown.TypeName) => onPokemonChange?.({
+                  onChange: (type: Showdown.TypeName) => updatePokemon({
                     teraType: type,
                     terastallized: !!type && type !== '???' && pokemon?.terastallized,
                   }),
                 }}
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel="Tera"
-                // teraTyping
-                shorterAbbreviations={['xs', 'sm'].includes(containerSize)}
+                teraTyping
+                containerSize={containerSize}
                 highlight={pokemon?.terastallized}
                 highlightTypes={flattenAlts(pokemon?.altTeraTypes)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
@@ -870,7 +473,7 @@ export const PokeInfo = ({
                   absoluteHover
                   // active={pokemon?.autoPreset}
                   disabled /** @todo remove after implementing auto-presets */
-                  onPress={() => onPokemonChange?.({
+                  onPress={() => updatePokemon({
                     autoPreset: !pokemon?.autoPreset,
                   })}
                 />
@@ -906,7 +509,7 @@ export const PokeInfo = ({
                   tooltipPlacement="bottom"
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
-                  disabled={!pokemon?.speciesForme || typeof onPokemonChange !== 'function'}
+                  disabled={!pokemon?.speciesForme || typeof updatePokemon !== 'function'}
                   onPress={handlePokePasteImport}
                 >
                   <Badge
@@ -975,14 +578,14 @@ export const PokeInfo = ({
             input={{
               name: `PokeInfo:Preset:${pokemonKey}:Dropdown`,
               value: pokemon?.preset,
-              onChange: handlePresetChange,
+              onChange: applyPreset,
             }}
             options={presetOptions}
             noOptionsMessage="No Sets"
             clearable={false}
             loading={presetsLoading}
             loadingMessage="Downloading..."
-            disabled={!pokemon?.speciesForme || presetsLoading || !presets.length}
+            disabled={!pokemon?.speciesForme || presetsLoading || !presetOptions.length}
           />
         </div>
       </div>
@@ -1014,7 +617,7 @@ export const PokeInfo = ({
                   absoluteHover
                   active={pokemon.abilityToggled}
                   disabled={disableAbilityToggle}
-                  onPress={() => onPokemonChange?.({
+                  onPress={() => updatePokemon({
                     abilityToggled: !pokemon.abilityToggled,
                   })}
                 />
@@ -1079,7 +682,7 @@ export const PokeInfo = ({
               input={{
                 name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
                 value: pokemon?.nature,
-                onChange: (name: Showdown.PokemonNature) => onPokemonChange?.({
+                onChange: (name: Showdown.PokemonNature) => updatePokemon({
                   nature: name,
                 }),
               }}
@@ -1127,7 +730,7 @@ export const PokeInfo = ({
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
                   active
-                  onPress={() => onPokemonChange?.({
+                  onPress={() => updatePokemon({
                     dirtyItem: null,
                   })}
                 />
@@ -1173,7 +776,7 @@ export const PokeInfo = ({
               input={{
                 name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
                 value: itemName,
-                onChange: (name: ItemName) => onPokemonChange?.({
+                onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),
                 }),
               }}

@@ -3,76 +3,59 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { PiconButton } from '@showdex/components/app';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
-import { ShowdexVerifiedTesters } from '@showdex/consts/app';
 import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
-import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
-import { formatId, openUserPopup } from '@showdex/utils/app';
+import { useColorScheme } from '@showdex/redux/store';
+import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
 import { getResourceUrl } from '@showdex/utils/core';
-import type { GenerationNum } from '@smogon/calc';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import type {
-  CalcdexBattleField,
-  CalcdexBattleRules,
-  CalcdexPlayer,
-  CalcdexPlayerKey,
-  CalcdexPokemon,
-} from '@showdex/redux/store';
+import type { CalcdexPlayerKey } from '@showdex/redux/store';
+import { CalcdexPokeProvider } from './CalcdexPokeProvider';
+import { useCalcdexContext } from './CalcdexProvider';
 import { PokeCalc } from './PokeCalc';
 import styles from './PlayerCalc.module.scss';
 
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
-  gen?: GenerationNum;
-  format?: string;
-  rules?: CalcdexBattleRules;
-  authPlayerKey?: CalcdexPlayerKey;
   playerKey?: CalcdexPlayerKey;
-  player: CalcdexPlayer;
-  opponent: CalcdexPlayer;
-  field?: CalcdexBattleField;
   defaultName?: string;
   containerSize?: ElementSizeLabel;
-  onPokemonChange?: (playerKey: CalcdexPlayerKey, pokemon: DeepPartial<CalcdexPokemon>) => void;
-  onIndexSelect?: (index: number) => void;
-  onAutoSelectChange?: (autoSelect: boolean) => void;
 }
 
 export const PlayerCalc = ({
   className,
   style,
-  gen,
-  format,
-  rules,
-  authPlayerKey,
   playerKey = 'p1',
-  player,
-  opponent,
-  field,
   defaultName = '--',
   containerSize,
-  onPokemonChange,
-  onIndexSelect,
-  onAutoSelectChange,
 }: PlayerCalcProps): JSX.Element => {
-  const settings = useCalcdexSettings();
+  const {
+    state,
+    settings,
+    setSelectionIndex,
+    setAutoSelect,
+  } = useCalcdexContext();
+
   const colorScheme = useColorScheme();
 
+  const { format } = state;
+  const player = state[playerKey] || {};
+
   const {
-    sideid: playerSideId,
     name,
     rating: ratingFromBattle,
-    pokemon,
-    // pokemonOrder,
-    // activeIndex,
+    pokemon: playerParty,
+    maxPokemon,
     activeIndices,
     selectionIndex: playerIndex,
     autoSelect,
-  } = player || {};
+  } = player;
 
   const playerId = formatId(name);
+  const playerTitle = findPlayerTitle(playerId);
+  const playerPokemon = playerParty?.[playerIndex];
 
   // only fetch the rating if the battle didn't provide it to us
   const {
@@ -101,16 +84,6 @@ export const PlayerCalc = ({
     glicko1Deviation: ladder?.rprd ? Math.round(parseFloat(ladder.rprd)) : null,
   };
 
-  const {
-    // sideid: opponentSideId,
-    pokemon: opponentPokemons,
-    selectionIndex: opponentIndex,
-  } = opponent || {};
-
-  // const activePokemon = pokemon[activeIndex];
-  const playerPokemon = pokemon[playerIndex];
-  const opponentPokemon = opponentPokemons[opponentIndex];
-
   return (
     <div
       className={cx(
@@ -128,42 +101,52 @@ export const PlayerCalc = ({
       >
         <div className={styles.playerInfo}>
           <Button
-            className={cx(
-              styles.usernameButton,
-              !!name && ShowdexVerifiedTesters.includes(name) && styles.tester,
-            )}
+            className={styles.usernameButton}
+            style={playerTitle?.color?.[colorScheme] ? {
+              color: playerTitle.color[colorScheme],
+            } : undefined}
             labelClassName={styles.usernameButtonLabel}
             label={name || defaultName}
             tooltip={(
               <div className={styles.tooltipContent}>
                 {
-                  (!!name && ShowdexVerifiedTesters.includes(name)) &&
+                  !!playerTitle?.title &&
                   <>
-                    <em>Verified Showdex Tester</em>
-                    <br />
+                    {settings?.showUiTooltips ? (
+                      <em>{playerTitle.title}</em>
+                    ) : playerTitle.title}
+                    {
+                      settings?.showUiTooltips &&
+                      <br />
+                    }
                   </>
                 }
-                Open{' '}
-                {name ? (
+                {
+                  settings?.showUiTooltips &&
                   <>
-                    <strong>{name}</strong>'s
+                    Open{' '}
+                    {name ? (
+                      <>
+                        <strong>{name}</strong>'s
+                      </>
+                    ) : 'User'}{' '}
+                    Profile
                   </>
-                ) : 'User'}{' '}
-                Profile
+                }
               </div>
             )}
-            tooltipDisabled={!settings?.showUiTooltips}
+            tooltipDisabled={!playerTitle && !settings?.showUiTooltips}
             hoverScale={1}
             absoluteHover
             disabled={!name}
             onPress={() => openUserPopup(name)}
           >
             {
-              (!!name && ShowdexVerifiedTesters.includes(name)) &&
+              !!playerTitle?.icon &&
               <Svg
                 className={styles.usernameButtonIcon}
-                description="Flask Icon"
-                src={getResourceUrl('flask.svg')}
+                description={playerTitle.iconDescription}
+                src={getResourceUrl(`${playerTitle.icon}.svg`)}
               />
             }
           </Button>
@@ -176,8 +159,8 @@ export const PlayerCalc = ({
               tooltipDisabled={!settings?.showUiTooltips}
               absoluteHover
               active={autoSelect}
-              disabled={!pokemon?.length}
-              onPress={() => onAutoSelectChange?.(!autoSelect)}
+              disabled={!playerParty?.length}
+              onPress={() => setAutoSelect(playerKey, !autoSelect)}
             />
 
             {
@@ -259,38 +242,38 @@ export const PlayerCalc = ({
             gridTemplateColumns: `repeat(${['xs', 'sm'].includes(containerSize) ? 6 : 12}, min-content)`,
           }}
         >
-          {Array(player?.maxPokemon || 0).fill(null).map((_, i) => {
-            const mon = pokemon?.[i];
+          {Array(maxPokemon || 0).fill(null).map((_, i) => {
+            const pokemon = playerParty?.[i];
 
-            const pokemonKey = mon?.calcdexId
-              || mon?.ident
-              || mon?.searchid
-              || mon?.details
-              || mon?.name
-              || mon?.speciesForme
+            const pokemonKey = pokemon?.calcdexId
+              || pokemon?.ident
+              || pokemon?.searchid
+              || pokemon?.details
+              || pokemon?.name
+              || pokemon?.speciesForme
               || defaultName
               || '???';
 
-            const friendlyPokemonName = mon?.speciesForme
-              || mon?.name
+            const friendlyPokemonName = pokemon?.speciesForme
+              || pokemon?.name
               || pokemonKey;
 
-            const nickname = hasNickname(mon) && settings?.showNicknames
-              ? mon.name
+            const nickname = hasNickname(pokemon) && settings?.showNicknames
+              ? pokemon.name
               : null;
 
             // const speciesForme = mon?.transformedForme || mon?.speciesForme;
-            const speciesForme = mon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
-            const item = mon?.dirtyItem ?? mon?.item;
+            const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
+            const item = pokemon?.dirtyItem ?? pokemon?.item;
 
-            const pokemonActive = !!mon?.calcdexId
+            const pokemonActive = !!pokemon?.calcdexId
               // && !!activePokemon?.calcdexId
               // && activePokemon.calcdexId === mon.calcdexId;
               && activeIndices.includes(i);
 
-            const pokemonSelected = !!mon?.calcdexId
+            const pokemonSelected = !!pokemon?.calcdexId
               && !!playerPokemon?.calcdexId
-              && playerPokemon.calcdexId === mon.calcdexId;
+              && playerPokemon.calcdexId === pokemon.calcdexId;
 
             return (
               <PiconButton
@@ -299,17 +282,17 @@ export const PlayerCalc = ({
                   styles.piconButton,
                   pokemonActive && styles.active,
                   pokemonSelected && styles.selected,
-                  !mon?.hp && styles.fainted,
+                  !pokemon?.hp && styles.fainted,
                 )}
                 piconClassName={styles.picon}
                 display="block"
                 aria-label={`Select ${friendlyPokemonName}`}
-                pokemon={mon ? {
-                  ...mon,
-                  speciesForme: speciesForme?.replace(mon?.useMax ? '' : '-Gmax', ''),
+                pokemon={pokemon ? {
+                  ...pokemon,
+                  speciesForme: speciesForme?.replace(pokemon?.useMax ? '' : '-Gmax', ''),
                   item,
                 } : 'pokeball-none'}
-                tooltip={mon ? (
+                tooltip={pokemon ? (
                   <div className={styles.piconTooltip}>
                     {nickname ? (
                       <>
@@ -326,8 +309,8 @@ export const PlayerCalc = ({
                     }
                   </div>
                 ) : undefined}
-                disabled={!mon?.speciesForme}
-                onPress={() => onIndexSelect?.(i)}
+                disabled={!pokemon?.speciesForme}
+                onPress={() => setSelectionIndex(playerKey, i)}
               >
                 <div className={styles.background} />
               </PiconButton>
@@ -336,24 +319,12 @@ export const PlayerCalc = ({
         </div>
       </div>
 
-      <PokeCalc
-        className={styles.pokeCalc}
-        gen={gen}
-        format={format}
-        rules={rules}
-        authPlayerKey={authPlayerKey}
-        playerKey={playerKey}
-        playerPokemon={playerPokemon}
-        opponentPokemon={opponentPokemon}
-        // active={activeIndices?.includes(playerIndex)}
-        field={{
-          ...field,
-          attackerSide: playerSideId === playerKey ? field?.attackerSide : field?.defenderSide,
-          defenderSide: playerSideId === playerKey ? field?.defenderSide : field?.attackerSide,
-        }}
-        containerSize={containerSize}
-        onPokemonChange={(p) => onPokemonChange?.(playerKey, p)}
-      />
+      <CalcdexPokeProvider playerKey={playerKey}>
+        <PokeCalc
+          className={styles.pokeCalc}
+          containerSize={containerSize}
+        />
+      </CalcdexPokeProvider>
     </div>
   );
 };

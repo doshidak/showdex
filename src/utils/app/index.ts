@@ -1,5 +1,6 @@
 export * from './createCalcdexRoom';
-export * from './createSideRoom';
+export * from './createHtmlRoom';
+export * from './findPlayerTitle';
 export * from './formatId';
 export * from './getActiveBattle';
 export * from './getAuthUsername';

@@ -1,6 +1,6 @@
 import { createSlice, current } from '@reduxjs/toolkit';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
-import { sanitizeField } from '@showdex/utils/battle';
+import { detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -29,6 +29,7 @@ export type CalcdexLeanPokemon = Omit<NonFunctionProperties<Partial<Showdown.Pok
   | 'prevItem'
   | 'side'
   | 'sprite'
+  | 'terastallized'
 >;
 
 /* eslint-enable @typescript-eslint/indent */
@@ -1273,6 +1274,15 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   format: string;
 
   /**
+   * Whether the gen uses legacy battle mechanics.
+   *
+   * * Determined via `detectLegacyGen()`.
+   *
+   * @since 1.1.1
+   */
+  legacy: boolean;
+
+  /**
    * Rules (clauses) applied to the battle.
    *
    * @since 0.1.3
@@ -1485,6 +1495,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         gen,
         format,
+        legacy: detectLegacyGen(format || gen),
         rules,
         turn,
 

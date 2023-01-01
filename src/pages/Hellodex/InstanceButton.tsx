@@ -4,6 +4,7 @@ import cx from 'classnames';
 import { BaseButton } from '@showdex/components/ui';
 import { FormatLabels } from '@showdex/consts/battle';
 import { useColorScheme } from '@showdex/redux/store';
+import { findPlayerTitle } from '@showdex/utils/app';
 import { detectGenFromFormat } from '@showdex/utils/battle';
 import { getResourceUrl } from '@showdex/utils/core';
 import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
@@ -41,6 +42,9 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     ? opponentNameFromProps
     : playerName;
 
+  const playerTitle = findPlayerTitle(playerName);
+  const opponentTitle = findPlayerTitle(opponentName);
+
   return (
     <BaseButton
       ref={forwardedRef}
@@ -76,8 +80,22 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
             <>
               {
                 !authPlayer &&
-                <div className={styles.username}>
+                <div
+                  className={styles.username}
+                  style={playerTitle?.color?.[colorScheme] ? {
+                    color: playerTitle.color[colorScheme],
+                  } : undefined}
+                >
                   {playerName}
+
+                  {
+                    !!playerTitle?.icon &&
+                    <Svg
+                      className={styles.usernameIcon}
+                      description={playerTitle.iconDescription}
+                      src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                    />
+                  }
                 </div>
               }
 
@@ -90,8 +108,22 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                 vs
               </div>
 
-              <div className={styles.username}>
+              <div
+                className={styles.username}
+                style={opponentTitle?.color?.[colorScheme] ? {
+                  color: opponentTitle.color[colorScheme],
+                } : undefined}
+              >
                 {opponentName}
+
+                {
+                  !!opponentTitle?.icon &&
+                  <Svg
+                    className={styles.usernameIcon}
+                    description={opponentTitle.iconDescription}
+                    src={getResourceUrl(`${opponentTitle.icon}.svg`)}
+                  />
+                }
               </div>
             </>
           }

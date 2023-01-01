@@ -8,52 +8,44 @@ import {
   PokemonNatureBoosts,
   PokemonStatNames,
 } from '@showdex/consts/pokemon';
-import { useCalcdexSettings, useColorScheme } from '@showdex/redux/store';
-import {
-  detectLegacyGen,
-  detectStatBoostDelta,
-  formatStatBoost,
-  legalLockedFormat,
-} from '@showdex/utils/battle';
+import { useColorScheme } from '@showdex/redux/store';
+import { detectStatBoostDelta, formatStatBoost, legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { pluralize } from '@showdex/utils/humanize';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
-  gen?: GenerationNum;
-  format?: string;
-  playerPokemon: CalcdexPokemon;
-  opponentPokemon: CalcdexPokemon;
-  field?: CalcdexBattleField;
-  authPlayerKey?: CalcdexPlayerKey;
-  playerKey?: CalcdexPlayerKey;
   containerSize?: ElementSizeLabel;
-  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
 }
 
 export const PokeStats = ({
   className,
   style,
-  gen,
-  format,
-  playerPokemon: pokemon,
-  opponentPokemon,
-  field,
-  authPlayerKey,
-  playerKey,
   containerSize,
-  onPokemonChange,
 }: PokeStatsProps): JSX.Element => {
-  const settings = useCalcdexSettings();
-  const colorScheme = useColorScheme();
+  const {
+    state,
+    settings,
+    playerPokemon: pokemon,
+    opponentPokemon,
+    playerKey, // don't use the one from state btw
+    field, // don't use the one from state btw
+    updatePokemon,
+  } = useCalcdexPokeContext();
 
-  const legacy = detectLegacyGen(gen);
+  const {
+    gen,
+    format,
+    legacy,
+    authPlayerKey,
+  } = state;
+
+  const colorScheme = useColorScheme();
 
   const statNames = PokemonStatNames.filter((stat) => gen > 1 || stat !== 'spd');
   const boostNames = PokemonBoostNames.filter((stat) => gen > 1 || stat !== 'spd');
@@ -152,7 +144,7 @@ export const PokeStats = ({
           tooltipDisabled={!settings?.showUiTooltips}
           primary
           disabled={!pokemon?.speciesForme || missingIvs || missingEvs}
-          onPress={() => onPokemonChange?.({
+          onPress={() => updatePokemon({
             showGenetics: !pokemon.showGenetics,
           })}
         />
@@ -210,7 +202,7 @@ export const PokeStats = ({
               hoverScale={1}
               absoluteHover
               disabled={!pokemon?.speciesForme || !hasDirtyBaseStats}
-              onPress={() => onPokemonChange?.({
+              onPress={() => updatePokemon({
                 dirtyBaseStats: null,
               })}
             />
@@ -248,7 +240,7 @@ export const PokeStats = ({
                   absoluteHover
                   input={{
                     value: baseStat,
-                    onChange: (value: number) => onPokemonChange?.({
+                    onChange: (value: number) => updatePokemon({
                       dirtyBaseStats: { [stat]: value },
                     }),
                   }}
@@ -336,7 +328,7 @@ export const PokeStats = ({
                   absoluteHover
                   input={{
                     value,
-                    onChange: (val: number) => onPokemonChange?.({
+                    onChange: (val: number) => updatePokemon({
                       // note: HP (for gen 1 and 2) and SPD (for gen 2 only) handled in
                       // handlePokemonChange() of PokeCalc
                       ivs: { [stat]: legacy ? convertLegacyDvToIv(val) : val },
@@ -428,7 +420,7 @@ export const PokeStats = ({
                   absoluteHover
                   input={{
                     value: ev,
-                    onChange: (value: number) => onPokemonChange?.({
+                    onChange: (value: number) => updatePokemon({
                       evs: { [stat]: value },
                     }),
                   }}
@@ -522,7 +514,7 @@ export const PokeStats = ({
               label="-"
               hoverScale={1}
               disabled={!pokemon?.speciesForme || boost <= -6}
-              onPress={() => onPokemonChange?.({
+              onPress={() => updatePokemon({
                 dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
               })}
             />
@@ -539,7 +531,7 @@ export const PokeStats = ({
               hoverScale={1}
               absoluteHover
               disabled={!pokemon?.speciesForme || !didDirtyBoost}
-              onPress={() => onPokemonChange?.({
+              onPress={() => updatePokemon({
                 // resets the dirty boost, in which a re-render will re-sync w/
                 // the actual boost from the battle state
                 dirtyBoosts: { [stat]: null },
@@ -551,7 +543,7 @@ export const PokeStats = ({
               label="+"
               hoverScale={1}
               disabled={!pokemon?.speciesForme || boost >= 6}
-              onPress={() => onPokemonChange?.({
+              onPress={() => updatePokemon({
                 dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },
               })}
             />

@@ -14,12 +14,12 @@ declare namespace Showdown {
 
   interface Dex extends ModdedDex {
     /**
-     * @default 8
+     * @default 9
      */
     readonly gen: number;
 
     /**
-     * @default 'gen8'
+     * @default 'gen9'
      */
     readonly modid: string;
 
@@ -30,12 +30,24 @@ declare namespace Showdown {
     fxPrefix: string;
 
     /**
-     * @default { xy: 1, bw: 0 }
+     * @default
+     * ```ts
+     * {
+     *   xy: 1,
+     *   bw: 0,
+     * }
+     * ```
      */
-    loadedSpriteData: { xy: number; bw: number; };
+    loadedSpriteData: {
+      xy: number;
+      bw: number;
+    };
 
     /**
-     * @default {}
+     * @default
+     * ```ts
+     * {}
+     * ```
      */
     moddedDexes: { [mod: string]: ModdedDex; };
 
@@ -48,6 +60,7 @@ declare namespace Showdown {
 
     prefs(prop: 'theme'): ColorSchemeOption;
     prefs(prop: 'onepanel'): boolean;
+    prefs(prop: 'rightpanelbattles'): boolean;
     prefs<T = unknown>(prop: string): T;
 
     moves: {

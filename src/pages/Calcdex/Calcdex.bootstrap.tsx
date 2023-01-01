@@ -26,6 +26,7 @@ import type {
 } from '@showdex/redux/store';
 import { Calcdex } from './Calcdex';
 import { CalcdexError } from './CalcdexError';
+import { CalcdexProvider } from './CalcdexProvider';
 import styles from './Calcdex.module.scss';
 
 /**
@@ -53,12 +54,15 @@ export const renderCalcdex = (
       component={CalcdexError}
       battleId={typeof battle === 'string' ? battle : battle?.id}
     >
-      <Calcdex
+      <CalcdexProvider
         battle={typeof battle === 'string' ? undefined : battle}
         battleId={typeof battle === 'string' ? battle : undefined}
         request={battleRoom?.request}
-        onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
-      />
+      >
+        <Calcdex
+          onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
+        />
+      </CalcdexProvider>
     </ErrorBoundary>
   </ReduxProvider>
 ));

@@ -4,6 +4,8 @@ import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import { getGenlessFormat } from './getGenlessFormat';
 
+export type CalcdexPokemonPresetOption = DropdownOption<string>;
+
 /**
  * Builds the value for the `options` prop of the presets `Dropdown` component in `PokeInfo`.
  *
@@ -12,8 +14,8 @@ import { getGenlessFormat } from './getGenlessFormat';
 export const buildPresetOptions = (
   presets: CalcdexPokemonPreset[],
   usages?: CalcdexPokemonPreset[],
-): DropdownOption<string>[] => {
-  const options: DropdownOption<string>[] = [];
+): CalcdexPokemonPresetOption[] => {
+  const options: CalcdexPokemonPresetOption[] = [];
 
   if (!presets?.length) {
     return options;
@@ -24,7 +26,7 @@ export const buildPresetOptions = (
       return;
     }
 
-    const option: DropdownOption<string> = {
+    const option: CalcdexPokemonPresetOption = {
       label: preset.name,
       value: preset.calcdexId,
     };

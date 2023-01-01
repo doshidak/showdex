@@ -34,11 +34,13 @@ export const sanitizePokemon = (
   showAllFormes?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
-  const legacy = detectLegacyGen(format);
-
   const gen = typeof format === 'string'
     ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
     : format;
+
+  const legacy = detectLegacyGen(format);
+  const defaultIv = legacy ? 30 : 31;
+  // const defaultEv = legacy ? 252 : 0; // update: actually, changed my mind; better to have evs as an empty object
 
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];
@@ -75,7 +77,9 @@ export const sanitizePokemon = (
     types: typeChanged
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
-    teraType: pokemon?.teraType || null,
+    teraType: ('teraType' in pokemon && pokemon?.teraType)
+      || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
+      || null,
     altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
     hp: pokemon?.hp || 0,
@@ -105,22 +109,24 @@ export const sanitizePokemon = (
       : null,
 
     ivs: {
-      hp: ('ivs' in pokemon && pokemon.ivs?.hp) || 31,
-      atk: ('ivs' in pokemon && pokemon.ivs?.atk) || 31,
-      def: ('ivs' in pokemon && pokemon.ivs?.def) || 31,
-      spa: ('ivs' in pokemon && pokemon.ivs?.spa) || 31,
-      spd: ('ivs' in pokemon && pokemon.ivs?.spd) || 31,
-      spe: ('ivs' in pokemon && pokemon.ivs?.spe) || 31,
+      hp: ('ivs' in pokemon && pokemon.ivs?.hp) || defaultIv,
+      atk: ('ivs' in pokemon && pokemon.ivs?.atk) || defaultIv,
+      def: ('ivs' in pokemon && pokemon.ivs?.def) || defaultIv,
+      spa: ('ivs' in pokemon && pokemon.ivs?.spa) || defaultIv,
+      spd: ('ivs' in pokemon && pokemon.ivs?.spd) || defaultIv,
+      spe: ('ivs' in pokemon && pokemon.ivs?.spe) || defaultIv,
     },
 
-    evs: !legacy ? {
-      hp: ('evs' in pokemon && pokemon.evs?.hp) || 0,
-      atk: ('evs' in pokemon && pokemon.evs?.atk) || 0,
-      def: ('evs' in pokemon && pokemon.evs?.def) || 0,
-      spa: ('evs' in pokemon && pokemon.evs?.spa) || 0,
-      spd: ('evs' in pokemon && pokemon.evs?.spd) || 0,
-      spe: ('evs' in pokemon && pokemon.evs?.spe) || 0,
-    } : {},
+    evs: {
+      ...(!legacy && {
+        hp: ('evs' in pokemon && pokemon.evs?.hp) || 0,
+        atk: ('evs' in pokemon && pokemon.evs?.atk) || 0,
+        def: ('evs' in pokemon && pokemon.evs?.def) || 0,
+        spa: ('evs' in pokemon && pokemon.evs?.spa) || 0,
+        spd: ('evs' in pokemon && pokemon.evs?.spd) || 0,
+        spe: ('evs' in pokemon && pokemon.evs?.spe) || 0,
+      }),
+    },
 
     // update (2022/11/14): defaultShowGenetics setting is now deprecated in favor of lockGeneticsVisibility,
     // so this should be its new default, false (was previously true)
@@ -163,7 +169,7 @@ export const sanitizePokemon = (
 
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
     useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
-    terastallized: (!legacy && 'terastallized' in pokemon && pokemon.terastallized) || false,
+    terastallized: (!legacy && typeof pokemon?.terastallized === 'boolean' && pokemon.terastallized) || false,
     criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
 
     lastMove: <MoveName> pokemon?.lastMove || null,

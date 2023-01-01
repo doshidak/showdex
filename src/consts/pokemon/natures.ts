@@ -31,6 +31,9 @@ export const PokemonNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatu
 export const PokemonBoostedNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts)
   .filter((nature) => PokemonNatureBoosts[<Showdown.PokemonNature> nature].length);
 
+export const PokemonNeutralNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts)
+  .filter((nature) => !PokemonNatureBoosts[<Showdown.PokemonNature> nature].length);
+
 /**
 * These are used by the nature/EV/IV finding algorithm,
 * based on the Pokemon's final calculated stats.

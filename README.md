@@ -9,9 +9,9 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.1.0">v1.1.0</a>&nbsp;</th>
-      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Opera · Edge · Brave</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a>&nbsp;</th>
-      <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built">Reddit</a>&nbsp;</th>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.1.1">v1.1.1</a>&nbsp;</th>
+      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Opera · Edge · Brave</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
+      <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a></th>
     </tr>
   </thead>
 </table>
@@ -33,9 +33,9 @@ Fully supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpna
   </summary>
 
   ---
-  Unfortunately, we don't ~~ever~~ plan on supporting **Safari** since [Apple requires us to shell out $100/year for the Apple Developer Program](https://developer.apple.com/documentation/safariservices/safari_web_extensions) just to distribute a singular *free* extension on the App Store.
+  Unfortunately, we don't ~~ever~~ plan on *officially* supporting **Safari** since [Apple requires us to shell out $100/year for the Apple Developer Program](https://developer.apple.com/documentation/safariservices/safari_web_extensions) just to distribute a singular *free* extension on the App Store.
   
-  Alternative would be to manually distribute the extension, but there's the potential issue of codesigning, making for a very unpleasant installation process.
+  Not all hope is lost, fortunately! [**Enhanced Tooltips for Showdown**](https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050) ([Source on GitHub](https://github.com/cbruegg/Enhanced-Tooltips-for-Showdown)), currently available on the App Store, bundles Showdex along with the [Enhanced Tooltips](https://github.com/rowin1/Pokemon-Showdown-Enhanced-Tooltips) & [Randbats Tooltip](https://github.com/pkmn/randbats) extensions. Note that the bundled Showdex is not officially supported, so questions regarding Showdex running on Safari should be directed towards the maintainer of the aforementioned App Store app, [Christian Brüggemann](https://cbruegg.com/enhanced-tooltips-for-showdown-support) ([Smogon](https://www.smogon.com/forums/members/cbruegg.585763) · [GitHub](https://github.com/cbruegg)).
   
   Thanks Tim!
 
@@ -468,7 +468,7 @@ big thank to:
 * [**Smogon Dev Team**](https://github.com/smogon) & the [**`@smogon/calc` Maintainers & Contributors**](https://github.com/smogon/damage-calc) for the sauce,
 * [**pre**](https://smogon.com/forums/members/pre.10544) & [**pkmn.cc**](https://pkmn.cc) for keeping the Smogon sets hot, fresh & downloadable,
 * [**Austin**](https://smogon.com/forums/members/austin.231659) for the endorsement & support,
-* [**Honko**](https://smogon.com/forums/members/honko.42413) for the original damage calculator,
+* [**Honko**](https://smogon.com/forums/members/honko.42413) for the O.G damage calculator,
 * [**Zarel**](https://smogon.com/forums/members/zarel.102803) & the [**Showdown Staff & Contributors**](https://pokemonshowdown.com/credits) for this would literally be nothing without them,
 * **Game Freak** & **Nintendo** for good game (plz don't sue us lol), and
 * [**sumfuk**](https://smogon.com/forums/members/bot-keith.580065) ???
@@ -477,13 +477,19 @@ big thank to:
 
 ## Donators
 
-big sparkly thank to these fine individuals for their generous support!
+big **sparkly** thank to these fine individuals for their generous support!
 
 <table>
   <tbody>
     <tr>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Angie L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Max B.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jonathan M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
       <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Connor M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
@@ -513,42 +519,49 @@ another big thank to these fine people for helping with development!
     <tr>
       <td align="center"><a href="https://smogon.com/forums/members/85percent.457453"><strong>85percent</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/aim.53807"><strong>aim</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/andviet.70213"><strong>AndViet</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/baloor.342365"><strong>Baloor</strong></a></td>
-      <td align="center"><a href="https://www.smogon.com/forums/members/chrispbacon.544502"><strong>ChrisPBacon</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/clastia.545372"><strong>Clastia</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/cbruegg.585763"><strong>cbruegg</strong></a> · <a href="https://github.com/cbruegg">GH</a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/chrispbacon.544502"><strong>ChrisPBacon</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/clastia.545372"><strong>Clastia</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/darkphoenix911.247845"><strong>DarkPhoenix911</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/dex.277988"><strong>dex</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/ducky.525446"><strong>Ducky</strong></a></td>
-      <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0yafl"><strong>Fitah</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0yafl"><strong>Fitah_</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/furret4ssb.518775"><strong>Furret4ssb</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/ihatepasswords.611420"><strong>IHatePasswords</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/iodyne.567157"><strong>Iodyne</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
     </tr>
     <tr>
-      <td align="center"><a href="https://www.smogon.com/forums/members/ihatepasswords.611420"><strong>IHatePasswords</strong></a></td>
-      <td align="center"><a href="https://www.smogon.com/forums/members/iodyne.567157"><strong>Iodyne</strong></a></td>
-      <td align="center"><a href="https://www.smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/kibo.552274"><strong>Kibo</strong></a></td>
-      <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
-    </tr>
-    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/kirigon.349282"><strong>Kirigon</strong></a></td>
+      <td align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/lighthouse64.322009"><strong>lighthouse64</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
-      <td align="center"><a href="https://smogon.com/forums/members/maxouille.390049"><strong>Maxouille</strong></a> · <a href="https://github.com/Maxouille64">GH</a></td>
-      <td align="center"><a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0zpcd"><strong>mdragon13</strong></a></td>
-      <td align="center"><a href="https://www.smogon.com/forums/members/mia.425427"><strong>Mia</strong></a> · <a href="https://github.com/mia-pi-git">GH</a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/maxouille.390049"><strong>Maxouille</strong></a> · <a href="https://github.com/Maxouille64">GH</a></td>
+      <td align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0zpcd"><strong>mdragon13</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/mia.425427"><strong>Mia</strong></a> · <a href="https://github.com/mia-pi-git">GH</a></td>
       <td align="center"><a href="https://github.com/mpique"><strong>mpique</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/nails.51373"><strong>Nails</strong></a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://smogon.com/forums/members/orangelego21.315566"><strong>orangelego21</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/runoisch.568189"><strong>Runoisch</strong></a></td>
-      <td align="center"><a href="https://www.smogon.com/forums/members/sabelette.583793"><strong>Sabelette</strong></td>
+      <td align="center"><a href="https://smogon.com/forums/members/ry4242.551466"><strong>ry4242</strong></a></td>
+      <td align="center"><a href="https://smogon.com/forums/members/sabelette.583793"><strong>Sabelette</strong></td>
     </tr>
     <tr>
       <td align="center"><a href="https://smogon.com/forums/members/shiox.495116"><strong>Shiox</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GH</a></td>
-      <td align="center"><a href="https://www.smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a>
+      <td align="center"><a href="https://smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a>
       <td align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GH</a></td>
       <td align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
     </tr>
@@ -556,6 +569,7 @@ another big thank to these fine people for helping with development!
       <td align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
+      <td align="center"><a href="https://github.com/zooki2006"><strong>zooki2006</strong></a></td>
       <td align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GH</a></td>
     </tr>
   </tbody>

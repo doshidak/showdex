@@ -75,6 +75,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
     calcdex: {
       openOnStart: 'always',
       openAs: 'showdown',
+      openOnPanel: 'showdown',
       // forcedOpenAs: 'showdown',
       // closeOnEnd: false,
       closeOn: 'battle-tab',

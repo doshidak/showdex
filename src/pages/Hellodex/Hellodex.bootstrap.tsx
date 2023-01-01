@@ -5,7 +5,7 @@ import { renderCalcdex } from '@showdex/pages/Calcdex';
 import { calcdexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
-  createSideRoom,
+  createHtmlRoom,
   getBattleRoom,
   getCalcdexRoomId,
 } from '@showdex/utils/app';
@@ -127,7 +127,8 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
 
   const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.hellodex;
 
-  const hellodexRoom = createSideRoom('view-hellodex', 'Hellodex', {
+  const hellodexRoom = createHtmlRoom('view-hellodex', 'Hellodex', {
+    side: true,
     icon: Math.random() > 0.5 ? 'smile-o' : 'heart',
     focus: !settings?.focusRoomsRoom,
   });

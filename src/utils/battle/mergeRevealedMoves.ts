@@ -1,6 +1,8 @@
 import { PokemonPivotMoves } from '@showdex/consts/pokemon';
+import { formatId } from '@showdex/utils/app';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
+import { flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
 
 /**
@@ -17,6 +19,7 @@ export const mergeRevealedMoves = (
   const {
     types,
     moves,
+    altMoves,
     revealedMoves,
   } = pokemon || {};
 
@@ -61,7 +64,14 @@ export const mergeRevealedMoves = (
   ];
 
   for (const mergeableMoveName of mergeableMoveNames) {
-    const mergeableMove = dex.moves.get(mergeableMoveName);
+    // if the mergeableMoveName is Hidden Power (w/o a type), see if we can find a typed Hidden Power
+    // (something like 'hiddenpowerfire') in the Pokemon's move pool (i.e., altMoves), if available
+    // (if it happens to be just "Hidden Power" [Normal type], then all good cause of the logical OR)
+    const mergeableMove = dex.moves.get((
+      formatId(mergeableMoveName) === 'hiddenpower'
+        && altMoves?.length
+        && flattenAlts(altMoves).find((m) => /^hiddenpower\w+$/.test(formatId(m)))
+    ) || mergeableMoveName);
 
     // HUH
     if (!mergeableMove?.exists) {

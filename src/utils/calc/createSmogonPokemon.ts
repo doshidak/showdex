@@ -39,6 +39,7 @@ export const createSmogonPokemon = (
   }
 
   const legacy = detectLegacyGen(gen);
+  const defaultIv = legacy ? 30 : 31;
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
@@ -135,6 +136,7 @@ export const createSmogonPokemon = (
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
     isDynamaxed: pokemon.useMax,
+    isSaltCure: 'saltcure' in pokemon.volatiles,
 
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
     ability: pseudoToggleAbility && !pseudoToggled ? 'Pressure' : ability,
@@ -144,12 +146,12 @@ export const createSmogonPokemon = (
     moves: pokemon.moves,
 
     ivs: {
-      hp: pokemon.ivs?.hp ?? 31,
-      atk: pokemon.ivs?.atk ?? 31,
-      def: pokemon.ivs?.def ?? 31,
-      spa: pokemon.ivs?.spa ?? 31,
-      spd: pokemon.ivs?.spd ?? 31,
-      spe: pokemon.ivs?.spe ?? 31,
+      hp: pokemon.ivs?.hp ?? defaultIv,
+      atk: pokemon.ivs?.atk ?? defaultIv,
+      def: pokemon.ivs?.def ?? defaultIv,
+      spa: pokemon.ivs?.spa ?? defaultIv,
+      spd: pokemon.ivs?.spd ?? defaultIv,
+      spe: pokemon.ivs?.spe ?? defaultIv,
     },
 
     evs: legacy ? undefined : {
@@ -198,6 +200,18 @@ export const createSmogonPokemon = (
       ].slice(0, 3),
     },
   };
+
+  // in legacy gens, make sure that the SPD DVs match the SPA DVs
+  // (even though gen 1 doesn't have SPD [or even SPA, technically], doesn't hurt to set it anyways)
+  if (legacy) {
+    options.ivs.spd = options.ivs.spa;
+  }
+
+  // in gen 1, we must set any SPA boosts to SPD as well
+  // (in gen 2, they're separate boosts)
+  if (gen === 1) {
+    options.boosts.spd = options.boosts.spa;
+  }
 
   // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
   // unfortunately, we must forcibly set the item to Booster Energy to "activate" these abilities

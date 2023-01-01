@@ -1,3 +1,4 @@
+import { detectLegacyGen } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
@@ -30,6 +31,8 @@ export const transformPresetResponse = (
   const output: CalcdexPokemonPreset[] = [];
 
   const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
+  const legacy = detectLegacyGen(gen);
+  const defaultIv = legacy ? 30 : 31;
 
   // you bet your ass this is O(n^3), but not only that,
   // we're getting a bunch of formats and sets back from the API, all nested objects.
@@ -63,6 +66,8 @@ export const transformPresetResponse = (
         }
 
         const {
+          teraTypes: presetTeraTypes,
+          teratypes: presetTeratypes,
           ability,
           nature,
           item,
@@ -94,18 +99,28 @@ export const transformPresetResponse = (
           altMoves: flatMoves.filter((m, i) => !flatMoves.includes(m, i + 1)), // remove dupe moves
 
           ivs: {
-            hp: typeof ivs?.hp === 'number' ? ivs.hp : 31,
-            atk: typeof ivs?.atk === 'number' ? ivs.atk : 31,
-            def: typeof ivs?.def === 'number' ? ivs.def : 31,
-            spa: typeof ivs?.spa === 'number' ? ivs.spa : 31,
-            spd: typeof ivs?.spd === 'number' ? ivs.spd : 31,
-            spe: typeof ivs?.spe === 'number' ? ivs.spe : 31,
+            hp: typeof ivs?.hp === 'number' ? ivs.hp : defaultIv,
+            atk: typeof ivs?.atk === 'number' ? ivs.atk : defaultIv,
+            def: typeof ivs?.def === 'number' ? ivs.def : defaultIv,
+            spa: typeof ivs?.spa === 'number' ? ivs.spa : defaultIv,
+            spd: typeof ivs?.spd === 'number' ? ivs.spd : defaultIv,
+            spe: typeof ivs?.spe === 'number' ? ivs.spe : defaultIv,
           },
 
-          evs: {
-            ...evs,
-          },
+          evs: { ...(!legacy && evs) },
         };
+
+        // determine the Tera types (first from teraTypes [if the API fixes the casing], then teratypes)
+        // (note: this was straight up copied from transformFormatPresetResponse())
+        const teraTypes = (!!presetTeraTypes?.length && typeof presetTeraTypes === 'string' && [presetTeraTypes])
+          || (!!presetTeraTypes?.length && Array.isArray(presetTeraTypes) && presetTeraTypes)
+          || (!!presetTeratypes?.length && typeof presetTeratypes === 'string' && [presetTeratypes])
+          || (!!presetTeratypes?.length && Array.isArray(presetTeratypes) && presetTeratypes)
+          || [];
+
+        if (teraTypes.length) {
+          preset.teraTypes = [...teraTypes];
+        }
 
         preset.calcdexId = calcPresetCalcdexId(preset);
         preset.id = preset.calcdexId; // used by RTK Query for tagging
