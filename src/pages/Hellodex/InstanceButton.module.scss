@@ -132,11 +132,22 @@ div.container {
 
 .username {
   // max-width: 44%;
+  @include flex.row($align: center);
   font-weight: 500;
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  @include transition.apply(color);
+}
+
+.usernameIcon {
+  width: 12px;
+  min-width: 12px;
+  height: 12px;
+  min-height: 12px;
+  @include spacing.margin($left: 1px);
+  color: inherit;
 }
 
 .versus {

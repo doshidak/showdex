@@ -36,7 +36,7 @@
 
 button.usernameButton {
   justify-content: initial;
-  max-width: 80%;
+  max-width: 90%;
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
 
   .light & {
@@ -47,15 +47,15 @@ button.usernameButton {
     color: color.alpha(colors.$white, 0.75);
   }
 
-  &.tester {
-    .light & {
-      color: color.alpha(#009688, 0.8);
-    }
-
-    .dark & {
-      color: color.alpha(color.tint(#009688, 15%), 0.8);
-    }
-  }
+  // &.tester {
+  //   .light & {
+  //     color: color.alpha(#009688, 0.8);
+  //   }
+  //
+  //   .dark & {
+  //     color: color.alpha(color.tint(#009688, 15%), 0.8);
+  //   }
+  // }
 }
 
 .usernameButtonLabel {

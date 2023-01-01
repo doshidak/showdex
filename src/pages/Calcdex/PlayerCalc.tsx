@@ -3,11 +3,10 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { PiconButton } from '@showdex/components/app';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
-import { ShowdexVerifiedTesters } from '@showdex/consts/app';
 import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
 import { getResourceUrl } from '@showdex/utils/core';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
@@ -55,6 +54,7 @@ export const PlayerCalc = ({
   } = player;
 
   const playerId = formatId(name);
+  const playerTitle = findPlayerTitle(playerId);
   const playerPokemon = playerParty?.[playerIndex];
 
   // only fetch the rating if the battle didn't provide it to us
@@ -101,42 +101,52 @@ export const PlayerCalc = ({
       >
         <div className={styles.playerInfo}>
           <Button
-            className={cx(
-              styles.usernameButton,
-              !!name && ShowdexVerifiedTesters.includes(name) && styles.tester,
-            )}
+            className={styles.usernameButton}
+            style={playerTitle?.color?.[colorScheme] ? {
+              color: playerTitle.color[colorScheme],
+            } : undefined}
             labelClassName={styles.usernameButtonLabel}
             label={name || defaultName}
             tooltip={(
               <div className={styles.tooltipContent}>
                 {
-                  (!!name && ShowdexVerifiedTesters.includes(name)) &&
+                  !!playerTitle?.title &&
                   <>
-                    <em>Verified Showdex Tester</em>
-                    <br />
+                    {settings?.showUiTooltips ? (
+                      <em>{playerTitle.title}</em>
+                    ) : playerTitle.title}
+                    {
+                      settings?.showUiTooltips &&
+                      <br />
+                    }
                   </>
                 }
-                Open{' '}
-                {name ? (
+                {
+                  settings?.showUiTooltips &&
                   <>
-                    <strong>{name}</strong>'s
+                    Open{' '}
+                    {name ? (
+                      <>
+                        <strong>{name}</strong>'s
+                      </>
+                    ) : 'User'}{' '}
+                    Profile
                   </>
-                ) : 'User'}{' '}
-                Profile
+                }
               </div>
             )}
-            tooltipDisabled={!settings?.showUiTooltips}
+            tooltipDisabled={!playerTitle && !settings?.showUiTooltips}
             hoverScale={1}
             absoluteHover
             disabled={!name}
             onPress={() => openUserPopup(name)}
           >
             {
-              (!!name && ShowdexVerifiedTesters.includes(name)) &&
+              !!playerTitle?.icon &&
               <Svg
                 className={styles.usernameButtonIcon}
-                description="Flask Icon"
-                src={getResourceUrl('flask.svg')}
+                description={playerTitle.iconDescription}
+                src={getResourceUrl(`${playerTitle.icon}.svg`)}
               />
             }
           </Button>
