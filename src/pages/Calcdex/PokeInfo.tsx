@@ -70,7 +70,7 @@ export const PokeInfo = ({
 
   const colorScheme = useColorScheme();
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nickname = hasNickname(pokemon) && settings?.showNicknames
@@ -381,7 +381,7 @@ export const PokeInfo = ({
                 }),
               }}
               tooltipPlacement="bottom-start"
-              shorterAbbreviations={gen > 8 && ['xs', 'sm'].includes(containerSize)}
+              containerSize={gen > 8 ? containerSize : null}
               highlight={gen < 9 || !pokemon?.terastallized}
               readOnly={!editableTypes}
               disabled={!pokemon?.speciesForme}
@@ -403,8 +403,8 @@ export const PokeInfo = ({
                 }}
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel="Tera"
-                // teraTyping
-                shorterAbbreviations={['xs', 'sm'].includes(containerSize)}
+                teraTyping
+                containerSize={containerSize}
                 highlight={pokemon?.terastallized}
                 highlightTypes={flattenAlts(pokemon?.altTeraTypes)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}

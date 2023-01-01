@@ -30,7 +30,7 @@ export interface PokeTypeFieldProps<
   multi?: boolean;
   maxMultiTypes?: number;
   defaultTypeLabel?: string;
-  // teraTyping?: boolean;
+  teraTyping?: boolean;
   containerSize?: ElementSizeLabel;
   highlight?: boolean;
   highlightTypes?: Showdown.TypeName[];
@@ -55,7 +55,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   multi,
   maxMultiTypes = 2,
   defaultTypeLabel,
-  // teraTyping,
+  teraTyping,
   containerSize,
   highlight = true,
   highlightTypes,
@@ -178,6 +178,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       >
         <PokeType
           className={styles.typeOptionType}
+          labelClassName={styles.typeOptionLabel}
           type={pokemonType}
           reverseColorScheme
           highlight={optionSelected}
@@ -271,6 +272,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
             type={typeValue}
             defaultLabel={defaultTypeLabel}
             // reverseColorScheme
+            teraTyping={teraTyping}
             containerSize={containerSize}
             highlight={highlight}
           />

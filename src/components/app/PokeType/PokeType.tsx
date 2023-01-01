@@ -8,8 +8,11 @@ import styles from './PokeType.module.scss';
 export interface PokeTypeProps {
   className?: string;
   style?: React.CSSProperties;
+  labelClassName?: string;
+  labelStyle?: React.CSSProperties;
   type?: Showdown.TypeName;
   defaultLabel?: string;
+  teraTyping?: boolean;
   reverseColorScheme?: boolean;
   containerSize?: ElementSizeLabel;
   highlight?: boolean;
@@ -18,11 +21,14 @@ export interface PokeTypeProps {
 export const PokeType = ({
   className,
   style,
+  labelClassName,
+  labelStyle,
   type,
   defaultLabel,
+  highlight = true,
   reverseColorScheme,
   containerSize,
-  highlight = true,
+  teraTyping,
 }: PokeTypeProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
 
@@ -54,15 +60,33 @@ export const PokeType = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
-        // (!type || type === '???') && styles['type-unknown'],
         !!type && type !== '???' && styles[`type-${type.toLowerCase()}`],
         shouldAbbreviate && styles[containerSize],
         highlight && styles.highlight,
+        teraTyping && styles.teraTyping,
         className,
       )}
       style={style}
     >
-      {label}
+      <span
+        className={cx(styles.label, labelClassName)}
+        style={labelStyle}
+      >
+        {label}
+      </span>
+
+      {
+        teraTyping &&
+        <>
+          {/* &nbsp; */}
+          <span className={cx(styles.teraEdge, styles.topLeft)} />
+          <span className={cx(styles.teraEdge, styles.topRight)} />
+          <span className={cx(styles.teraEdge, styles.middleRight)} />
+          <span className={cx(styles.teraEdge, styles.bottomRight)} />
+          <span className={cx(styles.teraEdge, styles.bottomLeft)} />
+          <span className={cx(styles.teraEdge, styles.middleLeft)} />
+        </>
+      }
     </span>
   );
 };

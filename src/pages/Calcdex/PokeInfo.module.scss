@@ -128,7 +128,7 @@ button.nameButton {
   @include spacing.margin($left: 0.5em);
   // user-select: none;
 
-  // .smol &.teraTypeField {
+  // .verySmol &.teraTypeField {
   //   @include spacing.margin($left: 0.3em);
   // }
 }
@@ -191,6 +191,7 @@ button.nameButton {
   @include spacing.margin($left: 1em);
 
   .verySmol & {
+    flex: 0.75;
     min-width: auto;
   }
 

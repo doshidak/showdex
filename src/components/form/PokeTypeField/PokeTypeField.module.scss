@@ -10,7 +10,7 @@
 @use 'mixins/transition';
 
 $container: (
-  min-width: 28px,
+  // min-width: 28px,
   padding-x: 3px,
   padding-y: 3px,
   border-radius: 8px,
@@ -111,8 +111,8 @@ $type-option-button: (
 $type-option-type: (
   color: (
     default: (
-      light: color.alpha(colors.$white, 0.65),
-      dark: color.alpha(colors.$black, 0.65),
+      light: color.alpha(colors.$white, 0.85),
+      dark: color.alpha(colors.$black, 0.75),
     ),
   ),
 
@@ -146,7 +146,7 @@ $type-value: (
 
 .container {
   position: relative;
-  min-width: map.get($container, min-width);
+  // min-width: map.get($container, min-width);
   @include transition.apply(opacity);
 
   &::before {
@@ -299,7 +299,9 @@ $type-value: (
 .typeOptionType {
   grid-area: span 1 / span 1;
   z-index: 1;
+}
 
+.typeOptionLabel {
   .typeOptionButton:not(.selected):not(.withUsage) & {
     .light & {
       color: map.get($type-option-type, color, default, light);
