@@ -11,7 +11,7 @@
     <tr>
       <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.1.1">v1.1.1</a>&nbsp;</th>
       <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Opera · Edge · Brave</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
-      <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://www.reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built">Reddit</a>&nbsp;</th>
+      <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a></th>
     </tr>
   </thead>
 </table>
