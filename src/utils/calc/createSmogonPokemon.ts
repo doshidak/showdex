@@ -8,7 +8,7 @@ import {
   notFullyEvolved,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { Specie } from '@smogon/calc/dist/data/interface';
+import type { MoveName, Specie } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
@@ -28,7 +28,7 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon');
 export const createSmogonPokemon = (
   format: string,
   pokemon: CalcdexPokemon,
-  // moveName?: MoveName,
+  moveName?: MoveName,
   // field?: CalcdexBattleField,
 ): SmogonPokemon => {
   const dex = getGenDexForFormat(format);
@@ -132,7 +132,13 @@ export const createSmogonPokemon = (
     teraType: (pokemon.terastallized && pokemon.teraType) || null,
     status,
     toxicCounter: pokemon.toxicCounter,
-    alliesFainted: pokemon.faintCounter,
+
+    // if the move has been manually overridden, don't specify this property
+    // (e.g., don't apply Supreme Overlord boosts when user overrides a move's base power)
+    alliesFainted: (
+      (!moveName || !Object.keys(pokemon.moveOverrides?.[moveName] || {}).length)
+        && pokemon.faintCounter
+    ) || null,
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
