@@ -8,8 +8,8 @@ import {
   notFullyEvolved,
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { ItemName, Specie } from '@smogon/calc/dist/data/interface';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
+import type { Specie } from '@smogon/calc/dist/data/interface';
+import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
@@ -29,7 +29,7 @@ export const createSmogonPokemon = (
   format: string,
   pokemon: CalcdexPokemon,
   // moveName?: MoveName,
-  field?: CalcdexBattleField,
+  // field?: CalcdexBattleField,
 ): SmogonPokemon => {
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
@@ -132,6 +132,7 @@ export const createSmogonPokemon = (
     teraType: (pokemon.terastallized && pokemon.teraType) || null,
     status,
     toxicCounter: pokemon.toxicCounter,
+    alliesFainted: pokemon.faintCounter,
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
@@ -215,20 +216,21 @@ export const createSmogonPokemon = (
 
   // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
   // unfortunately, we must forcibly set the item to Booster Energy to "activate" these abilities
-  if (pseudoToggled && ['protosynthesis', 'quarkdrive'].includes(abilityId) && options.item !== 'Booster Energy') {
-    const {
-      weather,
-      terrain,
-    } = field || {};
-
-    // update (2022/12/11): no need to forcibly set the item if the field conditions activate the abilities
-    const fieldActivated = (abilityId === 'protosynthesis' && ['Sun', 'Harsh Sunshine'].includes(weather))
-      || (abilityId === 'quarkdrive' && terrain === 'Electric');
-
-    if (!fieldActivated) {
-      options.item = <ItemName> 'Booster Energy';
-    }
-  }
+  // update (2023/01/02): added a @smogon/calc patch for these abilities to ignore item/field checks if abilityOn is true
+  // if (pseudoToggled && ['protosynthesis', 'quarkdrive'].includes(abilityId) && options.item !== 'Booster Energy') {
+  //   const {
+  //     weather,
+  //     terrain,
+  //   } = field || {};
+  //
+  //   // update (2022/12/11): no need to forcibly set the item if the field conditions activate the abilities
+  //   const fieldActivated = (abilityId === 'protosynthesis' && ['Sun', 'Harsh Sunshine'].includes(weather))
+  //     || (abilityId === 'quarkdrive' && terrain === 'Electric');
+  //
+  //   if (!fieldActivated) {
+  //     options.item = <ItemName> 'Booster Energy';
+  //   }
+  // }
 
   // also in gen 9, Supreme Overlord! (tf who named these lol)
   // (workaround cause @smogon/damage-calc doesn't support this ability yet)
