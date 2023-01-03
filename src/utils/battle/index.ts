@@ -26,6 +26,7 @@ export * from './guessTableFormatKey';
 export * from './getNaturesDex';
 export * from './getPokemonLearnset';
 export * from './getTypesDex';
+export * from './getWeatherConditions';
 export * from './hasMegaForme';
 export * from './hasNickname';
 export * from './importPokePaste';
