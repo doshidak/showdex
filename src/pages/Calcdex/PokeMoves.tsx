@@ -53,17 +53,26 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const showZToggle = format?.includes('nationaldex')
-    || gen === 6
-    || gen === 7;
+  const nationalDexFormat = !!format && [
+    'nationaldex',
+    'natdex',
+  ].some((f) => format.includes(f));
 
-  const showMaxToggle = !rules?.dynamax && gen < 9 && (
-    format?.includes('nationaldex')
+  const showZToggle = !!pokemon?.speciesForme && (
+    nationalDexFormat
+      || gen === 6
+      || gen === 7
+  );
+
+  const showMaxToggle = !!pokemon?.speciesForme && !rules?.dynamax && gen < 9 && (
+    nationalDexFormat
       || (gen === 8 && !format?.includes('bdsp'))
   );
 
-  const showEditButton = settings?.showMoveEditor === 'always'
-    || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format));
+  const showEditButton = !!pokemon?.speciesForme && (
+    settings?.showMoveEditor === 'always'
+      || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
+  );
 
   const handleMoveChange = (name: MoveName, index: number) => {
     const moves = upsizeArray(
@@ -126,7 +135,7 @@ export const PokeMoves = ({
         </div>
 
         {
-          gen > 8 &&
+          (!!pokemon?.speciesForme && gen > 8) &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
             label="Tera"
