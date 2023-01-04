@@ -14,6 +14,7 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useColorScheme, useShowdexSettings, useUpdateSettings } from '@showdex/redux/store';
+import { findPlayerTitle, getAuthUsername } from '@showdex/utils/app';
 import {
   env,
   getResourceUrl,
@@ -50,8 +51,10 @@ export const SettingsPane = ({
   inBattle,
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
-  const colorScheme = useColorScheme();
+  const authName = getAuthUsername();
+  const authTitle = findPlayerTitle(authName);
 
+  const colorScheme = useColorScheme();
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
 
@@ -559,6 +562,25 @@ export const SettingsPane = ({
                       </div>
                     )}
                   />
+
+                  {
+                    !!authTitle &&
+                    <Field<ShowdexSettings['hellodex']['showDonateButton']>
+                      name="hellodex.showDonateButton"
+                      component={Switch}
+                      className={styles.field}
+                      label="Show Donate Button"
+                      tooltip={(
+                        <div className={styles.tooltipContent}>
+                          Shows the donate button in the Hellodex.
+                          <br />
+                          <br />
+                          If you're seeing this, you're either very special to us or you're a 1337 hax0r.
+                          Either way, feel free to turn this off.
+                        </div>
+                      )}
+                    />
+                  }
                 </div>
               </div>
 
