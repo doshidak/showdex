@@ -35,6 +35,7 @@ export const DehydratedHellodexSettingsMap: Record<keyof ShowdexHellodexSettings
   openOnStart: 'oos',
   focusRoomsRoom: 'frr',
   showBattleRecord: 'sbr',
+  showDonateButton: 'sdb',
 };
 
 /**
