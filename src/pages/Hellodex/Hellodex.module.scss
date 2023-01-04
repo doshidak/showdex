@@ -4,6 +4,7 @@
 @use 'functions/color';
 @use 'mixins/flex';
 @use 'mixins/font';
+@use 'mixins/media';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
@@ -193,7 +194,19 @@
   @include spacing.margin-xy($y: 25px);
   border-radius: 15px;
   overflow: hidden;
-  @include transition.apply(background-color, box-shadow);
+  @include transition.apply(height, background-color, box-shadow);
+
+  &.hiddenDonation {
+    height: 50vh;
+
+    @include media.for-max-height(850px) {
+      height: 43vh;
+    }
+
+    @include media.for-max-height(750px) {
+      height: 35vh;
+    }
+  }
 
   .light & {
     background-color: color.alpha(colors.$white, 0.65);
