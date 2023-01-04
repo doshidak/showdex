@@ -845,10 +845,11 @@ export interface CalcdexPokemonPreset {
   speciesForme?: string;
   level?: number;
   gender?: Showdown.GenderName;
-  hpType?: string;
+  hiddenPowerType?: string;
   teraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
   shiny?: boolean;
   happiness?: number;
+  dynamaxLevel?: number;
   gigantamax?: boolean;
   ability?: AbilityName;
   altAbilities?: CalcdexPokemonAlt<AbilityName>[];
