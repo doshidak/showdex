@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { PokemonUsageFuckedFormes } from '@showdex/consts/pokemon';
 import {
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
@@ -8,7 +7,12 @@ import {
 } from '@showdex/redux/services';
 import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, getDexForFormat, getGenlessFormat } from '@showdex/utils/battle';
+import {
+  detectGenFromFormat,
+  // getDexForFormat,
+  getGenlessFormat,
+  getPresetFormes,
+} from '@showdex/utils/battle';
 // import { logger } from '@showdex/utils/debug';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
@@ -149,28 +153,30 @@ export const usePresets = ({
 }): CalcdexPresetsHookInterface => {
   const settings = useCalcdexSettings();
 
-  const dex = getDexForFormat(format);
+  // const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
 
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
-  const dexForme = speciesForme?.includes('-') ? dex?.species.get(speciesForme) : null;
+  // const dexForme = speciesForme?.includes('-') ? dex?.species.get(speciesForme) : null;
 
-  const baseForme = dexForme?.baseSpecies; // e.g., 'Necrozma'
-  const checkBaseForme = !!baseForme && baseForme !== speciesForme;
+  // const baseForme = dexForme?.baseSpecies; // e.g., 'Necrozma'
+  // const checkBaseForme = !!baseForme && baseForme !== speciesForme;
 
-  const battleFormes = Array.isArray(dexForme?.battleOnly)
-    ? dexForme.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Wings']
-    : [dexForme?.battleOnly].filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
+  // const battleFormes = Array.isArray(dexForme?.battleOnly)
+  //   ? dexForme.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']
+  //   : [dexForme?.battleOnly].filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
 
-  const formes = Array.from(new Set([
-    speciesForme, // e.g., 'Necrozma-Ultra' (typically wouldn't have any sets)
-    !!battleFormes.length && battleFormes.find((f) => PokemonUsageFuckedFormes.includes(f)), // e.g., 'Necrozma-Dawn-Wings' (sets would match this forme)
-    !battleFormes.length && checkBaseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
-    randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`, // e.g., (for some other Pokemon) 'Gengar-Gmax'
-  ].filter(Boolean))).map((f) => formatId(f));
+  // const formes = Array.from(new Set([
+  //   speciesForme, // e.g., 'Necrozma-Ultra' (typically wouldn't have any sets)
+  //   !!battleFormes.length && battleFormes.find((f) => PokemonUsageFuckedFormes.includes(f)), // e.g., 'Necrozma-Dawn-Wings' (sets would match this forme)
+  //   !battleFormes.length && checkBaseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
+  //   randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`, // e.g., (for some other Pokemon) 'Gengar-Gmax'
+  // ].filter(Boolean))).map((f) => formatId(f));
+
+  const formes = getPresetFormes(speciesForme, format, true);
 
   const shouldSkip = disabled
     || !format

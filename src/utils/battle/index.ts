@@ -25,6 +25,7 @@ export * from './getZMove';
 export * from './guessTableFormatKey';
 export * from './getNaturesDex';
 export * from './getPokemonLearnset';
+export * from './getPresetFormes';
 export * from './getTypesDex';
 export * from './getWeatherConditions';
 export * from './hasMegaForme';
