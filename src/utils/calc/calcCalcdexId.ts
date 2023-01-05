@@ -33,7 +33,7 @@ export const calcPresetCalcdexId = (
   preset: CalcdexPokemonPreset,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemonPreset, string>>>({
   // name: preset?.name,
-  source: preset?.source,
+  // source: preset?.source,
   format: preset?.format,
   gen: String(preset?.gen),
   speciesForme: preset?.speciesForme,
