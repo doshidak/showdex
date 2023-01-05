@@ -32,19 +32,19 @@ export const calcCalcdexId = <T>(payload: T): string => {
 export const calcPresetCalcdexId = (
   preset: CalcdexPokemonPreset,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemonPreset, string>>>({
-  name: preset?.name,
+  // name: preset?.name,
   source: preset?.source,
   format: preset?.format,
   gen: String(preset?.gen),
   speciesForme: preset?.speciesForme,
   level: String(preset?.level || 100),
-  shiny: String(!!preset?.shiny),
+  // shiny: String(!!preset?.shiny),
   ability: preset?.ability,
   // altAbilities: preset?.altAbilities?.join(','),
   nature: preset?.nature,
   item: preset?.item,
   // altItems: preset?.altItems?.join(','),
-  moves: preset?.moves?.join(','),
+  moves: preset?.moves?.sort().join(','), // sort moves in ABC order
   // altMoves: preset?.moves?.join(','),
   ivs: calcCalcdexId<Showdown.StatsTable>(preset?.ivs),
   evs: calcCalcdexId<Showdown.StatsTable>(preset?.evs),
