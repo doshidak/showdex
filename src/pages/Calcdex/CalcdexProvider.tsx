@@ -134,7 +134,8 @@ export const CalcdexProvider = ({
 
   // determine if the Calcdex should render
   const shouldRender = !battle?.calcdexDestroyed
-    && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+    // && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+    && (!renderAsOverlay || battle?.calcdexOverlayVisible);
 
   // handle `battle` changes from the client
   // (this is the sauce that invokes the syncBattle())

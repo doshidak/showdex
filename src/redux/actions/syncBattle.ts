@@ -378,7 +378,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // this is our starting point for the current clientPokemon
         const basePokemon = matchedPokemon
-          || sanitizePokemon(clientPokemon, battleState.format, settings?.showAllFormes);
+          || sanitizePokemon(
+            clientPokemon,
+            battleState.format,
+            // settings?.showAllFormes, // update (2023/01/05): no longer a setting
+            true,
+          );
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -392,7 +397,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           clientPokemon,
           serverPokemon,
           battleState,
-          settings?.showAllFormes,
+          // settings?.showAllFormes, // update (2023/01/05): no longer a setting
+          true,
           (!isMyPokemonSide || !hasMyPokemon)
             && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey ? 'auth' : playerKey],
           teambuilderPresets,

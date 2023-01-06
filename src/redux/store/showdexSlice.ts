@@ -190,7 +190,7 @@ export interface ShowdexCalcdexSettings {
    */
   destroyOnClose: boolean;
 
-  /**
+  /*
    * Whether to perserve the component rendering states of an overlayed Calcdex by hiding instead of blocking renders.
    *
    * * If `true` (default), will simply slap a `display: none;` instead of returning `null`,
@@ -199,10 +199,11 @@ export interface ShowdexCalcdexSettings {
    *   reinitialize their states.
    * * Has no effect if `openAs` is `'panel'` (default).
    *
+   * @deprecated As of v1.1.2, this setting has been removed and will always be enabled.
    * @default true
    * @since 1.0.3
    */
-  preserveRenderStates: boolean;
+  // preserveRenderStates: boolean;
 
   /**
    * Default auto-select settings per side.
@@ -283,13 +284,14 @@ export interface ShowdexCalcdexSettings {
    */
   openSmogonPage: boolean;
 
-  /**
+  /*
    * Whether to allow all possible formes to be switched to, if any, even if a forme is revealed.
    *
+   * @deprecated As of v1.1.2, this is no longer being used since the `PokeFormeTooltip` exists.
    * @default true
    * @since 1.0.3
    */
-  showAllFormes: boolean;
+  // showAllFormes?: boolean;
 
   /**
    * Whether to show all possible abilities/items/moves in legal-locked formats.

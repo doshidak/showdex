@@ -81,7 +81,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       // closeOnEnd: false,
       closeOn: 'battle-tab',
       destroyOnClose: true,
-      preserveRenderStates: true,
+      // preserveRenderStates: true,
 
       defaultAutoSelect: {
         auth: true,
@@ -96,7 +96,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       showNicknames: false,
       reverseIconName: false,
       openSmogonPage: true,
-      showAllFormes: true,
+      // showAllFormes: true,
       showAllOptions: false,
       showNonDamageRanges: true,
       downloadSmogonPresets: true,
