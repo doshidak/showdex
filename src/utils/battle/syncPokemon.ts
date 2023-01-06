@@ -11,18 +11,12 @@ import { env } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type {
-  // CalcdexBattleField,
-  CalcdexBattleState,
-  // CalcdexMoveState,
-  CalcdexPokemon,
-  CalcdexPokemonPreset,
-} from '@showdex/redux/store';
+import type { CalcdexBattleState, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
-// import { detectToggledAbility } from './detectToggledAbility';
 import { flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
+import { guessTeambuilderPreset } from './guessTeambuilderPreset';
 import { mergeRevealedMoves } from './mergeRevealedMoves';
 import { sanitizePokemon } from './sanitizePokemon';
 import { sanitizeMoveTrack } from './sanitizeMoveTrack';
@@ -35,10 +29,10 @@ export const syncPokemon = (
   pokemon: CalcdexPokemon,
   clientPokemon: DeepPartial<Showdown.Pokemon>,
   serverPokemon?: DeepPartial<Showdown.ServerPokemon>,
-  // field?: CalcdexBattleField,
   state?: CalcdexBattleState,
   showAllFormes?: boolean,
   autoMoves?: boolean,
+  teambuilderPresets?: CalcdexPokemonPreset[],
 ): CalcdexPokemon => {
   const dex = getDexForFormat(state?.format);
   const legacy = detectLegacyGen(state?.format);
@@ -403,10 +397,6 @@ export const syncPokemon = (
   if (serverPokemon?.ident) {
     // should always be the case, idk why it shouldn't be (but you know we gotta check)
     if (typeof serverPokemon.hp === 'number' && typeof serverPokemon.maxhp === 'number') {
-      // serverSourced is used primarily as a flag to distinguish `hp` as the actual value or as a percentage
-      // (but since this conditional should always succeed in theory, should be ok to use to distinguish other properties)
-      syncedPokemon.serverSourced = true;
-
       syncedPokemon.hp = serverPokemon.hp;
 
       // make sure `maxhp` isn't a percentage (which is usually the case with dead Pokemon, i.e., 0% HP)
@@ -414,6 +404,10 @@ export const syncPokemon = (
       if (serverPokemon.hp || serverPokemon.maxhp !== 100) {
         syncedPokemon.maxhp = serverPokemon.maxhp;
       }
+
+      // serverSourced is used primarily as a flag to distinguish `hp` as the actual value or as a percentage
+      // (but since this conditional should always succeed in theory, should be ok to use to distinguish other properties)
+      syncedPokemon.serverSourced = true;
     }
 
     // check if the Tera type has been revealed
@@ -468,85 +462,110 @@ export const syncPokemon = (
       return <MoveName> dexMove.name;
     }).filter(Boolean);
 
-    // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves
-    const guessedSpread = legacy ? guessServerLegacySpread(
-      state?.format,
-      syncedPokemon,
-    ) : guessServerSpread(
-      state?.format,
-      syncedPokemon,
-      state?.format?.includes('random') ? 'Hardy' : undefined,
-    );
-
-    // build a preset around the serverPokemon
-    const serverPreset: CalcdexPokemonPreset = {
-      source: 'server',
-      name: 'Yours',
-      gen,
-      format: state?.format,
-      speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
-      level: syncedPokemon.level || serverPokemon.level,
-      gender: syncedPokemon.gender || serverPokemon.gender || null,
-      teraTypes: <Showdown.TypeName[]> [serverPokemon.teraType].filter(Boolean),
-      ability: syncedPokemon.ability,
-      item: syncedPokemon.item,
-      ...guessedSpread,
-    };
-
-    // in case a post-transformed Ditto breaks the original preset
-    const presetValid = (legacy || !!serverPreset.nature)
-      && !!Object.keys({ ...serverPreset.ivs, ...(!legacy && serverPreset.evs) }).length;
-
-    if (presetValid) {
-      syncedPokemon.ivs = { ...serverPreset.ivs };
-
-      if (!legacy) {
-        syncedPokemon.nature = serverPreset.nature;
-        syncedPokemon.evs = { ...serverPreset.evs };
-      }
-
-      // need to do some special processing for moves
-      // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
-      // what we want: ['Calm Mind', 'Moonblast', 'Flamethrower', 'Thunderbolt']
-      if (serverMoves?.length) {
-        serverPreset.moves = [...serverMoves];
-        syncedPokemon.moves = [...serverMoves];
-      }
-
-      // calculate the stats with the EVs/IVs from the server preset
-      // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
-      // (update: we calculate this at the end now, before syncedPokemon is returned)
-      // if (typeof dex?.stats?.calc === 'function') {
-      //   syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
-      // }
-
-      serverPreset.calcdexId = calcPresetCalcdexId(serverPreset);
-
-      // technically, this should be a one-time thing, but if not, we'll at least want only have 1 'Yours' preset
-      const serverPresetIndex = syncedPokemon.presets
-        // .findIndex((p) => p.calcdexId === serverPreset.calcdexId);
-        // .findIndex((p) => p.name === 'Yours');
-        .findIndex((p) => p.source === 'server');
-
-      if (serverPresetIndex > -1) {
-        syncedPokemon.presets[serverPresetIndex] = serverPreset;
-      } else {
-        syncedPokemon.presets.unshift(serverPreset);
-      }
-
-      // disabling autoPreset since we already set the preset here
-      // (also tells PokeInfo not to apply the first preset)
-      syncedPokemon.preset = serverPreset.calcdexId;
-      syncedPokemon.autoPreset = false;
-    }
-
-    // set the serverMoves/transformedMoves if provided
+    // set the serverMoves/transformedMoves if available
     if (serverMoves?.length) {
       const moveKey = syncedPokemon.transformedForme
         ? 'transformedMoves'
         : 'serverMoves';
 
       syncedPokemon[moveKey] = [...serverMoves];
+    }
+
+    // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves,
+    // either from the Teambuilder presets (if enabled) or guessing the spread
+    if (!syncedPokemon.preset) {
+      let serverPreset: CalcdexPokemonPreset = null;
+
+      // first, attempt to find a matching Teambuilder preset, if provided
+      // (will only be provided once per non-Randoms battle, resulting in an empty array on subsequent syncs)
+      if (teambuilderPresets?.length) {
+        serverPreset = guessTeambuilderPreset(
+          teambuilderPresets,
+          syncedPokemon,
+          state?.format,
+        );
+      }
+
+      // at this point, if the serverPreset wasn't found, guess the spread and make a preset out of it
+      if (!serverPreset) {
+        // update (2023/01/03): apparently this part was running on every sync, so added the serverSourced check
+        // to make sure it only fires once (might help with the lag now that the spread guesser won't fire all the time)
+        const guessedSpread = legacy ? guessServerLegacySpread(
+          state?.format,
+          syncedPokemon,
+        ) : guessServerSpread(
+          state?.format,
+          syncedPokemon,
+          state?.format?.includes('random') ? 'Hardy' : undefined,
+        );
+
+        // build a preset around the serverPokemon
+        serverPreset = {
+          calcdexId: null,
+          id: null,
+          source: 'server',
+          name: 'Yours',
+          gen,
+          format: state?.format,
+          speciesForme: syncedPokemon.speciesForme || serverPokemon.speciesForme,
+          level: syncedPokemon.level || serverPokemon.level,
+          gender: syncedPokemon.gender || serverPokemon.gender || null,
+          teraTypes: <Showdown.TypeName[]> [serverPokemon.teraType].filter(Boolean),
+          ability: syncedPokemon.ability,
+          item: syncedPokemon.item,
+          ...guessedSpread,
+        };
+
+        serverPreset.calcdexId = calcPresetCalcdexId(serverPreset);
+        serverPreset.id = serverPreset.calcdexId;
+      }
+
+      // in case a post-transformed Ditto breaks the original preset
+      const presetValid = (legacy || !!serverPreset.nature)
+        && !!Object.keys({ ...serverPreset.ivs, ...(!legacy && serverPreset.evs) }).length;
+
+      // apply the serverPreset if it's valid
+      if (presetValid) {
+        syncedPokemon.ivs = { ...serverPreset.ivs };
+
+        if (!legacy) {
+          syncedPokemon.nature = serverPreset.nature;
+          syncedPokemon.evs = { ...serverPreset.evs };
+        }
+
+        // need to do some special processing for moves
+        // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
+        // what we want: ['Calm Mind', 'Moonblast', 'Flamethrower', 'Thunderbolt']
+        if (serverMoves?.length) {
+          serverPreset.moves = [...serverMoves];
+          syncedPokemon.moves = [...serverMoves];
+        }
+
+        // calculate the stats with the EVs/IVs from the server preset
+        // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
+        // (update: we calculate this at the end now, before syncedPokemon is returned)
+        // if (typeof dex?.stats?.calc === 'function') {
+        //   syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
+        // }
+
+        // add the 'Yours' preset (source: 'server') if we haven't found a Teambuilder preset (source: 'storage') yet
+        // (technically, this should be a one-time thing, but if not, we'll at least want only have 1 'Yours' preset)
+        if (serverPreset.source === 'server') {
+          const serverPresetIndex = syncedPokemon.presets
+            .findIndex((p) => p.source === 'server');
+
+          if (serverPresetIndex > -1) {
+            syncedPokemon.presets[serverPresetIndex] = serverPreset;
+          } else {
+            syncedPokemon.presets.unshift(serverPreset);
+          }
+        }
+
+        // disabling autoPreset since we already set the preset here
+        // (also tells PokeInfo not to apply the first preset)
+        syncedPokemon.preset = serverPreset.calcdexId;
+        syncedPokemon.autoPreset = false;
+      }
     }
   }
 
