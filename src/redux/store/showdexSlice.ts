@@ -355,13 +355,21 @@ export interface ShowdexCalcdexSettings {
   /**
    * Whether local Teambuilder presets should be included.
    *
-   * * If disabled, the Pokemon's spread will be guessed, which may lead to Chinese EVs/IVs and an incorrect nature.
+   * * `'always'` will include **both** Teambuilder teams and boxes.
+   * * `'teams'` will only include Teambuilder teams, ignoring boxes.
+   * * `'boxes'` will only include Teambuilder boxes, ignoring teams.
+   *   - Teambuilder preset detection for `Showdown.ServerPokemon` (in `guessTeambuilderPreset()`) will still
+   *     look for teams, but won't show them as dropdown options.
+   * * `'never'` will never include Teambuilder presets.
+   *   - Pokemon's `serverSpread` will be guessed, which may lead to Chinese EVs/IVs and an incorrect nature.
+   * * Has no effect in Randoms formats, obviously!
+   * * Fun fact: this setting, though introduced in v1.0.3, has been implemented in v1.1.2.
+   *   - ...At least we got to it finally!
    *
-   * @deprecated As of v1.0.3, this currently does nothing.
-   * @default true
+   * @default 'always'
    * @since 1.0.3
    */
-  includeTeambuilder: boolean;
+  includeTeambuilder: 'always' | 'teams' | 'boxes' | 'never';
 
   /**
    * Whether to auto-export the opponent's team to the Teambuilder once the battle ends.

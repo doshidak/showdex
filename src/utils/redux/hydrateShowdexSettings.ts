@@ -103,7 +103,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       downloadRandomsPresets: true,
       downloadUsageStats: true,
       prioritizeUsageStats: false,
-      includeTeambuilder: false, /** @todo disabled for now (default: `true`) */
+      includeTeambuilder: 'always',
       autoExportOpponent: false,
 
       defaultAutoMoves: {
@@ -307,6 +307,13 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       }
     }
   });
+
+  // some bandaid fixes cause I ended up changing the types of some old settings
+  if (typeof settings.calcdex.includeTeambuilder === 'boolean') {
+    settings.calcdex.includeTeambuilder = settings.calcdex.includeTeambuilder
+      ? 'always' // true
+      : 'never'; // false
+  }
 
   return settings;
 };
