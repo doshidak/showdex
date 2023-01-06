@@ -105,6 +105,8 @@ export const unpackStorageTeam = (
   const dex = getDexForFormat(format);
 
   packedPokemon.forEach((packed) => {
+    const maxIv = legacy ? 30 : 31;
+
     const preset: CalcdexPokemonPreset = {
       calcdexId: null,
       id: null,
@@ -120,6 +122,16 @@ export const unpackStorageTeam = (
       item: null,
       nature: 'Hardy',
       moves: [],
+
+      // update (2023/01/05): IV parsing may not happen since the split value could be an empty string
+      ivs: {
+        hp: maxIv,
+        atk: maxIv,
+        def: maxIv,
+        spa: maxIv,
+        spd: maxIv,
+        spe: maxIv,
+      },
     };
 
     const [
@@ -226,8 +238,6 @@ export const unpackStorageTeam = (
     if (['M', 'F', 'N'].includes(gender)) {
       preset.gender = <Showdown.GenderName> gender;
     }
-
-    const maxIv = legacy ? 30 : 31;
 
     if (packedIvs?.includes(',')) {
       // note: if the value in Teambuilder is the max DV/IV, then the split value will be an empty string
