@@ -57,9 +57,11 @@ export const getPresetFormes = (
   const { baseSpecies: baseForme } = dexSpecies; // e.g., 'Necrozma'
   const checkBaseForme = !!baseForme && baseForme !== dexSpecies.name;
 
-  const battleFormes = Array.isArray(dexSpecies.battleOnly)
-    ? dexSpecies.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']
-    : [dexSpecies.battleOnly]; // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
+  const battleFormes = (
+    Array.isArray(dexSpecies.battleOnly)
+      ? dexSpecies.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']
+      : [dexSpecies.battleOnly]
+  ).filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
 
   if (battleFormes.length) {
     // e.g., 'Necrozma-Dawn-Wings' (sets would typically match this forme)
