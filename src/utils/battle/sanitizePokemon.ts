@@ -48,7 +48,7 @@ export const sanitizePokemon = (
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: ('calcdexId' in pokemon && pokemon.calcdexId) || null,
     // calcdexNonce: ('calcdexNonce' in pokemon && pokemon.calcdexNonce) || null,
-    serverSourced: ('serverSourced' in pokemon && pokemon.serverSourced) || null,
+    serverSourced: ('serverSourced' in pokemon && pokemon.serverSourced) || false,
     playerKey: ('playerKey' in pokemon && pokemon.playerKey)
       || detectPlayerKeyFromPokemon(pokemon)
       || null,
