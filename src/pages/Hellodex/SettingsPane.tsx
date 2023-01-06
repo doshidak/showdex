@@ -850,7 +850,74 @@ export const SettingsPane = ({
                     Sets
                   </div>
 
-                  <Field<ShowdexSettings['calcdex']['downloadSmogonPresets']>
+                  <Field<ShowdexSettings['calcdex'], HTMLDivElement, ('smogon' | 'randoms' | 'usage')[]>
+                    name="calcdex"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      // !inBattle && styles.singleColumn,
+                    )}
+                    label="Download Sets"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Smogon',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads freshly updated sets in non-Randoms formats.
+                          All sets from all available formats in the gen will be downloaded once
+                          per Showdown session.
+                          <br />
+                          <br />
+                          Disabling this may improve performance on lower-spec machines.
+                        </div>
+                      ),
+                      value: 'smogon',
+                    }, {
+                      label: 'Randoms',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads freshly updated special sets in Randoms only,
+                          which includes all the pools you can already find on
+                          the original Damage Calculator.
+                          <br />
+                          <br />
+                          Disabling this may <em>slightly</em> improve performance on lower-spec machines.
+                        </div>
+                      ),
+                      value: 'randoms',
+                    }, {
+                      label: 'Usage',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads freshly updated Showdown usage stats, which will display probabilities
+                          for abilities, items &amp; moves.
+                          <br />
+                          <br />
+                          In non-Randoms formats, an additional set called <em>Showdown Usage</em> will be
+                          available, converted from the usage stats.
+                          <br />
+                          <br />
+                          Disabling this may <em>slightly</em> improve performance on lower-spec machines.
+                        </div>
+                      ),
+                      value: 'usage',
+                    }]}
+                    multi
+                    unique
+                    parse={(value) => ({
+                      ...values?.calcdex,
+                      downloadSmogonPresets: !!value?.includes('smogon'),
+                      downloadRandomsPresets: !!value?.includes('randoms'),
+                      downloadUsageStats: !!value?.includes('usage'),
+                    })}
+                    format={(value) => ([
+                      value?.downloadSmogonPresets && 'smogon',
+                      value?.downloadRandomsPresets && 'randoms',
+                      value?.downloadUsageStats && 'usage',
+                    ] as ('smogon' | 'randoms' | 'usage')[]).filter(Boolean)}
+                  />
+
+                  {/* <Field<ShowdexSettings['calcdex']['downloadSmogonPresets']>
                     name="calcdex.downloadSmogonPresets"
                     component={Switch}
                     className={styles.field}
@@ -865,9 +932,9 @@ export const SettingsPane = ({
                         Disabling this may improve performance on lower-spec machines.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['downloadRandomsPresets']>
+                  {/* <Field<ShowdexSettings['calcdex']['downloadRandomsPresets']>
                     name="calcdex.downloadRandomsPresets"
                     component={Switch}
                     className={styles.field}
@@ -882,9 +949,9 @@ export const SettingsPane = ({
                         Disabling this may <em>slightly</em> improve performance on lower-spec machines.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['downloadUsageStats']>
+                  {/* <Field<ShowdexSettings['calcdex']['downloadUsageStats']>
                     name="calcdex.downloadUsageStats"
                     component={Switch}
                     className={styles.field}
@@ -902,7 +969,7 @@ export const SettingsPane = ({
                         Disabling this may <em>slightly</em> improve performance on lower-spec machines.
                       </div>
                     )}
-                  />
+                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['prioritizeUsageStats']>
                     name="calcdex.prioritizeUsageStats"
@@ -925,20 +992,83 @@ export const SettingsPane = ({
 
                   <Field<ShowdexSettings['calcdex']['includeTeambuilder']>
                     name="calcdex.includeTeambuilder"
-                    component={Switch}
-                    className={styles.field}
-                    label="Include Teambuilder Sets"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        <em>
-                          This is a planned feature.
-                          <br />
-                          Stay tuned!
-                        </em>
-                      </div>
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
                     )}
-                    readOnly
-                    format={() => false}
+                    label="Include Teambuilder"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Teams',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Includes your locally-stored Teambuilder teams only, but not boxes.
+                          These sets will be available in the dropdown for your &amp; your opponent's
+                          (or spectating players') Pok&eacute;mon.
+                          <br />
+                          <br />
+                          Teams that start with "Untitled" or Pok&eacute;mon with an empty moveset or
+                          incomplete EV distribution (if applicable) will be ignored.
+                          <br />
+                          <br />
+                          For your Pok&eacute;mon, your Teambuilder sets will be used to match the
+                          server-reported stats before guessing, in which case you won't see the{' '}
+                          <em>Yours</em> set if a match was found.
+                        </div>
+                      ),
+                      value: 'teams',
+                    }, {
+                      label: 'Boxes',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Includes your locally-stored Teambuilder boxes only, but not teams.
+                          These sets will be available in the dropdown for your &amp; your opponent's
+                          (or spectating players') Pok&eacute;mon.
+                          <br />
+                          <br />
+                          Pok&eacute;mon in these boxes with an empty moveset or incomplete EV distribution
+                          (if applicable) will be ignored.
+                          <br />
+                          <br />
+                          For your Pok&eacute;mon, sets derived from your Teambuilder teams will still
+                          be used to match the server-reported stats before guessing, in which case you
+                          won't see the <em>Yours</em> set if a match was found.
+                        </div>
+                      ),
+                      value: 'boxes',
+                    }, {
+                      label: 'Both',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Includes <em>both</em> of your locally-stored Teambuilder teams &amp; boxes.
+                          These sets will be available in the dropdown for your &amp; your opponent's
+                          (or spectating players') Pok&eacute;mon.
+                          <br />
+                          <br />
+                          Teams that start with "Untitled" or Pok&eacute;mon with an empty moveset or
+                          incomplete EV distribution (if applicable) will be ignored.
+                          <br />
+                          <br />
+                          For your Pok&eacute;mon, your Teambuilder sets will be used to match the
+                          server-reported stats before guessing, in which case you won't see the{' '}
+                          <em>Yours</em> set if a match was found.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never includes locally-stored Teambuilder teams &amp; boxes.
+                          <br />
+                          <br />
+                          For your Pok&eacute;mon, the Calcdex will guess your spread every time as the server
+                          only reports stats after the spread has been applied, but not the exact spread.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
                   />
 
                   <Field<ShowdexSettings['calcdex']['autoExportOpponent']>
