@@ -398,6 +398,16 @@ export const CalcdexPokeProvider = ({
     //   mutation.showGenetics = settings?.defaultShowGenetics?.auth;
     // }
 
+    // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
+    const forceShowGenetics = !playerPokemon.showGenetics && (
+      !Object.values(mutation.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
+        || !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
+    );
+
+    if (forceShowGenetics) {
+      mutation.showGenetics = true;
+    }
+
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
     updatePokemon(playerKey, mutation);
   }, [
