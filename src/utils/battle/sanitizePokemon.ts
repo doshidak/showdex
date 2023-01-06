@@ -220,9 +220,6 @@ export const sanitizePokemon = (
     // check if this Pokemon can Dynamax
     sanitizedPokemon.dmaxable = !species.cannotDynamax;
 
-    /** @todo read from `BattleRoom.requests` */
-    // sanitizedPokemon.gmaxable = 'read from BattleRoom.requests';
-
     // attempt to populate all other formes based on the base forme
     // (or determined base forme from the curren other forme if showAllFormes is true)
     sanitizedPokemon.altFormes = transformedBaseSpecies?.otherFormes?.length
@@ -246,8 +243,9 @@ export const sanitizePokemon = (
         : [];
 
     // make sure we don't got any bunk formes like Hisuian formes
-    sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
-      .filter((f) => !!f && !f.includes('-Hisui'));
+    // update (2023/01/05): probably ok to allow Hisuian formes now
+    // sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
+    //   .filter((f) => !!f && !f.includes('-Hisui'));
 
     // if this Pokemon can G-max, add the appropriate formes
     if (sanitizedPokemon.dmaxable && species.canGigantamax) {
