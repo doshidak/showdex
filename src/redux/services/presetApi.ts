@@ -226,6 +226,8 @@ export interface PkmnSmogonRandomPreset {
    */
   roles?: {
     [roleName: string]: {
+      abilities: AbilityName[];
+      items: ItemName[];
       teraTypes: Showdown.TypeName[];
       moves: MoveName[];
     };
@@ -264,6 +266,8 @@ export interface PkmnSmogonRandomsStatsResponse {
     roles?: {
       [roleName: string]: {
         weight: number;
+        abilities?: { [name: AbilityName]: number; };
+        items?: { [name: ItemName]: number; };
         teraTypes: Record<Showdown.TypeName, number>;
         moves: { [name: MoveName]: number; };
       };
