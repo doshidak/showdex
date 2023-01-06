@@ -71,18 +71,21 @@ const sortPresets = (
     return 0;
   }
 
+  // remove 'series<#>' from the genlessFormat
+  const format = genlessFormat.replace(/series\d+/i, '');
+
   // first, hard match the genless formats
-  const matchesA = a.format === genlessFormat;
-  const matchesB = b.format === genlessFormat;
+  const matchesA = a.format === format;
+  const matchesB = b.format === format;
 
   if (matchesA) {
     // no need to repeat this case below since this only occurs when `a` and `b` both match
     if (matchesB) {
-      if (formatId(a.name) === 'showdownusage') {
+      if (a.source === 'usage') {
         return 1;
       }
 
-      if (formatId(b.name) === 'showdownusage') {
+      if (b.source === 'usage') {
         return -1;
       }
     }
@@ -97,11 +100,11 @@ const sortPresets = (
   // at this point, we should've gotten all the hard matches, so we can do partial matching
   // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
   // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
-  if (a.format.endsWith(genlessFormat)) {
+  if (a.format.endsWith(format)) {
     return -1;
   }
 
-  if (b.format.endsWith(genlessFormat)) {
+  if (b.format.endsWith(format)) {
     return 1;
   }
 
@@ -252,20 +255,38 @@ export const usePresets = ({
     }),
   });
 
+  // probably the guessed 'Yours' preset
+  const nonStoragePresets = React.useMemo(() => pokemon?.presets?.filter((p) => (
+    !['storage', 'storage-box'].includes(p?.source)
+  )) ?? [], [
+    pokemon,
+  ]);
+
+  // presets derived from the Teambuilder
+  const storagePresets = React.useMemo(() => pokemon?.presets?.filter((p) => (
+    ['storage', 'storage-box'].includes(p?.source)
+  )) ?? [], [
+    pokemon,
+  ]);
+
   const presets = React.useMemo(() => [
-    ...((!!pokemon?.presets?.length && pokemon.presets) || []),
+    // ...((!!pokemon?.presets?.length && pokemon.presets) || []),
+    ...nonStoragePresets,
     ...((!randomsFormat && [
       ...((!!formatPresets?.length && formatPresets) || []),
       ...((!!formatStatsPresets?.length && formatStatsPresets) || []),
     ]) || []).filter(Boolean).sort(sortPresets(genlessFormat)),
     ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
+    ...storagePresets, // put Teambuilder presets last
   ].filter(Boolean), [
     genlessFormat,
     formatPresets,
     formatStatsPresets,
-    pokemon,
+    nonStoragePresets,
+    // pokemon,
     randomsFormat,
     randomsPresets,
+    storagePresets,
   ]);
 
   // note: randoms usage set, though a proper CalcdexPokemonPreset, is only used to access its usage stats data
