@@ -485,7 +485,7 @@ export const SettingsPane = ({
                     <Field<ShowdexSettings['developerMode']>
                       name="developerMode"
                       component={Switch}
-                      className={styles.field}
+                      className={cx(styles.field, styles.switchField)}
                       label="Developer Mode"
                       tooltip={(
                         <div className={styles.tooltipContent}>
@@ -510,7 +510,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['hellodex']['openOnStart']>
                     name="hellodex.openOnStart"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Open When Showdown Starts"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -530,7 +530,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['hellodex']['focusRoomsRoom']>
                     name="hellodex.focusRoomsRoom"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Show Chatrooms Panel"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -546,7 +546,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['hellodex']['showBattleRecord']>
                     name="hellodex.showBattleRecord"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Show Win/Loss Counter"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -568,7 +568,7 @@ export const SettingsPane = ({
                     <Field<ShowdexSettings['hellodex']['showDonateButton']>
                       name="hellodex.showDonateButton"
                       component={Switch}
-                      className={styles.field}
+                      className={cx(styles.field, styles.switchField)}
                       label="Show Donate Button"
                       tooltip={(
                         <div className={styles.tooltipContent}>
@@ -802,7 +802,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['destroyOnClose']>
                     name="calcdex.destroyOnClose"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Clear Memory After Tab Closes"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -920,7 +920,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['prioritizeUsageStats']>
                     name="calcdex.prioritizeUsageStats"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Apply Usage Sets First"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1219,95 +1219,10 @@ export const SettingsPane = ({
                     ].filter(Boolean) as ('auth' | 'player')[])}
                   />
 
-                  {/* <Field<ShowdexSettings['calcdex']['defaultAutoSelect']['auth']>
-                    name="calcdex.defaultAutoSelect.auth"
-                    component={Switch}
-                    className={styles.field}
-                    label={`Auto-Swap My Pok${eacute}mon`}
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Auto-swaps to your Pok&eacute;mon that's currently active on the field.
-                        <br />
-                        <br />
-                        Disabling this does not prevent auto-selection from being re-enabled,
-                        just initially disables the auto-selection until toggled on.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['defaultAutoSelect'], HTMLInputElement, boolean>
-                    name="calcdex.defaultAutoSelect"
-                    component={Switch}
-                    className={styles.field}
-                    label={`Auto-Swap Opponent's Pok${eacute}mon`}
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Auto-swaps to your opponent's (or spectating players') Pok&eacute;mon that's
-                        currently active on the field.
-                        <br />
-                        <br />
-                        Disabling this does not prevent auto-selection from being re-enabled,
-                        just initially disables the auto-selection until toggled on.
-                      </div>
-                    )}
-                    parse={(value) => ({
-                      auth: values?.calcdex?.defaultAutoSelect?.auth,
-                      p1: value,
-                      p2: value,
-                      p3: value,
-                      p4: value,
-                    })}
-                    format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
-                    name="calcdex.defaultShowGenetics.auth"
-                    component={Switch}
-                    className={styles.field}
-                    label={`Show My Pok${eacute}mon's EVs/IVs`}
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows your Pok&eacute;mon's EVs &amp; IVs/DVs underneath its moves,
-                        until you click on <em>Hide</em>,
-                        applied on a <em>per-Pok&eacute;mon</em> basis.
-                        <br />
-                        <br />
-                        However, if your Pok&eacute;mon's spread couldn't be found,
-                        the EVs &amp; IVs will be shown regardless of this setting.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics'], HTMLInputElement, boolean>
-                    name="calcdex.defaultShowGenetics"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Opponent's EVs/IVs"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows your opponent's (or spectating players') Pok&eacute;mon's
-                        EVs &amp; IVs/DVs underneath its moves, until you click on <em>Hide</em>,
-                        applied on a <em>per-Pok&eacute;mon</em> basis.
-                        <br />
-                        <br />
-                        However, if their Pok&eacute;mon's spread couldn't be found,
-                        the EVs &amp; IVs will be shown regardless of this setting.
-                      </div>
-                    )}
-                    parse={(value) => ({
-                      auth: values?.calcdex?.defaultShowGenetics?.auth,
-                      p1: value,
-                      p2: value,
-                      p3: value,
-                      p4: value,
-                    })}
-                    format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
-                  /> */}
-
                   <Field<ShowdexSettings['calcdex']['showPlayerRatings']>
                     name="calcdex.showPlayerRatings"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Show Players' Elo Ratings"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1319,7 +1234,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['reverseIconName']>
                     name="calcdex.reverseIconName"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Swap Icon/Name Behavior"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1335,7 +1250,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['openSmogonPage']>
                     name="calcdex.openSmogonPage"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     // label={`Open Pok${eacute}mon Smogon Pages`}
                     label={`Link to Pok${eacute}mon Smogon Dex`}
                     tooltip={(
@@ -1346,25 +1261,10 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  {/* <Field<ShowdexSettings['calcdex']['showAllFormes']>
-                    name="calcdex.showAllFormes"
-                    component={Switch}
-                    className={styles.field}
-                    label="Cycle All Possible Formes"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        When switching a Pok&eacute;mon's forme
-                        (depending on <em>Swap Icon/Name Behavior</em>),
-                        all possible formes will be cycled through,
-                        even if its current, non-base forme is revealed.
-                      </div>
-                    )}
-                  /> */}
-
                   <Field<ShowdexSettings['calcdex']['showNicknames']>
                     name="calcdex.showNicknames"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label={`Show Pok${eacute}mon Nicknames`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1379,12 +1279,11 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['defaultAutoMoves'], HTMLInputElement, boolean>
                     name="calcdex.defaultAutoMoves"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Auto-Fill Revealed Moves"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Selects revealed moves of your opponent's
-                        (or spectating players') Pok&eacute;mon,
+                        Selects revealed moves of your opponent's (or spectating players') Pok&eacute;mon,
                         if not already selected from the applied set.
                       </div>
                     )}
@@ -1401,7 +1300,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['showNonDamageRanges']>
                     name="calcdex.showNonDamageRanges"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label={'Show "N/A" Damage Ranges'}
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1411,88 +1310,6 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  {/* <div className={styles.settingsGroupTitle}>
-                    Tooltips
-                  </div> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['showUiTooltips']>
-                    name="calcdex.showUiTooltips"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show UI Info Tooltips"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows explainer tooltips for buttons in the UI when hovered over.
-                        <br />
-                        <br />
-                        Disable this if you're a Calcdex pro and know what everything does already.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
-                    name="calcdex.showFieldTooltips"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Field Tooltips"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows short descriptions when hovering over screens, weather &amp; terrain
-                        in the field section located in the middle.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['showAbilityTooltip']>
-                    name="calcdex.showAbilityTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Ability Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a short description of the hovered ability in the dropdown list.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['showItemTooltip']>
-                    name="calcdex.showItemTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Item Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a short description of the hovered item in the dropdown list.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['showMoveTooltip']>
-                    name="calcdex.showMoveTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Move Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a short description &amp; quick stats (e.g., type, category, BP)
-                        of the hovered move in the dropdown list.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['showMatchupTooltip']>
-                    name="calcdex.showMatchupTooltip"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Matchup Tooltip"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Shows a description of the move's matchup from the original
-                        Damage Calculator when hovering over its damage range.
-                      </div>
-                    )}
-                  /> */}
-
                   <div className={styles.settingsGroupTitle}>
                     Advanced
                   </div>
@@ -1500,7 +1317,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['prettifyMatchupDescription']>
                     name="calcdex.prettifyMatchupDescription"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Prettify Matchup Description"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1515,7 +1332,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['copyMatchupDescription']>
                     name="calcdex.copyMatchupDescription"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Copy Matchup When Clicked"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1572,7 +1389,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['formatMatchupDamageAmounts']>
                     name="calcdex.formatMatchupDamageAmounts"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Percentify Damage Amounts"
                     tooltip={(
                       <div className={styles.tooltipContent}>
@@ -1751,7 +1568,7 @@ export const SettingsPane = ({
                   <Field<ShowdexSettings['calcdex']['showAllOptions']>
                     name="calcdex.showAllOptions"
                     component={Switch}
-                    className={styles.field}
+                    className={cx(styles.field, styles.switchField)}
                     label="Show Illegal Abilities & Moves"
                     tooltip={(
                       <div className={styles.tooltipContent}>
