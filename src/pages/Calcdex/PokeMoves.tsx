@@ -53,17 +53,26 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const showZToggle = format?.includes('nationaldex')
-    || gen === 6
-    || gen === 7;
+  const nationalDexFormat = !!format && [
+    'nationaldex',
+    'natdex',
+  ].some((f) => format.includes(f));
 
-  const showMaxToggle = !rules?.dynamax && gen < 9 && (
-    format?.includes('nationaldex')
+  const showZToggle = !!pokemon?.speciesForme && (
+    nationalDexFormat
+      || gen === 6
+      || gen === 7
+  );
+
+  const showMaxToggle = !!pokemon?.speciesForme && !rules?.dynamax && gen < 9 && (
+    nationalDexFormat
       || (gen === 8 && !format?.includes('bdsp'))
   );
 
-  const showEditButton = settings?.showMoveEditor === 'always'
-    || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format));
+  const showEditButton = !!pokemon?.speciesForme && (
+    settings?.showMoveEditor === 'always'
+      || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
+  );
 
   const handleMoveChange = (name: MoveName, index: number) => {
     const moves = upsizeArray(
@@ -126,7 +135,7 @@ export const PokeMoves = ({
         </div>
 
         {
-          gen > 8 &&
+          (!!pokemon?.speciesForme && gen > 8) &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
             label="Tera"
@@ -631,7 +640,7 @@ export const PokeMoves = ({
                       <Button
                         className={cx(
                           styles.damageButton,
-                          !showMatchupTooltip && styles.disabled,
+                          (!showMatchupTooltip || !hasDamageRange) && styles.disabled,
                         )}
                         labelClassName={cx(
                           styles.damageButtonLabel,
@@ -642,10 +651,10 @@ export const PokeMoves = ({
                         tooltip={matchupTooltip}
                         tooltipTrigger="mouseenter"
                         tooltipTouch={['hold', 500]}
-                        tooltipDisabled={!showMatchupTooltip}
+                        tooltipDisabled={!showMatchupTooltip || !hasDamageRange}
                         hoverScale={1}
                         absoluteHover
-                        disabled={!showMatchupTooltip}
+                        disabled={!showMatchupTooltip || !hasDamageRange}
                         onPress={() => handleDamagePress(i, [
                           description.raw,
                           showDamageAmounts && `(${description.damageAmounts})`,
@@ -658,7 +667,7 @@ export const PokeMoves = ({
                         delay={[1000, 50]}
                         trigger="mouseenter"
                         touch={['hold', 500]}
-                        disabled={!showMatchupTooltip}
+                        disabled={!showMatchupTooltip || !hasDamageRange}
                       >
                         <div
                           className={cx(

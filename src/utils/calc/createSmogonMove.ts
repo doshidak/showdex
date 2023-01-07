@@ -1,5 +1,5 @@
 import { Move as SmogonMove } from '@smogon/calc';
-// import { formatId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app';
 import {
   getGenDexForFormat,
   // getMaxMove,
@@ -46,7 +46,7 @@ export const createSmogonMove = (
 
   // const moveId = formatId(moveName);
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
-  // const abilityId = formatId(ability);
+  const abilityId = formatId(ability);
   const item = pokemon.dirtyItem ?? pokemon.item;
 
   const options: ConstructorParameters<typeof SmogonMove>[2] = {
@@ -122,11 +122,16 @@ export const createSmogonMove = (
   //   overrides.basePower = Math.max(basePowerOverride, 0);
   // }
 
-  overrides.basePower = typeof basePowerOverride === 'number'
+  const overrodeBasePower = typeof basePowerOverride === 'number';
+
+  overrides.basePower = overrodeBasePower
     ? clamp(0, basePowerOverride)
     : calcMoveBasePower(format, pokemon, moveName, opponentPokemon, overrides);
 
-  if (overrides.basePower < 1) {
+  // update (2023/01/02): @smogon/calc added an alliesFainted property to their Pokemon class,
+  // so no need to manually provide that functionality now; specified in createSmogonPokemon()
+  // (also, didn't remove it from calcMoveBasePower() since we still want to show the actual BP in the UI)
+  if (overrides.basePower < 1 || (!overrodeBasePower && abilityId === 'supremeoverlord')) {
     delete overrides.basePower;
   }
 

@@ -41,6 +41,7 @@ declare const BattleAbilities: Showdown.BattleAbilities;
 declare const BattleItems: Showdown.BattleItems;
 declare const BattleMovedex: Showdown.BattleMovedex;
 declare const BattleTeambuilderTable: Showdown.BattleTeambuilderTable;
+declare class BattleStatGuesser extends Showdown.BattleStatGuesser {}
 declare const UserPopup: Showdown.UserPopup;
 
 /**

@@ -360,17 +360,14 @@ export const calcPokemonFinalStats = (
       }
     }
 
-    // note: snow in gen 9 will still be 'hail' in the data, just displayed as "Snow" in the UI lmao
-    if (weather === 'hail') {
-      // 50% DEF boost if Ice type w/ "snow" only (gen 9)
-      if (gen > 8 && types.includes('Ice')) {
-        record.apply('def', 1.5, 'field', 'Snow');
-      }
+    // 2x SPE modifier if ability is "Slush Rush" w/ hail/snow
+    if (['hail', 'snow'].includes(weather) && ability === 'slushrush') {
+      record.apply('spe', 2, 'ability', 'Slush Rush');
+    }
 
-      // 2x SPE modifier if ability is "Slush Rush" w/ hail/"snow"
-      if (ability === 'slushrush') {
-        record.apply('spe', 2, 'ability', 'Slush Rush');
-      }
+    // 50% DEF boost if Ice type w/ "snow" only (gen 9)
+    if (weather === 'snow' && types.includes('Ice')) {
+      record.apply('def', 1.5, 'field', 'Snow');
     }
 
     if (ignoreItem || item !== 'utilityumbrella') {

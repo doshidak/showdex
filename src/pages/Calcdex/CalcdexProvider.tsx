@@ -134,7 +134,8 @@ export const CalcdexProvider = ({
 
   // determine if the Calcdex should render
   const shouldRender = !battle?.calcdexDestroyed
-    && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+    // && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+    && (!renderAsOverlay || battle?.calcdexOverlayVisible);
 
   // handle `battle` changes from the client
   // (this is the sauce that invokes the syncBattle())
@@ -316,7 +317,7 @@ export const CalcdexProvider = ({
       };
 
       // check for any possible abilities, base stat & type updates due to speciesForme changes
-      if ('speciesForme' in payload && payload.speciesForme !== prevPokemon.speciesForme) {
+      if ('speciesForme' in pokemon && pokemon.speciesForme !== prevPokemon.speciesForme) {
         const {
           abilities,
           baseStats,
@@ -359,16 +360,16 @@ export const CalcdexProvider = ({
       }
 
       // clear the dirtyAbility, if any, if it matches the ability
-      if ('dirtyAbility' in payload && payload.dirtyAbility === prevPokemon.ability) {
+      if ('dirtyAbility' in pokemon && pokemon.dirtyAbility === prevPokemon.ability) {
         payload.dirtyAbility = null;
       }
 
       const ability = payload.dirtyAbility || prevPokemon.dirtyAbility || prevPokemon.ability;
       const abilityId = formatId(ability);
 
-      if ('dirtyItem' in payload) {
+      if ('dirtyItem' in pokemon) {
         // clear the dirtyItem, if any, if it matches the item
-        if (payload.dirtyItem === prevPokemon.item) {
+        if (pokemon.dirtyItem === prevPokemon.item) {
           payload.dirtyItem = null;
         }
 
@@ -388,12 +389,12 @@ export const CalcdexProvider = ({
       }
 
       // update (2022/11/06): now allowing base stat editing as a setting lul
-      if ('dirtyBaseStats' in payload) {
+      if ('dirtyBaseStats' in pokemon) {
         // if we receive nothing valid in payload.dirtyBaseStats, means all dirty values should be cleared
         payload.dirtyBaseStats = {
-          ...(!!Object.keys(payload.dirtyBaseStats || {}).length && {
+          ...(!!Object.keys(pokemon.dirtyBaseStats || {}).length && {
             ...prevPokemon?.dirtyBaseStats,
-            ...payload.dirtyBaseStats,
+            ...pokemon.dirtyBaseStats,
           }),
         };
 
@@ -414,8 +415,8 @@ export const CalcdexProvider = ({
       }
 
       // individually spread each overridden move w/ the move's defaults, if any
-      if ('moveOverrides' in payload) {
-        Object.entries(payload.moveOverrides || {}).forEach(([
+      if ('moveOverrides' in pokemon) {
+        Object.entries(pokemon.moveOverrides || {}).forEach(([
           moveName,
           overrides,
         ]: [

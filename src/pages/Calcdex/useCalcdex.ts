@@ -78,7 +78,8 @@ export const useCalcdex = ({
 
   // determine if we should render the Calcdex
   const shouldRender = !battle?.calcdexDestroyed
-    && (!renderAsOverlay || settings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+    // && (!renderAsOverlay || settings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+    && (!renderAsOverlay || battle?.calcdexOverlayVisible);
 
   // handles `battle` changes
   React.useEffect(() => {

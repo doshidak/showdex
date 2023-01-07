@@ -85,6 +85,25 @@ export interface ShowdexHellodexSettings {
    * @since 1.0.6
    */
   showBattleRecord: boolean;
+
+  /**
+   * Whether to show the donate button.
+   *
+   * * This is a hidden setting that is only visible to Showdown usernames assigned to a title.
+   *   - List of usernames can be found in `ShowdexPlayerTitles` from `@showdex/consts/app`.
+   *   - For instance, donators would be assigned a title, so they'd be able to hide it since they've
+   *     donated before, duh.
+   * * Purposefully only checking this setting when rendering the button, so users can technically
+   *   import this setting as `false` even if they don't have a title assigned.
+   *   - i.e., Hellodex won't check if the user has a title, only this setting's value.
+   *   - I mean, if you went through all that trouble to hide the button, then you deserve it lmao.
+   * * Note that the donate button won't be shown if the value of the `HELLODEX_DONATION_URL`
+   *   environment variable doesn't contain a valid URL.
+   *
+   * @default true
+   * @since 1.1.2
+   */
+  showDonateButton: boolean;
 }
 
 /**
@@ -171,7 +190,7 @@ export interface ShowdexCalcdexSettings {
    */
   destroyOnClose: boolean;
 
-  /**
+  /*
    * Whether to perserve the component rendering states of an overlayed Calcdex by hiding instead of blocking renders.
    *
    * * If `true` (default), will simply slap a `display: none;` instead of returning `null`,
@@ -180,10 +199,11 @@ export interface ShowdexCalcdexSettings {
    *   reinitialize their states.
    * * Has no effect if `openAs` is `'panel'` (default).
    *
+   * @deprecated As of v1.1.2, this setting has been removed and will always be enabled.
    * @default true
    * @since 1.0.3
    */
-  preserveRenderStates: boolean;
+  // preserveRenderStates: boolean;
 
   /**
    * Default auto-select settings per side.
@@ -264,13 +284,14 @@ export interface ShowdexCalcdexSettings {
    */
   openSmogonPage: boolean;
 
-  /**
+  /*
    * Whether to allow all possible formes to be switched to, if any, even if a forme is revealed.
    *
+   * @deprecated As of v1.1.2, this is no longer being used since the `PokeFormeTooltip` exists.
    * @default true
    * @since 1.0.3
    */
-  showAllFormes: boolean;
+  // showAllFormes?: boolean;
 
   /**
    * Whether to show all possible abilities/items/moves in legal-locked formats.
@@ -336,13 +357,21 @@ export interface ShowdexCalcdexSettings {
   /**
    * Whether local Teambuilder presets should be included.
    *
-   * * If disabled, the Pokemon's spread will be guessed, which may lead to Chinese EVs/IVs and an incorrect nature.
+   * * `'always'` will include **both** Teambuilder teams and boxes.
+   * * `'teams'` will only include Teambuilder teams, ignoring boxes.
+   * * `'boxes'` will only include Teambuilder boxes, ignoring teams.
+   *   - Teambuilder preset detection for `Showdown.ServerPokemon` (in `guessTeambuilderPreset()`) will still
+   *     look for teams, but won't show them as dropdown options.
+   * * `'never'` will never include Teambuilder presets.
+   *   - Pokemon's `serverSpread` will be guessed, which may lead to Chinese EVs/IVs and an incorrect nature.
+   * * Has no effect in Randoms formats, obviously!
+   * * Fun fact: this setting, though introduced in v1.0.3, has been implemented in v1.1.2.
+   *   - ...At least we got to it finally!
    *
-   * @deprecated As of v1.0.3, this currently does nothing.
-   * @default true
+   * @default 'always'
    * @since 1.0.3
    */
-  includeTeambuilder: boolean;
+  includeTeambuilder: 'always' | 'teams' | 'boxes' | 'never';
 
   /**
    * Whether to auto-export the opponent's team to the Teambuilder once the battle ends.

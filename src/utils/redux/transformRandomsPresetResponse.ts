@@ -104,6 +104,8 @@ export const transformRandomsPresetResponse = (
       },
     };
 
+    // note: either `preset` or `rolePreset` will be pushed to the `output` array!
+    // (former if there are no roles and latter if there are)
     if (Object.keys(roles || {}).length) {
       Object.entries(roles).forEach(([
         roleName,
@@ -115,13 +117,27 @@ export const transformRandomsPresetResponse = (
 
         const rolePreset = { ...preset };
 
+        // update (2023/01/05): apparently they added role-specific abilities and items lol
+        // (but not all roles will have them, so make sure we're falling back to the ones attached to the Pokemon)
         const {
+          abilities: roleAbilities,
+          items: roleItems,
           teraTypes,
           moves: roleMoves,
         } = role;
 
         if (roleName) {
           rolePreset.name = roleName;
+        }
+
+        if (roleAbilities?.length) {
+          rolePreset.altAbilities = roleAbilities;
+          [rolePreset.ability] = roleAbilities;
+        }
+
+        if (roleItems?.length) {
+          rolePreset.altItems = roleItems;
+          [rolePreset.item] = roleItems;
         }
 
         if (teraTypes?.length) {

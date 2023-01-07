@@ -94,6 +94,8 @@ export const transformRandomsStatsResponse = (
       [[preset.item]] = altItems;
     }
 
+    // note: either `preset` or `rolePreset` will be pushed to the `output` array!
+    // (former if there are no roles and latter if there are)
     if (Object.keys(roles || {}).length) {
       Object.entries(roles).forEach(([
         roleName,
@@ -105,8 +107,12 @@ export const transformRandomsStatsResponse = (
 
         const rolePreset = { ...preset };
 
+        // update (2023/01/05): as mentioned in transformRandomsPresetResponse(),
+        // they added role-specific items and abilities
         const {
           weight,
+          abilities: roleAbilities,
+          items: roleItems,
           teraTypes,
           moves: roleMoves,
         } = roleStats;
@@ -117,6 +123,24 @@ export const transformRandomsStatsResponse = (
 
         if ((weight || 0) > 0) {
           rolePreset.usage = weight;
+        }
+
+        if (Object.keys(roleAbilities || {}).length) {
+          const altRoleAbilities = processUsageAlts(roleAbilities);
+
+          if (altRoleAbilities.length) {
+            rolePreset.altAbilities = altRoleAbilities;
+            [[rolePreset.ability]] = altRoleAbilities;
+          }
+        }
+
+        if (Object.values(roleItems || {}).length) {
+          const altRoleItems = processUsageAlts(roleItems);
+
+          if (altRoleItems.length) {
+            rolePreset.altItems = altRoleItems;
+            [[rolePreset.item]] = altRoleItems;
+          }
         }
 
         const altTeraTypes = processUsageAlts(teraTypes);

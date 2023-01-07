@@ -8,6 +8,8 @@ import {
   flattenAlt,
   flattenAlts,
   mergeRevealedMoves,
+  usageAltPercentFinder,
+  usageAltPercentSorter,
 } from '@showdex/utils/battle';
 import { upsizeArray } from '@showdex/utils/core';
 import { sortUsageAlts } from '@showdex/utils/redux';
@@ -118,13 +120,13 @@ export const CalcdexPokeProvider = ({
 
   // note: `preset` is confusingly the `calcdexId` of the preset
   // (there's a todo for `preset` to update its name lol)
-  const presetName = (playerPokemon?.preset ? [
+  const appliedPreset = (playerPokemon?.preset ? [
     ...presets,
     ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
-  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset)?.name;
+  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset);
 
   const usage = (usages?.length === 1 && usages[0])
-    || (!!presetName && usages?.find((p) => p?.source === 'usage' && p.name?.includes(presetName)))
+    || (!!appliedPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(appliedPreset.name)))
     || usages?.find((p) => p?.source === 'usage');
 
   // build dropdown options
@@ -233,13 +235,15 @@ export const CalcdexPokeProvider = ({
       return;
     }
 
+    // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
+    // (normally only an issue in Gen 9 Randoms with their role system, which has multiple usage presets)
+    const detectedUsage = (usages?.length === 1 && usages[0])
+      || (!!preset.name && usages?.find((u) => u?.source === 'usage' && u.name?.includes(preset.name)))
+      || null;
+
     const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
 
     // check if we have Tera typing usage data
-    const detectedUsage = (usages?.length === 1 && usages[0])
-      || (!!preset.name && usages?.find((u) => u?.source === 'usage' && u.name?.includes(preset.name)))
-      || usage;
-
     const teraTypesUsage = detectedUsage?.teraTypes?.filter(detectUsageAlt);
 
     if (teraTypesUsage?.length) {
@@ -283,8 +287,16 @@ export const CalcdexPokeProvider = ({
       mutation.altAbilities = [...preset.altAbilities];
 
       // apply the top usage ability (if available)
-      if (typeof sortAbilitiesByUsage === 'function' && mutation.altAbilities.length > 1 && !clearDirtyAbility) {
-        const sortedAbilities = flattenAlts(mutation.altAbilities).sort(sortAbilitiesByUsage);
+      const abilityUsageAvailable = detectedUsage?.altAbilities?.length > 1
+        && mutation.altAbilities?.length > 1
+        && !clearDirtyAbility;
+
+      if (abilityUsageAvailable) {
+        // update (2023/01/06): can't actually use sortedAbilitiesByUsage() since it may use usage from a prior set
+        // (only a problem in Gen 9 Randoms since there are multiple "usages" due to the role system, so the sorters
+        // will be referencing the current role's usage and not the one we're trying to switch to... if that makes sense lol)
+        const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altAbilities));
+        const sortedAbilities = flattenAlts(mutation.altAbilities).sort(sorter);
         const [topAbility] = sortedAbilities;
 
         if (sortedAbilities.length === mutation.altAbilities.length) {
@@ -301,8 +313,13 @@ export const CalcdexPokeProvider = ({
       mutation.altItems = [...preset.altItems];
 
       // apply the top usage item (if available)
-      if (typeof sortItemsByUsage === 'function' && mutation.altItems.length > 1 && !clearDirtyItem) {
-        const sortedItems = flattenAlts(mutation.altItems).sort(sortItemsByUsage);
+      const itemUsageAvailable = detectedUsage?.altItems?.length > 1
+        && mutation.altItems?.length > 1
+        && !clearDirtyItem;
+
+      if (itemUsageAvailable) {
+        const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altItems));
+        const sortedItems = flattenAlts(mutation.altItems).sort(sorter);
         const [topItem] = sortedItems;
 
         if (sortedItems.length === mutation.altItems.length) {
@@ -320,8 +337,12 @@ export const CalcdexPokeProvider = ({
 
       // sort the moves by their usage stats (if available) and apply the top 4 moves
       // (otherwise, just apply the moves from the preset)
-      if (typeof sortMovesByUsage === 'function' && mutation.altMoves.length > 1) {
-        const sortedMoves = flattenAlts(mutation.altMoves).sort(sortMovesByUsage);
+      const moveUsageAvailable = detectedUsage?.altMoves?.length > 1
+        && mutation.altMoves?.length > 1;
+
+      if (moveUsageAvailable) {
+        const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altMoves));
+        const sortedMoves = flattenAlts(mutation.altMoves).sort(sorter);
 
         if (sortedMoves.length) {
           mutation.altMoves = sortedMoves;
@@ -343,22 +364,22 @@ export const CalcdexPokeProvider = ({
     // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
     // update (2022/10/06): nvm on the setting the actual ability/item cause it's screwy when switching formes,
     // so opting to use their dirty counterparts instead lol
-    if (preset.format?.includes('random')) {
-      // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
-      if (preset.speciesForme.endsWith('-Gmax')) {
-        mutation.speciesForme = preset.speciesForme;
-      }
-
-      if (!clearDirtyAbility && mutation.altAbilities?.length === 1) {
-        [mutation.dirtyAbility] = flattenAlts(mutation.altAbilities);
-        // mutation.dirtyAbility = null;
-      }
-
-      if (!playerPokemon.item && !playerPokemon.prevItem && mutation.altItems?.length === 1) {
-        [mutation.dirtyItem] = flattenAlts(mutation.altItems);
-        // mutation.dirtyItem = null;
-      }
-    }
+    // if (preset.format?.includes('random')) {
+    //   // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
+    //   if (preset.speciesForme.endsWith('-Gmax')) {
+    //     mutation.speciesForme = preset.speciesForme;
+    //   }
+    //
+    //   if (!clearDirtyAbility && mutation.altAbilities?.length === 1) {
+    //     [mutation.dirtyAbility] = flattenAlts(mutation.altAbilities);
+    //     // mutation.dirtyAbility = null;
+    //   }
+    //
+    //   if (!playerPokemon.item && !playerPokemon.prevItem && mutation.altItems?.length === 1) {
+    //     [mutation.dirtyItem] = flattenAlts(mutation.altItems);
+    //     // mutation.dirtyItem = null;
+    //   }
+    // }
 
     // carefully apply the spread if Pokemon is transformed and a spread was already present prior
     const shouldTransformSpread = !!playerPokemon.transformedForme
@@ -398,6 +419,16 @@ export const CalcdexPokeProvider = ({
     //   mutation.showGenetics = settings?.defaultShowGenetics?.auth;
     // }
 
+    // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
+    const forceShowGenetics = !playerPokemon.showGenetics && (
+      !Object.values(mutation.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
+        || !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
+    );
+
+    if (forceShowGenetics) {
+      mutation.showGenetics = true;
+    }
+
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
     updatePokemon(playerKey, mutation);
   }, [
@@ -406,11 +437,11 @@ export const CalcdexPokeProvider = ({
     playerKey,
     playerPokemon,
     presets,
-    sortAbilitiesByUsage,
-    sortItemsByUsage,
-    sortMovesByUsage,
+    // sortAbilitiesByUsage,
+    // sortItemsByUsage,
+    // sortMovesByUsage,
     updatePokemon,
-    usage,
+    // usage,
     usages,
   ]);
 

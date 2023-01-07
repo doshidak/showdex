@@ -259,6 +259,12 @@ $close-icon-size: 28px;
     align-self: center;
   }
 
+  // fixes tooltips appearing in empty spaces, which could get annoying
+  // (otherwise, it'll extend like `width: 100%` !!)
+  .switchField {
+    width: fit-content;
+  }
+
   .singleColumn {
     grid-area: span 1 / span 2;
   }

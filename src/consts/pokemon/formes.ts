@@ -11,10 +11,13 @@ import { eacute } from '@showdex/consts/core';
  * * Top contender for sure is *Pikachu*.
  * * Special thanks to camdawgboi for making this list.
  *   - (Refer all complaints to him.)
+ * * As of v1.1.2, this has been renamed to `PokemonPresetFuckedFormes` from `PokemonUsageFuckedFormes` to better
+ *   reflect what this is used for.
+ *   - Primarily only used by the `getPresetFormes()` utility.
  *
  * @since 1.0.5
  */
-export const PokemonUsageFuckedFormes: string[] = [
+export const PokemonPresetFuckedFormes: string[] = [
   'Basculin', // -> Basculin-Blue-Striped -> Basculin-White-Striped
   // 'Basculegion', // -> Basculegion-F (technically a Hisuian Pokemon--only available in PLA)
   'Burmy', // -> Burmy-Sandy -> Burmy-Trash

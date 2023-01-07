@@ -30,17 +30,19 @@ export const calcPokemonSpreadStats = (
   const legacy = detectLegacyGen(format);
 
   return PokemonStatNames.reduce((prev, stat) => {
-    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? stat === 'hp'
-      ? pokemon.baseStats?.hp
-      : pokemon.transformedForme
-        ? pokemon.transformedBaseStats?.[stat] ?? pokemon.baseStats?.[stat]
-        : pokemon.baseStats?.[stat];
+    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? (
+      stat === 'hp'
+        ? pokemon.baseStats?.hp
+        : pokemon.transformedForme
+          ? pokemon.transformedBaseStats?.[stat] ?? pokemon.baseStats?.[stat]
+          : pokemon.baseStats?.[stat]
+    );
 
     prev[stat] = calcPokemonStat(
       format,
       stat,
       baseStat,
-      pokemon.ivs?.[stat] ?? 31,
+      pokemon.ivs?.[stat] ?? (legacy ? 30 : 31),
       legacy ? undefined : pokemon.evs?.[stat] ?? 0,
       pokemon.level ?? 100,
       legacy ? undefined : pokemon.nature,

@@ -4,16 +4,16 @@ import { Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
 import {
-  LegacyWeatherNames,
+  // LegacyWeatherNames,
   TerrainDescriptions,
   TerrainNames,
   WeatherDescriptions,
-  WeatherMap,
-  WeatherNames,
+  // WeatherMap,
+  // WeatherNames,
 } from '@showdex/consts/field';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
-import { getDexForFormat } from '@showdex/utils/battle';
+import { getDexForFormat, getWeatherConditions } from '@showdex/utils/battle';
 // import type { GenerationNum } from '@smogon/calc';
 import type { Weather } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
@@ -137,6 +137,14 @@ export const FieldCalc = ({
     ...PlayerSideScreensMap,
     ...(doubles && PlayerSideDoublesMap),
   };
+
+  // update (2023/01/06): as per an executive order from camdawgboi, these toggles will be removed in
+  // Gen 9 for non-National Dex formats (though, are there any doubles National Dex formats?)
+  if (gen === 9 && doubles && !['nationaldex', 'natdex'].some((f) => format.includes(f))) {
+    delete sideFieldMap.Gift;
+    delete sideFieldMap.Battery;
+    delete sideFieldMap.Power;
+  }
 
   const p1Attacker = playerKey === 'p1';
   const attackerSide = p1Attacker ? p1Side : p2Side;
@@ -279,18 +287,8 @@ export const FieldCalc = ({
               weather: updatedWeather,
             }),
           }}
-          options={(gen > 5 ? WeatherNames : [
-            ...LegacyWeatherNames,
-            gen > 2 && WeatherMap.hail,
-          ].filter(Boolean)).map((name: Weather) => ({
-            /**
-             * @todo hmm kinda gross no? lol
-             */
-            label: (
-              gen > 8 && name === 'Hail' // for gen 9, but > 8 for posterity lol
-                ? 'Snow' // `value` would still be 'Hail' btw
-                : WeatherDescriptions[name]?.label
-            ) || name,
+          options={getWeatherConditions(format).map((name: Weather) => ({
+            label: WeatherDescriptions[name]?.label || name,
             value: name,
           }))}
           noOptionsMessage="No Weather"

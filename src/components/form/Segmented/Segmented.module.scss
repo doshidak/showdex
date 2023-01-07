@@ -31,8 +31,12 @@ $label: (
   font-size: 12px,
 );
 
+$options: (
+  break-spacing: 5px, // margin-top for broken options
+);
+
 $option: (
-  spacing: 5px, // distance between buttons
+  spacing: 3px, // distance between buttons
   padding-x: 5px,
   padding-y: 3px,
   font-size: 10px,
@@ -100,6 +104,10 @@ $option: (
 
 .options {
   @include flex.row;
+
+  &.break {
+    @include spacing.margin($top: map.get($options, break-spacing));
+  }
 
   button.option {
     @include spacing.padding-xy($x: map.get($option, padding-x), $y: map.get($option, padding-y));

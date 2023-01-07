@@ -70,6 +70,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       openOnStart: true,
       focusRoomsRoom: false,
       showBattleRecord: true,
+      showDonateButton: true,
     },
 
     calcdex: {
@@ -80,7 +81,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       // closeOnEnd: false,
       closeOn: 'battle-tab',
       destroyOnClose: true,
-      preserveRenderStates: true,
+      // preserveRenderStates: true,
 
       defaultAutoSelect: {
         auth: true,
@@ -95,14 +96,14 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       showNicknames: false,
       reverseIconName: false,
       openSmogonPage: true,
-      showAllFormes: true,
+      // showAllFormes: true,
       showAllOptions: false,
       showNonDamageRanges: true,
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,
       downloadUsageStats: true,
       prioritizeUsageStats: false,
-      includeTeambuilder: false, /** @todo disabled for now (default: `true`) */
+      includeTeambuilder: 'always',
       autoExportOpponent: false,
 
       defaultAutoMoves: {
@@ -306,6 +307,13 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       }
     }
   });
+
+  // some bandaid fixes cause I ended up changing the types of some old settings
+  if (typeof settings.calcdex.includeTeambuilder === 'boolean') {
+    settings.calcdex.includeTeambuilder = settings.calcdex.includeTeambuilder
+      ? 'always' // true
+      : 'never'; // false
+  }
 
   return settings;
 };

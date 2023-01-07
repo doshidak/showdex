@@ -1,9 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { getTeambuilderPresets } from '@showdex/utils/app';
 import {
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectLegacyGen,
   detectPlayerKeyFromBattle,
+  getPresetFormes,
   legalLockedFormat,
   sanitizePokemon,
   sanitizeVolatiles,
@@ -123,6 +125,32 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
     battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
 
+    // determine if we should convert Teambuilder presets
+    // (getTeambuilderPresets() may be an expensive operation, so we want to limit it to a one-time exec)
+    const shouldIncludeTeambuilder = !!settings?.includeTeambuilder
+      && settings.includeTeambuilder !== 'never'
+      && (!battleState.authPlayerKey || !!myPokemon?.length)
+      && !battleState.format.includes('random')
+      && !battleState.includedTeambuilder;
+
+    /**
+     * @todo Seems to be some kind of race condition here; sometimes, the battle will be slow to report myPokemon,
+     *   so it will revert to using the 'Yours' preset, so no Teambuilder presets will be loaded for the auth side!
+     *   This typically only occurs when you first load into the battle (doesn't seem to be reproducible when refreshing mid-battle).
+     *   Potential fix is to move the `!battleState.authPlayerKey || !!myPokemon?.length` check to the value of
+     *   `battleState.includedTeambuilder`, so that if it evals to `false`, it can at least try to include the Teambuilder presets
+     *   on the next sync since they're attached to the Pokemon's `presets[]` array.
+     */
+    const teambuilderPresets = shouldIncludeTeambuilder
+      ? getTeambuilderPresets(battleState.format)
+      : [];
+
+    // immediately update the includedTeambuilder flag so that we don't convert
+    // the Teambuilder presets on the next sync
+    if (shouldIncludeTeambuilder) {
+      battleState.includedTeambuilder = true;
+    }
+
     for (const playerKey of <CalcdexPlayerKey[]> ['p1', 'p2']) {
       // l.debug('Processing player', playerKey);
 
@@ -185,20 +213,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       const hasMyPokemon = !!myPokemon?.length;
 
-      // preserve the initial ordering of myPokemon since it's subject to change its indices
-      // (battle state may move the most recent active Pokemon to the front of the array)
-      // if (isMyPokemonSide && !playerState.pokemonOrder?.length) {
-      //   playerState.pokemonOrder = myPokemon.map((p, i) => searchId(p, playerKey, i));
-      // }
-      // if (playerState.pokemonOrder.length < env.int('calcdex-player-max-pokemon')) {
-      //   const useMyPokemon = isMyPokemonSide && hasMyPokemon;
-
       // if we're in an active battle and the logged-in user is also a player,
       // but did not receieve myPokemon from the server yet, don't process any Pokemon!
       // (we need the calcdexId to be assigned to myPokemon first, then mapped to the clientPokemon)
       const initialPokemon = battleState.active
-          && isMyPokemonSide
-          && battleState.authPlayerKey === playerKey
+        && isMyPokemonSide
+        && battleState.authPlayerKey === playerKey
         ? myPokemon || []
         : player.pokemon;
 
@@ -220,12 +240,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           pokemon.calcdexId = (
             isMyPokemonSide
               && !!pokemon.ident
-              && player.pokemon.find((p) => !!p?.calcdexId && (
-                !!p.ident
+              && player.pokemon.find((p) => (
+                !!p?.calcdexId
+                  && !!p.ident
                   && p.ident === pokemon.ident
               ))?.calcdexId
-          )
-            || calcPokemonCalcdexId(pokemon, playerKey);
+          ) || calcPokemonCalcdexId(pokemon, playerKey);
 
           l.debug(
             'Assigned calcdexId', pokemon.calcdexId, 'to', pokemon.speciesForme,
@@ -366,7 +386,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // this is our starting point for the current clientPokemon
         const basePokemon = matchedPokemon
-          || sanitizePokemon(clientPokemon, battleState.format, settings?.showAllFormes);
+          || sanitizePokemon(
+            clientPokemon,
+            battleState.format,
+            // settings?.showAllFormes, // update (2023/01/05): no longer a setting
+            true,
+          );
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -380,16 +405,35 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           clientPokemon,
           serverPokemon,
           battleState,
-          // battleState.field,
-          // battleState.format,
-          settings?.showAllFormes,
+          // settings?.showAllFormes, // update (2023/01/05): no longer a setting
+          true,
           (!isMyPokemonSide || !hasMyPokemon)
             && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey ? 'auth' : playerKey],
+          teambuilderPresets,
         );
 
         // update the syncedPokemon's playerKey, if falsy or mismatched
         if (!syncedPokemon.playerKey || syncedPokemon.playerKey !== playerKey) {
           syncedPokemon.playerKey = playerKey;
+        }
+
+        // attach Teambuilder presets for the specific Pokemon, if available
+        // (this should only happen once per battle)
+        if (shouldIncludeTeambuilder && teambuilderPresets.length) {
+          const formes = getPresetFormes(syncedPokemon.speciesForme, battleState.format);
+
+          const matchedPresets = teambuilderPresets.filter((p) => (
+            formes.includes(p.speciesForme) && (
+              settings.includeTeambuilder === 'always'
+                || (settings.includeTeambuilder === 'teams' && p.source === 'storage')
+                || (settings.includeTeambuilder === 'boxes' && p.source === 'storage-box')
+                || syncedPokemon.preset === p.calcdexId // include the matched Teambuilder team if 'boxes'
+            )
+          ));
+
+          if (matchedPresets.length) {
+            syncedPokemon.presets.push(...matchedPresets);
+          }
         }
 
         // extract Gmax/Tera info from the BattleRoom's `request` object, if available
@@ -705,7 +749,27 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }).filter((n) => typeof n === 'number' && n > -1) || [];
 
       if (playerState.activeIndices?.length && playerState.autoSelect) {
-        [playerState.selectionIndex] = playerState.activeIndices;
+        // check for Dondozo & commanding Tatsugiri in Gen 9, selecting the Dondozo if that's the case
+        // (while there is a `commanding` property, it's only available in Showdown.ServerPokemon for some reason)
+        // -- though, just in case, I'm specifically not checking if we're in Gen 9, but rather, only the activePokemon
+        const activePokemon = playerState.pokemon.filter((_, i) => playerState.activeIndices.includes(i));
+
+        // note: since this happens during sync, we don't care about Tatsugiri's dirtyAbility
+        // (Commander should be revealed in-battle)
+        // also, using startsWith() here since Tatsugiri has cosmetic formes, like Tatsugiri-Stretchy lol
+        const selectTatsugiri = activePokemon?.length > 1
+          && !!activePokemon.find((p) => p.speciesForme.startsWith('Dondozo'))
+          && activePokemon.find((p) => p.speciesForme.startsWith('Tatsugiri'))?.ability === 'Commander';
+
+        if (selectTatsugiri) {
+          const dondozoIndex = playerState.pokemon.findIndex((p) => p.speciesForme.startsWith('Dondozo'));
+
+          if (dondozoIndex > -1) {
+            playerState.selectionIndex = dondozoIndex;
+          }
+        } else {
+          [playerState.selectionIndex] = playerState.activeIndices;
+        }
       }
 
       // update Ruin abilities (gen 9), if any, before syncing the field

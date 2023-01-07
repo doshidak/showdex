@@ -226,6 +226,8 @@ export interface PkmnSmogonRandomPreset {
    */
   roles?: {
     [roleName: string]: {
+      abilities: AbilityName[];
+      items: ItemName[];
       teraTypes: Showdown.TypeName[];
       moves: MoveName[];
     };
@@ -264,6 +266,8 @@ export interface PkmnSmogonRandomsStatsResponse {
     roles?: {
       [roleName: string]: {
         weight: number;
+        abilities?: { [name: AbilityName]: number; };
+        items?: { [name: ItemName]: number; };
         teraTypes: Record<Showdown.TypeName, number>;
         moves: { [name: MoveName]: number; };
       };
@@ -292,7 +296,7 @@ export const presetApi = pkmnApi.injectEndpoints({
         const response = await runtimeFetch([
           env('pkmn-presets-base-url'),
           env('pkmn-presets-format-path'), // e.g., '/smogon/data/sets'
-          `/${formatOnly ? format : `gen${gen}`}.json`, // e.g., '/gen8.json'
+          `/${formatOnly ? format.replace(/series\d+/i, '') : `gen${gen}`}.json`, // e.g., '/gen8.json'
         ].join(''), {
           method: HttpMethod.GET,
           headers: {
@@ -324,7 +328,7 @@ export const presetApi = pkmnApi.injectEndpoints({
         const response = await runtimeFetch<PkmnSmogonFormatStatsResponse>([
           env('pkmn-presets-base-url'),
           env('pkmn-presets-format-stats-path'), // e.g., '/smogon/data/stats'
-          `/${format}.json`, // e.g., '/gen8bdspou.json'
+          `/${format.replace(/series\d+/i, '')}.json`, // e.g., '/gen8bdspou.json', 'gen9vgc2023series1' -> 'gen9vgc2023.json'
         ].join(''), {
           method: HttpMethod.GET,
           headers: {

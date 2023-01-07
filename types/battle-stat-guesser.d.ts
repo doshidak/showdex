@@ -9,18 +9,18 @@
  */
 
 declare namespace Showdown {
-  interface BattleStatGuesser {
-    formatid: string;
-    dex: ModdedDex;
-    moveCount?: { [K in PokemonSet]: number; };
-    hasMove?: { [moveid: string]: number; };
-    ignoreEVLimits?: boolean;
-    supportsEVs?: boolean;
-    supportsAVs?: boolean;
+  class BattleStatGuesser {
+    public formatid: string;
+    public dex: ModdedDex;
+    public moveCount?: { [K in PokemonSet]: number; };
+    public hasMove?: { [moveid: string]: number; };
+    public ignoreEVLimits?: boolean;
+    public supportsEVs?: boolean;
+    public supportsAVs?: boolean;
 
-    (formatid: string): this;
+    public constructor(formatid: string): this;
 
-    guess(set: PokemonSet): {
+    public guess(set: PokemonSet): {
       role: PokemonRole;
       evs: StatsTable;
       plusStat: StatName;
@@ -33,11 +33,11 @@ declare namespace Showdown {
      * @example 'Fast Physical Sweeper'
      * @example 'Special Biased Mixed Scarf'
      */
-    guessRole(set: PokemonSet): string;
+    public guessRole(set: PokemonSet): string;
 
-    ensureMinEVs(evs: StatsTable, stat: StatName, min: number, evTotal: number): number;
-    ensureMaxEVs(evs: StatsTable, stat: StatName, min: number, evTotal: number): number;
-    guessEVs(set: PokemonSet, role: PokemonRole): Partial<StatsTable> & { plusStat?: StatName | ''; minusStat?: StatName | ''; };
-    getStat(stat: StatName, set: PokemonSet, evOverride?: number, natureOverride?: number): number;
+    public ensureMinEVs(evs: StatsTable, stat: StatName, min: number, evTotal: number): number;
+    public ensureMaxEVs(evs: StatsTable, stat: StatName, min: number, evTotal: number): number;
+    public guessEVs(set: PokemonSet, role: PokemonRole): Partial<StatsTable> & { plusStat?: StatName | ''; minusStat?: StatName | ''; };
+    public getStat(stat: StatName, set: PokemonSet, evOverride?: number, natureOverride?: number): number;
   }
 }

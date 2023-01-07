@@ -34,6 +34,7 @@ const featuresUrl = env('hellodex-features-url');
 export const Hellodex = ({
   openCalcdexInstance,
 }: HellodexProps): JSX.Element => {
+  const colorScheme = useColorScheme();
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const { size } = useElementSize(contentRef, {
@@ -42,6 +43,7 @@ export const Hellodex = ({
   });
 
   const authName = getAuthUsername();
+  // const authTitle = findPlayerTitle(authName);
 
   // globally listen for left/right key presses to mimic native keyboard navigation behaviors
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
@@ -54,33 +56,12 @@ export const Hellodex = ({
   const calcdexState = useCalcdexState();
   const instancesEmpty = !Object.keys(calcdexState).length;
 
-  // const handleInstancePress = (battleId: string) => {
-  //   if (typeof app === 'undefined' || !Object.keys(app.rooms || {}).length || !battleId) {
-  //     return;
-  //   }
-  //
-  //   // check if the Calcdex tab is already open
-  //   const calcdexRoomId = getCalcdexRoomId(battleId);
-  //
-  //   if (!(calcdexRoomId in app.rooms)) {
-  //     return;
-  //   }
-  //
-  //   const calcdexRoom = app.rooms[calcdexRoomId] as unknown as HtmlRoom;
-  //
-  //   if (calcdexRoom.tabHidden) {
-  //     calcdexRoom.tabHidden = false;
-  //   }
-  //
-  //   // no need to call app.topbar.updateTabbar() since app.focusRoomRight() will call it for us
-  //   // (app.focusRoomRight() -> app.updateLayout() -> app.topbar.updateTabbar())
-  //   app.focusRoomRight(calcdexRoomId);
-  // };
+  // donate button visibility
+  const showDonateButton = donationUrl?.startsWith('https://')
+    && settings?.showDonateButton;
 
   // settings pane visibility
   const [settingsVisible, setSettingsVisible] = React.useState(false);
-
-  const colorScheme = useColorScheme();
 
   return (
     <div
@@ -155,7 +136,12 @@ export const Hellodex = ({
           </div>
 
           <div className={styles.instancesContainer}>
-            <div className={styles.instancesContent}>
+            <div
+              className={cx(
+                styles.instancesContent,
+                !showDonateButton && styles.hiddenDonation,
+              )}
+            >
               {instancesEmpty ? (
                 <div className={styles.empty}>
                   <Svg
@@ -265,7 +251,7 @@ export const Hellodex = ({
           </div>
 
           {
-            donationUrl?.startsWith('https://') &&
+            showDonateButton &&
             <div
               className={cx(
                 styles.donations,

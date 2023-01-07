@@ -24,6 +24,13 @@ export interface SegmentedOption<TValue extends TextFieldValue = string> {
   value: TValue;
 
   /**
+   * Whether to break the row of options on this option.
+   *
+   * @since 1.1.2
+   */
+  break?: boolean;
+
+  /**
    * Whether to not render this option at all.
    *
    * @since 1.0.3
@@ -88,6 +95,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
   input,
   disabled,
 }: SegmentedProps<TValue, Multi>, forwardedRef: React.ForwardedRef<HTMLDivElement>): JSX.Element => {
+  const colorScheme = useColorScheme();
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useImperativeHandle(
@@ -95,7 +103,19 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
     () => containerRef.current,
   );
 
-  const colorScheme = useColorScheme();
+  const containerKey = `Segmented:${input?.name || '???'}`;
+
+  const breakIndices = options?.reduce((prev, option, i) => {
+    if (!option?.break) {
+      return prev;
+    }
+
+    prev.push(i);
+
+    return prev;
+  }, [] as number[]) ?? [];
+
+  const breakCount = breakIndices.length + 1;
 
   const handleChange = (value: TValue) => {
     if (typeof input?.onChange !== 'function') {
@@ -156,57 +176,76 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
             </label>
           }
 
-          <div
-            className={cx(
-              styles.options,
-              optionsClassName,
-            )}
-          >
-            {options?.filter?.((o) => !!o?.value && !o.hidden).map((option) => {
-              const {
-                key: optionKey,
-                className: classNameFromOption,
-                style: styleFromOption,
-                labelStyle,
-                label: optionLabel,
-                tooltip: optionTooltip,
-                value: optionValue,
-                disabled: optionDisabled,
-              } = option;
+          {Array(breakCount).fill(null).map((_, i) => {
+            const startIndex = i === 0 ? 0 : (breakIndices[i - 1] || 0);
+            const endIndex = breakIndices[i] || options?.length || 0;
 
-              const rawKey = optionKey || String(option.value) || option.label;
-              const key = formatId(rawKey);
+            const breakOptions = options
+              ?.slice(startIndex, endIndex)
+              .filter((o) => !!o?.value && !o.hidden);
 
-              // not checking with !!input?.value in case input.value is purposefully some falsy value,
-              // like 0 or `''` (empty string)
-              const selected = 'value' in (input || {}) && (
-                (!multi && (input.value as TValue) === optionValue)
-                  || (multi && ((input.value as TValue[])?.includes?.(optionValue)))
-              );
+            if (!breakOptions?.length) {
+              return null;
+            }
 
-              return (
-                <ToggleButton
-                  key={`Segmented:${input?.name || '???'}:ToggleButton:${key}`}
-                  className={cx(
-                    styles.option,
-                    selected && styles.selected,
-                    optionClassName,
-                    classNameFromOption,
-                  )}
-                  style={styleFromOption}
-                  labelStyle={labelStyle}
-                  label={optionLabel}
-                  tooltip={optionTooltip}
-                  primary
-                  active={selected}
-                  hoverScale={selected ? 1 : undefined}
-                  activeScale={selected ? 0.98 : undefined}
-                  disabled={disabled || optionDisabled}
-                  onPress={() => handleChange(optionValue)}
-                />
-              );
-            })}
-          </div>
+            const optionsKey = `${containerKey}:BreakOptions:${i}:${startIndex}:${endIndex}`;
+
+            return (
+              <div
+                key={optionsKey}
+                className={cx(
+                  styles.options,
+                  i > 0 && styles.break,
+                  optionsClassName,
+                )}
+              >
+                {breakOptions.map((option, j) => {
+                  const {
+                    key: optionKey,
+                    className: classNameFromOption,
+                    style: styleFromOption,
+                    labelStyle,
+                    label: optionLabel,
+                    tooltip: optionTooltip,
+                    value: optionValue,
+                    disabled: optionDisabled,
+                  } = option;
+
+                  const rawKey = optionKey || String(option.value) || option.label || String(j);
+                  const key = formatId(rawKey);
+
+                  // not checking with !!input?.value in case input.value is purposefully some falsy value,
+                  // like 0 or `''` (empty string)
+                  const selected = 'value' in (input || {}) && (
+                    (!multi && (input.value as TValue) === optionValue)
+                      || (multi && ((input.value as TValue[])?.includes?.(optionValue)))
+                  );
+
+                  return (
+                    <ToggleButton
+                      key={`${optionsKey}:ToggleButton:${key}`}
+                      className={cx(
+                        styles.option,
+                        selected && styles.selected,
+                        optionClassName,
+                        classNameFromOption,
+                      )}
+                      style={styleFromOption}
+                      labelStyle={labelStyle}
+                      label={optionLabel}
+                      tooltip={optionTooltip}
+                      primary
+                      active={selected}
+                      hoverScale={selected ? 1 : undefined}
+                      activeScale={selected ? 0.98 : undefined}
+                      disabled={disabled || optionDisabled}
+                      onPress={() => handleChange(optionValue)}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
 

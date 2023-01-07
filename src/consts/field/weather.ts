@@ -66,7 +66,7 @@ export const LegacyWeatherNames: Weather[] = [
 export const WeatherMap: Record<string, Weather> = {
   ...LegacyWeatherMap,
   hail: 'Hail',
-  snow: 'Hail',
+  snow: 'Snow',
   deltastream: 'Strong Winds',
   desolateland: 'Harsh Sunshine',
   primordialsea: 'Heavy Rain',
@@ -80,7 +80,8 @@ export const WeatherMap: Record<string, Weather> = {
  */
 export const WeatherNames: Weather[] = [
   ...LegacyWeatherNames,
-  'Hail',
+  'Hail', // only available in gens 3-8
+  'Snow', // replaces Hail in gens 9+
   'Heavy Rain',
   'Harsh Sunshine',
   'Strong Winds',
@@ -93,7 +94,7 @@ export const WeatherNames: Weather[] = [
  * @see https://smogon.com/dex/ss
  * @since 1.0.3
  */
-export const WeatherDescriptions: Record<Weather | 'Snow', FieldConditionDescription> = {
+export const WeatherDescriptions: Record<Weather, FieldConditionDescription> = {
   Rain: {
     label: 'Rain',
     shortDesc: `For 5 turns (8 w/ Damp Rock), Water 1.5${times}, Fire 0.5${times}.`,
@@ -108,7 +109,7 @@ export const WeatherDescriptions: Record<Weather | 'Snow', FieldConditionDescrip
     // label: 'Sandstorm',
     label: 'Sand',
     shortDesc: 'For 5 turns (8 w/ Smooth Rock), '
-      + `SPD 1.5${times} (Rock-types only), `
+      + `SPD 1.5${times} (Rock only), `
       + '-6% HP (floored, non-Ground/Rock/Steel, non-Magic Guard/Overcoat/Sand Force/Sand Rush/Sand Veil).',
     // desc: 'For 5 turns, the weather becomes Sandstorm. '
     //   + 'At the end of each turn except the last, all active Pokemon lose 1/16 of their maximum HP, rounded down, '
@@ -143,11 +144,9 @@ export const WeatherDescriptions: Record<Weather | 'Snow', FieldConditionDescrip
     //   + 'Fails if the current weather is Hail.',
   },
 
-  // note: internally, this isn't used within the data layer since it's represented as `'Hail'`
-  // `'Snow'` only exists here for rendering this info the user.
   Snow: {
     label: 'Snow',
-    shortDesc: `For 5 turns (8 w/ Icy Rock), DEF 1.5${times} (Ice-types only).`,
+    shortDesc: `For 5 turns (8 w/ Icy Rock), DEF 1.5${times} (Ice only).`,
     // desc: 'For 5 turns, the weather becomes Snow. '
     //   + 'During the effect, the Defense of Ice-type Pokemon is multiplied by 1.5 '
     //   + 'when taking damage from a physical attack. '
