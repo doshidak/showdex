@@ -20,6 +20,7 @@ export const FormatLabels: Record<string, string> = {
   battlespotdoubles: 'B-Spot Doubles',
   battlestadiumsingles: 'BSS',
   battlestadiumsinglesseries1: 'BSS Series 1',
+  battlestadiumsinglesseries2: 'BSS Series 2', // just a lil near-future-proofing lol
   battlestadiumdoubles: 'BSD',
   battlestadiumdoublesseries13: 'BSD Series 13',
   bdsp3v3singles: 'BDSP 3v3 Singles',
@@ -70,20 +71,21 @@ export const FormatLabels: Record<string, string> = {
   linked: 'Linked',
   metronomebattle: 'Metronome',
   mixandmega: 'Mix & Mega',
-  monotype: 'Mono',
+  monotype: 'Monotype',
   monotypebattlefactory: 'B-Factory Monotype',
   monotyperandombattle: 'Monotype Randoms',
   multibility: 'Multibility',
   multirandombattle: 'Multibility Randoms',
+  natdex4v4doublesdraft: 'NatDex 4v4 Doubles Draft',
+  natdex6v6doublesdraft: 'NatDex 6v6 Doubles Draft',
+  natdexdraft: 'NatDex Draft', // update (2023/01/06): think it's 'natdex' and not 'nationaldex' here
+  natdexlcdraft: 'NatDex LC Draft',
   nationaldex: 'NatDex',
-  nationaldex4v4doublesdraft: 'NatDex 4v4 Doubles Draft',
-  nationaldex6v6doublesdraft: 'NatDex 6v6 Doubles Draft',
   nationaldexag: 'NatDex AG',
   nationaldexbh: 'NatDex BH',
-  nationaldexdraft: 'NatDex Draft',
-  nationaldexlcdraft: 'NatDex LC Draft',
   nationaldexmonotype: 'NatDex Monotype',
   nationaldexru: 'NatDex RU',
+  nationaldexubers: 'NatDex Ubers',
   nationaldexuu: 'NatDex UU',
   natureswap: 'Nature Swap',
   nextou: 'Next OU',
@@ -95,7 +97,7 @@ export const FormatLabels: Record<string, string> = {
   oublitz: 'OU Blitz', // went w/ BZ for Blitz cause BL = BanList! (like in PUBL, UUBL, etc.)
   paldeadexdraft: 'Paldea Dex Draft',
   partnersincrime: 'Partners-in-Crime',
-  pickyourteamrandombattle: 'Pick-Your-Team Randoms',
+  pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
   pokebilities: 'Pokebilities',
   pu: 'PU', // PU (as in, "P-U, smells like ass"... I think)
   purehackmons: 'Pure Hackmons',
@@ -137,6 +139,8 @@ export const FormatLabels: Record<string, string> = {
   vgc2022: 'VGC 2022',
   vgc2023: 'VGC 2023',
   vgc2023series1: 'VGC 2023 Series 1',
+  vgc2023series2: 'VGC 2023 Series 2', // just another lil near-future-proofing... lol
+  voltturnmayhem: 'VoltTurn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
 
