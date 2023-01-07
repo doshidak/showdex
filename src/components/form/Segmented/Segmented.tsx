@@ -24,11 +24,11 @@ export interface SegmentedOption<TValue extends TextFieldValue = string> {
   value: TValue;
 
   /**
-   * Whether to break the row of options after this option.
+   * Whether to break the row of options on this option.
    *
    * @since 1.1.2
    */
-  breakAfter?: boolean;
+  break?: boolean;
 
   /**
    * Whether to not render this option at all.
@@ -106,7 +106,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
   const containerKey = `Segmented:${input?.name || '???'}`;
 
   const breakIndices = options?.reduce((prev, option, i) => {
-    if (!option?.breakAfter) {
+    if (!option?.break) {
       return prev;
     }
 
