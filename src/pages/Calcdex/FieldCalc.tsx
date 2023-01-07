@@ -138,6 +138,14 @@ export const FieldCalc = ({
     ...(doubles && PlayerSideDoublesMap),
   };
 
+  // update (2023/01/06): as per an executive order from camdawgboi, these toggles will be removed in
+  // Gen 9 for non-National Dex formats (though, are there any doubles National Dex formats?)
+  if (gen === 9 && doubles && !['nationaldex', 'natdex'].some((f) => format.includes(f))) {
+    delete sideFieldMap.Gift;
+    delete sideFieldMap.Battery;
+    delete sideFieldMap.Power;
+  }
+
   const p1Attacker = playerKey === 'p1';
   const attackerSide = p1Attacker ? p1Side : p2Side;
   const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
