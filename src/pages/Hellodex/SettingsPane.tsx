@@ -822,7 +822,7 @@ export const SettingsPane = ({
                     disabled={values.calcdex?.openAs === 'overlay'}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['preserveRenderStates']>
+                  {/* <Field<ShowdexSettings['calcdex']['preserveRenderStates']>
                     name="calcdex.preserveRenderStates"
                     component={Switch}
                     className={styles.field}
@@ -844,7 +844,7 @@ export const SettingsPane = ({
                     )}
                     format={(value) => (values.calcdex?.openAs === 'panel' ? false : value)}
                     disabled={values.calcdex?.openAs === 'panel'}
-                  />
+                  /> */}
 
                   <div className={styles.settingsGroupTitle}>
                     Sets
@@ -905,7 +905,7 @@ export const SettingsPane = ({
                     multi
                     unique
                     parse={(value) => ({
-                      ...values?.calcdex,
+                      ...values.calcdex,
                       downloadSmogonPresets: !!value?.includes('smogon'),
                       downloadRandomsPresets: !!value?.includes('randoms'),
                       downloadUsageStats: !!value?.includes('usage'),
@@ -916,60 +916,6 @@ export const SettingsPane = ({
                       value?.downloadUsageStats && 'usage',
                     ] as ('smogon' | 'randoms' | 'usage')[]).filter(Boolean)}
                   />
-
-                  {/* <Field<ShowdexSettings['calcdex']['downloadSmogonPresets']>
-                    name="calcdex.downloadSmogonPresets"
-                    component={Switch}
-                    className={styles.field}
-                    label="Download Smogon Sets"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Downloads freshly updated sets in non-Randoms formats.
-                        All sets from all available formats in the gen will be downloaded once
-                        per Showdown session.
-                        <br />
-                        <br />
-                        Disabling this may improve performance on lower-spec machines.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['downloadRandomsPresets']>
-                    name="calcdex.downloadRandomsPresets"
-                    component={Switch}
-                    className={styles.field}
-                    label="Download Randoms Sets"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Downloads freshly updated special sets in Randoms only,
-                        which includes all the pools you can already find on
-                        the original Damage Calculator.
-                        <br />
-                        <br />
-                        Disabling this may <em>slightly</em> improve performance on lower-spec machines.
-                      </div>
-                    )}
-                  /> */}
-
-                  {/* <Field<ShowdexSettings['calcdex']['downloadUsageStats']>
-                    name="calcdex.downloadUsageStats"
-                    component={Switch}
-                    className={styles.field}
-                    label="Download Usage Stats"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Downloads freshly updated Showdown usage stats, which will display probabilities
-                        for abilities, items &amp; moves.
-                        <br />
-                        <br />
-                        In non-Randoms formats, an additional set called <em>Showdown Usage</em> will be
-                        available, converted from the usage stats.
-                        <br />
-                        <br />
-                        Disabling this may <em>slightly</em> improve performance on lower-spec machines.
-                      </div>
-                    )}
-                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['prioritizeUsageStats']>
                     name="calcdex.prioritizeUsageStats"
@@ -1071,7 +1017,7 @@ export const SettingsPane = ({
                     }]}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['autoExportOpponent']>
+                  {/* <Field<ShowdexSettings['calcdex']['autoExportOpponent']>
                     name="calcdex.autoExportOpponent"
                     component={Switch}
                     className={styles.field}
@@ -1087,20 +1033,107 @@ export const SettingsPane = ({
                     )}
                     readOnly
                     format={() => false}
-                  />
+                  /> */}
 
                   <div className={styles.settingsGroupTitle}>
                     Interface
                   </div>
+
+                  <Field<ShowdexSettings['calcdex'], HTMLDivElement, ('ui' | 'field' | 'ability' | 'item' | 'move' | 'matchup')[]>
+                    name="calcdex"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label="Show Tooltips"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'UI Info',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Shows explainer tooltips for buttons in the UI when hovered over.
+                          <br />
+                          <br />
+                          Disable this if you're a Calcdex pro and know what everything does already.
+                        </div>
+                      ),
+                      value: 'ui',
+                    }, {
+                      label: 'Ability',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Shows a short description of the hovered ability in the dropdown list.
+                        </div>
+                      ),
+                      value: 'ability',
+                    }, {
+                      label: 'Item',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Shows a short description of the hovered item in the dropdown list.
+                        </div>
+                      ),
+                      value: 'item',
+                    }, {
+                      label: 'Move',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Shows a short description &amp; quick stats (e.g., type, category, BP)
+                          of the hovered move in the dropdown list.
+                        </div>
+                      ),
+                      value: 'move',
+                      breakAfter: inBattle,
+                    }, {
+                      label: 'Matchup',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Shows a description of the move's matchup from the original
+                          Damage Calculator when hovering over its damage range.
+                        </div>
+                      ),
+                      value: 'matchup',
+                    }, {
+                      label: 'Field',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Shows short descriptions when hovering over screens, weather &amp; terrain
+                          in the field section located in the middle.
+                        </div>
+                      ),
+                      value: 'field',
+                    }]}
+                    multi
+                    unique
+                    parse={(value) => ({
+                      ...values?.calcdex,
+                      showUiTooltips: !!value?.includes('ui'),
+                      showFieldTooltips: !!value?.includes('field'),
+                      showAbilityTooltip: !!value?.includes('ability'),
+                      showItemTooltip: !!value?.includes('item'),
+                      showMoveTooltip: !!value?.includes('move'),
+                      showMatchupTooltip: !!value?.includes('matchup'),
+                    })}
+                    format={(value) => ([
+                      value?.showUiTooltips && 'ui',
+                      value?.showFieldTooltips && 'field',
+                      value?.showAbilityTooltip && 'ability',
+                      value?.showItemTooltip && 'item',
+                      value?.showMoveTooltip && 'move',
+                      value?.showMatchupTooltip && 'matchup',
+                    ].filter(Boolean) as ('ui' | 'field' | 'ability' | 'item' | 'move' | 'matchup')[])}
+                  />
 
                   <Field<ShowdexSettings['calcdex']['authPosition']>
                     name="calcdex.authPosition"
                     component={Segmented}
                     className={cx(
                       styles.field,
-                      !inBattle && styles.singleColumn,
+                      // !inBattle && styles.singleColumn,
                     )}
-                    label={`My Pok${eacute}mon's Location`}
+                    // label={`My Pok${eacute}mon's Location`}
+                    label="My Location"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Top',
@@ -1136,7 +1169,57 @@ export const SettingsPane = ({
                     }]}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['defaultAutoSelect']['auth']>
+                  <Field<ShowdexSettings['calcdex']['defaultAutoSelect'], HTMLDivElement, ('auth' | 'player')[]>
+                    name="calcdex.defaultAutoSelect"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      // !inBattle && styles.singleColumn,
+                    )}
+                    label={`Auto-Swap Pok${eacute}mon`}
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Mine',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Auto-swaps to your Pok&eacute;mon that's currently active on the field.
+                          <br />
+                          <br />
+                          Disabling this does not prevent auto-selection from being re-enabled,
+                          just initially disables the auto-selection until toggled on.
+                        </div>
+                      ),
+                      value: 'auth',
+                    }, {
+                      label: 'Opponent',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Auto-swaps to your opponent's (or spectating players') Pok&eacute;mon that's
+                          currently active on the field.
+                          <br />
+                          <br />
+                          Disabling this does not prevent auto-selection from being re-enabled,
+                          just initially disables the auto-selection until toggled on.
+                        </div>
+                      ),
+                      value: 'player',
+                    }]}
+                    multi
+                    unique
+                    parse={(value) => ({
+                      auth: !!value?.includes('auth'),
+                      p1: !!value?.includes('player'),
+                      p2: !!value?.includes('player'),
+                      p3: !!value?.includes('player'),
+                      p4: !!value?.includes('player'),
+                    })}
+                    format={(value) => ([
+                      value?.auth && 'auth',
+                      (value?.p1 || value?.p2 || value?.p3 || value?.p4) && 'player',
+                    ].filter(Boolean) as ('auth' | 'player')[])}
+                  />
+
+                  {/* <Field<ShowdexSettings['calcdex']['defaultAutoSelect']['auth']>
                     name="calcdex.defaultAutoSelect.auth"
                     component={Switch}
                     className={styles.field}
@@ -1150,9 +1233,9 @@ export const SettingsPane = ({
                         just initially disables the auto-selection until toggled on.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['defaultAutoSelect'], HTMLInputElement, boolean>
+                  {/* <Field<ShowdexSettings['calcdex']['defaultAutoSelect'], HTMLInputElement, boolean>
                     name="calcdex.defaultAutoSelect"
                     component={Switch}
                     className={styles.field}
@@ -1175,7 +1258,7 @@ export const SettingsPane = ({
                       p4: value,
                     })}
                     format={(value) => Object.entries(value || {}).some(([k, v]) => k !== 'auth' && !!v)}
-                  />
+                  /> */}
 
                   {/* <Field<ShowdexSettings['calcdex']['defaultShowGenetics']['auth']>
                     name="calcdex.defaultShowGenetics.auth"
@@ -1253,16 +1336,17 @@ export const SettingsPane = ({
                     name="calcdex.openSmogonPage"
                     component={Switch}
                     className={styles.field}
-                    label={`Open Pok${eacute}mon Smogon Pages`}
+                    // label={`Open Pok${eacute}mon Smogon Pages`}
+                    label={`Link to Pok${eacute}mon Smogon Dex`}
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Opens the Pok&eacute;mon's Smogon page when the configured button is
-                        clicked on, depending on <em>Swap Icon/Name Behavior</em>.
+                        Opens the Pok&eacute;mon's Smogon Dex page as a popup window when the configured
+                        button is clicked on, depending on <em>Swap Icon/Name Behavior</em>.
                       </div>
                     )}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['showAllFormes']>
+                  {/* <Field<ShowdexSettings['calcdex']['showAllFormes']>
                     name="calcdex.showAllFormes"
                     component={Switch}
                     className={styles.field}
@@ -1275,7 +1359,7 @@ export const SettingsPane = ({
                         even if its current, non-base forme is revealed.
                       </div>
                     )}
-                  />
+                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['showNicknames']>
                     name="calcdex.showNicknames"
@@ -1288,20 +1372,6 @@ export const SettingsPane = ({
                         <br />
                         <br />
                         ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showAllOptions']>
-                    name="calcdex.showAllOptions"
-                    component={Switch}
-                    className={styles.field}
-                    label="Show Illegal Abilities & Moves"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Allows you to select from all possible abilities &amp; moves in
-                        legal-locked formats like{' '}
-                        <em>OU</em> &amp; <em>Randoms</em>.
                       </div>
                     )}
                   />
@@ -1332,23 +1402,20 @@ export const SettingsPane = ({
                     name="calcdex.showNonDamageRanges"
                     component={Switch}
                     className={styles.field}
-                    label="Show Non-Damaging Ranges"
+                    label={'Show "N/A" Damage Ranges'}
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Shows damage ranges that do no damage, which are typical of status moves &amp;
-                        damaging moves that the defending Pok&eacute;mon is immune to.
-                        <br />
-                        <br />
-                        Disabling this will prevent the Matchup Tooltip from showing (if on).
+                        Shows damage ranges that are "N/A" or "IMMUNE", typical of status moves
+                        or <em>Earthquake</em> against a Flying-type Pok&eacute;mon, for instance.
                       </div>
                     )}
                   />
 
-                  <div className={styles.settingsGroupTitle}>
+                  {/* <div className={styles.settingsGroupTitle}>
                     Tooltips
-                  </div>
+                  </div> */}
 
-                  <Field<ShowdexSettings['calcdex']['showUiTooltips']>
+                  {/* <Field<ShowdexSettings['calcdex']['showUiTooltips']>
                     name="calcdex.showUiTooltips"
                     component={Switch}
                     className={styles.field}
@@ -1361,9 +1428,9 @@ export const SettingsPane = ({
                         Disable this if you're a Calcdex pro and know what everything does already.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
+                  {/* <Field<ShowdexSettings['calcdex']['showFieldTooltips']>
                     name="calcdex.showFieldTooltips"
                     component={Switch}
                     className={styles.field}
@@ -1374,9 +1441,9 @@ export const SettingsPane = ({
                         in the field section located in the middle.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['showAbilityTooltip']>
+                  {/* <Field<ShowdexSettings['calcdex']['showAbilityTooltip']>
                     name="calcdex.showAbilityTooltip"
                     component={Switch}
                     className={styles.field}
@@ -1386,9 +1453,9 @@ export const SettingsPane = ({
                         Shows a short description of the hovered ability in the dropdown list.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['showItemTooltip']>
+                  {/* <Field<ShowdexSettings['calcdex']['showItemTooltip']>
                     name="calcdex.showItemTooltip"
                     component={Switch}
                     className={styles.field}
@@ -1398,9 +1465,9 @@ export const SettingsPane = ({
                         Shows a short description of the hovered item in the dropdown list.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['showMoveTooltip']>
+                  {/* <Field<ShowdexSettings['calcdex']['showMoveTooltip']>
                     name="calcdex.showMoveTooltip"
                     component={Switch}
                     className={styles.field}
@@ -1411,9 +1478,9 @@ export const SettingsPane = ({
                         of the hovered move in the dropdown list.
                       </div>
                     )}
-                  />
+                  /> */}
 
-                  <Field<ShowdexSettings['calcdex']['showMatchupTooltip']>
+                  {/* <Field<ShowdexSettings['calcdex']['showMatchupTooltip']>
                     name="calcdex.showMatchupTooltip"
                     component={Switch}
                     className={styles.field}
@@ -1424,7 +1491,7 @@ export const SettingsPane = ({
                         Damage Calculator when hovering over its damage range.
                       </div>
                     )}
-                  />
+                  /> */}
 
                   <div className={styles.settingsGroupTitle}>
                     Advanced
@@ -1528,190 +1595,11 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['editPokemonTypes']>
-                    name="calcdex.editPokemonTypes"
-                    component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
-                    label={`Editable Pok${eacute}mon Types`}
-                    labelPosition={inBattle ? 'top' : 'left'}
-                    options={[{
-                      label: 'Always',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Always allow the Pok&eacute;mon's types to be edited when clicked on.
-                        </div>
-                      ),
-                      value: 'always',
-                    }, {
-                      label: 'Meta',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Only allow the Pok&eacute;mon's types to be edited in nonstandard metagame
-                          formats when clicked on.
-                          <br />
-                          <br />
-                          <em>This option is not affiliated with Meta, the Social Metaverse Company.</em>
-                        </div>
-                      ),
-                      value: 'meta',
-                    }, {
-                      label: 'Never',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Never allow the Pok&eacute;mon's types to be edited.
-                        </div>
-                      ),
-                      value: 'never',
-                    }]}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showMoveEditor']>
-                    name="calcdex.showMoveEditor"
-                    component={Segmented}
-                    className={cx(
-                      styles.field,
-                      !inBattle && styles.singleColumn,
-                    )}
-                    label="Editable Move Properties"
-                    labelPosition={inBattle ? 'top' : 'left'}
-                    options={[{
-                      label: 'Always',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Always show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
-                          <br />
-                          <br />
-                          You can edit the move's type, category (if damaging) &amp;
-                          BP (including separate BPs for Z &amp; Max moves when activated).
-                          Edits are unique to each move of the Pok&eacute;mon.
-                          <br />
-                          <br />
-                          Additionally, if space permits, you can override the attacking stat (ATK/SPA)
-                          &amp; the defending stat (DEF/SPD).
-                          <br />
-                          <br />
-                          (Note: There's currently no setting to show stat overrides on smaller screens.)
-                        </div>
-                      ),
-                      value: 'always',
-                    }, {
-                      label: 'Meta',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Only show the <em>Edit</em> button in nonstandard metagame formats.
-                          <br />
-                          <br />
-                          Hover over the <strong>Always</strong> option to learn more about move editing.
-                        </div>
-                      ),
-                      value: 'meta',
-                    }, {
-                      label: 'Never',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Never show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
-                        </div>
-                      ),
-                      value: 'never',
-                    }]}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['showBaseStats']>
-                    name="calcdex.showBaseStats"
-                    component={Segmented}
-                    className={styles.field}
-                    label="Editable Base Stats"
-                    labelPosition={inBattle ? 'top' : 'left'}
-                    options={[{
-                      label: 'Always',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Always show the Pok&eacute;mon's base stats in its stats table,
-                          allowing its values to be edited.
-                          <br />
-                          <br />
-                          Lowest possible base stat value is <strong>1</strong> &amp;
-                          highest is arbitrarily set at <strong>999</strong>.
-                        </div>
-                      ),
-                      value: 'always',
-                    }, {
-                      label: 'Meta',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Only show the Pok&eacute;mon's base stats in nonstandard metagame formats.
-                          <br />
-                          <br />
-                          Hover over the <strong>Always</strong> option to learn more about base stat editing.
-                        </div>
-                      ),
-                      value: 'meta',
-                    }, {
-                      label: 'Never',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Never show the Pok&eacute;mon's base stats.
-                        </div>
-                      ),
-                      value: 'never',
-                    }]}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['allowIllegalSpreads']>
-                    name="calcdex.allowIllegalSpreads"
-                    component={Segmented}
-                    className={styles.field}
-                    label="Allow Illegal Spreads"
-                    labelPosition={inBattle ? 'top' : 'left'}
-                    options={[{
-                      label: 'Always',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Always allow illegal values for a Pok&eacute;mon's EVs/IVs.
-                          <br />
-                          <br />
-                          This does not apply to DVs in legacy gens, where a limit of 15 will still be enforced.
-                          <br />
-                          <br />
-                          Lowest possible EV/IV value is <strong>0</strong> &amp;
-                          highest is arbitrarily set at <strong>999</strong>.
-                        </div>
-                      ),
-                      value: 'always',
-                    }, {
-                      label: 'Meta',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Only allow illegal values for a Pok&eacute;mon's EVs/IVs in nonstandard metagame formats.
-                          <br />
-                          <br />
-                          Hover over the <strong>Always</strong> option to learn more about illegal EV/IV values.
-                        </div>
-                      ),
-                      value: 'meta',
-                    }, {
-                      label: 'Never',
-                      tooltip: (
-                        <div className={styles.tooltipContent}>
-                          Never allow illegal values for a Pok&eacute;mon's EVs/IVs.
-                          <br />
-                          <br />
-                          Lowest possible EV/IV value is <strong>0</strong> &amp;
-                          highest is <strong>252</strong> for EVs &amp; <strong>31</strong> for IVs.
-                        </div>
-                      ),
-                      value: 'never',
-                    }]}
-                  />
-
                   <Field<ShowdexSettings['calcdex']['lockGeneticsVisibility']['auth']>
                     name="calcdex.lockGeneticsVisibility.auth"
                     component={Segmented}
                     className={styles.field}
-                    label={`Show My Pok${eacute}mon's Stats`}
+                    label={`Show My Pok${eacute}mon's`}
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Base',
@@ -1763,7 +1651,7 @@ export const SettingsPane = ({
                     name="calcdex.lockGeneticsVisibility"
                     component={Segmented}
                     className={styles.field}
-                    label="Show Opponent's Stats"
+                    label="Show Opponent's"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Base',
@@ -1817,6 +1705,200 @@ export const SettingsPane = ({
                       p4: value,
                     })}
                     format={(value) => [...(value?.p1 || [])]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['editPokemonTypes']>
+                    name="calcdex.editPokemonTypes"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      // !inBattle && styles.singleColumn,
+                    )}
+                    // label={`Editable Pok${eacute}mon Types`}
+                    label="Edit Types"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always allow the Pok&eacute;mon's types to be edited when clicked on.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only allow the Pok&eacute;mon's types to be edited in nonstandard metagame
+                          formats when clicked on.
+                          <br />
+                          <br />
+                          <em>This option is not affiliated with Meta, the Social Metaverse Company.</em>
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never allow the Pok&eacute;mon's types to be edited.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showAllOptions']>
+                    name="calcdex.showAllOptions"
+                    component={Switch}
+                    className={styles.field}
+                    label="Show Illegal Abilities & Moves"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Allows you to select from all possible abilities &amp; moves in
+                        legal-locked formats like{' '}
+                        <em>OU</em> &amp; <em>Randoms</em>.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showMoveEditor']>
+                    name="calcdex.showMoveEditor"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      // !inBattle && styles.singleColumn,
+                    )}
+                    label="Edit Moves"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
+                          <br />
+                          <br />
+                          You can edit the move's type, category (if damaging) &amp;
+                          BP (including separate BPs for Z &amp; Max moves when activated).
+                          Edits are unique to each move of the Pok&eacute;mon.
+                          <br />
+                          <br />
+                          Additionally, if space permits, you can override the attacking stat (ATK/SPA)
+                          &amp; the defending stat (DEF/SPD).
+                          <br />
+                          <br />
+                          (Note: There's currently no setting to show stat overrides on smaller screens.)
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only show the <em>Edit</em> button in nonstandard metagame formats.
+                          <br />
+                          <br />
+                          Hover over the <strong>Always</strong> option to learn more about move editing.
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never show the <em>Edit</em> button in the Pok&eacute;mon's moves table.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['allowIllegalSpreads']>
+                    name="calcdex.allowIllegalSpreads"
+                    component={Segmented}
+                    className={styles.field}
+                    label="Allow Illegal Spreads"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always allow illegal values for a Pok&eacute;mon's EVs/IVs.
+                          <br />
+                          <br />
+                          This does not apply to DVs in legacy gens, where a limit of 15 will still be enforced.
+                          <br />
+                          <br />
+                          Lowest possible EV/IV value is <strong>0</strong> &amp;
+                          highest is arbitrarily set at <strong>999</strong>.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only allow illegal values for a Pok&eacute;mon's EVs/IVs in nonstandard metagame formats.
+                          <br />
+                          <br />
+                          Hover over the <strong>Always</strong> option to learn more about illegal EV/IV values.
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never allow illegal values for a Pok&eacute;mon's EVs/IVs.
+                          <br />
+                          <br />
+                          Lowest possible EV/IV value is <strong>0</strong> &amp;
+                          highest is <strong>252</strong> for EVs &amp; <strong>31</strong> for IVs.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showBaseStats']>
+                    name="calcdex.showBaseStats"
+                    component={Segmented}
+                    className={styles.field}
+                    label="Edit Base Stats"
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: 'Always',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Always show the Pok&eacute;mon's base stats in its stats table,
+                          allowing its values to be edited.
+                          <br />
+                          <br />
+                          Lowest possible base stat value is <strong>1</strong> &amp;
+                          highest is arbitrarily set at <strong>999</strong>.
+                        </div>
+                      ),
+                      value: 'always',
+                    }, {
+                      label: 'Meta',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Only show the Pok&eacute;mon's base stats in nonstandard metagame formats.
+                          <br />
+                          <br />
+                          Hover over the <strong>Always</strong> option to learn more about base stat editing.
+                        </div>
+                      ),
+                      value: 'meta',
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Never show the Pok&eacute;mon's base stats.
+                        </div>
+                      ),
+                      value: 'never',
+                    }]}
                   />
 
                   <div
