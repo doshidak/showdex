@@ -42,7 +42,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     'camdawgboi',
-    'showdextestee',
+    ['showdextestee', 'Verified Showdex Testee'],
     'showdextester',
     'sumfuk',
   ],
