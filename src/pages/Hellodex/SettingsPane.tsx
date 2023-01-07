@@ -1084,7 +1084,6 @@ export const SettingsPane = ({
                         </div>
                       ),
                       value: 'move',
-                      breakAfter: inBattle,
                     }, {
                       label: 'Matchup',
                       tooltip: (
@@ -1094,6 +1093,7 @@ export const SettingsPane = ({
                         </div>
                       ),
                       value: 'matchup',
+                      break: inBattle,
                     }, {
                       label: 'Field',
                       tooltip: (
