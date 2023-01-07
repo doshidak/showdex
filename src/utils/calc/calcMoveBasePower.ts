@@ -39,6 +39,22 @@ export const calcMoveBasePower = (
     return 0;
   }
 
+  /**
+   * @todo Remove this once `@smogon/calc` natively implements this.
+   */
+  // quick fix for Tera STAB moves under 60 BP (non-multihit, non-priority) not boosting to 60 BP
+  // see: https://smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/post-9460009
+  const shouldBoostTera = !!pokemon?.teraType
+    && pokemon.terastallized
+    && basePower < 60
+    && move.type === pokemon.teraType
+    && !move.multihit
+    && !move.priority;
+
+  if (shouldBoostTera) {
+    basePower = 60;
+  }
+
   const hitCounter = clamp(0, pokemon?.hitCounter || 0);
   const faintCounter = clamp(0, pokemon?.faintCounter || 0);
 
