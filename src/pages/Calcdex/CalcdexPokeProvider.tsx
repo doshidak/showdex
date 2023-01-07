@@ -287,8 +287,8 @@ export const CalcdexPokeProvider = ({
       mutation.altAbilities = [...preset.altAbilities];
 
       // apply the top usage ability (if available)
-      const abilityUsageAvailable = detectedUsage?.altAbilities.length > 1
-        && mutation.altAbilities.length > 1
+      const abilityUsageAvailable = detectedUsage?.altAbilities?.length > 1
+        && mutation.altAbilities?.length > 1
         && !clearDirtyAbility;
 
       if (abilityUsageAvailable) {
@@ -313,8 +313,8 @@ export const CalcdexPokeProvider = ({
       mutation.altItems = [...preset.altItems];
 
       // apply the top usage item (if available)
-      const itemUsageAvailable = detectedUsage?.altItems.length > 1
-        && mutation.altItems.length > 1
+      const itemUsageAvailable = detectedUsage?.altItems?.length > 1
+        && mutation.altItems?.length > 1
         && !clearDirtyItem;
 
       if (itemUsageAvailable) {
@@ -338,7 +338,7 @@ export const CalcdexPokeProvider = ({
       // sort the moves by their usage stats (if available) and apply the top 4 moves
       // (otherwise, just apply the moves from the preset)
       const moveUsageAvailable = detectedUsage?.altMoves?.length > 1
-        && mutation.altItems.length > 1;
+        && mutation.altMoves?.length > 1;
 
       if (moveUsageAvailable) {
         const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altMoves));
