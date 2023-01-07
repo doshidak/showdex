@@ -133,6 +133,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       && !battleState.format.includes('random')
       && !battleState.includedTeambuilder;
 
+    /**
+     * @todo Seems to be some kind of race condition here; sometimes, the battle will be slow to report myPokemon,
+     *   so it will revert to using the 'Yours' preset, so no Teambuilder presets will be loaded for the auth side!
+     *   This typically only occurs when you first load into the battle (doesn't seem to be reproducible when refreshing mid-battle).
+     *   Potential fix is to move the `!battleState.authPlayerKey || !!myPokemon?.length` check to the value of
+     *   `battleState.includedTeambuilder`, so that if it evals to `false`, it can at least try to include the Teambuilder presets
+     *   on the next sync since they're attached to the Pokemon's `presets[]` array.
+     */
     const teambuilderPresets = shouldIncludeTeambuilder
       ? getTeambuilderPresets(battleState.format)
       : [];
@@ -741,7 +749,27 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }).filter((n) => typeof n === 'number' && n > -1) || [];
 
       if (playerState.activeIndices?.length && playerState.autoSelect) {
-        [playerState.selectionIndex] = playerState.activeIndices;
+        // check for Dondozo & commanding Tatsugiri in Gen 9, selecting the Dondozo if that's the case
+        // (while there is a `commanding` property, it's only available in Showdown.ServerPokemon for some reason)
+        // -- though, just in case, I'm specifically not checking if we're in Gen 9, but rather, only the activePokemon
+        const activePokemon = playerState.pokemon.filter((_, i) => playerState.activeIndices.includes(i));
+
+        // note: since this happens during sync, we don't care about Tatsugiri's dirtyAbility
+        // (Commander should be revealed in-battle)
+        // also, using startsWith() here since Tatsugiri has cosmetic formes, like Tatsugiri-Stretchy lol
+        const selectTatsugiri = activePokemon?.length > 1
+          && !!activePokemon.find((p) => p.speciesForme.startsWith('Dondozo'))
+          && activePokemon.find((p) => p.speciesForme.startsWith('Tatsugiri'))?.ability === 'Commander';
+
+        if (selectTatsugiri) {
+          const dondozoIndex = playerState.pokemon.findIndex((p) => p.speciesForme.startsWith('Dondozo'));
+
+          if (dondozoIndex > -1) {
+            playerState.selectionIndex = dondozoIndex;
+          }
+        } else {
+          [playerState.selectionIndex] = playerState.activeIndices;
+        }
       }
 
       // update Ruin abilities (gen 9), if any, before syncing the field
