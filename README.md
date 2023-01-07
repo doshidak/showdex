@@ -482,16 +482,16 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
 <table>
   <tbody>
     <tr>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Angie L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Max B.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jonathan M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Angie L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Max B.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jonathan M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Connor M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="210px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Connor M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M.</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -507,8 +507,8 @@ another big thank to these fine people for helping with development!
 <table>
   <tbody>
     <tr>
-      <td width="220px" align="center"><a href="https://github.com/SpiffyTheSpaceman"><strong>SpiffyTheSpaceman</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/malaow3.507739"><strong>malaow3</strong></a> · <a href="https://github.com/malaow3">GitHub</a></td>
+      <td width="210px" align="center"><a href="https://github.com/SpiffyTheSpaceman"><strong>SpiffyTheSpaceman</strong></a></td>
+      <td width="210px" align="center"><a href="https://smogon.com/forums/members/malaow3.507739"><strong>malaow3</strong></a> · <a href="https://github.com/malaow3">GitHub</a></td>
     </tr>
   </tbody>
 </table>
