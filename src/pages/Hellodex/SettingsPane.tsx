@@ -564,7 +564,7 @@ export const SettingsPane = ({
                   />
 
                   {
-                    !!authTitle &&
+                    (!!authTitle || !values?.hellodex?.showDonateButton) &&
                     <Field<ShowdexSettings['hellodex']['showDonateButton']>
                       name="hellodex.showDonateButton"
                       component={Switch}
