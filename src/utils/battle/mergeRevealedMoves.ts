@@ -58,8 +58,9 @@ export const mergeRevealedMoves = (
   const mergeableMoveNames = revealedMoves
     // .filter((m) => !moves.some((n) => n.startsWith(m)));
     .filter((m) => (
-      (m.startsWith('Hidden Power') && !moves.some((n) => n.startsWith(m)))
-        || !moves.some((n) => n === m)
+      m.startsWith('Hidden Power')
+        ? !moves.some((n) => n.startsWith(m))
+        : !moves.some((n) => n === m)
     ));
 
   if (!mergeableMoveNames.length) {
@@ -77,7 +78,7 @@ export const mergeRevealedMoves = (
     const mergeableMove = dex.moves.get((
       formatId(mergeableMoveName) === 'hiddenpower'
         && altMoves?.length
-        && flattenAlts(altMoves).find((m) => /^hiddenpower\w+$/.test(formatId(m)))
+        && flattenAlts(altMoves).find((m) => /^hiddenpower\w+$/i.test(formatId(m)))
     ) || mergeableMoveName);
 
     // HUH
