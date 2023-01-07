@@ -640,7 +640,7 @@ export const PokeMoves = ({
                       <Button
                         className={cx(
                           styles.damageButton,
-                          !showMatchupTooltip && styles.disabled,
+                          (!showMatchupTooltip || !hasDamageRange) && styles.disabled,
                         )}
                         labelClassName={cx(
                           styles.damageButtonLabel,
@@ -651,10 +651,10 @@ export const PokeMoves = ({
                         tooltip={matchupTooltip}
                         tooltipTrigger="mouseenter"
                         tooltipTouch={['hold', 500]}
-                        tooltipDisabled={!showMatchupTooltip}
+                        tooltipDisabled={!showMatchupTooltip || !hasDamageRange}
                         hoverScale={1}
                         absoluteHover
-                        disabled={!showMatchupTooltip}
+                        disabled={!showMatchupTooltip || !hasDamageRange}
                         onPress={() => handleDamagePress(i, [
                           description.raw,
                           showDamageAmounts && `(${description.damageAmounts})`,
@@ -667,7 +667,7 @@ export const PokeMoves = ({
                         delay={[1000, 50]}
                         trigger="mouseenter"
                         touch={['hold', 500]}
-                        disabled={!showMatchupTooltip}
+                        disabled={!showMatchupTooltip || !hasDamageRange}
                       >
                         <div
                           className={cx(
