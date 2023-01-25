@@ -5,6 +5,7 @@ import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import type { SmogonMoveOverrides } from './createSmogonMove';
 import { calcHiddenPower } from './calcHiddenPower';
+import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Calculates the base power of the provided `moveName` based on conditions of the `pokemon`.
@@ -46,13 +47,7 @@ export const calcMoveBasePower = (
    */
   // quick fix for Tera STAB moves under 60 BP (non-multihit, non-priority) not boosting to 60 BP
   // see: https://smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/post-9460009
-  const boostTeraStab = !!pokemon?.teraType
-    && pokemon.terastallized
-    && move.type === pokemon.teraType
-    && basePower < 60
-    && (abilityId !== 'technician' || Math.floor(basePower * 1.5) < 60)
-    && !move.multihit
-    && !move.priority;
+  const boostTeraStab = shouldBoostTeraStab(format, pokemon, moveName);
 
   if (boostTeraStab) {
     basePower = 60;
