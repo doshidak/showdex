@@ -1,5 +1,6 @@
 import { createSlice, current } from '@reduxjs/toolkit';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import { detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
@@ -901,6 +902,17 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   calcdexNonce?: string;
 
   /**
+   * Whether the player is active in the battle.
+   *
+   * * This value will initially be `false` until the player is properly initialized.
+   * * For most battles with only two players, `'p3'` and `'p4'` will typically have this property set to `false`.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  active?: boolean;
+
+  /**
    * Index of the `CalcdexPokemon` that is currently active on the field.
    *
    * @deprecated As of v1.0.4, not being used anymore in favor of `activeIndices`.
@@ -974,39 +986,30 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    * @since 0.1.0
    */
   pokemon?: CalcdexPokemon[];
+
+  /**
+   * Field conditions on the player's side.
+   *
+   * * As of v1.1.3, these are now directly being stored in the `CalcdexPlayer`, as opposed to the
+   *   `CalcdexBattleField` in prior versions.
+   *   - `attackerSide` and `defenderSide` in `CalcdexBattleField` is still used, but dynamically assigned
+   *     in the `createSmogonField()` utility depending on who's attacking and defending.
+   *   - This will allow us to keep track of individual field conditions of each player, particularly in FFA
+   *     (Free-For-All) modes, where there could be up to 4 unique players in a single battle.
+   *
+   * @since 1.1.3
+   */
+  side?: CalcdexPlayerSide;
 }
 
 /**
- * Think someone at `@smogon/calc` forgot to include these additional field conditions
- * in the `State.Field` (but it exists in the `Field` class... huh).
- *
- * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
- * * Checking the source code for the `Field` class (see link below),
- *   the constructor accepts these missing properties.
- *
- * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
- * @since 0.1.3
- */
-export interface CalcdexBattleField extends SmogonState.Field {
-  isMagicRoom?: boolean;
-  isWonderRoom?: boolean;
-  isAuraBreak?: boolean;
-  isFairyAura?: boolean;
-  isDarkAura?: boolean;
-  attackerSide: CalcdexPlayerSide;
-  defenderSide: CalcdexPlayerSide;
-}
-
-/**
- * As is the case with `CalcdexBattleField`, this adds the missing properties that exist
- * in `Side`, but not `State.Side`.
+ * Field conditions on the player's side.
  *
  * * Additional properties that will be unused by the `Side` constructor are included
  *   as they may be used in Pokemon stat calculations.
+ * * As of v1.1.3, these are now attached to each individual `CalcdexPlayer` instead
+ *   of the `CalcdexBattleField`.
  *
- * @todo get rid of `attackerSide` and `defenderSide` in `CalcdexBattleField` and merge this entire
- *   interface with `CalcdexPlayer` or something.
- * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L84-L102
  * @since 0.1.3
  */
 export interface CalcdexPlayerSide extends SmogonState.Side {
@@ -1072,6 +1075,51 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    * @since 1.1.0
    */
   ruinVesselCount?: number;
+}
+
+/**
+ * Think someone at `@smogon/calc` forgot to include these additional field conditions
+ * in the `State.Field` (but it exists in the `Field` class... huh).
+ *
+ * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
+ * * Checking the source code for the `Field` class (see link below),
+ *   the constructor accepts these missing properties.
+ *
+ * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
+ * @since 0.1.3
+ */
+export interface CalcdexBattleField extends SmogonState.Field {
+  isMagicRoom?: boolean;
+  isWonderRoom?: boolean;
+  isAuraBreak?: boolean;
+  isFairyAura?: boolean;
+  isDarkAura?: boolean;
+
+  /**
+   * Field conditions on the attacking player's side.
+   *
+   * * Should be grabbed from the attacking `CalcdexPlayer`'s `side` and set to this value when instatiating the
+   *   `Smogon.Field` in `createSmogonField()`.
+   *
+   * @warning As of v1.1.3, these are attached to each individual `CalcdexPlayer` and
+   *   dynamically assigned during damage calculation. In other words, **do not** store
+   *   a player's `side` in here!
+   * @since 0.1.3
+   */
+  attackerSide: CalcdexPlayerSide;
+
+  /**
+   * Field conditions on the defending player's side.
+   *
+   * * Should be grabbed from the defending `CalcdexPlayer`'s `side` and set to this value when instatiating the
+   *   `Smogon.Field` in `createSmogonField()`.
+   *
+   * @warning As of v1.1.3, these are attached to each individual `CalcdexPlayer` and
+   *   dynamically assigned during damage calculation. In other words, **do not** store
+   *   a player's `side` in here!
+   * @since 0.1.3
+   */
+  defenderSide: CalcdexPlayerSide;
 }
 
 /**
@@ -1485,8 +1533,6 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
-        p1,
-        p2,
         field,
         ...payload
       } = action.payload;
@@ -1529,37 +1575,37 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         authPlayerKey,
         opponentKey,
 
-        p1: {
-          sideid: 'p1',
-          name: null,
-          rating: null,
-          // activeIndex: -1,
-          activeIndices: [],
-          selectionIndex: 0,
-          autoSelect: true,
-          maxPokemon: defaultMaxPokemon,
-          pokemonOrder: [],
-          ...p1,
-          pokemon: [],
-        },
+        ...AllPlayerKeys.reduce((prev, currentPlayerKey) => {
+          prev[currentPlayerKey] = {
+            // all of these can technically be overridden in payload[currentPlayerKey]
+            sideid: currentPlayerKey,
+            active: currentPlayerKey in payload,
+            name: null,
+            rating: null,
+            activeIndices: [],
+            selectionIndex: 0,
+            autoSelect: true,
+            maxPokemon: defaultMaxPokemon,
 
-        p2: {
-          sideid: 'p2',
-          name: null,
-          rating: null,
-          // activeIndex: -1,
-          activeIndices: [],
-          selectionIndex: 0,
-          autoSelect: true,
-          maxPokemon: defaultMaxPokemon,
-          pokemonOrder: [],
-          ...p2,
-          pokemon: [],
-        },
+            // since this requires the battle object (typically only available in the CalcdexProvider scope),
+            // we won't initialize it here; however, initial values can still be provided through payload[currentPlayerKey]
+            side: null,
 
-        // currently unsupported
-        p3: null,
-        p4: null,
+            // spread any overrides provided from the payload
+            ...payload[currentPlayerKey],
+
+            // these cannot be overridden on init
+            pokemonOrder: [],
+            pokemon: [],
+          };
+
+          return prev;
+        }, <Record<CalcdexPlayerKey, CalcdexPlayer>> {
+          p1: null,
+          p2: null,
+          p3: null,
+          p4: null,
+        }),
 
         field: field || sanitizeField(),
       };
@@ -1661,15 +1707,18 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...battleField,
         ...field,
 
-        attackerSide: {
-          ...battleField.attackerSide,
-          ...field?.attackerSide,
-        },
+        // update (2023/01/22): attackerSide and defenderSide are now only dynamically populated
+        // within createSmogonField(); these properties are now being stored in each CalcdexPlayer
+        // under the `side` property (i.e., don't store the CalcdexPlayerSide's in the CalcdexBattleField!)
+        // attackerSide: {
+        //   ...battleField.attackerSide,
+        //   ...field?.attackerSide,
+        // },
 
-        defenderSide: {
-          ...battleField.defenderSide,
-          ...field?.defenderSide,
-        },
+        // defenderSide: {
+        //   ...battleField.defenderSide,
+        //   ...field?.defenderSide,
+        // },
       };
 
       l.debug(
@@ -1686,11 +1735,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         '\n', 'state', __DEV__ && current(state),
       );
 
-      const {
-        battleId,
-        p1,
-        p2,
-      } = action.payload;
+      const { battleId } = action.payload;
 
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
@@ -1704,23 +1749,27 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
-      if (!Object.keys(p1 || {}).length && !Object.keys(p2 || {}).length) {
-        l.error('Found no player to update!');
+      if (AllPlayerKeys.every((k) => !Object.keys(action.payload[k] || {}).length)) {
+        l.error('Found no players to update!');
       }
 
-      if (p1) {
-        state[battleId].p1 = {
-          ...state[battleId].p1,
-          ...p1,
-        };
-      }
+      AllPlayerKeys.forEach((playerKey) => {
+        const payload = action.payload[playerKey];
 
-      if (p2) {
-        state[battleId].p2 = {
-          ...state[battleId].p2,
-          ...p2,
+        if (!Object.keys(payload || {}).length) {
+          return;
+        }
+
+        state[battleId][playerKey] = {
+          ...state[battleId][playerKey],
+          ...payload,
+
+          side: {
+            ...state[battleId][playerKey].side,
+            ...payload?.side,
+          },
         };
-      }
+      });
 
       l.debug(
         'DONE', action.type, 'for', battleId || '(missing battleId)',
