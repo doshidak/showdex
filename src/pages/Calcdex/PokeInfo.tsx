@@ -15,14 +15,17 @@ import {
 } from '@showdex/components/ui';
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId, openSmogonUniversity } from '@showdex/utils/app';
+import {
+  exportPokePaste,
+  formatId,
+  importPokePaste,
+  openSmogonUniversity,
+} from '@showdex/utils/app';
 import {
   detectToggledAbility,
   detectUsageAlt,
-  exportPokePaste,
   flattenAlts,
   hasNickname,
-  importPokePaste,
   legalLockedFormat,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
