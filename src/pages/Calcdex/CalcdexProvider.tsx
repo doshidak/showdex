@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import { syncBattle } from '@showdex/redux/actions';
 import {
   calcdexSlice,
@@ -11,7 +12,8 @@ import {
   detectToggledAbility,
   toggleableAbility,
   toggleRuinAbilities,
-  sanitizeField,
+  // sanitizeField,
+  sanitizePlayerSide,
   sanitizePokemon,
 } from '@showdex/utils/battle';
 import {
@@ -26,7 +28,8 @@ import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleState,
   CalcdexMoveOverride,
-  CalcdexPlayerKey,
+  CalcdexPlayer,
+  // CalcdexPlayerKey,
   CalcdexRenderMode,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
@@ -82,13 +85,6 @@ export interface CalcdexProviderProps {
    */
   children?: React.ReactNode;
 }
-
-const AllPlayerKeys: CalcdexPlayerKey[] = [
-  'p1',
-  'p2',
-  // 'p3',
-  // 'p4',
-];
 
 const l = logger('@showdex/pages/Calcdex/CalcdexProvider');
 
@@ -207,8 +203,10 @@ export const CalcdexProvider = ({
         ?.filter?.((q) => q?.startsWith('|j|☆'))
         .map((q) => q.replace('|j|☆', ''));
 
-      const p1Name = battle.p1?.name || joinedUsers?.[0];
-      const p2Name = battle.p2?.name || joinedUsers?.[1];
+      const p1Name = battle.p1?.name || joinedUsers?.[0] || null;
+      const p2Name = battle.p2?.name || joinedUsers?.[1] || null;
+      const p3Name = battle.p3?.name || joinedUsers?.[2] || null;
+      const p4Name = battle.p4?.name || joinedUsers?.[3] || null;
 
       dispatch(calcdexSlice.actions.init({
         battleId,
@@ -220,6 +218,7 @@ export const CalcdexProvider = ({
         renderMode,
 
         p1: {
+          active: !!p1Name,
           name: p1Name,
           rating: battle.p1?.rating,
           autoSelect: !!authUser && p1Name === authUser
@@ -228,11 +227,30 @@ export const CalcdexProvider = ({
         },
 
         p2: {
+          active: !!p2Name,
           name: p2Name,
           rating: battle.p2?.rating,
           autoSelect: !!authUser && p2Name === authUser
             ? calcdexSettings.defaultAutoSelect?.auth
             : calcdexSettings.defaultAutoSelect?.p2,
+        },
+
+        p3: {
+          active: !!p3Name,
+          name: p3Name,
+          rating: battle.p3?.rating,
+          autoSelect: !!authUser && p3Name === authUser
+            ? calcdexSettings.defaultAutoSelect?.auth
+            : calcdexSettings.defaultAutoSelect?.p3,
+        },
+
+        p4: {
+          active: !!p4Name,
+          name: p4Name,
+          rating: battle.p3?.rating || null,
+          autoSelect: !!authUser && p4Name === authUser
+            ? calcdexSettings.defaultAutoSelect?.auth
+            : calcdexSettings.defaultAutoSelect?.p4,
         },
       }));
 
@@ -471,45 +489,78 @@ export const CalcdexProvider = ({
         );
       }
 
-      dispatch(calcdexSlice.actions.updatePlayer({
-        battleId,
-        // [playerKey]: playerState,
-        [playerKey]: {
-          pokemon: playerState.pokemon,
-        },
-      }));
+      const playerPayload: Partial<CalcdexPlayer> = {
+        pokemon: playerState.pokemon,
+      };
 
       // handle recounting Ruin abilities when something changes of the Pokemon
       if (updatedState.gen > 8) {
-        const {
-          attackerSide,
-          defenderSide,
-        } = sanitizeField(battle, updatedState);
-
-        dispatch(calcdexSlice.actions.updateField({
-          battleId,
-          field: {
-            attackerSide: {
-              ruinBeadsCount: attackerSide.ruinBeadsCount,
-              ruinSwordCount: attackerSide.ruinSwordCount,
-              ruinTabletsCount: attackerSide.ruinTabletsCount,
-              ruinVesselCount: attackerSide.ruinVesselCount,
-            },
-
-            defenderSide: {
-              ruinBeadsCount: defenderSide.ruinBeadsCount,
-              ruinSwordCount: defenderSide.ruinSwordCount,
-              ruinTabletsCount: defenderSide.ruinTabletsCount,
-              ruinVesselCount: defenderSide.ruinVesselCount,
-            },
-          },
-        }));
+        playerPayload.side = sanitizePlayerSide(
+          updatedState.gen,
+          battle[playerKey],
+          playerState,
+        );
       }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        battleId,
+        [playerKey]: playerPayload,
+      }));
+
+      // handle recounting Ruin abilities for other players
+      if (updatedState.gen > 8) {
+        const otherPlayerKeys = AllPlayerKeys.filter((k) => k !== playerKey);
+
+        otherPlayerKeys.forEach((otherPlayerKey) => {
+          if (!(otherPlayerKey in battle)) {
+            return;
+          }
+
+          const otherPlayerPayload: Partial<CalcdexPlayer> = {
+            side: sanitizePlayerSide(
+              updatedState.gen,
+              battle[otherPlayerKey],
+              updatedState[otherPlayerKey],
+            ),
+          };
+
+          dispatch(calcdexSlice.actions.updatePlayer({
+            battleId,
+            [otherPlayerKey]: otherPlayerPayload,
+          }));
+        });
+      }
+    },
+
+    updateSide: (playerKey, side) => {
+      const updatedState = structuredClone(battleState);
+      const playerState = updatedState[playerKey];
+
+      if (!playerState?.sideid || !Object.keys(side || {}).length) {
+        return;
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        battleId,
+        [playerKey]: {
+          side: {
+            ...playerState.side,
+            ...side,
+          },
+        },
+      }));
     },
 
     updateField: (field) => {
       if (battleState.gen > 8 && ('weather' in field || 'terrain' in field)) {
         const updatedState = structuredClone(battleState);
+
+        updatedState.field = {
+          ...updatedState.field,
+          ...field,
+          // attackerSide: { ...updatedState.field.attackerSide, ...field?.attackerSide },
+          // defenderSide: { ...updatedState.field.defenderSide, ...field?.defenderSide },
+        };
 
         AllPlayerKeys.forEach((playerKey) => {
           const { pokemon = [] } = updatedState[playerKey];
@@ -521,13 +572,6 @@ export const CalcdexProvider = ({
           if (!retoggleIds.length) {
             return;
           }
-
-          updatedState.field = {
-            ...updatedState.field,
-            ...field,
-            attackerSide: { ...updatedState.field.attackerSide, ...field?.attackerSide },
-            defenderSide: { ...updatedState.field.defenderSide, ...field?.defenderSide },
-          };
 
           retoggleIds.forEach((id) => {
             const mon = pokemon.find((p) => p.calcdexId === id);
@@ -585,40 +629,31 @@ export const CalcdexProvider = ({
         );
       }
 
-      dispatch(calcdexSlice.actions.updatePlayer({
-        battleId,
-        [playerKey]: {
-          selectionIndex: playerState.selectionIndex,
-          pokemon: playerState.pokemon,
-        },
-      }));
+      const playerPayload: Partial<CalcdexPlayer> = {
+        selectionIndex: playerState.selectionIndex,
+        pokemon: playerState.pokemon,
 
-      // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
-      // the Pokemon itself, not in the Side, which is the case for gen 2+.
-      // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
-      const updatedField = sanitizeField(
-        battle,
-        updatedState,
-        updatedState.gen === 1 && playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
-        updatedState.gen === 1 && playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
-      );
+        // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
+        // the Pokemon itself, not in the Side, which is the case for gen 2+.
+        // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
+        side: sanitizePlayerSide(
+          updatedState.gen,
+          battle[playerKey],
+          playerState,
+        ),
+      };
 
       // don't sync screens here, otherwise, user's values will be overwritten when switching Pokemon
       // (normally should only be overwritten per sync at the end of the turn, via syncBattle())
       if (updatedState.gen > 1) {
-        delete updatedField.weather;
-        delete updatedField.terrain;
-        delete updatedField.attackerSide.isReflect;
-        delete updatedField.attackerSide.isLightScreen;
-        delete updatedField.attackerSide.isAuroraVeil;
-        delete updatedField.defenderSide.isReflect;
-        delete updatedField.defenderSide.isLightScreen;
-        delete updatedField.defenderSide.isAuroraVeil;
+        delete playerPayload.side.isReflect;
+        delete playerPayload.side.isLightScreen;
+        delete playerPayload.side.isAuroraVeil;
       }
 
-      dispatch(calcdexSlice.actions.updateField({
+      dispatch(calcdexSlice.actions.updatePlayer({
         battleId,
-        field: updatedField,
+        [playerKey]: playerPayload,
       }));
     },
 

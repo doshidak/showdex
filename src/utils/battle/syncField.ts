@@ -24,7 +24,7 @@ export const syncField = (
   // create a sanitized `Field` from the passed-in `battle`, then compare each result for changes
   // (works similarly to `syncPokemon`)
   const newField = structuredClone(state.field);
-  const updatedField = sanitizeField(battle, state);
+  const updatedField = sanitizeField(battle);
 
   const fieldSideKeys = <(keyof CalcdexBattleField)[]> ['attackerSide', 'defenderSide'];
   const fieldRemainingKeys = (<(keyof CalcdexBattleField)[]> Object.keys(updatedField || {}))
@@ -41,24 +41,25 @@ export const syncField = (
     (<Record<keyof CalcdexBattleField, unknown>> newField)[key] = value;
   });
 
-  fieldSideKeys.forEach((sideKey) => {
-    Object.keys(newField?.[sideKey] || <CalcdexBattleField> {}).forEach((key) => {
-      /** @warning Not really type `string`, but was forcibly casted to keep TypeScript happy lol. */
-      const value = <string> (<Record<keyof CalcdexBattleField, unknown>> updatedField?.[sideKey])?.[key];
-
-      if (value === null || value === undefined) {
-        return;
-      }
-
-      const originalValue = <string> (<Record<keyof CalcdexBattleField, unknown>> newField?.[sideKey])?.[key];
-
-      if (JSON.stringify(value) === JSON.stringify(originalValue)) {
-        return;
-      }
-
-      (<Record<keyof CalcdexBattleField, unknown>> newField[sideKey])[key] = value;
-    });
-  });
+  // update (2023/01/22): fieldSideKeys are now attached to each individual CalcdexPlayer under the `side` property
+  // fieldSideKeys.forEach((sideKey) => {
+  //   Object.keys(newField?.[sideKey] || <CalcdexBattleField> {}).forEach((key) => {
+  //     /** @warning Not really type `string`, but was forcibly casted to keep TypeScript happy lol. */
+  //     const value = <string> (<Record<keyof CalcdexBattleField, unknown>> updatedField?.[sideKey])?.[key];
+  //
+  //     if (value === null || value === undefined) {
+  //       return;
+  //     }
+  //
+  //     const originalValue = <string> (<Record<keyof CalcdexBattleField, unknown>> newField?.[sideKey])?.[key];
+  //
+  //     if (JSON.stringify(value) === JSON.stringify(originalValue)) {
+  //       return;
+  //     }
+  //
+  //     (<Record<keyof CalcdexBattleField, unknown>> newField[sideKey])[key] = value;
+  //   });
+  // });
 
   return newField;
 };

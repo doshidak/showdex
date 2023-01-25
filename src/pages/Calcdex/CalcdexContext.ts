@@ -3,12 +3,14 @@ import type {
   CalcdexBattleField,
   CalcdexBattleState,
   CalcdexPlayerKey,
+  CalcdexPlayerSide,
   CalcdexPokemon,
   CalcdexRenderMode,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
 
 export type CalcdexPokemonMutation = DeepPartial<CalcdexPokemon>;
+export type CalcdexPlayerSideMutation = DeepPartial<CalcdexPlayerSide>;
 export type CalcdexBattleFieldMutation = DeepPartial<CalcdexBattleField>;
 
 /**
@@ -24,6 +26,7 @@ export interface CalcdexContextConsumables {
   shouldRender: boolean;
 
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemonMutation) => void;
+  updateSide: (playerKey: CalcdexPlayerKey, side: CalcdexPlayerSideMutation) => void;
   updateField: (field: CalcdexBattleFieldMutation) => void;
   setActiveIndex: (playerKey: CalcdexPlayerKey, index: number) => void;
   setActiveIndices: (playerKey: CalcdexPlayerKey, indices: number[]) => void;

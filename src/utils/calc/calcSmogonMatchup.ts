@@ -6,7 +6,7 @@ import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc'
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleField,
-  CalcdexPlayerKey,
+  CalcdexPlayer,
   CalcdexPokemon,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
@@ -102,7 +102,8 @@ export const calcSmogonMatchup = (
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerMove: MoveName,
-  playerKey?: CalcdexPlayerKey,
+  player?: CalcdexPlayer,
+  opponent?: CalcdexPlayer,
   field?: CalcdexBattleField,
   settings?: ShowdexCalcdexSettings,
 ): CalcdexMatchupResult => {
@@ -124,10 +125,13 @@ export const calcSmogonMatchup = (
         'Calculation ignored due to invalid arguments.',
         // '\n', 'dex.num', dex?.num,
         '\n', 'format', format, 'dex', dex,
-        '\n', 'playerPokemon.speciesForme', playerPokemon?.speciesForme,
-        '\n', 'opponentPokemon.speciesForme', opponentPokemon?.speciesForme,
+        '\n', 'playerPokemon', playerPokemon?.name || playerPokemon?.speciesForme || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon?.name || opponentPokemon?.speciesForme || '???', opponentPokemon,
         '\n', 'playerMove', playerMove,
+        '\n', 'player', player,
+        '\n', 'opponent', opponent,
         '\n', 'field', field,
+        '\n', 'settings', settings,
         '\n', '(You will only see this warning on development.)',
       );
     }
@@ -160,7 +164,7 @@ export const calcSmogonMatchup = (
   matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
   matchup.defender = createSmogonPokemon(format, opponentPokemon);
 
-  const smogonField = createSmogonField(field, playerPokemon, playerKey);
+  const smogonField = createSmogonField(field, playerPokemon, player?.side, opponent?.side);
 
   try {
     const result = calculate(
@@ -194,9 +198,13 @@ export const calcSmogonMatchup = (
       l.error(
         'Exception while calculating the damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
         '\n', 'dex.num', dex.num,
-        '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-        '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+        '\n', 'playerPokemon', playerPokemon.name || playerPokemon.speciesForme || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon.name || opponentPokemon.speciesForme || '???', opponentPokemon,
+        '\n', 'playerMove', playerMove,
+        '\n', 'player', player,
+        '\n', 'opponent', opponent,
         '\n', 'field', field,
+        '\n', 'settings', settings,
         '\n', '(You will only see this error on development.)',
         '\n', error,
       );

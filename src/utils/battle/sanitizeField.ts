@@ -1,8 +1,6 @@
 import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/field';
 import { formatId } from '@showdex/utils/app';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexBattleState } from '@showdex/redux/store';
-import { sanitizePlayerSide } from './sanitizePlayerSide';
+import type { CalcdexBattleField } from '@showdex/redux/store';
 
 /**
  * Reads properties from the `battle` to construct a new `CalcdexBattleField`,
@@ -23,26 +21,26 @@ import { sanitizePlayerSide } from './sanitizePlayerSide';
  */
 export const sanitizeField = (
   battle?: Partial<Showdown.Battle>,
-  state?: Partial<CalcdexBattleState>,
-  ignoreP1Side?: boolean,
-  ignoreP2Side?: boolean,
+  // state?: Partial<CalcdexBattleState>,
+  // ignoreP1Side?: boolean,
+  // ignoreP2Side?: boolean,
 ): CalcdexBattleField => {
   const {
-    gen: genFromBattle,
+    // gen: genFromBattle,
     gameType,
-    p1: battleP1,
-    p2: battleP2,
+    // p1: battleP1,
+    // p2: battleP2,
     pseudoWeather,
     weather,
   } = battle || {};
 
-  const {
-    gen: genFromState,
-    p1: stateP1,
-    p2: stateP2,
-  } = state || {};
+  // const {
+  //   gen: genFromState,
+  //   p1: stateP1,
+  //   p2: stateP2,
+  // } = state || {};
 
-  const gen = genFromState || <GenerationNum> genFromBattle;
+  // const gen = genFromState || <GenerationNum> genFromBattle;
 
   const pseudoWeatherMoveNames = pseudoWeather
     ?.map((weatherState) => formatId(weatherState?.[0]))
@@ -57,31 +55,37 @@ export const sanitizeField = (
   const sanitizedField: CalcdexBattleField = {
     gameType: gameType === 'doubles' ? 'Doubles' : 'Singles',
 
-    weather: WeatherMap[weather] ?? null,
-    terrain: PseudoWeatherMap[pseudoWeatherName] ?? null,
+    weather: WeatherMap[weather] || null,
+    terrain: PseudoWeatherMap[pseudoWeatherName] || null,
 
     isMagicRoom: pseudoWeatherMoveNames.includes('magicroom'),
     isWonderRoom: pseudoWeatherMoveNames.includes('wonderroom'),
     isGravity: pseudoWeatherMoveNames.includes('gravity'),
 
-    attackerSide: !ignoreP1Side
-      ? sanitizePlayerSide(gen, battleP1, stateP1)
-      : null,
+    // attackerSide: !ignoreP1Side
+    //   ? sanitizePlayerSide(gen, battleP1, stateP1)
+    //   : null,
 
-    defenderSide: !ignoreP2Side
-      ? sanitizePlayerSide(gen, battleP2, stateP2)
-      : null,
+    // defenderSide: !ignoreP2Side
+    //   ? sanitizePlayerSide(gen, battleP2, stateP2)
+    //   : null,
+
+    // update (2023/01/23): attackerSide and defenderSide are now dynamically assigned when Smogon.Field
+    // is instantiated in createSmogonField(); the CalcdexPlayerSide's are now directly attached to each
+    // CalcdexPlayer under the `side` property
+    attackerSide: null,
+    defenderSide: null,
   };
 
   // in case this is spread with an existing field,
   // we don't want to overwrite the existing side if falsy
-  if (!sanitizedField.attackerSide) {
-    delete sanitizedField.attackerSide;
-  }
+  // if (!sanitizedField.attackerSide) {
+  //   delete sanitizedField.attackerSide;
+  // }
 
-  if (!sanitizedField.defenderSide) {
-    delete sanitizedField.defenderSide;
-  }
+  // if (!sanitizedField.defenderSide) {
+  //   delete sanitizedField.defenderSide;
+  // }
 
   return sanitizedField;
 };

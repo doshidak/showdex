@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import { getTeambuilderPresets } from '@showdex/utils/app';
 import {
   detectAuthPlayerKeyFromBattle,
@@ -7,6 +8,7 @@ import {
   detectPlayerKeyFromBattle,
   getPresetFormes,
   legalLockedFormat,
+  sanitizePlayerSide,
   sanitizePokemon,
   sanitizeVolatiles,
   syncField,
@@ -17,7 +19,7 @@ import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleState, CalcdexPlayerKey, RootState } from '@showdex/redux/store';
+import type { CalcdexBattleState, RootState } from '@showdex/redux/store';
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
@@ -151,7 +153,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.includedTeambuilder = true;
     }
 
-    for (const playerKey of <CalcdexPlayerKey[]> ['p1', 'p2']) {
+    for (const playerKey of AllPlayerKeys) {
       // l.debug('Processing player', playerKey);
 
       if (!(playerKey in battle) || battle[playerKey]?.sideid !== playerKey) {
@@ -385,13 +387,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           : null;
 
         // this is our starting point for the current clientPokemon
-        const basePokemon = matchedPokemon
-          || sanitizePokemon(
-            clientPokemon,
-            battleState.format,
-            // settings?.showAllFormes, // update (2023/01/05): no longer a setting
-            true,
-          );
+        const basePokemon = matchedPokemon || sanitizePokemon(
+          clientPokemon,
+          battleState.format,
+          // settings?.showAllFormes, // update (2023/01/05): no longer a setting
+          true,
+        );
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -781,6 +782,13 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           true, // update the selected Pokemon's abilityToggled value too
         );
       }
+
+      // sync player side
+      playerState.side = sanitizePlayerSide(
+        battleState.gen,
+        battle[playerKey],
+        playerState,
+      );
     }
 
     const syncedField = syncField(
@@ -801,10 +809,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         );
       }
 
-      return;
+      // return;
+    } else {
+      battleState.field = syncedField;
     }
-
-    battleState.field = syncedField;
 
     // this is important, otherwise we can't ignore re-renders of the same battle state
     // (which may result in reaching React's maximum update depth)

@@ -548,7 +548,8 @@ export const CalcdexPokeProvider = ({
     format,
     playerPokemon,
     opponentPokemon,
-    playerKey,
+    player,
+    opponent,
     field,
     settings,
   );

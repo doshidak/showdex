@@ -47,13 +47,26 @@ export const Calcdex = ({
     opponentKey,
   } = state;
 
-  const topKey = authPlayerKey && playerKey === authPlayerKey
-    ? settings?.authPosition === 'bottom'
-      ? opponentKey
-      : (settings?.authPosition === 'auto' ? 'p1' : playerKey)
-    : playerKey;
+  // if authPlayerKey = playerKey = 'p1' and opponentKey = 'p2',
+  // then topKey = 'p2' if authPosition is 'bottom' and 'p1' otherwise;
+  // if authPlayerKey = playerKey = 'p2' and opponentKey = 'p1',
+  // then topKey = 'p1' if authPosition is 'bottom' or 'auto', and 'p2' otherwise;
+  // const topKey = authPlayerKey && playerKey === authPlayerKey
+  //   ? settings?.authPosition === 'bottom'
+  //     ? opponentKey
+  //     : (settings?.authPosition === 'auto' ? 'p1' : playerKey)
+  //   : playerKey;
 
-  const bottomKey = topKey === 'p1' ? 'p2' : 'p1';
+  const topKey = (
+    !!authPlayerKey
+      && playerKey === authPlayerKey
+      && settings?.authPosition === 'bottom'
+      && opponentKey
+  ) || playerKey;
+
+  const bottomKey = topKey === playerKey
+    ? opponentKey
+    : playerKey;
 
   return (
     <div
@@ -90,6 +103,7 @@ export const Calcdex = ({
           <FieldCalc
             className={cx(styles.section, styles.fieldCalc)}
             playerKey={topKey}
+            opponentKey={bottomKey}
             containerSize={size}
           />
 
