@@ -5,7 +5,7 @@ import { clamp, env } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import type { CalcdexPokemonPreset, CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { getDexForFormat } from './getDexForFormat';
@@ -108,6 +108,7 @@ export const importPokePaste = (
   pokePaste: string,
   format?: string,
   name = 'Import',
+  source: CalcdexPokemonPresetSource = 'import',
 ): CalcdexPokemonPreset => {
   if (!pokePaste) {
     return null;
@@ -122,7 +123,7 @@ export const importPokePaste = (
   const preset: CalcdexPokemonPreset = {
     calcdexId: null,
     id: null,
-    source: 'import',
+    source,
     name,
     gen,
     format,
