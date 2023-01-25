@@ -1,7 +1,7 @@
 import { PokemonSpeedReductionItems } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
+import { hasMegaForme } from '@showdex/utils/battle';
 import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
-import { hasMegaForme } from './hasMegaForme';
 
 /**
  * Determines whether the `pokemon`'s item's effects should be ignored.

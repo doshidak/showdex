@@ -41,7 +41,6 @@ export * from './sanitizeMoveTrack';
 export * from './sanitizePlayerSide';
 export * from './sanitizePokemon';
 export * from './sanitizeVolatiles';
-export * from './shouldIgnoreItem';
 export * from './syncField';
 export * from './syncPokemon';
 export * from './toggleableAbility';
