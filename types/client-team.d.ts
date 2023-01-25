@@ -58,8 +58,10 @@ declare namespace Showdown {
     /**
      * Serialized Teambuilder teams as a single string.
      *
-     * * This is stored in the same way (after the `<format>]<name>|` prefix) for each team
+     * * This is stored in the same way (after the `<format>]<name>|` prefix) for each team.
+     *
+     * @example 'Glimmora||airballoon|toxicdebris|stealthrock,spikes,mortalspin,earthpower|Timid|252,,,4,,252|...'
      */
-    team: string[];
+    team: string;
   }
 }
