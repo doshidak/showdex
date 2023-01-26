@@ -374,6 +374,14 @@ export interface ShowdexCalcdexSettings {
   includeTeambuilder: 'always' | 'teams' | 'boxes' | 'never';
 
   /**
+   * Whether to auto-import and apply presets derived from open team sheets or the `!showteam` chat command.
+   *
+   * @default true
+   * @since 1.1.3
+   */
+  autoImportTeamSheets: boolean;
+
+  /**
    * Whether to auto-export the opponent's team to the Teambuilder once the battle ends.
    *
    * * If `true`, will be exported to its own Teambuilder folder called "Showdex".
