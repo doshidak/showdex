@@ -855,7 +855,7 @@ export const SettingsPane = ({
                     component={Segmented}
                     className={cx(
                       styles.field,
-                      // !inBattle && styles.singleColumn,
+                      !inBattle && styles.singleColumn,
                     )}
                     label="Download Sets"
                     labelPosition={inBattle ? 'top' : 'left'}
@@ -915,25 +915,6 @@ export const SettingsPane = ({
                       value?.downloadRandomsPresets && 'randoms',
                       value?.downloadUsageStats && 'usage',
                     ] as ('smogon' | 'randoms' | 'usage')[]).filter(Boolean)}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['prioritizeUsageStats']>
-                    name="calcdex.prioritizeUsageStats"
-                    component={Switch}
-                    className={cx(styles.field, styles.switchField)}
-                    label="Apply Usage Sets First"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Prioritizes applying the <em>Showdown Usage</em> set, if available,
-                        to your opponent's (or spectating players') Pok&eacute;mon
-                        in non-Randoms formats.
-                        <br />
-                        <br />
-                        Otherwise, the first set of the closest matching format will be applied.
-                      </div>
-                    )}
-                    format={(value) => (!values.calcdex?.downloadUsageStats ? false : value)}
-                    disabled={!values.calcdex?.downloadUsageStats}
                   />
 
                   <Field<ShowdexSettings['calcdex']['includeTeambuilder']>
@@ -1017,6 +998,44 @@ export const SettingsPane = ({
                     }]}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['prioritizeUsageStats']>
+                    name="calcdex.prioritizeUsageStats"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Apply Usage Sets First"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Prioritizes applying the <em>Showdown Usage</em> set, if available,
+                        to your opponent's (or spectating players') Pok&eacute;mon
+                        in non-Randoms formats.
+                        <br />
+                        <br />
+                        Otherwise, the first set of the closest matching format will be applied.
+                      </div>
+                    )}
+                    format={(value) => (!values.calcdex?.downloadUsageStats ? false : value)}
+                    disabled={!values.calcdex?.downloadUsageStats}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['autoImportTeamSheets']>
+                    name="calcdex.autoImportTeamSheets"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Auto-Import Team Sheets"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Imports &amp; applies sets to your opponent's (or spectating players') Pok&eacute;mon
+                        derived from open team sheets (typical of VGC 2023 formats) or the !showteam chat command.
+                        <br />
+                        <br />
+                        Note that open team sheets may omit spreads, i.e., the EVs, IVs &amp; nature.
+                        In those cases, team sheets won't be converted into sets, but the provided info will be
+                        marked as revealed, allowing spreads from other sets, such as from{' '}
+                        <em>Showdown Usage</em>, to apply.
+                      </div>
+                    )}
+                  />
+
                   {/* <Field<ShowdexSettings['calcdex']['autoExportOpponent']>
                     name="calcdex.autoExportOpponent"
                     component={Switch}
@@ -1055,7 +1074,7 @@ export const SettingsPane = ({
                           Shows explainer tooltips for buttons in the UI when hovered over.
                           <br />
                           <br />
-                          Disable this if you're a Calcdex pro and know what everything does already.
+                          Disable this if you're a Calcdex pro &amp; know what everything does already.
                         </div>
                       ),
                       value: 'ui',
