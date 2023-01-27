@@ -524,12 +524,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
                 if (Object.keys(matchedPreset.evs || {}).length) {
                   syncedPokemon.evs = {
-                    hp: matchedPreset.evs.hp || syncedPokemon.evs?.hp || 0,
-                    atk: matchedPreset.evs.atk || syncedPokemon.evs?.atk || 0,
-                    def: matchedPreset.evs.def || syncedPokemon.evs?.def || 0,
-                    spa: matchedPreset.evs.spa || syncedPokemon.evs?.spa || 0,
-                    spd: matchedPreset.evs.spd || syncedPokemon.evs?.spd || 0,
-                    spe: matchedPreset.evs.spe || syncedPokemon.evs?.spe || 0,
+                    hp: matchedPreset.evs.hp ?? 0,
+                    atk: matchedPreset.evs.atk ?? 0,
+                    def: matchedPreset.evs.def ?? 0,
+                    spa: matchedPreset.evs.spa ?? 0,
+                    spd: matchedPreset.evs.spd ?? 0,
+                    spe: matchedPreset.evs.spe ?? 0,
                   };
                 }
               }
@@ -553,12 +553,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
               if (Object.keys(matchedPreset.ivs || {}).length) {
                 syncedPokemon.ivs = {
-                  hp: matchedPreset.ivs.hp ?? syncedPokemon.ivs?.hp ?? defaultIv,
-                  atk: matchedPreset.ivs.atk ?? syncedPokemon.ivs?.atk ?? defaultIv,
-                  def: matchedPreset.ivs.def ?? syncedPokemon.ivs?.def ?? defaultIv,
-                  spa: matchedPreset.ivs.spa ?? syncedPokemon.ivs?.spa ?? defaultIv,
-                  spd: matchedPreset.ivs.spd ?? syncedPokemon.ivs?.spd ?? defaultIv,
-                  spe: matchedPreset.ivs.spe ?? syncedPokemon.ivs?.spe ?? defaultIv,
+                  hp: matchedPreset.ivs.hp ?? defaultIv,
+                  atk: matchedPreset.ivs.atk ?? defaultIv,
+                  def: matchedPreset.ivs.def ?? defaultIv,
+                  spa: matchedPreset.ivs.spa ?? defaultIv,
+                  spd: matchedPreset.ivs.spd ?? defaultIv,
+                  spe: matchedPreset.ivs.spe ?? defaultIv,
                 };
               }
 
