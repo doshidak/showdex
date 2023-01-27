@@ -31,9 +31,11 @@ export const PokeStats = ({
   const {
     state,
     settings,
-    playerPokemon: pokemon,
-    opponentPokemon,
+    player,
     playerKey, // don't use the one from state btw
+    playerPokemon: pokemon,
+    opponent,
+    opponentPokemon,
     field, // don't use the one from state btw
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -99,13 +101,15 @@ export const PokeStats = ({
     gen,
     pokemon,
     opponentPokemon,
+    player,
+    opponent,
     field,
-    playerKey,
   ) : null), [
     field,
     gen,
+    opponent,
     opponentPokemon,
-    playerKey,
+    player,
     pokemon,
   ]);
 
@@ -454,13 +458,13 @@ export const PokeStats = ({
                       className={cx(
                         styles.statModValue,
                         styles.statValue,
-                        mod?.modifier > 1 && styles.positive,
-                        mod?.modifier < 1 && styles.negative,
+                        (mod?.modifier ?? 1) > 1 && styles.positive,
+                        (mod?.modifier ?? 1) < 1 && styles.negative,
                       )}
                     >
-                      {mod?.modifier >= 0 ? (
+                      {(mod?.modifier ?? -1) >= 0 ? (
                         <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
-                      ) : <>&ndash;</>}
+                      ) : null}
                     </div>
                     <div className={styles.statModLabel}>
                       {mod?.label || '??? HUH'}
