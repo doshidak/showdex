@@ -409,7 +409,10 @@ export const PokeInfo = ({
                 teraTyping
                 containerSize={containerSize}
                 highlight={pokemon?.terastallized}
-                highlightTypes={flattenAlts(pokemon?.altTeraTypes)}
+                highlightTypes={Array.from(new Set([
+                  ...flattenAlts(pokemon?.altTeraTypes),
+                  pokemon?.revealedTeraType,
+                ])).filter(Boolean)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}
               />
