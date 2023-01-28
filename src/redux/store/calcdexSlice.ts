@@ -183,6 +183,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   altTeraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
 
   /**
+   * Revealed Tera type from the battle.
+   *
+   * * Can be populated from the `terastallized` property of `Showdown.Pokemon` or from a team sheet.
+   * * Why isn't this just `teraType` and the existing `teraType` not `dirtyTeraType`?
+   *   - No idea.
+   *   - Sounds like a good idea though.
+   *   - I'll leave it like this for now as to not break anything.
+   *
+   * @since 1.1.3
+   */
+  revealedTeraType?: Showdown.TypeName;
+
+  /**
    * Ability of the Pokemon.
    *
    * @since 0.1.0
@@ -1005,6 +1018,32 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   pokemon?: CalcdexPokemon[];
 
   /**
+   * Whether the player has already Dynamaxed (including Gigantamax, if applicable) one of their Pokemon.
+   *
+   * * If `true`, this will disable the Max toggles for all of the player's Pokemon in `PokeMoves`.
+   *   - Note that once the battle is over (`active` in `CalcdexBattleState` is `false`), the Max toggles will
+   *     be re-enabled again.
+   * * Obviously for non-Gen 9 formats, this isn't being used.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  usedMax?: boolean;
+
+  /**
+   * Whether the player has already Terastallized one of their Pokemon.
+   *
+   * * If `true`, this will disable the Tera toggles for all of the player's Pokemon in `PokeMoves`.
+   *   - Note that once the battle is over (`active` in `CalcdexBattleState` is `false`), the Tera toggles will
+   *     be re-enabled again.
+   * * Obviously for non-Gen 9 formats, this isn't being used.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  usedTera?: boolean;
+
+  /**
    * Field conditions on the player's side.
    *
    * * As of v1.1.3, these are now directly being stored in the `CalcdexPlayer`, as opposed to the
@@ -1633,6 +1672,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
             selectionIndex: 0,
             autoSelect: true,
             maxPokemon: defaultMaxPokemon,
+            usedMax: false,
+            usedTera: false,
 
             // since this requires the battle object (typically only available in the CalcdexProvider scope),
             // we won't initialize it here; however, initial values can still be provided through payload[currentPlayerKey]
