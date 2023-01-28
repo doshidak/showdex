@@ -137,7 +137,8 @@ export const syncPokemon = (
           return;
         }
 
-        syncedPokemon.teraType = <Showdown.TypeName> value;
+        syncedPokemon.revealedTeraType = <Showdown.TypeName> value;
+        syncedPokemon.teraType = syncedPokemon.revealedTeraType;
 
         // break;
         return;
@@ -304,7 +305,7 @@ export const syncPokemon = (
         // (client reports a 'typechange' volatile when a Pokemon terastallizes)
         const changedTypes = (
           'typechange' in volatiles
-            && <Showdown.TypeName[]>volatiles.typechange[1]?.split?.('/') // 'Psychic/Ice' -> ['Psychic', 'Ice']
+            && <Showdown.TypeName[]> volatiles.typechange[1]?.split?.('/') // 'Psychic/Ice' -> ['Psychic', 'Ice']
         ) || [];
 
         // sync the Pokemon's terastallization state
