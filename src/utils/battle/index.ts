@@ -47,3 +47,5 @@ export * from './toggleableAbility';
 export * from './toggleRuinAbilities';
 export * from './usageAltPercentFinder';
 export * from './usageAltPercentSorter';
+export * from './usedDynamax';
+export * from './usedTerastallization';
