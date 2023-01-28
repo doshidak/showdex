@@ -34,6 +34,7 @@ export const PokeMoves = ({
   const {
     state,
     settings,
+    player,
     playerPokemon: pokemon,
     opponentPokemon,
     moveOptions,
@@ -42,6 +43,7 @@ export const PokeMoves = ({
   } = useCalcdexPokeContext();
 
   const {
+    active: battleActive,
     gen,
     format,
     rules,
@@ -58,16 +60,24 @@ export const PokeMoves = ({
     'natdex',
   ].some((f) => format.includes(f));
 
+  const disableTeraToggle = !pokemon?.speciesForme
+    || !pokemon.teraType
+    || pokemon.teraType === '???'
+    || (player?.usedTera && battleActive);
+
   const showZToggle = !!pokemon?.speciesForme && (
     nationalDexFormat
       || gen === 6
       || gen === 7
   );
 
-  const showMaxToggle = !!pokemon?.speciesForme && !rules?.dynamax && gen < 9 && (
-    nationalDexFormat
-      || (gen === 8 && !format?.includes('bdsp'))
-  );
+  const showMaxToggle = !!pokemon?.speciesForme
+    && !rules?.dynamax
+    && gen < 9
+    && (nationalDexFormat || (gen === 8 && !format?.includes('bdsp')));
+
+  const disableMaxToggle = !pokemon?.speciesForme
+    || (player?.usedMax && battleActive);
 
   const showEditButton = !!pokemon?.speciesForme && (
     settings?.showMoveEditor === 'always'
@@ -147,7 +157,7 @@ export const PokeMoves = ({
             tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.terastallized}
-            disabled={!pokemon?.speciesForme || !pokemon.teraType || pokemon.teraType === '???'}
+            disabled={disableTeraToggle}
             onPress={() => updatePokemon({
               terastallized: !pokemon?.terastallized,
               useZ: false,
@@ -191,7 +201,7 @@ export const PokeMoves = ({
             tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useMax}
-            disabled={!pokemon?.speciesForme}
+            disabled={disableMaxToggle}
             onPress={() => updatePokemon({
               terastallized: false,
               useZ: false,
