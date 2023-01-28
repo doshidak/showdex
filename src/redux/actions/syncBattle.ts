@@ -11,12 +11,15 @@ import {
   getPresetFormes,
   getTeamSheetPresets,
   legalLockedFormat,
+  mergeRevealedMoves,
   sanitizePlayerSide,
   sanitizePokemon,
   sanitizeVolatiles,
   syncField,
   syncPokemon,
   toggleRuinAbilities,
+  usedDynamax,
+  usedTerastallization,
 } from '@showdex/utils/battle';
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
@@ -539,16 +542,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 syncedPokemon.dirtyItem = null;
               }
 
-              /**
-               * @todo Revealed `teraType` may be overwritten by `applyPreset()` in `CalcdexPokeProvider` when switching presets
-               *   since there's currently no distinction between battle-reported Tera types and user-provided ones.
-               */
               if (matchedPreset.teraTypes?.length && PokemonTypes.includes(<Showdown.TypeName> matchedPreset.teraTypes[0])) {
-                [syncedPokemon.teraType] = <Showdown.TypeName[]> matchedPreset.teraTypes;
+                [syncedPokemon.revealedTeraType] = <Showdown.TypeName[]> matchedPreset.teraTypes;
+                syncedPokemon.teraType = syncedPokemon.revealedTeraType;
               }
 
               if (matchedPreset.moves?.length) {
                 syncedPokemon.revealedMoves = [...matchedPreset.moves];
+                syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
               }
 
               if (Object.keys(matchedPreset.ivs || {}).length) {
@@ -623,7 +624,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             }
 
             if (hasTeraData && syncedPokemon.teraType !== moveData.canTerastallize) {
-              syncedPokemon.teraType = moveData.canTerastallize;
+              syncedPokemon.revealedTeraType = moveData.canTerastallize;
+              syncedPokemon.teraType = syncedPokemon.revealedTeraType;
             }
 
             break;
@@ -905,6 +907,35 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
         } else {
           [playerState.selectionIndex] = playerState.activeIndices;
+        }
+      }
+
+      // determine if the player used Max/Tera to disable it within PokeMoves
+      // (will be re-enabled once the battle is over)
+      playerState.usedMax = usedDynamax(playerKey, battle?.stepQueue);
+      playerState.usedTera = usedTerastallization(playerKey, battle?.stepQueue);
+
+      // resync Max (gen 8)/Tera (gen 9) states
+      // note: while syncPokemon() will reset the values, this only occurs when a client Pokemon has been found,
+      // i.e., if the Pokemon isn't revealed yet (such as in Randoms), there would be no corresponding client Pokemon
+      if (battleState.gen > 7) {
+        // note: despite using filter(), which would normally create a new array, the elements inside of pokemon[]
+        // are objects, so elements in the filtered array are still referencing the original objects
+        playerState.pokemon
+          .filter((p) => p.useMax && !('dynamax' in p.volatiles))
+          .forEach((p) => { p.useMax = false; });
+      }
+
+      if (battleState.gen > 8) {
+        // find the name of the Pokemon that Terastallized
+        const teraStep = battle.stepQueue.find((q) => q.startsWith('|-terastallize|') && q.includes(`|${playerKey}`));
+        const [, name] = /p\d+[a-z]:\x20(.+)\|/.exec(teraStep) || [];
+
+        if (name) {
+          // see note in playerState.usedMax for why this still mutates the pokemon `p`, despite using filter()
+          playerState.pokemon
+            .filter((p) => p.terastallized && !p.speciesForme.includes(name))
+            .forEach((p) => { p.terastallized = false; });
         }
       }
 
