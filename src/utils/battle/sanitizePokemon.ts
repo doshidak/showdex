@@ -77,8 +77,11 @@ export const sanitizePokemon = (
     types: typeChanged
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
-    teraType: ('teraType' in pokemon && pokemon?.teraType)
+    teraType: ('teraType' in pokemon && pokemon.teraType)
       || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
+      || null,
+    revealedTeraType: ('revealedTeraType' in pokemon && pokemon.revealedTeraType)
+      || (typeof pokemon.terastallized === 'string' && pokemon.terastallized)
       || null,
     altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
