@@ -230,6 +230,8 @@ export interface PkmnSmogonRandomPreset {
       items: ItemName[];
       teraTypes: Showdown.TypeName[];
       moves: MoveName[];
+      ivs?: Showdown.StatsTable;
+      evs?: Showdown.StatsTable;
     };
   };
 }

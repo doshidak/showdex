@@ -124,6 +124,8 @@ export const transformRandomsPresetResponse = (
           items: roleItems,
           teraTypes,
           moves: roleMoves,
+          evs: roleEvs,
+          ivs: roleIvs,
         } = role;
 
         if (roleName) {
@@ -149,6 +151,22 @@ export const transformRandomsPresetResponse = (
          */
         rolePreset.moves = roleMoves.slice(0, 4);
         rolePreset.altMoves = [...roleMoves];
+
+        // update (2023/01/28): adding support for role-specific EVs/IVs, but for also when Pre eventually
+        // moves the EVs/IVs into each role instead of in the parent (only for Gen 9 Randoms btw)
+        if (!legacy && Object.keys(roleEvs || {}).length) {
+          rolePreset.evs = {
+            ...rolePreset.evs,
+            ...roleEvs,
+          };
+        }
+
+        if (Object.keys(roleIvs || {}).length) {
+          rolePreset.ivs = {
+            ...rolePreset.ivs,
+            ...roleIvs,
+          };
+        }
 
         rolePreset.calcdexId = calcPresetCalcdexId(rolePreset);
         rolePreset.id = rolePreset.calcdexId;
