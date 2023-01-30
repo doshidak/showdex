@@ -6,6 +6,7 @@ import { pkmnApi, showdownApi } from '../services';
 import { calcdexSlice } from './calcdexSlice';
 import { hellodexSlice } from './hellodexSlice';
 import { showdexSlice } from './showdexSlice';
+import { teamdexSlice } from './teamdexSlice';
 
 export type RootStore = ReturnType<typeof createStore>;
 export type RootDispatch = RootStore['dispatch'];
@@ -14,6 +15,7 @@ export interface RootState extends ReturnType<RootStore['getState']> {
   showdex: ReturnType<typeof showdexSlice.getInitialState>;
   hellodex: ReturnType<typeof hellodexSlice.getInitialState>;
   calcdex: ReturnType<typeof calcdexSlice.getInitialState>;
+  teamdex: ReturnType<typeof teamdexSlice.getInitialState>;
 }
 
 /**
@@ -58,6 +60,7 @@ export const createStore = (
       [showdexSlice.name]: showdexSlice.reducer,
       [hellodexSlice.name]: hellodexSlice.reducer,
       [calcdexSlice.name]: calcdexSlice.reducer,
+      [teamdexSlice.name]: teamdexSlice.reducer,
     },
 
     // need to disable these default middlewares, otherwise, it'll get wayyy too laggy!
