@@ -5,11 +5,12 @@ import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
 /**
- * Reads Teambuilder teams stored in `LocalStorage` and returns `CalcdexPokemonPreset[]`s of matching gens
- * detected from the provided `format`.
+ * Reads Teambuilder teams stored in `LocalStorage` and returns `CalcdexPokemonPreset[]`s.
  *
  * * Teambuilder teams are typically stored under the `LocalStorage` key `'showdown_teams'`,
  *   which (in case it changes) is provided by the `STORAGE_TEAMBUILDER_KEY` environment variable.
+ * * If `format` is provided, only presets of the matching gen derived from the `format` will be returned.
+ *   - Otherwise, all presets will be converted, regardless of format.
  * * You'll need to sift through the returned array to grab presets for specific Pokemon.
  *   - Recommended you use this in conjunction with `getPresetFormes()` to make sure you're grabbing
  *     the correct presets for the Pokemon's `speciesForme`.
@@ -26,39 +27,38 @@ import type { CalcdexPokemonPreset } from '@showdex/redux/store';
  * * Guaranteed to at least return an empty array (i.e., `[]`) if reading fails at any point.
  * * As of v1.1.3, this will first look for Teambuilder teams in `Storage.teams` since they will be populated even
  *   across different origins (e.g., on other `psim.us` sites), falling back to using `LocalStorage` if unpopulated.
+ *   - Additionally, `format` was made optional in order to populate the `presets` state of the `teamdexSlice`.
  *
  * @since 1.1.2
  */
 export const getTeambuilderPresets = (
-  format: GenerationNum | string,
+  format?: GenerationNum | string,
   // includeTeams = true,
   // includeBoxes = true,
 ): CalcdexPokemonPreset[] => {
-  if (!format) {
-    return [];
-  }
+  // if (!format) {
+  //   return [];
+  // }
 
   const gen = typeof format === 'string'
     ? detectGenFromFormat(format)
     : format;
 
-  if (!gen) {
-    return [];
-  }
-
-  const legacy = detectLegacyGen(format);
+  // if (!gen) {
+  //   return [];
+  // }
 
   // update (2023/01/24): either grab the teams from Storage.teams (solves the cross-origin issue on other psim sites)
   // or fallback to accessing the teams from LocalStorage
   const packedTeams = (<Showdown.ClientStorage> <unknown> Storage).teams
-    ?.map((team) => (team?.format && team.team ? `${team.format}${team.capacity ?? 0 > 6 ? '-box' : ''}]${team.name}|${team.team}` : null))
+    ?.map((team) => (team?.format && team.team ? `${team.format}${(team.capacity ?? 0) > 6 ? '-box' : ''}]${team.name}|${team.team}` : null))
     .filter(Boolean)
     || getStoredItem('storage-teambuilder-key')?.split('\n')
     || [];
 
   const matchedTeams = packedTeams
     .filter((t) => (
-      t?.startsWith(`gen${gen}`)
+      (!format || !gen || t?.startsWith(`gen${gen}`)) // grab teams from any gen if `format` wasn't provided
         && !formatId(t.slice(t.indexOf(']') + 1)).startsWith('untitled')
         // && (includeTeams || t.slice(0, t.indexOf(']')).endsWith('-box'))
         // && (includeBoxes || !t.slice(0, t.indexOf(']')).endsWith('-box'))
@@ -68,13 +68,10 @@ export const getTeambuilderPresets = (
     return [];
   }
 
-  const maxLegalEvs = legacy
-    ? 0 // EVs don't exist in legacy gens, so this value shouldn't even be used
-    : env.int('calcdex-pokemon-max-legal-evs', 0);
-
   return matchedTeams.flatMap(unpackStorageTeam).reduce((prev, preset) => {
     const {
       calcdexId,
+      format: presetFormat,
       moves,
       evs,
     } = preset;
@@ -85,6 +82,11 @@ export const getTeambuilderPresets = (
     if (!uniquePreset) {
       return prev;
     }
+
+    const legacy = detectLegacyGen(presetFormat);
+    const maxLegalEvs = legacy
+      ? 0 // EVs don't exist in legacy gens, so this value shouldn't even be used
+      : env.int('calcdex-pokemon-max-legal-evs', 0);
 
     const validPreset = !!moves?.length
       && (legacy || Object.values(evs || {}).reduce((sum, val) => sum + (val || 0), 0) >= maxLegalEvs);
