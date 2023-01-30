@@ -391,7 +391,7 @@ export const PokeInfo = ({
             />
 
             {
-              gen > 8 &&
+              (!!pokemon?.speciesForme && gen > 8) &&
               <PokeTypeField
                 className={cx(styles.typesField, styles.teraTypeField)}
                 label={`Tera Type for Pokemon ${friendlyPokemonName}`}
@@ -455,11 +455,11 @@ export const PokeInfo = ({
             }
 
             {
-              (!!pokemon && (!!pokemon.status || !hpPercentage)) &&
+              (!!pokemon?.speciesForme && (!!pokemon.status || !hpPercentage)) &&
               <div className={styles.statuses}>
                 <PokeStatus
                   className={styles.status}
-                  status={pokemon?.status}
+                  status={pokemon.status}
                   fainted={!hpPercentage}
                 />
               </div>
