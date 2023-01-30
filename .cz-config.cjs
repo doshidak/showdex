@@ -30,6 +30,7 @@ module.exports = {
 
     { name: 'calcdex' },
     { name: 'hellodex' },
+    { name: 'teamdex' },
   ],
 
   messages: {
