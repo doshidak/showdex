@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
-import { formatId, getTeambuilderPresets } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app';
 import {
   appliedPreset,
   detectAuthPlayerKeyFromBattle,
@@ -133,31 +133,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
     battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
 
-    // determine if we should convert Teambuilder presets
-    // (getTeambuilderPresets() may be an expensive operation, so we want to limit it to a one-time exec)
-    const shouldIncludeTeambuilder = !!settings?.includeTeambuilder
-      && settings.includeTeambuilder !== 'never'
-      && (!battleState.authPlayerKey || !!myPokemon?.length)
-      && !battleState.format.includes('random')
-      && !battleState.includedTeambuilder;
-
-    /**
-     * @todo Seems to be some kind of race condition here; sometimes, the battle will be slow to report myPokemon,
-     *   so it will revert to using the 'Yours' preset, so no Teambuilder presets will be loaded for the auth side!
-     *   This typically only occurs when you first load into the battle (doesn't seem to be reproducible when refreshing mid-battle).
-     *   Potential fix is to move the `!battleState.authPlayerKey || !!myPokemon?.length` check to the value of
-     *   `battleState.includedTeambuilder`, so that if it evals to `false`, it can at least try to include the Teambuilder presets
-     *   on the next sync since they're attached to the Pokemon's `presets[]` array.
-     */
-    const teambuilderPresets = shouldIncludeTeambuilder
-      ? getTeambuilderPresets(battleState.format)
-      : [];
-
-    // immediately update the includedTeambuilder flag so that we don't convert
-    // the Teambuilder presets on the next sync
-    if (teambuilderPresets.length) {
-      battleState.includedTeambuilder = true;
-    }
+    // determine if we should include Teambuilder presets
+    // (should be already pre-converted in the teamdexSlice)
+    const teambuilderPresets = (
+      !!settings?.includeTeambuilder
+        && settings.includeTeambuilder !== 'never'
+        && !battleState.format.includes('random')
+        && rootState?.teamdex?.presets?.filter((p) => p?.gen === battleState.gen)
+    ) || [];
 
     // determine if we should look for team sheets
     const sheetStepQueues = (
@@ -449,7 +432,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // attach Teambuilder presets for the specific Pokemon, if available
         // (this should only happen once per battle)
-        if (teambuilderPresets.length) {
+        const shouldAddTeambuilder = !!teambuilderPresets.length
+          && !syncedPokemon.presets.some((p) => ['storage', 'storage-box'].includes(p.source));
+
+        if (shouldAddTeambuilder) {
           const matchedPresets = teambuilderPresets.filter((p) => (
             formes.includes(p.speciesForme) && (
               settings.includeTeambuilder === 'always'
@@ -934,7 +920,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (name) {
           // see note in playerState.usedMax for why this still mutates the pokemon `p`, despite using filter()
           playerState.pokemon
-            .filter((p) => p.terastallized && !p.speciesForme.includes(name))
+            .filter((p) => p.terastallized && (p.name !== name || !p.speciesForme.includes(name)))
             .forEach((p) => { p.terastallized = false; });
         }
       }
