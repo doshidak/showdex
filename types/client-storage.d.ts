@@ -10,7 +10,7 @@ declare namespace Showdown {
   type ClientStorageLoadTracker<
     TValue = unknown,
     TContext = unknown,
-  > = ((callback: <T = TValue>(value: T) => void, context: TContext) => void) & {
+  > = ((callback: <T = TValue>(value?: T) => void, context: TContext) => void) & {
     /**
      * @default false
      */
