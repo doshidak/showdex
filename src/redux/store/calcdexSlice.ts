@@ -1422,20 +1422,6 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   renderMode?: CalcdexRenderMode;
 
   /**
-   * Whether Teambuilder presets have been included for the battle.
-   *
-   * * This exists as a performance optimization so that the Teambuilder presets are only converted
-   *   once per battle.
-   *   - Since this is primarily being used in `syncBattle()`, this prevents conversions on each sync.
-   * * You should logical AND (`&&`) this with the `includeTeambuilder` Calcdex setting when determining
-   *   Teambuilder preset conversion.
-   *
-   * @default false
-   * @since 1.1.2
-   */
-  includedTeambuilder?: boolean;
-
-  /**
    * Side key/ID of the player.
    *
    * * Does not necessarily mean the logged-in user ("auth") is a player.
@@ -1655,7 +1641,6 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         active,
 
         renderMode,
-        includedTeambuilder: false,
 
         playerKey,
         authPlayerKey,
