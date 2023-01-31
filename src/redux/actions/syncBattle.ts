@@ -891,7 +891,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           if (dondozoIndex > -1) {
             playerState.selectionIndex = dondozoIndex;
           }
-        } else {
+        } else if (!playerState.activeIndices.includes(playerState.selectionIndex)) {
+          // update (2023/01/30): only update the selectionIndex if it's not one of the activeIndices
           [playerState.selectionIndex] = playerState.activeIndices;
         }
       }
