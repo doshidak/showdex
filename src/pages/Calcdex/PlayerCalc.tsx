@@ -40,7 +40,11 @@ export const PlayerCalc = ({
 
   const colorScheme = useColorScheme();
 
-  const { format } = state;
+  const {
+    format,
+    legacy,
+  } = state;
+
   const player = state[playerKey] || {};
 
   const {
@@ -264,11 +268,15 @@ export const PlayerCalc = ({
 
             // const speciesForme = mon?.transformedForme || mon?.speciesForme;
             const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
+            const ability = pokemon?.dirtyAbility || pokemon?.ability;
             const item = pokemon?.dirtyItem ?? pokemon?.item;
 
+            // only tracking Ruin abilities (gen 9) atm
+            const abilityActive = !legacy
+              && formatId(ability).endsWith('ofruin')
+              && pokemon.abilityToggled;
+
             const pokemonActive = !!pokemon?.calcdexId
-              // && !!activePokemon?.calcdexId
-              // && activePokemon.calcdexId === mon.calcdexId;
               && activeIndices.includes(i);
 
             const pokemonSelected = !!pokemon?.calcdexId
@@ -300,6 +308,15 @@ export const PlayerCalc = ({
                         (<strong>{friendlyPokemonName}</strong>)
                       </>
                     ) : <strong>{friendlyPokemonName}</strong>}
+
+                    {
+                      abilityActive &&
+                      <span className={styles.activeAbility}>
+                        <br />
+                        {ability}
+                      </span>
+                    }
+
                     {
                       !!item &&
                       <>

@@ -182,6 +182,11 @@ button.usernameButton {
   user-select: none;
 }
 
+.activeAbility {
+  font-weight: 500;
+  color: colors.$blue;
+}
+
 .background {
   // @include position.absolute-anchor($x: -3px, $y: -6px);
   // @include position.absolute-anchor($x: 0px, $y: -3px);
