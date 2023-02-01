@@ -33,7 +33,7 @@ import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexBattleField, CalcdexPlayerSide } from '@showdex/redux/store';
+import type { CalcdexPlayerSide } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
@@ -54,7 +54,8 @@ export const PokeInfo = ({
   const {
     state,
     settings,
-    playerKey,
+    // playerKey,
+    player,
     playerPokemon: pokemon,
     field, // don't use the one from state btw
     presetsLoading,
@@ -115,9 +116,9 @@ export const PokeInfo = ({
       || field?.gameType === 'Doubles'
   );
 
-  const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
-    ? 'defenderSide'
-    : 'attackerSide';
+  // const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
+  //   ? 'defenderSide'
+  //   : 'attackerSide';
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = pokemon?.abilityToggleable
@@ -130,7 +131,7 @@ export const PokeInfo = ({
       'ruinTabletsCount',
       'ruinVesselCount',
     ] as (keyof CalcdexPlayerSide)[])
-      .reduce((sum, key) => sum + ((field[fieldKey]?.[key] as number) || 0), 0) >= 2;
+      .reduce((sum, key) => sum + ((player?.side?.[key] as number) || 0), 0) >= 2;
 
   const showResetAbility = !!pokemon?.dirtyAbility
     && !pokemon.transformedForme
