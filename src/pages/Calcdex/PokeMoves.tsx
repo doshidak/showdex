@@ -26,6 +26,8 @@ export interface PokeMovesProps {
   containerSize?: ElementSizeLabel;
 }
 
+const baseScope = '@showdex/pages/Calcdex/PokeMoves';
+
 export const PokeMoves = ({
   className,
   style,
@@ -100,7 +102,7 @@ export const PokeMoves = ({
 
     updatePokemon({
       moves,
-    });
+    }, `${baseScope}:handleMoveChange()`);
   };
 
   // copies the matchup result description to the user's clipboard when the damage range is clicked
@@ -162,7 +164,7 @@ export const PokeMoves = ({
               terastallized: !pokemon?.terastallized,
               useZ: false,
               useMax: false,
-            })}
+            }, `${baseScope}:ToggleButton~Tera:onPress()`)}
           />
         }
 
@@ -184,7 +186,7 @@ export const PokeMoves = ({
               terastallized: false,
               useZ: !pokemon?.useZ,
               useMax: false,
-            })}
+            }, `${baseScope}:ToggleButton~Z:onPress()`)}
           />
         }
 
@@ -206,7 +208,7 @@ export const PokeMoves = ({
               terastallized: false,
               useZ: false,
               useMax: !pokemon?.useMax,
-            })}
+            }, `${baseScope}:ToggleButton~Max:onPress()`)}
           />
         }
 
@@ -226,7 +228,7 @@ export const PokeMoves = ({
             disabled={!pokemon?.speciesForme}
             onPress={() => updatePokemon({
               showMoveOverrides: !pokemon?.showMoveOverrides,
-            })}
+            }, `${baseScope}:ToggleButton~Edit:onPress()`)}
           />
         }
       </TableGridItem>
@@ -260,7 +262,7 @@ export const PokeMoves = ({
               disabled={!pokemon?.speciesForme}
               onPress={() => updatePokemon({
                 criticalHit: !pokemon?.criticalHit,
-              })}
+              }, `${baseScope}:ToggleButton~Crit:onPress()`)}
             />
           </TableGridItem>
 
@@ -438,7 +440,7 @@ export const PokeMoves = ({
                         moveOverrides: {
                           [moveName]: { type: value },
                         },
-                      }),
+                      }, `${baseScope}:PokeTypeField~Move:input.onChange()`),
                     }}
                   />
 
@@ -473,7 +475,7 @@ export const PokeMoves = ({
                             : 'Physical',
                         },
                       },
-                    }) : undefined}
+                    }, `${baseScope}:ToggleButton~Category:onPress()`) : undefined}
                   />
 
                   {
@@ -532,7 +534,7 @@ export const PokeMoves = ({
                               moveOverrides: {
                                 [moveName]: { offensiveStat: 'atk' },
                               },
-                            })}
+                            }, `${baseScope}:ToggleButton~Offense-ATK:onPress()`)}
                           />
                           <ToggleButton
                             className={styles.editorButton}
@@ -551,7 +553,7 @@ export const PokeMoves = ({
                               moveOverrides: {
                                 [moveName]: { offensiveStat: 'spa' },
                               },
-                            })}
+                            }, `${baseScope}:ToggleButton~Offense-SPA:onPress()`)}
                           />
 
                           <div
@@ -578,7 +580,7 @@ export const PokeMoves = ({
                               moveOverrides: {
                                 [moveName]: { defensiveStat: 'def' },
                               },
-                            })}
+                            }, `${baseScope}:ToggleButton~Defense-DEF:onPress()`)}
                           />
                           <ToggleButton
                             className={styles.editorButton}
@@ -597,7 +599,7 @@ export const PokeMoves = ({
                               moveOverrides: {
                                 [moveName]: { defensiveStat: 'spd' },
                               },
-                            })}
+                            }, `${baseScope}:ToggleButton~Defense-SPD:onPress()`)}
                           />
                           {/* update (2022/11/04): ignoreDefensive in createSmogonMove() doesn't seem to do anything */}
                           {/* <ToggleButton
@@ -636,7 +638,7 @@ export const PokeMoves = ({
                       moveOverrides: {
                         [moveName]: null,
                       },
-                    })}
+                    }, `${baseScope}:ToggleButton~Reset:onPress()`)}
                   />
                 </div>
               </TableGridItem>

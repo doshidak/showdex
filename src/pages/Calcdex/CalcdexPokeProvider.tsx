@@ -7,6 +7,7 @@ import {
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
+  hasMegaForme,
   mergeRevealedMoves,
   usageAltPercentFinder,
   usageAltPercentSorter,
@@ -56,6 +57,8 @@ export interface CalcdexPokeProviderProps {
   children?: React.ReactNode;
 }
 
+const baseScope = '@showdex/pages/Calcdex/CalcdexPokeProvider';
+
 export const CalcdexPokeProvider = ({
   playerKey,
   movesCount = 4,
@@ -80,16 +83,6 @@ export const CalcdexPokeProvider = ({
     legacy,
     field,
   } = state;
-
-  // update: don't flip the attackerSide/defenderSide since it's already being flipped in createSmogonField()
-  // const field = React.useMemo<CalcdexBattleField>(() => ({
-  //   ...fieldFromState,
-  //   attackerSide: playerKey === 'p1' ? fieldFromState?.attackerSide : fieldFromState?.defenderSide,
-  //   defenderSide: playerKey === 'p1' ? fieldFromState?.defenderSide : fieldFromState?.attackerSide,
-  // }), [
-  //   fieldFromState,
-  //   playerKey,
-  // ]);
 
   const opponentKey: CalcdexPlayerKey = playerKey === 'p1' ? 'p2' : 'p1';
   const player = React.useMemo(() => state[playerKey] || {}, [playerKey, state]);
@@ -189,6 +182,7 @@ export const CalcdexPokeProvider = ({
   const applyPreset = React.useCallback<CalcdexPokeContextConsumables['applyPreset']>((
     presetOrId,
     additionalMutations,
+    scope,
   ) => {
     const preset = typeof presetOrId === 'string'
       ? presets.find((p) => p?.calcdexId === presetOrId)
@@ -204,10 +198,14 @@ export const CalcdexPokeProvider = ({
       calcdexId: playerPokemon?.calcdexId,
       preset: preset.calcdexId,
 
-      moves: preset.moves,
-      nature: preset.nature,
+      altTeraTypes: [],
+      altAbilities: [],
       dirtyAbility: preset.ability,
+      nature: preset.nature,
+      altItems: [],
       dirtyItem: preset.item,
+      altMoves: [],
+      moves: preset.moves,
 
       ivs: {
         hp: preset?.ivs?.hp ?? defaultIv,
@@ -233,6 +231,12 @@ export const CalcdexPokeProvider = ({
 
     if (!mutation.calcdexId) {
       return;
+    }
+
+    // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
+    // if the preset was for its non-Mega forme (since they could have different abilities)
+    if (hasMegaForme(playerPokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
+      delete mutation.dirtyAbility;
     }
 
     // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
@@ -426,7 +430,7 @@ export const CalcdexPokeProvider = ({
     }
 
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
-    updatePokemon(playerKey, mutation);
+    updatePokemon(playerKey, mutation, scope || `${baseScope}:applyPreset()`);
   }, [
     defaultIv,
     legacy,
@@ -468,6 +472,9 @@ export const CalcdexPokeProvider = ({
     if (existingPreset) {
       return;
     }
+
+    // used for debugging purposes only
+    const scope = `${baseScope}:React.useEffect()`;
 
     const {
       downloadUsageStats,
@@ -513,14 +520,13 @@ export const CalcdexPokeProvider = ({
         updatePokemon(playerKey, {
           calcdexId: playerPokemon.calcdexId,
           showGenetics: true,
-        });
-        console.log('forcibly showing genetics for', playerPokemon.ident, playerPokemon);
+        }, scope);
       }
 
       return;
     }
 
-    applyPreset(initialPreset);
+    applyPreset(initialPreset, null, scope);
   }, [
     applyPreset,
     format,
@@ -583,16 +589,16 @@ export const CalcdexPokeProvider = ({
 
     applyPreset,
 
-    updatePokemon: (pokemon) => updatePokemon(playerKey, {
+    updatePokemon: (pokemon, scope) => updatePokemon(playerKey, {
       ...pokemon,
       calcdexId: playerPokemon?.calcdexId,
-    }),
+    }, scope || `${baseScope}:updatePokemon()`),
 
     updateField,
-    setActiveIndex: (index) => setActiveIndex(playerKey, index),
-    setActiveIndices: (indices) => setActiveIndices(playerKey, indices),
-    setSelectionIndex: (index) => setSelectionIndex(playerKey, index),
-    setAutoSelect: (autoSelect) => setAutoSelect(playerKey, autoSelect),
+    setActiveIndex: (index, scope) => setActiveIndex(playerKey, index, scope || `${baseScope}:setActiveIndex()`),
+    setActiveIndices: (indices, scope) => setActiveIndices(playerKey, indices, scope || `${baseScope}:setActiveIndices()`),
+    setSelectionIndex: (index, scope) => setSelectionIndex(playerKey, index, scope || `${baseScope}:setSelectionIndex()`),
+    setAutoSelect: (autoSelect, scope) => setAutoSelect(playerKey, autoSelect, scope || `${baseScope}:setAutoSelect()`),
   }), [
     abilityOptions,
     applyPreset,

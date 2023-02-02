@@ -95,7 +95,8 @@ export interface CalcdexProviderProps {
   children?: React.ReactNode;
 }
 
-const l = logger('@showdex/pages/Calcdex/CalcdexProvider');
+const baseScope = '@showdex/pages/Calcdex/CalcdexProvider';
+const l = logger(baseScope);
 
 export const CalcdexProvider = ({
   // battle,
@@ -324,7 +325,7 @@ export const CalcdexProvider = ({
     // renderMode,
     // shouldRender,
 
-    updatePokemon: (playerKey, pokemon) => {
+    updatePokemon: (playerKey, pokemon, scopeFromArgs) => {
       const updatedState = structuredClone(battleState);
       const playerState = updatedState[playerKey];
 
@@ -342,6 +343,10 @@ export const CalcdexProvider = ({
         return;
       }
 
+      // used for debugging purposes only
+      const scope = scopeFromArgs || `${baseScope}:updatePokemon()`;
+
+      // this is what we'll be replacing the one at pokemonIndex (i.e., the prevPokemon)
       const payload: CalcdexPokemonMutation = {
         ...prevPokemon,
         ...pokemon,
@@ -364,6 +369,11 @@ export const CalcdexProvider = ({
 
         if (abilities?.length) {
           payload.abilities = [...abilities];
+
+          // checking payload.ability so as to not overwrite what's actually revealed in battle
+          if (!prevPokemon.ability && !payload.abilities.includes(prevPokemon.dirtyAbility)) {
+            [payload.dirtyAbility] = payload.abilities;
+          }
         }
 
         if (types?.length) {
@@ -372,6 +382,19 @@ export const CalcdexProvider = ({
 
         if (Object.keys(baseStats || {}).length) {
           payload.baseStats = { ...baseStats };
+        }
+
+        // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
+        // (this will make the auto-preset applier in CalcdexPokeProvider apply the first preset
+        // for the new speciesForme again)
+        const preset = (
+          !!prevPokemon.preset
+            && !!prevPokemon.presets?.length // 'server' or 'sheets' would be present here only
+            && prevPokemon.presets.find((p) => p?.calcdexId === prevPokemon.preset)
+        ) || null;
+
+        if (!['server', 'sheet'].includes(preset?.source)) {
+          payload.preset = null;
         }
       }
 
@@ -509,18 +532,14 @@ export const CalcdexProvider = ({
         );
       }
 
+      // because of Ruin abilities, I have to do this, so here it is:
+      // this is the payload that will be dispatched below (after placing the `payload` at `pokemonIndex` above)
       const playerPayload: Partial<CalcdexPlayer> = {
         pokemon: playerState.pokemon,
       };
 
       // handle recounting Ruin abilities when something changes of the Pokemon
       if (updatedState.gen > 8) {
-        // playerPayload.side = sanitizePlayerSide(
-        //   updatedState.gen,
-        //   battle[playerKey],
-        //   playerState,
-        // );
-
         playerPayload.side = {
           ...playerPayload.side,
           ...countSideRuinAbilities(playerState),
@@ -528,6 +547,7 @@ export const CalcdexProvider = ({
       }
 
       dispatch(calcdexSlice.actions.updatePlayer({
+        scope,
         battleId,
         [playerKey]: playerPayload,
       }));
@@ -538,19 +558,8 @@ export const CalcdexProvider = ({
           .filter((k) => k !== playerKey && updatedState[k]?.active);
 
         otherPlayerKeys.forEach((otherPlayerKey) => {
-          // if (!(otherPlayerKey in battle)) {
-          //   return;
-          // }
-
-          // const otherPlayerPayload: Partial<CalcdexPlayer> = {
-          //   side: sanitizePlayerSide(
-          //     updatedState.gen,
-          //     battle[otherPlayerKey],
-          //     updatedState[otherPlayerKey],
-          //   ),
-          // };
-
           dispatch(calcdexSlice.actions.updatePlayer({
+            scope,
             battleId,
             [otherPlayerKey]: {
               side: countSideRuinAbilities(updatedState[otherPlayerKey]),
@@ -560,7 +569,7 @@ export const CalcdexProvider = ({
       }
     },
 
-    updateSide: (playerKey, side) => {
+    updateSide: (playerKey, side, scope) => {
       const updatedState = structuredClone(battleState);
       const playerState = updatedState[playerKey];
 
@@ -569,6 +578,7 @@ export const CalcdexProvider = ({
       }
 
       dispatch(calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:updateSide()`,
         battleId,
         [playerKey]: {
           side: {
@@ -579,7 +589,9 @@ export const CalcdexProvider = ({
       }));
     },
 
-    updateField: (field) => {
+    updateField: (field, scopeFromArgs) => {
+      const scope = scopeFromArgs || `${baseScope}:updateField()`;
+
       if (battleState.gen > 8 && ('weather' in field || 'terrain' in field)) {
         const updatedState = structuredClone(battleState);
 
@@ -612,6 +624,7 @@ export const CalcdexProvider = ({
           });
 
           dispatch(calcdexSlice.actions.updatePlayer({
+            scope,
             battleId,
             [playerKey]: { pokemon },
           }));
@@ -619,22 +632,29 @@ export const CalcdexProvider = ({
       }
 
       dispatch(calcdexSlice.actions.updateField({
+        scope,
         battleId,
         field,
       }));
     },
 
-    setActiveIndex: (playerKey, activeIndex) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId,
-      [playerKey]: { activeIndex },
-    })),
+    setActiveIndex: (playerKey, activeIndex, scope) => dispatch(
+      calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setActiveIndex()`,
+        battleId,
+        [playerKey]: { activeIndex },
+      }),
+    ),
 
-    setActiveIndices: (playerKey, activeIndices) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId,
-      [playerKey]: { activeIndices },
-    })),
+    setActiveIndices: (playerKey, activeIndices, scope) => dispatch(
+      calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setActiveIndices()`,
+        battleId,
+        [playerKey]: { activeIndices },
+      }),
+    ),
 
-    setSelectionIndex: (playerKey, selectionIndex) => {
+    setSelectionIndex: (playerKey, selectionIndex, scope) => {
       if (!playerKey || !(playerKey in battleState) || selectionIndex < 0) {
         return;
       }
@@ -680,15 +700,19 @@ export const CalcdexProvider = ({
       }
 
       dispatch(calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setSelectionIndex()`,
         battleId,
         [playerKey]: playerPayload,
       }));
     },
 
-    setAutoSelect: (playerKey, autoSelect) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId,
-      [playerKey]: { autoSelect },
-    })),
+    setAutoSelect: (playerKey, autoSelect, scope) => dispatch(
+      calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setAutoSelect()`,
+        battleId,
+        [playerKey]: { autoSelect },
+      }),
+    ),
   }), [
     // battle,
     battleId,
