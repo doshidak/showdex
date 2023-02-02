@@ -24,10 +24,10 @@ const DexDescriptionFormatters: { regex: RegExp; replacement: string; }[] = [
   { regex: /1\/8[\w\s]+max\s+HP/, replacement: '12% HP' },
   { regex: /1\/10[\w\s]+max\s+HP/, replacement: '10% HP' },
   { regex: /1\/16[\w\s]+max\s+HP/, replacement: '6% HP' },
-  { regex: /(?:Attack(?!s)|(?<!Sp\.?\s+)Atk(?=[.,:;!?\s]))/, replacement: 'ATK' },
-  { regex: /(?:Defense(?!s)|(?<!Sp\.?\s+)Def(?=[.,:;!?\s]))/, replacement: 'DEF' },
-  { regex: /(?:Sp\.?\s+Atk|SpA(?=[.,:;!?\s]))/, replacement: 'SPA' },
-  { regex: /(?:Sp\.?\s+Def|SpD(?=[.,:;!?\s]))/, replacement: 'SPD' },
+  { regex: /(?:(?<!Special\s+|Sp\.?\s+)Attack(?!s)|(?<!Sp\.?\s+)Atk(?=[.,:;!?\s]))/, replacement: 'ATK' },
+  { regex: /(?:(?<!Special\s+|Sp\.?\s+)Defense(?!s)|(?<!Sp\.?\s+)Def(?=[.,:;!?\s]))/, replacement: 'DEF' },
+  { regex: /(?:Special\s+Attack|Sp\.?\s+Atk|SpA(?=[.,:;!?\s]))/, replacement: 'SPA' },
+  { regex: /(?:Special\s+Defense|Sp\.?\s+Def|SpD(?=[.,:;!?\s]))/, replacement: 'SPD' },
   { regex: /(?:Speed(?!s)|Spe(?=[.,:;!?\s]))/, replacement: 'SPE' },
 ];
 
