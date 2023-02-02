@@ -59,6 +59,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     l.debug(
       'RECV', SyncBattleActionType, 'for', battle?.id || '(missing battle.id)',
       '\n', 'payload', payload,
+      '\n', 'settings', settings,
       '\n', 'state', state,
     );
 
@@ -937,11 +938,13 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // sync player side
-      playerState.side = sanitizePlayerSide(
-        battleState.gen,
-        battle[playerKey],
-        playerState,
-      );
+      if (playerState.active) {
+        playerState.side = sanitizePlayerSide(
+          battleState.gen,
+          playerState,
+          battle[playerKey],
+        );
+      }
     }
 
     const syncedField = syncField(
