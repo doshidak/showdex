@@ -535,7 +535,7 @@ export const CalcdexProvider = ({
       // handle recounting Ruin abilities for other players
       if (updatedState.gen > 8) {
         const otherPlayerKeys = AllPlayerKeys
-          .filter((k) => k !== playerKey && battleState[k]?.active);
+          .filter((k) => k !== playerKey && updatedState[k]?.active);
 
         otherPlayerKeys.forEach((otherPlayerKey) => {
           // if (!(otherPlayerKey in battle)) {
@@ -553,7 +553,7 @@ export const CalcdexProvider = ({
           dispatch(calcdexSlice.actions.updatePlayer({
             battleId,
             [otherPlayerKey]: {
-              side: countSideRuinAbilities(playerState),
+              side: countSideRuinAbilities(updatedState[otherPlayerKey]),
             },
           }));
         });
