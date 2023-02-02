@@ -11,6 +11,7 @@ import { PlayerCalc } from './PlayerCalc';
 import styles from './Calcdex.module.scss';
 
 export interface CalcdexProps {
+  // overlayVisible?: boolean;
   onRequestOverlayClose?: () => void;
 }
 
@@ -27,25 +28,26 @@ export const Calcdex = ({
   const {
     state,
     settings,
-    renderMode,
-    shouldRender,
+    // shouldRender,
   } = useCalcdexContext();
 
   const colorScheme = useColorScheme();
   const mobile = useMobileViewport();
 
-  if (!shouldRender) {
-    return null;
-  }
-
-  const renderAsOverlay = renderMode === 'overlay';
-
   const {
     battleId,
+    renderMode,
+    // overlayVisible,
     playerKey,
     authPlayerKey,
     opponentKey,
   } = state;
+
+  const renderAsOverlay = renderMode === 'overlay';
+
+  // if (renderAsOverlay && !overlayVisible) {
+  //   return null;
+  // }
 
   // if authPlayerKey = playerKey = 'p1' and opponentKey = 'p2',
   // then topKey = 'p2' if authPosition is 'bottom' and 'p1' otherwise;
@@ -115,9 +117,12 @@ export const Calcdex = ({
           />
 
           {
-            (renderAsOverlay && mobile) &&
+            renderAsOverlay &&
             <CloseCalcdexButton
-              className={styles.bottomCloseButton}
+              className={cx(
+                styles.bottomCloseButton,
+                mobile && styles.mobile,
+              )}
               onPress={onRequestOverlayClose}
             />
           }

@@ -120,13 +120,13 @@ export const CalcdexPokeProvider = ({
 
   // note: `preset` is confusingly the `calcdexId` of the preset
   // (there's a todo for `preset` to update its name lol)
-  const appliedPreset = (playerPokemon?.preset ? [
+  const currentPreset = (playerPokemon?.preset ? [
     ...presets,
     ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
   ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset);
 
   const usage = (usages?.length === 1 && usages[0])
-    || (!!appliedPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(appliedPreset.name)))
+    || (!!currentPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(currentPreset.name)))
     || usages?.find((p) => p?.source === 'usage');
 
   // build dropdown options
@@ -247,12 +247,8 @@ export const CalcdexPokeProvider = ({
     const teraTypesUsage = detectedUsage?.teraTypes?.filter(detectUsageAlt);
 
     if (teraTypesUsage?.length) {
-      // mutation.altTeraTypes = flatAltTeraTypes
-      //   .map((t) => [t, teraTypesUsage.find((u) => u[0] === t)?.[1] || 0] as CalcdexPokemonUsageAlt<Showdown.TypeName>)
-      //   .sort(sortUsageAlts);
-      mutation.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
-
       // update the teraType to the most likely one after sorting
+      mutation.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
       [mutation.teraType] = mutation.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
     } else if (altTeraTypes?.[0]) {
       // apply the first teraType from the preset's teraTypes
@@ -447,7 +443,7 @@ export const CalcdexPokeProvider = ({
 
   // this will allow the user to switch back to the "Yours" preset for a transformed Pokemon
   // (using a ref instead of state since we don't want to cause an unnecessary re-render)
-  const appliedTransformedPreset = React.useRef<boolean>(false);
+  const appliedTransformedPreset = React.useRef(false);
 
   // automatically apply the first preset if the Pokemon has no/invalid preset
   // (invalid presets could be due to the forme changing, so new presets are loaded in)
@@ -464,7 +460,6 @@ export const CalcdexPokeProvider = ({
     const existingPreset = playerPokemon.preset && presets?.length
       ? presets.find((p) => p?.calcdexId === playerPokemon.preset && (
         !playerPokemon.transformedForme
-          // || formatId(p.name) !== 'yours'
           || p.source !== 'server' // i.e., the 'Yours' preset
           || appliedTransformedPreset.current
       ))
@@ -483,18 +478,11 @@ export const CalcdexPokeProvider = ({
     // If we are playing random battles, grab the appropriate randombattles set.
     let initialPreset = presets[0]; // presets[0] as the default case
 
-    // update (2022/10/27): will always be first preset in randoms
-    // if (format.includes('random')) {
-    //   initialPreset = presets.find((p) => (
-    //     (p.format === format)
-    //   ));
-    // } else if (downloadUsageStats && prioritizeUsageStats) {
-
     // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
     // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
     // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
     if (playerPokemon.transformedForme && presets[1]) {
-      [, initialPreset] = presets; // readability 100
+      [, initialPreset] = presets; // readability 100; fancy JS way of writing initialPresets = presets[1]
       appliedTransformedPreset.current = true;
     }
 
@@ -502,9 +490,9 @@ export const CalcdexPokeProvider = ({
       // If we aren't in a random battle, check if we should prioritize
       // the showdown usage stats.
       // note: 'usage'-sourced sets won't exist in `presets` for Randoms formats
-      const usagePreset = presets.find((p) => (
-        // (p.format === format?.replace(/^gen\d/, '') && formatId(p.name) === 'showdownusage')
-        p?.source === 'usage' && (!format || format.includes(p.format))
+      const usagePreset = presets.find((p) => p?.source === 'usage' && (
+        !format
+          || format.includes(p.format)
       ));
 
       // only update if we found a Showdown Usage preset for the format
@@ -526,6 +514,7 @@ export const CalcdexPokeProvider = ({
           calcdexId: playerPokemon.calcdexId,
           showGenetics: true,
         });
+        console.log('forcibly showing genetics for', playerPokemon.ident, playerPokemon);
       }
 
       return;

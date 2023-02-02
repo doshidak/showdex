@@ -5,7 +5,7 @@ import type {
   CalcdexPlayerKey,
   CalcdexPlayerSide,
   CalcdexPokemon,
-  CalcdexRenderMode,
+  // CalcdexRenderMode,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
 
@@ -22,8 +22,8 @@ export interface CalcdexContextConsumables {
   state: CalcdexBattleState;
   settings: ShowdexCalcdexSettings;
 
-  renderMode: CalcdexRenderMode;
-  shouldRender: boolean;
+  // renderMode: CalcdexRenderMode;
+  // shouldRender: boolean;
 
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemonMutation) => void;
   updateSide: (playerKey: CalcdexPlayerKey, side: CalcdexPlayerSideMutation) => void;

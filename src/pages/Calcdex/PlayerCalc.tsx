@@ -273,7 +273,7 @@ export const PlayerCalc = ({
 
             // only tracking Ruin abilities (gen 9) atm
             const abilityActive = !legacy
-              && formatId(ability).endsWith('ofruin')
+              && formatId(ability)?.endsWith('ofruin')
               && pokemon.abilityToggled;
 
             const pokemonActive = !!pokemon?.calcdexId

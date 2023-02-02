@@ -910,10 +910,14 @@ export type CalcdexLeanSide = Partial<Omit<NonFunctionProperties<Showdown.Side>,
   | 'active'
   | 'ally'
   | 'battle'
+  | 'faintCounter'
   | 'foe'
+  | 'isFar'
   | 'lastPokemon'
   | 'missedPokemon'
+  | 'n'
   | 'pokemon'
+  | 'sideConditions'
   | 'wisher'
   | 'x'
   | 'y'
@@ -1069,6 +1073,15 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
  * @since 0.1.3
  */
 export interface CalcdexPlayerSide extends SmogonState.Side {
+  /**
+   * Current side conditions synced directly from the battle.
+   *
+   * * Not used by the calc, but by `sanitizePlayerSide()` to populate `spikes` and `isSR` (*Stealth Rock*).
+   *
+   * @since 1.1.3
+   */
+  conditions?: Showdown.Side['sideConditions'];
+
   isProtected?: boolean;
   isSeeded?: boolean;
   isFriendGuard?: boolean;
@@ -1422,6 +1435,15 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   renderMode?: CalcdexRenderMode;
 
   /**
+   * Whether the overlay is open/visible.
+   *
+   * * Has no effect if `renderMode` is not `'overlay'`.
+   *
+   * @since 1.1.3
+   */
+  overlayVisible?: boolean;
+
+  /**
    * Side key/ID of the player.
    *
    * * Does not necessarily mean the logged-in user ("auth") is a player.
@@ -1602,6 +1624,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         turn = 0,
         active = false,
         renderMode,
+        overlayVisible = false,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
@@ -1631,7 +1654,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...payload,
 
         battleId,
-        battleNonce: null, // make sure we don't set this for the syncBattle() action
+        // battleNonce: null, // make sure we don't set this for the syncBattle() action
 
         gen,
         format,
@@ -1641,6 +1664,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         active,
 
         renderMode,
+        overlayVisible: renderMode === 'overlay' && overlayVisible,
 
         playerKey,
         authPlayerKey,
@@ -1706,6 +1730,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen,
         format,
         active,
+        overlayVisible,
       } = action.payload;
 
       if (!battleId) {
@@ -1734,6 +1759,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
         format: format || currentState.format,
         // active: typeof active === 'boolean' ? active : currentState.active,
+        overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
       };
 
       // for the active state, only update if previously true and the new value is false
