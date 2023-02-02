@@ -32,7 +32,11 @@ export const transformRandomsPresetResponse = (
 
   const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
   const legacy = detectLegacyGen(gen);
+
+  // see notes for the `evs` property in `PkmnSmogonRandomPreset` in `@showdex/redux/services/pkmnApi`
+  // for more info about why 84 EVs is the default value for each stat
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 0 : 84;
 
   // at least this is only O(n)
   // ...stonks
@@ -90,16 +94,14 @@ export const transformRandomsPresetResponse = (
         spe: ivs?.spe ?? defaultIv,
       },
 
-      // see notes for the `evs` property in `PkmnSmogonRandomPreset` in `@showdex/redux/services/pkmnApi`
-      // for more info about why 84 EVs is the default value for each stat
       evs: {
         ...(!legacy && {
-          hp: evs?.hp ?? 84,
-          atk: evs?.atk ?? 84,
-          def: evs?.def ?? 84,
-          spa: evs?.spa ?? 84,
-          spd: evs?.spd ?? 84,
-          spe: evs?.spe ?? 84,
+          hp: evs?.hp ?? defaultEv,
+          atk: evs?.atk ?? defaultEv,
+          def: evs?.def ?? defaultEv,
+          spa: evs?.spa ?? defaultEv,
+          spd: evs?.spd ?? defaultEv,
+          spe: evs?.spe ?? defaultEv,
         }),
       },
     };
@@ -156,15 +158,23 @@ export const transformRandomsPresetResponse = (
         // moves the EVs/IVs into each role instead of in the parent (only for Gen 9 Randoms btw)
         if (!legacy && Object.keys(roleEvs || {}).length) {
           rolePreset.evs = {
-            ...rolePreset.evs,
-            ...roleEvs,
+            hp: roleEvs?.hp ?? defaultEv,
+            atk: roleEvs?.atk ?? defaultEv,
+            def: roleEvs?.def ?? defaultEv,
+            spa: roleEvs?.spa ?? defaultEv,
+            spd: roleEvs?.spd ?? defaultEv,
+            spe: roleEvs?.spe ?? defaultEv,
           };
         }
 
         if (Object.keys(roleIvs || {}).length) {
           rolePreset.ivs = {
-            ...rolePreset.ivs,
-            ...roleIvs,
+            hp: roleIvs?.hp ?? defaultIv,
+            atk: roleIvs?.atk ?? defaultIv,
+            def: roleIvs?.def ?? defaultIv,
+            spa: roleIvs?.spa ?? defaultIv,
+            spd: roleIvs?.spd ?? defaultIv,
+            spe: roleIvs?.spe ?? defaultIv,
           };
         }
 
