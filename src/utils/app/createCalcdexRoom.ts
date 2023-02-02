@@ -48,7 +48,7 @@ export const createCalcdexRoom = (
 
       if (battle?.id) {
         delete battle.calcdexRoom;
-        delete battle.calcdexReactRoot;
+        // delete battle.calcdexReactRoot; // update (2023/02/01): no longer exists in battle
       }
 
       // we need to grab a fresher version of the state when this function runs
