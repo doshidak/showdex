@@ -256,6 +256,12 @@ export const createSmogonPokemon = (
   //   }
   // }
 
+  // calc will apply STAB boosts for ALL moves regardless of the Pokemon's changed type and the move's type
+  // if the Pokemon has Protean or Libero; we don't want this to happen since the client reports the changed typings
+  if (['protean', 'libero'].includes(abilityId)) {
+    options.ability = 'Pressure';
+  }
+
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
   // so we won't report these abilities to the calc to avoid unintentional double boostage
   if (['intrepidsword', 'download'].includes(abilityId)) {
