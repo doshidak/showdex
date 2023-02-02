@@ -4,6 +4,7 @@ export * from './buildItemOptions';
 export * from './buildMoveOptions';
 export * from './buildPresetOptions';
 export * from './countRuinAbilities';
+export * from './countSideRuinAbilities';
 export * from './detectBattleRules';
 export * from './detectGenFromFormat';
 export * from './detectLegacyGen';
