@@ -311,10 +311,12 @@ export const PlayerCalc = ({
 
                     {
                       abilityActive &&
-                      <span className={styles.activeAbility}>
+                      <>
                         <br />
-                        {ability}
-                      </span>
+                        <span className={styles.activeAbility}>
+                          {ability}
+                        </span>
+                      </>
                     }
 
                     {
@@ -322,6 +324,16 @@ export const PlayerCalc = ({
                       <>
                         <br />
                         {item}
+                      </>
+                    }
+
+                    {
+                      (!pokemon?.dirtyItem && !!pokemon?.prevItem) &&
+                      <>
+                        <br />
+                        <span className={styles.prevItem}>
+                          {pokemon.prevItem}
+                        </span>
                       </>
                     }
                   </div>

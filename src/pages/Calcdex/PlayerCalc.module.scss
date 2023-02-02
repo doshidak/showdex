@@ -187,6 +187,11 @@ button.usernameButton {
   color: colors.$blue;
 }
 
+.prevItem {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
 .background {
   // @include position.absolute-anchor($x: -3px, $y: -6px);
   // @include position.absolute-anchor($x: 0px, $y: -3px);
