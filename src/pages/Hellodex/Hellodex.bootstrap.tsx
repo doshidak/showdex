@@ -82,7 +82,7 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       // we'll toggle it both ways here (only if we didn't have to focus the room),
       // for use as an "emergency exit" (hehe) should the "Close Calcdex" go missing...
       // but it shouldn't tho, think I covered all the bases... hopefully :o
-      if (!shouldFocus || !battleRoom.battle?.calcdexOverlayVisible) {
+      if (!shouldFocus || !battleState.overlayVisible) {
         battleRoom.toggleCalcdexOverlay?.();
       }
 
@@ -107,15 +107,15 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       renderCalcdex(
         calcdexReactRoot,
         store,
-        battleRoom?.battle || battleId,
-        battleRoom,
+        battleRoom?.battle?.id || battleId,
+        // battleRoom,
       );
 
-      // if the battleRoom exists, attach the created room and ReactDOM root to the battle object
+      // if the battleRoom exists, attach the created room to the battle object
       if (battleRoom?.battle?.id) {
         battleRoom.battle.calcdexDestroyed = false; // just in case
         battleRoom.battle.calcdexRoom = calcdexRoom;
-        battleRoom.battle.calcdexReactRoot = calcdexReactRoot;
+        // battleRoom.battle.calcdexReactRoot = calcdexReactRoot;
       }
     }
 
