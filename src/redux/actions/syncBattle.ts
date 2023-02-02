@@ -524,7 +524,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 }
               }
 
-              if (battleState.gen > 1 && matchedPreset.item) {
+              // checking prevItem to make sure to not apply the item if their actual item was knocked off, for instance
+              // (in which case prevItem would be 'Focus Sash' and prevItemEffect would be 'knocked off')
+              if (battleState.gen > 1 && matchedPreset.item && !syncedPokemon.prevItem) {
                 syncedPokemon.item = matchedPreset.item;
                 syncedPokemon.dirtyItem = null;
               }
@@ -977,10 +979,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     l.debug(
-      'Dispatching synced battleState for', battleState.battleId || '(missing battleId)',
+      'Dispatching synced battleState for', battleState.battleId || '???',
       '\n', 'battle', battle,
-      '\n', 'battleState', battleState,
-      '\n', 'state', state,
+      '\n', 'state', battleState,
     );
 
     return battleState;
