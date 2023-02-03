@@ -26,6 +26,7 @@ export const useSmogonMatchup = (
   opponentPokemon: CalcdexPokemon,
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
+  allPlayers?: CalcdexPlayer[],
   field?: CalcdexBattleField,
   settings?: ShowdexCalcdexSettings,
 ): SmogonMatchupHookCalculator => React.useCallback<SmogonMatchupHookCalculator>((
@@ -37,9 +38,11 @@ export const useSmogonMatchup = (
   playerMove,
   player,
   opponent,
+  allPlayers,
   field,
   settings,
 ), [
+  allPlayers,
   field,
   format,
   opponent,

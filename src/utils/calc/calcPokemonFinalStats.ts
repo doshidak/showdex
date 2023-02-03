@@ -47,6 +47,7 @@ export const calcPokemonFinalStats = (
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
   field?: CalcdexBattleField,
+  allPlayers?: CalcdexPlayer[], // primarily for FFA... like Ruin abilities... fun fun
 ): CalcdexStatModRecording => {
   const record = statModRecorder(pokemon);
 
@@ -285,8 +286,8 @@ export const calcPokemonFinalStats = (
   // apply "Ruin" ability effects that'll ruin me (gen 9)
   // update (2022/12/14): Showdown fixed the Ruin stacking bug, so apply only once now
   // update (2023/01/23): apparently Ruin abilities will CANCEL each other out if BOTH Pokemon have it
-  if (ruinAbilitiesActive(player?.side, opponent?.side)) {
-    const ruinCounts = countRuinAbilities(player?.side, opponent?.side);
+  if (allPlayers?.length && ruinAbilitiesActive(...allPlayers.map((p) => p?.side))) {
+    const ruinCounts = countRuinAbilities(...allPlayers.map((p) => p?.side));
 
     // 25% SPD reduction if there's at least one Pokemon with the "Beads of Ruin" ability (excluding this `pokemon`)
     const ruinBeadsCount = Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? ruinCounts.beads : 0), 0);

@@ -7,6 +7,7 @@ export const createSmogonField = (
   field: CalcdexBattleField,
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
+  allPlayers?: CalcdexPlayer[],
 ): SmogonField => {
   if (!field?.gameType) {
     return null;
@@ -18,9 +19,11 @@ export const createSmogonField = (
     defenderSide: opponent?.side,
   };
 
+  const allPlayerSides = (allPlayers || [player, opponent])?.map((p) => p?.side) || [];
+
   // check for Ruin abilities from active Pokemon on the field (gen 9)
   // (ability counts are set in sanitizeField, so ignore processing if they're all 0)
-  const hasActiveRuin = ruinAbilitiesActive(player?.side, opponent?.side);
+  const hasActiveRuin = ruinAbilitiesActive(...allPlayerSides);
 
   // update (2023/01/30): @smogon/calc now implemented the Ruin effects if the Pokemon has them
   // (before they did nothing), so we don't need to rely on these field toggles if not Doubles
@@ -30,7 +33,7 @@ export const createSmogonField = (
   // note that this will apply for the playerPokemon only to calculate the current matchup
   // (specifically the playerPokemon's playerMove in calcSmogonMatchup())
   if (hasActiveRuin && doubles) {
-    const ruinCounts = countRuinAbilities(player.side, opponent.side);
+    const ruinCounts = countRuinAbilities(...allPlayerSides);
 
     // update (2023/01/31): check if any of the Pokemon in the 1v1 matchup (Pokemon at the selectionIndex for both players)
     // have a Ruin ability, and if not, set these field toggles. DON'T set them if one of them DO have the specific Ruin ability.

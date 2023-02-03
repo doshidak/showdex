@@ -104,6 +104,7 @@ export const calcSmogonMatchup = (
   playerMove: MoveName,
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
+  allPlayers?: CalcdexPlayer[],
   field?: CalcdexBattleField,
   settings?: ShowdexCalcdexSettings,
 ): CalcdexMatchupResult => {
@@ -160,7 +161,7 @@ export const calcSmogonMatchup = (
   //   basePowerMods.push(2);
   // }
 
-  const smogonField = createSmogonField(field, player, opponent);
+  const smogonField = createSmogonField(field, player, opponent, allPlayers);
 
   matchup.attacker = createSmogonPokemon(format, playerPokemon, playerMove, opponentPokemon, smogonField);
   matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
