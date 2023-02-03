@@ -358,9 +358,10 @@ export const CalcdexPokeProvider = ({
     }
 
     // check if we already have revealed moves (typical of spectating or replaying a battle)
+    // update (2023/02/03): merging all mutations to provide altMoves[] (for Hidden Power moves)
     mutation.moves = playerPokemon.transformedForme && playerPokemon.transformedMoves?.length
       ? [...playerPokemon.transformedMoves]
-      : mergeRevealedMoves({ ...playerPokemon, moves: mutation.moves });
+      : mergeRevealedMoves({ ...playerPokemon, ...mutation });
 
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
@@ -432,7 +433,11 @@ export const CalcdexPokeProvider = ({
     }
 
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
-    updatePokemon(playerKey, mutation, scope || `${baseScope}:applyPreset()`);
+    updatePokemon(
+      playerKey,
+      mutation,
+      `${baseScope}:applyPreset() via ${scope || '(anon)'}`,
+    );
   }, [
     defaultIv,
     legacy,
