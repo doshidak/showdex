@@ -101,6 +101,11 @@ export const PokeMoveOptionTooltip = ({
     && (dexMove.accuracy || 0) > 0
     && dexMove.accuracy !== 100;
 
+  // Z/Max/G-Max moves also don't inherit the original move's priority
+  const showPriority = !!dexMove.priority
+    && !pokemon?.useZ
+    && !pokemon?.useMax;
+
   return (
     <div
       className={cx(
@@ -189,7 +194,7 @@ export const PokeMoveOptionTooltip = ({
         }
 
         {
-          !!dexMove.priority &&
+          showPriority &&
           <div className={styles.moveProperty}>
             <div className={styles.propertyName}>
               PRI
