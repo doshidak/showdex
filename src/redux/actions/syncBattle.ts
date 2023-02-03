@@ -417,7 +417,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // settings?.showAllFormes, // update (2023/01/05): no longer a setting
           true,
           (!isMyPokemonSide || !hasMyPokemon)
-            && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey ? 'auth' : playerKey],
+            // update (2023/02/03): defaultAutoMoves.auth is always false since we'd normally have myPokemon,
+            // but in cases of old replays, myPokemon won't be available, so we'd want to respect the user's setting
+            // using the playerKey instead of 'auth'
+            && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey && hasMyPokemon ? 'auth' : playerKey],
           teambuilderPresets,
         );
 
