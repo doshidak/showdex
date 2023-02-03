@@ -655,15 +655,33 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - See the `name` property in `CalcdexPokemonPreset` for more information.
    * * Recommended you use the preset's `calcdexId` as this property's value instead.
    *
-   * @todo Rename this to `presetId` to avoid confusion about this property's type.
+   * @deprecated As of v1.1.3, this property is no longer being used in favor of `presetId`.
+   *   Most instances of `preset` have been replaced with `presetId`, but just in case, I'm leaving this
+   *   still defined for now.
    * @since 0.1.0
    */
   preset?: string;
 
   /**
+   * ID of the preset that's currently applied to the Pokemon.
+   *
+   * * ID refers to the `calcdexId` of the preset.
+   * * Same functionality as the `preset` property that existed since day one (v0.1.0).
+   *   - Renamed since `preset` doesn't store a `CalcdexPokemonPreset` anymore, but its `calcdexId`.
+   *
+   * @since 1.1.3
+   */
+  presetId?: string;
+
+  /**
    * Available presets (i.e., sets) for the Pokemon.
    *
-   * @todo change this to `string[]` (of calcdexId's) for better memory management
+   * * These are typically presets derived from the battle, not downloaded from an external repository.
+   *   - You'll find presets sourced from the `'server'`, `'storage'`/`'storage-box'` (from the Teambuilder),
+   *     `'import'` (imported PokePastes), and `'sheets'` (open team sheets or `!showteam`).
+   * * As such, this is uniquely populated for each battle, if presets from any of the aforementioned sources
+   *   are available.
+   *
    * @default
    * ```ts
    * []

@@ -113,10 +113,10 @@ export const CalcdexPokeProvider = ({
 
   // note: `preset` is confusingly the `calcdexId` of the preset
   // (there's a todo for `preset` to update its name lol)
-  const currentPreset = (playerPokemon?.preset ? [
+  const currentPreset = (playerPokemon?.presetId ? [
     ...presets,
     ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
-  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset);
+  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.presetId);
 
   const usage = (usages?.length === 1 && usages[0])
     || (!!currentPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(currentPreset.name)))
@@ -196,8 +196,10 @@ export const CalcdexPokeProvider = ({
       ...additionalMutations,
 
       calcdexId: playerPokemon?.calcdexId,
-      preset: preset.calcdexId,
+      presetId: preset.calcdexId,
 
+      // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
+      // the new preset (don't want alts from a previous set to persist if none are defined)
       altTeraTypes: [],
       altAbilities: [],
       dirtyAbility: preset.ability,
@@ -262,7 +264,7 @@ export const CalcdexPokeProvider = ({
 
     // don't apply the dirtyAbility/dirtyItem if we're applying the Pokemon's first preset and
     // their abilility/item was already revealed or it matches the Pokemon's revealed ability/item
-    // const clearDirtyAbility = (!playerPokemon.preset && playerPokemon.ability)
+    // const clearDirtyAbility = (!playerPokemon.presetId && playerPokemon.ability)
     //   || playerPokemon.ability === preset.ability;
 
     // update (2022/10/07): don't apply the dirtyAbility/dirtyItem at all if their non-dirty
@@ -273,7 +275,7 @@ export const CalcdexPokeProvider = ({
       mutation.dirtyAbility = null;
     }
 
-    // const clearDirtyItem = (!playerPokemon.preset && playerPokemon.item && playerPokemon.item !== '(exists)')
+    // const clearDirtyItem = (!playerPokemon.presetId && playerPokemon.item && playerPokemon.item !== '(exists)')
     //   || playerPokemon.item === preset.item
     //   || (!playerPokemon.item && playerPokemon.prevItem && playerPokemon.prevItemEffect);
     const clearDirtyItem = (playerPokemon.item && playerPokemon.item !== '(exists)')
@@ -461,8 +463,8 @@ export const CalcdexPokeProvider = ({
       appliedTransformedPreset.current = false;
     }
 
-    const existingPreset = playerPokemon.preset && presets?.length
-      ? presets.find((p) => p?.calcdexId === playerPokemon.preset && (
+    const existingPreset = playerPokemon.presetId && presets?.length
+      ? presets.find((p) => p?.calcdexId === playerPokemon.presetId && (
         !playerPokemon.transformedForme
           || p.source !== 'server' // i.e., the 'Yours' preset
           || appliedTransformedPreset.current

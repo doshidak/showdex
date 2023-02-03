@@ -71,7 +71,7 @@ const calcPokemonCalcdexNonce = (
   dirtyBaseStats: (!!pokemon?.speciesForme && 'dirtyBaseStats' in pokemon && calcCalcdexId(pokemon.dirtyBaseStats)) || null,
   spreadStats: (!!pokemon?.speciesForme && 'spreadStats' in pokemon && calcCalcdexId(pokemon.spreadStats)) || null,
   criticalHit: (!!pokemon?.speciesForme && 'criticalHit' in pokemon && pokemon.criticalHit?.toString()) || null,
-  // preset: pokemon?.preset,
+  // presetId: pokemon?.presetId,
   // presets: pokemon?.presets?.map((p) => p?.calcdexId || p?.name).join('|'),
 });
 

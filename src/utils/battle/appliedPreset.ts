@@ -13,7 +13,7 @@ import { detectLegacyGen } from './detectLegacyGen';
  *   - Moves (in no particular order as long as all of the `preset`'s moves exist in `pokemon.moves`),
  *   - IVs (DVs if legacy; SPD is ignored for gen 1 since SPA is used for SPC),
  *   - EVs (if not legacy),
- * * Note that the `calcdexId` of the `preset` & `pokemon.preset` and `teraTypes` are not taken into consideration.
+ * * Note that the `calcdexId` of the `preset` & `pokemon.presetId` and `teraTypes` are not taken into consideration.
  * * Dirty properties are considered for the `pokemon` only, but no alternative properties in `preset` are considered.
  *
  * @example

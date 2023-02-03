@@ -474,7 +474,7 @@ export const syncPokemon = (
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves,
     // either from the Teambuilder presets (if enabled) or guessing the spread
-    if (!syncedPokemon.preset) {
+    if (!syncedPokemon.presetId) {
       let serverPreset: CalcdexPokemonPreset = null;
 
       // first, attempt to find a matching Teambuilder preset, if provided
@@ -568,7 +568,7 @@ export const syncPokemon = (
 
         // disabling autoPreset since we already set the preset here
         // (also tells PokeInfo not to apply the first preset)
-        syncedPokemon.preset = serverPreset.calcdexId;
+        syncedPokemon.presetId = serverPreset.calcdexId;
         syncedPokemon.autoPreset = false;
       }
     }

@@ -442,7 +442,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               settings.includeTeambuilder === 'always'
                 || (settings.includeTeambuilder === 'teams' && p.source === 'storage')
                 || (settings.includeTeambuilder === 'boxes' && p.source === 'storage-box')
-                || syncedPokemon.preset === p.calcdexId // include the matched Teambuilder team if 'boxes'
+                || syncedPokemon.presetId === p.calcdexId // include the matched Teambuilder team if 'boxes'
             )
           ));
 
@@ -556,7 +556,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               // which omits EVs, IVs, and nature (in which case, we didn't add incomplete presets to the Pokemon's presets
               // in the first place, so the some() call would return false)
               if (syncedPokemon.presets.some((p) => p?.calcdexId === matchedPreset.calcdexId)) {
-                syncedPokemon.preset = matchedPreset.calcdexId;
+                syncedPokemon.presetId = matchedPreset.calcdexId;
               }
             } // end shouldApplyPreset
           } // end shouldAddPresets

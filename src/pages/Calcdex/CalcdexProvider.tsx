@@ -388,13 +388,13 @@ export const CalcdexProvider = ({
         // (this will make the auto-preset applier in CalcdexPokeProvider apply the first preset
         // for the new speciesForme again)
         const preset = (
-          !!prevPokemon.preset
+          !!prevPokemon.presetId
             && !!prevPokemon.presets?.length // 'server' or 'sheets' would be present here only
-            && prevPokemon.presets.find((p) => p?.calcdexId === prevPokemon.preset)
+            && prevPokemon.presets.find((p) => p?.calcdexId === prevPokemon.presetId)
         ) || null;
 
         if (!['server', 'sheet'].includes(preset?.source)) {
-          payload.preset = null;
+          payload.presetId = null;
         }
       }
 

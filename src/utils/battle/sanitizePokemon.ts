@@ -186,7 +186,7 @@ export const sanitizePokemon = (
     // returns moveTrack and revealedMoves (guaranteed to be empty arrays, at the very least)
     ...sanitizeMoveTrack(pokemon, format),
 
-    preset: ('preset' in pokemon && pokemon.preset) || null,
+    presetId: ('presetId' in pokemon && pokemon.presetId) || null,
     presets: ('presets' in pokemon && pokemon.presets) || [],
     autoPreset: 'autoPreset' in pokemon ? pokemon.autoPreset : true,
 
@@ -301,8 +301,10 @@ export const sanitizePokemon = (
 
     // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
     // (using Set makes sure there aren't any duplicate abilities in the array)
+    // update (2023/02/02): don't want to persist the legal abilities from the prior forme, which can be
+    // problematic for Mega Pokemon who have one legal ability compared to their non-Mega'd counterparts
     sanitizedPokemon.abilities = Array.from(new Set([
-      ...(sanitizedPokemon.abilities || []),
+      // ...(sanitizedPokemon.abilities || []),
       ...(<AbilityName[]> Object.values(species?.abilities || {})),
     ].filter(Boolean)));
 

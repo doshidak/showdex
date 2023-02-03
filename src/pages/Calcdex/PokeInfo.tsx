@@ -586,7 +586,7 @@ export const PokeInfo = ({
             hint="None"
             input={{
               name: `PokeInfo:Preset:${pokemonKey}:Dropdown`,
-              value: pokemon?.preset,
+              value: pokemon?.presetId,
               onChange: (id: string) => applyPreset(id, null, `${baseScope}:Dropdown~Preset:input.onChange()`),
             }}
             options={presetOptions}
