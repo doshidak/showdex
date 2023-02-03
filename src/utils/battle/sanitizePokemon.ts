@@ -165,6 +165,8 @@ export const sanitizePokemon = (
     status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
     turnstatuses: pokemon?.turnstatuses,
 
+    chainMove: ('chainMove' in pokemon && pokemon.chainMove) || null,
+    chainCounter: ('chainCounter' in pokemon && pokemon.chainCounter) || 0,
     sleepCounter: ('sleepCounter' in pokemon && pokemon.sleepCounter) || pokemon?.statusData?.sleepTurns || 0,
     toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter) || pokemon?.statusData?.toxicTurns || 0,
     hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter) || pokemon?.timesAttacked || 0,

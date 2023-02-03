@@ -593,6 +593,47 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   criticalHit?: boolean;
 
   /**
+   * Move last used consecutively.
+   *
+   * * This is the move that `chainCounter` refers to.
+   * * Any move, regardless of it doing damage, can be stored here.
+   *   - If the mechanic boosts BP based on consecutive usage, then Status moves would be unaffected, obviously!
+   * * Showdown doesn't provide this info, so this information is derived by the Calcdex during battle syncs.
+   *   - As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet (probably in v1.1.4).
+   *
+   * @default null
+   * @since 1.1.3
+   */
+  chainMove?: MoveName;
+
+  /**
+   * Number of times the `chainMove` was used.
+   *
+   * * Can be used for a variety of mechanics that depend on consecutive move usage.
+   * * Counter will only increment **after** the `chainMove` was *successfully* used, so any effects that make
+   *   use of consecutively-used moves will be applied on the following turn, as long as the `chainMove` is
+   *   successfully used again.
+   * * Follows mechanics used by the *Metronome* item (not the ability!):
+   *   - Switching out, using another move, and using the move *unsuccessfully* will reset the counter to `0`.
+   *   - Multi-strike moves (e.g., *Population Bomb*) will only increment the counter once.
+   *   - Moves calling other moves (e.g., *Copycat*, *Metronome*, *Nature Power*) will increment the counter
+   *     only if the called move matches `chainMove` (otherwise, will be reset to `0` with the called move).
+   *   - Moves with a charging turn (e.g., *Fly*, *Geomancy*, *Phantom Force*) will increment the counter
+   *     even on the charging turn as it will be considered to be successfully used.
+   * * *Unsuccessful* move usage entails situations where the move failed to hit, such as:
+   *   - Defending Pokemon protects (hitting the *Substitute* counts as a *successful* hit, however),
+   *   - Defending Pokemon is immune to the move (e.g., *Earthquake* on a Flying type),
+   *   - Attacking Pokemon misses the move (e.g., *High Jump Kick* with 90% accuracy),
+   *   - Attacking Pokemon's status prevents usage of the move (e.g., Paralysis, Sleep).
+   * * Showdown doesn't provide this info, so this information is derived by the Calcdex during battle syncs.
+   *   - As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet (probably in v1.1.4).
+   *
+   * @default 0
+   * @since 1.1.3
+   */
+  chainCounter?: number;
+
+  /**
    * Number of turns the Pokemon was asleep for.
    *
    * * Kept track by the client under the `statusData.sleepTurns` property in `Showdown.Pokemon`.
