@@ -35,6 +35,8 @@ export interface CalcdexContextConsumables {
   setActiveIndices: (playerKey: CalcdexPlayerKey, indices: number[], scope?: string) => void;
   setSelectionIndex: (playerKey: CalcdexPlayerKey, index: number, scope?: string) => void;
   setAutoSelect: (playerKey: CalcdexPlayerKey, autoSelect: boolean, scope?: string) => void;
+  setPlayerKey: (playerKey: CalcdexPlayerKey, scope?: string) => void;
+  setOpponentKey: (opponentKey: CalcdexPlayerKey, scope?: string) => void;
 }
 
 export const CalcdexContext = React.createContext<CalcdexContextConsumables>(null);

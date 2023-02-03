@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   buildAbilityOptions,
   buildItemOptions,
@@ -552,6 +553,7 @@ export const CalcdexPokeProvider = ({
     opponentPokemon,
     player,
     opponent,
+    AllPlayerKeys.filter((k) => state[k]?.active).map((k) => state[k]),
     field,
     settings,
   );

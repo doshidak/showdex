@@ -1,9 +1,15 @@
 import * as React from 'react';
+import Svg from 'react-inlinesvg';
 import cx from 'classnames';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
+import { findPlayerTitle } from '@showdex/utils/app';
+import { getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
+import type { DropdownOption } from '@showdex/components/form';
+import type { CalcdexPlayerKey } from '@showdex/redux/store';
 import { useCalcdexContext } from './CalcdexProvider';
 import { CloseCalcdexButton } from './CloseCalcdexButton';
 import { FieldCalc } from './FieldCalc';
@@ -38,10 +44,51 @@ export const Calcdex = ({
     battleId,
     renderMode,
     // overlayVisible,
+    playerCount,
     playerKey,
     authPlayerKey,
     opponentKey,
   } = state;
+
+  const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
+    playerCount > 2 && AllPlayerKeys
+      .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
+      .map((k) => {
+        const { name: playerName } = state[k];
+        const playerTitle = findPlayerTitle(playerName);
+
+        return {
+          labelClassName: styles.playerOption,
+          labelStyle: playerTitle?.color?.[colorScheme] ? {
+            color: playerTitle.color[colorScheme],
+          } : undefined,
+          label: (
+            <>
+              <div className={styles.label}>
+                {playerName}
+              </div>
+
+              {
+                !!playerTitle?.icon &&
+                <Svg
+                  className={styles.icon}
+                  description={playerTitle.iconDescription}
+                  src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                />
+              }
+            </>
+          ),
+          rightLabel: k.toUpperCase(),
+          subLabel: playerTitle?.title,
+          value: k,
+        };
+      })
+  ) || null, [
+    authPlayerKey,
+    colorScheme,
+    playerCount,
+    state,
+  ]);
 
   const renderAsOverlay = renderMode === 'overlay';
 
@@ -97,9 +144,11 @@ export const Calcdex = ({
 
           <PlayerCalc
             className={styles.section}
+            position="top"
             playerKey={topKey}
             defaultName="Player 1"
             containerSize={size}
+            playerOptions={(!authPlayerKey || topKey !== authPlayerKey) && playerOptions}
           />
 
           <FieldCalc
@@ -111,9 +160,11 @@ export const Calcdex = ({
 
           <PlayerCalc
             className={cx(styles.section, styles.opponentCalc)}
+            position="bottom"
             playerKey={bottomKey}
             defaultName="Player 2"
             containerSize={size}
+            playerOptions={(!authPlayerKey || bottomKey !== authPlayerKey) && playerOptions}
           />
 
           {

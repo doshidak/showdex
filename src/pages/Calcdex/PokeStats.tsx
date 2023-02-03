@@ -3,6 +3,7 @@ import cx from 'classnames';
 import { ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   PokemonBoostNames,
   PokemonNatureBoosts,
@@ -106,6 +107,7 @@ export const PokeStats = ({
     player,
     opponent,
     field,
+    AllPlayerKeys.filter((k) => state[k]?.active).map((k) => state[k]),
   ) : null), [
     field,
     gen,
@@ -113,6 +115,7 @@ export const PokeStats = ({
     opponentPokemon,
     player,
     pokemon,
+    state,
   ]);
 
   const {

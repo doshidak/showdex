@@ -2,6 +2,7 @@
 @use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/device';
+@use 'mixins/flex';
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
@@ -133,5 +134,22 @@ div.bottomCloseButton {
 
   &:not(.mobile)::before {
     @include position.absolute-xy($x: 0, $y: -3px);
+  }
+}
+
+.playerOption {
+  @include flex.row($align: center);
+
+  .label {
+    @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  }
+
+  .icon {
+    width: 12px;
+    min-width: 12px;
+    height: 12px;
+    min-height: 12px;
+    @include spacing.margin($left: 1px);
+    color: inherit;
   }
 }

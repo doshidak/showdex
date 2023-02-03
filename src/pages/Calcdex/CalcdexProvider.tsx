@@ -713,6 +713,24 @@ export const CalcdexProvider = ({
         [playerKey]: { autoSelect },
       }),
     ),
+
+    setPlayerKey: (playerKey, scope) => dispatch(
+      calcdexSlice.actions.update({
+        scope: scope || `${baseScope}:setPlayerKey()`,
+        battleId,
+        playerKey,
+        opponentKey: battleState[battleState.opponentKey === playerKey ? 'playerKey' : 'opponentKey'],
+      }),
+    ),
+
+    setOpponentKey: (opponentKey, scope) => dispatch(
+      calcdexSlice.actions.update({
+        scope: scope || `${baseScope}:setOpponentKey()`,
+        battleId,
+        playerKey: battleState[battleState.playerKey === opponentKey ? 'opponentKey' : 'playerKey'],
+        opponentKey,
+      }),
+    ),
   }), [
     // battle,
     battleId,
