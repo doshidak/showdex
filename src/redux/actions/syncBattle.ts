@@ -8,6 +8,7 @@ import {
   detectBattleRules,
   detectLegacyGen,
   detectPlayerKeyFromBattle,
+  detectPlayerKeyFromPokemon,
   getPresetFormes,
   getTeamSheetPresets,
   legalLockedFormat,
@@ -126,13 +127,16 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // find out which side myPokemon belongs to
     const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
 
-    if (detectedPlayerKey && battleState.playerKey !== detectedPlayerKey) {
+    if (detectedPlayerKey && !battleState.playerKey) {
       battleState.playerKey = detectedPlayerKey;
     }
 
     // also, while we're here, update the authPlayerKey (if any) and opponentKey
     battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
-    battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
+
+    if (!battleState.opponentKey) {
+      battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
+    }
 
     // determine if we should include Teambuilder presets
     // (should be already pre-converted in the teamdexSlice)
@@ -819,6 +823,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       const processedIds: string[] = [];
 
       playerState.activeIndices = player.active?.map((activePokemon) => {
+        // particularly in FFA, there may be a Pokemon belonging to another player in active[]
+        if (detectPlayerKeyFromPokemon(activePokemon) !== playerKey) {
+          return null;
+        }
+
         // checking myPokemon first (if it's available) for Illusion/Zoroark
         const activeId = (
           isMyPokemonSide
