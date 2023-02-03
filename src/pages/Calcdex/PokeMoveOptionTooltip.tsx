@@ -76,8 +76,15 @@ export const PokeMoveOptionTooltip = ({
     || 0;
 
   const { basePower: dexBasePower } = dexMove;
-  const baseBasePower = dexMove.id.startsWith('hiddenpower') ? calcHiddenPower(format, pokemon) : dexBasePower;
-  const basePower = moveOverrides.basePower || dexBasePower || 0;
+  const baseBasePower = dexMove.id.startsWith('hiddenpower')
+    ? calcHiddenPower(format, pokemon)
+    : dexBasePower;
+
+  const basePower = (pokemon?.useZ && moveOverrides?.zBasePower)
+    || (pokemon?.useMax && moveOverrides?.maxBasePower)
+    || moveOverrides.basePower
+    || dexBasePower
+    || 0;
 
   const basePowerDelta: PokemonStatBoostDelta = (
     !basePowerOverride && (
