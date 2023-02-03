@@ -161,3 +161,13 @@ div.container {
     @include spacing.padding($left: 0);
   }
 }
+
+.morePlayers {
+  @include spacing.margin($left: 3px);
+  font-weight: 500;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.6;
+  overflow: hidden;
+}

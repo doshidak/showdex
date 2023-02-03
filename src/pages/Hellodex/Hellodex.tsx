@@ -217,6 +217,7 @@ export const Hellodex = ({
                       battleId,
                       format,
                       active,
+                      playerCount,
                       p1,
                       p2,
                     }) => (
@@ -228,6 +229,7 @@ export const Hellodex = ({
                         playerName={p1?.name}
                         opponentName={p2?.name}
                         active={active}
+                        hasMorePlayers={playerCount > 2}
                         // onPress={() => handleInstancePress(battle.battleId)}
                         onPress={() => openCalcdexInstance?.(battleId)}
                       />
