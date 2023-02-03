@@ -1503,6 +1503,14 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   overlayVisible?: boolean;
 
   /**
+   * Number of active players in the battle.
+   *
+   * @default 0
+   * @since 1.1.3
+   */
+  playerCount: number;
+
+  /**
    * Side key/ID of the player.
    *
    * * Does not necessarily mean the logged-in user ("auth") is a player.
@@ -1741,6 +1749,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         renderMode,
         overlayVisible: renderMode === 'overlay' && overlayVisible,
 
+        playerCount: 0,
         playerKey,
         authPlayerKey,
         opponentKey,
@@ -1785,6 +1794,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         sheets: [],
       };
 
+      state[battleId].playerCount = AllPlayerKeys.filter((k) => state[battleId][k].active).length;
+
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
         '\n', 'battleId', battleId || '???',
@@ -1808,6 +1819,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         format,
         active,
         overlayVisible,
+        playerKey,
+        opponentKey,
       } = action.payload;
 
       if (!battleId) {
@@ -1837,6 +1850,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         format: format || currentState.format,
         // active: typeof active === 'boolean' ? active : currentState.active,
         overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
+        playerKey: playerKey || currentState.playerKey,
+        opponentKey: opponentKey || currentState.opponentKey,
       };
 
       // for the active state, only update if previously true and the new value is false
