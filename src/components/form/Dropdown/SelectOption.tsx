@@ -143,7 +143,10 @@ export const SelectOption = <
         {
           !!data?.label &&
           <div className={styles.optionRow}>
-            <div className={styles.optionLabel}>
+            <div
+              className={cx(styles.optionLabel, data.labelClassName)}
+              style={data.labelStyle}
+            >
               {data.label}
             </div>
 

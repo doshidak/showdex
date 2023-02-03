@@ -21,6 +21,7 @@ export const SelectSingleValue = <
   Group extends GroupBase<Option>,
 >({
   className,
+  data,
   isDisabled,
   innerProps,
   // selectProps,
@@ -30,11 +31,13 @@ export const SelectSingleValue = <
     className={cx(
       styles.singleValue,
       isDisabled && styles.disabled,
+      data?.labelClassName,
       className,
     )}
+    style={data?.labelStyle}
     {...innerProps}
   >
-    {children}
+    {children || data?.label}
   </div>
 );
 
