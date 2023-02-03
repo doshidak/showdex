@@ -17,9 +17,12 @@ import { countRuinAbilities } from './countRuinAbilities';
  * @since 1.1.0
  */
 export const ruinAbilitiesActive = (
-  playerSide: CalcdexPlayerSide,
-  opponentSide: CalcdexPlayerSide,
-): boolean => !!Object.keys(playerSide || {}).length
-  && !!Object.keys(opponentSide || {}).length
-  && !!Object.values(countRuinAbilities(playerSide, opponentSide))
+  // playerSide: CalcdexPlayerSide,
+  // opponentSide: CalcdexPlayerSide,
+  ...sides: CalcdexPlayerSide[]
+): boolean => !!sides?.length
+  // && !!Object.keys(playerSide || {}).length
+  // && !!Object.keys(opponentSide || {}).length
+  // && !!Object.values(countRuinAbilities(playerSide, opponentSide))
+  && !!Object.values(countRuinAbilities(...sides))
     .reduce((sum, count) => sum + count, 0);

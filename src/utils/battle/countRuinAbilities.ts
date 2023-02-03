@@ -10,11 +10,16 @@ import type { CalcdexPlayerSide } from '@showdex/redux/store';
  * @since 1.1.0
  */
 export const countRuinAbilities = (
-  playerSide: CalcdexPlayerSide,
-  opponentSide: CalcdexPlayerSide,
+  // playerSide: CalcdexPlayerSide,
+  // opponentSide: CalcdexPlayerSide,
+  ...sides: CalcdexPlayerSide[]
 ): Record<'beads' | 'sword' | 'tablets' | 'vessel', number> => ({
-  beads: (playerSide?.ruinBeadsCount || 0) + (opponentSide?.ruinBeadsCount || 0),
-  sword: (playerSide?.ruinSwordCount || 0) + (opponentSide?.ruinSwordCount || 0),
-  tablets: (playerSide?.ruinTabletsCount || 0) + (opponentSide?.ruinTabletsCount || 0),
-  vessel: (playerSide?.ruinVesselCount || 0) + (opponentSide?.ruinVesselCount || 0),
+  // beads: (playerSide?.ruinBeadsCount || 0) + (opponentSide?.ruinBeadsCount || 0),
+  // sword: (playerSide?.ruinSwordCount || 0) + (opponentSide?.ruinSwordCount || 0),
+  // tablets: (playerSide?.ruinTabletsCount || 0) + (opponentSide?.ruinTabletsCount || 0),
+  // vessel: (playerSide?.ruinVesselCount || 0) + (opponentSide?.ruinVesselCount || 0),
+  beads: sides?.reduce((sum, side) => sum + (side?.ruinBeadsCount || 0), 0) || 0,
+  sword: sides?.reduce((sum, side) => sum + (side?.ruinSwordCount || 0), 0) || 0,
+  tablets: sides?.reduce((sum, side) => sum + (side?.ruinTabletsCount || 0), 0) || 0,
+  vessel: sides?.reduce((sum, side) => sum + (side?.ruinVesselCount || 0), 0) || 0,
 });
