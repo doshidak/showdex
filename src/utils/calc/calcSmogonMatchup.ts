@@ -161,7 +161,7 @@ export const calcSmogonMatchup = (
   //   basePowerMods.push(2);
   // }
 
-  const smogonField = createSmogonField(field, player, opponent, allPlayers);
+  const smogonField = createSmogonField(format, field, player, opponent, allPlayers);
 
   matchup.attacker = createSmogonPokemon(format, playerPokemon, playerMove, opponentPokemon, smogonField);
   matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
@@ -181,15 +181,15 @@ export const calcSmogonMatchup = (
     matchup.koChance = formatKoChance(result, settings?.nhkoLabels);
     matchup.koColor = getKoColor(result, settings?.nhkoColors);
 
-    // l.debug(
-    //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-    //   '\n', 'gen', dex.num,
-    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    //   '\n', 'field', field,
-    //   '\n', 'matchup', matchup,
-    //   '\n', 'result', result,
-    // );
+    l.debug(
+      'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
+      '\n', 'gen', dex.num,
+      '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+      '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+      '\n', 'field', field,
+      '\n', 'matchup', matchup,
+      '\n', 'result', result,
+    );
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
     // which is separate from 'N/A' damage (e.g., status moves).

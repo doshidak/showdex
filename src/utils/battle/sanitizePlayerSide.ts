@@ -1,10 +1,10 @@
 import { formatId } from '@showdex/utils/app';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPlayer, CalcdexPlayerSide } from '@showdex/redux/store';
 import { countSideRuinAbilities } from './countSideRuinAbilities';
 
-const l = logger('@showdex/utils/battle/sanitizePlayerSide');
+// const l = logger('@showdex/utils/battle/sanitizePlayerSide');
 
 /**
  * Sanitizes a player side (e.g., `p1`, `p2`, etc.) from the `battle` state.
@@ -81,18 +81,19 @@ export const sanitizePlayerSide = (
     ?? [];
 
   // check whether we should apply any Spikes and Stealth Rocks
-  const applyFieldHazards = gen > 1
-    // && !!currentPokemon?.speciesForme // no reason to check this lol
-    && selectionIndex > -1
-    // && activeIndex !== selectionIndex;
-    && !activeIndices.includes(selectionIndex);
+  // update (2023/02/04): we're now doing this in createSmogonField() instead
+  // const applyFieldHazards = gen > 1
+  //   // && !!currentPokemon?.speciesForme // no reason to check this lol
+  //   && selectionIndex > -1
+  //   // && activeIndex !== selectionIndex;
+  //   && !activeIndices.includes(selectionIndex);
 
-  l.debug(
-    'Sanitizing side for player', player?.sideid || 'p?', player?.name || '???',
-    '\n', 'gen', gen, 'activeIndices', activeIndices, 'selectionIndex', selectionIndex,
-    '\n', 'currentPokemon', currentPokemon,
-    ...(gen > 1 ? ['\n', 'applyFieldHazards?', applyFieldHazards] : []),
-  );
+  // l.debug(
+  //   'Sanitizing side for player', player?.sideid || 'p?', player?.name || '???',
+  //   '\n', 'gen', gen, 'activeIndices', activeIndices, 'selectionIndex', selectionIndex,
+  //   '\n', 'currentPokemon', currentPokemon,
+  //   // ...(gen > 1 ? ['\n', 'applyFieldHazards?', applyFieldHazards] : []),
+  // );
 
   // count how many Pokemon have an activated Ruin ability (gen 9)
   // const activeRuinAbilities = playerPokemon
@@ -103,8 +104,10 @@ export const sanitizePlayerSide = (
   return {
     // conditionally remove Spikes & Stealth Rocks from the calc if the Pokemon is
     // already on the field (don't want the hazard damage to re-apply)
-    spikes: applyFieldHazards && sideConditionNames.includes('spikes') ? sideConditions.spikes?.[1] ?? 0 : 0,
-    isSR: applyFieldHazards && sideConditionNames.includes('stealthrock'),
+    // update (2023/02/04): as part of the CalcdexPlayerSide refactoring, we're now conditionally removing
+    // these in createSmogonField() instead. we want the actual values from the battle stored here!
+    spikes: (sideConditionNames.includes('spikes') && sideConditions.spikes?.[1]) || 0,
+    isSR: sideConditionNames.includes('stealthrock'),
 
     steelsurge: sideConditionNames.includes('gmaxsteelsurge'),
     vinelash: sideConditionNames.includes('gmaxvinelash'),

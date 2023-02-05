@@ -1,23 +1,57 @@
 import { Field as SmogonField } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
-import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
+import { countRuinAbilities, detectGenFromFormat, ruinAbilitiesActive } from '@showdex/utils/battle';
 import type { CalcdexBattleField, CalcdexPlayer } from '@showdex/redux/store';
 
 export const createSmogonField = (
+  format: string,
   field: CalcdexBattleField,
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
   allPlayers?: CalcdexPlayer[],
 ): SmogonField => {
-  if (!field?.gameType) {
+  const gen = detectGenFromFormat(format);
+
+  if (!format || !gen || !field?.gameType) {
     return null;
   }
 
+  // note: using structuredClone() for attackerSide & defenderSide here since we may mutate their
+  // properties for hazards, so we don't want to accidentally mutate their original objects from the args!
   const processedField: CalcdexBattleField = {
     ...field,
-    attackerSide: player?.side,
-    defenderSide: opponent?.side,
+    attackerSide: structuredClone(player?.side || {}),
+    defenderSide: structuredClone(opponent?.side || {}),
   };
+
+  // check if we should remove field hazards (e.g., Spikes, Stealth Rocks) if the selected Pokemon
+  // we're doing calcs for is already out on the field (i.e., if the selectionIndex is in the activeIndices)
+  // (note: since this is an array of objects, the objects are actually references to them, so we'll be mutating
+  // the original object [e.g., processedField.attackerSide] when modifying properties in `side`)
+  if (gen > 1) {
+    [
+      processedField.attackerSide,
+      processedField.defenderSide,
+    ].forEach((side, i) => {
+      const {
+        selectionIndex,
+        activeIndices,
+      } = (i === 0 ? player : opponent) || {};
+
+      if (selectionIndex < 0 || !activeIndices?.length) {
+        return;
+      }
+
+      // here, we're allowing whatever value is currently stored to apply since the selected Pokemon isn't active
+      if (!activeIndices.includes(selectionIndex)) {
+        return;
+      }
+
+      // now we know the selected Pokemon is active, so reset the hazards
+      side.spikes = 0;
+      side.isSR = false; // SR = Stealth Rocks
+    });
+  }
 
   const allPlayerSides = (allPlayers || [player, opponent])?.map((p) => p?.side) || [];
 
