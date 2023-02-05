@@ -36,6 +36,11 @@ const appReceive = <typeof app.receive> app.receive.bind(app);
 app.receive = (data: string) => {
   const receivedRoom = data?.startsWith?.('>');
 
+  // call the original function
+  // update (2023/02/04): my dumb ass was calling the bootstrapper() BEFORE this,
+  // so I was wondering why the `battle` object was never populated... hmm... LOL
+  appReceive(data);
+
   if (receivedRoom) {
     const roomId = data.slice(1, data.indexOf('\n'));
     const room = app.rooms[roomId];
@@ -49,9 +54,6 @@ app.receive = (data: string) => {
     // call each bootstrapper
     bootstrappers.forEach((bootstrapper) => bootstrapper(store, data, roomId));
   }
-
-  // call the original function
-  appReceive(data);
 };
 
 l.debug('Initializing MutationObserver for client colorScheme changes...');
