@@ -69,7 +69,7 @@ declare namespace Showdown {
     teamdexInit?: boolean;
 
     initialize(): void;
-    trigger(name: string): ClientUser;
+    trigger(name: string, ...argv?: unknown[]): ClientUser;
     updateSetting(setting: string, value: string): void;
     getActionPHP(): string;
     finishRename(name: string, assertion: string): void;
