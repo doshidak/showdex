@@ -822,8 +822,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // keep track of which calcdexId's we've added so far (for myPokemon in Doubles)
       const processedIds: string[] = [];
 
-      l.debug('populating activeIndices for', playerKey);
-
       playerState.activeIndices = player.active?.map((activePokemon) => {
         // particularly in FFA, there may be a Pokemon belonging to another player in active[]
         if (!activePokemon || detectPlayerKeyFromPokemon(activePokemon) !== playerKey) {
@@ -914,8 +912,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
       }
 
-      l.debug('populating usedMax/usedTera for', playerKey);
-
       // determine if the player used Max/Tera to disable it within PokeMoves
       // (will be re-enabled once the battle is over)
       playerState.usedMax = usedDynamax(playerKey, battle?.stepQueue);
@@ -925,7 +921,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // note: while syncPokemon() will reset the values, this only occurs when a client Pokemon has been found,
       // i.e., if the Pokemon isn't revealed yet (such as in Randoms), there would be no corresponding client Pokemon
       if (battleState.gen > 7) {
-        l.debug('resyncing useMax for', playerKey);
         // note: despite using filter(), which would normally create a new array, the elements inside of pokemon[]
         // are objects, so elements in the filtered array are still referencing the original objects
         playerState.pokemon
@@ -934,7 +929,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       if (battleState.gen > 8) {
-        l.debug('resyncing terastallized for', playerKey);
         // find the name of the Pokemon that Terastallized
         const teraStep = battle.stepQueue.find((q) => q.startsWith('|-terastallize|') && q.includes(`|${playerKey}`));
         const [, name] = /p\d+[a-z]:\x20(.+)\|/.exec(teraStep) || [];
@@ -949,7 +943,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // update Ruin abilities (gen 9), if any, before syncing the field
       if (battleState.gen > 8) {
-        l.debug('resyncing Ruin abilities for', playerKey);
         toggleRuinAbilities(
           playerState,
           null,
@@ -960,7 +953,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // sync player side
       if (playerState.active) {
-        l.debug('syncing side for', playerKey);
         playerState.side = sanitizePlayerSide(
           battleState.gen,
           playerState,
@@ -968,8 +960,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         );
       }
     }
-
-    l.debug('syncing field');
 
     const syncedField = syncField(
       battleState,
