@@ -28,9 +28,9 @@ export const teamdexBootstrapper: ShowdexBootstrapper = (store) => {
   if (typeof app.user?.trigger === 'function' && !app.user.teamdexInit) {
     const userTrigger = app.user.trigger.bind(app.user) as typeof app.user.trigger;
 
-    app.user.trigger = (name) => {
+    app.user.trigger = (name, ...argv) => {
       // run this first to make sure the data is freshly mutated before we run our injected bit
-      const output = userTrigger(name);
+      const output = userTrigger(name, ...argv);
 
       if (name === 'saveteams') {
         updateTeambuilderPresets();
