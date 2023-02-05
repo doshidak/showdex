@@ -958,6 +958,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           playerState,
           battle[playerKey],
         );
+
+        // also add the sideConditions from the battle
+        playerState.side.conditions = structuredClone(player.sideConditions || {});
       }
     }
 
