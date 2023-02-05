@@ -19,6 +19,7 @@ import {
 } from '@showdex/utils/app';
 import {
   detectAuthPlayerKeyFromBattle,
+  sanitizePlayerSide,
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
@@ -201,6 +202,10 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       // this will destroy the Calcdex state if configured to, via calcdexRoom's requestLeave() handler
       app.leaveRoom(calcdexRoomId);
+
+      // update (2023/02/04): did I forget a return here? ...probably cause it keeps triggering the return from
+      // the typeof battle?.subscribe check
+      return;
     }
 
     l.debug(
@@ -208,6 +213,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       '\n', 'battleRoom', battleRoom,
       '\n', 'battleState', battleState,
     );
+
+    // update (2023/02/04): might as well put a return here too since this is part of the !battle?.id handler
+    return;
   }
 
   if (typeof battle?.subscribe !== 'function') {
@@ -228,6 +236,19 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
   // don't process this battle if we've already added (or forcibly prevented) the filth
   if (calcdexInit) {
+    return;
+  }
+
+  // delaying initialization if the battle hasn't instantiated all the players yet
+  // (which we can quickly determine by the existence of '|player|' steps in the stepQueue)
+  if (!battle.stepQueue?.length || !battle.stepQueue.some((q) => q?.startsWith('|player|'))) {
+    l.debug(
+      'Ignoring Calcdex init due to uninitialized players in battle',
+      '\n', 'stepQueue', battle.stepQueue,
+      '\n', 'battleId', battle.id || roomid,
+      '\n', 'battle', battle,
+    );
+
     return;
   }
 
@@ -843,6 +864,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             usedTera: usedTerastallization(playerKey, battle.stepQueue),
           };
 
+          prev[playerKey].side = sanitizePlayerSide(
+            battle.gen as GenerationNum,
+            prev[playerKey],
+            player,
+          );
+
           return prev;
         }, {} as Record<CalcdexPlayerKey, CalcdexPlayer>),
       }));
@@ -962,6 +989,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       battle.id || roomid,
       battleRoom,
     );
+
+    // force a callback after rendering
+    battle.subscription('callback');
   } else {
     l.error(
       'ReactDOM root has not been initialized, despite completing the bootstrap.',
