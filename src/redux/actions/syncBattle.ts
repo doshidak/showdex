@@ -953,14 +953,18 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       // sync player side
       if (playerState.active) {
-        playerState.side = sanitizePlayerSide(
-          battleState.gen,
-          playerState,
-          battle[playerKey],
-        );
-
-        // also add the sideConditions from the battle
+        // sync the sideConditions from the battle
+        // (this is first so that it'll be available in sanitizePlayerSide(), just in case)
         playerState.side.conditions = structuredClone(player.sideConditions || {});
+
+        playerState.side = {
+          conditions: playerState.side.conditions,
+          ...sanitizePlayerSide(
+            battleState.gen,
+            playerState,
+            battle[playerKey],
+          ),
+        };
       }
     }
 
