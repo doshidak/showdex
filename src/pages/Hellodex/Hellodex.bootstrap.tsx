@@ -2,10 +2,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { renderCalcdex } from '@showdex/pages/Calcdex';
-import { calcdexSlice } from '@showdex/redux/store';
+import { calcdexSlice, showdexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
   createHtmlRoom,
+  formatId,
   getBattleRoom,
   getCalcdexRoomId,
 } from '@showdex/utils/app';
@@ -25,6 +26,40 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
     'Hellodex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
   );
+
+  if (typeof app?.user?.finishRename === 'function') {
+    l.debug('Hooking into the client\'s app.user.finishRename()...');
+
+    const userFinishRename = app.user.finishRename.bind(app.user) as typeof app.user.finishRename;
+
+    app.user.finishRename = (name, assertion) => {
+      // call the original function
+      userFinishRename(name, assertion);
+
+      // l.debug(
+      //   'app.user.finishRename()',
+      //   '\n', 'name', name,
+      //   '\n', 'assertion', assertion,
+      // );
+
+      // determine if the user logged in
+      // assertion seems to be some sha256, then the user ID, then 4?, then some timestamp,
+      // then some server url, then some sha1, then some half of a sha1 (lol), finally some super long sha hash
+      if (name && assertion?.includes(',')) {
+        const assertions = assertion.split(',');
+        const userId = assertions[1];
+
+        if (formatId(name) === userId) {
+          l.debug(
+            'Logged in as', name, '(probably)',
+            '\n', 'assertions', assertions,
+          );
+
+          store.dispatch(showdexSlice.actions.setAuthUsername(name));
+        }
+      }
+    };
+  }
 
   if (!env.bool('hellodex-enabled')) {
     l.debug(
