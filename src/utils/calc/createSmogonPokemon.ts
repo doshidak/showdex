@@ -270,7 +270,7 @@ export const createSmogonPokemon = (
 
   // for Ruin abilities (gen 9), if BOTH Pokemon have the same type of Ruin ability, they'll cancel each other out
   // (@smogon/calc does not implement this mechanic yet, applying stat drops to BOTH Pokemon)
-  if (abilityId.endsWith('ofruin') && opponentPokemon?.speciesForme) {
+  if (!legacy && abilityId?.endsWith('ofruin') && opponentPokemon?.speciesForme) {
     const opponentAbilityId = formatId(opponentPokemon.dirtyAbility || opponentPokemon.ability);
 
     if (opponentAbilityId?.endsWith('ofruin') && opponentAbilityId === abilityId) {
