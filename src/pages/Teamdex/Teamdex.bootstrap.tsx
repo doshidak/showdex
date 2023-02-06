@@ -26,6 +26,8 @@ export const teamdexBootstrapper: ShowdexBootstrapper = (store) => {
 
   // override app.user.trigger() to listen for 'saveteams', in order to update the converted presets
   if (typeof app.user?.trigger === 'function' && !app.user.teamdexInit) {
+    l.debug('Hooking into the client\'s app.user.trigger()...');
+
     const userTrigger = app.user.trigger.bind(app.user) as typeof app.user.trigger;
 
     app.user.trigger = (name, ...argv) => {
@@ -41,6 +43,8 @@ export const teamdexBootstrapper: ShowdexBootstrapper = (store) => {
 
     app.user.teamdexInit = true;
   }
+
+  l.debug('Registering callback to Storage.whenTeamsLoaded()...');
 
   // on first init, either convert the presets if ready, or register a callback to convert once ready
   const teamsLoaded = (Storage as unknown as Showdown.ClientStorage)?.whenTeamsLoaded?.isLoaded;
