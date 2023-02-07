@@ -1,0 +1,235 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$patronage-icon-size: 48px;
+$close-icon-size: 28px;
+$gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
+
+.container {
+  @include position.absolute($top: 0, $right: 0, $bottom: 73px, $left: 0);
+  @include transition.apply(color, background-color);
+  overflow: hidden;
+  z-index: 1;
+
+  &.light {
+    color: colors.$black;
+    background-color: color.alpha(colors.$white, 0.95);
+  }
+
+  &.dark {
+    color: colors.$white;
+    background-color: color.alpha(#121212, 0.95);
+  }
+}
+
+.contentContainer {
+  @include position.absolute-fill;
+  overflow-x: hidden;
+}
+
+.content {
+  @include spacing.padding-all(15px);
+}
+
+.header {
+  @include flex.column-center;
+  @include spacing.padding-xy($x: 10px, $y: 20px);
+  @include transition.apply(padding);
+  user-select: none;
+
+  .verySmol & {
+    @include spacing.padding-xy($x: 5px);
+  }
+
+  .iconContainer {
+    position: relative;
+    @include flex.row-center;
+    @include spacing.padding-all(25px);
+    backdrop-filter: blur(3px);
+    border-radius: 500px;
+    @include transition.apply(color, background-color, box-shadow);
+
+    // &::before {
+    //   content: '';
+    //   @include position.absolute-all(5px);
+    //   background: $gradient;
+    //   border-radius: 500px;
+    // }
+
+    .light & {
+      color: #6A1B9A;
+      background-color: color.alpha(colors.$white, 0.5);
+      box-shadow: (
+        0 0 1px color.alpha(colors.$black, 0.15),
+        0 0 25px color.alpha(#6A1B9A, 0.3),
+      );
+    }
+
+    .dark & {
+      color: #9C27B0;
+      background-color: color.alpha(#121212, 0.5);
+      box-shadow: (
+        0 0 1px color.alpha(colors.$white, 0.3),
+        0 0 25px color.alpha(#9C27B0, 0.5),
+      );
+    }
+  }
+
+  .icon {
+    width: $patronage-icon-size;
+    min-width: $patronage-icon-size;
+    height: $patronage-icon-size;
+    min-height: $patronage-icon-size;
+    color: inherit;
+    // color: colors.$white;
+
+    // .light & {
+    //   mix-blend-mode: hard-light;
+    // }
+
+    .dark & {
+      mix-blend-mode: screen;
+    }
+  }
+
+  .title {
+    @include spacing.margin($top: 25px);
+    font-weight: 600;
+    font-size: 18px;
+    // color: colors.$transparent;
+    letter-spacing: 3px;
+    text-indent: 3px;
+    text-align: center;
+    text-transform: uppercase;
+    // background: $gradient;
+    // background-clip: text;
+    opacity: 0.65;
+
+    .thin {
+      font-weight: 300;
+    }
+  }
+}
+
+.closeButton {
+  @include position.absolute($top: 24px, $right: 25px);
+  color: inherit;
+  z-index: 2;
+
+  .light & {
+    color: colors.$gray-dark;
+  }
+
+  .closeIcon {
+    width: $close-icon-size;
+    min-width: $close-icon-size;
+    height: $close-icon-size;
+    min-height: $close-icon-size;
+  }
+}
+
+.supportMethods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 5px;
+  row-gap: 5px;
+  @include spacing.padding($bottom: 20px);
+
+  .verySmol & {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 30px;
+  }
+}
+
+.supportMethod {
+  position: relative;
+  grid-area: span 1 / span 1;
+  height: calc(100% - (19px + 15px) - (41px + 25px));
+  @include spacing.margin-all(10px);
+  font-size: 10px;
+
+  .title {
+    @include spacing.margin($bottom: 15px);
+    font-weight: 600;
+    font-size: 16px;
+    color: colors.$transparent;
+    letter-spacing: 3px;
+    text-indent: 3px;
+    text-align: center;
+    text-transform: uppercase;
+    background: $gradient;
+    background-clip: text;
+    user-select: none;
+    @include transition.apply((background-position, 500ms));
+  }
+
+  &:hover .title {
+    background-position: 100% 0;
+  }
+
+  .heading {
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-indent: 1px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    user-select: none;
+  }
+
+  .info {
+    height: 100%;
+    // @include spacing.padding-xy($x: 10px, $y: 15px);
+    @include spacing.padding-all(15px);
+    // @include spacing.padding($top: 15px, $right: 15px, $bottom: 30px, $left: 15px);
+    border-radius: 10px;
+    @include transition.apply(background-color, box-shadow);
+
+    .light & {
+      background-color: color.alpha(colors.$white, 0.85);
+      box-shadow: (
+        0 0 1px color.alpha(colors.$black, 0.15),
+        0 0 15px color.alpha(colors.$gray-dark, 0.3),
+      );
+    }
+
+    .dark & {
+      background-color: color.alpha(#121212, 0.85);
+      box-shadow: (
+        0 0 1px color.alpha(colors.$white, 0.3),
+        0 0 7px color.alpha(colors.$gray-dark, 0.3),
+      );
+    }
+  }
+
+  .description {
+    text-align: justify;
+    opacity: 0.65;
+  }
+
+  .value {
+    // @include spacing.padding-xy($x: 5px, $y: 3px);
+    @include spacing.padding-all(5px);
+    // @include font.apply(fonts.$mono);
+    font-size: 12px;
+  }
+
+  .buttonContainer {
+    @include flex.row-center;
+    @include spacing.margin($top: 25px);
+  }
+
+  .button {
+    @include transition.apply(color, (background-position, 500ms), box-shadow);
+  }
+
+  &:hover .button {
+    background-position: 100% 0;
+  }
+}
