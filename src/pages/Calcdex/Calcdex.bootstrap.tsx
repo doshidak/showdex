@@ -97,7 +97,8 @@ const updateBattleRecord = (
   battle: Showdown.Battle,
   forceResult?: 'win' | 'loss',
 ): void => {
-  const authUser = getAuthUsername();
+  const authUser = getAuthUsername()
+    || (store.getState()?.showdex as ShowdexSliceState)?.authUsername;
 
   if (!authUser || (!battle?.id && !forceResult) || typeof store?.dispatch !== 'function') {
     return;
@@ -124,7 +125,8 @@ const updateBattleRecord = (
   store.dispatch(hellodexSlice.actions[reducerName]());
 };
 
-const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
+const baseScope = '@showdex/pages/Calcdex/Calcdex.bootstrap';
+const l = logger(baseScope);
 
 export const calcdexBootstrapper: ShowdexBootstrapper = (
   store,
@@ -741,7 +743,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     if (didUpdate && battleRoom.battle.calcdexInit) {
       const prevNonce = battleRoom.battle.nonce;
 
-      battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle);
+      battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle, battleRoom.request);
 
       l.debug(
         'Restored previous calcdexId\'s in battle.myPokemon[]',
@@ -749,7 +751,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
       );
 
-      // battleRoom.battle.subscription('callback');
+      // since myPokemon could be available now, forcibly fire a battle sync
+      // (should we check if myPokemon is actually populated? maybe... but I'll leave it like this for now)
+      battleRoom.battle.subscription('callback');
     }
   };
 
@@ -814,11 +818,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       return;
     }
 
-    // ignore any freshly created battle objects with no players yet
-    if (AllPlayerKeys.every((k) => !battle[k]?.id)) {
+    // ignore any freshly created battle objects with missing players
+    if (!battle.p1?.id || AllPlayerKeys.slice(1).every((k) => !battle[k]?.id)) {
       l.debug(
-        'No players exist yet in the battle!',
-        '\n', 'battleId', roomid,
+        'Not all players exist yet in the battle!',
+        '\n', 'players', AllPlayerKeys.map((k) => battle[k]?.id),
+        '\n', 'stepQueue', battle.stepQueue,
+        '\n', 'battleId', battle.id || roomid,
       );
 
       return;
@@ -827,7 +833,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     if (!battle.calcdexStateInit) {
       // dispatch a Calcdex state initialization to Redux
       // (moved this out from CalcdexProvider, where React originally dispatched init/sync in early versions before Redux)
-      const authUser = getAuthUsername();
+      const authUser = getAuthUsername()
+        || (store.getState()?.showdex as ShowdexSliceState)?.authUsername;
 
       // note: using NIL_UUID as the initial nonce here since the init state could be ready by the time the nonce
       // check for syncing executes (if we used the actual nonce, the check would fail since they'd be the same!)
@@ -841,6 +848,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       store.dispatch(calcdexSlice.actions.init({
+        scope: `${baseScope}:battle.subscribe()`,
         battleId: battle.id || roomid,
         battleNonce: initNonce,
         gen: battle.gen as GenerationNum,
@@ -848,6 +856,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         turn: Math.max(battle.turn || 0, 0),
         active: !battle.ended,
         renderMode: openAsPanel ? 'panel' : 'overlay',
+        switchPlayers: battle.sidesSwitched,
 
         ...AllPlayerKeys.reduce((prev, playerKey) => {
           const player = battle[playerKey];
@@ -864,11 +873,18 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             usedTera: usedTerastallization(playerKey, battle.stepQueue),
           };
 
-          prev[playerKey].side = sanitizePlayerSide(
-            battle.gen as GenerationNum,
-            prev[playerKey],
-            player,
-          );
+          prev[playerKey].side = {
+            conditions: structuredClone(player?.sideConditions || {}),
+          };
+
+          prev[playerKey].side = {
+            conditions: prev[playerKey].side.conditions,
+            ...sanitizePlayerSide(
+              battle.gen as GenerationNum,
+              prev[playerKey],
+              player,
+            ),
+          };
 
           return prev;
         }, {} as Record<CalcdexPlayerKey, CalcdexPlayer>),
@@ -880,7 +896,14 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       // update (2023/01/31): nvm, init state could be available on the store.getState() call below,
       // but since we're checking for a battleNonce before syncing, it's ok if it doesn't exist yet either
       // (if a NIL as battleNonce is present, even if NIL_UUID, then we know the state has initialized)
-      // return;
+      // update (2023/02/06): now preventing the first battle sync if the logged-in user is also player
+      // since myPokemon could be empty here; the callback in the overridden updateSide() should trigger
+      // the battle sync once myPokemon is populated; but if we're just spectating here, we can continue
+      // syncing after init as normal; also, checking if the battle ended since we could be watching a replay,
+      // in which case the authUser check could pass without myPokemon being populated
+      if (!battle.ended && AllPlayerKeys.some((k) => battle[k]?.name === authUser)) {
+        return;
+      }
     }
 
     // since this is inside a function, we need to grab a fresher snapshot of the Redux state
@@ -907,6 +930,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       store.dispatch(calcdexSlice.actions.update({
+        scope: `${baseScope}:battle.subscribe()`,
         battleId: battle.id || roomid,
         battleNonce: battle.nonce,
         active: false,
@@ -991,7 +1015,22 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     );
 
     // force a callback after rendering
-    battle.subscription('callback');
+    // update (2023/02/04): bad idea, sometimes leads to a half-initialized battle object where there's
+    // only one player (which breaks the syncing); downside is that it doesn't appear to the user that the
+    // Calcdex is loading that fast, but it loads with the battle frame, so it isn't the worst thing ever
+    // update (2023/02/06): now checking if we're already at the queue end, which could happen if you refresh
+    // the page mid-battle or join a spectating game; otherwise, the Calcdex won't appear until the players
+    // do something (e.g., choose an option, turn on the timer, etc.) that triggers the subscription callback
+    if (battle.atQueueEnd) {
+      l.debug(
+        'Forcing a battle sync via battle.subscription() since the battle is atQueueEnd',
+        '\n', 'battle.atQueueEnd', battle.atQueueEnd,
+        '\n', 'battle', battle,
+        '\n', 'battleRoom', battleRoom,
+      );
+
+      battle.subscription('atqueueend');
+    }
   } else {
     l.error(
       'ReactDOM root has not been initialized, despite completing the bootstrap.',
