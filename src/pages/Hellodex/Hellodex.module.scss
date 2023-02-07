@@ -387,12 +387,12 @@ button.spectateButton {
     }
   }
 
-  .labelAction {
+  .labelThicc {
     font-weight: 600;
   }
 
-  .labelPreposition {
-    @include spacing.padding-xy($x: 5px);
+  .labelThin {
+    // @include spacing.padding-xy($x: 5px);
     font-weight: 300;
     // text-indent: 5px;
   }
@@ -406,7 +406,7 @@ button.spectateButton {
 }
 
 .donateFootnote {
-  max-width: 285px + 10px;
+  max-width: 250px + 10px;
   @include spacing.padding-all(5px);
   @include spacing.margin($top: 15px, $right: auto, $left: auto);
   backdrop-filter: blur(3px);
