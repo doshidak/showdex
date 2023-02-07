@@ -68,14 +68,15 @@ export const dehydrateStatsTable = (
 ].map((v) => dehydrateValue(v)).join(delimiter);
 
 /**
- * Dehydrates a player field side `value`, filtering out properties with falsy values and
+ * Dehydrates a player side `value`, filtering out properties with falsy values and
  * joining the resulting dehydrated property values with the `delimiter`.
  *
  * * Key and value of each property is deliminated by an equals (`'='`).
+ * * Does not dehydrate the `conditions` object at the moment.
  *
  * @example
  * ```ts
- * dehydrateFieldSide({
+ * dehydratePlayerSide({
  *   spikes: 0,
  *   isSR: true,
  *   isReflect: true,
@@ -87,11 +88,11 @@ export const dehydrateStatsTable = (
  * ```
  * @since 1.0.3
  */
-export const dehydrateFieldSide = (
+export const dehydratePlayerSide = (
   value: CalcdexPlayerSide,
   delimiter = '/',
 ): string => Object.entries(value || {})
-  .filter((e) => !!e?.[0] && !!e[1])
+  .filter((e) => !!e?.[0] && e[0] !== 'conditions' && !!e[1])
   .map(([k, v]) => `${k}=${dehydrateValue(v)}`)
   .join(delimiter);
 
