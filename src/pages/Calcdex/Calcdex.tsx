@@ -41,13 +41,14 @@ export const Calcdex = ({
   const mobile = useMobileViewport();
 
   const {
-    battleId,
+    // battleId,
     renderMode,
     // overlayVisible,
     playerCount,
     playerKey,
     authPlayerKey,
     opponentKey,
+    switchPlayers,
   } = state;
 
   const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
@@ -109,9 +110,11 @@ export const Calcdex = ({
   const topKey = (
     !!authPlayerKey
       && playerKey === authPlayerKey
-      && settings?.authPosition === 'bottom'
-      && opponentKey
-  ) || playerKey;
+      && (
+        (settings?.authPosition === 'bottom' && opponentKey)
+          || (settings?.authPosition === 'auto' && ((playerKey === 'p1' && playerKey) || opponentKey))
+      )
+  ) || (!authPlayerKey && switchPlayers ? opponentKey : playerKey);
 
   const bottomKey = topKey === playerKey
     ? opponentKey
@@ -127,58 +130,55 @@ export const Calcdex = ({
         !!colorScheme && styles[colorScheme],
       )}
     >
-      {
-        !!battleId &&
-        <Scrollable className={styles.content}>
-          <BuildInfo
-            position="top-right"
+      <Scrollable className={styles.content}>
+        <BuildInfo
+          position="top-right"
+        />
+
+        {
+          (renderAsOverlay && mobile) &&
+          <CloseCalcdexButton
+            className={styles.topCloseButton}
+            onPress={onRequestOverlayClose}
           />
+        }
 
-          {
-            (renderAsOverlay && mobile) &&
-            <CloseCalcdexButton
-              className={styles.topCloseButton}
-              onPress={onRequestOverlayClose}
-            />
-          }
+        <PlayerCalc
+          className={styles.section}
+          position="top"
+          playerKey={topKey}
+          defaultName="Player 1"
+          containerSize={size}
+          playerOptions={(!authPlayerKey || topKey !== authPlayerKey) && playerOptions}
+        />
 
-          <PlayerCalc
-            className={styles.section}
-            position="top"
-            playerKey={topKey}
-            defaultName="Player 1"
-            containerSize={size}
-            playerOptions={(!authPlayerKey || topKey !== authPlayerKey) && playerOptions}
+        <FieldCalc
+          className={cx(styles.section, styles.fieldCalc)}
+          playerKey={topKey}
+          opponentKey={bottomKey}
+          containerSize={size}
+        />
+
+        <PlayerCalc
+          className={cx(styles.section, styles.opponentCalc)}
+          position="bottom"
+          playerKey={bottomKey}
+          defaultName="Player 2"
+          containerSize={size}
+          playerOptions={(!authPlayerKey || bottomKey !== authPlayerKey) && playerOptions}
+        />
+
+        {
+          renderAsOverlay &&
+          <CloseCalcdexButton
+            className={cx(
+              styles.bottomCloseButton,
+              mobile && styles.mobile,
+            )}
+            onPress={onRequestOverlayClose}
           />
-
-          <FieldCalc
-            className={cx(styles.section, styles.fieldCalc)}
-            playerKey={topKey}
-            opponentKey={bottomKey}
-            containerSize={size}
-          />
-
-          <PlayerCalc
-            className={cx(styles.section, styles.opponentCalc)}
-            position="bottom"
-            playerKey={bottomKey}
-            defaultName="Player 2"
-            containerSize={size}
-            playerOptions={(!authPlayerKey || bottomKey !== authPlayerKey) && playerOptions}
-          />
-
-          {
-            renderAsOverlay &&
-            <CloseCalcdexButton
-              className={cx(
-                styles.bottomCloseButton,
-                mobile && styles.mobile,
-              )}
-              onPress={onRequestOverlayClose}
-            />
-          }
-        </Scrollable>
-      }
+        }
+      </Scrollable>
     </div>
   );
 };
