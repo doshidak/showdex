@@ -193,7 +193,7 @@ export const unpackStorageTeam = (
       }
     }
 
-    if (packedMoves?.includes(',')) {
+    if (packedMoves) {
       packedMoves.split(',').forEach((moveId) => {
         if (!moveId) {
           return;
