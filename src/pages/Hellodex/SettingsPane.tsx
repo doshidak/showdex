@@ -13,8 +13,13 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
-import { useColorScheme, useShowdexSettings, useUpdateSettings } from '@showdex/redux/store';
-import { findPlayerTitle, getAuthUsername } from '@showdex/utils/app';
+import {
+  useAuthUsername,
+  useColorScheme,
+  useShowdexSettings,
+  useUpdateSettings,
+} from '@showdex/redux/store';
+import { findPlayerTitle } from '@showdex/utils/app';
 import {
   env,
   getResourceUrl,
@@ -51,7 +56,7 @@ export const SettingsPane = ({
   inBattle,
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
-  const authName = getAuthUsername();
+  const authName = useAuthUsername();
   const authTitle = findPlayerTitle(authName);
 
   const colorScheme = useColorScheme();
