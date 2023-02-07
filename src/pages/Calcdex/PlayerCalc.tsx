@@ -9,7 +9,7 @@ import { useUserLadderQuery } from '@showdex/redux/services';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
-import { getResourceUrl } from '@showdex/utils/core';
+import { env, getResourceUrl } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
 import type { DropdownOption } from '@showdex/components/form';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
@@ -30,6 +30,7 @@ interface PlayerCalcProps {
 }
 
 const baseScope = '@showdex/pages/Calcdex/PlayerCalc';
+const minPokemon = env.int('calcdex-player-min-pokemon');
 
 export const PlayerCalc = ({
   className,
@@ -281,7 +282,7 @@ export const PlayerCalc = ({
             gridTemplateColumns: `repeat(${['xs', 'sm'].includes(containerSize) ? 6 : 12}, min-content)`,
           }}
         >
-          {Array(maxPokemon || 0).fill(null).map((_, i) => {
+          {Array(Math.max(maxPokemon || 0, minPokemon)).fill(null).map((_, i) => {
             const pokemon = playerParty?.[i];
 
             const pokemonKey = pokemon?.calcdexId
