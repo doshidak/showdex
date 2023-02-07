@@ -1,4 +1,5 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
+import { PokemonToggleAbilities } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
   detectGenFromFormat,
@@ -9,7 +10,7 @@ import {
 } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { MoveName, Specie } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
@@ -29,7 +30,8 @@ export const createSmogonPokemon = (
   format: string,
   pokemon: CalcdexPokemon,
   moveName?: MoveName,
-  // field?: CalcdexBattleField,
+  opponentPokemon?: CalcdexPokemon,
+  field?: CalcdexBattleField,
 ): SmogonPokemon => {
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
@@ -83,21 +85,19 @@ export const createSmogonPokemon = (
   const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
   const abilityId = formatId(ability);
 
+  const doubles = field?.gameType === 'Doubles';
+
   // note: these are in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // but we're allowing the effects of these abilities to be toggled on/off
-  const pseudoToggleAbility = !!ability && [
-    'beadsofruin',
-    'multiscale',
-    'protosynthesis',
-    'quarkdrive',
-    'shadowshield',
-    'swordofruin',
-    'tabletsofruin',
-    'vesselofruin',
-  ].includes(abilityId);
+  // update (2023/01/31): Ruin abilities aren't designed to be toggleable in Singles, only Doubles.
+  const pseudoToggleAbility = !!abilityId
+    && PokemonToggleAbilities
+      .map((a) => (formatId(a).endsWith('ofruin') && !doubles ? null : formatId(a)))
+      .filter(Boolean)
+      .includes(abilityId);
 
   const pseudoToggled = pseudoToggleAbility
-    && pokemon.abilityToggleable
+    && pokemon.abilityToggleable // update (2023/01/31): don't think we really need to populate this lol
     && pokemon.abilityToggled;
 
   const options: SmogonPokemonOptions = {
@@ -204,7 +204,7 @@ export const createSmogonPokemon = (
         ...pokemon.types,
         null,
         null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
-      ].slice(0, 3),
+      ].slice(0, 2),
     },
   };
 
@@ -239,7 +239,7 @@ export const createSmogonPokemon = (
   // }
 
   // also in gen 9, Supreme Overlord! (tf who named these lol)
-  // (workaround cause @smogon/damage-calc doesn't support this ability yet)
+  // (workaround cause @smogon/calc doesn't support this ability yet)
   // update: whoops nvm, looks like Showdown applies it to the move's BP instead
   // if (abilityId === 'supremeoverlord' && field?.attackerSide) {
   //   const fieldKey: keyof CalcdexBattleField = pokemon.playerKey === 'p2' ? 'defenderSide' : 'attackerSide';
@@ -256,10 +256,26 @@ export const createSmogonPokemon = (
   //   }
   // }
 
+  // calc will apply STAB boosts for ALL moves regardless of the Pokemon's changed type and the move's type
+  // if the Pokemon has Protean or Libero; we don't want this to happen since the client reports the changed typings
+  if (['protean', 'libero'].includes(abilityId)) {
+    options.ability = 'Pressure';
+  }
+
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
   // so we won't report these abilities to the calc to avoid unintentional double boostage
-  if (['intrepidsword', 'download'].includes(formatId(ability))) {
+  if (['intrepidsword', 'download'].includes(abilityId)) {
     options.ability = 'Pressure';
+  }
+
+  // for Ruin abilities (gen 9), if BOTH Pokemon have the same type of Ruin ability, they'll cancel each other out
+  // (@smogon/calc does not implement this mechanic yet, applying stat drops to BOTH Pokemon)
+  if (!legacy && abilityId?.endsWith('ofruin') && opponentPokemon?.speciesForme) {
+    const opponentAbilityId = formatId(opponentPokemon.dirtyAbility || opponentPokemon.ability);
+
+    if (opponentAbilityId?.endsWith('ofruin') && opponentAbilityId === abilityId) {
+      options.ability = 'Pressure';
+    }
   }
 
   // need to update the base HP stat for transformed Pokemon

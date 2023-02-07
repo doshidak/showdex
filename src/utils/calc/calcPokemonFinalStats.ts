@@ -13,14 +13,14 @@ import {
   getDexForFormat,
   notFullyEvolved,
   ruinAbilitiesActive,
-  shouldIgnoreItem,
 } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPlayer, CalcdexPokemon } from '@showdex/redux/store';
 import type { CalcdexStatModRecording } from './statModRecorder';
 import { calcPokemonHp } from './calcPokemonHp';
+import { shouldIgnoreItem } from './shouldIgnoreItem';
 import { statModRecorder } from './statModRecorder';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
@@ -44,8 +44,10 @@ export const calcPokemonFinalStats = (
   format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
   opponentPokemon: DeepPartial<CalcdexPokemon>,
-  field: CalcdexBattleField,
-  playerKey: CalcdexPlayerKey,
+  player?: CalcdexPlayer,
+  opponent?: CalcdexPlayer,
+  field?: CalcdexBattleField,
+  allPlayers?: CalcdexPlayer[], // primarily for FFA... like Ruin abilities... fun fun
 ): CalcdexStatModRecording => {
   const record = statModRecorder(pokemon);
 
@@ -59,9 +61,11 @@ export const calcPokemonFinalStats = (
     if (__DEV__) {
       l.warn(
         'Global Dex is unavailable for format', format,
-        '\n', 'pokemon', pokemon,
+        '\n', 'pokemon', pokemon?.name || pokemon?.speciesForme || '???', pokemon,
+        '\n', 'player', player,
+        '\n', 'opponentPokemon', opponentPokemon?.name || opponentPokemon?.speciesForme || '???', opponentPokemon,
+        '\n', 'opponent', opponent,
         '\n', 'field', field,
-        '\n', 'playerKey', playerKey,
         '\n', '(You will only see this warning on development.)',
       );
     }
@@ -281,58 +285,35 @@ export const calcPokemonFinalStats = (
 
   // apply "Ruin" ability effects that'll ruin me (gen 9)
   // update (2022/12/14): Showdown fixed the Ruin stacking bug, so apply only once now
-  if (ruinAbilitiesActive(field)) {
-    const ruinCounts = countRuinAbilities(field);
+  // update (2023/01/23): apparently Ruin abilities will CANCEL each other out if BOTH Pokemon have it
+  if (allPlayers?.length && ruinAbilitiesActive(...allPlayers.map((p) => p?.side))) {
+    const ruinCounts = countRuinAbilities(...allPlayers.map((p) => p?.side));
 
-    // 25% SPD reduction for each active Pokemon with the "Beads of Ruin" ability (excluding this `pokemon`)
-    const ruinBeadsCount = Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? 1 : 0), 0);
+    // 25% SPD reduction if there's at least one Pokemon with the "Beads of Ruin" ability (excluding this `pokemon`)
+    const ruinBeadsCount = Math.max(ruinCounts.beads - (ability === 'beadsofruin' ? ruinCounts.beads : 0), 0);
 
     if (ruinBeadsCount) {
-      // record.apply(
-      //   'spd',
-      //   0.75 ** ruinBeadsCount,
-      //   'ability',
-      //   `Beads of Ruin ${ruinBeadsCount > 1 ? `${times}${ruinBeadsCount}` : ''}`,
-      // );
       record.apply('spd', 0.75, 'ability', 'Beads of Ruin');
     }
 
-    // 25% DEF reduction for each active Pokemon with the "Sword of Ruin" ability (excluding this `pokemon`)
-    const ruinSwordCount = Math.max(ruinCounts.sword - (ability === 'swordofruin' ? 1 : 0), 0);
+    // 25% DEF reduction if there's at least one Pokemon with the "Sword of Ruin" ability (excluding this `pokemon`)
+    const ruinSwordCount = Math.max(ruinCounts.sword - (ability === 'swordofruin' ? ruinCounts.sword : 0), 0);
 
     if (ruinSwordCount) {
-      // record.apply(
-      //   'def',
-      //   0.75 ** ruinSwordCount,
-      //   'ability',
-      //   `Sword of Ruin ${ruinSwordCount > 1 ? `${times}${ruinSwordCount}` : ''}`,
-      // );
       record.apply('def', 0.75, 'ability', 'Sword of Ruin');
     }
 
-    // 25% ATK reduction for each active Pokemon with the "Tablets of Ruin" ability (excluding this `pokemon`)
-    const ruinTabletsCount = Math.max(ruinCounts.tablets - (ability === 'tabletsofruin' ? 1 : 0), 0);
+    // 25% ATK reduction if there's at least one Pokemon with the "Tablets of Ruin" ability (excluding this `pokemon`)
+    const ruinTabletsCount = Math.max(ruinCounts.tablets - (ability === 'tabletsofruin' ? ruinCounts.tablets : 0), 0);
 
     if (ruinTabletsCount) {
-      // record.apply(
-      //   'atk',
-      //   0.75 ** ruinTabletsCount,
-      //   'ability',
-      //   `Tablets of Ruin ${ruinTabletsCount > 1 ? `${times}${ruinTabletsCount}` : ''}`,
-      // );
       record.apply('atk', 0.75, 'ability', 'Tablets of Ruin');
     }
 
-    // 25% SPA reduction for each active Pokemon with the "Vessel of Ruin" ability (excluding this `pokemon`)
-    const ruinVesselCount = Math.max(ruinCounts.vessel - (ability === 'vesselofruin' ? 1 : 0), 0);
+    // 25% SPA reduction if there's at least one Pokemon with the "Vessel of Ruin" ability (excluding this `pokemon`)
+    const ruinVesselCount = Math.max(ruinCounts.vessel - (ability === 'vesselofruin' ? ruinCounts.vessel : 0), 0);
 
     if (ruinVesselCount) {
-      // record.apply(
-      //   'spa',
-      //   0.75 ** ruinVesselCount,
-      //   'ability',
-      //   `Vessel of Ruin ${ruinVesselCount > 1 ? `${times}${ruinVesselCount}` : ''}`,
-      // );
       record.apply('spa', 0.75, 'ability', 'Vessel of Ruin');
     }
   }
@@ -450,8 +431,9 @@ export const calcPokemonFinalStats = (
   }
 
   // apply player side conditions
-  const fieldSideKey = playerKey === 'p1' ? 'attackerSide' : 'defenderSide';
-  const playerSide = field[fieldSideKey];
+  // const fieldSideKey = playerKey === 'p1' ? 'attackerSide' : 'defenderSide';
+  // const playerSide = field[fieldSideKey];
+  const { side: playerSide } = player || {};
 
   // 2x SPE modifier if "Tailwind" is active on the field
   if (playerSide?.isTailwind) {

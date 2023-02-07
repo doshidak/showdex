@@ -1,5 +1,5 @@
 import { createSlice, current } from '@reduxjs/toolkit';
-import { getSystemColorScheme } from '@showdex/utils/app';
+import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateShowdexSettings, hydrateShowdexSettings } from '@showdex/utils/redux';
@@ -374,6 +374,14 @@ export interface ShowdexCalcdexSettings {
   includeTeambuilder: 'always' | 'teams' | 'boxes' | 'never';
 
   /**
+   * Whether to auto-import and apply presets derived from open team sheets or the `!showteam` chat command.
+   *
+   * @default true
+   * @since 1.1.3
+   */
+  autoImportTeamSheets: boolean;
+
+  /**
    * Whether to auto-export the opponent's team to the Teambuilder once the battle ends.
    *
    * * If `true`, will be exported to its own Teambuilder folder called "Showdex".
@@ -629,6 +637,20 @@ export interface ShowdexCalcdexSettings {
  * @since 1.0.2
  */
 export interface ShowdexSliceState {
+  /**
+   * Name of the currently authenticated user.
+   *
+   * * Note that this is populated inside the Hellodex bootstrapper, which loads as soon as Showdown starts.
+   *
+   * @since 1.1.3
+   */
+  authUsername?: string;
+
+  /**
+   * Showdex settings.
+   *
+   * @since 1.0.2
+   */
   settings: ShowdexSettings;
 }
 
@@ -638,6 +660,13 @@ export interface ShowdexSliceState {
  * @since 1.0.2
  */
 export interface ShowdexSliceReducers extends SliceCaseReducers<ShowdexSliceState> {
+  /**
+   * Sets the `authUsername`.
+   *
+   * @since 1.1.3
+   */
+  setAuthUsername: (state: Draft<ShowdexSliceState>, action: PayloadAction<string>) => void;
+
   /**
    * Sets any specified `ShowdexSettings`.
    *
@@ -677,22 +706,39 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
   name: 'showdex',
 
   initialState: {
+    authUsername: getAuthUsername(), // won't probably exist on init btw
     settings: hydrateShowdexSettings(getStoredItem('storage-settings-key')),
   },
 
   reducers: {
+    setAuthUsername: (state, action) => {
+      l.debug(
+        'RECV', action.type,
+        '\n', 'payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
+      );
+
+      state.authUsername = action.payload || null;
+
+      l.debug(
+        'DONE', action.type,
+        '\n', 'payload', action.payload,
+        '\n', 'state', __DEV__ && current(state),
+      );
+    },
+
     updateSettings: (state, action) => {
       l.debug(
         'RECV', action.type,
-        '\n', 'action.payload', action.payload,
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
       if (!Object.keys(action.payload || {}).length) {
         if (__DEV__) {
           l.warn(
-            'Received an empty action.payload!',
-            '\n', 'action.payload', action.payload,
+            'Received an empty payload!',
+            '\n', 'payload', action.payload,
             '\n', '(You will only see this warning on development.)',
           );
         }
@@ -726,7 +772,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
 
       l.debug(
         'DONE', action.type,
-        '\n', 'action.payload', action.payload,
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && stateSnapshot,
       );
     },
@@ -784,6 +830,15 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
     },
   },
 });
+
+/**
+ * Convenient hook to access the `authUsername`.
+ *
+ * @since 1.1.3
+ */
+export const useAuthUsername = () => useSelector(
+  (state) => state?.showdex?.authUsername,
+);
 
 /**
  * Convenient hook to access the `ShowdexSettings` state.

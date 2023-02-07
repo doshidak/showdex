@@ -1,5 +1,6 @@
 export * from './createCalcdexRoom';
 export * from './createHtmlRoom';
+export * from './exportPokePaste';
 export * from './findPlayerTitle';
 export * from './formatId';
 export * from './getActiveBattle';
@@ -10,6 +11,7 @@ export * from './getColorScheme';
 export * from './getSideRooms';
 export * from './getTeambuilderPresets';
 export * from './hasSinglePanel';
+export * from './importPokePaste';
 export * from './openShowdownUser';
 export * from './openSmogonUniversity';
 export * from './openUserPopup';

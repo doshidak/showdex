@@ -2,13 +2,16 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { PiconButton } from '@showdex/components/app';
+import { Dropdown } from '@showdex/components/form';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
 import { hasNickname } from '@showdex/utils/battle';
-import { getResourceUrl } from '@showdex/utils/core';
+import { env, getResourceUrl } from '@showdex/utils/core';
+import { capitalize } from '@showdex/utils/humanize';
+import type { DropdownOption } from '@showdex/components/form';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import type { CalcdexPlayerKey } from '@showdex/redux/store';
 import { CalcdexPokeProvider } from './CalcdexPokeProvider';
@@ -19,28 +22,41 @@ import styles from './PlayerCalc.module.scss';
 interface PlayerCalcProps {
   className?: string;
   style?: React.CSSProperties;
+  position?: 'top' | 'bottom';
   playerKey?: CalcdexPlayerKey;
   defaultName?: string;
   containerSize?: ElementSizeLabel;
+  playerOptions?: DropdownOption<CalcdexPlayerKey>[];
 }
+
+const baseScope = '@showdex/pages/Calcdex/PlayerCalc';
+const minPokemon = env.int('calcdex-player-min-pokemon');
 
 export const PlayerCalc = ({
   className,
   style,
+  position = 'top',
   playerKey = 'p1',
   defaultName = '--',
   containerSize,
+  playerOptions,
 }: PlayerCalcProps): JSX.Element => {
+  const ctx = useCalcdexContext();
+
   const {
     state,
     settings,
     setSelectionIndex,
     setAutoSelect,
-  } = useCalcdexContext();
+  } = ctx;
 
   const colorScheme = useColorScheme();
 
-  const { format } = state;
+  const {
+    format,
+    legacy,
+  } = state;
+
   const player = state[playerKey] || {};
 
   const {
@@ -100,56 +116,80 @@ export const PlayerCalc = ({
         )}
       >
         <div className={styles.playerInfo}>
-          <Button
-            className={styles.usernameButton}
-            style={playerTitle?.color?.[colorScheme] ? {
-              color: playerTitle.color[colorScheme],
-            } : undefined}
-            labelClassName={styles.usernameButtonLabel}
-            label={name || defaultName}
-            tooltip={(
-              <div className={styles.tooltipContent}>
-                {
-                  !!playerTitle?.title &&
-                  <>
-                    {settings?.showUiTooltips ? (
-                      <em>{playerTitle.title}</em>
-                    ) : playerTitle.title}
-                    {
-                      settings?.showUiTooltips &&
-                      <br />
-                    }
-                  </>
-                }
-                {
-                  settings?.showUiTooltips &&
-                  <>
-                    Open{' '}
-                    {name ? (
-                      <>
-                        <strong>{name}</strong>'s
-                      </>
-                    ) : 'User'}{' '}
-                    Profile
-                  </>
-                }
-              </div>
-            )}
-            tooltipDisabled={!playerTitle && !settings?.showUiTooltips}
-            hoverScale={1}
-            absoluteHover
-            disabled={!name}
-            onPress={() => openUserPopup(name)}
-          >
-            {
-              !!playerTitle?.icon &&
-              <Svg
-                className={styles.usernameButtonIcon}
-                description={playerTitle.iconDescription}
-                src={getResourceUrl(`${playerTitle.icon}.svg`)}
-              />
-            }
-          </Button>
+          {playerOptions?.length ? (
+            <Dropdown
+              aria-label={`Player Selector for the ${capitalize(position)} Section`}
+              hint={name || defaultName}
+              tooltip={settings?.showUiTooltips ? (
+                <div className={styles.tooltipContent}>
+                  Switch <strong>{capitalize(position)}</strong> Player
+                </div>
+              ) : null}
+              input={{
+                name: `PlayerCalc:PlayerKey:${position}:Dropdown`,
+                value: playerKey,
+                onChange: (key: CalcdexPlayerKey) => ctx[position === 'top' ? 'setPlayerKey' : 'setOpponentKey'](
+                  key,
+                  `${baseScope}:Dropdown~PlayerKey-${position}:input.onChange()`,
+                ),
+              }}
+              options={playerOptions}
+              noOptionsMessage="No Players Found"
+              clearable={false}
+              disabled={!playerKey}
+            />
+          ) : (
+            <Button
+              className={styles.usernameButton}
+              style={playerTitle?.color?.[colorScheme] ? {
+                color: playerTitle.color[colorScheme],
+              } : undefined}
+              labelClassName={styles.usernameButtonLabel}
+              label={name || defaultName}
+              tooltip={(
+                <div className={styles.tooltipContent}>
+                  {
+                    !!playerTitle?.title &&
+                    <>
+                      {settings?.showUiTooltips ? (
+                        <em>{playerTitle.title}</em>
+                      ) : playerTitle.title}
+                      {
+                        settings?.showUiTooltips &&
+                        <br />
+                      }
+                    </>
+                  }
+                  {
+                    settings?.showUiTooltips &&
+                    <>
+                      Open{' '}
+                      {name ? (
+                        <>
+                          <strong>{name}</strong>'s
+                        </>
+                      ) : 'User'}{' '}
+                      Profile
+                    </>
+                  }
+                </div>
+              )}
+              tooltipDisabled={!playerTitle && !settings?.showUiTooltips}
+              hoverScale={1}
+              absoluteHover
+              disabled={!name}
+              onPress={() => openUserPopup(name)}
+            >
+              {
+                !!playerTitle?.icon &&
+                <Svg
+                  className={styles.usernameButtonIcon}
+                  description={playerTitle.iconDescription}
+                  src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                />
+              }
+            </Button>
+          )}
 
           <div className={styles.playerActions}>
             <ToggleButton
@@ -242,7 +282,7 @@ export const PlayerCalc = ({
             gridTemplateColumns: `repeat(${['xs', 'sm'].includes(containerSize) ? 6 : 12}, min-content)`,
           }}
         >
-          {Array(maxPokemon || 0).fill(null).map((_, i) => {
+          {Array(Math.max(maxPokemon || 0, minPokemon)).fill(null).map((_, i) => {
             const pokemon = playerParty?.[i];
 
             const pokemonKey = pokemon?.calcdexId
@@ -264,11 +304,15 @@ export const PlayerCalc = ({
 
             // const speciesForme = mon?.transformedForme || mon?.speciesForme;
             const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
+            const ability = pokemon?.dirtyAbility || pokemon?.ability;
             const item = pokemon?.dirtyItem ?? pokemon?.item;
 
+            // only tracking Ruin abilities (gen 9) atm
+            const abilityActive = !legacy
+              && formatId(ability)?.endsWith('ofruin')
+              && pokemon.abilityToggled;
+
             const pokemonActive = !!pokemon?.calcdexId
-              // && !!activePokemon?.calcdexId
-              // && activePokemon.calcdexId === mon.calcdexId;
               && activeIndices.includes(i);
 
             const pokemonSelected = !!pokemon?.calcdexId
@@ -300,11 +344,32 @@ export const PlayerCalc = ({
                         (<strong>{friendlyPokemonName}</strong>)
                       </>
                     ) : <strong>{friendlyPokemonName}</strong>}
+
+                    {
+                      abilityActive &&
+                      <>
+                        <br />
+                        <span className={styles.activeAbility}>
+                          {ability}
+                        </span>
+                      </>
+                    }
+
                     {
                       !!item &&
                       <>
                         <br />
                         {item}
+                      </>
+                    }
+
+                    {
+                      (!pokemon?.dirtyItem && !!pokemon?.prevItem) &&
+                      <>
+                        <br />
+                        <span className={styles.prevItem}>
+                          {pokemon.prevItem}
+                        </span>
                       </>
                     }
                   </div>

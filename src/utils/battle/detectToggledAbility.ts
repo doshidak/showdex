@@ -88,7 +88,7 @@ export const detectToggledAbility = (
       return selectionIndex > -1 && pokemonIndex === selectionIndex;
     }
 
-    return activeIndices?.length && activeIndices.includes(pokemonIndex);
+    return !!activeIndices?.length && activeIndices.includes(pokemonIndex);
   }
 
   // handle Protosynthesis/Quark Drive

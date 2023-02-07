@@ -1,5 +1,6 @@
 import { createSlice, current } from '@reduxjs/toolkit';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import { detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
@@ -180,6 +181,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.0
    */
   altTeraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
+
+  /**
+   * Revealed Tera type from the battle.
+   *
+   * * Can be populated from the `terastallized` property of `Showdown.Pokemon` or from a team sheet.
+   * * Why isn't this just `teraType` and the existing `teraType` not `dirtyTeraType`?
+   *   - No idea.
+   *   - Sounds like a good idea though.
+   *   - I'll leave it like this for now as to not break anything.
+   *
+   * @since 1.1.3
+   */
+  revealedTeraType?: Showdown.TypeName;
 
   /**
    * Ability of the Pokemon.
@@ -579,6 +593,47 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   criticalHit?: boolean;
 
   /**
+   * Move last used consecutively.
+   *
+   * * This is the move that `chainCounter` refers to.
+   * * Any move, regardless of it doing damage, can be stored here.
+   *   - If the mechanic boosts BP based on consecutive usage, then Status moves would be unaffected, obviously!
+   * * Showdown doesn't provide this info, so this information is derived by the Calcdex during battle syncs.
+   *   - As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet (probably in v1.1.4).
+   *
+   * @default null
+   * @since 1.1.3
+   */
+  chainMove?: MoveName;
+
+  /**
+   * Number of times the `chainMove` was used.
+   *
+   * * Can be used for a variety of mechanics that depend on consecutive move usage.
+   * * Counter will only increment **after** the `chainMove` was *successfully* used, so any effects that make
+   *   use of consecutively-used moves will be applied on the following turn, as long as the `chainMove` is
+   *   successfully used again.
+   * * Follows mechanics used by the *Metronome* item (not the ability!):
+   *   - Switching out, using another move, and using the move *unsuccessfully* will reset the counter to `0`.
+   *   - Multi-strike moves (e.g., *Population Bomb*) will only increment the counter once.
+   *   - Moves calling other moves (e.g., *Copycat*, *Metronome*, *Nature Power*) will increment the counter
+   *     only if the called move matches `chainMove` (otherwise, will be reset to `0` with the called move).
+   *   - Moves with a charging turn (e.g., *Fly*, *Geomancy*, *Phantom Force*) will increment the counter
+   *     even on the charging turn as it will be considered to be successfully used.
+   * * *Unsuccessful* move usage entails situations where the move failed to hit, such as:
+   *   - Defending Pokemon protects (hitting the *Substitute* counts as a *successful* hit, however),
+   *   - Defending Pokemon is immune to the move (e.g., *Earthquake* on a Flying type),
+   *   - Attacking Pokemon misses the move (e.g., *High Jump Kick* with 90% accuracy),
+   *   - Attacking Pokemon's status prevents usage of the move (e.g., Paralysis, Sleep).
+   * * Showdown doesn't provide this info, so this information is derived by the Calcdex during battle syncs.
+   *   - As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet (probably in v1.1.4).
+   *
+   * @default 0
+   * @since 1.1.3
+   */
+  chainCounter?: number;
+
+  /**
    * Number of turns the Pokemon was asleep for.
    *
    * * Kept track by the client under the `statusData.sleepTurns` property in `Showdown.Pokemon`.
@@ -641,15 +696,33 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - See the `name` property in `CalcdexPokemonPreset` for more information.
    * * Recommended you use the preset's `calcdexId` as this property's value instead.
    *
-   * @todo Rename this to `presetId` to avoid confusion about this property's type.
+   * @deprecated As of v1.1.3, this property is no longer being used in favor of `presetId`.
+   *   Most instances of `preset` have been replaced with `presetId`, but just in case, I'm leaving this
+   *   still defined for now.
    * @since 0.1.0
    */
   preset?: string;
 
   /**
+   * ID of the preset that's currently applied to the Pokemon.
+   *
+   * * ID refers to the `calcdexId` of the preset.
+   * * Same functionality as the `preset` property that existed since day one (v0.1.0).
+   *   - Renamed since `preset` doesn't store a `CalcdexPokemonPreset` anymore, but its `calcdexId`.
+   *
+   * @since 1.1.3
+   */
+  presetId?: string;
+
+  /**
    * Available presets (i.e., sets) for the Pokemon.
    *
-   * @todo change this to `string[]` (of calcdexId's) for better memory management
+   * * These are typically presets derived from the battle, not downloaded from an external repository.
+   *   - You'll find presets sourced from the `'server'`, `'storage'`/`'storage-box'` (from the Teambuilder),
+   *     `'import'` (imported PokePastes), and `'sheets'` (open team sheets or `!showteam`).
+   * * As such, this is uniquely populated for each battle, if presets from any of the aforementioned sources
+   *   are available.
+   *
    * @default
    * ```ts
    * []
@@ -730,17 +803,19 @@ export type CalcdexPokemonUsageAlt<
  *
  * * `'import'` refers to any preset imported from the user's clipboard.
  * * `'server'` refers to any preset provided by the Showdown server, typically for the logged-in user's Pokemon.
- * * `'smogon'` refers to any preset that has been downloaded, though typically from the Smogon dex.
- * * `'storage'` refers to any preset locally saved in the user's browser, typically stored by the Teambuilder.
+ * * `'sheet'` refers to any preset derived from an open team sheet or the `!showteam` chat command.
+ * * `'smogon'` refers to any preset downloaded from a repository of Smogon sets.
+ * * `'storage'` refers to any preset derived from locally-stored Teambuilder teams and boxes.
  *   - `'storage'` refers to any preset derived from a Teambuilder team.
  *   - `'storage-box'` refers to any preset derived from a Teambuilder box.
- * * `'usage'` refers to any preset from Showdown usage stats.
+ * * `'usage'` refers to any preset derived from Showdown usage stats.
  *
  * @since 1.0.7
  */
 export type CalcdexPokemonPresetSource =
   | 'import'
   | 'server'
+  | 'sheet'
   | 'smogon'
   | 'storage'
   | 'storage-box'
@@ -788,6 +863,21 @@ export interface CalcdexPokemonPreset {
    * @since 1.0.7
    */
   source?: CalcdexPokemonPresetSource;
+
+  /**
+   * Username of the player that the preset belongs to.
+   *
+   * * Primarily used to distinguish open team sheets in formats like VGC 2023.
+   *   - Presets sourced from team sheets will have a `source` value of `'sheet'`.
+   *   - Revealed team sheets include all active players, so this will be useful when filtering for presets
+   *     belonging to a specific player.
+   * * Note that this has not been formatted by as ID and could possibly include unicode symbols.
+   * * Don't always expect this to be populated; most preset builders don't make use of this property.
+   *
+   * @example 'sumfuk'
+   * @since 1.1.3
+   */
+  playerName?: string;
 
   /**
    * Name of the preset.
@@ -879,10 +969,14 @@ export type CalcdexLeanSide = Partial<Omit<NonFunctionProperties<Showdown.Side>,
   | 'active'
   | 'ally'
   | 'battle'
+  | 'faintCounter'
   | 'foe'
+  | 'isFar'
   | 'lastPokemon'
   | 'missedPokemon'
+  | 'n'
   | 'pokemon'
+  | 'sideConditions'
   | 'wisher'
   | 'x'
   | 'y'
@@ -899,6 +993,17 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    * @since 0.1.0
    */
   calcdexNonce?: string;
+
+  /**
+   * Whether the player is active in the battle.
+   *
+   * * This value will initially be `false` until the player is properly initialized.
+   * * For most battles with only two players, `'p3'` and `'p4'` will typically have this property set to `false`.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  active?: boolean;
 
   /**
    * Index of the `CalcdexPokemon` that is currently active on the field.
@@ -974,42 +1079,68 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
    * @since 0.1.0
    */
   pokemon?: CalcdexPokemon[];
+
+  /**
+   * Whether the player has already Dynamaxed (including Gigantamax, if applicable) one of their Pokemon.
+   *
+   * * If `true`, this will disable the Max toggles for all of the player's Pokemon in `PokeMoves`.
+   *   - Note that once the battle is over (`active` in `CalcdexBattleState` is `false`), the Max toggles will
+   *     be re-enabled again.
+   * * Obviously for non-Gen 9 formats, this isn't being used.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  usedMax?: boolean;
+
+  /**
+   * Whether the player has already Terastallized one of their Pokemon.
+   *
+   * * If `true`, this will disable the Tera toggles for all of the player's Pokemon in `PokeMoves`.
+   *   - Note that once the battle is over (`active` in `CalcdexBattleState` is `false`), the Tera toggles will
+   *     be re-enabled again.
+   * * Obviously for non-Gen 9 formats, this isn't being used.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  usedTera?: boolean;
+
+  /**
+   * Field conditions on the player's side.
+   *
+   * * As of v1.1.3, these are now directly being stored in the `CalcdexPlayer`, as opposed to the
+   *   `CalcdexBattleField` in prior versions.
+   *   - `attackerSide` and `defenderSide` in `CalcdexBattleField` is still used, but dynamically assigned
+   *     in the `createSmogonField()` utility depending on who's attacking and defending.
+   *   - This will allow us to keep track of individual field conditions of each player, particularly in FFA
+   *     (Free-For-All) modes, where there could be up to 4 unique players in a single battle.
+   *
+   * @since 1.1.3
+   */
+  side?: CalcdexPlayerSide;
 }
 
 /**
- * Think someone at `@smogon/calc` forgot to include these additional field conditions
- * in the `State.Field` (but it exists in the `Field` class... huh).
- *
- * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
- * * Checking the source code for the `Field` class (see link below),
- *   the constructor accepts these missing properties.
- *
- * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
- * @since 0.1.3
- */
-export interface CalcdexBattleField extends SmogonState.Field {
-  isMagicRoom?: boolean;
-  isWonderRoom?: boolean;
-  isAuraBreak?: boolean;
-  isFairyAura?: boolean;
-  isDarkAura?: boolean;
-  attackerSide: CalcdexPlayerSide;
-  defenderSide: CalcdexPlayerSide;
-}
-
-/**
- * As is the case with `CalcdexBattleField`, this adds the missing properties that exist
- * in `Side`, but not `State.Side`.
+ * Field conditions on the player's side.
  *
  * * Additional properties that will be unused by the `Side` constructor are included
  *   as they may be used in Pokemon stat calculations.
+ * * As of v1.1.3, these are now attached to each individual `CalcdexPlayer` instead
+ *   of the `CalcdexBattleField`.
  *
- * @todo get rid of `attackerSide` and `defenderSide` in `CalcdexBattleField` and merge this entire
- *   interface with `CalcdexPlayer` or something.
- * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L84-L102
  * @since 0.1.3
  */
 export interface CalcdexPlayerSide extends SmogonState.Side {
+  /**
+   * Current side conditions synced directly from the battle.
+   *
+   * * Not used by the calc, but by `sanitizePlayerSide()` to populate `spikes` and `isSR` (*Stealth Rock*).
+   *
+   * @since 1.1.3
+   */
+  conditions?: Showdown.Side['sideConditions'];
+
   isProtected?: boolean;
   isSeeded?: boolean;
   isFriendGuard?: boolean;
@@ -1072,6 +1203,51 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    * @since 1.1.0
    */
   ruinVesselCount?: number;
+}
+
+/**
+ * Think someone at `@smogon/calc` forgot to include these additional field conditions
+ * in the `State.Field` (but it exists in the `Field` class... huh).
+ *
+ * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
+ * * Checking the source code for the `Field` class (see link below),
+ *   the constructor accepts these missing properties.
+ *
+ * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
+ * @since 0.1.3
+ */
+export interface CalcdexBattleField extends SmogonState.Field {
+  isMagicRoom?: boolean;
+  isWonderRoom?: boolean;
+  isAuraBreak?: boolean;
+  isFairyAura?: boolean;
+  isDarkAura?: boolean;
+
+  /**
+   * Field conditions on the attacking player's side.
+   *
+   * * Should be grabbed from the attacking `CalcdexPlayer`'s `side` and set to this value when instatiating the
+   *   `Smogon.Field` in `createSmogonField()`.
+   *
+   * @warning As of v1.1.3, these are attached to each individual `CalcdexPlayer` and
+   *   dynamically assigned during damage calculation. In other words, **do not** store
+   *   a player's `side` in here!
+   * @since 0.1.3
+   */
+  attackerSide: CalcdexPlayerSide;
+
+  /**
+   * Field conditions on the defending player's side.
+   *
+   * * Should be grabbed from the defending `CalcdexPlayer`'s `side` and set to this value when instatiating the
+   *   `Smogon.Field` in `createSmogonField()`.
+   *
+   * @warning As of v1.1.3, these are attached to each individual `CalcdexPlayer` and
+   *   dynamically assigned during damage calculation. In other words, **do not** store
+   *   a player's `side` in here!
+   * @since 0.1.3
+   */
+  defenderSide: CalcdexPlayerSide;
 }
 
 /**
@@ -1318,18 +1494,21 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   renderMode?: CalcdexRenderMode;
 
   /**
-   * Whether Teambuilder presets have been included for this current battle.
+   * Whether the overlay is open/visible.
    *
-   * * This exists as a performance optimization so that the Teambuilder presets are only converted
-   *   once per battle.
-   *   - Since this is primarily being used in `syncBattle()`, this prevents conversions on each sync.
-   * * You should logical AND (`&&`) this with the `includeTeambuilder` Calcdex setting when determining
-   *   Teambuilder preset conversion.
+   * * Has no effect if `renderMode` is not `'overlay'`.
    *
-   * @default false
-   * @since 1.1.2
+   * @since 1.1.3
    */
-  includedTeambuilder?: boolean;
+  overlayVisible?: boolean;
+
+  /**
+   * Number of active players in the battle.
+   *
+   * @default 0
+   * @since 1.1.3
+   */
+  playerCount: number;
 
   /**
    * Side key/ID of the player.
@@ -1369,11 +1548,53 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   opponentKey: CalcdexPlayerKey;
 
   /**
+   * Whether to switch the players in the Calcdex.
+   *
+   * * Populated directly from `sidesSwitched` of the `battle`.
+   * * Does not change the population behavior of `playerKey` and `opponentKey`, just how they're rendered.
+   *   - Specifically, this dictates the `topKey` and `bottomKey` in the Calcdex.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  switchPlayers?: boolean;
+
+  /**
    * Tracked field conditions.
    *
    * @since 0.1.0
    */
   field: CalcdexBattleField;
+
+  /**
+   * Hash of all the relevant `stepQueue`s used to derive `sheets`.
+   *
+   * * Primarily used to determine if we should repopulate the `sheets`.
+   *   - Could happen if another player suddenly reveals their team mid-battle.
+   *   - For this reason, we don't optimize the population of `sheets` to once per battle.
+   * * Hash is generated by `calcCalcdexId()` by joining all relevant `stepQueue`s into a `string`, deliminated by a
+   *   semi-colon (i.e., `;`), in `syncBattle()`.
+   *   - In other words, this hash is a namespaced UUID.
+   *
+   * @default null
+   * @since 1.1.3
+   */
+  sheetsNonce: string;
+
+  /**
+   * Converted presets derived from team sheets posted in the battle.
+   *
+   * * These are unique to each battle and are populated from the relevant `stepQueue`s in `syncBattle()`.
+   * * Will only be populated if the `autoImportTeamSheet` Calcdex setting is enabled, team sheets are available, and
+   *   the generated `sheetsNonce` doesn't match the previously stored value, if any.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.1.3
+   */
+  sheets: CalcdexPokemonPreset[];
 }
 
 /**
@@ -1386,12 +1607,26 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
  */
 export type CalcdexSliceStateAction<
   TRequired extends keyof CalcdexBattleState = null,
-> = PayloadAction<Modify<DeepPartial<CalcdexBattleState>, {
+> = PayloadAction<Modify<{ scope?: string; } & DeepPartial<CalcdexBattleState>, {
   // idk why CalcdexBattleField isn't partialed from DeepPartial<CalcdexBattleState>
   [P in TRequired]: P extends 'field' ? DeepPartial<CalcdexBattleField> : DeepPartial<CalcdexBattleState>[P];
 }>>;
 
+/**
+ * Payload required for mutating a `playerKey`'s `pokemon` in the `battleId`.
+ *
+ * @since 0.1.3
+ */
 export interface CalcdexSlicePokemonAction {
+  /**
+   * Optional name of the thing that dispatched this action.
+   *
+   * * Used for debugging purposes only.
+   *
+   * @since 1.1.3
+   */
+  scope?: string;
+
   battleId: string;
   playerKey: CalcdexPlayerKey;
   pokemon: DeepPartial<CalcdexPokemon>;
@@ -1469,12 +1704,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
   reducers: {
     init: (state, action) => {
       l.debug(
-        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', action.payload?.battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
       const {
+        scope, // used for debugging; not used here, but destructuring it from `...payload`
         battleId,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
@@ -1482,11 +1719,11 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         turn = 0,
         active = false,
         renderMode,
+        overlayVisible = false,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
-        p1,
-        p2,
+        switchPlayers = false,
         field,
         ...payload
       } = action.payload;
@@ -1513,7 +1750,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...payload,
 
         battleId,
-        battleNonce: null, // make sure we don't set this for the syncBattle() action
+        // battleNonce: null, // make sure we don't set this for the syncBattle() action
 
         gen,
         format,
@@ -1523,58 +1760,69 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         active,
 
         renderMode,
-        includedTeambuilder: false,
+        overlayVisible: renderMode === 'overlay' && overlayVisible,
 
+        playerCount: 0,
         playerKey,
         authPlayerKey,
         opponentKey,
+        switchPlayers,
 
-        p1: {
-          sideid: 'p1',
-          name: null,
-          rating: null,
-          // activeIndex: -1,
-          activeIndices: [],
-          selectionIndex: 0,
-          autoSelect: true,
-          maxPokemon: defaultMaxPokemon,
-          pokemonOrder: [],
-          ...p1,
-          pokemon: [],
-        },
+        ...AllPlayerKeys.reduce((prev, currentPlayerKey) => {
+          prev[currentPlayerKey] = {
+            // all of these can technically be overridden in payload[currentPlayerKey]
+            sideid: currentPlayerKey,
+            active: currentPlayerKey in payload,
+            name: null,
+            rating: null,
+            activeIndices: [],
+            selectionIndex: 0,
+            autoSelect: true,
+            maxPokemon: defaultMaxPokemon,
+            usedMax: false,
+            usedTera: false,
 
-        p2: {
-          sideid: 'p2',
-          name: null,
-          rating: null,
-          // activeIndex: -1,
-          activeIndices: [],
-          selectionIndex: 0,
-          autoSelect: true,
-          maxPokemon: defaultMaxPokemon,
-          pokemonOrder: [],
-          ...p2,
-          pokemon: [],
-        },
+            // since this requires the battle object (typically only available in the CalcdexProvider scope),
+            // we won't initialize it here; however, initial values can still be provided through payload[currentPlayerKey]
+            side: null,
 
-        // currently unsupported
-        p3: null,
-        p4: null,
+            // spread any overrides provided from the payload
+            ...payload[currentPlayerKey],
+
+            // these cannot be overridden on init
+            pokemonOrder: [],
+            pokemon: [],
+          };
+
+          return prev;
+        }, <Record<CalcdexPlayerKey, CalcdexPlayer>> {
+          p1: null,
+          p2: null,
+          p3: null,
+          p4: null,
+        }),
 
         field: field || sanitizeField(),
+
+        sheetsNonce: null,
+        sheets: [],
       };
 
+      state[battleId].playerCount = AllPlayerKeys.filter((k) => state[battleId][k].active).length;
+
       l.debug(
-        'DONE', action.type, 'for', battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'DONE', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     update: (state, action) => {
       l.debug(
-        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', action.payload?.battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
@@ -1584,6 +1832,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen,
         format,
         active,
+        overlayVisible,
+        playerKey,
+        opponentKey,
       } = action.payload;
 
       if (!battleId) {
@@ -1612,6 +1863,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
         format: format || currentState.format,
         // active: typeof active === 'boolean' ? active : currentState.active,
+        overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
+        playerKey: playerKey || currentState.playerKey,
+        opponentKey: opponentKey || currentState.opponentKey,
       };
 
       // for the active state, only update if previously true and the new value is false
@@ -1621,16 +1875,18 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       }
 
       l.debug(
-        'DONE', action.type, 'for', battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'DONE', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     updateField: (state, action) => {
       l.debug(
-        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', action.payload?.battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
@@ -1661,36 +1917,37 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...battleField,
         ...field,
 
-        attackerSide: {
-          ...battleField.attackerSide,
-          ...field?.attackerSide,
-        },
+        // update (2023/01/22): attackerSide and defenderSide are now only dynamically populated
+        // within createSmogonField(); these properties are now being stored in each CalcdexPlayer
+        // under the `side` property (i.e., don't store the CalcdexPlayerSide's in the CalcdexBattleField!)
+        // attackerSide: {
+        //   ...battleField.attackerSide,
+        //   ...field?.attackerSide,
+        // },
 
-        defenderSide: {
-          ...battleField.defenderSide,
-          ...field?.defenderSide,
-        },
+        // defenderSide: {
+        //   ...battleField.defenderSide,
+        //   ...field?.defenderSide,
+        // },
       };
 
       l.debug(
-        'DONE', action.type, 'for', battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'DONE', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     updatePlayer: (state, action) => {
       l.debug(
-        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', action.payload?.battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
-      const {
-        battleId,
-        p1,
-        p2,
-      } = action.payload;
+      const { battleId } = action.payload;
 
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
@@ -1704,35 +1961,41 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
-      if (!Object.keys(p1 || {}).length && !Object.keys(p2 || {}).length) {
-        l.error('Found no player to update!');
+      if (AllPlayerKeys.every((k) => !Object.keys(action.payload[k] || {}).length)) {
+        l.error('Found no players to update!');
       }
 
-      if (p1) {
-        state[battleId].p1 = {
-          ...state[battleId].p1,
-          ...p1,
-        };
-      }
+      AllPlayerKeys.forEach((playerKey) => {
+        const payload = action.payload[playerKey];
 
-      if (p2) {
-        state[battleId].p2 = {
-          ...state[battleId].p2,
-          ...p2,
+        if (!Object.keys(payload || {}).length) {
+          return;
+        }
+
+        state[battleId][playerKey] = {
+          ...state[battleId][playerKey],
+          ...payload,
+
+          side: {
+            ...state[battleId][playerKey].side,
+            ...payload?.side,
+          },
         };
-      }
+      });
 
       l.debug(
-        'DONE', action.type, 'for', battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'DONE', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
 
     updatePokemon: (state, action) => {
       l.debug(
-        'RECV', action.type, 'for', action.payload?.battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', action.payload?.battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
@@ -1758,7 +2021,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       if (!(playerKey in battleState)) {
         l.error(
-          'Could not find player', playerKey, 'in battleId', battleId,
+          'Could not find player', playerKey, 'in state for', battleId,
           '\n', 'pokemon', pokemon,
           '\n', 'battleState', __DEV__ && current(state)[battleId],
         );
@@ -1777,7 +2040,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           const currentState = __DEV__ ? current(state) : null;
 
           l.warn(
-            'Could not find Pokemon', pokemonId, 'of player', playerKey, 'in battleId', battleId,
+            'Could not find Pokemon', pokemonId, 'of player', playerKey, 'in state for', battleId,
             '\n', 'pokemon', pokemon,
             '\n', 'playerState', __DEV__ && currentState?.[battleId]?.[playerKey],
             '\n', 'battleState', __DEV__ && currentState?.[battleId],
@@ -1794,8 +2057,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       };
 
       l.debug(
-        'DONE', action.type, 'for', battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'DONE', action.type, 'from', action.payload?.scope || '(anon)',
+        '\n', 'battleId', battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     },
@@ -1803,7 +2067,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
     destroy: (state, action) => {
       l.debug(
         'RECV', action.type,
-        '\n', 'action.payload', action.payload,
+        '\n', 'battleId (payload)', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
 
@@ -1824,7 +2088,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       l.debug(
         'DONE', action.type,
-        '\n', 'action.payload', action.payload,
+        '\n', 'battleId (payload)', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
     },
@@ -1839,8 +2103,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       }
 
       l.debug(
-        'DONE', SyncBattleActionType, 'for', battleId || '(missing battleId)',
-        '\n', 'action.payload', action.payload,
+        'DONE', SyncBattleActionType, 'from', '@showdex/redux/actions/syncBattle',
+        '\n', 'battleId', battleId || '???',
+        '\n', 'payload', action.payload,
         '\n', 'battleState', __DEV__ && current(state)[battleId],
       );
     }),

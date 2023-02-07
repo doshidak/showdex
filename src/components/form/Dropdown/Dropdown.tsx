@@ -41,7 +41,9 @@ export type DropdownValue = DropdownSingleValue | DropdownMultiValue;
 export interface DropdownOption<
   TValue extends DropdownSingleValue = DropdownSingleValue,
 > {
-  label?: string;
+  labelClassName?: string;
+  labelStyle?: React.CSSProperties;
+  label?: React.ReactNode;
   rightLabel?: React.ReactNode;
   subLabel?: React.ReactNode;
   value?: TValue;

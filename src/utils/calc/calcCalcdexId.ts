@@ -26,7 +26,10 @@ export const calcCalcdexId = <T>(payload: T): string => {
     return null;
   }
 
-  return uuidv5(serialized, env('uuid-namespace', NIL_UUID));
+  return uuidv5(
+    serialized?.replace(/[^A-Z0-9\x20~`!@#$%^&*()+\-_=\[\]{}<>\|:;,\.'"\/\\]/gi, ''),
+    env('uuid-namespace', NIL_UUID),
+  );
 };
 
 export const calcPresetCalcdexId = (

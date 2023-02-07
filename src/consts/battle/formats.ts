@@ -9,6 +9,7 @@
 export const FormatLabels: Record<string, string> = {
   '1v1': '1v1',
   '2v2doubles': '2v2 Doubles',
+  '350cup': '350 Cup',
   '4v4doublesdraft': '4v4 Doubles Draft',
   '6v6doublesdraft': '6v6 Doubles Draft',
   almostanyability: 'AAA',
@@ -18,9 +19,12 @@ export const FormatLabels: Record<string, string> = {
   battlefactory: 'Battle Factory',
   battlespotsingles: 'B-Spot Singles',
   battlespotdoubles: 'B-Spot Doubles',
+  battlespottriples: 'B-Spot Triples',
   battlestadiumsingles: 'BSS',
   battlestadiumsinglesseries1: 'BSS Series 1',
-  battlestadiumsinglesseries2: 'BSS Series 2', // just a lil near-future-proofing lol
+  battlestadiumsinglesseries2: 'BSS Series 2',
+  battlestadiumsinglesseries3: 'BSS Series 3', // just a lil near-future-proofing lol
+  battlestadiumsinglesseries4: 'BSS Series 4',
   battlestadiumdoubles: 'BSD',
   battlestadiumdoublesseries13: 'BSD Series 13',
   bdsp3v3singles: 'BDSP 3v3 Singles',
@@ -35,6 +39,7 @@ export const FormatLabels: Record<string, string> = {
   bdspru: 'BDSP RU',
   bdspubers: 'BDSP Ubers',
   bdspuu: 'BDSP UU',
+  bonustype: 'Bonus Type',
   bssfactory: 'BSS Factory',
   camomons: 'Camomons',
   cap: 'CAP', // CreateAPokemon (no cap, always factual)
@@ -44,16 +49,18 @@ export const FormatLabels: Record<string, string> = {
   challengecup1v1: 'Challenge Cup 1v1',
   challengecup2v2: 'Challenge Cup 2v2',
   challengecup6v6: 'Challenge Cup 6v6',
+  chimera1v1: 'Chimera 1v1',
   computergeneratedteams: 'CG Teams',
   crossevolution: 'Cross Evo',
   customgame: 'Customs',
-  doublescustomgame: 'Customs Doubles',
-  doubleshackmonscup: 'Hackmons Cup Doubles',
-  doubleslc: 'LC Doubles',
-  doublesou: 'OU Doubles',
-  doublesubers: 'Ubers Doubles',
-  doublesuu: 'UU Doubles',
+  doublescustomgame: 'Doubles Customs',
+  doubleshackmonscup: 'Doubles Hackmons Cup',
+  doubleslc: 'Doubles LC',
+  doublesou: 'Doubles OU',
+  doublesubers: 'Doubles Ubers',
+  doublesuu: 'Doubles UU',
   draft: 'Draft',
+  flipped: 'Flipped',
   freeforall: 'FFA',
   freeforallrandombattle: 'FFA Randoms',
   fullpotential: 'Full Potential',
@@ -83,6 +90,7 @@ export const FormatLabels: Record<string, string> = {
   nationaldex: 'NatDex',
   nationaldexag: 'NatDex AG',
   nationaldexbh: 'NatDex BH',
+  nationaldexlegacy: 'NatDex Legacy',
   nationaldexmonotype: 'NatDex Monotype',
   nationaldexru: 'NatDex RU',
   nationaldexubers: 'NatDex Ubers',
@@ -99,12 +107,14 @@ export const FormatLabels: Record<string, string> = {
   partnersincrime: 'Partners-in-Crime',
   pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
   pokebilities: 'Pokebilities',
+  pokebilitiesaaa: 'Pokebilities AAA',
   pu: 'PU', // PU (as in, "P-U, smells like ass"... I think)
   purehackmons: 'Pure Hackmons',
   randombattle: 'Randoms',
   randombattleblitz: 'Randoms Blitz',
   randombattlemayhem: 'Randoms Mayhem',
   randombattlenodmax: 'Randoms No-Dmax',
+  randombattlepotd: 'Randoms PotD', // Pokemon of the Day
   randomdex: 'Randoms Dex',
   randomdoublesbattle: 'Randoms Doubles',
   revelationmons: 'Revelationmons',
@@ -113,12 +123,15 @@ export const FormatLabels: Record<string, string> = {
   sharedpowerrandombattle: 'Shared Power Randoms',
   spikemuthcup: 'Spikemuth Cup',
   stabmons: 'STABmons', // SameTypeAttackBonus
+  stabmonsmixandmega: 'STABmons Mix & Mega',
   stadiumou: 'Stadium OU',
   superstaffbros4: 'Super Staff Bros 4',
-  thelosersgame: 'The Loser\'s Game',
   tagteamsingles: 'Tag Team Singles',
+  thelosersgame: 'The Loser\'s Game',
+  tiershift: 'Tier Shift',
   tradebacksou: 'Tradebacks OU',
-  triplescustomgame: 'Customs Triples',
+  trademarked: 'Trademarked',
+  triplescustomgame: 'Triples Customs',
   ubers: 'Ubers',
   ultimatefinale: 'Ultimate Finale',
   unratedrandombattle: 'Unrated Randoms',
@@ -139,8 +152,10 @@ export const FormatLabels: Record<string, string> = {
   vgc2022: 'VGC 2022',
   vgc2023: 'VGC 2023',
   vgc2023series1: 'VGC 2023 Series 1',
-  vgc2023series2: 'VGC 2023 Series 2', // just another lil near-future-proofing... lol
-  voltturnmayhem: 'VoltTurn Mayhem',
+  vgc2023series2: 'VGC 2023 Series 2',
+  vgc2023series3: 'VGC 2023 Series 3', // just another lil near-future-proofing... lol
+  vgc2023series4: 'VGC 2023 Series 4',
+  voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
 

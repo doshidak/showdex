@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   buildAbilityOptions,
   buildItemOptions,
@@ -7,6 +8,7 @@ import {
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
+  hasMegaForme,
   mergeRevealedMoves,
   usageAltPercentFinder,
   usageAltPercentSorter,
@@ -56,6 +58,8 @@ export interface CalcdexPokeProviderProps {
   children?: React.ReactNode;
 }
 
+const baseScope = '@showdex/pages/Calcdex/CalcdexPokeProvider';
+
 export const CalcdexPokeProvider = ({
   playerKey,
   movesCount = 4,
@@ -80,16 +84,6 @@ export const CalcdexPokeProvider = ({
     legacy,
     field,
   } = state;
-
-  // update: don't flip the attackerSide/defenderSide since it's already being flipped in createSmogonField()
-  // const field = React.useMemo<CalcdexBattleField>(() => ({
-  //   ...fieldFromState,
-  //   attackerSide: playerKey === 'p1' ? fieldFromState?.attackerSide : fieldFromState?.defenderSide,
-  //   defenderSide: playerKey === 'p1' ? fieldFromState?.defenderSide : fieldFromState?.attackerSide,
-  // }), [
-  //   fieldFromState,
-  //   playerKey,
-  // ]);
 
   const opponentKey: CalcdexPlayerKey = playerKey === 'p1' ? 'p2' : 'p1';
   const player = React.useMemo(() => state[playerKey] || {}, [playerKey, state]);
@@ -120,13 +114,13 @@ export const CalcdexPokeProvider = ({
 
   // note: `preset` is confusingly the `calcdexId` of the preset
   // (there's a todo for `preset` to update its name lol)
-  const appliedPreset = (playerPokemon?.preset ? [
+  const currentPreset = (playerPokemon?.presetId ? [
     ...presets,
     ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
-  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.preset);
+  ] : []).find((p) => !!p?.calcdexId && p.calcdexId === playerPokemon.presetId);
 
   const usage = (usages?.length === 1 && usages[0])
-    || (!!appliedPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(appliedPreset.name)))
+    || (!!currentPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(currentPreset.name)))
     || usages?.find((p) => p?.source === 'usage');
 
   // build dropdown options
@@ -189,6 +183,7 @@ export const CalcdexPokeProvider = ({
   const applyPreset = React.useCallback<CalcdexPokeContextConsumables['applyPreset']>((
     presetOrId,
     additionalMutations,
+    scope,
   ) => {
     const preset = typeof presetOrId === 'string'
       ? presets.find((p) => p?.calcdexId === presetOrId)
@@ -202,12 +197,18 @@ export const CalcdexPokeProvider = ({
       ...additionalMutations,
 
       calcdexId: playerPokemon?.calcdexId,
-      preset: preset.calcdexId,
+      presetId: preset.calcdexId,
 
-      moves: preset.moves,
-      nature: preset.nature,
+      // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
+      // the new preset (don't want alts from a previous set to persist if none are defined)
+      altTeraTypes: [],
+      altAbilities: [],
       dirtyAbility: preset.ability,
+      nature: preset.nature,
+      altItems: [],
       dirtyItem: preset.item,
+      altMoves: [],
+      moves: preset.moves,
 
       ivs: {
         hp: preset?.ivs?.hp ?? defaultIv,
@@ -235,6 +236,12 @@ export const CalcdexPokeProvider = ({
       return;
     }
 
+    // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
+    // if the preset was for its non-Mega forme (since they could have different abilities)
+    if (hasMegaForme(playerPokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
+      delete mutation.dirtyAbility;
+    }
+
     // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
     // (normally only an issue in Gen 9 Randoms with their role system, which has multiple usage presets)
     const detectedUsage = (usages?.length === 1 && usages[0])
@@ -247,12 +254,8 @@ export const CalcdexPokeProvider = ({
     const teraTypesUsage = detectedUsage?.teraTypes?.filter(detectUsageAlt);
 
     if (teraTypesUsage?.length) {
-      // mutation.altTeraTypes = flatAltTeraTypes
-      //   .map((t) => [t, teraTypesUsage.find((u) => u[0] === t)?.[1] || 0] as CalcdexPokemonUsageAlt<Showdown.TypeName>)
-      //   .sort(sortUsageAlts);
-      mutation.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
-
       // update the teraType to the most likely one after sorting
+      mutation.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
       [mutation.teraType] = mutation.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
     } else if (altTeraTypes?.[0]) {
       // apply the first teraType from the preset's teraTypes
@@ -262,7 +265,7 @@ export const CalcdexPokeProvider = ({
 
     // don't apply the dirtyAbility/dirtyItem if we're applying the Pokemon's first preset and
     // their abilility/item was already revealed or it matches the Pokemon's revealed ability/item
-    // const clearDirtyAbility = (!playerPokemon.preset && playerPokemon.ability)
+    // const clearDirtyAbility = (!playerPokemon.presetId && playerPokemon.ability)
     //   || playerPokemon.ability === preset.ability;
 
     // update (2022/10/07): don't apply the dirtyAbility/dirtyItem at all if their non-dirty
@@ -273,7 +276,7 @@ export const CalcdexPokeProvider = ({
       mutation.dirtyAbility = null;
     }
 
-    // const clearDirtyItem = (!playerPokemon.preset && playerPokemon.item && playerPokemon.item !== '(exists)')
+    // const clearDirtyItem = (!playerPokemon.presetId && playerPokemon.item && playerPokemon.item !== '(exists)')
     //   || playerPokemon.item === preset.item
     //   || (!playerPokemon.item && playerPokemon.prevItem && playerPokemon.prevItemEffect);
     const clearDirtyItem = (playerPokemon.item && playerPokemon.item !== '(exists)')
@@ -356,9 +359,10 @@ export const CalcdexPokeProvider = ({
     }
 
     // check if we already have revealed moves (typical of spectating or replaying a battle)
+    // update (2023/02/03): merging all mutations to provide altMoves[] (for Hidden Power moves)
     mutation.moves = playerPokemon.transformedForme && playerPokemon.transformedMoves?.length
       ? [...playerPokemon.transformedMoves]
-      : mergeRevealedMoves({ ...playerPokemon, moves: mutation.moves });
+      : mergeRevealedMoves({ ...playerPokemon, ...mutation });
 
     // only apply the ability/item (and remove their dirty counterparts) if there's only
     // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
@@ -422,7 +426,7 @@ export const CalcdexPokeProvider = ({
     // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
     const forceShowGenetics = !playerPokemon.showGenetics && (
       !Object.values(mutation.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-        || !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
+        || (!legacy && !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0))
     );
 
     if (forceShowGenetics) {
@@ -430,7 +434,11 @@ export const CalcdexPokeProvider = ({
     }
 
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
-    updatePokemon(playerKey, mutation);
+    updatePokemon(
+      playerKey,
+      mutation,
+      `${baseScope}:applyPreset() via ${scope || '(anon)'}`,
+    );
   }, [
     defaultIv,
     legacy,
@@ -447,7 +455,7 @@ export const CalcdexPokeProvider = ({
 
   // this will allow the user to switch back to the "Yours" preset for a transformed Pokemon
   // (using a ref instead of state since we don't want to cause an unnecessary re-render)
-  const appliedTransformedPreset = React.useRef<boolean>(false);
+  const appliedTransformedPreset = React.useRef(false);
 
   // automatically apply the first preset if the Pokemon has no/invalid preset
   // (invalid presets could be due to the forme changing, so new presets are loaded in)
@@ -461,18 +469,39 @@ export const CalcdexPokeProvider = ({
       appliedTransformedPreset.current = false;
     }
 
-    const existingPreset = playerPokemon.preset && presets?.length
-      ? presets.find((p) => p?.calcdexId === playerPokemon.preset && (
-        !playerPokemon.transformedForme
-          // || formatId(p.name) !== 'yours'
-          || p.source !== 'server' // i.e., the 'Yours' preset
-          || appliedTransformedPreset.current
-      ))
-      : null;
+    // const existingPreset = playerPokemon.presetId && presets?.length
+    //   ? presets.find((p) => p?.calcdexId === playerPokemon.presetId && (
+    //     !playerPokemon.transformedForme
+    //       || p.source !== 'server' // i.e., the 'Yours' preset
+    //       || appliedTransformedPreset.current
+    //   ))
+    //   : null;
 
-    if (existingPreset) {
+    const existingPreset = (
+      !!playerPokemon.presetId
+        && !!presets?.length
+        && presets.find((p) => p?.calcdexId === playerPokemon.presetId)
+    ) || null;
+
+    const shouldAutoPreset = !!presets?.length
+      && (
+        // auto-preset if one hasn't been found or no longer exists in `presets`
+        !existingPreset?.calcdexId
+          // allow another round of auto-presetting if they are transformed
+          || (!!playerPokemon.transformedForme && !appliedTransformedPreset.current)
+      )
+      && (
+        !existingPreset?.source
+          // don't auto-preset if we already know the exact preset or usage is currently applied
+          || !['server', 'sheet', 'usage'].includes(existingPreset.source)
+      );
+
+    if (!shouldAutoPreset) {
       return;
     }
+
+    // used for debugging purposes only
+    const scope = `${baseScope}:React.useEffect()`;
 
     const {
       downloadUsageStats,
@@ -483,18 +512,11 @@ export const CalcdexPokeProvider = ({
     // If we are playing random battles, grab the appropriate randombattles set.
     let initialPreset = presets[0]; // presets[0] as the default case
 
-    // update (2022/10/27): will always be first preset in randoms
-    // if (format.includes('random')) {
-    //   initialPreset = presets.find((p) => (
-    //     (p.format === format)
-    //   ));
-    // } else if (downloadUsageStats && prioritizeUsageStats) {
-
     // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
     // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
     // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
     if (playerPokemon.transformedForme && presets[1]) {
-      [, initialPreset] = presets; // readability 100
+      [, initialPreset] = presets; // readability 100; fancy JS way of writing initialPresets = presets[1]
       appliedTransformedPreset.current = true;
     }
 
@@ -502,9 +524,9 @@ export const CalcdexPokeProvider = ({
       // If we aren't in a random battle, check if we should prioritize
       // the showdown usage stats.
       // note: 'usage'-sourced sets won't exist in `presets` for Randoms formats
-      const usagePreset = presets.find((p) => (
-        // (p.format === format?.replace(/^gen\d/, '') && formatId(p.name) === 'showdownusage')
-        p?.source === 'usage' && (!format || format.includes(p.format))
+      const usagePreset = presets.find((p) => p?.source === 'usage' && (
+        !format
+          || format.includes(p.format)
       ));
 
       // only update if we found a Showdown Usage preset for the format
@@ -518,23 +540,24 @@ export const CalcdexPokeProvider = ({
       // it's likely that the Pokemon has no EVs/IVs set, so show the EVs/IVs if they're hidden
       const forceShowGenetics = !playerPokemon.showGenetics && (
         !Object.values(playerPokemon.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-          || !Object.values(playerPokemon.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
+          || (!legacy && !Object.values(playerPokemon.evs || {}).reduce((sum, val) => sum + (val || 0), 0))
       );
 
       if (forceShowGenetics) {
         updatePokemon(playerKey, {
           calcdexId: playerPokemon.calcdexId,
           showGenetics: true,
-        });
+        }, scope);
       }
 
       return;
     }
 
-    applyPreset(initialPreset);
+    applyPreset(initialPreset, null, scope);
   }, [
     applyPreset,
     format,
+    legacy,
     playerKey,
     playerPokemon,
     presets,
@@ -548,7 +571,9 @@ export const CalcdexPokeProvider = ({
     format,
     playerPokemon,
     opponentPokemon,
-    playerKey,
+    player,
+    opponent,
+    AllPlayerKeys.filter((k) => state[k]?.active).map((k) => state[k]),
     field,
     settings,
   );
@@ -593,16 +618,16 @@ export const CalcdexPokeProvider = ({
 
     applyPreset,
 
-    updatePokemon: (pokemon) => updatePokemon(playerKey, {
+    updatePokemon: (pokemon, scope) => updatePokemon(playerKey, {
       ...pokemon,
       calcdexId: playerPokemon?.calcdexId,
-    }),
+    }, scope || `${baseScope}:updatePokemon()`),
 
     updateField,
-    setActiveIndex: (index) => setActiveIndex(playerKey, index),
-    setActiveIndices: (indices) => setActiveIndices(playerKey, indices),
-    setSelectionIndex: (index) => setSelectionIndex(playerKey, index),
-    setAutoSelect: (autoSelect) => setAutoSelect(playerKey, autoSelect),
+    setActiveIndex: (index, scope) => setActiveIndex(playerKey, index, scope || `${baseScope}:setActiveIndex()`),
+    setActiveIndices: (indices, scope) => setActiveIndices(playerKey, indices, scope || `${baseScope}:setActiveIndices()`),
+    setSelectionIndex: (index, scope) => setSelectionIndex(playerKey, index, scope || `${baseScope}:setSelectionIndex()`),
+    setAutoSelect: (autoSelect, scope) => setAutoSelect(playerKey, autoSelect, scope || `${baseScope}:setAutoSelect()`),
   }), [
     abilityOptions,
     applyPreset,

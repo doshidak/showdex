@@ -1,4 +1,4 @@
-import type { CalcdexBattleField } from '@showdex/redux/store';
+import type { CalcdexPlayerSide } from '@showdex/redux/store';
 import { countRuinAbilities } from './countRuinAbilities';
 
 /**
@@ -11,10 +11,18 @@ import { countRuinAbilities } from './countRuinAbilities';
  *   - *Vessel of Ruin*, reducing SPA of all other active Pokemon by 25%.
  * * Effects of these abilities can stack, more applicable in Doubles.
  *   - However, this utility just checks if any are active at all.
+ * * As of v1.1.3, since the `CalcdexPlayerSide` is now attached to each `CalcdexPlayer`,
+ *   as opposed to the `CalcdexBattleField` in prior versions, the arguments have been updated.
  *
  * @since 1.1.0
  */
 export const ruinAbilitiesActive = (
-  field: CalcdexBattleField,
-): boolean => !!field?.gameType
-  && !!Object.values(countRuinAbilities(field)).reduce((sum, count) => sum + count, 0);
+  // playerSide: CalcdexPlayerSide,
+  // opponentSide: CalcdexPlayerSide,
+  ...sides: CalcdexPlayerSide[]
+): boolean => !!sides?.length
+  // && !!Object.keys(playerSide || {}).length
+  // && !!Object.keys(opponentSide || {}).length
+  // && !!Object.values(countRuinAbilities(playerSide, opponentSide))
+  && !!Object.values(countRuinAbilities(...sides))
+    .reduce((sum, count) => sum + count, 0);

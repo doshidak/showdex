@@ -5,17 +5,19 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
 import {
+  useAuthUsername,
   useCalcdexSettings,
   useCalcdexState,
   useColorScheme,
   useHellodexSettings,
 } from '@showdex/redux/store';
-import { getAuthUsername, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
 import { InstanceButton } from './InstanceButton';
+import { PatronagePane } from './PatronagePane';
 import { SettingsPane } from './SettingsPane';
 import styles from './Hellodex.module.scss';
 
@@ -24,7 +26,7 @@ export interface HellodexProps {
 }
 
 const packageVersion = `v${env('package-version', '#.#.#')}`;
-const donationUrl = env('hellodex-donation-url');
+// const donationUrl = env('hellodex-donation-url');
 const forumUrl = env('hellodex-forum-url');
 const repoUrl = env('hellodex-repo-url');
 const releasesUrl = env('hellodex-releases-url');
@@ -42,8 +44,8 @@ export const Hellodex = ({
     initialHeight: 700,
   });
 
-  const authName = getAuthUsername();
-  // const authTitle = findPlayerTitle(authName);
+  const authName = useAuthUsername();
+  const authTitle = findPlayerTitle(authName);
 
   // globally listen for left/right key presses to mimic native keyboard navigation behaviors
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
@@ -57,10 +59,12 @@ export const Hellodex = ({
   const instancesEmpty = !Object.keys(calcdexState).length;
 
   // donate button visibility
-  const showDonateButton = donationUrl?.startsWith('https://')
-    && settings?.showDonateButton;
+  // const showDonateButton = donationUrl?.startsWith('https://')
+  //   && settings?.showDonateButton;
+  const showDonateButton = settings?.showDonateButton;
 
-  // settings pane visibility
+  // pane visibilities
+  const [patronageVisible, setPatronageVisible] = React.useState(false);
   const [settingsVisible, setSettingsVisible] = React.useState(false);
 
   return (
@@ -82,6 +86,14 @@ export const Hellodex = ({
           ['xs', 'sm'].includes(size) && styles.verySmol,
         )}
       >
+        {
+          patronageVisible &&
+          <PatronagePane
+            containerSize={size}
+            onRequestClose={() => setPatronageVisible(false)}
+          />
+        }
+
         {
           settingsVisible &&
           <SettingsPane
@@ -217,6 +229,7 @@ export const Hellodex = ({
                       battleId,
                       format,
                       active,
+                      playerCount,
                       p1,
                       p2,
                     }) => (
@@ -228,6 +241,7 @@ export const Hellodex = ({
                         playerName={p1?.name}
                         opponentName={p2?.name}
                         active={active}
+                        hasMorePlayers={playerCount > 2}
                         // onPress={() => handleInstancePress(battle.battleId)}
                         onPress={() => openCalcdexInstance?.(battleId)}
                       />
@@ -260,40 +274,45 @@ export const Hellodex = ({
             >
               <BaseButton
                 className={styles.donateButton}
-                aria-label="Donate via PayPal"
-                // disabled={!donationUrl}
-                onPress={() => window.open(donationUrl, '_blank')}
+                aria-label="Support Showdex"
+                // onPress={() => window.open(donationUrl, '_blank')}
+                onPress={() => {
+                  setPatronageVisible(true);
+                  setSettingsVisible(false);
+                }}
               >
-                <span className={styles.labelAction}>
-                  Donate
-                </span>
-                <span className={styles.labelPreposition}>
-                  via
-                </span>
-                <span className={styles.labelAction}>
-                  PayPal
-                </span>
-                {/* <Svg
-                  className={styles.paypalLogo}
-                  description="PayPal"
-                  src={getResourceUrl('paypal.svg')}
-                  // src={getResourceUrl('donate-mask.svg')}
-                /> */}
-                {/* <svg width="100%" height="100%">
-                  <rect x="0" y="0" width="100%" height="100%" fill="#000000" fillOpacity="1" mask="url(#donateMask)" />
-
-                  <mask id="donateMask">
-                    <rect x="0" y="0" width="100%" height="100%" fill="#FFFFFF" />
-                    <text x="0" y="50%" fill="#FFFFFF" textAnchor="middle" fontWeight="600">DONATE</text>
-                    <text x="25" y="50%" dx="30px" fill="#FFFFFF" textAnchor="middle" fontWeight="300">VIA</text>
-                    <Svg src={getResourceUrl('paypal.svg')} />
-                  </mask>
-                </svg> */}
+                {authTitle?.title ? (
+                  <i
+                    className="fa fa-heart"
+                    style={{ padding: '0 7px' }}
+                  />
+                ) : (
+                  <>
+                    <span className={styles.labelThicc}>
+                      Show
+                    </span>
+                    <span className={styles.labelThin}>
+                      dex
+                    </span>
+                    <span className={styles.labelThin} style={{ margin: '0 7px' }}>
+                      Some
+                    </span>
+                    <span className={styles.labelThicc}>
+                      Love
+                    </span>
+                  </>
+                )}
               </BaseButton>
 
               <div className={styles.donateFootnote}>
-                If you enjoyed this extension,
-                please consider donating to help support further development.
+                {authTitle?.title ? (
+                  <>Thanks for supporting Showdex!</>
+                ) : (
+                  <>
+                    If you enjoyed this extension,
+                    please consider supporting further development.
+                  </>
+                )}
               </div>
             </div>
           }
@@ -313,7 +332,10 @@ export const Hellodex = ({
               label={settingsVisible ? 'Close' : 'Settings'}
               aria-label="Showdex Extension Settings"
               tooltip={`${settingsVisible ? 'Close' : 'Open'} Showdex Settings`}
-              onPress={() => setSettingsVisible(!settingsVisible)}
+              onPress={() => {
+                setPatronageVisible(false);
+                setSettingsVisible(!settingsVisible);
+              }}
             />
 
             {
@@ -403,7 +425,7 @@ export const Hellodex = ({
           </BaseButton>
 
           <div className={cx(styles.credits, styles.hideWhenSmol)}>
-            created with &hearts; by
+            created with <i className="fa fa-heart" /> by
             <br />
             sumfuk/doshidak &amp; camdawgboi
           </div>

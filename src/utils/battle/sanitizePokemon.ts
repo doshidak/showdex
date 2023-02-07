@@ -77,8 +77,11 @@ export const sanitizePokemon = (
     types: typeChanged
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
-    teraType: ('teraType' in pokemon && pokemon?.teraType)
+    teraType: ('teraType' in pokemon && pokemon.teraType)
       || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
+      || null,
+    revealedTeraType: ('revealedTeraType' in pokemon && pokemon.revealedTeraType)
+      || (typeof pokemon.terastallized === 'string' && pokemon.terastallized)
       || null,
     altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
@@ -162,6 +165,8 @@ export const sanitizePokemon = (
     status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
     turnstatuses: pokemon?.turnstatuses,
 
+    chainMove: ('chainMove' in pokemon && pokemon.chainMove) || null,
+    chainCounter: ('chainCounter' in pokemon && pokemon.chainCounter) || 0,
     sleepCounter: ('sleepCounter' in pokemon && pokemon.sleepCounter) || pokemon?.statusData?.sleepTurns || 0,
     toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter) || pokemon?.statusData?.toxicTurns || 0,
     hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter) || pokemon?.timesAttacked || 0,
@@ -183,7 +188,7 @@ export const sanitizePokemon = (
     // returns moveTrack and revealedMoves (guaranteed to be empty arrays, at the very least)
     ...sanitizeMoveTrack(pokemon, format),
 
-    preset: ('preset' in pokemon && pokemon.preset) || null,
+    presetId: ('presetId' in pokemon && pokemon.presetId) || null,
     presets: ('presets' in pokemon && pokemon.presets) || [],
     autoPreset: 'autoPreset' in pokemon ? pokemon.autoPreset : true,
 
@@ -298,8 +303,10 @@ export const sanitizePokemon = (
 
     // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
     // (using Set makes sure there aren't any duplicate abilities in the array)
+    // update (2023/02/02): don't want to persist the legal abilities from the prior forme, which can be
+    // problematic for Mega Pokemon who have one legal ability compared to their non-Mega'd counterparts
     sanitizedPokemon.abilities = Array.from(new Set([
-      ...(sanitizedPokemon.abilities || []),
+      // ...(sanitizedPokemon.abilities || []),
       ...(<AbilityName[]> Object.values(species?.abilities || {})),
     ].filter(Boolean)));
 

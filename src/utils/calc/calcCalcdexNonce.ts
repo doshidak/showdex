@@ -1,5 +1,6 @@
-import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
-import { env } from '@showdex/utils/core';
+// import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
+// import { flattenAlts } from '@showdex/utils/battle';
+// import { env } from '@showdex/utils/core';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcCalcdexId } from './calcCalcdexId';
 
@@ -15,7 +16,7 @@ import { calcCalcdexId } from './calcCalcdexId';
  * @since 0.1.0
  */
 const calcPokemonCalcdexNonce = (
-  pokemon: DeepPartial<Showdown.Pokemon & CalcdexPokemon>,
+  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon>,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   ident: pokemon?.ident,
   name: pokemon?.name,
@@ -25,45 +26,53 @@ const calcPokemonCalcdexNonce = (
   level: pokemon?.level?.toString(),
   gender: pokemon?.gender,
   ability: pokemon?.ability,
-  dirtyAbility: pokemon?.dirtyAbility,
-  abilityToggled: pokemon?.abilityToggled?.toString(),
+  dirtyAbility: (!!pokemon?.speciesForme && 'dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
+  // altAbilities: (!!pokemon?.speciesForme && 'altAbilities' in pokemon && flattenAlts(pokemon.altAbilities)?.join(';')) || null,
+  // abilityToggled: (!!pokemon?.speciesForme && 'abilityToggled' in pokemon && pokemon.abilityToggled.toString()) || null,
   baseAbility: pokemon?.baseAbility,
-  altAbilities: pokemon?.altAbilities?.join('|'),
-  nature: pokemon?.nature,
-  types: pokemon?.types?.join('|'),
+  // altAbilities: (!!pokemon?.speciesForme && 'altAbilities' in pokemon && pokemon.altAbilities?.join(';')) || null,
+  nature: (!!pokemon?.speciesForme && 'nature' in pokemon && pokemon.nature) || null,
+  types: (!!pokemon?.speciesForme && 'types' in pokemon && pokemon.types?.join('|')) || null,
+  teraType: (!!pokemon?.speciesForme && 'teraType' in pokemon && pokemon.teraType)
+    || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
+    || null,
   item: pokemon?.item,
-  dirtyItem: pokemon?.dirtyItem,
-  altItems: pokemon?.altItems?.join('|'),
+  dirtyItem: (!!pokemon?.speciesForme && 'dirtyItem' in pokemon && pokemon.dirtyItem) || null,
+  // altItems: (!!pokemon?.speciesForme && 'altItems' in pokemon && flattenAlts(pokemon.altItems)?.join(';')) || null,
   itemEffect: pokemon?.itemEffect,
   prevItem: pokemon?.prevItem,
   prevItemEffect: pokemon?.prevItemEffect,
-  ivs: calcCalcdexId(pokemon?.ivs),
-  evs: calcCalcdexId(pokemon?.evs),
+  ivs: (!!pokemon?.speciesForme && 'ivs' in pokemon && calcCalcdexId(pokemon.ivs)) || null,
+  evs: (!!pokemon?.speciesForme && 'evs' in pokemon && calcCalcdexId(pokemon.evs)) || null,
   status: pokemon?.status,
   statusData: calcCalcdexId(pokemon?.statusData),
   statusStage: pokemon?.statusStage?.toString(),
   volatiles: calcCalcdexId(pokemon?.volatiles),
   turnstatuses: calcCalcdexId(pokemon?.turnstatuses),
-  toxicCounter: pokemon?.toxicCounter?.toString(),
-  moves: pokemon?.moves?.join('|'),
-  altMoves: pokemon?.altMoves?.join('|'),
-  moveTrack: calcCalcdexId<Partial<Record<string, number>>>(pokemon?.moveTrack?.reduce((prev, track) => {
-    if (track?.[0] && !(track[0] in prev)) {
-      prev[track[0]] = track[1]; // eslint-disable-line prefer-destructuring
-    }
-
-    return prev;
-  }, <Partial<Record<string, number>>> {})),
+  sleepCounter: (!!pokemon?.speciesForme && 'sleepCounter' in pokemon && pokemon.sleepCounter?.toString())
+    || (!!Object.keys(pokemon?.statusData || {}).length && pokemon.statusData.sleepTurns?.toString())
+    || null,
+  toxicCounter: (!!pokemon?.speciesForme && 'toxicCounter' in pokemon && pokemon.toxicCounter?.toString())
+    || (!!Object.keys(pokemon?.statusData || {}).length && pokemon.statusData.toxicTurns?.toString())
+    || null,
+  hitCounter: (!!pokemon?.speciesForme && 'hitCounter' in pokemon && pokemon.hitCounter?.toString())
+    || (!!pokemon?.speciesForme && 'timesAttacked' in pokemon && pokemon.timesAttacked?.toString())
+    || null,
+  faintCounter: (!!pokemon?.speciesForme && 'faintCounter' in pokemon && pokemon.faintCounter?.toString())
+    || null,
+  moves: pokemon?.moves?.join(';'),
+  // altMoves: (!!pokemon?.speciesForme && 'altMoves' in pokemon && flattenAlts(pokemon.altMoves)?.join(';')) || null,
+  moveTrack: calcCalcdexId((<CalcdexPokemon['moveTrack']> pokemon?.moveTrack)?.map((t) => t?.join(':'))?.join(';')),
   // moveState: calcCalcdexId<Partial<CalcdexPokemon['moveState']>>(pokemon?.moveState),
-  revealedMoves: calcCalcdexId(pokemon?.revealedMoves),
+  revealedMoves: (!!pokemon?.speciesForme && 'revealedMoves' in pokemon && calcCalcdexId(pokemon.revealedMoves)) || null,
   boosts: calcCalcdexId(pokemon?.boosts),
-  dirtyBoosts: calcCalcdexId(pokemon?.dirtyBoosts),
-  baseStats: calcCalcdexId(pokemon?.baseStats),
-  spreadStats: calcCalcdexId(pokemon?.spreadStats),
-  criticalHit: pokemon?.criticalHit?.toString(),
-  preset: pokemon?.preset,
-  presets: pokemon?.presets?.map((p) => p?.calcdexId || p?.name).join('|'),
-  autoPreset: pokemon?.autoPreset?.toString(),
+  dirtyBoosts: (!!pokemon?.speciesForme && 'dirtyBoosts' in pokemon && calcCalcdexId(pokemon.dirtyBoosts)) || null,
+  baseStats: (!!pokemon?.speciesForme && 'baseStats' in pokemon && calcCalcdexId(pokemon.baseStats)) || null,
+  dirtyBaseStats: (!!pokemon?.speciesForme && 'dirtyBaseStats' in pokemon && calcCalcdexId(pokemon.dirtyBaseStats)) || null,
+  spreadStats: (!!pokemon?.speciesForme && 'spreadStats' in pokemon && calcCalcdexId(pokemon.spreadStats)) || null,
+  criticalHit: (!!pokemon?.speciesForme && 'criticalHit' in pokemon && pokemon.criticalHit?.toString()) || null,
+  // presetId: pokemon?.presetId,
+  // presets: pokemon?.presets?.map((p) => p?.calcdexId || p?.name).join('|'),
 });
 
 /**
@@ -85,9 +94,9 @@ const calcSideCalcdexNonce = (
   name: side?.name,
   rating: side?.rating,
   totalPokemon: side?.totalPokemon?.toString(),
-  active: side?.active?.map((mon) => calcPokemonCalcdexNonce(<CalcdexPokemon> (<unknown> mon))).join('|'), // TypeScript can't infer that string[] is the same as MoveName[] (of type string[])
-  pokemon: side?.pokemon?.map((mon) => calcPokemonCalcdexNonce(<CalcdexPokemon> (<unknown> mon))).join('|'), // once you think you're good, naw, AbilityName is NOT the same thing as string, even tho it's a string. fantastic!
-  sideConditions: Object.keys(side?.sideConditions || {}).join('|'),
+  active: side?.active?.map((mon) => calcPokemonCalcdexNonce(<CalcdexPokemon> (<unknown> mon))).join(';'), // TypeScript can't infer that string[] is the same as MoveName[] (of type string[])
+  pokemon: side?.pokemon?.map((mon) => calcPokemonCalcdexNonce(<CalcdexPokemon> (<unknown> mon))).join(';'), // once you think you're good, naw, AbilityName is NOT the same thing as string, even tho it's a string. fantastic!
+  sideConditions: Object.keys(side?.sideConditions || {}).join(';'),
 });
 
 /**
@@ -103,18 +112,18 @@ export const calcBattleCalcdexNonce = (
 ): string => {
   // inactive timeout messages may interfere with the activeIndex currently set by the user
   // excludes steps: '|inactive|', '|inactiveoff|', '|-message|' '|c|' (chat), '|j|' (join), and '|l|' (leave)
+  // includes steps: '|c| <username>|/raw <html>' (response stepQueue from the !showteam chat command)
   const stepQueue = battle?.stepQueue
-    ?.filter?.((q) => !!q && !/^\|(?:inactive|-message|c|j|l|player)/i.test(q))
-    ?? [];
+    ?.filter?.((q) => !!q && !/^\|(?:inactive|-message|c(?!.+\|\/raw)|j|l|player)/i.test(q))
+    || [];
 
   return calcCalcdexId<Partial<Record<(keyof Showdown.Battle) | (keyof Showdown.BattleRequest), string>>>({
     id: battle?.id,
     gen: battle?.gen?.toString(),
     tier: battle?.tier,
     gameType: battle?.gameType,
-    myPokemon: battle?.myPokemon?.length ? uuidv5(
-      battle.myPokemon.map((p) => calcPokemonCalcdexNonce(<CalcdexPokemon> <unknown> p)).join('|') || 'empty',
-      env('uuid-namespace', NIL_UUID),
+    myPokemon: battle?.myPokemon?.length ? calcCalcdexId(
+      battle.myPokemon.map((p) => calcPokemonCalcdexNonce(<CalcdexPokemon> <unknown> p)).join(';') || 'empty',
     ) : null,
     mySide: calcSideCalcdexNonce(battle?.mySide),
     nearSide: calcSideCalcdexNonce(battle?.nearSide),
@@ -123,9 +132,7 @@ export const calcBattleCalcdexNonce = (
     p3: calcSideCalcdexNonce(battle?.p3),
     p4: calcSideCalcdexNonce(battle?.p4),
     // currentStep: battle?.currentStep?.toString(),
-    stepQueue: stepQueue.length
-      ? uuidv5(stepQueue.join('|'), env('uuid-namespace', NIL_UUID))
-      : null,
+    stepQueue: calcCalcdexId(stepQueue.join(';')),
     rqid: request?.rqid?.toString(),
     requestType: request?.requestType,
     side: [

@@ -5,6 +5,9 @@ import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
 import {
   // LegacyWeatherNames,
+  PlayerSideConditionsDexMap,
+  PlayerSideConditionsToggleMap,
+  PlayerSideScreensToggleMap,
   TerrainDescriptions,
   TerrainNames,
   WeatherDescriptions,
@@ -17,7 +20,7 @@ import { getDexForFormat, getWeatherConditions } from '@showdex/utils/battle';
 // import type { GenerationNum } from '@smogon/calc';
 import type { Weather } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexBattleField, CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
+import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexContext } from './CalcdexProvider';
 import styles from './FieldCalc.module.scss';
@@ -26,45 +29,21 @@ interface FieldCalcProps {
   className?: string;
   style?: React.CSSProperties;
   playerKey?: CalcdexPlayerKey;
+  opponentKey?: CalcdexPlayerKey;
   containerSize?: ElementSizeLabel;
 }
-
-const PlayerSideScreensMap: Record<string, keyof CalcdexPlayerSide> = {
-  Light: 'isLightScreen',
-  Reflect: 'isReflect',
-  Aurora: 'isAuroraVeil',
-};
-
-const PlayerSideDoublesMap: Record<string, keyof CalcdexPlayerSide> = {
-  Hand: 'isHelpingHand',
-  Gift: 'isFlowerGift',
-  Guard: 'isFriendGuard',
-  Battery: 'isBattery',
-  Power: 'isPowerSpot',
-  Twind: 'isTailwind',
-};
-
-const PlayerSideFieldDexMap: Partial<Record<keyof CalcdexPlayerSide, 'abilities' | 'moves'>> = {
-  isLightScreen: 'moves',
-  isReflect: 'moves',
-  isAuroraVeil: 'moves',
-  isHelpingHand: 'moves',
-  isFriendGuard: 'abilities',
-  isFlowerGift: 'abilities',
-  isBattery: 'abilities',
-  isPowerSpot: 'abilities',
-  isTailwind: 'moves',
-};
 
 export const FieldCalc = ({
   className,
   style,
   playerKey = 'p1',
+  opponentKey = 'p2',
   containerSize,
 }: FieldCalcProps): JSX.Element => {
   const {
     state,
     settings,
+    updateSide,
     updateField,
   } = useCalcdexContext();
 
@@ -73,8 +52,8 @@ export const FieldCalc = ({
     gen,
     format,
     authPlayerKey,
-    p1,
-    p2,
+    // p1,
+    // p2,
     field,
   } = state;
 
@@ -82,8 +61,8 @@ export const FieldCalc = ({
     gameType,
     weather,
     terrain,
-    attackerSide: p1Side,
-    defenderSide: p2Side,
+    // attackerSide: p1Side,
+    // defenderSide: p2Side,
   } = field || {};
 
   const colorScheme = useColorScheme();
@@ -94,8 +73,7 @@ export const FieldCalc = ({
       return null;
     }
 
-    const value = gen > 8 && option.value === 'Hail' ? 'Snow' : option.value;
-    const description = WeatherDescriptions[value]?.shortDesc;
+    const description = WeatherDescriptions[option.value]?.shortDesc;
 
     if (!description) {
       return null;
@@ -107,7 +85,7 @@ export const FieldCalc = ({
       </div>
     );
   }, [
-    gen,
+    // gen,
     settings,
   ]);
 
@@ -134,8 +112,8 @@ export const FieldCalc = ({
   const doubles = gameType === 'Doubles';
 
   const sideFieldMap = {
-    ...PlayerSideScreensMap,
-    ...(doubles && PlayerSideDoublesMap),
+    ...PlayerSideScreensToggleMap,
+    ...(doubles && PlayerSideConditionsToggleMap),
   };
 
   // update (2023/01/06): as per an executive order from camdawgboi, these toggles will be removed in
@@ -146,15 +124,21 @@ export const FieldCalc = ({
     delete sideFieldMap.Power;
   }
 
-  const p1Attacker = playerKey === 'p1';
-  const attackerSide = p1Attacker ? p1Side : p2Side;
-  const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
+  // const p1Attacker = playerKey === 'p1';
+  // const attackerSide = p1Attacker ? p1Side : p2Side;
+  // const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
 
-  const defenderSide = p1Attacker ? p2Side : p1Side;
-  const defenderSideKey: keyof CalcdexBattleField = p1Attacker ? 'defenderSide' : 'attackerSide';
+  // const defenderSide = p1Attacker ? p2Side : p1Side;
+  // const defenderSideKey: keyof CalcdexBattleField = p1Attacker ? 'defenderSide' : 'attackerSide';
 
-  const disabled = !p1?.pokemon?.length
-    || !p2?.pokemon?.length;
+  // update (2023/01/23): CalcdexPlayerSide's (formerly attached to attackerSide and defenderSide of CalcdexBattleField)
+  // are now attached to each individual CalcdexPlayer under the `side` property; attackerSide and defenderSide are
+  // dynamically set during instantiation of the Smogon.Field in createSmogonField()
+  const playerSide = state[playerKey]?.side; // i.e., attackingSide
+  const opponentSide = state[opponentKey]?.side; // i.e., defendingSide
+
+  const disabled = !state[playerKey]?.pokemon?.length
+    || !state[opponentKey]?.pokemon?.length;
 
   return (
     <TableGrid
@@ -221,7 +205,7 @@ export const FieldCalc = ({
         ]) => {
           // e.g., 'isAuroraVeil' -> 'AuroraVeil' -> formatId() -> 'auroraveil'
           const screenMoveId = formatId(sideKey.replace('is', ''));
-          const dexMapping = PlayerSideFieldDexMap[sideKey];
+          const dexMapping = PlayerSideConditionsDexMap[sideKey];
 
           const dexFieldEffect = screenMoveId && settings?.showFieldTooltips
             ? dex[dexMapping].get(screenMoveId)
@@ -238,7 +222,7 @@ export const FieldCalc = ({
 
           return (
             <React.Fragment
-              key={`FieldCalc:${battleId || '?'}:${attackerSideKey}:${label}:ToggleButton`}
+              key={`FieldCalc:${battleId || '???'}:${playerKey}:${label}:ToggleButton`}
             >
               <ToggleButton
                 className={styles.toggleButton}
@@ -256,17 +240,12 @@ export const FieldCalc = ({
                   </div>
                 ) : null}
                 primary
-                active={!!attackerSide?.[sideKey]}
-                disabled={disabled || !battleId || !attackerSideKey || !attackerSide}
-                onPress={() => updateField({
-                  [attackerSideKey]: {
-                    ...attackerSide,
-                    [sideKey]: !attackerSide?.[sideKey],
-                  },
+                active={!!playerSide?.[sideKey]}
+                disabled={disabled || !battleId || !playerSide}
+                onPress={() => updateSide(playerKey, {
+                  [sideKey]: !playerSide?.[sideKey],
                 })}
               />
-
-              {/* {i < Object.keys(sideFieldMap).length - 1 && ' '} */}
             </React.Fragment>
           );
         })}
@@ -281,7 +260,7 @@ export const FieldCalc = ({
           optionTooltip={weatherTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
-            name: `FieldCalc:${battleId || '?'}:Weather:Dropdown`,
+            name: `FieldCalc:${battleId || '???'}:Weather:Dropdown`,
             value: weather,
             onChange: (updatedWeather: CalcdexBattleField['weather']) => updateField({
               weather: updatedWeather,
@@ -306,7 +285,7 @@ export const FieldCalc = ({
           optionTooltip={terrainTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
-            name: `FieldCalc:${battleId || '?'}:Terrain:Dropdown`,
+            name: `FieldCalc:${battleId || '???'}:Terrain:Dropdown`,
             value: terrain,
             onChange: (updatedTerrain: CalcdexBattleField['terrain']) => updateField({
               terrain: updatedTerrain,
@@ -332,7 +311,7 @@ export const FieldCalc = ({
           sideKey,
         ]) => {
           const screenMoveId = formatId(sideKey.replace('is', ''));
-          const dexMapping = PlayerSideFieldDexMap[sideKey];
+          const dexMapping = PlayerSideConditionsDexMap[sideKey];
 
           const dexFieldEffect = screenMoveId && settings?.showFieldTooltips
             ? dex[dexMapping].get(screenMoveId)
@@ -349,7 +328,7 @@ export const FieldCalc = ({
 
           return (
             <React.Fragment
-              key={`FieldCalc:${battleId || '?'}:${defenderSideKey}:${label}:ToggleButton`}
+              key={`FieldCalc:${battleId || '???'}:${opponentKey}:${label}:ToggleButton`}
             >
               <ToggleButton
                 className={styles.toggleButton}
@@ -367,13 +346,10 @@ export const FieldCalc = ({
                   </div>
                 ) : null}
                 primary
-                active={!!defenderSide?.[sideKey]}
-                disabled={disabled || !battleId || !defenderSideKey || !defenderSide}
-                onPress={() => updateField({
-                  [defenderSideKey]: {
-                    ...defenderSide,
-                    [sideKey]: !defenderSide?.[sideKey],
-                  },
+                active={!!opponentSide?.[sideKey]}
+                disabled={disabled || !battleId || !opponentSide}
+                onPress={() => updateSide(opponentKey, {
+                  [sideKey]: !opponentSide?.[sideKey],
                 })}
               />
 

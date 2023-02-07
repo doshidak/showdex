@@ -1,18 +1,23 @@
 import * as React from 'react';
-import { syncBattle } from '@showdex/redux/actions';
+import { AllPlayerKeys } from '@showdex/consts/battle';
+// import { syncBattle } from '@showdex/redux/actions';
 import {
   calcdexSlice,
   useCalcdexBattleState,
   useCalcdexSettings,
   useDispatch,
 } from '@showdex/redux/store';
-import { formatId, getAuthUsername } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app';
 import {
   detectToggledAbility,
   toggleableAbility,
   toggleRuinAbilities,
-  sanitizeField,
+  // sanitizeField,
+  sanitizePlayerSide,
   sanitizePokemon,
+  countSideRuinAbilities,
+  // usedDynamax,
+  // usedTerastallization,
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpDv,
@@ -21,13 +26,14 @@ import {
   getLegacySpcDv,
 } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
+// import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleState,
   CalcdexMoveOverride,
-  CalcdexPlayerKey,
-  CalcdexRenderMode,
+  CalcdexPlayer,
+  // CalcdexPlayerKey,
+  // CalcdexRenderMode,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
 import type { CalcdexContextConsumables, CalcdexPokemonMutation } from './CalcdexContext';
@@ -39,15 +45,18 @@ import { CalcdexContext } from './CalcdexContext';
  * @since 1.1.1
  */
 export interface CalcdexProviderProps {
-  /**
+  /*
    * Battle state from the Showdown client, typically available under `app.curRoom.battle`.
    *
    * * You must provide either this or `battleId`.
    *   - If both are provided, this will take precedence over `battleId`.
    *
+   * @deprecated As of v1.1.3, the `battle` object is strictly handled in the bootstrapper only,
+   *   including dispatching battle syncs. React will only have access to the battle through its
+   *   state in Redux.
    * @since 1.1.1
    */
-  battle?: Showdown.Battle;
+  // battle?: Showdown.Battle;
 
   /**
    * ID of a previously initialized battle.
@@ -63,7 +72,7 @@ export interface CalcdexProviderProps {
    */
   battleId?: string;
 
-  /**
+  /*
    * Battle request state from the Showdown client, typically available under `app.curRoom.request`.
    *
    * * Contains information such as G-max and Tera type.
@@ -71,9 +80,12 @@ export interface CalcdexProviderProps {
    *     or `terastallized` from `Showdown.Pokemon`.
    * * Note that the client will typically only send information about the Pokemon currently active on the field.
    *
+   * @deprecated As of v1.1.3, the `battle` object is strictly handled in the bootstrapper only,
+   *   including dispatching battle syncs. React will only have access to the battle through its
+   *   state in Redux.
    * @since 1.1.1
    */
-  request?: Showdown.BattleRequest;
+  // request?: Showdown.BattleRequest;
 
   /**
    * Children of the Calcdex Context, of which any can be a Context Consumer.
@@ -83,210 +95,237 @@ export interface CalcdexProviderProps {
   children?: React.ReactNode;
 }
 
-const AllPlayerKeys: CalcdexPlayerKey[] = [
-  'p1',
-  'p2',
-  // 'p3',
-  // 'p4',
-];
-
-const l = logger('@showdex/pages/Calcdex/CalcdexProvider');
+const baseScope = '@showdex/pages/Calcdex/CalcdexProvider';
+const l = logger(baseScope);
 
 export const CalcdexProvider = ({
-  battle,
-  battleId: battleIdFromProps,
-  request,
+  // battle,
+  battleId,
+  // battleId: battleIdFromProps,
+  // request,
   children,
 }: CalcdexProviderProps): JSX.Element => {
-  const battleId = battle?.id || battleIdFromProps;
-  const authUser = getAuthUsername();
+  // const battleId = battle?.id || battleIdFromProps;
+  // const authUser = getAuthUsername();
 
   const calcdexSettings = useCalcdexSettings();
   const battleState = useCalcdexBattleState(battleId);
   const dispatch = useDispatch();
 
-  const debugBattle = React.useMemo(() => ({
-    id: battleId || '(missing battleId)',
-    nonce: ['nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce],
-    info: ['gen', battleState?.gen, 'format', battleState?.format, 'turn', battleState?.turn],
-    vs: [battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)'],
-    state: ['battle', battle, '\n', 'state', battleState],
-  }), [
-    battle,
-    battleId,
-    battleState,
-  ]);
+  // const debugBattle = React.useMemo(() => ({
+  //   id: battleId || '(missing battleId)',
+  //   nonce: ['nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce],
+  //   info: ['gen', battleState?.gen, 'format', battleState?.format, 'turn', battleState?.turn],
+  //   vs: [battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)'],
+  //   state: ['battle', battle, '\n', 'state', battleState],
+  // }), [
+  //   battle,
+  //   battleId,
+  //   battleState,
+  // ]);
 
   l.debug(
-    'Providing Context for', debugBattle.id,
-    '\n', ...debugBattle.info,
-    '\n', ...debugBattle.vs,
-    '\n', ...debugBattle.state,
+    'Providing Context for', battleId || '???',
+    '\n', 'settings', calcdexSettings,
+    '\n', 'state', battleState,
   );
 
   // determine if this Calcdex is set up by the bootstrapper to open as an overlay
-  const renderAsOverlay = !!calcdexSettings?.openAs
-    // && calcdexSettings.openAs === 'overlay' // bad cause user can change the setting post-bootstrap :o
-    && !battle?.calcdexRoom // shouldn't be present in overlay mode
-    && typeof battle?.calcdexOverlayVisible === 'boolean'; // should've been set by the bootstrapper
+  // const renderAsOverlay = !!calcdexSettings?.openAs
+  //   // && calcdexSettings.openAs === 'overlay' // bad cause user can change the setting post-bootstrap :o
+  //   && !battle?.calcdexRoom // shouldn't be present in overlay mode
+  //   && typeof battle?.calcdexOverlayVisible === 'boolean'; // should've been set by the bootstrapper
 
-  const renderMode: CalcdexRenderMode = renderAsOverlay ? 'overlay' : 'panel';
+  // const renderMode: CalcdexRenderMode = renderAsOverlay ? 'overlay' : 'panel';
 
   // determine if the Calcdex should render
-  const shouldRender = !battle?.calcdexDestroyed
-    // && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
-    && (!renderAsOverlay || battle?.calcdexOverlayVisible);
+  // const shouldRender = !battle?.calcdexDestroyed
+  //   // && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
+  //   && (!renderAsOverlay || battle?.calcdexOverlayVisible);
 
   // handle `battle` changes from the client
   // (this is the sauce that invokes the syncBattle())
-  React.useEffect(() => {
-    if (!battle?.id) {
-      return;
-    }
-
-    if (AllPlayerKeys.every((key) => !battle[key])) {
-      // l.debug(
-      //   'Ignoring battle update for', debugBattle.id, 'due to missing players... w0t ???',
-      //   '\n', ...debugBattle.info,
-      //   '\n', ...debugBattle.vs,
-      //   '\n', 'p1', battle?.p1,
-      //   '\n', 'p2', battle?.p2,
-      //   // '\n', 'p3', battle?.p3,
-      //   // '\n', 'p4', battle?.p4,
-      //   '\n', ...debugBattle.nonce,
-      //   '\n', ...debugState.state,
-      // );
-
-      return;
-    }
-
-    if (battle.calcdexDestroyed) {
-      l.debug(
-        'Ignoring battle update for', debugBattle.id, 'due to destroyed state',
-        '\n', ...debugBattle.info,
-        '\n', ...debugBattle.vs,
-        '\n', ...debugBattle.nonce,
-        '\n', ...debugBattle.state,
-      );
-
-      return;
-    }
-
-    // check for the injected `nonce` to make sure `battle` passed through the bootstrapper
-    if (!battle.nonce) {
-      l.debug(
-        'Ignoring battle update for', debugBattle.id, 'due to missing nonce',
-        '\n', ...debugBattle.info,
-        '\n', ...debugBattle.vs,
-        '\n', ...debugBattle.nonce,
-        '\n', ...debugBattle.state,
-      );
-
-      return;
-    }
-
-    l.debug(
-      'Received battle update for', debugBattle.id,
-      '\n', ...debugBattle.info,
-      '\n', ...debugBattle.vs,
-      '\n', ...debugBattle.nonce,
-      '\n', ...debugBattle.state,
-    );
-
-    // check if we need to initialize a new Calcdex state for the current `battle`
-    if (!battleState?.battleId) {
-      l.debug(
-        'Initializing Calcdex state for', debugBattle.id,
-        '\n', ...debugBattle.info,
-        '\n', ...debugBattle.vs,
-        '\n', ...debugBattle.nonce,
-        '\n', ...debugBattle.state,
-      );
-
-      const joinedUsers = battle.stepQueue
-        ?.filter?.((q) => q?.startsWith('|j|☆'))
-        .map((q) => q.replace('|j|☆', ''));
-
-      const p1Name = battle.p1?.name || joinedUsers?.[0];
-      const p2Name = battle.p2?.name || joinedUsers?.[1];
-
-      dispatch(calcdexSlice.actions.init({
-        battleId,
-        battleNonce: battle.nonce,
-        gen: battle.gen as GenerationNum,
-        format: battle.id.split('-')?.[1],
-        turn: battle.turn || 0,
-        active: !battle.ended,
-        renderMode,
-
-        p1: {
-          name: p1Name,
-          rating: battle.p1?.rating,
-          autoSelect: !!authUser && p1Name === authUser
-            ? calcdexSettings.defaultAutoSelect?.auth
-            : calcdexSettings.defaultAutoSelect?.p1,
-        },
-
-        p2: {
-          name: p2Name,
-          rating: battle.p2?.rating,
-          autoSelect: !!authUser && p2Name === authUser
-            ? calcdexSettings.defaultAutoSelect?.auth
-            : calcdexSettings.defaultAutoSelect?.p2,
-        },
-      }));
-
-      return;
-    }
-
-    // otherwise, check if we should sync the updated `battle` from its `nonce`
-    if (battleState?.battleNonce && battle.nonce === battleState.battleNonce) {
-      // l.debug(
-      //   'Ignoring battle update for', debugBattle.id, 'due to same nonce',
-      //   '\n', ...debugBattle.info,
-      //   '\n', ...debugBattle.vs,
-      //   '\n', ...debugBattle.nonce,
-      //   '\n', ...debugBattle.state,
-      // );
-
-      return;
-    }
-
-    l.debug(
-      'Syncing battle update for', debugBattle.id,
-      '\n', ...debugBattle.info,
-      '\n', ...debugBattle.vs,
-      '\n', ...debugBattle.nonce,
-      '\n', ...debugBattle.state,
-    );
-
-    // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
-    // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
-    void dispatch(syncBattle({
-      battle,
-      request,
-    }));
-  }, [
-    authUser,
-    battle,
-    battle?.nonce,
-    battleId,
-    battleState,
-    calcdexSettings,
-    debugBattle,
-    dispatch,
-    renderMode,
-    request,
-  ]);
+  // React.useEffect(() => {
+  //   if (!battle?.id) {
+  //     return;
+  //   }
+  //
+  //   if (AllPlayerKeys.every((key) => !battle[key])) {
+  //     // l.debug(
+  //     //   'Ignoring battle update for', debugBattle.id, 'due to missing players... w0t ???',
+  //     //   '\n', ...debugBattle.info,
+  //     //   '\n', ...debugBattle.vs,
+  //     //   '\n', 'p1', battle?.p1,
+  //     //   '\n', 'p2', battle?.p2,
+  //     //   // '\n', 'p3', battle?.p3,
+  //     //   // '\n', 'p4', battle?.p4,
+  //     //   '\n', ...debugBattle.nonce,
+  //     //   '\n', ...debugState.state,
+  //     // );
+  //
+  //     return;
+  //   }
+  //
+  //   if (battle.calcdexDestroyed) {
+  //     l.debug(
+  //       'Ignoring battle update for', debugBattle.id, 'due to destroyed state',
+  //       '\n', ...debugBattle.info,
+  //       '\n', ...debugBattle.vs,
+  //       '\n', ...debugBattle.nonce,
+  //       '\n', ...debugBattle.state,
+  //     );
+  //
+  //     return;
+  //   }
+  //
+  //   // check for the injected `nonce` to make sure `battle` passed through the bootstrapper
+  //   if (!battle.nonce) {
+  //     l.debug(
+  //       'Ignoring battle update for', debugBattle.id, 'due to missing nonce',
+  //       '\n', ...debugBattle.info,
+  //       '\n', ...debugBattle.vs,
+  //       '\n', ...debugBattle.nonce,
+  //       '\n', ...debugBattle.state,
+  //     );
+  //
+  //     return;
+  //   }
+  //
+  //   l.debug(
+  //     'Received battle update for', debugBattle.id,
+  //     '\n', ...debugBattle.info,
+  //     '\n', ...debugBattle.vs,
+  //     '\n', ...debugBattle.nonce,
+  //     '\n', ...debugBattle.state,
+  //   );
+  //
+  //   // check if we need to initialize a new Calcdex state for the current `battle`
+  //   if (!battleState?.battleId) {
+  //     l.debug(
+  //       'Initializing Calcdex state for', debugBattle.id,
+  //       '\n', ...debugBattle.info,
+  //       '\n', ...debugBattle.vs,
+  //       '\n', ...debugBattle.nonce,
+  //       '\n', ...debugBattle.state,
+  //     );
+  //
+  //     const joinedUsers = Array.from(new Set(
+  //       battle.stepQueue
+  //         ?.filter?.((q) => q?.startsWith('|j|☆'))
+  //         .map((q) => q.replace('|j|☆', ''))
+  //       || [],
+  //     ));
+  //
+  //     const p1Name = battle.p1?.name || joinedUsers[0] || null;
+  //     const p2Name = battle.p2?.name || joinedUsers[1] || null;
+  //     const p3Name = battle.p3?.name || joinedUsers[2] || null;
+  //     const p4Name = battle.p4?.name || joinedUsers[3] || null;
+  //
+  //     dispatch(calcdexSlice.actions.init({
+  //       battleId,
+  //       battleNonce: battle.nonce,
+  //       gen: battle.gen as GenerationNum,
+  //       format: battle.id.split('-')?.[1],
+  //       turn: battle.turn || 0,
+  //       active: !battle.ended,
+  //       renderMode,
+  //
+  //       p1: {
+  //         active: !!p1Name,
+  //         name: p1Name,
+  //         rating: battle.p1?.rating,
+  //         autoSelect: !!authUser && p1Name === authUser
+  //           ? calcdexSettings.defaultAutoSelect?.auth
+  //           : calcdexSettings.defaultAutoSelect?.p1,
+  //         usedMax: usedDynamax('p1', battle.stepQueue),
+  //         usedTera: usedTerastallization('p1', battle.stepQueue),
+  //       },
+  //
+  //       p2: {
+  //         active: !!p2Name,
+  //         name: p2Name,
+  //         rating: battle.p2?.rating,
+  //         autoSelect: !!authUser && p2Name === authUser
+  //           ? calcdexSettings.defaultAutoSelect?.auth
+  //           : calcdexSettings.defaultAutoSelect?.p2,
+  //         usedMax: usedDynamax('p2', battle.stepQueue),
+  //         usedTera: usedTerastallization('p2', battle.stepQueue),
+  //       },
+  //
+  //       p3: {
+  //         active: !!p3Name,
+  //         name: p3Name,
+  //         rating: battle.p3?.rating,
+  //         autoSelect: !!authUser && p3Name === authUser
+  //           ? calcdexSettings.defaultAutoSelect?.auth
+  //           : calcdexSettings.defaultAutoSelect?.p3,
+  //         usedMax: usedDynamax('p3', battle.stepQueue),
+  //         usedTera: usedTerastallization('p3', battle.stepQueue),
+  //       },
+  //
+  //       p4: {
+  //         active: !!p4Name,
+  //         name: p4Name,
+  //         rating: battle.p3?.rating || null,
+  //         autoSelect: !!authUser && p4Name === authUser
+  //           ? calcdexSettings.defaultAutoSelect?.auth
+  //           : calcdexSettings.defaultAutoSelect?.p4,
+  //         usedMax: usedDynamax('p4', battle.stepQueue),
+  //         usedTera: usedTerastallization('p4', battle.stepQueue),
+  //       },
+  //     }));
+  //
+  //     return;
+  //   }
+  //
+  //   // otherwise, check if we should sync the updated `battle` from its `nonce`
+  //   if (battleState?.battleNonce && battle.nonce === battleState.battleNonce) {
+  //     // l.debug(
+  //     //   'Ignoring battle update for', debugBattle.id, 'due to same nonce',
+  //     //   '\n', ...debugBattle.info,
+  //     //   '\n', ...debugBattle.vs,
+  //     //   '\n', ...debugBattle.nonce,
+  //     //   '\n', ...debugBattle.state,
+  //     // );
+  //
+  //     return;
+  //   }
+  //
+  //   l.debug(
+  //     'Syncing battle update for', debugBattle.id,
+  //     '\n', ...debugBattle.info,
+  //     '\n', ...debugBattle.vs,
+  //     '\n', ...debugBattle.nonce,
+  //     '\n', ...debugBattle.state,
+  //   );
+  //
+  //   // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
+  //   // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
+  //   void dispatch(syncBattle({
+  //     battle,
+  //     request,
+  //   }));
+  // }, [
+  //   authUser,
+  //   battle,
+  //   battle?.nonce,
+  //   battleId,
+  //   battleState,
+  //   calcdexSettings,
+  //   debugBattle,
+  //   dispatch,
+  //   renderMode,
+  //   request,
+  // ]);
 
   const consumables = React.useMemo<CalcdexContextConsumables>(() => ({
     state: battleState || ({} as CalcdexBattleState),
     settings: calcdexSettings || ({} as ShowdexCalcdexSettings),
 
-    renderMode,
-    shouldRender,
+    // renderMode,
+    // shouldRender,
 
-    updatePokemon: (playerKey, pokemon) => {
+    updatePokemon: (playerKey, pokemon, scopeFromArgs) => {
       const updatedState = structuredClone(battleState);
       const playerState = updatedState[playerKey];
 
@@ -304,6 +343,10 @@ export const CalcdexProvider = ({
         return;
       }
 
+      // used for debugging purposes only
+      const scope = scopeFromArgs || `${baseScope}:updatePokemon()`;
+
+      // this is what we'll be replacing the one at pokemonIndex (i.e., the prevPokemon)
       const payload: CalcdexPokemonMutation = {
         ...prevPokemon,
         ...pokemon,
@@ -326,6 +369,11 @@ export const CalcdexProvider = ({
 
         if (abilities?.length) {
           payload.abilities = [...abilities];
+
+          // checking payload.ability so as to not overwrite what's actually revealed in battle
+          if (!prevPokemon.ability && !payload.abilities.includes(prevPokemon.dirtyAbility)) {
+            [payload.dirtyAbility] = payload.abilities;
+          }
         }
 
         if (types?.length) {
@@ -334,6 +382,19 @@ export const CalcdexProvider = ({
 
         if (Object.keys(baseStats || {}).length) {
           payload.baseStats = { ...baseStats };
+        }
+
+        // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
+        // (this will make the auto-preset applier in CalcdexPokeProvider apply the first preset
+        // for the new speciesForme again)
+        const preset = (
+          !!prevPokemon.presetId
+            && !!prevPokemon.presets?.length // 'server' or 'sheets' would be present here only
+            && prevPokemon.presets.find((p) => p?.calcdexId === prevPokemon.presetId)
+        ) || null;
+
+        if (!['server', 'sheet'].includes(preset?.source)) {
+          payload.presetId = null;
         }
       }
 
@@ -471,45 +532,75 @@ export const CalcdexProvider = ({
         );
       }
 
-      dispatch(calcdexSlice.actions.updatePlayer({
-        battleId,
-        // [playerKey]: playerState,
-        [playerKey]: {
-          pokemon: playerState.pokemon,
-        },
-      }));
+      // because of Ruin abilities, I have to do this, so here it is:
+      // this is the payload that will be dispatched below (after placing the `payload` at `pokemonIndex` above)
+      const playerPayload: Partial<CalcdexPlayer> = {
+        pokemon: playerState.pokemon,
+      };
 
       // handle recounting Ruin abilities when something changes of the Pokemon
       if (updatedState.gen > 8) {
-        const {
-          attackerSide,
-          defenderSide,
-        } = sanitizeField(battle, updatedState);
+        playerPayload.side = {
+          ...playerPayload.side,
+          ...countSideRuinAbilities(playerState),
+        };
+      }
 
-        dispatch(calcdexSlice.actions.updateField({
-          battleId,
-          field: {
-            attackerSide: {
-              ruinBeadsCount: attackerSide.ruinBeadsCount,
-              ruinSwordCount: attackerSide.ruinSwordCount,
-              ruinTabletsCount: attackerSide.ruinTabletsCount,
-              ruinVesselCount: attackerSide.ruinVesselCount,
-            },
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope,
+        battleId,
+        [playerKey]: playerPayload,
+      }));
 
-            defenderSide: {
-              ruinBeadsCount: defenderSide.ruinBeadsCount,
-              ruinSwordCount: defenderSide.ruinSwordCount,
-              ruinTabletsCount: defenderSide.ruinTabletsCount,
-              ruinVesselCount: defenderSide.ruinVesselCount,
+      // handle recounting Ruin abilities for other players
+      if (updatedState.gen > 8) {
+        const otherPlayerKeys = AllPlayerKeys
+          .filter((k) => k !== playerKey && updatedState[k]?.active);
+
+        otherPlayerKeys.forEach((otherPlayerKey) => {
+          dispatch(calcdexSlice.actions.updatePlayer({
+            scope,
+            battleId,
+            [otherPlayerKey]: {
+              side: countSideRuinAbilities(updatedState[otherPlayerKey]),
             },
-          },
-        }));
+          }));
+        });
       }
     },
 
-    updateField: (field) => {
+    updateSide: (playerKey, side, scope) => {
+      const updatedState = structuredClone(battleState);
+      const playerState = updatedState[playerKey];
+
+      if (!playerState?.sideid || !Object.keys(side || {}).length) {
+        return;
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:updateSide()`,
+        battleId,
+        [playerKey]: {
+          side: {
+            ...playerState.side,
+            ...side,
+          },
+        },
+      }));
+    },
+
+    updateField: (field, scopeFromArgs) => {
+      const scope = scopeFromArgs || `${baseScope}:updateField()`;
+
       if (battleState.gen > 8 && ('weather' in field || 'terrain' in field)) {
         const updatedState = structuredClone(battleState);
+
+        updatedState.field = {
+          ...updatedState.field,
+          ...field,
+          // attackerSide: { ...updatedState.field.attackerSide, ...field?.attackerSide },
+          // defenderSide: { ...updatedState.field.defenderSide, ...field?.defenderSide },
+        };
 
         AllPlayerKeys.forEach((playerKey) => {
           const { pokemon = [] } = updatedState[playerKey];
@@ -522,13 +613,6 @@ export const CalcdexProvider = ({
             return;
           }
 
-          updatedState.field = {
-            ...updatedState.field,
-            ...field,
-            attackerSide: { ...updatedState.field.attackerSide, ...field?.attackerSide },
-            defenderSide: { ...updatedState.field.defenderSide, ...field?.defenderSide },
-          };
-
           retoggleIds.forEach((id) => {
             const mon = pokemon.find((p) => p.calcdexId === id);
 
@@ -540,6 +624,7 @@ export const CalcdexProvider = ({
           });
 
           dispatch(calcdexSlice.actions.updatePlayer({
+            scope,
             battleId,
             [playerKey]: { pokemon },
           }));
@@ -547,22 +632,29 @@ export const CalcdexProvider = ({
       }
 
       dispatch(calcdexSlice.actions.updateField({
+        scope,
         battleId,
         field,
       }));
     },
 
-    setActiveIndex: (playerKey, activeIndex) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId,
-      [playerKey]: { activeIndex },
-    })),
+    setActiveIndex: (playerKey, activeIndex, scope) => dispatch(
+      calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setActiveIndex()`,
+        battleId,
+        [playerKey]: { activeIndex },
+      }),
+    ),
 
-    setActiveIndices: (playerKey, activeIndices) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId,
-      [playerKey]: { activeIndices },
-    })),
+    setActiveIndices: (playerKey, activeIndices, scope) => dispatch(
+      calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setActiveIndices()`,
+        battleId,
+        [playerKey]: { activeIndices },
+      }),
+    ),
 
-    setSelectionIndex: (playerKey, selectionIndex) => {
+    setSelectionIndex: (playerKey, selectionIndex, scope) => {
       if (!playerKey || !(playerKey in battleState) || selectionIndex < 0) {
         return;
       }
@@ -585,55 +677,68 @@ export const CalcdexProvider = ({
         );
       }
 
-      dispatch(calcdexSlice.actions.updatePlayer({
-        battleId,
-        [playerKey]: {
-          selectionIndex: playerState.selectionIndex,
-          pokemon: playerState.pokemon,
-        },
-      }));
+      const playerPayload: Partial<CalcdexPlayer> = {
+        selectionIndex: playerState.selectionIndex,
+        pokemon: playerState.pokemon,
 
-      // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
-      // the Pokemon itself, not in the Side, which is the case for gen 2+.
-      // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
-      const updatedField = sanitizeField(
-        battle,
-        updatedState,
-        updatedState.gen === 1 && playerKey === 'p2', // ignore P1 (attackerSide) if playerKey is P2
-        updatedState.gen === 1 && playerKey === 'p1', // ignore P2 (defenderSide) if playerKey is P1
-      );
+        // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
+        // the Pokemon itself, not in the Side, which is the case for gen 2+.
+        // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
+        side: sanitizePlayerSide(
+          updatedState.gen,
+          playerState,
+          // battle[playerKey],
+        ),
+      };
 
       // don't sync screens here, otherwise, user's values will be overwritten when switching Pokemon
       // (normally should only be overwritten per sync at the end of the turn, via syncBattle())
       if (updatedState.gen > 1) {
-        delete updatedField.weather;
-        delete updatedField.terrain;
-        delete updatedField.attackerSide.isReflect;
-        delete updatedField.attackerSide.isLightScreen;
-        delete updatedField.attackerSide.isAuroraVeil;
-        delete updatedField.defenderSide.isReflect;
-        delete updatedField.defenderSide.isLightScreen;
-        delete updatedField.defenderSide.isAuroraVeil;
+        delete playerPayload.side.isReflect;
+        delete playerPayload.side.isLightScreen;
+        delete playerPayload.side.isAuroraVeil;
       }
 
-      dispatch(calcdexSlice.actions.updateField({
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setSelectionIndex()`,
         battleId,
-        field: updatedField,
+        [playerKey]: playerPayload,
       }));
     },
 
-    setAutoSelect: (playerKey, autoSelect) => dispatch(calcdexSlice.actions.updatePlayer({
-      battleId,
-      [playerKey]: { autoSelect },
-    })),
+    setAutoSelect: (playerKey, autoSelect, scope) => dispatch(
+      calcdexSlice.actions.updatePlayer({
+        scope: scope || `${baseScope}:setAutoSelect()`,
+        battleId,
+        [playerKey]: { autoSelect },
+      }),
+    ),
+
+    setPlayerKey: (playerKey, scope) => dispatch(
+      calcdexSlice.actions.update({
+        scope: scope || `${baseScope}:setPlayerKey()`,
+        battleId,
+        playerKey,
+        opponentKey: battleState[battleState.opponentKey === playerKey ? 'playerKey' : 'opponentKey'],
+      }),
+    ),
+
+    setOpponentKey: (opponentKey, scope) => dispatch(
+      calcdexSlice.actions.update({
+        scope: scope || `${baseScope}:setOpponentKey()`,
+        battleId,
+        playerKey: battleState[battleState.playerKey === opponentKey ? 'opponentKey' : 'playerKey'],
+        opponentKey,
+      }),
+    ),
   }), [
-    battle,
+    // battle,
     battleId,
     battleState,
     calcdexSettings,
     dispatch,
-    renderMode,
-    shouldRender,
+    // renderMode,
+    // shouldRender,
   ]);
 
   return (

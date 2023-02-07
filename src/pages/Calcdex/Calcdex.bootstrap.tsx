@@ -1,7 +1,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
+import { NIL as NIL_UUID } from 'uuid';
 import { ErrorBoundary } from '@showdex/components/debug';
+import { AllPlayerKeys } from '@showdex/consts/battle';
+import { syncBattle } from '@showdex/redux/actions';
 import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
@@ -14,11 +17,19 @@ import {
   // getSideRooms,
   hasSinglePanel,
 } from '@showdex/utils/app';
-import { detectAuthPlayerKeyFromBattle } from '@showdex/utils/battle';
+import {
+  detectAuthPlayerKeyFromBattle,
+  sanitizePlayerSide,
+  usedDynamax,
+  usedTerastallization,
+} from '@showdex/utils/battle';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
+import type { GenerationNum } from '@smogon/calc';
 import type { ShowdexBootstrapper } from '@showdex/main';
 import type {
+  CalcdexPlayer,
+  CalcdexPlayerKey,
   CalcdexPokemon,
   CalcdexSliceState,
   RootStore,
@@ -46,20 +57,26 @@ export interface BattleRoomOverride<
 export const renderCalcdex = (
   dom: ReactDOM.Root,
   store: RootStore,
-  battle?: Showdown.Battle | string,
+  battleId: string,
+  // battle?: Showdown.Battle | string,
   battleRoom?: Showdown.BattleRoom,
 ): void => dom.render((
   <ReduxProvider store={store}>
     <ErrorBoundary
       component={CalcdexError}
-      battleId={typeof battle === 'string' ? battle : battle?.id}
+      battleId={battleId}
+      // battleId={typeof battle === 'string' ? battle : battle?.id}
     >
       <CalcdexProvider
-        battle={typeof battle === 'string' ? undefined : battle}
-        battleId={typeof battle === 'string' ? battle : undefined}
-        request={battleRoom?.request}
+        battleId={battleId}
+        // battleId={typeof battle === 'string' ? battle : battle?.id}
+        // battle={typeof battle === 'string' ? undefined : battle}
+        // request={battleRoom?.request}
       >
         <Calcdex
+          // overlayVisible={typeof battle !== 'string' && battle?.calcdexOverlayVisible}
+          // note: if we dispatch overlayClosed to false, the battleRoom and the injected Calcdex button
+          // won't properly update to reflect the closed state, so we must provide this prop
           onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
         />
       </CalcdexProvider>
@@ -80,7 +97,8 @@ const updateBattleRecord = (
   battle: Showdown.Battle,
   forceResult?: 'win' | 'loss',
 ): void => {
-  const authUser = getAuthUsername();
+  const authUser = getAuthUsername()
+    || (store.getState()?.showdex as ShowdexSliceState)?.authUsername;
 
   if (!authUser || (!battle?.id && !forceResult) || typeof store?.dispatch !== 'function') {
     return;
@@ -107,7 +125,8 @@ const updateBattleRecord = (
   store.dispatch(hellodexSlice.actions[reducerName]());
 };
 
-const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
+const baseScope = '@showdex/pages/Calcdex/Calcdex.bootstrap';
+const l = logger(baseScope);
 
 export const calcdexBootstrapper: ShowdexBootstrapper = (
   store,
@@ -144,53 +163,60 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     const state = store.getState()?.calcdex as CalcdexSliceState;
 
     // we'd typically reach this point when the user forfeits through the popup
-    if (roomid in (state || {})) {
-      const battleState = state[roomid];
-
-      if (battleState?.active) {
-        store.dispatch(calcdexSlice.actions.update({
-          battleId: roomid,
-          active: false,
-        }));
-      }
-
-      const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
-      const calcdexRoomId = getCalcdexRoomId(roomid);
-
-      l.debug(
-        '\n', 'settings.closeOn', settings?.closeOn,
-        '\n', 'battleState.renderMode', battleState.renderMode,
-        '\n', 'calcdexRoomId', calcdexRoomId,
-        '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
-      );
-
-      // this would only apply in the tabbed panel mode, obviously
-      if (battleState.renderMode === 'panel' && settings?.closeOn !== 'never' && calcdexRoomId in app.rooms) {
-        l.debug(
-          'Leaving calcdexRoom with destroyed battle due to user settings...',
-          '\n', 'calcdexRoomId', calcdexRoomId,
-        );
-
-        // if (settings.destroyOnClose) {
-        //   store.dispatch(calcdexSlice.actions.destroy(roomid));
-        // }
-
-        // this will destroy the Calcdex state if configured to, via calcdexRoom's requestLeave() handler
-        app.leaveRoom(calcdexRoomId);
-      }
-
-      l.debug(
-        'Calcdex for roomid', roomid, 'exists in state, but battle was forcibly ended, probably.',
-        '\n', 'battleRoom', battleRoom,
-        '\n', 'battleState', battleState,
-      );
-    } else {
+    if (!(roomid in (state || {}))) {
       l.debug(
         'Calcdex bootstrap request was ignored for roomid', roomid,
         'since no proper battle object exists within the current BattleRoom',
       );
+
+      return;
     }
 
+    const battleState = state[roomid];
+
+    if (battleState?.active) {
+      store.dispatch(calcdexSlice.actions.update({
+        battleId: roomid,
+        active: false,
+      }));
+    }
+
+    const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
+    const calcdexRoomId = getCalcdexRoomId(roomid);
+
+    l.debug(
+      '\n', 'settings.closeOn', settings?.closeOn,
+      '\n', 'battleState.renderMode', battleState.renderMode,
+      '\n', 'calcdexRoomId', calcdexRoomId,
+      '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
+    );
+
+    // this would only apply in the tabbed panel mode, obviously
+    if (battleState.renderMode === 'panel' && settings?.closeOn !== 'never' && calcdexRoomId in app.rooms) {
+      l.debug(
+        'Leaving calcdexRoom with destroyed battle due to user settings...',
+        '\n', 'calcdexRoomId', calcdexRoomId,
+      );
+
+      // if (settings.destroyOnClose) {
+      //   store.dispatch(calcdexSlice.actions.destroy(roomid));
+      // }
+
+      // this will destroy the Calcdex state if configured to, via calcdexRoom's requestLeave() handler
+      app.leaveRoom(calcdexRoomId);
+
+      // update (2023/02/04): did I forget a return here? ...probably cause it keeps triggering the return from
+      // the typeof battle?.subscribe check
+      return;
+    }
+
+    l.debug(
+      'Calcdex for roomid', roomid, 'exists in state, but battle was forcibly ended, probably.',
+      '\n', 'battleRoom', battleRoom,
+      '\n', 'battleState', battleState,
+    );
+
+    // update (2023/02/04): might as well put a return here too since this is part of the !battle?.id handler
     return;
   }
 
@@ -212,6 +238,19 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
   // don't process this battle if we've already added (or forcibly prevented) the filth
   if (calcdexInit) {
+    return;
+  }
+
+  // delaying initialization if the battle hasn't instantiated all the players yet
+  // (which we can quickly determine by the existence of '|player|' steps in the stepQueue)
+  if (!battle.stepQueue?.length || !battle.stepQueue.some((q) => q?.startsWith('|player|'))) {
+    l.debug(
+      'Ignoring Calcdex init due to uninitialized players in battle',
+      '\n', 'stepQueue', battle.stepQueue,
+      '\n', 'battleId', battle.id || roomid,
+      '\n', 'battle', battle,
+    );
+
     return;
   }
 
@@ -243,6 +282,10 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       return;
     }
   }
+
+  // update (2023/02/01): used to be in the battle object as calcdexReactRoot, but post-refactor, we no longer
+  // need to keep a reference in the battle object (Hellodex will create a new root via ReactDOM.createRoot() btw)
+  let calcdexReactRoot: ReactDOM.Root;
 
   const openAsPanel = !calcdexSettings?.openAs
     || calcdexSettings.openAs === 'panel'
@@ -301,10 +344,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       return true;
     };
 
-    battle.calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
+    calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
   } else { // must be opening as an overlay here
     // set the initial visibility of the overlay
-    battle.calcdexOverlayVisible = false;
+    // update (2023/02/01): after refactoring the Calcdex to not touch the battle object within React,
+    // this property is now stored in the CalcdexBattleState under overlayVisible (false, by default)
+    // battle.calcdexOverlayVisible = false;
 
     // local helper function that will be called once the native BattleRoom controls
     // are rendered in the `overrides` below
@@ -317,10 +362,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         return;
       }
 
-      // grab the latest calcdexOverlayVisible value
-      const {
-        calcdexOverlayVisible: visible,
-      } = battleRoom?.battle || {};
+      // grab the latest overlayVisible value
+      // const {
+      //   calcdexOverlayVisible: visible,
+      // } = battleRoom?.battle || {};
+      const state = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id || roomid];
+      const { overlayVisible: visible } = state || {};
 
       // remove the outlying <p> tags so we can inject our custom button in
       // const strippedControlsHtml = controlsHtml.replace(/^<p>(.+)<\/p>$/, '$1');
@@ -441,12 +488,20 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
     // button handler (which is the value of its name prop)
     battleRoom.toggleCalcdexOverlay = () => {
-      battle.calcdexOverlayVisible = !battle.calcdexOverlayVisible;
+      // battle.calcdexOverlayVisible = !battle.calcdexOverlayVisible;
+
+      const state = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id || roomid];
+      const visible = !state?.overlayVisible;
+
+      store.dispatch(calcdexSlice.actions.update({
+        battleId: battle.id || roomid,
+        overlayVisible: visible,
+      }));
 
       const battleRoomStyles: React.CSSProperties = {
-        display: battle.calcdexOverlayVisible ? 'block' : 'none',
-        opacity: battle.calcdexOverlayVisible ? 0.3 : 1,
-        visibility: battle.calcdexOverlayVisible ? 'hidden' : 'visible',
+        display: visible ? 'block' : 'none',
+        opacity: visible ? 0.3 : 1,
+        visibility: visible ? 'hidden' : 'visible',
       };
 
       $rootContainer.css('display', battleRoomStyles.display);
@@ -461,7 +516,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       // (shoutout to SpiffyTheSpaceman for helping me debug this in < 5 minutes while blasted af)
       // also note that $chatbox comes and goes, so sometimes it's null, hence the check
       if (battleRoom.$chatbox?.length) {
-        battleRoom.$chatbox.prop('disabled', battle.calcdexOverlayVisible);
+        battleRoom.$chatbox.prop('disabled', visible);
       }
 
       // found another one lol (typically in spectator mode)
@@ -469,12 +524,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         const $joinButton = battleRoom.$chatAdd.find('button');
 
         if ($joinButton.length) {
-          $joinButton.prop('disabled', battle.calcdexOverlayVisible);
+          $joinButton.prop('disabled', visible);
         }
       }
 
       // for mobile (no effect on desktops), prevent pinch zooming and zooming on input focus
-      if (battle.calcdexOverlayVisible) {
+      if (visible) {
         const $existingMeta = $('meta[data-calcdex*="no-mobile-zoom"]');
 
         if ($existingMeta.length) {
@@ -495,9 +550,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       }
 
       // re-render the Calcdex React root only when opening
-      if (battle.calcdexOverlayVisible) {
-        battle.subscription('callback');
-      }
+      // if (visible) {
+      //   battle.subscription('callback');
+      // }
 
       // most BattleRoom button callbacks seem to do this at the end lol
       battleRoom.updateControls();
@@ -507,7 +562,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // (couldn't get it to play nicely when injecting into $chatFrame sadge)
     // (also, $rootContainer's className is the .overlayContainer module to position it appropriately)
     $el.append($rootContainer);
-    battle.calcdexReactRoot = ReactDOM.createRoot($rootContainer[0]);
+    calcdexReactRoot = ReactDOM.createRoot($rootContainer[0]);
 
     // handle destroying the Calcdex when leaving the battleRoom
     const requestLeave = battleRoom.requestLeave.bind(battleRoom) as typeof battleRoom.requestLeave;
@@ -556,7 +611,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   }
 
   // override each player's addPokemon() method to assign a calcdexId lol
-  (['p1', 'p2', 'p3', 'p4'] as Showdown.SideID[]).forEach((playerKey) => {
+  AllPlayerKeys.forEach((playerKey) => {
     if (!(playerKey in battle) || typeof battle[playerKey]?.addPokemon !== 'function') {
       return;
     }
@@ -611,7 +666,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         ));
 
       l.debug(
-        'side.addPokemon()', 'w/ name', name, 'for player', side.sideid,
+        'side.addPokemon()', 'for', ident || name || details?.split(',')?.[0], 'for player', side.sideid,
         '\n', 'ident', ident,
         '\n', 'details', details,
         '\n', 'replaceSlot', replaceSlot,
@@ -688,7 +743,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     if (didUpdate && battleRoom.battle.calcdexInit) {
       const prevNonce = battleRoom.battle.nonce;
 
-      battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle);
+      battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle, battleRoom.request);
 
       l.debug(
         'Restored previous calcdexId\'s in battle.myPokemon[]',
@@ -696,12 +751,14 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
       );
 
-      // battleRoom.battle.subscription('callback');
+      // since myPokemon could be available now, forcibly fire a battle sync
+      // (should we check if myPokemon is actually populated? maybe... but I'll leave it like this for now)
+      battleRoom.battle.subscription('callback');
     }
   };
 
   l.debug(
-    'battle\'s subscription() isn\'t dirty yet!',
+    // 'battle\'s subscription() isn\'t dirty yet!',
     'About to inject some real filth into battle.subscribe()...',
     '\n', 'battleId', roomid,
     '\n', 'typeof battle.subscription', typeof battle.subscription,
@@ -714,10 +771,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   // (in js/battle.js) battle.subscribe = function (listener) { this.subscription = listener; };
   battle.subscribe((state) => {
     l.debug(
-      'subscribe()',
-      '\n', 'state (argv[0])', state,
-      '\n', 'typeof prevSubscription', typeof prevSubscription,
-      '\n', 'battleId', battle?.id || roomid,
+      'battle.subscribe() for', battle?.id || roomid,
+      '\n', 'state', state,
       '\n', 'battle', battle,
     );
 
@@ -763,6 +818,94 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       return;
     }
 
+    // ignore any freshly created battle objects with missing players
+    if (!battle.p1?.id || AllPlayerKeys.slice(1).every((k) => !battle[k]?.id)) {
+      l.debug(
+        'Not all players exist yet in the battle!',
+        '\n', 'players', AllPlayerKeys.map((k) => battle[k]?.id),
+        '\n', 'stepQueue', battle.stepQueue,
+        '\n', 'battleId', battle.id || roomid,
+      );
+
+      return;
+    }
+
+    if (!battle.calcdexStateInit) {
+      // dispatch a Calcdex state initialization to Redux
+      // (moved this out from CalcdexProvider, where React originally dispatched init/sync in early versions before Redux)
+      const authUser = getAuthUsername()
+        || (store.getState()?.showdex as ShowdexSliceState)?.authUsername;
+
+      // note: using NIL_UUID as the initial nonce here since the init state could be ready by the time the nonce
+      // check for syncing executes (if we used the actual nonce, the check would fail since they'd be the same!)
+      // const initNonce = calcBattleCalcdexNonce(battle, battleRoom.request);
+      const initNonce = NIL_UUID; // i.e., NIL_UUID = '00000000-0000-0000-0000-000000000000'
+
+      l.debug(
+        'Initializing Calcdex state for', battle.id || roomid,
+        '\n', 'nonce', '(init)', initNonce,
+        '\n', 'battle', battle,
+      );
+
+      store.dispatch(calcdexSlice.actions.init({
+        scope: `${baseScope}:battle.subscribe()`,
+        battleId: battle.id || roomid,
+        battleNonce: initNonce,
+        gen: battle.gen as GenerationNum,
+        format: battle.id.split('-')?.[1],
+        turn: Math.max(battle.turn || 0, 0),
+        active: !battle.ended,
+        renderMode: openAsPanel ? 'panel' : 'overlay',
+        switchPlayers: battle.sidesSwitched,
+
+        ...AllPlayerKeys.reduce((prev, playerKey) => {
+          const player = battle[playerKey];
+
+          prev[playerKey] = {
+            active: !!player?.id,
+            name: player?.name || null,
+            rating: player?.rating || null,
+
+            autoSelect: calcdexSettings.defaultAutoSelect
+              ?.[(!!authUser && player?.name === authUser && 'auth') || playerKey],
+
+            usedMax: usedDynamax(playerKey, battle.stepQueue),
+            usedTera: usedTerastallization(playerKey, battle.stepQueue),
+          };
+
+          prev[playerKey].side = {
+            conditions: structuredClone(player?.sideConditions || {}),
+          };
+
+          prev[playerKey].side = {
+            conditions: prev[playerKey].side.conditions,
+            ...sanitizePlayerSide(
+              battle.gen as GenerationNum,
+              prev[playerKey],
+              player,
+            ),
+          };
+
+          return prev;
+        }, {} as Record<CalcdexPlayerKey, CalcdexPlayer>),
+      }));
+
+      battle.calcdexStateInit = true;
+
+      // don't continue processing until the next subscription callback
+      // update (2023/01/31): nvm, init state could be available on the store.getState() call below,
+      // but since we're checking for a battleNonce before syncing, it's ok if it doesn't exist yet either
+      // (if a NIL as battleNonce is present, even if NIL_UUID, then we know the state has initialized)
+      // update (2023/02/06): now preventing the first battle sync if the logged-in user is also player
+      // since myPokemon could be empty here; the callback in the overridden updateSide() should trigger
+      // the battle sync once myPokemon is populated; but if we're just spectating here, we can continue
+      // syncing after init as normal; also, checking if the battle ended since we could be watching a replay,
+      // in which case the authUser check could pass without myPokemon being populated
+      if (!battle.ended && AllPlayerKeys.some((k) => battle[k]?.name === authUser)) {
+        return;
+      }
+    }
+
     // since this is inside a function, we need to grab a fresher snapshot of the Redux state
     const currentState = store.getState();
 
@@ -787,7 +930,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       store.dispatch(calcdexSlice.actions.update({
-        battleId: battle.id,
+        scope: `${baseScope}:battle.subscribe()`,
+        battleId: battle.id || roomid,
         battleNonce: battle.nonce,
         active: false,
       }));
@@ -804,8 +948,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           '\n', 'battle', battle,
         );
 
-        // sets battle.calcdexDestroyed to true and
-        // removes the calcdexRoom & calcdexReactRoot properties
+        // sets battle.calcdexDestroyed to true and `delete`s the calcdexRoom property
+        // update (2023/02/01): no longer `delete`s the calcdexReactRoot since it's not stored in the battle anymore
         app.leaveRoom(calcdexRoomId);
       }
 
@@ -818,24 +962,85 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // next Calcdex render callback (i.e., here).
     battle.nonce = calcBattleCalcdexNonce(battle, battleRoom.request);
 
-    if (!battle.calcdexReactRoot) {
+    // this check is to make sure the state has been initialized before attempting to sync
+    if (!battleState.battleNonce) {
+      return;
+    }
+
+    // dispatch a battle sync if the nonces are different (i.e., something changed)
+    if (battle.nonce === battleState.battleNonce) {
+      l.debug(
+        'Ignoring battle sync due to same nonce for', battle.id || roomid,
+        '\n', 'nonce', '(prev)', battleState.battleNonce, '(now)', battle.nonce,
+        '\n', 'battle', battle,
+      );
+
       return;
     }
 
     l.debug(
-      'Rendering Calcdex for battle', battle.id || roomid,
-      '\n', 'nonce', battle.nonce,
+      'Syncing battle for', battle.id || roomid,
+      '\n', 'nonce', '(prev)', battleState.battleNonce, '(now)', battle.nonce,
       '\n', 'request', battleRoom.request,
       '\n', 'battle', battle,
+      '\n', 'state', '(prev)', battleState,
+    );
+
+    // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
+    // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
+    void store.dispatch(syncBattle({
+      battle,
+      request: battleRoom.request,
+    }));
+  });
+
+  // update (2023/02/01): we're now only rendering the Calcdex once since React is no longer
+  // dispatching battle updates (we're dispatching them out here in the bootstrapper).
+  // state mutations in Redux should trigger necessary UI re-renders within React.
+  // (also probably no longer need to reference the calcdexReactRoot in the battle object now tbh)
+  if (calcdexReactRoot) {
+    l.debug(
+      'Rendering Calcdex for', battle.id || roomid,
+      // '\n', 'nonce', '(now)', battle.nonce || initNonce,
+      // '\n', 'request', battleRoom.request,
+      '\n', 'battle', battle,
+      '\n', 'battleRoom', battleRoom,
     );
 
     renderCalcdex(
-      battle.calcdexReactRoot,
+      calcdexReactRoot,
       store,
-      battle,
+      battle.id || roomid,
       battleRoom,
     );
-  });
+
+    // force a callback after rendering
+    // update (2023/02/04): bad idea, sometimes leads to a half-initialized battle object where there's
+    // only one player (which breaks the syncing); downside is that it doesn't appear to the user that the
+    // Calcdex is loading that fast, but it loads with the battle frame, so it isn't the worst thing ever
+    // update (2023/02/06): now checking if we're already at the queue end, which could happen if you refresh
+    // the page mid-battle or join a spectating game; otherwise, the Calcdex won't appear until the players
+    // do something (e.g., choose an option, turn on the timer, etc.) that triggers the subscription callback
+    if (battle.atQueueEnd) {
+      l.debug(
+        'Forcing a battle sync via battle.subscription() since the battle is atQueueEnd',
+        '\n', 'battle.atQueueEnd', battle.atQueueEnd,
+        '\n', 'battle', battle,
+        '\n', 'battleRoom', battleRoom,
+      );
+
+      battle.subscription('atqueueend');
+    }
+  } else {
+    l.error(
+      'ReactDOM root has not been initialized, despite completing the bootstrap.',
+      'Something is horribly wrong here!',
+      '\n', 'battleId', battle.id || roomid,
+      '\n', 'calcdexReactRoot', '(type)', typeof calcdexReactRoot, '(now)', calcdexReactRoot,
+      '\n', 'battle', battle,
+      '\n', 'battleRoom', battleRoom,
+    );
+  }
 
   battle.calcdexInit = true;
 };

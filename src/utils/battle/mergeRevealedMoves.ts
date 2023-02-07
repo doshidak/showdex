@@ -1,5 +1,5 @@
 import { PokemonPivotMoves } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { flattenAlts } from './flattenAlts';
@@ -55,34 +55,46 @@ export const mergeRevealedMoves = (
   // therefore, filtered out of this list; otherwise, 'Hidden Power' will replace another move!)
   // update (2023/01/06): changed the filter condition since using startsWith() will prevent something like
   // 'Toxic' from merging if 'Toxic Spikes' already exists ('Toxic Spikes'.startsWith('Toxic') -> true ... LOL)
-  const mergeableMoveNames = revealedMoves
-    // .filter((m) => !moves.some((n) => n.startsWith(m)));
-    .filter((m) => (
-      m.startsWith('Hidden Power')
-        ? !moves.some((n) => n.startsWith(m))
-        : !moves.some((n) => n === m)
-    ));
+  // update (2023/02/03): renamed this from `mergeableMoveNames` cause its name was confusing af tbh.
+  // e.g., revealedMoves: ['Hidden Power', 'Calm Mind'],
+  // moves: ['Diamond Storm', 'Protect', 'Moonblast', 'Hidden Power Fire']
+  const revealedMoveNames = revealedMoves.filter((r) => ( // e.g., m = 'Hidden Power'
+    !moves.some((m) => ( // e.g., n = 'Hidden Power Fire'
+      (r.startsWith('Hidden Power') && m.startsWith(r)) // e.g., true, so 'Hidden Power' is ignored
+        || m === r
+    ))
+  ));
 
-  if (!mergeableMoveNames.length) {
+  if (!revealedMoveNames.length) {
     return moves;
   }
 
+  // 'Hidden Power' can still exist in revealedMoveNames if some typed equivalent doesn't exist in moves[],
+  // so if altMoves[] are provided, we can look for a typed Hidden Power and replace its Normal-type
+  // counterpart in revealedMoveNames
+  // update (2023/02/03): reason why I'm back for round 4/5? of Hidden Power fixes is cause I forgot
+  // to merge the altMoves in applyPreset() of the CalcdexPokeProvider (which also happens to be the
+  // *only* place calling this utility that can provide an altMoves since they're from presets lmfaoo)
+  if (revealedMoveNames.includes(<MoveName> 'Hidden Power') && altMoves?.length) {
+    const revealedIndex = revealedMoveNames.findIndex((m) => m === 'Hidden Power');
+    const hiddenPowerFromAlt = flattenAlts(altMoves).find((m) => m?.startsWith('Hidden Power'));
+
+    if (revealedIndex > -1 && hiddenPowerFromAlt) {
+      revealedMoveNames[revealedIndex] = hiddenPowerFromAlt;
+    }
+  }
+
+  // this will be our final return value
   const output: MoveName[] = [
     ...moves,
   ];
 
-  for (const mergeableMoveName of mergeableMoveNames) {
-    // if the mergeableMoveName is Hidden Power (w/o a type), see if we can find a typed Hidden Power
-    // (something like 'hiddenpowerfire') in the Pokemon's move pool (i.e., altMoves), if available
-    // (if it happens to be just "Hidden Power" [Normal type], then all good cause of the logical OR)
-    const mergeableMove = dex.moves.get((
-      formatId(mergeableMoveName) === 'hiddenpower'
-        && altMoves?.length
-        && flattenAlts(altMoves).find((m) => /^hiddenpower\w+$/i.test(formatId(m)))
-    ) || mergeableMoveName);
+  for (const revealedMoveName of revealedMoveNames) {
+    // attempt a dex lookup of the current revealedMoveName
+    const revealedMove = dex.moves.get(revealedMoveName);
 
     // HUH
-    if (!mergeableMove?.exists) {
+    if (!revealedMove?.exists) {
       continue;
     }
 
@@ -94,7 +106,7 @@ export const mergeRevealedMoves = (
       const moveIndex = output.findIndex((m) => m === statusMoveName);
 
       if (moveIndex > -1) {
-        output[moveIndex] = mergeableMoveName;
+        output[moveIndex] = revealedMoveName;
         nonRevealedMoves.splice(statusMoveIndex, 1);
 
         continue;
@@ -102,8 +114,8 @@ export const mergeRevealedMoves = (
     }
 
     // look for damaging STAB moves (except pivot moves like U-turn),
-    // but only if the current mergeableMove is damaging
-    if (mergeableMove.category !== 'Status' && types.includes(mergeableMove.type)) {
+    // but only if the current revealedMove is damaging
+    if (revealedMove.category !== 'Status' && types.includes(revealedMove.type)) {
       const stabMoveIndex = nonRevealedMoves.findIndex((m) => (
         (!!m?.category && m.category !== 'Status')
           && types.includes(m.type)
@@ -115,7 +127,7 @@ export const mergeRevealedMoves = (
         const moveIndex = output.findIndex((m) => m === stabMoveName);
 
         if (moveIndex > -1) {
-          output[moveIndex] = mergeableMoveName;
+          output[moveIndex] = revealedMoveName;
           nonRevealedMoves.splice(stabMoveIndex, 1);
 
           continue;
@@ -133,7 +145,7 @@ export const mergeRevealedMoves = (
       const moveIndex = output.findIndex((m) => m === nonStabMoveName);
 
       if (moveIndex > -1) {
-        output[moveIndex] = mergeableMoveName;
+        output[moveIndex] = revealedMoveName;
         nonRevealedMoves.splice(nonStabMoveIndex, 1);
 
         continue;
@@ -151,7 +163,7 @@ export const mergeRevealedMoves = (
       const moveIndex = output.findIndex((m) => m === nextMoveName);
 
       if (moveIndex > -1) {
-        output[moveIndex] = mergeableMoveName;
+        output[moveIndex] = revealedMoveName;
         nonRevealedMoves.splice(0, 1);
       }
     }

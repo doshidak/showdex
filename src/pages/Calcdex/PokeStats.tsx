@@ -3,6 +3,7 @@ import cx from 'classnames';
 import { ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
+import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   PokemonBoostNames,
   PokemonNatureBoosts,
@@ -23,6 +24,8 @@ export interface PokeStatsProps {
   containerSize?: ElementSizeLabel;
 }
 
+const baseScope = '@showdex/pages/Calcdex/PokeStats';
+
 export const PokeStats = ({
   className,
   style,
@@ -31,9 +34,11 @@ export const PokeStats = ({
   const {
     state,
     settings,
-    playerPokemon: pokemon,
-    opponentPokemon,
+    player,
     playerKey, // don't use the one from state btw
+    playerPokemon: pokemon,
+    opponent,
+    opponentPokemon,
     field, // don't use the one from state btw
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -47,8 +52,8 @@ export const PokeStats = ({
 
   const colorScheme = useColorScheme();
 
-  const statNames = PokemonStatNames.filter((stat) => gen > 1 || stat !== 'spd');
-  const boostNames = PokemonBoostNames.filter((stat) => gen > 1 || stat !== 'spd');
+  const statNames = PokemonStatNames.filter((stat) => gen !== 1 || stat !== 'spd');
+  const boostNames = PokemonBoostNames.filter((stat) => gen !== 1 || stat !== 'spd');
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
@@ -99,14 +104,18 @@ export const PokeStats = ({
     gen,
     pokemon,
     opponentPokemon,
+    player,
+    opponent,
     field,
-    playerKey,
+    AllPlayerKeys.filter((k) => state[k]?.active).map((k) => state[k]),
   ) : null), [
     field,
     gen,
+    opponent,
     opponentPokemon,
-    playerKey,
+    player,
     pokemon,
+    state,
   ]);
 
   const {
@@ -146,7 +155,7 @@ export const PokeStats = ({
           disabled={!pokemon?.speciesForme || missingIvs || missingEvs}
           onPress={() => updatePokemon({
             showGenetics: !pokemon.showGenetics,
-          })}
+          }, `${baseScope}:ToggleButton~Genetics:onPress()`)}
         />
       </TableGridItem>
 
@@ -204,11 +213,12 @@ export const PokeStats = ({
               disabled={!pokemon?.speciesForme || !hasDirtyBaseStats}
               onPress={() => updatePokemon({
                 dirtyBaseStats: null,
-              })}
+              }, `${baseScope}:Button~DirtyBaseStats:onPress()`)}
             />
           </TableGridItem>
 
           {statNames.map((stat) => {
+            const statLabel = stat.toUpperCase();
             const baseStat = pokemon?.dirtyBaseStats?.[stat] ?? pokemon?.baseStats?.[stat];
             const pristine = typeof pokemon?.dirtyBaseStats?.[stat] !== 'number';
             const disabled = !pokemon?.speciesForme;
@@ -226,7 +236,7 @@ export const PokeStats = ({
                     disabled && styles.disabled,
                   )}
                   inputClassName={styles.valueFieldInput}
-                  label={`${stat.toUpperCase()} Base Stat for ${friendlyPokemonName}`}
+                  label={`${statLabel} Base Stat for ${friendlyPokemonName}`}
                   hideLabel
                   hint={baseStat?.toString() || 1}
                   fallbackValue={1}
@@ -242,7 +252,7 @@ export const PokeStats = ({
                     value: baseStat,
                     onChange: (value: number) => updatePokemon({
                       dirtyBaseStats: { [stat]: value },
-                    }),
+                    }, `${baseScope}:ValueField~Base-${statLabel}:input.onChange()`),
                   }}
                   disabled={disabled}
                 />
@@ -293,6 +303,8 @@ export const PokeStats = ({
               ? 'spc'
               : stat;
 
+            const statLabel = statName.toUpperCase();
+
             const iv = pokemon?.ivs?.[stat] || 0;
             const value = legacy ? convertIvToLegacyDv(iv) : iv;
 
@@ -314,7 +326,7 @@ export const PokeStats = ({
                     styles.valueFieldInput,
                     missingIvs && styles.missingSpread,
                   )}
-                  label={`${statName.toUpperCase()} ${legacy ? 'DV' : 'IV'} for ${friendlyPokemonName}`}
+                  label={`${statLabel} ${legacy ? 'DV' : 'IV'} for ${friendlyPokemonName}`}
                   hideLabel
                   hint={value.toString() || (legacy ? '15' : '31')}
                   fallbackValue={legacy ? 15 : 31}
@@ -332,7 +344,7 @@ export const PokeStats = ({
                       // note: HP (for gen 1 and 2) and SPD (for gen 2 only) handled in
                       // handlePokemonChange() of PokeCalc
                       ivs: { [stat]: legacy ? convertLegacyDvToIv(val) : val },
-                    }),
+                    }, `${baseScope}:ValueField~Iv-${statLabel}:input.onChange()`),
                   }}
                   disabled={disabled}
                 />
@@ -393,6 +405,7 @@ export const PokeStats = ({
           </Tooltip>
 
           {statNames.map((stat) => {
+            const statLabel = stat.toUpperCase();
             const ev = pokemon?.evs?.[stat] || 0;
 
             return (
@@ -406,7 +419,7 @@ export const PokeStats = ({
                     styles.valueFieldInput,
                     missingEvs && styles.missingSpread,
                   )}
-                  label={`${stat.toUpperCase()} EV for ${friendlyPokemonName}`}
+                  label={`${statLabel} EV for ${friendlyPokemonName}`}
                   hideLabel
                   hint={ev.toString() || '252'}
                   fallbackValue={0}
@@ -422,7 +435,7 @@ export const PokeStats = ({
                     value: ev,
                     onChange: (value: number) => updatePokemon({
                       evs: { [stat]: value },
-                    }),
+                    }, `${baseScope}:ValueField~Ev-${statLabel}:input.onChange()`),
                   }}
                   disabled={!pokemon?.speciesForme}
                 />
@@ -454,13 +467,13 @@ export const PokeStats = ({
                       className={cx(
                         styles.statModValue,
                         styles.statValue,
-                        mod?.modifier > 1 && styles.positive,
-                        mod?.modifier < 1 && styles.negative,
+                        (mod?.modifier ?? 1) > 1 && styles.positive,
+                        (mod?.modifier ?? 1) < 1 && styles.negative,
                       )}
                     >
-                      {mod?.modifier >= 0 ? (
+                      {(mod?.modifier ?? -1) >= 0 ? (
                         <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
-                      ) : <>&ndash;</>}
+                      ) : null}
                     </div>
                     <div className={styles.statModLabel}>
                       {mod?.label || '??? HUH'}
@@ -499,8 +512,11 @@ export const PokeStats = ({
         Stage
       </TableGridItem>
 
-      <TableGridItem /> {/* this is used as a spacer since HP cannot be boosted, obviously! */}
+      {/* this is used as a spacer since HP cannot be boosted, obviously! */}
+      <TableGridItem />
+
       {boostNames.map((stat) => {
+        const statLabel = stat.toUpperCase();
         const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
         const didDirtyBoost = typeof pokemon?.dirtyBoosts?.[stat] === 'number';
 
@@ -516,7 +532,7 @@ export const PokeStats = ({
               disabled={!pokemon?.speciesForme || boost <= -6}
               onPress={() => updatePokemon({
                 dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
-              })}
+              }, `${baseScope}:Button~DirtyBoosts-${statLabel}-Minus:onPress()`)}
             />
 
             <Button
@@ -535,7 +551,7 @@ export const PokeStats = ({
                 // resets the dirty boost, in which a re-render will re-sync w/
                 // the actual boost from the battle state
                 dirtyBoosts: { [stat]: null },
-              })}
+              }, `${baseScope}:Button~DirtyBoosts-${statLabel}-Reset:onPress()`)}
             />
 
             <Button
@@ -545,7 +561,7 @@ export const PokeStats = ({
               disabled={!pokemon?.speciesForme || boost >= 6}
               onPress={() => updatePokemon({
                 dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },
-              })}
+              }, `${baseScope}:Button~DirtyBoosts-${statLabel}-Plus:onPress()`)}
             />
           </TableGridItem>
         );

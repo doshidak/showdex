@@ -293,9 +293,10 @@ declare namespace Showdown {
 
     // Showdex-injected custom properties
     calcdexRoom?: HtmlRoom;
-    calcdexOverlayVisible?: boolean;
-    calcdexReactRoot?: import('react-dom/client').Root;
+    // calcdexOverlayVisible?: boolean;
+    // calcdexReactRoot?: import('react-dom/client').Root;
     calcdexInit?: boolean;
+    calcdexStateInit?: boolean;
     calcdexDestroyed?: boolean;
     nonce?: string;
 

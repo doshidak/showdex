@@ -1,5 +1,5 @@
 // import { formatId } from '@showdex/utils/app';
-import { getDexForFormat } from '@showdex/utils/battle';
+import { getDexForFormat, getMaxMove } from '@showdex/utils/battle';
 // import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexMoveOverride } from '@showdex/redux/store';
@@ -49,6 +49,18 @@ export const getMoveOverrideDefaults = (
   //     ? calcRageFist(pokemon)
   //     : basePowerFromDex;
 
+  // update (2023/02/02): came across G-Max Fireball on a Cinderace-Gmax, which showed 140 BP.
+  // turns out we need to separately lookup G-Max moves since maxMove.basePower refers to Max Flare.
+  const gmaxMoveName = (
+    pokemon.speciesForme.endsWith('-Gmax')
+      && getMaxMove(moveName, pokemon.dirtyAbility || pokemon.ability, pokemon.speciesForme)
+  ) || null;
+
+  const gmaxBasePower = (
+    gmaxMoveName?.startsWith('G-Max')
+      && dex.moves.get(gmaxMoveName)?.basePower
+  ) || 0;
+
   const basePower = calcMoveBasePower(format, pokemon, moveName, opponentPokemon);
   const criticalHit = alwaysCriticalHits(moveName, format);
 
@@ -71,7 +83,7 @@ export const getMoveOverrideDefaults = (
     category,
     basePower,
     zBasePower: zMove?.basePower,
-    maxBasePower: maxMove?.basePower,
+    maxBasePower: gmaxBasePower || maxMove?.basePower,
     alwaysCriticalHits: criticalHit,
     defensiveStat: (ignoreDefensive ? 'ignore' : overrideDefensiveStat) || defaultDefensiveStat,
     offensiveStat: overrideOffensiveStat || defaultOffensiveStat,

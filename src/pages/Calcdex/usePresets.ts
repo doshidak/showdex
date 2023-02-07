@@ -186,20 +186,24 @@ export const usePresets = ({
     || !gen
     || !genlessFormat;
 
+  const shouldSkipFormats = shouldSkip || randomsFormat || !settings?.downloadSmogonPresets;
+
   const {
     formatPresets,
-    isLoading: formatLoading,
+    formatPending,
+    formatLoading,
   } = usePokemonFormatPresetQuery({
     gen,
     format,
-    formatOnly: genlessFormat.includes('bdsp'),
+    formatOnly: genlessFormat?.includes('bdsp'),
     // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
   }, {
-    skip: shouldSkip || randomsFormat || !settings?.downloadSmogonPresets,
+    skip: shouldSkipFormats,
 
-    selectFromResult: ({ data, isLoading }) => ({
+    selectFromResult: ({ data, isUninitialized, isLoading }) => ({
       formatPresets: selectPresetsFromResult(data, formes),
-      isLoading,
+      formatPending: isUninitialized,
+      formatLoading: isLoading,
     }),
   });
 
@@ -210,48 +214,60 @@ export const usePresets = ({
   //   '\n', 'downloadRandomsPresets', settings?.downloadRandomsPresets,
   // );
 
+  const shouldSkipFormatStats = shouldSkip || randomsFormat || !settings?.downloadUsageStats;
+
   const {
     formatStatsPresets,
-    isLoading: formatStatsLoading,
+    formatStatsPending,
+    formatStatsLoading,
   } = usePokemonFormatStatsQuery({
     gen,
     format,
   }, {
-    skip: shouldSkip || randomsFormat || !settings?.downloadUsageStats,
+    skip: shouldSkipFormatStats,
 
-    selectFromResult: ({ data, isLoading }) => ({
+    selectFromResult: ({ data, isUninitialized, isLoading }) => ({
       formatStatsPresets: selectPresetsFromResult(data, formes),
-      isLoading,
+      formatStatsPending: isUninitialized,
+      formatStatsLoading: isLoading,
     }),
   });
 
+  const shouldSkipRandoms = shouldSkip || !randomsFormat || !settings?.downloadRandomsPresets;
+
   const {
     randomsPresets,
-    isLoading: randomsLoading,
+    randomsPending,
+    randomsLoading,
   } = usePokemonRandomsPresetQuery({
     gen,
     format, // if it's BDSP, the query will automatically fetch from `gen8bdsprandombattle.json`
   }, {
-    skip: shouldSkip || !randomsFormat || !settings?.downloadRandomsPresets,
+    skip: shouldSkipRandoms,
 
-    selectFromResult: ({ data, isLoading }) => ({
+    selectFromResult: ({ data, isUninitialized, isLoading }) => ({
       randomsPresets: selectPresetsFromResult(data, formes),
-      isLoading,
+      randomsPending: isUninitialized,
+      randomsLoading: isLoading,
     }),
   });
 
+  const shouldSkipRandomsStats = shouldSkip || !randomsFormat || !settings?.downloadUsageStats;
+
   const {
     randomsStatsPresets,
-    isLoading: randomsStatsLoading,
+    randomsStatsPending,
+    randomsStatsLoading,
   } = usePokemonRandomsStatsQuery({
     gen,
     format, // supplying both this and `gen`, but `format` will take precedence over `gen`
   }, {
-    skip: shouldSkip || !randomsFormat || !settings?.downloadUsageStats,
+    skip: shouldSkipRandomsStats,
 
-    selectFromResult: ({ data, isLoading }) => ({
+    selectFromResult: ({ data, isUninitialized, isLoading }) => ({
       randomsStatsPresets: selectPresetsFromResult(data, formes),
-      isLoading,
+      randomsStatsPending: isUninitialized,
+      randomsStatsLoading: isLoading,
     }),
   });
 
@@ -300,16 +316,29 @@ export const usePresets = ({
     randomsStatsPresets,
   ]);
 
+  // update (2023/02/01): since the great Calcdex refactoring (i.e., React no longer has direct access to the `battle`,
+  // only through the synced values in Redux), the UI loads too fast, so loading would be initially false, causing the
+  // showGenetics of the initially selected Pokemon to be true from the auto-preset React effect in CalcdexPokeProvider.
+  // if we're not skipping, we'll also look at the pending states (alias of isUninitialized) since the fetching may not
+  // have started yet (so loading would be false, which is the cause of our showGenetics problem).
   const loading = React.useMemo(() => (
-    formatLoading
-      || formatStatsLoading
-      || randomsLoading
-      || randomsStatsLoading
+    (!shouldSkipFormats && (formatPending || formatLoading))
+      || (!shouldSkipFormatStats && (formatStatsPending || formatStatsLoading))
+      || (!shouldSkipRandoms && (randomsPending || randomsLoading))
+      || (!shouldSkipRandomsStats && (randomsStatsPending || randomsStatsLoading))
   ), [
+    formatPending,
     formatLoading,
+    formatStatsPending,
     formatStatsLoading,
+    randomsPending,
     randomsLoading,
+    randomsStatsPending,
     randomsStatsLoading,
+    shouldSkipFormats,
+    shouldSkipFormatStats,
+    shouldSkipRandoms,
+    shouldSkipRandomsStats,
   ]);
 
   // l.debug(

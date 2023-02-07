@@ -6,7 +6,7 @@ import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc'
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleField,
-  CalcdexPlayerKey,
+  CalcdexPlayer,
   CalcdexPokemon,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
@@ -102,7 +102,9 @@ export const calcSmogonMatchup = (
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerMove: MoveName,
-  playerKey?: CalcdexPlayerKey,
+  player?: CalcdexPlayer,
+  opponent?: CalcdexPlayer,
+  allPlayers?: CalcdexPlayer[],
   field?: CalcdexBattleField,
   settings?: ShowdexCalcdexSettings,
 ): CalcdexMatchupResult => {
@@ -120,15 +122,18 @@ export const calcSmogonMatchup = (
 
   if (!dex || !format || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
-      l.warn(
+      l.debug(
         'Calculation ignored due to invalid arguments.',
         // '\n', 'dex.num', dex?.num,
         '\n', 'format', format, 'dex', dex,
-        '\n', 'playerPokemon.speciesForme', playerPokemon?.speciesForme,
-        '\n', 'opponentPokemon.speciesForme', opponentPokemon?.speciesForme,
+        '\n', 'playerPokemon', playerPokemon?.name || playerPokemon?.speciesForme || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon?.name || opponentPokemon?.speciesForme || '???', opponentPokemon,
         '\n', 'playerMove', playerMove,
+        '\n', 'player', player,
+        '\n', 'opponent', opponent,
         '\n', 'field', field,
-        '\n', '(You will only see this warning on development.)',
+        '\n', 'settings', settings,
+        // '\n', '(You will only see this warning on development.)',
       );
     }
 
@@ -156,11 +161,11 @@ export const calcSmogonMatchup = (
   //   basePowerMods.push(2);
   // }
 
-  matchup.attacker = createSmogonPokemon(format, playerPokemon, playerMove);
-  matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
-  matchup.defender = createSmogonPokemon(format, opponentPokemon);
+  const smogonField = createSmogonField(format, field, player, opponent, allPlayers);
 
-  const smogonField = createSmogonField(field, playerPokemon, playerKey);
+  matchup.attacker = createSmogonPokemon(format, playerPokemon, playerMove, opponentPokemon, smogonField);
+  matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
+  matchup.defender = createSmogonPokemon(format, opponentPokemon, null, playerPokemon, smogonField);
 
   try {
     const result = calculate(
@@ -177,7 +182,7 @@ export const calcSmogonMatchup = (
     matchup.koColor = getKoColor(result, settings?.nhkoColors);
 
     // l.debug(
-    //   'Calculated damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
+    //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
     //   '\n', 'gen', dex.num,
     //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
     //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
@@ -192,11 +197,15 @@ export const calcSmogonMatchup = (
     // like using Earthquake against a Lando-T, which is immune due to its Flying type.
     if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
       l.error(
-        'Exception while calculating the damage from', playerPokemon.name, 'using', playerMove, 'against', opponentPokemon.name,
+        'Exception while calculating the damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
         '\n', 'dex.num', dex.num,
-        '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-        '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+        '\n', 'playerPokemon', playerPokemon.name || playerPokemon.speciesForme || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon.name || opponentPokemon.speciesForme || '???', opponentPokemon,
+        '\n', 'playerMove', playerMove,
+        '\n', 'player', player,
+        '\n', 'opponent', opponent,
         '\n', 'field', field,
+        '\n', 'settings', settings,
         '\n', '(You will only see this error on development.)',
         '\n', error,
       );

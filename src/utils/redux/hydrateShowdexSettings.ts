@@ -104,6 +104,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       downloadUsageStats: true,
       prioritizeUsageStats: false,
       includeTeambuilder: 'always',
+      autoImportTeamSheets: true,
       autoExportOpponent: false,
 
       defaultAutoMoves: {

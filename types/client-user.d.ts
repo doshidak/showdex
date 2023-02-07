@@ -23,14 +23,19 @@ declare namespace Showdown {
     language?: string;
   }
 
+  interface ClientUserRegistration {
+    userid: string;
+    username: string;
+  }
+
   interface ClientUserAttributes {
     userid?: string;
     name: string;
     named?: boolean;
-    avatar: string;
+    avatar: string | number;
     status: string;
     away?: boolean;
-    registered?: boolean;
+    registered?: boolean | ClientUserRegistration;
     settings?: ClientUserSettings;
   }
 
@@ -38,6 +43,7 @@ declare namespace Showdown {
     _changing: boolean;
     _pending: boolean;
     _previousAttributes: ClientUserAttributes;
+    _events: Record<string, unknown[]>;
 
     attributes: ClientUserAttributes;
     cid: string;
@@ -48,7 +54,22 @@ declare namespace Showdown {
     normalizeList: Record<string, RegExp>;
     replaceList: Record<string, RegExp>;
 
+    defaults: {
+      userid: string;
+      name: string;
+      named: boolean;
+      avatar: string | number;
+      registered: boolean | ClientUserRegistration;
+      status: string;
+      away: boolean;
+      settings: ClientUserSettings;
+    };
+
+    // Showdex-injected custom properties
+    teamdexInit?: boolean;
+
     initialize(): void;
+    trigger(name: string, ...argv?: unknown[]): ClientUser;
     updateSetting(setting: string, value: string): void;
     getActionPHP(): string;
     finishRename(name: string, assertion: string): void;
@@ -56,5 +77,6 @@ declare namespace Showdown {
     passwordRename(name: string, password: string, special: string): void;
     receiveChallstr(challstr: string): void;
     logout(): void;
+    setPersistentName(name: string): void;
   }
 }

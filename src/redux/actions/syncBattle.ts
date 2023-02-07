@@ -1,23 +1,32 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { getTeambuilderPresets } from '@showdex/utils/app';
+import { AllPlayerKeys } from '@showdex/consts/battle';
+import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
+import { formatId } from '@showdex/utils/app';
 import {
+  appliedPreset,
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectLegacyGen,
   detectPlayerKeyFromBattle,
+  detectPlayerKeyFromPokemon,
   getPresetFormes,
+  getTeamSheetPresets,
   legalLockedFormat,
+  mergeRevealedMoves,
+  sanitizePlayerSide,
   sanitizePokemon,
   sanitizeVolatiles,
   syncField,
   syncPokemon,
   toggleRuinAbilities,
+  usedDynamax,
+  usedTerastallization,
 } from '@showdex/utils/battle';
-import { calcPokemonCalcdexId } from '@showdex/utils/calc';
+import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleState, CalcdexPlayerKey, RootState } from '@showdex/redux/store';
+import type { CalcdexBattleState, RootState } from '@showdex/redux/store';
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
@@ -51,6 +60,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     l.debug(
       'RECV', SyncBattleActionType, 'for', battle?.id || '(missing battle.id)',
       '\n', 'payload', payload,
+      '\n', 'settings', settings,
       '\n', 'state', state,
     );
 
@@ -114,44 +124,51 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.active = !ended;
     }
 
-    // find out which side myPokemon belongs to
-    const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
+    // update the authPlayerKey (if any)
+    battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
 
-    if (detectedPlayerKey && battleState.playerKey !== detectedPlayerKey) {
+    // find out which side myPokemon belongs to
+    const detectedPlayerKey = battleState.authPlayerKey || detectPlayerKeyFromBattle(battle);
+
+    if (detectedPlayerKey && !battleState.playerKey) {
       battleState.playerKey = detectedPlayerKey;
     }
 
-    // also, while we're here, update the authPlayerKey (if any) and opponentKey
-    battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
-    battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
-
-    // determine if we should convert Teambuilder presets
-    // (getTeambuilderPresets() may be an expensive operation, so we want to limit it to a one-time exec)
-    const shouldIncludeTeambuilder = !!settings?.includeTeambuilder
-      && settings.includeTeambuilder !== 'never'
-      && (!battleState.authPlayerKey || !!myPokemon?.length)
-      && !battleState.format.includes('random')
-      && !battleState.includedTeambuilder;
-
-    /**
-     * @todo Seems to be some kind of race condition here; sometimes, the battle will be slow to report myPokemon,
-     *   so it will revert to using the 'Yours' preset, so no Teambuilder presets will be loaded for the auth side!
-     *   This typically only occurs when you first load into the battle (doesn't seem to be reproducible when refreshing mid-battle).
-     *   Potential fix is to move the `!battleState.authPlayerKey || !!myPokemon?.length` check to the value of
-     *   `battleState.includedTeambuilder`, so that if it evals to `false`, it can at least try to include the Teambuilder presets
-     *   on the next sync since they're attached to the Pokemon's `presets[]` array.
-     */
-    const teambuilderPresets = shouldIncludeTeambuilder
-      ? getTeambuilderPresets(battleState.format)
-      : [];
-
-    // immediately update the includedTeambuilder flag so that we don't convert
-    // the Teambuilder presets on the next sync
-    if (shouldIncludeTeambuilder) {
-      battleState.includedTeambuilder = true;
+    if (!battleState.opponentKey) {
+      battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
     }
 
-    for (const playerKey of <CalcdexPlayerKey[]> ['p1', 'p2']) {
+    // update the sidesSwitched from the battle
+    battleState.switchPlayers = battle.sidesSwitched;
+
+    // determine if we should include Teambuilder presets
+    // (should be already pre-converted in the teamdexSlice)
+    const teambuilderPresets = (
+      !!settings?.includeTeambuilder
+        && settings.includeTeambuilder !== 'never'
+        && !battleState.format.includes('random')
+        && rootState?.teamdex?.presets?.filter((p) => p?.gen === battleState.gen)
+    ) || [];
+
+    // determine if we should look for team sheets
+    const sheetStepQueues = (
+      !!settings?.autoImportTeamSheets
+        && battle.stepQueue?.filter((q) => (q.startsWith('|c|') && q.includes('/raw')) || q.startsWith('|uhtml|ots|'))
+    ) || [];
+
+    const sheetsNonce = sheetStepQueues.length
+      ? calcCalcdexId(sheetStepQueues.join(';'))
+      : null;
+
+    if (sheetsNonce && battleState.sheetsNonce !== sheetsNonce) {
+      battleState.sheetsNonce = sheetsNonce;
+      battleState.sheets = sheetStepQueues.flatMap((sheetStepQueue) => getTeamSheetPresets(
+        battleState.format,
+        sheetStepQueue,
+      ));
+    }
+
+    for (const playerKey of AllPlayerKeys) {
       // l.debug('Processing player', playerKey);
 
       if (!(playerKey in battle) || battle[playerKey]?.sideid !== playerKey) {
@@ -385,13 +402,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           : null;
 
         // this is our starting point for the current clientPokemon
-        const basePokemon = matchedPokemon
-          || sanitizePokemon(
-            clientPokemon,
-            battleState.format,
-            // settings?.showAllFormes, // update (2023/01/05): no longer a setting
-            true,
-          );
+        const basePokemon = matchedPokemon || sanitizePokemon(
+          clientPokemon,
+          battleState.format,
+          // settings?.showAllFormes, // update (2023/01/05): no longer a setting
+          true,
+        );
 
         // in case the volatiles aren't sanitized yet lol
         if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
@@ -408,7 +424,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // settings?.showAllFormes, // update (2023/01/05): no longer a setting
           true,
           (!isMyPokemonSide || !hasMyPokemon)
-            && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey ? 'auth' : playerKey],
+            // update (2023/02/03): defaultAutoMoves.auth is always false since we'd normally have myPokemon,
+            // but in cases of old replays, myPokemon won't be available, so we'd want to respect the user's setting
+            // using the playerKey instead of 'auth'
+            && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey && hasMyPokemon ? 'auth' : playerKey],
           teambuilderPresets,
         );
 
@@ -417,17 +436,23 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           syncedPokemon.playerKey = playerKey;
         }
 
+        const formes = getPresetFormes(
+          syncedPokemon.transformedForme || syncedPokemon.speciesForme,
+          battleState.format,
+        );
+
         // attach Teambuilder presets for the specific Pokemon, if available
         // (this should only happen once per battle)
-        if (shouldIncludeTeambuilder && teambuilderPresets.length) {
-          const formes = getPresetFormes(syncedPokemon.speciesForme, battleState.format);
+        const shouldAddTeambuilder = !!teambuilderPresets.length
+          && !syncedPokemon.presets.some((p) => ['storage', 'storage-box'].includes(p.source));
 
+        if (shouldAddTeambuilder) {
           const matchedPresets = teambuilderPresets.filter((p) => (
             formes.includes(p.speciesForme) && (
               settings.includeTeambuilder === 'always'
                 || (settings.includeTeambuilder === 'teams' && p.source === 'storage')
                 || (settings.includeTeambuilder === 'boxes' && p.source === 'storage-box')
-                || syncedPokemon.preset === p.calcdexId // include the matched Teambuilder team if 'boxes'
+                || syncedPokemon.presetId === p.calcdexId // include the matched Teambuilder team if 'boxes'
             )
           ));
 
@@ -435,6 +460,117 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             syncedPokemon.presets.push(...matchedPresets);
           }
         }
+
+        // attach presets derived from team sheets matching the specific player AND Pokemon, if available
+        if (battleState.sheets.length) {
+          // filter for matching sheet presets, then sort them with the highest allocated EVs first
+          // (handles case where open team sheets are available, which has no EVs, then !showteam is invoked, which has EVs)
+          const matchedPresets = battleState.sheets.filter((p) => (
+            formes.includes(p.speciesForme)
+              && formatId(p.playerName) === formatId(playerState.name)
+          )).sort((a, b) => {
+            // note: both would be 0 for legacy gens, obviously, so no sorting will happen
+            const evsA = Object.values(a?.evs || {}).reduce((sum, value) => sum + value, 0);
+            const evsB = Object.values(b?.evs || {}).reduce((sum, value) => sum + value, 0);
+
+            if (evsA > evsB) {
+              return -1;
+            }
+
+            if (evsB > evsA) {
+              return 1;
+            }
+
+            return 0;
+          });
+
+          // don't add sheets for the auth player's Pokemon since we should already know its exact preset!
+          const shouldAddPresets = !!matchedPresets.length
+            && !syncedPokemon.serverSourced
+            && !syncedPokemon.presets.some((p) => p.source === 'sheet' && formes.includes(p.speciesForme));
+
+          if (shouldAddPresets) {
+            syncedPokemon.presets.splice(
+              syncedPokemon.presets[0]?.source === 'server' ? 1 : 0, // 'Yours' preset is always first (index 0)
+              0, // don't remove any presets!
+              ...matchedPresets.filter((p) => (
+                battleState.legacy
+                  || Object.values(p.evs || {}).reduce((sum, value) => sum + value, 0) > 0
+              )), // only include valid presets with EVs, if not legacy (nature will be Hardy if not provided btw)
+            );
+
+            // auto-apply the first team sheet preset if the current one applied isn't the matchedPreset
+            const [matchedPreset] = matchedPresets;
+
+            const shouldApplyPreset = !!matchedPreset?.calcdexId
+              && !appliedPreset(battleState.format, syncedPokemon, matchedPreset);
+
+            if (shouldApplyPreset) {
+              const defaultIv = battleState.legacy ? 30 : 31;
+
+              if (!battleState.legacy) {
+                // note: since team sheets contain the Pokemon's actual ability and items, we're setting them as
+                // ability and item, respectively, instead of dirtyAbility and dirtyItem, also respectively
+                if (matchedPreset.ability) {
+                  syncedPokemon.ability = matchedPreset.ability;
+                  syncedPokemon.dirtyAbility = null; // in case applyPreset() already applied one before this point
+                }
+
+                // don't apply the default neutral nature from importPokePaste()
+                // (sets the nature to 'Hardy' by default if a nature couldn't be parsed from the PokePaste)
+                if (PokemonNatures.includes(matchedPreset.nature) && matchedPreset.nature !== 'Hardy') {
+                  syncedPokemon.nature = matchedPreset.nature;
+                }
+
+                if (Object.keys(matchedPreset.evs || {}).length) {
+                  syncedPokemon.evs = {
+                    hp: matchedPreset.evs.hp ?? 0,
+                    atk: matchedPreset.evs.atk ?? 0,
+                    def: matchedPreset.evs.def ?? 0,
+                    spa: matchedPreset.evs.spa ?? 0,
+                    spd: matchedPreset.evs.spd ?? 0,
+                    spe: matchedPreset.evs.spe ?? 0,
+                  };
+                }
+              }
+
+              // checking prevItem to make sure to not apply the item if their actual item was knocked off, for instance
+              // (in which case prevItem would be 'Focus Sash' and prevItemEffect would be 'knocked off')
+              if (battleState.gen > 1 && matchedPreset.item && !syncedPokemon.prevItem) {
+                syncedPokemon.item = matchedPreset.item;
+                syncedPokemon.dirtyItem = null;
+              }
+
+              if (matchedPreset.teraTypes?.length && PokemonTypes.includes(<Showdown.TypeName> matchedPreset.teraTypes[0])) {
+                [syncedPokemon.revealedTeraType] = <Showdown.TypeName[]> matchedPreset.teraTypes;
+                syncedPokemon.teraType = syncedPokemon.revealedTeraType;
+              }
+
+              if (matchedPreset.moves?.length) {
+                syncedPokemon.revealedMoves = [...matchedPreset.moves];
+                syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
+              }
+
+              if (Object.keys(matchedPreset.ivs || {}).length) {
+                syncedPokemon.ivs = {
+                  hp: matchedPreset.ivs.hp ?? defaultIv,
+                  atk: matchedPreset.ivs.atk ?? defaultIv,
+                  def: matchedPreset.ivs.def ?? defaultIv,
+                  spa: matchedPreset.ivs.spa ?? defaultIv,
+                  spd: matchedPreset.ivs.spd ?? defaultIv,
+                  spe: matchedPreset.ivs.spe ?? defaultIv,
+                };
+              }
+
+              // only set this if the matchedPreset is a complete preset, typically from !showteam, but not open team sheets,
+              // which omits EVs, IVs, and nature (in which case, we didn't add incomplete presets to the Pokemon's presets
+              // in the first place, so the some() call would return false)
+              if (syncedPokemon.presets.some((p) => p?.calcdexId === matchedPreset.calcdexId)) {
+                syncedPokemon.presetId = matchedPreset.calcdexId;
+              }
+            } // end shouldApplyPreset
+          } // end shouldAddPresets
+        } // end battleState.sheets.length
 
         // extract Gmax/Tera info from the BattleRoom's `request` object, if available
         if (request?.requestType === 'move' && request.side?.id === playerKey) {
@@ -487,7 +623,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             }
 
             if (hasTeraData && syncedPokemon.teraType !== moveData.canTerastallize) {
-              syncedPokemon.teraType = moveData.canTerastallize;
+              syncedPokemon.revealedTeraType = moveData.canTerastallize;
+              syncedPokemon.teraType = syncedPokemon.revealedTeraType;
             }
 
             break;
@@ -689,6 +826,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       const processedIds: string[] = [];
 
       playerState.activeIndices = player.active?.map((activePokemon) => {
+        // particularly in FFA, there may be a Pokemon belonging to another player in active[]
+        if (!activePokemon || detectPlayerKeyFromPokemon(activePokemon) !== playerKey) {
+          return null;
+        }
+
         // checking myPokemon first (if it's available) for Illusion/Zoroark
         const activeId = (
           isMyPokemonSide
@@ -767,8 +909,38 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           if (dondozoIndex > -1) {
             playerState.selectionIndex = dondozoIndex;
           }
-        } else {
+        } else if (!playerState.activeIndices.includes(playerState.selectionIndex)) {
+          // update (2023/01/30): only update the selectionIndex if it's not one of the activeIndices
           [playerState.selectionIndex] = playerState.activeIndices;
+        }
+      }
+
+      // determine if the player used Max/Tera to disable it within PokeMoves
+      // (will be re-enabled once the battle is over)
+      playerState.usedMax = usedDynamax(playerKey, battle?.stepQueue);
+      playerState.usedTera = usedTerastallization(playerKey, battle?.stepQueue);
+
+      // resync Max (gen 8)/Tera (gen 9) states
+      // note: while syncPokemon() will reset the values, this only occurs when a client Pokemon has been found,
+      // i.e., if the Pokemon isn't revealed yet (such as in Randoms), there would be no corresponding client Pokemon
+      if (battleState.gen > 7) {
+        // note: despite using filter(), which would normally create a new array, the elements inside of pokemon[]
+        // are objects, so elements in the filtered array are still referencing the original objects
+        playerState.pokemon
+          .filter((p) => p.useMax && !('dynamax' in p.volatiles))
+          .forEach((p) => { p.useMax = false; });
+      }
+
+      if (battleState.gen > 8) {
+        // find the name of the Pokemon that Terastallized
+        const teraStep = battle.stepQueue.find((q) => q.startsWith('|-terastallize|') && q.includes(`|${playerKey}`));
+        const [, name] = /p\d+[a-z]:\x20(.+)\|/.exec(teraStep) || [];
+
+        if (name) {
+          // see note in playerState.usedMax for why this still mutates the pokemon `p`, despite using filter()
+          playerState.pokemon
+            .filter((p) => p.terastallized && (p.name !== name || !p.speciesForme.includes(name)))
+            .forEach((p) => { p.terastallized = false; });
         }
       }
 
@@ -780,6 +952,22 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           battleState.field?.gameType,
           true, // update the selected Pokemon's abilityToggled value too
         );
+      }
+
+      // sync player side
+      if (playerState.active) {
+        // sync the sideConditions from the battle
+        // (this is first so that it'll be available in sanitizePlayerSide(), just in case)
+        playerState.side.conditions = structuredClone(player.sideConditions || {});
+
+        playerState.side = {
+          conditions: playerState.side.conditions,
+          ...sanitizePlayerSide(
+            battleState.gen,
+            playerState,
+            battle[playerKey],
+          ),
+        };
       }
     }
 
@@ -801,10 +989,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         );
       }
 
-      return;
+      // return;
+    } else {
+      battleState.field = syncedField;
     }
-
-    battleState.field = syncedField;
 
     // this is important, otherwise we can't ignore re-renders of the same battle state
     // (which may result in reaching React's maximum update depth)
@@ -813,10 +1001,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     l.debug(
-      'Dispatching synced battleState for', battleState.battleId || '(missing battleId)',
+      'Dispatching synced battleState for', battleState.battleId || '???',
       '\n', 'battle', battle,
-      '\n', 'battleState', battleState,
-      '\n', 'state', state,
+      '\n', 'state', battleState,
     );
 
     return battleState;

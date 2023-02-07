@@ -16,6 +16,7 @@ export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
   playerName?: string;
   opponentName?: string;
   active?: boolean;
+  hasMorePlayers?: boolean;
 }
 
 export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
@@ -27,6 +28,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   hoverScale = 1,
   activeScale = 0.98,
   active,
+  hasMorePlayers,
   disabled,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
@@ -125,6 +127,13 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                   />
                 }
               </div>
+
+              {
+                hasMorePlayers &&
+                <span className={styles.morePlayers}>
+                  &amp; friends
+                </span>
+              }
             </>
           }
         </div>

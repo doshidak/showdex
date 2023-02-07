@@ -15,5 +15,5 @@ export const detectLegacyGen = (format: GenerationNum | string): boolean => {
     ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
     : format;
 
-  return gen < 3;
+  return !!format && gen < 3;
 };

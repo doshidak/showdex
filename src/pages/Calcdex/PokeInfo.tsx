@@ -15,14 +15,17 @@ import {
 } from '@showdex/components/ui';
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId, openSmogonUniversity } from '@showdex/utils/app';
+import {
+  exportPokePaste,
+  formatId,
+  importPokePaste,
+  openSmogonUniversity,
+} from '@showdex/utils/app';
 import {
   detectToggledAbility,
   detectUsageAlt,
-  exportPokePaste,
   flattenAlts,
   hasNickname,
-  importPokePaste,
   legalLockedFormat,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
@@ -30,7 +33,7 @@ import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexBattleField, CalcdexPlayerSide } from '@showdex/redux/store';
+import type { CalcdexPlayerSide } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
@@ -43,6 +46,8 @@ export interface PokeInfoProps {
   containerSize?: ElementSizeLabel;
 }
 
+const baseScope = '@showdex/pages/Calcdex/PokeInfo';
+
 export const PokeInfo = ({
   className,
   style,
@@ -51,7 +56,8 @@ export const PokeInfo = ({
   const {
     state,
     settings,
-    playerKey,
+    // playerKey,
+    player,
     playerPokemon: pokemon,
     field, // don't use the one from state btw
     presetsLoading,
@@ -112,9 +118,9 @@ export const PokeInfo = ({
       || field?.gameType === 'Doubles'
   );
 
-  const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
-    ? 'defenderSide'
-    : 'attackerSide';
+  // const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
+  //   ? 'defenderSide'
+  //   : 'attackerSide';
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = pokemon?.abilityToggleable
@@ -127,7 +133,7 @@ export const PokeInfo = ({
       'ruinTabletsCount',
       'ruinVesselCount',
     ] as (keyof CalcdexPlayerSide)[])
-      .reduce((sum, key) => sum + ((field[fieldKey]?.[key] as number) || 0), 0) >= 2;
+      .reduce((sum, key) => sum + ((player?.side?.[key] as number) || 0), 0) >= 2;
 
   const showResetAbility = !!pokemon?.dirtyAbility
     && !pokemon.transformedForme
@@ -140,7 +146,7 @@ export const PokeInfo = ({
       ...pokemon,
       ability: name,
     }),
-  });
+  }, `${baseScope}:handleAbilityChange()`);
 
   const handleAbilityReset = () => updatePokemon({
     dirtyAbility: null,
@@ -148,7 +154,7 @@ export const PokeInfo = ({
       ...pokemon,
       dirtyAbility: null,
     }),
-  });
+  }, `${baseScope}:handleAbilityReset()`);
 
   const showResetItem = !!pokemon?.dirtyItem
     && (!!pokemon?.item || !!pokemon?.prevItem)
@@ -223,7 +229,7 @@ export const PokeInfo = ({
 
       applyPreset(preset, {
         presets: currentPresets,
-      });
+      }, `${baseScope}:handlePokePasteImport()`);
 
       importBadgeRef.current?.show();
     } catch (error) {
@@ -288,7 +294,7 @@ export const PokeInfo = ({
             pokemon={pokemon}
             visible={formesVisible}
             disabled={!settings?.reverseIconName}
-            onPokemonChange={updatePokemon}
+            onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip~Picon:onPokemonChange()`)}
             onRequestClose={closeFormesTooltip}
           >
             <PiconButton
@@ -321,7 +327,7 @@ export const PokeInfo = ({
               pokemon={pokemon}
               visible={formesVisible}
               disabled={settings?.reverseIconName}
-              onPokemonChange={updatePokemon}
+              onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip~Name:onPokemonChange()`)}
               onRequestClose={closeFormesTooltip}
             >
               <Button
@@ -378,7 +384,7 @@ export const PokeInfo = ({
                 value: [...(pokemon?.types || [])],
                 onChange: (types: Showdown.TypeName[]) => updatePokemon({
                   types: [...(types || [])],
-                }),
+                }, `${baseScope}:PokeTypeField:input.onChange()`),
               }}
               tooltipPlacement="bottom-start"
               containerSize={gen > 8 ? containerSize : null}
@@ -388,7 +394,7 @@ export const PokeInfo = ({
             />
 
             {
-              gen > 8 &&
+              (!!pokemon?.speciesForme && gen > 8) &&
               <PokeTypeField
                 className={cx(styles.typesField, styles.teraTypeField)}
                 label={`Tera Type for Pokemon ${friendlyPokemonName}`}
@@ -399,14 +405,17 @@ export const PokeInfo = ({
                   onChange: (type: Showdown.TypeName) => updatePokemon({
                     teraType: type,
                     terastallized: !!type && type !== '???' && pokemon?.terastallized,
-                  }),
+                  }, `${baseScope}:PokeTypeField~Tera:input.onChange()`),
                 }}
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel="Tera"
                 teraTyping
                 containerSize={containerSize}
                 highlight={pokemon?.terastallized}
-                highlightTypes={flattenAlts(pokemon?.altTeraTypes)}
+                highlightTypes={Array.from(new Set([
+                  ...flattenAlts(pokemon?.altTeraTypes),
+                  pokemon?.revealedTeraType,
+                ])).filter(Boolean)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}
               />
@@ -449,11 +458,11 @@ export const PokeInfo = ({
             }
 
             {
-              (!!pokemon && (!!pokemon.status || !hpPercentage)) &&
+              (!!pokemon?.speciesForme && (!!pokemon.status || !hpPercentage)) &&
               <div className={styles.statuses}>
                 <PokeStatus
                   className={styles.status}
-                  status={pokemon?.status}
+                  status={pokemon.status}
                   fainted={!hpPercentage}
                 />
               </div>
@@ -475,7 +484,7 @@ export const PokeInfo = ({
                   disabled /** @todo remove after implementing auto-presets */
                   onPress={() => updatePokemon({
                     autoPreset: !pokemon?.autoPreset,
-                  })}
+                  }, `${baseScope}:ToggleButton~AutoPreset:onPress()`)}
                 />
               </div>
 
@@ -577,8 +586,8 @@ export const PokeInfo = ({
             hint="None"
             input={{
               name: `PokeInfo:Preset:${pokemonKey}:Dropdown`,
-              value: pokemon?.preset,
-              onChange: applyPreset,
+              value: pokemon?.presetId,
+              onChange: (id: string) => applyPreset(id, null, `${baseScope}:Dropdown~Preset:input.onChange()`),
             }}
             options={presetOptions}
             noOptionsMessage="No Sets"
@@ -619,7 +628,7 @@ export const PokeInfo = ({
                   disabled={disableAbilityToggle}
                   onPress={() => updatePokemon({
                     abilityToggled: !pokemon.abilityToggled,
-                  })}
+                  }, `${baseScope}:ToggleButton~AbilityToggled:onPress()`)}
                 />
               }
 
@@ -684,7 +693,7 @@ export const PokeInfo = ({
                 value: pokemon?.nature,
                 onChange: (name: Showdown.PokemonNature) => updatePokemon({
                   nature: name,
-                }),
+                }, `${baseScope}:Dropdown~Nature:input.onChange()`),
               }}
               options={PokemonCommonNatures.map((name) => ({
                 label: name,
@@ -732,7 +741,7 @@ export const PokeInfo = ({
                   active
                   onPress={() => updatePokemon({
                     dirtyItem: null,
-                  })}
+                  }, `${baseScope}:ToggleButton~DirtyItem:onPress()`)}
                 />
               }
             </div>
@@ -778,7 +787,7 @@ export const PokeInfo = ({
                 value: itemName,
                 onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),
-                }),
+                }, `${baseScope}:Dropdown~Item:input.onChange()`),
               }}
               options={itemOptions}
               noOptionsMessage="No Items"

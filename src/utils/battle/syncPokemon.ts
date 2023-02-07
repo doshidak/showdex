@@ -137,7 +137,8 @@ export const syncPokemon = (
           return;
         }
 
-        syncedPokemon.teraType = <Showdown.TypeName> value;
+        syncedPokemon.revealedTeraType = <Showdown.TypeName> value;
+        syncedPokemon.teraType = syncedPokemon.revealedTeraType;
 
         // break;
         return;
@@ -304,7 +305,7 @@ export const syncPokemon = (
         // (client reports a 'typechange' volatile when a Pokemon terastallizes)
         const changedTypes = (
           'typechange' in volatiles
-            && <Showdown.TypeName[]>volatiles.typechange[1]?.split?.('/') // 'Psychic/Ice' -> ['Psychic', 'Ice']
+            && <Showdown.TypeName[]> volatiles.typechange[1]?.split?.('/') // 'Psychic/Ice' -> ['Psychic', 'Ice']
         ) || [];
 
         // sync the Pokemon's terastallization state
@@ -473,7 +474,7 @@ export const syncPokemon = (
 
     // since the server doesn't send us the Pokemon's EVs/IVs/nature, we gotta find it ourselves,
     // either from the Teambuilder presets (if enabled) or guessing the spread
-    if (!syncedPokemon.preset) {
+    if (!syncedPokemon.presetId) {
       let serverPreset: CalcdexPokemonPreset = null;
 
       // first, attempt to find a matching Teambuilder preset, if provided
@@ -533,14 +534,6 @@ export const syncPokemon = (
           syncedPokemon.evs = { ...serverPreset.evs };
         }
 
-        // need to do some special processing for moves
-        // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
-        // what we want: ['Calm Mind', 'Moonblast', 'Flamethrower', 'Thunderbolt']
-        if (serverMoves?.length) {
-          serverPreset.moves = [...serverMoves];
-          syncedPokemon.moves = [...serverMoves];
-        }
-
         // calculate the stats with the EVs/IVs from the server preset
         // (note: same thing happens in applyPreset() in PokeInfo since the EVs/IVs from the preset are now available)
         // (update: we calculate this at the end now, before syncedPokemon is returned)
@@ -548,9 +541,17 @@ export const syncPokemon = (
         //   syncedPokemon.spreadStats = calcPokemonSpreadStats(dex, syncedPokemon);
         // }
 
-        // add the 'Yours' preset (source: 'server') if we haven't found a Teambuilder preset (source: 'storage') yet
-        // (technically, this should be a one-time thing, but if not, we'll at least want only have 1 'Yours' preset)
+        // perform additional processing for the 'Yours' presets only (non-storage & storage-box presets)
         if (serverPreset.source === 'server') {
+          // need to do some special processing for moves
+          // e.g., serverPokemon.moves = ['calmmind', 'moonblast', 'flamethrower', 'thunderbolt']
+          // what we want: ['Calm Mind', 'Moonblast', 'Flamethrower', 'Thunderbolt']
+          if (serverMoves?.length) {
+            serverPreset.moves = [...serverMoves];
+          }
+
+          // add the 'Yours' preset (source: 'server') if we haven't found a Teambuilder preset (source: 'storage') yet
+          // (technically, this should be a one-time thing, but if not, we'll at least want only have 1 'Yours' preset)
           const serverPresetIndex = syncedPokemon.presets
             .findIndex((p) => p.source === 'server');
 
@@ -561,9 +562,13 @@ export const syncPokemon = (
           }
         }
 
+        if (serverPreset.moves?.length) {
+          syncedPokemon.moves = [...serverPreset.moves];
+        }
+
         // disabling autoPreset since we already set the preset here
         // (also tells PokeInfo not to apply the first preset)
-        syncedPokemon.preset = serverPreset.calcdexId;
+        syncedPokemon.presetId = serverPreset.calcdexId;
         syncedPokemon.autoPreset = false;
       }
     }

@@ -1,4 +1,4 @@
-import { calcdexBootstrapper, hellodexBootstrapper } from '@showdex/pages';
+import { calcdexBootstrapper, hellodexBootstrapper, teamdexBootstrapper } from '@showdex/pages';
 import { createStore, showdexSlice } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import type { RootStore } from '@showdex/redux/store';
@@ -36,6 +36,11 @@ const appReceive = <typeof app.receive> app.receive.bind(app);
 app.receive = (data: string) => {
   const receivedRoom = data?.startsWith?.('>');
 
+  // call the original function
+  // update (2023/02/04): my dumb ass was calling the bootstrapper() BEFORE this,
+  // so I was wondering why the `battle` object was never populated... hmm... LOL
+  appReceive(data);
+
   if (receivedRoom) {
     const roomId = data.slice(1, data.indexOf('\n'));
     const room = app.rooms[roomId];
@@ -49,9 +54,6 @@ app.receive = (data: string) => {
     // call each bootstrapper
     bootstrappers.forEach((bootstrapper) => bootstrapper(store, data, roomId));
   }
-
-  // call the original function
-  appReceive(data);
 };
 
 l.debug('Initializing MutationObserver for client colorScheme changes...');
@@ -86,5 +88,12 @@ colorSchemeObserver.observe(document.documentElement, {
 // open the Hellodex when the Showdown client starts
 // (hence why it's not part of the bootstrappers array)
 hellodexBootstrapper(store);
+
+/**
+ * @todo May require some special logic to detect when the Teambuilder room opens.
+ *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
+ *   i.e., doesn't render anything, this implementation is fine.
+ */
+teamdexBootstrapper(store);
 
 l.info('Completed main execution!');

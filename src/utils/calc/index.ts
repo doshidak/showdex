@@ -23,4 +23,6 @@ export * from './guessServerLegacySpread';
 export * from './guessServerSpread';
 export * from './hasMoveOverrides';
 export * from './parseDescription';
+export * from './shouldBoostTeraStab';
+export * from './shouldIgnoreItem';
 export * from './statModRecorder';

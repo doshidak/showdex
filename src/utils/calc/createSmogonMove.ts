@@ -17,6 +17,7 @@ import { calcMoveBasePower } from './calcMoveBasePower';
 // import { calcRageFist } from './calcRageFist';
 import { determineCriticalHit } from './determineCriticalHit';
 import { determineMoveTargets } from './determineMoveTargets';
+import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Overrides for `SmogonMove`.
@@ -131,7 +132,14 @@ export const createSmogonMove = (
   // update (2023/01/02): @smogon/calc added an alliesFainted property to their Pokemon class,
   // so no need to manually provide that functionality now; specified in createSmogonPokemon()
   // (also, didn't remove it from calcMoveBasePower() since we still want to show the actual BP in the UI)
-  if (overrides.basePower < 1 || (!overrodeBasePower && abilityId === 'supremeoverlord')) {
+  const removeBasePowerOverride = overrides.basePower < 1 || (
+    !overrodeBasePower && (
+      abilityId === 'supremeoverlord'
+        || shouldBoostTeraStab(format, pokemon, moveName)
+    )
+  );
+
+  if (removeBasePowerOverride) {
     delete overrides.basePower;
   }
 

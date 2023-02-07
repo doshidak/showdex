@@ -76,8 +76,15 @@ export const PokeMoveOptionTooltip = ({
     || 0;
 
   const { basePower: dexBasePower } = dexMove;
-  const baseBasePower = dexMove.id.startsWith('hiddenpower') ? calcHiddenPower(format, pokemon) : dexBasePower;
-  const basePower = moveOverrides.basePower || dexBasePower || 0;
+  const baseBasePower = dexMove.id.startsWith('hiddenpower')
+    ? calcHiddenPower(format, pokemon)
+    : dexBasePower;
+
+  const basePower = (pokemon?.useZ && moveOverrides?.zBasePower)
+    || (pokemon?.useMax && moveOverrides?.maxBasePower)
+    || moveOverrides.basePower
+    || dexBasePower
+    || 0;
 
   const basePowerDelta: PokemonStatBoostDelta = (
     !basePowerOverride && (
@@ -93,6 +100,11 @@ export const PokeMoveOptionTooltip = ({
     && typeof dexMove.accuracy !== 'boolean'
     && (dexMove.accuracy || 0) > 0
     && dexMove.accuracy !== 100;
+
+  // Z/Max/G-Max moves also don't inherit the original move's priority
+  const showPriority = !!dexMove.priority
+    && !pokemon?.useZ
+    && !pokemon?.useMax;
 
   return (
     <div
@@ -182,7 +194,7 @@ export const PokeMoveOptionTooltip = ({
         }
 
         {
-          !!dexMove.priority &&
+          showPriority &&
           <div className={styles.moveProperty}>
             <div className={styles.propertyName}>
               PRI

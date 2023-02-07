@@ -17,7 +17,11 @@ import type {
   CalcdexPokemonUsageAltSorter,
 } from '@showdex/utils/battle';
 import type { CalcdexMatchupResult } from '@showdex/utils/calc';
-import type { CalcdexBattleFieldMutation, CalcdexPokemonMutation } from './CalcdexContext';
+import type {
+  // CalcdexBattleFieldMutation,
+  CalcdexContextConsumables,
+  CalcdexPokemonMutation,
+} from './CalcdexContext';
 // import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
 
 /**
@@ -56,14 +60,18 @@ export interface CalcdexPokeContextConsumables {
   sortItemsByUsage: CalcdexPokemonUsageAltSorter<ItemName>;
   sortMovesByUsage: CalcdexPokemonUsageAltSorter<MoveName>;
 
-  applyPreset: (preset: CalcdexPokemonPreset | string, additionalMutations?: CalcdexPokemonMutation) => void;
+  applyPreset: (
+    preset: CalcdexPokemonPreset | string,
+    additionalMutations?: CalcdexPokemonMutation,
+    scope?: string,
+  ) => void;
 
-  updatePokemon: (pokemon: CalcdexPokemonMutation) => void;
-  updateField: (field: CalcdexBattleFieldMutation) => void;
-  setActiveIndex: (index: number) => void;
-  setActiveIndices: (indices: number[]) => void;
-  setSelectionIndex: (index: number) => void;
-  setAutoSelect: (autoSelect: boolean) => void;
+  updatePokemon: (pokemon: CalcdexPokemonMutation, scope?: string) => void;
+  updateField: CalcdexContextConsumables['updateField'];
+  setActiveIndex: (index: number, scope?: string) => void;
+  setActiveIndices: (indices: number[], scope?: string) => void;
+  setSelectionIndex: (index: number, scope?: string) => void;
+  setAutoSelect: (autoSelect: boolean, scope?: string) => void;
 }
 
 /**

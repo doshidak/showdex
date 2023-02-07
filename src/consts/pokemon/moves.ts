@@ -127,7 +127,7 @@ export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName
   Fire: {
     centiskorch: <MoveName> 'G-Max Centiferno',
     charizard: <MoveName> 'G-Max Wildfire',
-    cinderace: <MoveName> 'G-Max Fire Ball',
+    cinderace: <MoveName> 'G-Max Fireball',
   },
   Flying: { corviknight: <MoveName> 'G-Max Wind Rage' },
   Ghost: { gengar: <MoveName> 'G-Max Terror' },
