@@ -1548,6 +1548,18 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
   opponentKey: CalcdexPlayerKey;
 
   /**
+   * Whether to switch the players in the Calcdex.
+   *
+   * * Populated directly from `sidesSwitched` of the `battle`.
+   * * Does not change the population behavior of `playerKey` and `opponentKey`, just how they're rendered.
+   *   - Specifically, this dictates the `topKey` and `bottomKey` in the Calcdex.
+   *
+   * @default false
+   * @since 1.1.3
+   */
+  switchPlayers?: boolean;
+
+  /**
    * Tracked field conditions.
    *
    * @since 0.1.0
@@ -1711,6 +1723,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
+        switchPlayers = false,
         field,
         ...payload
       } = action.payload;
@@ -1753,6 +1766,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         playerKey,
         authPlayerKey,
         opponentKey,
+        switchPlayers,
 
         ...AllPlayerKeys.reduce((prev, currentPlayerKey) => {
           prev[currentPlayerKey] = {
