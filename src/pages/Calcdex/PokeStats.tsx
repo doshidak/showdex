@@ -52,8 +52,8 @@ export const PokeStats = ({
 
   const colorScheme = useColorScheme();
 
-  const statNames = PokemonStatNames.filter((stat) => gen > 1 || stat !== 'spd');
-  const boostNames = PokemonBoostNames.filter((stat) => gen > 1 || stat !== 'spd');
+  const statNames = PokemonStatNames.filter((stat) => gen !== 1 || stat !== 'spd');
+  const boostNames = PokemonBoostNames.filter((stat) => gen !== 1 || stat !== 'spd');
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
