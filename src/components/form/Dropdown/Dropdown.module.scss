@@ -450,7 +450,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
   @include font.apply(fonts.$primary, ( font-weight: $group-heading-font-weight ));
   font-size: $group-heading-font-size;
   letter-spacing: $group-heading-letter-spacing;
-  text-indent: -$group-heading-letter-spacing;
+  text-indent: $group-heading-letter-spacing;
   text-transform: uppercase;
   user-select: none;
   cursor: default;
