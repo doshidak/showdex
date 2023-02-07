@@ -426,7 +426,7 @@ export const CalcdexPokeProvider = ({
     // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
     const forceShowGenetics = !playerPokemon.showGenetics && (
       !Object.values(mutation.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-        || !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
+        || (!legacy && !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0))
     );
 
     if (forceShowGenetics) {
@@ -469,15 +469,34 @@ export const CalcdexPokeProvider = ({
       appliedTransformedPreset.current = false;
     }
 
-    const existingPreset = playerPokemon.presetId && presets?.length
-      ? presets.find((p) => p?.calcdexId === playerPokemon.presetId && (
-        !playerPokemon.transformedForme
-          || p.source !== 'server' // i.e., the 'Yours' preset
-          || appliedTransformedPreset.current
-      ))
-      : null;
+    // const existingPreset = playerPokemon.presetId && presets?.length
+    //   ? presets.find((p) => p?.calcdexId === playerPokemon.presetId && (
+    //     !playerPokemon.transformedForme
+    //       || p.source !== 'server' // i.e., the 'Yours' preset
+    //       || appliedTransformedPreset.current
+    //   ))
+    //   : null;
 
-    if (existingPreset) {
+    const existingPreset = (
+      !!playerPokemon.presetId
+        && !!presets?.length
+        && presets.find((p) => p?.calcdexId === playerPokemon.presetId)
+    ) || null;
+
+    const shouldAutoPreset = !!presets?.length
+      && (
+        // auto-preset if one hasn't been found or no longer exists in `presets`
+        !existingPreset?.calcdexId
+          // allow another round of auto-presetting if they are transformed
+          || (!!playerPokemon.transformedForme && !appliedTransformedPreset.current)
+      )
+      && (
+        !existingPreset?.source
+          // don't auto-preset if we already know the exact preset or usage is currently applied
+          || !['server', 'sheet', 'usage'].includes(existingPreset.source)
+      );
+
+    if (!shouldAutoPreset) {
       return;
     }
 
@@ -521,7 +540,7 @@ export const CalcdexPokeProvider = ({
       // it's likely that the Pokemon has no EVs/IVs set, so show the EVs/IVs if they're hidden
       const forceShowGenetics = !playerPokemon.showGenetics && (
         !Object.values(playerPokemon.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-          || !Object.values(playerPokemon.evs || {}).reduce((sum, val) => sum + (val || 0), 0)
+          || (!legacy && !Object.values(playerPokemon.evs || {}).reduce((sum, val) => sum + (val || 0), 0))
       );
 
       if (forceShowGenetics) {
@@ -538,6 +557,7 @@ export const CalcdexPokeProvider = ({
   }, [
     applyPreset,
     format,
+    legacy,
     playerKey,
     playerPokemon,
     presets,
