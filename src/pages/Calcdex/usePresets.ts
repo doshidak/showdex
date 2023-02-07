@@ -195,7 +195,7 @@ export const usePresets = ({
   } = usePokemonFormatPresetQuery({
     gen,
     format,
-    formatOnly: genlessFormat.includes('bdsp'),
+    formatOnly: genlessFormat?.includes('bdsp'),
     // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
   }, {
     skip: shouldSkipFormats,
