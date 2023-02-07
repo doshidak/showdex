@@ -124,19 +124,22 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.active = !ended;
     }
 
+    // update the authPlayerKey (if any)
+    battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
+
     // find out which side myPokemon belongs to
-    const detectedPlayerKey = detectPlayerKeyFromBattle(battle);
+    const detectedPlayerKey = battleState.authPlayerKey || detectPlayerKeyFromBattle(battle);
 
     if (detectedPlayerKey && !battleState.playerKey) {
       battleState.playerKey = detectedPlayerKey;
     }
 
-    // also, while we're here, update the authPlayerKey (if any) and opponentKey
-    battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
-
     if (!battleState.opponentKey) {
       battleState.opponentKey = battleState.playerKey === 'p2' ? 'p1' : 'p2';
     }
+
+    // update the sidesSwitched from the battle
+    battleState.switchPlayers = battle.sidesSwitched;
 
     // determine if we should include Teambuilder presets
     // (should be already pre-converted in the teamdexSlice)
