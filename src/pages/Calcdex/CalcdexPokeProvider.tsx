@@ -270,7 +270,11 @@ export const CalcdexPokeProvider = ({
 
     // update (2022/10/07): don't apply the dirtyAbility/dirtyItem at all if their non-dirty
     // counterparts are revealed already
-    const clearDirtyAbility = !!playerPokemon.ability && !playerPokemon.transformedForme;
+    // const clearDirtyAbility = !!playerPokemon.ability && !playerPokemon.transformedForme;
+
+    // update (2023/02/07): always clear the dirtyAbility from the preset if its actual ability
+    // has been already revealed (even when transformed)
+    const clearDirtyAbility = !!playerPokemon.ability;
 
     if (clearDirtyAbility) {
       mutation.dirtyAbility = null;
@@ -465,6 +469,9 @@ export const CalcdexPokeProvider = ({
       return;
     }
 
+    // used for debugging purposes only
+    const scope = `${baseScope}:React.useEffect()`;
+
     if (!playerPokemon.transformedForme && appliedTransformedPreset.current) {
       appliedTransformedPreset.current = false;
     }
@@ -497,11 +504,15 @@ export const CalcdexPokeProvider = ({
       );
 
     if (!shouldAutoPreset) {
+      if (!existingPreset?.calcdexId && !playerPokemon.showGenetics) {
+        updatePokemon(playerKey, {
+          calcdexId: playerPokemon.calcdexId,
+          showGenetics: true,
+        }, scope);
+      }
+
       return;
     }
-
-    // used for debugging purposes only
-    const scope = `${baseScope}:React.useEffect()`;
 
     const {
       downloadUsageStats,
@@ -515,8 +526,15 @@ export const CalcdexPokeProvider = ({
     // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
     // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
     // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
-    if (playerPokemon.transformedForme && presets[1]) {
-      [, initialPreset] = presets; // readability 100; fancy JS way of writing initialPresets = presets[1]
+    if (playerPokemon.transformedForme) {
+      // [, initialPreset] = presets; // readability 100; fancy JS way of writing initialPresets = presets[1]
+      const nonServerPreset = presets.find((p) => p.source !== 'server');
+
+      if (nonServerPreset) {
+        initialPreset = nonServerPreset;
+      }
+
+      // update (2023/02/07): if we don't set this, this effect will infinite loop, causing Showdown to hang indefinitely
       appliedTransformedPreset.current = true;
     }
 

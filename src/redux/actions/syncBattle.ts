@@ -26,7 +26,12 @@ import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleState, RootState } from '@showdex/redux/store';
+import type {
+  CalcdexBattleState,
+  CalcdexPlayerKey,
+  CalcdexPokemon,
+  RootState,
+} from '@showdex/redux/store';
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
@@ -168,6 +173,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       ));
     }
 
+    // keep track of CalcdexPokemon mutations from one player to another
+    // (e.g., revealed properties of the transform target Pokemon from the current player's transformed Pokemon)
+    const futureMutations = AllPlayerKeys.reduce((prev, key) => {
+      prev[key] = [];
+
+      return prev;
+    }, <Record<CalcdexPlayerKey, DeepPartial<CalcdexPokemon>[]>> {});
+
     for (const playerKey of AllPlayerKeys) {
       // l.debug('Processing player', playerKey);
 
@@ -192,6 +205,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       if (player.rating && playerState.rating !== player.rating) {
         playerState.rating = player.rating;
+      }
+
+      if (!playerState.active) {
+        playerState.active = true;
       }
 
       // l.debug(
@@ -518,11 +535,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
                 // don't apply the default neutral nature from importPokePaste()
                 // (sets the nature to 'Hardy' by default if a nature couldn't be parsed from the PokePaste)
-                if (PokemonNatures.includes(matchedPreset.nature) && matchedPreset.nature !== 'Hardy') {
+                // update (2023/02/07): allow 'Hardy' natures if we're in Randoms
+                if (PokemonNatures.includes(matchedPreset.nature) && (battleState.format.includes('random') || matchedPreset.nature !== 'Hardy')) {
                   syncedPokemon.nature = matchedPreset.nature;
                 }
 
-                if (Object.keys(matchedPreset.evs || {}).length) {
+                // update (2023/02/07): only apply EVs from the team sheet if the sum of all of them is > 0
+                // (this prevents open team sheets, which doesn't include EVs, from overwriting existing EVs from another preset)
+                if (Object.values(matchedPreset.evs || {}).reduce((sum, value) => sum + (value || 0), 0)) {
                   syncedPokemon.evs = {
                     hp: matchedPreset.evs.hp ?? 0,
                     atk: matchedPreset.evs.atk ?? 0,
@@ -551,7 +571,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
               }
 
-              if (Object.keys(matchedPreset.ivs || {}).length) {
+              // update (2023/02/07): perform the same treatment for IVs as we did for EVs earlier
+              if (Object.values(matchedPreset.ivs || {}).reduce((sum, value) => sum + (value || 0), 0)) {
                 syncedPokemon.ivs = {
                   hp: matchedPreset.ivs.hp ?? defaultIv,
                   atk: matchedPreset.ivs.atk ?? defaultIv,
@@ -571,6 +592,113 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             } // end shouldApplyPreset
           } // end shouldAddPresets
         } // end battleState.sheets.length
+
+        // detect if Pokemon is transformed and to which player & which Pokemon,
+        // so we can apply those known properties to that Pokemon in that player's state
+        // (note: we'd only know these properties from the server, i.e., the auth user is also a player)
+        if (syncedPokemon.serverSourced && syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
+          // since we sanitized the volatiles earlier, we actually need the pointer to the target pokemon
+          // from the original Showdown.Pokemon (i.e., the clientPokemon) to retrieve its ident
+          const targetClientPokemon = <Showdown.Pokemon> <unknown> clientPokemon.volatiles.transform[1];
+          const targetPlayerKey = (!!targetClientPokemon?.ident && detectPlayerKeyFromPokemon(targetClientPokemon)) || null;
+
+          // update: this isn't fool-proof since the corresponding state of the targetClientPokemon
+          // may not have initialized fully yet! (e.g., we're p1, transformed Pokemon belongs to p2, but p2 isn't init'd yet)
+          // const targetPokemonState = (
+          //   AllPlayerKeys.includes(targetPlayerKey)
+          //     && battleState[targetPlayerKey].pokemon?.find((p) => (
+          //       (!!targetClientPokemon.calcdexId && p?.calcdexId === targetClientPokemon.calcdexId)
+          //         || p?.ident === targetClientPokemon.ident
+          //     ))
+          // ) || null;
+
+          // at this point, we'd know both targetClientPokemon & targetPlayerKey are valid
+          if (AllPlayerKeys.includes(targetPlayerKey)) {
+            l.debug(
+              'Adding revealed info for', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
+              '\n', 'targetPlayerKey', targetPlayerKey,
+              '\n', 'targetClientPokemon', targetClientPokemon,
+              // '\n', 'targetPokemonState', targetPokemonState,
+              '\n', 'syncedPokemon', syncedPokemon,
+              '\n', 'battle', battle,
+              '\n', 'battleState', battleState,
+            );
+
+            const mutations: DeepPartial<CalcdexPokemon> = {
+              calcdexId: targetClientPokemon.calcdexId, // may not exist
+              ident: targetClientPokemon.ident, // using this as a fallback
+            };
+
+            if (syncedPokemon.ability) {
+              // targetPokemonState.ability = syncedPokemon.ability;
+              mutations.ability = syncedPokemon.ability;
+
+              l.debug(
+                'Set ability of', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
+                '\n', 'ability', syncedPokemon.ability,
+                '\n', 'mutations', mutations,
+                '\n', 'targetClientPokemon', targetClientPokemon,
+                // '\n', 'targetPokemonState', targetPokemonState,
+                '\n', 'syncedPokemon', syncedPokemon,
+              );
+            }
+
+            if (syncedPokemon.transformedMoves.length) {
+              // targetPokemonState.revealedMoves = [...syncedPokemon.transformedMoves];
+              mutations.revealedMoves = [...syncedPokemon.transformedMoves];
+
+              // if (!targetPokemonState.moves?.length) {
+              //   targetPokemonState.moves = [...syncedPokemon.transformedMoves];
+              // }
+
+              l.debug(
+                'Set revealedMoves of', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
+                '\n', 'revealedMoves', syncedPokemon.transformedMoves,
+                '\n', 'mutations', mutations,
+                '\n', 'targetClientPokemon', targetClientPokemon,
+                // '\n', 'targetPokemonState', targetPokemonState,
+                '\n', 'syncedPokemon', syncedPokemon,
+              );
+            }
+
+            futureMutations[targetPlayerKey].push(mutations);
+          } // end targetPokemonState?.speciesForme
+        } // end syncedPokemon.serverSourced && syncedPokemon.transformedForme && ...
+
+        // apply any applicable futureMutations
+        const pendingMutations = futureMutations[playerKey]?.filter((m) => (
+          (!!m?.calcdexId && syncedPokemon.calcdexId === m.calcdexId)
+            || (!!m?.ident && syncedPokemon.ident === m.ident)
+        )).map(({
+          // we're removing calcdexId & ident since we know they're for this Pokemon at this point
+          calcdexId, // removed
+          ident, // removed
+          ...mutations
+        }) => ({ ...mutations }));
+
+        if (pendingMutations?.length) {
+          pendingMutations.forEach((mutation) => Object.entries(mutation).forEach(([
+            key,
+            value,
+          ]) => {
+            syncedPokemon[key] = value;
+
+            if (key === 'ability') {
+              syncedPokemon.dirtyAbility = null;
+            }
+
+            if (key === 'revealedMoves') {
+              syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
+            }
+          }));
+
+          l.debug(
+            'Applied pendingMutations for', syncedPokemon.ident,
+            '\n', 'pendingMutations', pendingMutations,
+            '\n', 'futureMutations', futureMutations,
+            '\n', 'syncedPokemon', syncedPokemon,
+          );
+        }
 
         // extract Gmax/Tera info from the BattleRoom's `request` object, if available
         if (request?.requestType === 'move' && request.side?.id === playerKey) {

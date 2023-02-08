@@ -467,7 +467,11 @@ export const CalcdexProvider = ({
           Showdown.StatName,
           number,
         ]) => {
-          const baseValue = prevPokemon.baseStats?.[stat] ?? -1;
+          const baseValue = (
+            prevPokemon.transformedForme && stat !== 'hp'
+              ? prevPokemon.transformedBaseStats?.[stat]
+              : prevPokemon.baseStats?.[stat]
+          ) ?? -1;
 
           if (baseValue === value) {
             delete payload.dirtyBaseStats[stat];

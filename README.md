@@ -9,9 +9,9 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.1.3">v1.1.3</a>&nbsp;</th>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.1.4">v1.1.4</a>&nbsp;</th>
       <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Opera · Edge · Brave</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
-      <th align="center">&nbsp;Discuss on <a href="https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a></th>
+      <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a></th>
     </tr>
   </thead>
 </table>
@@ -211,7 +211,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
   > This runs [**`patch-package`**](https://github.com/ds300/patch-package), which reads from the [**`patches`**](./patches) directory and applies the `diff` to the corresponding package in *your* `node_modules`.
   >
-  > [Patch for `@smogon/calc`](./patches/%40smogon%2Bcalc%2B0.7.0.patch) incorporates all the changes up to the [`77334fa`](https://github.com/smogon/damage-calc/commit/77334fa0babdfb8cd49076d8c5ee7eff8d2bede8) commit, which adds support for Gen 9 & implements some Gen 9-specific mechanics, such as [*Supreme Overlord*](https://smogon.com/dex/sv/abilities/supreme-overlord). These changes are unpublished on [npm](https://npmjs.com/package/@smogon/calc) as Gen 9 support in `@smogon/calc` is considered experimental (at the time of writing on 2023/01/06). Not all Gen 9 mechanics are supported however, such as [*Rage Fist*](https://smogon.com/dex/sv/moves/rage-fist), [*Glaive Rush*](https://www.smogon.com/dex/sv/moves/glaive-rush) & [*Electromorphosis*](https://smogon.com/dex/sv/abilities/electromorphosis), so the Calcdex will handle these mechanics until native support for them are added. Additionally, the patch adds support for independently toggling the [*Protosynthesis*](https://smogon.com/dex/sv/abilities/protosynthesis) & [*Quark Drive*](https://smogon.com/dex/sv/abilities/quark-drive) abilities without the need for the [*Booster Energy*](https://smogon.com/dex/sv/items/booster-energy) item or updating field conditions, which can affect damage calculations (e.g., [*Knock Off*](https://smogon.com/dex/sv/moves/knock-off), [*Acrobatics*](https://smogon.com/dex/sv/moves/acrobatics), [Fire/Water-type moves from the Sun](https://smogon.com/dex/sv/moves/sunny-day)).
+  > [Patch for `@smogon/calc`](./patches/%40smogon%2Bcalc%2B0.7.0.patch) incorporates all the changes up to the [`262e6a2`](https://github.com/smogon/damage-calc/commit/262e6a2c155f27fb3790946494519fbdff02ed6e) commit, which adds support for Gen 9. These changes are unpublished on [npm](https://npmjs.com/package/@smogon/calc) as Gen 9 support in `@smogon/calc` is considered experimental (at the time of writing on 2023/01/06). Not all Gen 9 mechanics are supported however, so the Calcdex will handle some of these mechanics until native support for them are added. Additionally, the patch adds support for independently toggling the [*Protosynthesis*](https://smogon.com/dex/sv/abilities/protosynthesis) & [*Quark Drive*](https://smogon.com/dex/sv/abilities/quark-drive) abilities without the need for the [*Booster Energy*](https://smogon.com/dex/sv/items/booster-energy) item or updating field conditions, which can affect damage calculations (e.g., [*Knock Off*](https://smogon.com/dex/sv/moves/knock-off), [*Acrobatics*](https://smogon.com/dex/sv/moves/acrobatics), [Fire/Water-type moves from the Sun](https://smogon.com/dex/sv/moves/sunny-day)).
   >
   > [Patch for `react-select`](./patches/react-select%2B5.4.0.patch) wraps the [`scrollIntoView()` call in the `componentDidUpdate()` of the `Select` component](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/Select.tsx#L735-L743) in a `setTimeout()` so that the internal [`menuListRef`](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/Select.tsx#L1928-L1931) is available when the menu first opens.
   >
@@ -407,7 +407,7 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 >
 > * **OS** (e.g., Windows, macOS, Android, etc.)
 > * **Browser** (e.g., Chrome, Firefox, etc.)
-> * **Showdex Version** (e.g., v1.1.3)
+> * **Showdex Version** (e.g., v1.1.4)
 > * **Format**, if applicable (e.g., Gen 9 National Dex AG)
 >
 > If you would like to be [credited for your contribution](#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
@@ -495,6 +495,7 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
     </tr>
     <tr>
       <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nate M</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -551,49 +552,54 @@ another big thank to these fine people for helping with development!
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/iodyne.567157"><strong>Iodyne</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/itr.589896"><strong>ITR</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/kibo.552274"><strong>Kibo</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/kirigon.349282"><strong>Kirigon</strong></a></td>
-      <td width="220px" align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
       <td width="220px" align="center"><a href="https://twitch.tv/lazosful"><strong>Lazosful</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/Legend-Recalls"><strong>Legend-Recalls</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/lighthouse64.322009"><strong>lighthouse64</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/mandibuladel5555.564701"><strong>Mandibuladel5555</strong></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/maxouille.390049"><strong>Maxouille</strong></a> · <a href="https://github.com/Maxouille64">GitHub</a></td>
       <td width="220px" align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0zpcd"><strong>mdragon13</strong></a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/mia.425427"><strong>Mia</strong></a> · <a href="https://github.com/mia-pi-git">GitHub</a></td>
       <td width="220px" align="center"><a href="https://github.com/mpique"><strong>mpique</strong></a></td>
-    </tr>
-    <tr>
       <td width="220px" align="center"><a href="https://github.com/mnittsch"><strong>mnittsch</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/nails.51373"><strong>Nails</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/orangelego21.315566"><strong>orangelego21</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/orangelego21.315566"><strong>orangelego21</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/pokeblade101.254632"><strong>pokeblade101</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/runoisch.568189"><strong>Runoisch</strong></a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/ry4242.551466"><strong>ry4242</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/sabelette.583793"><strong>Sabelette</strong></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/shiox.495116"><strong>Shiox</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GitHub</a></td>
     </tr>
     <tr>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GitHub</a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GitHub</a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/surgent-james.483985"><strong>Surgent James</strong></a></td>
+      <td width="220px" align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
     </tr>
     <tr>
-      <td width="220px" align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/timboberino.619145"><strong>Timboberino</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
     </tr>
     <tr>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/zooki2006"><strong>zooki2006</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GitHub</a></td>
     </tr>

@@ -28,6 +28,7 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
     'Peter T',
     'Connor M',
     'Nate M',
+    'Tanuj C',
   ],
 }];
 
