@@ -622,7 +622,7 @@ export const syncPokemon = (
   //   && !!transformedAbilities?.length
   //   && (!syncedPokemon.ability || !transformedAbilities.includes(syncedPokemon.dirtyAbility));
 
-  if (dirtyAbility && syncedPokemon.dirtyAbility !== dirtyAbility) {
+  if (!!transformedForme && dirtyAbility && syncedPokemon.dirtyAbility !== dirtyAbility) {
     // [syncedPokemon.dirtyAbility] = transformedAbilities;
     syncedPokemon.dirtyAbility = dirtyAbility;
   }
@@ -652,7 +652,6 @@ export const syncPokemon = (
   } : null;
 
   // if the Pokemon is transformed, auto-set the moves
-  /** @todo make auto-setting transformed moves a toggle? */
   if (syncedPokemon.transformedMoves?.length) {
     if (transformedForme) {
       syncedPokemon.moves = [...syncedPokemon.transformedMoves];
