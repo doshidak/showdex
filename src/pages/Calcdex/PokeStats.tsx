@@ -219,7 +219,13 @@ export const PokeStats = ({
 
           {statNames.map((stat) => {
             const statLabel = stat.toUpperCase();
-            const baseStat = pokemon?.dirtyBaseStats?.[stat] ?? pokemon?.baseStats?.[stat];
+
+            const baseStat = pokemon?.dirtyBaseStats?.[stat] ?? (
+              pokemon?.transformedForme && stat !== 'hp'
+                ? pokemon.transformedBaseStats
+                : pokemon?.baseStats
+            )?.[stat] as number;
+
             const pristine = typeof pokemon?.dirtyBaseStats?.[stat] !== 'number';
             const disabled = !pokemon?.speciesForme;
 
