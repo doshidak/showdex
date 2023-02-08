@@ -518,11 +518,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
                 // don't apply the default neutral nature from importPokePaste()
                 // (sets the nature to 'Hardy' by default if a nature couldn't be parsed from the PokePaste)
-                if (PokemonNatures.includes(matchedPreset.nature) && matchedPreset.nature !== 'Hardy') {
+                // update (2023/02/07): allow 'Hardy' natures if we're in Randoms
+                if (PokemonNatures.includes(matchedPreset.nature) && (battleState.format.includes('random') || matchedPreset.nature !== 'Hardy')) {
                   syncedPokemon.nature = matchedPreset.nature;
                 }
 
-                if (Object.keys(matchedPreset.evs || {}).length) {
+                // update (2023/02/07): only apply EVs from the team sheet if the sum of all of them is > 0
+                // (this prevents open team sheets, which doesn't include EVs, from overwriting existing EVs from another preset)
+                if (Object.values(matchedPreset.evs || {}).reduce((sum, value) => sum + (value || 0), 0)) {
                   syncedPokemon.evs = {
                     hp: matchedPreset.evs.hp ?? 0,
                     atk: matchedPreset.evs.atk ?? 0,
@@ -551,7 +554,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
               }
 
-              if (Object.keys(matchedPreset.ivs || {}).length) {
+              // update (2023/02/07): perform the same treatment for IVs as we did for EVs earlier
+              if (Object.values(matchedPreset.ivs || {}).reduce((sum, value) => sum + (value || 0), 0)) {
                 syncedPokemon.ivs = {
                   hp: matchedPreset.ivs.hp ?? defaultIv,
                   atk: matchedPreset.ivs.atk ?? defaultIv,
