@@ -30,13 +30,12 @@ export const calcPokemonSpreadStats = (
   const legacy = detectLegacyGen(format);
 
   return PokemonStatNames.reduce((prev, stat) => {
-    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? (
-      stat === 'hp'
-        ? pokemon.baseStats?.hp
-        : pokemon.transformedForme
-          ? pokemon.transformedBaseStats?.[stat] ?? pokemon.baseStats?.[stat]
-          : pokemon.baseStats?.[stat]
-    );
+    // update (2023/02/07): cleaned up the baseStat fuckery that existed before
+    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? <number> (
+      pokemon.transformedForme && stat !== 'hp'
+        ? pokemon.transformedBaseStats
+        : pokemon.baseStats
+    )?.[stat];
 
     prev[stat] = calcPokemonStat(
       format,
