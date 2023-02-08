@@ -60,7 +60,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     ['ttoki', 'twitch.tv/tt0ki'],
   ],
 }, {
-  title: 'Showdex Royalty',
+  title: 'Showdex VIP',
   icon: 'crown',
   iconDescription: 'Crown Icon',
 
@@ -70,6 +70,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   },
 
   userIds: [
+    'agentlag',
     ['finchinator', 'Our Lord and Savior'],
     ['mudkipnerd', "What's a King to a God"],
     ['nails', 'VGC Legend'],
