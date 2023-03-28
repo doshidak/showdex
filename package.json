@@ -24,19 +24,19 @@
     "cm": "yarn commit",
     "cz": "yarn commit",
     "postinstall": "yarn patch-ghooks && yarn patch-package",
+    "clean": "yarn clean:dev && yarn clean:prod",
     "clean:dev": "yarn rimraf ./build",
     "clean:dev:chrome": "yarn rimraf ./build/chrome",
     "clean:dev:firefox": "yarn rimraf ./build/firefox ./build/*.firefox.xpi",
     "clean:prod": "yarn rimraf ./dist",
     "clean:prod:chrome": "yarn rimraf ./dist/chrome ./dist/*.chrome.zip ./dist/*.chrome.html",
     "clean:prod:firefox": "yarn rimraf ./dist/firefox ./dist/*.firefox.xpi ./dist/*.firefox.html",
-    "clean": "yarn clean:dev && yarn clean:prod",
+    "dev": "yarn dev:chrome",
     "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
     "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
-    "dev": "yarn dev:chrome",
+    "build": "yarn build:chrome && yarn build:firefox",
     "build:chrome": "yarn clean:prod:chrome && NODE_ENV=production BUILD_TARGET=chrome node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
-    "build:firefox": "yarn clean:prod:firefox && NODE_ENV=production BUILD_TARGET=firefox node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
-    "build": "yarn build:chrome && yarn build:firefox"
+    "build:firefox": "yarn clean:prod:firefox && NODE_ENV=production BUILD_TARGET=firefox node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
   },
   "config": {
     "cz-customizable": {
