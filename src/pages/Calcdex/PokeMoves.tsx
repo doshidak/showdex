@@ -67,11 +67,8 @@ export const PokeMoves = ({
     || pokemon.teraType === '???'
     || (player?.usedTera && battleActive);
 
-  const showZToggle = !!pokemon?.speciesForme && (
-    nationalDexFormat
-      || gen === 6
-      || gen === 7
-  );
+  const showZToggle = !!pokemon?.speciesForme
+    && (gen === 7 || nationalDexFormat);
 
   const showMaxToggle = !!pokemon?.speciesForme
     && !rules?.dynamax
