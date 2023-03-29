@@ -15,12 +15,18 @@ const mode = __DEV__ ? 'development' : 'production';
 const buildTarget = String(process.env.BUILD_TARGET || 'chrome').toLowerCase();
 const buildDate = Date.now().toString(16).toUpperCase();
 
+const buildSuffix = String(process.env.BUILD_SUFFIX || '')
+  .toLowerCase()
+  .replace(/[^a-z0-9\.\,\-]+/gi, '')
+  .replace(/\s+/g, '-');
+
 // does not include the extension
 const buildFilename = [
   process.env.npm_package_name,
   !!process.env.npm_package_version && `-v${process.env.npm_package_version}`,
   !!buildDate && `-b${buildDate}`,
-  __DEV__ ? '-dev' : '',
+  !!buildSuffix && `-${buildSuffix}`,
+  __DEV__ && '-dev',
   `.${buildTarget}`,
 ].filter(Boolean).join('');
 
@@ -34,6 +40,7 @@ export const env = Object.entries({
   NODE_ENV: mode,
   BUILD_TARGET: buildTarget,
   BUILD_DATE: buildDate,
+  BUILD_SUFFIX: buildSuffix,
   PACKAGE_NAME: process.env.npm_package_name,
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_URL: process.env.npm_package_homepage,
@@ -273,10 +280,9 @@ const plugins = [
 
 // environment-specific config
 const envConfig = {
-  // development
-  ...(__DEV__ && {
-    devtool: 'cheap-module-source-map',
-  }),
+  // source maps for easier debugging of minified bundles
+  // (values are based off of webpack's recommendations depending on the environment)
+  devtool: __DEV__ ? 'eval-source-map' : 'source-map',
 
   // production
   ...(!__DEV__ && {

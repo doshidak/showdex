@@ -4,6 +4,7 @@ import { createEnvParser } from './createEnvParser';
 const processEnv: EnvDict = {
   BUILD_DATE: process.env.BUILD_DATE,
   BUILD_TARGET: process.env.BUILD_TARGET,
+  BUILD_SUFFIX: process.env.BUILD_SUFFIX,
 
   CALCDEX_DEFAULT_GEN: process.env.CALCDEX_DEFAULT_GEN,
   CALCDEX_PLAYER_MIN_POKEMON: process.env.CALCDEX_PLAYER_MIN_POKEMON,
