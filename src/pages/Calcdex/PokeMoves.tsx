@@ -54,13 +54,15 @@ export const PokeMoves = ({
   const colorScheme = useColorScheme();
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nationalDexFormat = !!format && [
     'nationaldex',
     'natdex',
   ].some((f) => format.includes(f));
+
+  const showTeraToggle = !!pokemon?.speciesForme && gen > 8;
 
   const disableTeraToggle = !pokemon?.speciesForme
     || !pokemon.teraType
@@ -144,16 +146,40 @@ export const PokeMoves = ({
         </div>
 
         {
-          (!!pokemon?.speciesForme && gen > 8) &&
+          showTeraToggle &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
             label="Tera"
-            tooltip={[
-              pokemon?.terastallized ? 'Revert' : 'Terastallize',
-              'to',
-              (pokemon?.terastallized ? pokemon?.types?.join('/') : pokemon?.teraType) || '???',
-            ].join(' ')}
-            tooltipDisabled={!settings?.showUiTooltips}
+            // tooltip={[
+            //   pokemon?.terastallized ? 'Revert' : 'Terastallize',
+            //   'to',
+            //   (pokemon?.terastallized ? pokemon?.types?.join('/') : pokemon?.teraType) || '???',
+            // ].join(' ')}
+            tooltip={(
+              <div className={styles.descTooltip}>
+                {
+                  settings?.showUiTooltips &&
+                  <div style={battleActive ? { marginBottom: 2 } : undefined}>
+                    {pokemon?.terastallized ? 'Revert' : 'Terastallize'} to{' '}
+                    {(pokemon?.terastallized ? pokemon?.types?.join('/') : pokemon?.teraType) || '???'}
+                  </div>
+                }
+
+                {
+                  battleActive &&
+                  <div
+                    className={cx(
+                      styles.ultUsage,
+                      !player?.usedTera && styles.available,
+                      player?.usedTera && styles.consumed,
+                    )}
+                  >
+                    Tera <strong>{player?.usedTera ? 'Used' : 'Available'}</strong>
+                  </div>
+                }
+              </div>
+            )}
+            tooltipDisabled={!settings?.showUiTooltips && !battleActive}
             primary
             active={pokemon?.terastallized}
             disabled={disableTeraToggle}
@@ -196,8 +222,30 @@ export const PokeMoves = ({
               showZToggle && styles.lessSpacing,
             )}
             label="Max"
-            tooltip={`${pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves`}
-            tooltipDisabled={!settings?.showUiTooltips}
+            tooltip={(
+              <div className={styles.descTooltip}>
+                {
+                  settings?.showUiTooltips &&
+                  <div style={battleActive ? { marginBottom: 2 } : undefined}>
+                    {pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves
+                  </div>
+                }
+
+                {
+                  battleActive &&
+                  <div
+                    className={cx(
+                      styles.ultUsage,
+                      !player?.usedMax && styles.available,
+                      player?.usedMax && styles.consumed,
+                    )}
+                  >
+                    Dmax <strong>{player?.usedMax ? 'Used' : 'Available'}</strong>
+                  </div>
+                }
+              </div>
+            )}
+            tooltipDisabled={!settings?.showUiTooltips && !battleActive}
             primary
             active={pokemon?.useMax}
             disabled={disableMaxToggle}

@@ -208,6 +208,20 @@ button.damageButton {
   .copiedBadge {
     @include position.absolute($top: -16px, $left: 50%);
   }
+
+  .ultUsage {
+    font-size: 8px;
+    text-transform: uppercase;
+    @include transition.apply(color, opacity);
+
+    &.available {
+      color: colors.$blue;
+    }
+
+    &.consumed {
+      opacity: 0.75;
+    }
+  }
 }
 
 .editorItem {
