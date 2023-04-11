@@ -67,7 +67,7 @@ export const PokeMoves = ({
   const disableTeraToggle = !pokemon?.speciesForme
     || !pokemon.teraType
     || pokemon.teraType === '???'
-    || (player?.usedTera && battleActive);
+    || (settings?.lockUsedTera && player?.usedTera && battleActive);
 
   const showZToggle = !!pokemon?.speciesForme
     && (gen === 7 || nationalDexFormat);
