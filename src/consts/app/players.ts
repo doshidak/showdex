@@ -88,6 +88,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   userIds: [
     'fr1e5',
     'fubwubs',
+    'goldengottago',
     'lunarvania',
     'momalaharris',
   ],
@@ -101,7 +102,9 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     dark: '#F44336',
   },
 
-  userIds: [],
+  userIds: [
+    ['bruhmomentmaker', 'First Blaziken Patron'],
+  ],
 }, {
   title: 'Pop Bomb Patron',
   icon: 'mouse',
@@ -112,7 +115,10 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     dark: '#29B6F6',
   },
 
-  userIds: [],
+  userIds: [
+    ['benzyne', 'First Showdex Patron'],
+    'goddessmina',
+  ],
 }, {
   title: 'Supreme Overlord Patron',
   icon: 'winged-sword',
