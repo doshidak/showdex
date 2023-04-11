@@ -281,8 +281,10 @@ const plugins = [
 // environment-specific config
 const envConfig = {
   // source maps for easier debugging of minified bundles
-  // (values are based off of webpack's recommendations depending on the environment)
-  devtool: __DEV__ ? 'eval-source-map' : 'source-map',
+  // (values are based off of webpack's recommendations depending on the environment,
+  // except for development, since we cannot use the webpack-recommended 'eval-source-map'
+  // due to an 'unsafe-eval' EvalError thrown when trying to first init the extension)
+  devtool: __DEV__ ? 'cheap-module-source-map' : 'source-map',
 
   // production
   ...(!__DEV__ && {
