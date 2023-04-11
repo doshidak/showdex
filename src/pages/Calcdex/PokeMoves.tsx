@@ -75,8 +75,8 @@ export const PokeMoves = ({
     && gen < 9
     && (nationalDexFormat || (gen === 8 && !format?.includes('bdsp')));
 
-  const disableMaxToggle = !pokemon?.speciesForme
-    || (player?.usedMax && battleActive);
+  const disableMaxToggle = !pokemon?.speciesForme;
+  //  || (player?.usedMax && battleActive);
 
   const showEditButton = !!pokemon?.speciesForme && (
     settings?.showMoveEditor === 'always'
