@@ -115,14 +115,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
-      // defaultShowGenetics: {
-      //   auth: false,
-      //   p1: true,
-      //   p2: true,
-      //   p3: true,
-      //   p4: true,
-      // },
-
+      lockUsedTera: false,
       editPokemonTypes: 'always',
       showMoveEditor: 'meta',
       showBaseStats: 'meta',
