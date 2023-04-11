@@ -15,15 +15,19 @@ const mode = __DEV__ ? 'development' : 'production';
 const buildTarget = String(process.env.BUILD_TARGET || 'chrome').toLowerCase();
 const buildDate = Date.now().toString(16).toUpperCase();
 
-const buildSuffix = String(process.env.BUILD_SUFFIX || '')
+const sanitizeBuildEnv = (value) => String(value || '')
   .toLowerCase()
   .replace(/[^a-z0-9\.\,\-]+/gi, '')
   .replace(/\s+/g, '-');
+
+const buildPrefix = sanitizeBuildEnv(process.env.BUILD_PREFIX);
+const buildSuffix = sanitizeBuildEnv(process.env.BUILD_SUFFIX);
 
 // does not include the extension
 const buildFilename = [
   process.env.npm_package_name,
   !!process.env.npm_package_version && `-v${process.env.npm_package_version}`,
+  !!buildPrefix && `-${buildPrefix}`,
   !!buildDate && `-b${buildDate}`,
   !!buildSuffix && `-${buildSuffix}`,
   __DEV__ && '-dev',
@@ -40,6 +44,7 @@ export const env = Object.entries({
   NODE_ENV: mode,
   BUILD_TARGET: buildTarget,
   BUILD_DATE: buildDate,
+  BUILD_PREFIX: buildPrefix,
   BUILD_SUFFIX: buildSuffix,
   PACKAGE_NAME: process.env.npm_package_name,
   PACKAGE_VERSION: process.env.npm_package_version,

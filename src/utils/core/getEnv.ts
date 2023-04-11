@@ -1,9 +1,9 @@
-import type { EnvDict } from './createEnvParser';
 import { createEnvParser } from './createEnvParser';
 
-const processEnv: EnvDict = {
+export const env = createEnvParser({
   BUILD_DATE: process.env.BUILD_DATE,
   BUILD_TARGET: process.env.BUILD_TARGET,
+  BUILD_PREFIX: process.env.BUILD_PREFIX,
   BUILD_SUFFIX: process.env.BUILD_SUFFIX,
 
   CALCDEX_DEFAULT_GEN: process.env.CALCDEX_DEFAULT_GEN,
@@ -40,6 +40,4 @@ const processEnv: EnvDict = {
   STORAGE_TEAMBUILDER_KEY: process.env.STORAGE_TEAMBUILDER_KEY,
 
   UUID_NAMESPACE: process.env.UUID_NAMESPACE,
-};
-
-export const env = createEnvParser(processEnv, 'DEBUG');
+}, 'DEBUG');
