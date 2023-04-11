@@ -213,11 +213,22 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
     opacity: 0.65;
   }
 
+  .userButton {
+    @include font.apply(fonts.$primary);
+    font-size: 12px;
+    color: inherit;
+  }
+
   .value {
     // @include spacing.padding-xy($x: 5px, $y: 3px);
     @include spacing.padding-all(5px);
     // @include font.apply(fonts.$mono);
     font-size: 12px;
+    user-select: none;
+
+    &.empty {
+      opacity: 0.3;
+    }
   }
 
   .buttonContainer {
@@ -232,4 +243,11 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
   &:hover .button {
     background-position: 100% 0;
   }
+}
+
+.tooltipContent {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
 }
