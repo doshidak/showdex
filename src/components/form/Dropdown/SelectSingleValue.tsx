@@ -30,7 +30,7 @@ export const SelectSingleValue = <
   <div
     className={cx(
       styles.singleValue,
-      isDisabled && styles.disabled,
+      (isDisabled || data?.disabled) && styles.disabled,
       data?.labelClassName,
       className,
     )}

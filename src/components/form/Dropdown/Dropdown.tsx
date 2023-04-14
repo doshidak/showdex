@@ -48,6 +48,7 @@ export interface DropdownOption<
   subLabel?: React.ReactNode;
   value?: TValue;
   options?: DropdownOption<TValue>[];
+  disabled?: boolean;
 }
 
 export type DropdownFieldSingleInput = FieldInputProps<DropdownSingleValue, HTMLInputElement>;

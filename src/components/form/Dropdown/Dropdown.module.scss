@@ -752,6 +752,11 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
       }
     } // end .dark &
   } // end &.selected
+
+  &.disabled {
+    opacity: $opacity-disabled;
+    pointer-events: none;
+  }
 }
 
 .optionRow {
