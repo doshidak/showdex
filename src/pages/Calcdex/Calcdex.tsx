@@ -53,7 +53,8 @@ export const Calcdex = ({
 
   const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
     playerCount > 2 && AllPlayerKeys
-      .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
+      // .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
+      .filter((k) => state[k]?.active)
       .map((k) => {
         const { name: playerName } = state[k];
         const playerTitle = findPlayerTitle(playerName);
@@ -66,7 +67,7 @@ export const Calcdex = ({
           label: (
             <>
               <div className={styles.label}>
-                {playerName}
+                {playerName || '--'}
               </div>
 
               {
@@ -82,10 +83,11 @@ export const Calcdex = ({
           rightLabel: k.toUpperCase(),
           subLabel: playerTitle?.title,
           value: k,
+          disabled: !playerName,
         };
       })
   ) || null, [
-    authPlayerKey,
+    // authPlayerKey,
     colorScheme,
     playerCount,
     state,
@@ -149,7 +151,7 @@ export const Calcdex = ({
           playerKey={topKey}
           defaultName="Player 1"
           containerSize={size}
-          playerOptions={(!authPlayerKey || topKey !== authPlayerKey) && playerOptions}
+          playerOptions={playerOptions}
         />
 
         <FieldCalc
@@ -165,7 +167,7 @@ export const Calcdex = ({
           playerKey={bottomKey}
           defaultName="Player 2"
           containerSize={size}
-          playerOptions={(!authPlayerKey || bottomKey !== authPlayerKey) && playerOptions}
+          playerOptions={playerOptions}
         />
 
         {
