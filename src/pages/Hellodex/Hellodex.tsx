@@ -347,7 +347,6 @@ export const Hellodex = ({
                 label="Smogon"
                 aria-label="Smogon Forums Post"
                 tooltip="Visit Thread on Smogon Forums"
-                // disabled={!forumUrl}
                 onPress={() => window.open(forumUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -361,7 +360,6 @@ export const Hellodex = ({
                 label="GitHub"
                 aria-label="Source Code on GitHub"
                 tooltip="Peep the Code on GitHub"
-                // disabled={!repoUrl}
                 onPress={() => window.open(repoUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -376,7 +374,6 @@ export const Hellodex = ({
                 label="New"
                 aria-label="Latest Release Notes on GitHub"
                 tooltip={`See What's New in ${packageVersion}`}
-                // disabled={!releasesUrl}
                 onPress={() => window.open(releasesUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -391,7 +388,6 @@ export const Hellodex = ({
                 label="Bugs"
                 aria-label="Known Issues/Bugs on GitHub"
                 tooltip="See Known Issues"
-                // disabled={!bugsUrl}
                 onPress={() => window.open(bugsUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -406,7 +402,6 @@ export const Hellodex = ({
                 label="Todo"
                 aria-label="Planned and Upcoming Features on GitHub"
                 tooltip="See Upcoming Features"
-                // disabled={!featuresUrl}
                 onPress={() => window.open(featuresUrl, '_blank', 'noopener,noreferrer')}
               />
             }
