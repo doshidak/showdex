@@ -4,6 +4,7 @@ import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
   appliedPreset,
+  countActivePlayers,
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectLegacyGen,
@@ -1098,6 +1099,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         };
       }
     }
+
+    // now that all players were processed, recount the number of players
+    // (typically required for FFA, when players 3 & 4 need to be invited, so the playerCount never updates)
+    battleState.playerCount = countActivePlayers(battleState);
 
     const syncedField = syncField(
       battleState,
