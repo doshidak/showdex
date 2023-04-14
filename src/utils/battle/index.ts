@@ -3,6 +3,7 @@ export * from './buildAbilityOptions';
 export * from './buildItemOptions';
 export * from './buildMoveOptions';
 export * from './buildPresetOptions';
+export * from './countActivePlayers';
 export * from './countRuinAbilities';
 export * from './countSideRuinAbilities';
 export * from './detectBattleRules';
