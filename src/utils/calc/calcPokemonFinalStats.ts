@@ -330,8 +330,8 @@ export const calcPokemonFinalStats = (
     // note: see WeatherMap in weather consts for the sanitized value
     // (e.g., `weather` will be `'sand'`, not `'sandstorm'`)
     if (weather === 'sand') {
-      // 50% SPD boost if Rock type w/ darude sandstorm
-      if (types.includes('Rock')) {
+      // 50% SPD boost if Rock type w/ darude sandstorm (gens 4+)
+      if (types.includes('Rock') && gen > 3) {
         record.apply('spd', 1.5, 'field', 'Darude Sandstorm');
       }
 
