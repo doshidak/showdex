@@ -70,7 +70,6 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
       openOnStart: true,
       focusRoomsRoom: false,
       showBattleRecord: true,
-      showFooterResources: true,
       showDonateButton: true,
     },
 

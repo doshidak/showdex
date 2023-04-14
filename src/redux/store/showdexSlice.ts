@@ -87,16 +87,6 @@ export interface ShowdexHellodexSettings {
   showBattleRecord: boolean;
 
   /**
-   * Whether to show additional footer buttons that link to official resources.
-   *
-   * * If `false`, only the *Settings* button will be shown.
-   *
-   * @default true
-   * @since 1.1.5
-   */
-  showFooterResources: boolean;
-
-  /**
    * Whether to show the donate button.
    *
    * * This is a hidden setting that is only visible to Showdown usernames assigned to a title.
