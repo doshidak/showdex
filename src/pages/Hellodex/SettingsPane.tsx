@@ -570,21 +570,27 @@ export const SettingsPane = ({
 
                   {
                     (!!authTitle || !values?.hellodex?.showDonateButton) &&
-                    <Field<ShowdexSettings['hellodex']['showDonateButton']>
-                      name="hellodex.showDonateButton"
-                      component={Switch}
-                      className={cx(styles.field, styles.switchField)}
-                      label="Show Donate Button"
-                      tooltip={(
-                        <div className={styles.tooltipContent}>
-                          Shows the donate button in the Hellodex.
-                          <br />
-                          <br />
-                          If you're seeing this, you're either very special to us or you're a 1337 hax0r.
-                          Either way, feel free to turn this off.
-                        </div>
-                      )}
-                    />
+                    <>
+                      <div className={styles.settingsGroupTitle}>
+                        Special
+                      </div>
+
+                      <Field<ShowdexSettings['hellodex']['showDonateButton']>
+                        name="hellodex.showDonateButton"
+                        component={Switch}
+                        className={cx(styles.field, styles.switchField)}
+                        label="Show Donate Button"
+                        tooltip={(
+                          <div className={styles.tooltipContent}>
+                            Shows the donate button in the Hellodex.
+                            <br />
+                            <br />
+                            If you're seeing this, you're either very special to us or you're a 1337 hax0r.
+                            Either way, feel free to turn this off.
+                          </div>
+                        )}
+                      />
+                    </>
                   }
                 </div>
               </div>
