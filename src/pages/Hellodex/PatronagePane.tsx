@@ -245,10 +245,9 @@ export const PatronagePane = ({
 
               <div className={styles.info}>
                 <div className={styles.description} style={{ marginBottom: 15 }}>
-                  <em>One-time</em> donations will entitle you to the benefits of the lowest
-                  Patreon tier, excluding benefits awarded to active pledges.{' '}
-                  <em>Monthly</em> donations will entitle you to the benefits of the closest
-                  matching Patreon tier to your donation amount.
+                  All donations are <em>one-time</em> contributions, entitling you to the benefits
+                  of the lowest Patreon tier, excluding benefits awarded to active pledges.
+                  Please visit our Patreon for specifics on awarded benefits.
                 </div>
 
                 {ShowdexDonorTiers.map(TierRenderer('DonorTier'))}
