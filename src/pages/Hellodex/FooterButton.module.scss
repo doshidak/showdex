@@ -8,7 +8,7 @@
 .container {
   position: relative;
   @include flex.column-center($inline: true);
-  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  @include font.apply(fonts.$primary);
   color: inherit;
   @include transition.apply(color, opacity);
   user-select: none;

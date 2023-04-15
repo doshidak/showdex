@@ -25,13 +25,16 @@ export interface HellodexProps {
   openCalcdexInstance?: (battleId: string) => void;
 }
 
-const packageVersion = `v${env('package-version', '#.#.#')}`;
-// const donationUrl = env('hellodex-donation-url');
+const packageVersion = `v${env('package-version', 'X.X.X')}`;
+const versionSuffix = env('package-version-suffix');
+const buildDate = env('build-date');
+const buildSuffix = env('build-suffix');
 const forumUrl = env('hellodex-forum-url');
 const repoUrl = env('hellodex-repo-url');
-const releasesUrl = env('hellodex-releases-url');
-const bugsUrl = env('hellodex-bugs-url');
-const featuresUrl = env('hellodex-features-url');
+const communityUrl = env('hellodex-community-url');
+// const releasesUrl = env('hellodex-releases-url');
+// const bugsUrl = env('hellodex-bugs-url');
+// const featuresUrl = env('hellodex-features-url');
 
 export const Hellodex = ({
   openCalcdexInstance,
@@ -59,8 +62,6 @@ export const Hellodex = ({
   const instancesEmpty = !Object.keys(calcdexState).length;
 
   // donate button visibility
-  // const showDonateButton = donationUrl?.startsWith('https://')
-  //   && settings?.showDonateButton;
   const showDonateButton = settings?.showDonateButton;
 
   // pane visibilities
@@ -114,7 +115,7 @@ export const Hellodex = ({
               <Button
                 className={styles.authorButton}
                 labelClassName={styles.label}
-                label="sumfuk"
+                label="BOT Keith"
                 hoverScale={1}
                 absoluteHover
                 onPress={() => openUserPopup('sumfuk')}
@@ -127,7 +128,7 @@ export const Hellodex = ({
               <Button
                 className={styles.authorButton}
                 labelClassName={styles.label}
-                label="camdawgboi"
+                label="analogcam"
                 hoverScale={1}
                 absoluteHover
                 onPress={() => openUserPopup('camdawgboi')}
@@ -142,6 +143,12 @@ export const Hellodex = ({
             </div>
             <div className={styles.extensionVersion}>
               {packageVersion}
+              <span className={styles.extensionVersionSuffix}>
+                {!!versionSuffix && `-${versionSuffix}`}
+                {__DEV__ && !!buildDate && `-b${buildDate.slice(-4)}`}
+                {!!buildSuffix && `-${buildSuffix}`}
+                {__DEV__ && '-dev'}
+              </span>
             </div>
 
             {/* <div className={styles.spacer} /> */}
@@ -326,7 +333,9 @@ export const Hellodex = ({
             )}
           >
             <FooterButton
-              className={styles.settingsButton}
+              className={cx(styles.linkItem, styles.settingsButton)}
+              // iconClassName={styles.settingsIcon}
+              labelClassName={styles.linkButtonLabel}
               iconAsset={settingsVisible ? 'close-circle.svg' : 'cog.svg'}
               iconDescription={settingsVisible ? 'Close Circle Icon' : 'Cog Icon'}
               label={settingsVisible ? 'Close' : 'Settings'}
@@ -339,14 +348,26 @@ export const Hellodex = ({
             />
 
             {
+              (forumUrl || repoUrl || communityUrl).startsWith('https://') &&
+              <div
+                className={cx(
+                  styles.linkItem,
+                  styles.linkSeparator,
+                )}
+              />
+            }
+
+            {
               forumUrl?.startsWith('https://') &&
               <FooterButton
-                className={cx(styles.linkButton, styles.forumButton)}
+                className={cx(styles.linkItem, styles.linkButton)}
+                iconClassName={styles.signpostIcon}
+                labelClassName={styles.linkButtonLabel}
                 iconAsset="signpost.svg"
                 iconDescription="Signpost Icon"
                 label="Smogon"
-                aria-label="Smogon Forums Post"
-                tooltip="Visit Thread on Smogon Forums"
+                aria-label="Showdex Thread on Smogon Forums"
+                tooltip="Discuss on Smogon Forums"
                 onPress={() => window.open(forumUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -354,21 +375,37 @@ export const Hellodex = ({
             {
               repoUrl?.startsWith('https://') &&
               <FooterButton
-                className={cx(styles.linkButton, styles.repoButton)}
+                className={cx(styles.linkItem, styles.linkButton)}
+                labelClassName={styles.linkButtonLabel}
                 iconAsset="github-face.svg"
-                iconDescription="GitHub Octocat Face Icon"
+                iconDescription="GitHub Octocat Icon"
                 label="GitHub"
-                aria-label="Source Code on GitHub"
-                tooltip="Peep the Code on GitHub"
+                aria-label="Showdex Source Code on GitHub"
+                tooltip="Peep the Source Code on GitHub"
                 onPress={() => window.open(repoUrl, '_blank', 'noopener,noreferrer')}
               />
             }
 
             {
+              communityUrl?.startsWith('https://') &&
+              <FooterButton
+                className={cx(styles.linkItem, styles.linkButton)}
+                labelClassName={styles.linkButtonLabel}
+                iconAsset="discord.svg"
+                iconDescription="Discord Clyde Icon"
+                label="Discord"
+                aria-label="Official Showdex Discord"
+                tooltip="Join Our Discord Community!"
+                onPress={() => window.open(communityUrl, '_blank', 'noopener,noreferrer')}
+              />
+            }
+
+            {/* {
               releasesUrl?.startsWith('https://') &&
               <FooterButton
-                className={styles.linkButton}
+                className={cx(styles.linkItem, styles.linkButton)}
                 iconClassName={styles.sparkleIcon}
+                labelClassName={styles.linkButtonLabel}
                 iconAsset="sparkle.svg"
                 iconDescription="Sparkle Icon"
                 label="New"
@@ -376,13 +413,14 @@ export const Hellodex = ({
                 tooltip={`See What's New in ${packageVersion}`}
                 onPress={() => window.open(releasesUrl, '_blank', 'noopener,noreferrer')}
               />
-            }
+            } */}
 
-            {
+            {/* {
               bugsUrl?.startsWith('https://') &&
               <FooterButton
-                className={styles.linkButton}
+                className={cx(styles.linkItem, styles.linkButton)}
                 iconClassName={styles.bugIcon}
+                labelClassName={styles.linkButtonLabel}
                 iconAsset="bug.svg"
                 iconDescription="Ladybug Icon"
                 label="Bugs"
@@ -390,13 +428,14 @@ export const Hellodex = ({
                 tooltip="See Known Issues"
                 onPress={() => window.open(bugsUrl, '_blank', 'noopener,noreferrer')}
               />
-            }
+            } */}
 
-            {
+            {/* {
               featuresUrl?.startsWith('https://') &&
               <FooterButton
-                className={styles.linkButton}
+                className={cx(styles.linkItem, styles.linkButton)}
                 iconClassName={styles.clipboardIcon}
+                labelClassName={styles.linkButtonLabel}
                 iconAsset="clipboard-heart.svg"
                 iconDescription="Clipboard Heart Icon"
                 label="Todo"
@@ -404,7 +443,7 @@ export const Hellodex = ({
                 tooltip="See Upcoming Features"
                 onPress={() => window.open(featuresUrl, '_blank', 'noopener,noreferrer')}
               />
-            }
+            } */}
           </div>
 
           <BaseButton
@@ -422,7 +461,7 @@ export const Hellodex = ({
           <div className={cx(styles.credits, styles.hideWhenSmol)}>
             created with <i className="fa fa-heart" /> by
             <br />
-            sumfuk/doshidak &amp; camdawgboi
+            BOT Keith &amp; analogcam
           </div>
         </div>
       </div>
