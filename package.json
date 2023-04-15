@@ -33,11 +33,11 @@
     "clean:prod:chrome": "yarn rimraf ./dist/chrome ./dist/*.chrome.zip ./dist/*.chrome.html",
     "clean:prod:firefox": "yarn rimraf ./dist/firefox ./dist/*.firefox.xpi ./dist/*.firefox.html",
     "dev": "yarn dev:chrome",
-    "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
-    "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev.js",
+    "dev:chrome": "yarn clean:dev:chrome && NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev",
+    "dev:firefox": "yarn clean:dev:firefox && NODE_ENV=development BUILD_TARGET=firefox node --conditions=development --experimental-specifier-resolution=node --trace-warnings -- ./scripts/dev",
     "build": "yarn build:chrome && yarn build:firefox",
-    "build:chrome": "yarn clean:prod:chrome && NODE_ENV=production BUILD_TARGET=chrome node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js",
-    "build:firefox": "yarn clean:prod:firefox && NODE_ENV=production BUILD_TARGET=firefox node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build.js"
+    "build:chrome": "yarn clean:prod:chrome && NODE_ENV=production BUILD_TARGET=chrome node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build",
+    "build:firefox": "yarn clean:prod:firefox && NODE_ENV=production BUILD_TARGET=firefox node --conditions=production --experimental-specifier-resolution=node -- ./scripts/build"
   },
   "config": {
     "cz-customizable": {
@@ -81,7 +81,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-final-form": "^6.5.9",
-    "react-hot-loader": "^4.13.0",
     "react-hotkeys-hook": "^3.4.7",
     "react-inlinesvg": "^3.0.1",
     "react-redux": "^8.0.5",
@@ -104,7 +103,6 @@
     "@types/base-64": "^1.0.0",
     "@types/chrome": "^0.0.200",
     "@types/firefox-webext-browser": "^94.0.1",
-    "@types/fs-extra": "^9.0.13",
     "@types/jquery": "^3.5.14",
     "@types/node": "^18.11.9",
     "@types/react": "^18.0.25",
@@ -131,7 +129,6 @@
     "eslint-plugin-react": "^7.31.10",
     "eslint-plugin-react-hooks": "^4.6.0",
     "file-loader": "^6.2.0",
-    "fs-extra": "^10.1.0",
     "ghooks": "^2.0.4",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
