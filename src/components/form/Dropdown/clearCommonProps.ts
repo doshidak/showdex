@@ -29,6 +29,7 @@ export const clearCommonProps = <
   className,
   clearValue,
   cx,
+  getClassNames,
   getStyles,
   getValue,
   hasValue,
