@@ -12,46 +12,58 @@ import manifest from './src/manifest' assert { type: 'json' };
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
 
-const buildTarget = String(process.env.BUILD_TARGET || 'chrome').toLowerCase();
-const buildDate = Date.now().toString(16).toUpperCase();
-
-const sanitizeBuildEnv = (value) => String(value || '')
-  .toLowerCase()
-  .replace(/[^a-z0-9\.\,\-]+/gi, '')
-  .replace(/\s+/g, '-');
-
-const buildPrefix = sanitizeBuildEnv(process.env.BUILD_PREFIX);
-const buildSuffix = sanitizeBuildEnv(process.env.BUILD_SUFFIX);
-
-// does not include the extension
-const buildFilename = [
-  process.env.npm_package_name,
-  !!process.env.npm_package_version && `-v${process.env.npm_package_version}`,
-  !!buildPrefix && `-${buildPrefix}`,
-  !!buildDate && `-b${buildDate}`,
-  !!buildSuffix && `-${buildSuffix}`,
-  __DEV__ && '-dev',
-  `.${buildTarget}`,
-].filter(Boolean).join('');
+export const buildTargets = [
+  'chrome',
+  'firefox',
+];
 
 // __dirname is not available in ESModules lmao
 if (typeof __dirname !== 'string') {
   global.__dirname = path.dirname(fileURLToPath(import.meta.url));
 }
 
-export const env = Object.entries({
-  ...dotenv.config({ path: path.join(__dirname, '.env') }).parsed,
+const sanitizeEnv = (
+  value,
+  defaultValue = '',
+) => String(value || defaultValue)
+  .toLowerCase()
+  .replace(/[^a-z0-9\.\,\-]+/gi, '')
+  .replace(/\s+/g, '-');
+
+const finalEnv = {
+  ...dotenv.config({
+    path: path.join(__dirname, '.env'),
+  }).parsed,
+
+  BUILD_DATE: Date.now().toString(16).toUpperCase(),
+  BUILD_SUFFIX: sanitizeEnv(process.env.BUILD_SUFFIX),
+  BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
   NODE_ENV: mode,
-  BUILD_TARGET: buildTarget,
-  BUILD_DATE: buildDate,
-  BUILD_PREFIX: buildPrefix,
-  BUILD_SUFFIX: buildSuffix,
-  PACKAGE_NAME: process.env.npm_package_name,
-  PACKAGE_VERSION: process.env.npm_package_version,
+  PACKAGE_AUTHOR: process.env.npm_package_author,
+  PACKAGE_DESCRIPTION: process.env.npm_package_description,
+  PACKAGE_NAME: process.env.npm_package_name || 'showdex',
   PACKAGE_URL: process.env.npm_package_homepage,
-}).reduce((prev, [key, value]) => {
+  PACKAGE_VERSION: process.env.npm_package_version,
+  PACKAGE_VERSION_SUFFIX: sanitizeEnv(process.env.PACKAGE_VERSION_SUFFIX),
+};
+
+finalEnv.BUILD_NAME = [
+  finalEnv.PACKAGE_NAME,
+  `-v${finalEnv.PACKAGE_VERSION || 'X.X.X'}`,
+  !!finalEnv.PACKAGE_VERSION_SUFFIX && `-${finalEnv.PACKAGE_VERSION_SUFFIX}`,
+  !!finalEnv.BUILD_DATE && `-b${finalEnv.BUILD_DATE}`,
+  !!finalEnv.BUILD_SUFFIX && `-${finalEnv.BUILD_SUFFIX}`,
+  __DEV__ && '-dev',
+  `.${finalEnv.BUILD_TARGET}`,
+].filter(Boolean).join('');
+
+export const env = Object.entries(finalEnv).sort(([a], [b]) => (
+  a === b
+    ? 0
+    : (a > b ? -1 : 1)
+)).reduce((prev, [key, value]) => {
   if (key) {
-    prev[`process.env.${key}`] = JSON.stringify(value || '');
+    prev[key] = value;
   }
 
   return prev;
@@ -59,13 +71,10 @@ export const env = Object.entries({
   __DEV__,
 });
 
-export const printableEnv = Object.keys(env).sort().reduce((prev, key) => {
-  const value = env[key];
-
-  const parsedKey = key.replace(/(?:"|process\.env\.)/g, '');
-  const parsedValue = typeof value === 'string' ? value?.replace(/"/g, '') : value;
-
-  prev[parsedKey] = parsedValue;
+const webpackEnv = Object.entries(env).reduce((prev, [key, value]) => {
+  if (key) {
+    prev[`${key.startsWith('__') ? '' : 'process.env.'}${key}`] = JSON.stringify(value || '');
+  }
 
   return prev;
 }, {});
@@ -77,12 +86,12 @@ const entry = {
 };
 
 // background is not used on Firefox
-if (buildTarget === 'firefox') {
+if (env.BUILD_TARGET === 'firefox') {
   delete entry.background;
 }
 
 const output = {
-  path: path.join(__dirname, __DEV__ ? 'build' : 'dist', buildTarget),
+  path: path.join(__dirname, __DEV__ ? 'build' : 'dist', env.BUILD_TARGET),
   filename: '[name].js',
   clean: false, // clean output.path dir before emitting files (update: cleaning it up ourselves via rimraf)
   publicPath: 'auto',
@@ -152,21 +161,21 @@ const resolve = {
 };
 
 const copyPatterns = [{
-  // fill in fields from package.json into manifest and transform it depending on the buildTarget
+  // fill in fields from package.json into manifest and transform it depending on env.BUILD_TARGET
   from: 'src/manifest.json',
   to: 'manifest.json',
 
   transform: (content) => {
     const parsed = JSON.parse(content.toString());
 
-    // should be set according to the buildTarget
+    // should be set according to env.BUILD_TARGET below (in the `switch` block)
     // (purposefully given an erroneous value to indicate some transformation was done)
     parsed.manifest_version = -1;
 
-    parsed.version = process.env.npm_package_version;
-    parsed.description = process.env.npm_package_description;
-    parsed.author = process.env.npm_package_author;
-    parsed.homepage_url = process.env.npm_package_homepage;
+    parsed.version = env.PACKAGE_VERSION;
+    parsed.description = env.PACKAGE_DESCRIPTION;
+    parsed.author = env.PACKAGE_AUTHOR;
+    parsed.homepage_url = env.PACKAGE_URL;
 
     const {
       applications,
@@ -174,7 +183,7 @@ const copyPatterns = [{
       web_accessible_resources,
     } = parsed;
 
-    switch (buildTarget) {
+    switch (env.BUILD_TARGET) {
       case 'chrome': {
         // set to Manifest V3 (MV3) for Chrome
         parsed.manifest_version = 3;
@@ -261,24 +270,24 @@ const copyPatterns = [{
 
 const plugins = [
   new webpack.ProgressPlugin(),
-  new webpack.DefinePlugin(env),
+  new webpack.DefinePlugin(webpackEnv),
   new CopyWebpackPlugin({ patterns: copyPatterns }),
 
   ...[
-    (!__DEV__ || buildTarget === 'firefox')
+    (!__DEV__ || env.BUILD_TARGET === 'firefox')
       && new ZipPlugin({
         // spit out the file in either `build` or `dist`
         path: '..',
 
         // extension will be appended to the end of the filename
-        filename: buildFilename,
-        extension: buildTarget === 'firefox' ? 'xpi' : 'zip',
+        filename: env.BUILD_NAME,
+        extension: env.BUILD_TARGET === 'firefox' ? 'xpi' : 'zip',
       }),
 
     !__DEV__
       && new VisualizerPlugin({
         // per the doc: this is relative to the webpack output dir
-        filename: path.join('..', `${buildFilename}.html`),
+        filename: path.join('..', `${env.BUILD_NAME}.html`),
       }),
   ].filter(Boolean),
 ];
