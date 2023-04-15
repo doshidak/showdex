@@ -84,7 +84,7 @@
     "react-hotkeys-hook": "^3.4.7",
     "react-inlinesvg": "^3.0.2",
     "react-redux": "^8.0.5",
-    "react-select": "^5.4.0",
+    "react-select": "^5.7.2",
     "remove": "^0.1.5",
     "simplebar": "^5.3.9",
     "slugify": "^1.6.6",
