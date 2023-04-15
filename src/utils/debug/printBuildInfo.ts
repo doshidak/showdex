@@ -5,19 +5,7 @@ import { env } from '@showdex/utils/core';
  *
  * @since 0.1.0
  */
-export const printBuildInfo = (): string => {
-  const packageName = env('package-name', 'showdex');
-  const packageVersion = env('package-version', 'X.X.X');
-  const buildDate = env('build-date');
-  const buildTarget = env('build-target', 'chrome');
-  const buildPrefix = env('build-prefix');
-  const buildSuffix = env('build-suffix');
-
-  return packageName
-    + (packageVersion ? `-v${packageVersion}` : '')
-    + (buildPrefix ? `-${buildPrefix}` : '')
-    + (buildDate ? `-b${buildDate}` : '')
-    + (buildSuffix ? `-${buildSuffix}` : '')
-    + `${__DEV__ ? '-dev' : ''}`
-    + `.${buildTarget}`;
-};
+export const printBuildInfo = (): string => env(
+  'build-name',
+  `showdex-vX.X.X-bX${__DEV__ ? '-dev' : ''}.chrome`,
+);

@@ -41,7 +41,7 @@ export const BuildInfo = ({
         !hideCredits &&
         <>
           <br />
-          by sumfuk/doshidak &amp; camdawgboi
+          by BOT·Keith &amp; analogcam
         </>
       }
     </div>
