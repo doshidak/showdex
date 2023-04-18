@@ -16,6 +16,7 @@ import { env, getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
+import { GradientButton } from './GradientButton';
 import { InstanceButton } from './InstanceButton';
 import { PatronagePane } from './PatronagePane';
 import { SettingsPane } from './SettingsPane';
@@ -150,8 +151,6 @@ export const Hellodex = ({
                 {__DEV__ && '-dev'}
               </span>
             </div>
-
-            {/* <div className={styles.spacer} /> */}
           </div>
 
           <div className={styles.instancesContainer}>
@@ -249,7 +248,6 @@ export const Hellodex = ({
                         opponentName={p2?.name}
                         active={active}
                         hasMorePlayers={playerCount > 2}
-                        // onPress={() => handleInstancePress(battle.battleId)}
                         onPress={() => openCalcdexInstance?.(battleId)}
                       />
                     ))}
@@ -279,10 +277,9 @@ export const Hellodex = ({
                 settings?.showBattleRecord && styles.withBattleRecord,
               )}
             >
-              <BaseButton
+              <GradientButton
                 className={styles.donateButton}
                 aria-label="Support Showdex"
-                // onPress={() => window.open(donationUrl, '_blank')}
                 onPress={() => {
                   setPatronageVisible(true);
                   setSettingsVisible(false);
@@ -295,21 +292,15 @@ export const Hellodex = ({
                   />
                 ) : (
                   <>
-                    <span className={styles.labelThicc}>
-                      Show
-                    </span>
-                    <span className={styles.labelThin}>
-                      dex
-                    </span>
-                    <span className={styles.labelThin} style={{ margin: '0 7px' }}>
+                    <strong>Show</strong>
+                    <span>dex</span>
+                    <strong style={{ margin: '0 7px' }}>
                       Some
-                    </span>
-                    <span className={styles.labelThicc}>
-                      Love
-                    </span>
+                    </strong>
+                    <strong>Love</strong>
                   </>
                 )}
-              </BaseButton>
+              </GradientButton>
 
               <div className={styles.donateFootnote}>
                 {authTitle?.title ? (

@@ -2,20 +2,15 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
-import {
-  BaseButton,
-  Button,
-  Scrollable,
-  Tooltip,
-} from '@showdex/components/ui';
+import { BaseButton, Scrollable, Tooltip } from '@showdex/components/ui';
 import { ShowdexDonorTiers, ShowdexPatronTiers } from '@showdex/consts/app';
 import { useAuthUsername, useColorScheme } from '@showdex/redux/store';
-import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import type { BaseButtonProps } from '@showdex/components/ui';
-import type { ShowdexSupporterTier } from '@showdex/consts/app';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import hellodexStyles from './Hellodex.module.scss';
+import { GradientButton } from '../GradientButton';
+import { PatronageTierRenderer } from './PatronageTierRenderer';
 import styles from './PatronagePane.module.scss';
 
 export interface PatronagePaneProps {
@@ -27,110 +22,6 @@ export interface PatronagePaneProps {
 
 const donationUrl = env('hellodex-donation-url');
 const patronageUrl = env('hellodex-patronage-url');
-
-/**
- * Internally-used tier renderer factory.
- *
- * * Return value of the outer function matches the function signature of
- *   the `callbackFn` argument of `Array.prototype.map()`.
- *   - This means you can specify this factory as the first argument
- *     after you specify the `key` (see example).
- *
- * @example
- * ```tsx
- * <div className={styles.info}>
- *   {ShowdexDonorTiers.map(TierRenderer('DonorTier'))}
- * </div>
- * ```
- * @since 1.1.5
- */
-const TierRenderer = (
-  key: string,
-) => (
-  tier: ShowdexSupporterTier,
-  index?: number,
-): JSX.Element => {
-  const {
-    title,
-    names,
-  } = tier || {};
-
-  // note: we're not checking if `names[]` is empty since we render an mdash if it is
-  if (!title || !Array.isArray(names)) {
-    return null;
-  }
-
-  const containerKey = `PatronagePane:${key}:${formatId(title)}`;
-  const notFirstTier = index > 0;
-  const namesCount = names.length;
-
-  return (
-    <React.Fragment key={containerKey}>
-      <div
-        className={styles.heading}
-        style={notFirstTier ? { marginTop: 15 } : undefined}
-      >
-        {title}
-      </div>
-
-      <div
-        className={cx(
-          styles.value,
-          !names.length && styles.empty,
-        )}
-      >
-        {names.length ? names.map((n, i) => {
-          const name = Array.isArray(n) ? n[0] : n;
-
-          if (!name) {
-            return null;
-          }
-
-          const username = formatId(name);
-          const nameKey = `${key}:${username}`;
-
-          const active = !Array.isArray(n) || n[1];
-          const nameStyle: React.CSSProperties = active ? undefined : {
-            opacity: 0.5,
-          };
-
-          const user = Array.isArray(n) && n[2];
-          const notLastChild = i < namesCount - 1;
-
-          return (
-            <React.Fragment key={nameKey}>
-              {user ? (
-                <Button
-                  display="inline"
-                  className={styles.userButton}
-                  labelStyle={nameStyle}
-                  label={name}
-                  tooltip={(
-                    <div className={styles.tooltipContent}>
-                      Open <strong>{name}</strong>'s Profile
-                    </div>
-                  )}
-                  absoluteHover
-                  onPress={() => openUserPopup(name)}
-                />
-              ) : (
-                <span style={nameStyle}>
-                  {name}
-                </span>
-              )}
-              {
-                notLastChild &&
-                <span style={{ opacity: 0.3 }}>
-                  ,{' '}
-                </span>
-              }
-            </React.Fragment>
-          );
-        }) : <>&mdash;</>}
-      </div>
-    </React.Fragment>
-  );
-};
 
 export const PatronagePane = ({
   className,
@@ -253,26 +144,22 @@ export const PatronagePane = ({
                   Please visit our Patreon for specifics on awarded benefits.
                 </div>
 
-                {ShowdexDonorTiers.map(TierRenderer('DonorTier'))}
+                {ShowdexDonorTiers.map(PatronageTierRenderer('DonorTier'))}
               </div>
 
               <div className={styles.buttonContainer}>
-                <BaseButton
-                  className={cx(hellodexStyles.donateButton, styles.button)}
+                <GradientButton
+                  className={styles.button}
                   aria-label="Donate via PayPal"
                   disabled={!donationUrl?.startsWith('https://')}
                   onPress={() => window.open(donationUrl, '_blank')}
                 >
-                  <span className={hellodexStyles.labelThicc}>
-                    Donate
-                  </span>
-                  <span className={hellodexStyles.labelThin} style={{ margin: '0 5px' }}>
+                  <strong>Donate</strong>
+                  <span style={{ margin: '0 5px' }}>
                     via
                   </span>
-                  <span className={hellodexStyles.labelThicc}>
-                    PayPal
-                  </span>
-                </BaseButton>
+                  <strong>PayPal</strong>
+                </GradientButton>
               </div>
             </div>
 
@@ -288,26 +175,22 @@ export const PatronagePane = ({
                   Batteries not included.
                 </div>
 
-                {ShowdexPatronTiers.map(TierRenderer('PatronTier'))}
+                {ShowdexPatronTiers.map(PatronageTierRenderer('PatronTier'))}
               </div>
 
               <div className={styles.buttonContainer}>
-                <BaseButton
-                  className={cx(hellodexStyles.donateButton, styles.button)}
+                <GradientButton
+                  className={styles.button}
                   aria-label={authTitle ? 'Visit Our Patreon' : 'Become a Patron'}
                   disabled={!patronageUrl?.startsWith('https://')}
                   onPress={() => window.open(patronageUrl, '_blank')}
                 >
-                  <span className={hellodexStyles.labelThicc}>
-                    {authTitle ? 'Visit' : 'Become'}
-                  </span>
-                  <span className={hellodexStyles.labelThin} style={{ margin: '0 5px' }}>
+                  <strong>{authTitle ? 'Visit' : 'Become'}</strong>
+                  <span style={{ margin: '0 5px' }}>
                     {authTitle ? 'our' : 'a'}
                   </span>
-                  <span className={hellodexStyles.labelThicc}>
-                    {authTitle ? 'Patreon' : 'Patron'}
-                  </span>
-                </BaseButton>
+                  <strong>{authTitle ? 'Patreon' : 'Patron'}</strong>
+                </GradientButton>
               </div>
             </div>
           </div>
