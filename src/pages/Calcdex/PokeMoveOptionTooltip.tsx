@@ -42,7 +42,7 @@ export const PokeMoveOptionTooltip = ({
   }
 
   const dexUltMove = pokemon?.useZ || pokemon?.useMax
-    ? dex?.moves.get(label)
+    ? dex?.moves.get(String(label))
     : null;
 
   const description = formatDexDescription(
