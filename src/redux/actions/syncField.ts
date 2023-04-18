@@ -1,8 +1,8 @@
+import { sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { CalcdexBattleField, CalcdexBattleState } from '@showdex/redux/store';
-import { sanitizeField } from './sanitizeField';
 
-const l = logger('@showdex/utils/battle/syncField');
+const l = logger('@showdex/redux/actions/syncField');
 
 export const syncField = (
   state: Partial<CalcdexBattleState>,

@@ -1,6 +1,15 @@
 import { PokemonBoostNames, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  detectToggledAbility,
+  mergeRevealedMoves,
+  sanitizePokemon,
+  sanitizeMoveTrack,
+  sanitizeVolatiles,
+} from '@showdex/utils/battle';
+import {
   calcPokemonSpreadStats,
   calcPresetCalcdexId,
   guessServerLegacySpread,
@@ -14,15 +23,8 @@ import { flattenAlts, guessTeambuilderPreset } from '@showdex/utils/presets';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexBattleState, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
-import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectLegacyGen } from './detectLegacyGen';
-import { mergeRevealedMoves } from './mergeRevealedMoves';
-import { sanitizePokemon } from './sanitizePokemon';
-import { sanitizeMoveTrack } from './sanitizeMoveTrack';
-import { sanitizeVolatiles } from './sanitizeVolatiles';
-import { detectToggledAbility } from './detectToggledAbility';
 
-// const l = logger('@showdex/utils/battle/syncPokemon');
+// const l = logger('@showdex/redux/actions/syncPokemon');
 
 export const syncPokemon = (
   pokemon: CalcdexPokemon,

@@ -14,8 +14,6 @@ import {
   sanitizePlayerSide,
   sanitizePokemon,
   sanitizeVolatiles,
-  syncField,
-  syncPokemon,
   toggleRuinAbilities,
   usedDynamax,
   usedTerastallization,
@@ -35,6 +33,8 @@ import type {
   CalcdexPokemon,
   RootState,
 } from '@showdex/redux/store';
+import { syncField } from './syncField';
+import { syncPokemon } from './syncPokemon';
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
