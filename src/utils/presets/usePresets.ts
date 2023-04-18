@@ -133,7 +133,7 @@ const selectPresetsFromResult = (
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
-// const l = logger('@showdex/pages/Calcdex/usePresets');
+// const l = logger('@showdex/utils/presets/usePresets');
 
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
