@@ -7,12 +7,16 @@ import { calcHiddenPower } from './calcHiddenPower';
 /**
  * Whether the Terastallized STAB move's BP should be boosted to 60.
  *
+ * * If the BP is dynamically determined (e.g., *Last Respects*) or is overwritten,
+ *   specify it as the `basePowerOverride` argument to prevent this from returning `true`.
+ *
  * @since 1.1.2
  */
 export const shouldBoostTeraStab = (
   format: string,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
+  basePowerOverride?: number,
 ): boolean => {
   const dex = getDexForFormat(format);
   const move = dex.moves.get(moveName);
@@ -23,9 +27,11 @@ export const shouldBoostTeraStab = (
 
   const moveId = move.id || formatId(moveName);
 
-  const basePower = moveId.startsWith('hiddenpower')
-    ? calcHiddenPower(format, pokemon)
-    : move.basePower || 0;
+  const basePower = basePowerOverride || (
+    moveId.startsWith('hiddenpower')
+      ? calcHiddenPower(format, pokemon)
+      : move.basePower || 0
+  );
 
   const abilityId = formatId(pokemon.dirtyAbility || pokemon.ability);
   const hasTechnician = abilityId === 'technician';

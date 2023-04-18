@@ -42,17 +42,6 @@ export const calcMoveBasePower = (
 
   const abilityId = formatId(pokemon?.dirtyAbility || pokemon?.ability);
 
-  /**
-   * @todo Remove this once `@smogon/calc` natively implements this.
-   */
-  // quick fix for Tera STAB moves under 60 BP (non-multihit, non-priority) not boosting to 60 BP
-  // see: https://smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/post-9460009
-  const boostTeraStab = shouldBoostTeraStab(format, pokemon, moveName);
-
-  if (boostTeraStab) {
-    basePower = 60;
-  }
-
   const hitCounter = clamp(0, pokemon?.hitCounter || 0);
   const faintCounter = clamp(0, pokemon?.faintCounter || 0);
 
@@ -62,6 +51,16 @@ export const calcMoveBasePower = (
 
   if (moveId === 'lastrespects' && faintCounter > 0) {
     basePower = clamp(0, basePower * (1 + faintCounter), 5050);
+  }
+
+  // update (2023/04/17): though @smogon/calc natively implements this now,
+  // leaving this logic here to show the boosted BP in the move's tooltip;
+  // also, this mechanic comes AFTER any boosts from Rage Fist/Last Respects
+  // (verified from the Showdown server source code)
+  const boostTeraStab = shouldBoostTeraStab(format, pokemon, moveName, basePower);
+
+  if (boostTeraStab) {
+    basePower = 60;
   }
 
   const basePowerMods: number[] = [];
