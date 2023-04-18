@@ -9,13 +9,13 @@ import type {
   CalcdexPokemonPreset,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
+import type { CalcdexPokemonUsageAltSorter } from '@showdex/utils/presets';
 import type {
   CalcdexPokemonAbilityOption,
   CalcdexPokemonItemOption,
   CalcdexPokemonMoveOption,
   CalcdexPokemonPresetOption,
-  CalcdexPokemonUsageAltSorter,
-} from '@showdex/utils/battle';
+} from '@showdex/utils/ui';
 import type { CalcdexMatchupResult } from '@showdex/utils/calc';
 import type {
   // CalcdexBattleFieldMutation,

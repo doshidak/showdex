@@ -8,7 +8,7 @@ import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@sho
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { SelectOptionTooltipProps } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-import type { PokemonStatBoostDelta } from '@showdex/utils/battle';
+import type { PokemonStatBoostDelta } from '@showdex/utils/ui';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<MoveName> {
