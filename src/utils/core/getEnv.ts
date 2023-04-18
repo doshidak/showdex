@@ -2,6 +2,7 @@ import { createEnvParser } from './createEnvParser';
 
 export const env = createEnvParser({
   BUILD_DATE: process.env.BUILD_DATE,
+  BUILD_NAME: process.env.BUILD_NAME,
   BUILD_SUFFIX: process.env.BUILD_SUFFIX,
   BUILD_TARGET: process.env.BUILD_TARGET,
 
