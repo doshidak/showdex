@@ -15,12 +15,7 @@ import {
 } from '@showdex/components/ui';
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
-import {
-  exportPokePaste,
-  formatId,
-  importPokePaste,
-  openSmogonUniversity,
-} from '@showdex/utils/app';
+import { formatId, openSmogonUniversity } from '@showdex/utils/app';
 import {
   detectToggledAbility,
   hasNickname,
@@ -29,7 +24,12 @@ import {
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
-import { detectUsageAlt, flattenAlts } from '@showdex/utils/presets';
+import {
+  detectUsageAlt,
+  exportPokePaste,
+  flattenAlts,
+  importPokePaste,
+} from '@showdex/utils/presets';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexPlayerSide } from '@showdex/redux/store';

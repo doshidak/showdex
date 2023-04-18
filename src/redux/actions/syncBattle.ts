@@ -3,15 +3,12 @@ import { AllPlayerKeys } from '@showdex/consts/battle';
 import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
-  appliedPreset,
   countActivePlayers,
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectLegacyGen,
   detectPlayerKeyFromBattle,
   detectPlayerKeyFromPokemon,
-  getPresetFormes,
-  getTeamSheetPresets,
   legalLockedFormat,
   mergeRevealedMoves,
   sanitizePlayerSide,
@@ -26,6 +23,11 @@ import {
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import {
+  appliedPreset,
+  getPresetFormes,
+  getTeamSheetPresets,
+} from '@showdex/utils/presets';
 import type { GenerationNum } from '@smogon/calc';
 import type {
   CalcdexBattleState,

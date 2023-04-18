@@ -7,14 +7,10 @@ import {
 } from '@showdex/redux/services';
 import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
-import {
-  detectGenFromFormat,
-  // getDexForFormat,
-  getGenlessFormat,
-  getPresetFormes,
-} from '@showdex/utils/battle';
+import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
 // import { logger } from '@showdex/utils/debug';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { getPresetFormes } from './getPresetFormes';
 
 /**
  * Options for the `usePresets()` hook.

@@ -9,14 +9,13 @@ import {
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { capitalize } from '@showdex/utils/humanize';
-import { flattenAlts } from '@showdex/utils/presets';
+import { flattenAlts, guessTeambuilderPreset } from '@showdex/utils/presets';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexBattleState, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { getDexForFormat } from './getDexForFormat';
-import { guessTeambuilderPreset } from './guessTeambuilderPreset';
 import { mergeRevealedMoves } from './mergeRevealedMoves';
 import { sanitizePokemon } from './sanitizePokemon';
 import { sanitizeMoveTrack } from './sanitizeMoveTrack';

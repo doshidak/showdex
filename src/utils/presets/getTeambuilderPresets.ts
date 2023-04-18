@@ -1,8 +1,9 @@
-import { formatId, unpackStorageTeam } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { env, getStoredItem } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { unpackStorageTeam } from './unpackStorageTeam';
 
 /**
  * Reads Teambuilder teams stored in `LocalStorage` and returns `CalcdexPokemonPreset[]`s.

@@ -1,5 +1,5 @@
-import { importPokePaste } from '@showdex/utils/app';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { importPokePaste } from './importPokePaste';
 
 const SummaryTag = '</summary>';
 

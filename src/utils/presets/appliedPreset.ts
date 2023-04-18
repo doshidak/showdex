@@ -1,7 +1,6 @@
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
-import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectLegacyGen } from './detectLegacyGen';
 
 /**
  * Determines if the `pokemon` has the provided `preset` applied.

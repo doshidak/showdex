@@ -16,6 +16,7 @@ import {
   sortUsageAlts,
   usageAltPercentFinder,
   usageAltPercentSorter,
+  usePresets,
   useUsageAltSorter,
 } from '@showdex/utils/presets';
 import type {
@@ -27,7 +28,6 @@ import type { CalcdexPokemonMutation } from './CalcdexContext';
 import type { CalcdexPokeContextConsumables } from './CalcdexPokeContext';
 import { CalcdexPokeContext } from './CalcdexPokeContext';
 import { useCalcdexContext } from './CalcdexProvider';
-import { usePresets } from './usePresets';
 import { useSmogonMatchup } from './useSmogonMatchup';
 
 /**

@@ -1,7 +1,6 @@
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
-import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectLegacyGen } from './detectLegacyGen';
 import { getPresetFormes } from './getPresetFormes';
 
 /**
