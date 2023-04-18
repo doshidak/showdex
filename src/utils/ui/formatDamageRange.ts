@@ -1,7 +1,7 @@
 import { logger } from '@showdex/utils/debug';
 import type { Result } from '@smogon/calc';
 
-const l = logger('@showdex/utils/calc/formatDamageRange');
+const l = logger('@showdex/utils/ui/formatDamageRange');
 
 /**
  * Extracts the damage range from the `result.desc()`.

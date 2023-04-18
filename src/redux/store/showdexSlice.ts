@@ -7,7 +7,7 @@ import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/calc';
+import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/ui';
 import type { CalcdexPlayerKey, CalcdexRenderMode } from './calcdexSlice';
 import { useDispatch, useSelector } from './hooks';
 

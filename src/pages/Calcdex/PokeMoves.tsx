@@ -10,8 +10,9 @@ import {
 } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
 import { legalLockedFormat } from '@showdex/utils/battle';
-import { formatDamageAmounts, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
+import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { clamp, upsizeArray, writeClipboardText } from '@showdex/utils/core';
+import { formatDamageAmounts } from '@showdex/utils/ui';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexMoveOverride } from '@showdex/redux/store';

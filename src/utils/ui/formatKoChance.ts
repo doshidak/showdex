@@ -9,7 +9,7 @@ export type SmogonMatchupNhkoLabels = [
   four: string,
 ];
 
-const l = logger('@showdex/utils/calc/formatKoChance');
+const l = logger('@showdex/utils/ui/formatKoChance');
 
 /**
  * Formats the KO chance object returned by `result.kochance()` into a nice `string`.

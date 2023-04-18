@@ -1,4 +1,9 @@
 import { formatId } from '@showdex/utils/app';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  legalLockedFormat,
+} from '@showdex/utils/battle';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -10,9 +15,6 @@ import {
 import type { AbilityName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import type { DropdownOption } from '@showdex/components/form';
-import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectLegacyGen } from './detectLegacyGen';
-import { legalLockedFormat } from './legalLockedFormat';
 
 export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
 

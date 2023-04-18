@@ -1,8 +1,8 @@
 import { FormatLabels } from '@showdex/consts/battle';
+import { getGenlessFormat } from '@showdex/utils/battle';
 import { percentage } from '@showdex/utils/humanize';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
-import { getGenlessFormat } from './getGenlessFormat';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -35,7 +35,7 @@ export const buildPresetOptions = (
     // 'Defensive (Physical Attacker)' -> { label: 'Defensive', subLabel: 'PHYSICAL ATTACKER' },
     // 'Metal Sound + Steelium Z' -> { label: 'Metal Sound', subLabel: '+ STEELIUM Z' },
     // 'The Pex' -> (regex fails) -> { label: 'The Pex' } (untouched lol)
-    if (/\x20+(?:\+\x20+\w[\w\x20]*|\(\w.*\))$/i.test(option.label)) {
+    if (/\x20+(?:\+\x20+\w[\w\x20]*|\(\w.*\))$/i.test(String(option.label))) {
       // update (2022/10/18): added default `[]` here cause the regex is letting some invalid
       // option.label through and I'm too lazy to find out what that is rn lol
       const [
@@ -43,7 +43,7 @@ export const buildPresetOptions = (
         label,
         plusLabel,
         subLabel,
-      ] = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i.exec(option.label) || [];
+      ] = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i.exec(String(option.label)) || [];
 
       // it'll be one or the other since the capture groups are alternatives in a non-capturing group
       const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;

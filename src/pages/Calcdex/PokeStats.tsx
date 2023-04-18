@@ -10,10 +10,11 @@ import {
   PokemonStatNames,
 } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
-import { detectStatBoostDelta, formatStatBoost, legalLockedFormat } from '@showdex/utils/battle';
+import { legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { pluralize } from '@showdex/utils/humanize';
+import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from './CalcdexPokeProvider';
 import styles from './PokeStats.module.scss';

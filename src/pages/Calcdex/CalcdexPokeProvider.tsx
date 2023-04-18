@@ -1,13 +1,6 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import {
-  buildAbilityOptions,
-  buildItemOptions,
-  buildMoveOptions,
-  buildPresetOptions,
-  hasMegaForme,
-  mergeRevealedMoves,
-} from '@showdex/utils/battle';
+import { hasMegaForme, mergeRevealedMoves } from '@showdex/utils/battle';
 import { upsizeArray } from '@showdex/utils/core';
 import {
   detectUsageAlt,
@@ -19,6 +12,12 @@ import {
   usePresets,
   useUsageAltSorter,
 } from '@showdex/utils/presets';
+import {
+  buildAbilityOptions,
+  buildItemOptions,
+  buildMoveOptions,
+  buildPresetOptions,
+} from '@showdex/utils/ui';
 import type {
   // CalcdexBattleField,
   CalcdexPlayerKey,

@@ -26,7 +26,7 @@ const SmogonMatchupDefaultNhkoColors: SmogonMatchupNhkoColors = [
   '#F44336', // 5+HKO -- (styles/config/colors.scss) colors.$red
 ];
 
-const l = logger('@showdex/utils/calc/getKoColor');
+const l = logger('@showdex/utils/ui/getKoColor');
 
 /**
  * Returns the color based on the NHKO (`n`) value from `result.kochance()`.
