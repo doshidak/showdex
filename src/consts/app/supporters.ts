@@ -45,15 +45,13 @@ export interface ShowdexSupporterTier {
  * @since 1.1.3
  */
 export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
-  title: 'Monthly Pals',
-  names: [],
-}, {
-  title: 'One-Time Pals',
+  title: 'Paid Pals',
   names: [
     'Angie L',
     ['Fubwubs', true, true],
     'Timothy B',
     'Michael L',
+    ['Bongphan', true, true],
     ['GenOne', true, true],
     ['Lunarvania', true, true],
     'Leman T',
@@ -62,7 +60,7 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
     ['momalaharris', true, true],
     ['FR1E5', true, true],
     'Tanuj C',
-    ['goldengottago', true, true],
+    ['GoldenGottaGo', true, true],
   ],
 }];
 
@@ -72,16 +70,18 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
  * @since 1.1.3
  */
 export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
-  title: 'T.3 Supreme Overlords',
-  names: [],
+  title: 'Supreme Overlords',
+  names: [
+    ['Dastardlydwarf', true, true],
+  ],
 }, {
-  title: 'T.2 Pop Bombers',
+  title: 'Pop Bombers',
   names: [
     ['benzyne', true, true],
     ['goddess mina', true, true],
   ],
 }, {
-  title: 'T.1 Blazikens',
+  title: 'Blazikens',
   names: [
     ['BruhMomentMaker', true, true],
   ],
