@@ -1,7 +1,7 @@
 import { calculate } from '@smogon/calc';
 // import { formatId } from '@showdex/utils/app';
-import { getGenDexForFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
+import { getGenDexForFormat } from '@showdex/utils/dex';
 import {
   formatDamageRange,
   formatKoChance,

@@ -1,6 +1,7 @@
 import { NIL as NIL_UUID, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
-import { detectPlayerKeyFromPokemon, getDexForFormat } from '@showdex/utils/battle';
+import { getDexForFormat } from '@showdex/utils/dex';
 import type { CalcdexPlayerKey, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export const serializePayload = <T>(payload: T): string => Object.entries(payload || {})

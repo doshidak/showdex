@@ -1,14 +1,9 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { PokemonToggleAbilities } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
-import {
-  detectGenFromFormat,
-  detectLegacyGen,
-  getGenDexForFormat,
-  // hasMegaForme,
-  notFullyEvolved,
-} from '@showdex/utils/battle';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
+import { getGenDexForFormat, notFullyEvolved } from '@showdex/utils/dex';
 import type { MoveName, Specie } from '@smogon/calc/dist/data/interface';
 import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';

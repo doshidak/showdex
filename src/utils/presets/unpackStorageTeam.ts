@@ -1,6 +1,7 @@
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/pokemon';
-import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/battle';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
+import { getDexForFormat } from '@showdex/utils/dex';
 import { clamp } from '@showdex/utils/core';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';

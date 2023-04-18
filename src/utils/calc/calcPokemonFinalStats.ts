@@ -9,18 +9,16 @@ import {
   countRuinAbilities,
   detectGenFromFormat,
   detectLegacyGen,
-  getDexForFormat,
-  notFullyEvolved,
   ruinAbilitiesActive,
 } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { getDexForFormat, notFullyEvolved, shouldIgnoreItem } from '@showdex/utils/dex';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayer, CalcdexPokemon } from '@showdex/redux/store';
 import type { CalcdexStatModRecording } from './statModRecorder';
 import { calcPokemonHp } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
-import { shouldIgnoreItem } from './shouldIgnoreItem';
 import { statModRecorder } from './statModRecorder';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats');

@@ -10,14 +10,10 @@ import {
 import { formatId } from '@showdex/utils/app';
 import {
   detectToggledAbility,
-  toggleableAbility,
   toggleRuinAbilities,
-  // sanitizeField,
   sanitizePlayerSide,
   sanitizePokemon,
   countSideRuinAbilities,
-  // usedDynamax,
-  // usedTerastallization,
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpDv,
@@ -26,7 +22,7 @@ import {
   getLegacySpcDv,
 } from '@showdex/utils/calc';
 import { logger } from '@showdex/utils/debug';
-// import type { GenerationNum } from '@smogon/calc';
+import { toggleableAbility } from '@showdex/utils/dex';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
   CalcdexBattleState,

@@ -1,4 +1,3 @@
-// import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';

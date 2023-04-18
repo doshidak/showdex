@@ -1,7 +1,7 @@
+import { detectGenFromFormat } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { Generation, Specie } from '@smogon/calc/dist/data/interface';
-import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
 import { getNaturesDex } from './getNaturesDex';
 import { getTypesDex } from './getTypesDex';

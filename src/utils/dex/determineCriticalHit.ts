@@ -1,8 +1,9 @@
-import { getMaxMove, getZMove } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
+import { getMaxMove } from './getMaxMove';
+import { getZMove } from './getZMove';
 
 /**
  * Determines whether the passed-in `moveName` should be a critical hit.

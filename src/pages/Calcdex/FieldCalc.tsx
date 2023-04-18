@@ -16,7 +16,7 @@ import {
 } from '@showdex/consts/field';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
-import { getDexForFormat, getWeatherConditions } from '@showdex/utils/battle';
+import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
 // import type { GenerationNum } from '@smogon/calc';
 import type { Weather } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';

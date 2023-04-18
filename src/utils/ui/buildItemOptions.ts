@@ -1,10 +1,7 @@
 import { eacute } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
-import {
-  getDexForFormat,
-  guessTableFormatKey,
-  legalLockedFormat,
-} from '@showdex/utils/battle';
+import { guessTableFormatKey, legalLockedFormat } from '@showdex/utils/battle';
+import { getDexForFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,

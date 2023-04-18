@@ -1,23 +1,15 @@
 import { Move as SmogonMove } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
-import {
-  getGenDexForFormat,
-  // getMaxMove,
-  // getZMove,
-  // detectGenFromFormat,
-} from '@showdex/utils/battle';
-// import { env } from '@showdex/utils/core';
 import { clamp } from '@showdex/utils/core';
-// import type { GenerationNum } from '@smogon/calc';
+import {
+  determineCriticalHit,
+  determineMoveTargets,
+  getGenDexForFormat,
+  shouldBoostTeraStab,
+} from '@showdex/utils/dex';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-// import { alwaysCriticalHits } from './alwaysCriticalHits';
-// import { calcHiddenPower } from './calcHiddenPower';
 import { calcMoveBasePower } from './calcMoveBasePower';
-// import { calcRageFist } from './calcRageFist';
-import { determineCriticalHit } from './determineCriticalHit';
-import { determineMoveTargets } from './determineMoveTargets';
-import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Overrides for `SmogonMove`.

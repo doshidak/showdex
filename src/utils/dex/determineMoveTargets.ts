@@ -4,7 +4,7 @@ import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-import type { SmogonMoveOverrides } from './createSmogonMove';
+import type { SmogonMoveOverrides } from '@showdex/utils/calc';
 
 /**
  * Performs a lookup via `@smogon/calc`'s internal dex from the detected `gen` from the passed-in `format`.

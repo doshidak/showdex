@@ -3,8 +3,13 @@ import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
 // import { useCalcdexSettings } from '@showdex/redux/store';
 // import { formatId } from '@showdex/utils/app';
-import { formatDexDescription, getDexForFormat } from '@showdex/utils/battle';
-import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
+import { calcHiddenPower } from '@showdex/utils/calc';
+import {
+  formatDexDescription,
+  getDexForFormat,
+  getMoveOverrideDefaults,
+  hasMoveOverrides,
+} from '@showdex/utils/dex';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { SelectOptionTooltipProps } from '@showdex/components/form';
 import type { CalcdexPokemon } from '@showdex/redux/store';

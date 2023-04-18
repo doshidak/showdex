@@ -1,11 +1,7 @@
 import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
-import {
-  detectGenFromFormat,
-  detectLegacyGen,
-  getDexForFormat,
-  hasNickname,
-} from '@showdex/utils/battle';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+import { getDexForFormat, hasNickname } from '@showdex/utils/dex';
 // import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 

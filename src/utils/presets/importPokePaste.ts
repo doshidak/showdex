@@ -1,8 +1,9 @@
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/battle';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env } from '@showdex/utils/core';
+import { getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';

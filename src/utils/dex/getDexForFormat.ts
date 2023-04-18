@@ -1,9 +1,9 @@
 import { formatId } from '@showdex/utils/app';
+import { detectGenFromFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
-import { detectGenFromFormat } from './detectGenFromFormat';
 
-const l = logger('@showdex/utils/battle/getDexForFormat');
+const l = logger('@showdex/utils/dex/getDexForFormat');
 
 /**
  * Returns the appropriate `Dex` object for the passed-in `format`.

@@ -1,6 +1,6 @@
 import { PokemonPresetFuckedFormes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
-import { getDexForFormat } from '@showdex/utils/battle';
+import { getDexForFormat } from '@showdex/utils/dex';
 import type { GenerationNum } from '@smogon/calc';
 
 /**

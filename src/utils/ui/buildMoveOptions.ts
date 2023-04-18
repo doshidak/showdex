@@ -1,13 +1,12 @@
 import { uarr } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
+import { detectGenFromFormat, legalLockedFormat } from '@showdex/utils/battle';
 import {
-  detectGenFromFormat,
   getDexForFormat,
   getMaxMove,
   getZMove,
   getPokemonLearnset,
-  legalLockedFormat,
-} from '@showdex/utils/battle';
+} from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,

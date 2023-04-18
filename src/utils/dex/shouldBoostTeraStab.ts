@@ -1,8 +1,8 @@
 import { formatId } from '@showdex/utils/app';
-import { getDexForFormat } from '@showdex/utils/battle';
+import { calcHiddenPower } from '@showdex/utils/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-import { calcHiddenPower } from './calcHiddenPower';
+import { getDexForFormat } from './getDexForFormat';
 
 /**
  * Whether the Terastallized STAB move's BP should be boosted to 60.

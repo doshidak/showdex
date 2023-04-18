@@ -1,7 +1,7 @@
 import { LegacyWeatherNames, WeatherMap, WeatherNames } from '@showdex/consts/field';
+import { detectGenFromFormat } from '@showdex/utils/battle';
 import type { GenerationNum } from '@smogon/calc';
 import type { Weather } from '@smogon/calc/dist/data/interface';
-import { detectGenFromFormat } from './detectGenFromFormat';
 
 /**
  * Determines the possible weather conditions for the gen number extracted from the provided `format`.

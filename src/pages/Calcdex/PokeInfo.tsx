@@ -16,13 +16,10 @@ import {
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId, openSmogonUniversity } from '@showdex/utils/app';
-import {
-  detectToggledAbility,
-  hasNickname,
-  legalLockedFormat,
-} from '@showdex/utils/battle';
+import { detectToggledAbility, legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
+import { hasNickname } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,

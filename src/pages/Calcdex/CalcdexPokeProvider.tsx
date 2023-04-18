@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { hasMegaForme, mergeRevealedMoves } from '@showdex/utils/battle';
+import { mergeRevealedMoves } from '@showdex/utils/battle';
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
+import { hasMegaForme } from '@showdex/utils/dex';
 import {
   detectUsageAlt,
   flattenAlt,

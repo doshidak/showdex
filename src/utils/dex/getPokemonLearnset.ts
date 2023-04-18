@@ -1,13 +1,12 @@
 import { formatId } from '@showdex/utils/app';
+import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
-import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
-import { guessTableFormatKey } from './guessTableFormatKey';
 
-const l = logger('@showdex/utils/battle/getPokemonLearnsets');
+const l = logger('@showdex/utils/dex/getPokemonLearnset');
 
 /**
  * Returns the legal learnsets of the passed-in `speciesForme`.

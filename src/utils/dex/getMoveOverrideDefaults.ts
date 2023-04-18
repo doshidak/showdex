@@ -1,13 +1,10 @@
-// import { formatId } from '@showdex/utils/app';
-import { getDexForFormat, getMaxMove } from '@showdex/utils/battle';
-// import type { GenerationNum } from '@smogon/calc';
+import { calcMoveBasePower } from '@showdex/utils/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexMoveOverride } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
-// import { calcHiddenPower } from './calcHiddenPower';
-import { calcMoveBasePower } from './calcMoveBasePower';
-// import { calcRageFist } from './calcRageFist';
 import { determineMoveTargets } from './determineMoveTargets';
+import { getDexForFormat } from './getDexForFormat';
+import { getMaxMove } from './getMaxMove';
 
 /**
  * Returns a `CalcdexMoveOverride` containing the default values for the passed-in `moveName`.
