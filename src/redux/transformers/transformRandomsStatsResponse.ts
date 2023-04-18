@@ -1,10 +1,10 @@
-import { detectLegacyGen, flattenAlts } from '@showdex/utils/battle';
+import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
+import { detectLegacyGen } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { PkmnSmogonPresetRequest, PkmnSmogonRandomsStatsResponse } from '@showdex/redux/services';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
-import { processUsageAlts } from './processUsageAlts';
 
 /**
  * Transforms the JSON response from the pkmn Randoms Stats API by converting the object into an array of `CalcdexPokemonPreset`s.

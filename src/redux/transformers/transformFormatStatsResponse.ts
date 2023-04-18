@@ -3,11 +3,11 @@ import { formatId } from '@showdex/utils/app';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
+import { processUsageAlts } from '@showdex/utils/presets';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
-import { processUsageAlts } from './processUsageAlts';
 
 /**
  * Transforms the JSON response from the Gen Format Stats API by converting the object into an array of `CalcdexPokemonPreset`s.

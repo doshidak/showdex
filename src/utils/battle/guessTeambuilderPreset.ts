@@ -2,7 +2,6 @@ import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
-// import { flattenAlts } from './flattenAlts';
 import { getPresetFormes } from './getPresetFormes';
 
 /**

@@ -23,14 +23,13 @@ import {
 } from '@showdex/utils/app';
 import {
   detectToggledAbility,
-  detectUsageAlt,
-  flattenAlts,
   hasNickname,
   legalLockedFormat,
 } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { capitalize } from '@showdex/utils/humanize';
+import { detectUsageAlt, flattenAlts } from '@showdex/utils/presets';
 import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexPlayerSide } from '@showdex/redux/store';

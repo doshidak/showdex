@@ -1,4 +1,4 @@
-import type { ReduxTagType } from '@showdex/consts/redux';
+import type { ReduxTagType } from '@showdex/redux/services';
 import type { ReduxBasePayload } from './buildQueryUrl';
 
 export interface ReduxProvidedTag {

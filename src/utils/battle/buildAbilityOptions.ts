@@ -1,15 +1,18 @@
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
+import {
+  detectUsageAlt,
+  flattenAlt,
+  flattenAlts,
+  usageAltPercentFinder,
+  usageAltPercentSorter,
+} from '@showdex/utils/presets';
 import type { AbilityName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import type { DropdownOption } from '@showdex/components/form';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
-import { detectUsageAlt } from './detectUsageAlt';
-import { flattenAlt, flattenAlts } from './flattenAlts';
 import { legalLockedFormat } from './legalLockedFormat';
-import { usageAltPercentFinder } from './usageAltPercentFinder';
-import { usageAltPercentSorter } from './usageAltPercentSorter';
 
 export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
 

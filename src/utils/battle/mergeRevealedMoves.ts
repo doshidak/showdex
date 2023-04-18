@@ -1,8 +1,7 @@
 import { PokemonPivotMoves } from '@showdex/consts/pokemon';
-// import { formatId } from '@showdex/utils/app';
+import { flattenAlts } from '@showdex/utils/presets';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-import { flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
 
 /**

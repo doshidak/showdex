@@ -1,8 +1,11 @@
 import { createSlice, current } from '@reduxjs/toolkit';
+import {
+  dehydrateShowdexSettings,
+  hydrateShowdexSettings,
+} from '@showdex/redux/helpers';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { dehydrateShowdexSettings, hydrateShowdexSettings } from '@showdex/utils/redux';
 import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
 import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/calc';
 import type { CalcdexPlayerKey, CalcdexRenderMode } from './calcdexSlice';

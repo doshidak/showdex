@@ -1,19 +1,22 @@
 import { uarr } from '@showdex/consts/core';
 import { formatId } from '@showdex/utils/app';
 import { percentage } from '@showdex/utils/humanize';
+import {
+  detectUsageAlt,
+  flattenAlt,
+  flattenAlts,
+  usageAltPercentFinder,
+  usageAltPercentSorter,
+} from '@showdex/utils/presets';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectUsageAlt } from './detectUsageAlt';
-import { flattenAlt, flattenAlts } from './flattenAlts';
 import { getDexForFormat } from './getDexForFormat';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';
 import { getPokemonLearnset } from './getPokemonLearnset';
 import { legalLockedFormat } from './legalLockedFormat';
-import { usageAltPercentFinder } from './usageAltPercentFinder';
-import { usageAltPercentSorter } from './usageAltPercentSorter';
 
 export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
 

@@ -1,6 +1,6 @@
 import { createSlice, current } from '@reduxjs/toolkit';
-import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { countActivePlayers, detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';

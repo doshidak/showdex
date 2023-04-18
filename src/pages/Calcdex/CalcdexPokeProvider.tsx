@@ -5,16 +5,19 @@ import {
   buildItemOptions,
   buildMoveOptions,
   buildPresetOptions,
+  hasMegaForme,
+  mergeRevealedMoves,
+} from '@showdex/utils/battle';
+import { upsizeArray } from '@showdex/utils/core';
+import {
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  hasMegaForme,
-  mergeRevealedMoves,
+  sortUsageAlts,
   usageAltPercentFinder,
   usageAltPercentSorter,
-} from '@showdex/utils/battle';
-import { upsizeArray } from '@showdex/utils/core';
-import { sortUsageAlts } from '@showdex/utils/redux';
+  useUsageAltSorter,
+} from '@showdex/utils/presets';
 import type {
   // CalcdexBattleField,
   CalcdexPlayerKey,
@@ -26,7 +29,6 @@ import { CalcdexPokeContext } from './CalcdexPokeContext';
 import { useCalcdexContext } from './CalcdexProvider';
 import { usePresets } from './usePresets';
 import { useSmogonMatchup } from './useSmogonMatchup';
-import { useUsageAltSorter } from './useUsageAltSorter';
 
 /**
  * Props passable to the `CalcdexPokeProvider` for initializing the Context for a specific Pokemon.

@@ -5,10 +5,10 @@ import cx from 'classnames';
 import lzutf8 from 'lzutf8';
 import { BuildInfo } from '@showdex/components/debug';
 import { Button, Scrollable } from '@showdex/components/ui';
+import { dehydrateCalcdex } from '@showdex/redux/helpers';
 import { useCalcdexBattleState } from '@showdex/redux/store';
 import { getResourceUrl } from '@showdex/utils/core';
 import { sanitizeStackTrace } from '@showdex/utils/debug';
-import { dehydrateCalcdex } from '@showdex/utils/redux';
 import type { ErrorBoundaryComponentProps } from '@showdex/components/debug';
 import styles from './CalcdexError.module.scss';
 

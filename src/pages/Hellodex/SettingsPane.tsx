@@ -14,6 +14,10 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import {
+  dehydrateShowdexSettings,
+  hydrateShowdexSettings,
+} from '@showdex/redux/helpers';
+import {
   useAuthUsername,
   useColorScheme,
   useShowdexSettings,
@@ -27,7 +31,6 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { dehydrateShowdexSettings, hydrateShowdexSettings } from '@showdex/utils/redux';
 import type { BadgeInstance, BaseButtonProps } from '@showdex/components/ui';
 import type { ShowdexSettings } from '@showdex/redux/store';
 import styles from './SettingsPane.module.scss';
