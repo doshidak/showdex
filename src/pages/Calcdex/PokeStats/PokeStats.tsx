@@ -16,7 +16,7 @@ import { env } from '@showdex/utils/core';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import { useCalcdexPokeContext } from './CalcdexPokeProvider';
+import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import styles from './PokeStats.module.scss';
 
 export interface PokeStatsProps {

@@ -8,13 +8,9 @@ import { syncBattle } from '@showdex/redux/actions';
 import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
-  // createSideRoom,
-  // getActiveBattle,
   getAuthUsername,
   getBattleRoom,
   getCalcdexRoomId,
-  // getCalcdexRoomId,
-  // getSideRooms,
   hasSinglePanel,
 } from '@showdex/utils/app';
 import {
@@ -36,8 +32,8 @@ import type {
   ShowdexSliceState,
 } from '@showdex/redux/store';
 import { Calcdex } from './Calcdex';
+import { CalcdexProvider } from './CalcdexContext';
 import { CalcdexError } from './CalcdexError';
-import { CalcdexProvider } from './CalcdexProvider';
 import styles from './Calcdex.module.scss';
 
 /**

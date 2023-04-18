@@ -14,9 +14,9 @@ import { capitalize } from '@showdex/utils/humanize';
 import type { DropdownOption } from '@showdex/components/form';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import type { CalcdexPlayerKey } from '@showdex/redux/store';
-import { CalcdexPokeProvider } from './CalcdexPokeProvider';
-import { useCalcdexContext } from './CalcdexProvider';
-import { PokeCalc } from './PokeCalc';
+import { CalcdexPokeProvider } from '../CalcdexPokeContext';
+import { useCalcdexContext } from '../CalcdexContext';
+import { PokeCalc } from '../PokeCalc';
 import styles from './PlayerCalc.module.scss';
 
 interface PlayerCalcProps {

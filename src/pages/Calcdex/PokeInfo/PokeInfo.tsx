@@ -31,7 +31,7 @@ import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexPlayerSide } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import { useCalcdexPokeContext } from './CalcdexPokeProvider';
+import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
 import styles from './PokeInfo.module.scss';

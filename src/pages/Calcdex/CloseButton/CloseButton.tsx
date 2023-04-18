@@ -2,9 +2,9 @@ import * as React from 'react';
 import cx from 'classnames';
 import { Button } from '@showdex/components/ui';
 import type { ButtonElement, ButtonProps } from '@showdex/components/ui';
-import styles from './CloseCalcdexButton.module.scss';
+import styles from './CloseButton.module.scss';
 
-export type CloseCalcdexButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' | 'absoluteHover' | 'children'>;
+export type CloseButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' | 'absoluteHover' | 'children'>;
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -16,12 +16,12 @@ export type CloseCalcdexButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' |
  *
  * @since 1.0.5
  */
-export const CloseCalcdexButton = React.forwardRef<ButtonElement, CloseCalcdexButtonProps>(({
+export const CloseButton = React.forwardRef<ButtonElement, CloseButtonProps>(({
   className,
   style,
   labelClassName,
   ...props
-}: CloseCalcdexButtonProps, forwardedRef) => (
+}: CloseButtonProps, forwardedRef) => (
   <Button
     ref={forwardedRef}
     {...props}

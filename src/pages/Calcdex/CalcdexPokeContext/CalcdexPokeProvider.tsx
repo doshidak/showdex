@@ -20,15 +20,11 @@ import {
   buildMoveOptions,
   buildPresetOptions,
 } from '@showdex/utils/ui';
-import type {
-  // CalcdexBattleField,
-  CalcdexPlayerKey,
-  CalcdexPokemonUsageAlt,
-} from '@showdex/redux/store';
-import type { CalcdexPokemonMutation } from './CalcdexContext';
+import type { CalcdexPlayerKey, CalcdexPokemonUsageAlt } from '@showdex/redux/store';
+import type { CalcdexPokemonMutation } from '../CalcdexContext';
 import type { CalcdexPokeContextConsumables } from './CalcdexPokeContext';
+import { useCalcdexContext } from '../CalcdexContext';
 import { CalcdexPokeContext } from './CalcdexPokeContext';
-import { useCalcdexContext } from './CalcdexProvider';
 
 /**
  * Props passable to the `CalcdexPokeProvider` for initializing the Context for a specific Pokemon.

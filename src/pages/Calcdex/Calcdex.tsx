@@ -10,14 +10,13 @@ import { getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPlayerKey } from '@showdex/redux/store';
-import { useCalcdexContext } from './CalcdexProvider';
-import { CloseCalcdexButton } from './CloseCalcdexButton';
+import { useCalcdexContext } from './CalcdexContext';
+import { CloseButton } from './CloseButton';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import styles from './Calcdex.module.scss';
 
 export interface CalcdexProps {
-  // overlayVisible?: boolean;
   onRequestOverlayClose?: () => void;
 }
 
@@ -34,16 +33,13 @@ export const Calcdex = ({
   const {
     state,
     settings,
-    // shouldRender,
   } = useCalcdexContext();
 
   const colorScheme = useColorScheme();
   const mobile = useMobileViewport();
 
   const {
-    // battleId,
     renderMode,
-    // overlayVisible,
     playerCount,
     playerKey,
     authPlayerKey,
@@ -97,20 +93,6 @@ export const Calcdex = ({
 
   const renderAsOverlay = renderMode === 'overlay';
 
-  // if (renderAsOverlay && !overlayVisible) {
-  //   return null;
-  // }
-
-  // if authPlayerKey = playerKey = 'p1' and opponentKey = 'p2',
-  // then topKey = 'p2' if authPosition is 'bottom' and 'p1' otherwise;
-  // if authPlayerKey = playerKey = 'p2' and opponentKey = 'p1',
-  // then topKey = 'p1' if authPosition is 'bottom' or 'auto', and 'p2' otherwise;
-  // const topKey = authPlayerKey && playerKey === authPlayerKey
-  //   ? settings?.authPosition === 'bottom'
-  //     ? opponentKey
-  //     : (settings?.authPosition === 'auto' ? 'p1' : playerKey)
-  //   : playerKey;
-
   const topKey = (
     !!authPlayerKey
       && playerKey === authPlayerKey
@@ -141,7 +123,7 @@ export const Calcdex = ({
 
         {
           (renderAsOverlay && mobile) &&
-          <CloseCalcdexButton
+          <CloseButton
             className={styles.topCloseButton}
             onPress={onRequestOverlayClose}
           />
@@ -174,7 +156,7 @@ export const Calcdex = ({
 
         {
           renderAsOverlay &&
-          <CloseCalcdexButton
+          <CloseButton
             className={cx(
               styles.bottomCloseButton,
               mobile && styles.mobile,

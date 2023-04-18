@@ -1,8 +1,8 @@
 import * as React from 'react';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import { PokeInfo } from './PokeInfo';
-import { PokeMoves } from './PokeMoves';
-import { PokeStats } from './PokeStats';
+import { PokeInfo } from '../PokeInfo';
+import { PokeMoves } from '../PokeMoves';
+import { PokeStats } from '../PokeStats';
 import styles from './PokeCalc.module.scss';
 
 interface PokeCalcProps {

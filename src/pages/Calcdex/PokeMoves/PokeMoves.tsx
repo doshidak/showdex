@@ -17,7 +17,7 @@ import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { BadgeInstance } from '@showdex/components/ui';
 import type { CalcdexMoveOverride } from '@showdex/redux/store';
 import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import { useCalcdexPokeContext } from './CalcdexPokeProvider';
+import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';
 

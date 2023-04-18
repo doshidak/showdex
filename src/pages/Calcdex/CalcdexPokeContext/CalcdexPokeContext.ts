@@ -18,11 +18,9 @@ import type {
 } from '@showdex/utils/ui';
 import type { CalcdexMatchupResult } from '@showdex/utils/calc';
 import type {
-  // CalcdexBattleFieldMutation,
   CalcdexContextConsumables,
   CalcdexPokemonMutation,
-} from './CalcdexContext';
-// import type { SmogonMatchupHookCalculator } from './useSmogonMatchup';
+} from '../CalcdexContext';
 
 /**
  * Stored properties for a specific Pokemon that's consumable by any Context Consumer.
