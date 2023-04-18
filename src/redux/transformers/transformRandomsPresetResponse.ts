@@ -6,7 +6,7 @@ import type { GenerationNum } from '@smogon/calc';
 import type { PkmnSmogonRandomsPresetResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
-// const l = logger('@showdex/utils/redux/transformRandomsPresetResponse');
+// const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse');
 
 /**
  * Transforms the JSON response from the Randoms API by converting the object into an array of `CalcdexPokemonPreset`s.

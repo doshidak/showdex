@@ -6,7 +6,7 @@ import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 import type { PkmnSmogonPresetRequest, PkmnSmogonPresetResponse } from '@showdex/redux/services';
 
-// const l = logger('@showdex/utils/redux/transformPresetResponse');
+// const l = logger('@showdex/redux/transformers/transformPresetResponse');
 
 /**
  * Transforms the JSON response from the Gen Sets API by converting the object into an array of `CalcdexPokemonPreset`s.

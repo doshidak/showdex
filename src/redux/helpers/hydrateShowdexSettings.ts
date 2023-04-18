@@ -49,7 +49,7 @@ const IgnoredDehydratedShowdexKeys = [
   // DehydratedShowdexSettingsMap.buildDate,
 ];
 
-const l = logger('@showdex/utils/redux/hydrateShowdexSettings');
+const l = logger('@showdex/redux/helpers/hydrateShowdexSettings');
 
 /**
  * Hydrates the passed-in dehydrated `settings`, typically for restoring settings stored in `LocalStorage`.

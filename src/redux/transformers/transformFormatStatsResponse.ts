@@ -9,6 +9,8 @@ import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
+// const l = logger('@showdex/redux/transformers/transformFormatStatsResponse');
+
 /**
  * Transforms the JSON response from the Gen Format Stats API by converting the object into an array of `CalcdexPokemonPreset`s.
  *
