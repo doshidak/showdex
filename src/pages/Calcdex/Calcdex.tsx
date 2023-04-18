@@ -59,11 +59,12 @@ export const Calcdex = ({
         const { name: playerName } = state[k];
         const playerTitle = findPlayerTitle(playerName);
 
+        const labelColor = playerTitle?.color?.[colorScheme];
+        const iconColor = playerTitle?.iconColor?.[colorScheme];
+
         return {
           labelClassName: styles.playerOption,
-          labelStyle: playerTitle?.color?.[colorScheme] ? {
-            color: playerTitle.color[colorScheme],
-          } : undefined,
+          labelStyle: labelColor ? { color: labelColor } : undefined,
           label: (
             <>
               <div className={styles.label}>
@@ -74,6 +75,7 @@ export const Calcdex = ({
                 !!playerTitle?.icon &&
                 <Svg
                   className={styles.icon}
+                  style={iconColor ? { color: iconColor } : undefined}
                   description={playerTitle.iconDescription}
                   src={getResourceUrl(`${playerTitle.icon}.svg`)}
                 />

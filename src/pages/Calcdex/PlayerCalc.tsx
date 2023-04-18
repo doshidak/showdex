@@ -71,6 +71,8 @@ export const PlayerCalc = ({
 
   const playerId = formatId(name);
   const playerTitle = findPlayerTitle(playerId);
+  const playerLabelColor = playerTitle?.color?.[colorScheme];
+  const playerIconColor = playerTitle?.iconColor?.[colorScheme];
   const playerPokemon = playerParty?.[playerIndex];
 
   // only fetch the rating if the battle didn't provide it to us
@@ -141,9 +143,7 @@ export const PlayerCalc = ({
           ) : (
             <Button
               className={styles.usernameButton}
-              style={playerTitle?.color?.[colorScheme] ? {
-                color: playerTitle.color[colorScheme],
-              } : undefined}
+              style={playerLabelColor ? { color: playerLabelColor } : undefined}
               labelClassName={styles.usernameButtonLabel}
               label={name || defaultName}
               tooltip={(
@@ -184,6 +184,7 @@ export const PlayerCalc = ({
                 !!playerTitle?.icon &&
                 <Svg
                   className={styles.usernameButtonIcon}
+                  style={playerIconColor ? { color: playerIconColor } : undefined}
                   description={playerTitle.iconDescription}
                   src={getResourceUrl(`${playerTitle.icon}.svg`)}
                 />

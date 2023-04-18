@@ -192,6 +192,9 @@ export const PatronagePane = ({
             >
               <Svg
                 className={styles.icon}
+                style={authTitle?.iconColor?.[colorScheme] ? {
+                  color: authTitle.iconColor[colorScheme],
+                } : undefined}
                 src={getResourceUrl(`${authTitle?.icon || 'sparkle'}.svg`)}
                 description={authTitle?.iconDescription || 'Sparkle Icon'}
               />

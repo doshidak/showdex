@@ -45,7 +45,11 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     : playerName;
 
   const playerTitle = findPlayerTitle(playerName);
+  const playerLabelColor = playerTitle?.color?.[colorScheme];
+  const playerIconColor = playerTitle?.iconColor?.[colorScheme];
   const opponentTitle = findPlayerTitle(opponentName);
+  const opponentLabelColor = opponentTitle?.color?.[colorScheme];
+  const opponentIconColor = opponentTitle?.iconColor?.[colorScheme];
 
   return (
     <BaseButton
@@ -84,9 +88,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                 !authPlayer &&
                 <div
                   className={styles.username}
-                  style={playerTitle?.color?.[colorScheme] ? {
-                    color: playerTitle.color[colorScheme],
-                  } : undefined}
+                  style={playerLabelColor ? { color: playerLabelColor } : undefined}
                 >
                   {playerName}
 
@@ -94,6 +96,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                     !!playerTitle?.icon &&
                     <Svg
                       className={styles.usernameIcon}
+                      style={playerIconColor ? { color: playerIconColor } : undefined}
                       description={playerTitle.iconDescription}
                       src={getResourceUrl(`${playerTitle.icon}.svg`)}
                     />
@@ -112,9 +115,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 
               <div
                 className={styles.username}
-                style={opponentTitle?.color?.[colorScheme] ? {
-                  color: opponentTitle.color[colorScheme],
-                } : undefined}
+                style={opponentLabelColor ? { color: opponentLabelColor } : undefined}
               >
                 {opponentName}
 
@@ -122,6 +123,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                   !!opponentTitle?.icon &&
                   <Svg
                     className={styles.usernameIcon}
+                    style={opponentIconColor ? { color: opponentIconColor } : undefined}
                     description={opponentTitle.iconDescription}
                     src={getResourceUrl(`${opponentTitle.icon}.svg`)}
                   />
