@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { hasMegaForme, mergeRevealedMoves } from '@showdex/utils/battle';
+import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 import {
   detectUsageAlt,
@@ -27,7 +28,6 @@ import type { CalcdexPokemonMutation } from './CalcdexContext';
 import type { CalcdexPokeContextConsumables } from './CalcdexPokeContext';
 import { CalcdexPokeContext } from './CalcdexPokeContext';
 import { useCalcdexContext } from './CalcdexProvider';
-import { useSmogonMatchup } from './useSmogonMatchup';
 
 /**
  * Props passable to the `CalcdexPokeProvider` for initializing the Context for a specific Pokemon.

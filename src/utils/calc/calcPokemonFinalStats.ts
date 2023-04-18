@@ -9,7 +9,6 @@ import {
   countRuinAbilities,
   detectGenFromFormat,
   detectLegacyGen,
-  findHighestStat,
   getDexForFormat,
   notFullyEvolved,
   ruinAbilitiesActive,
@@ -20,6 +19,7 @@ import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayer, CalcdexPokemon } from '@showdex/redux/store';
 import type { CalcdexStatModRecording } from './statModRecorder';
 import { calcPokemonHp } from './calcPokemonHp';
+import { findHighestStat } from './findHighestStat';
 import { shouldIgnoreItem } from './shouldIgnoreItem';
 import { statModRecorder } from './statModRecorder';
 

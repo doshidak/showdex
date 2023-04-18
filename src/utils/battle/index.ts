@@ -8,7 +8,6 @@ export * from './detectPlayerKey';
 export * from './detectPokemonIdent';
 export * from './detectSpeciesForme';
 export * from './detectToggledAbility';
-export * from './findHighestStat';
 export * from './formatDexDescription';
 export * from './getDexForFormat';
 export * from './getGenDexForFormat';
