@@ -1067,10 +1067,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const teraStep = battle.stepQueue.find((q) => q.startsWith('|-terastallize|') && q.includes(`|${playerKey}`));
         const [, name] = /p\d+[a-z]:\x20(.+)\|/.exec(teraStep) || [];
 
+        // if we found a name (e.g., 'p2a: Walking Wake' -> name = 'Walking Wake'), then toggle off
+        // `terastallized` for any *other* *Terastallized* Pokemon (not the one referenced in `name`)
+        // (note: `name` is not guaranteed to be the species forme since it also could be a given nickname!)
+        // (also, multiple Terastallized Pokemon could exist when the user manually toggles them on,
+        // but probably will forget to turn it off, so that's where this bit comes in)
         if (name) {
           // see note in playerState.usedMax for why this still mutates the pokemon `p`, despite using filter()
           playerState.pokemon
-            .filter((p) => p.terastallized && (p.name !== name || !p.speciesForme.includes(name)))
+            .filter((p) => p.terastallized && !p.name.includes(name) && !p.speciesForme.includes(name))
             .forEach((p) => { p.terastallized = false; });
         }
       }
