@@ -146,8 +146,9 @@ div.container {
   min-width: 12px;
   height: 12px;
   min-height: 12px;
-  @include spacing.margin($left: 1px);
+  @include spacing.margin($left: 2px);
   color: inherit;
+  transform: scale(1.1);
 }
 
 .versus {
