@@ -198,16 +198,17 @@ button.damageButton {
   }
 }
 
+.copiedBadge {
+  @include position.absolute($top: -3px, $left: 50%);
+  white-space: nowrap;
+}
+
 .descTooltip {
   position: relative;
   max-width: 200px;
   text-align: center;
   white-space: normal;
   user-select: none;
-
-  .copiedBadge {
-    @include position.absolute($top: -16px, $left: 50%);
-  }
 
   .ultUsage {
     font-size: 8px;

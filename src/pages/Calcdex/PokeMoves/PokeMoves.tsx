@@ -383,13 +383,6 @@ export const PokeMoves = ({
 
         const matchupTooltip = showMatchupTooltip ? (
           <div className={styles.descTooltip}>
-            <Badge
-              ref={(ref) => { copiedRefs.current[i] = ref; }}
-              className={styles.copiedBadge}
-              label="Copied!"
-              color="green"
-            />
-
             {settings?.prettifyMatchupDescription ? (
               <>
                 {description?.attacker}
@@ -717,7 +710,14 @@ export const PokeMoves = ({
                           description.raw,
                           showDamageAmounts && `(${description.damageAmounts})`,
                         ].filter(Boolean).join(' '))}
-                      />
+                      >
+                        <Badge
+                          ref={(ref) => { copiedRefs.current[i] = ref; }}
+                          className={styles.copiedBadge}
+                          label="Copied!"
+                          color="green"
+                        />
+                      </Button>
                     ) : (
                       <Tooltip
                         content={matchupTooltip}
