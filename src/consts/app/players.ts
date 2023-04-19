@@ -142,7 +142,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   iconDescription: 'Dragon Head Icon',
 
   color: {
-    light: '#FFC800',
+    light: '#D5AD1C',
     dark: '#FFC800',
   },
 
