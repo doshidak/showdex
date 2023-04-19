@@ -358,22 +358,6 @@ export const PokeInfo = ({
             <PokeTypeField
               className={styles.typesField}
               label={`Types for Pokemon ${friendlyPokemonName}`}
-              // tooltip={(
-              //   <div className={styles.tooltipContent}>
-              //     Change{' '}
-              //     {
-              //       !!pokemon?.speciesForme &&
-              //       <>
-              //         <strong>
-              //           {pokemon.speciesForme}
-              //         </strong>'s
-              //         {' '}
-              //       </>
-              //     }
-              //     Types
-              //   </div>
-              // )}
-              // tooltipDisabled={!settings?.showUiTooltips}
               multi
               input={{
                 name: `PokeInfo:Types:${pokemonKey}`,
@@ -489,25 +473,10 @@ export const PokeInfo = ({
                   className={cx(
                     styles.toggleButton,
                     styles.importButton,
-                    // !settings?.showUiTooltips && styles.floatingBadges,
                   )}
                   label="Import"
                   tooltip={(
                     <div className={styles.tooltipContent}>
-                      {/* <Badge
-                        ref={importBadgeRef}
-                        className={styles.importBadge}
-                        label="Imported"
-                        color="blue"
-                      />
-
-                      <Badge
-                        ref={importFailedBadgeRef}
-                        className={styles.importBadge}
-                        label={importFailedReason}
-                        color="red"
-                      /> */}
-
                       Import Pok&eacute;Paste from Clipboard
                     </div>
                   )}
@@ -537,20 +506,6 @@ export const PokeInfo = ({
                   label="Export"
                   tooltip={pokePaste ? (
                     <div className={styles.pokePasteTooltip}>
-                      {/* <Badge
-                        ref={exportBadgeRef}
-                        className={styles.importBadge}
-                        label="Copied!"
-                        color="green"
-                      />
-
-                      <Badge
-                        ref={exportFailedBadgeRef}
-                        className={styles.importBadge}
-                        label="Failed"
-                        color="red"
-                      /> */}
-
                       {pokePaste}
                     </div>
                   ) : null}
@@ -561,14 +516,14 @@ export const PokeInfo = ({
                 >
                   <Badge
                     ref={exportBadgeRef}
-                    className={cx(styles.importBadge, styles.floating)}
+                    className={styles.importBadge}
                     label="Copied!"
                     color="green"
                   />
 
                   <Badge
                     ref={exportFailedBadgeRef}
-                    className={cx(styles.importBadge, styles.floating)}
+                    className={styles.importBadge}
                     label="Failed"
                     color="red"
                   />
