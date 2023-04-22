@@ -12,10 +12,10 @@ import { getBattleRoom } from './getBattleRoom';
  * * Provide the optional Redux `store` argument to supply the room's `requestLeave()` handler,
  *   which will update the corresponding `BattleRoom` and `CalcdexBattleState`, if any,
  *   when the user leaves the room.
- * * As of v1.1.5, this will create a `ReactDOM.Root` from the `HtmlRoom`'s `el` (`HTMLDivElement`),
- *   accessible under the `reactRoot` property.
- *   - When this room's `requestLeave()` is called (typically by `app.leaveRoom()` or the user closing
- *     the tab), `reactRoot.unmount()` will be automatically called.
+ * * As of v1.1.5, this will create a `ReactDOM.Root` from the `Showdown.HtmlRoom`'s `el`
+ *   (`HTMLDivElement`), accessible under the `reactRoot` property.
+ *   - When this room's `requestLeave()` is called (typically by `app.leaveRoom()` or the user
+ *     closing the tab), `reactRoot.unmount()` will be automatically called.
  *
  * @since 1.0.3
  */

@@ -6,11 +6,11 @@ import { createHtmlRoom } from './createHtmlRoom';
  * Creates an `HtmlRoom` via `createHtmlRoom()` specially made to house a `Hellodex`.
  *
  * * Essentially exists to keep all the properties like the room name and icon consistent.
- * * Auto-focuses the room once created, but this behavior can be disabled if `focusRoomsRoom` of the
- *   user's `ShowdexHellodexSettings` is `true`.
- * * Creates a `ReactDOM.Root` from the `Showdown.HtmlRoom`'s `el` (`HTMLDivElement`), accessible under
- *   the `reactRoot` property.
- *   - When this room's `requestLeave()` is called (typically by `app.leaveRoom()` or the user closing
+ * * Auto-focuses the room once created, but this behavior can be disabled if `focusRoomsRoom` of
+ *   the user's `ShowdexHellodexSettings` is `true`.
+ * * Creates a `ReactDOM.Root` from the `Showdown.HtmlRoom`'s `el` (`HTMLDivElement`), accessible
+ *   under the `reactRoot` property.
+ *   - When this room's `requestLeave()` is called (typically by `app.leaveRoom()` or the user
  *     closing the tab), `reactRoot.unmount()` will be automatically called.
  *
  * @since 1.1.5
