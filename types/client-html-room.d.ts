@@ -38,6 +38,9 @@ declare namespace Showdown {
     public events: Record<string, string>;
     public lastUpdate?: number;
 
+    // Showdex-injected custom properties
+    reactRoot?: import('react-dom/client').Root;
+
     public constructor(props?: {
       id: string;
       el?: JQuery<HTMLDivElement>;
