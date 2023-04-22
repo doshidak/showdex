@@ -18,9 +18,6 @@ import { Hellodex } from './Hellodex';
 
 const l = logger('@showdex/pages/Hellodex/Hellodex.bootstrap');
 
-// Hellodex should only open once during initialization of the Showdown client
-// let opened = false;
-
 export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
   l.debug(
     'Hellodex bootstrapper was invoked;',
@@ -137,10 +134,9 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       // at this point, we need to recreate the room
       // (we should also be in the 'panel' renderMode now)
       const calcdexRoom = createCalcdexRoom(battleId, true, store);
-      const calcdexReactRoot = ReactDOM.createRoot(calcdexRoom.el);
 
       renderCalcdex(
-        calcdexReactRoot,
+        calcdexRoom.reactRoot,
         store,
         battleRoom?.battle?.id || battleId,
         // battleRoom,
