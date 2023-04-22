@@ -117,7 +117,9 @@ div.container {
 
 .format {
   // max-width: 100%;
+  @include spacing.margin($bottom: 2px);
   font-size: 10px;
+  letter-spacing: 0.25px;
   text-transform: uppercase;
   text-overflow: ellipsis;
   white-space: nowrap;
