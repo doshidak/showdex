@@ -259,6 +259,7 @@ button.spectateButton {
   @include spacing.margin-xy($x: auto);
   font-size: 10px;
   text-align: center;
+  line-height: 14px;
   user-select: none;
 
   &.withBattleRecord {
