@@ -10,8 +10,8 @@
   <thead>
     <tr>
       <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.1.5">v1.1.5</a>&nbsp;</th>
-      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome · Edge · Brave</a> · <a href="https://addons.opera.com/en/extensions/details/showdex">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
-      <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a></th>
+      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome</a> · <a href="https://addons.opera.com/en/extensions/details/showdex">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
+      <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://discord.gg/2PXVGGCkm2">Discord</a></th>
     </tr>
   </thead>
 </table>
@@ -201,7 +201,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
   * **`yarn patch-ghooks`** → [**`./scripts/patch-ghooks.sh`**](./scripts/patch-ghooks.sh)
 
-  > This project is configured for **ES Modules** (as opposed to ye olde **CommonJS**), while also making use of [`cz-customizable`](https://github.com/leoforfree/cz-customizable), which requires [`cz-customizable-ghooks`](https://github.com/uglow/cz-customizable-ghooks), which requires [**`ghooks`**](https://github.com/ghooks-org/ghooks).
+  > This project is configured for **ES Modules** (ESM) (as opposed to ye olde **CommonJS** [CJS]), while also making use of [`cz-customizable`](https://github.com/leoforfree/cz-customizable), which requires [`cz-customizable-ghooks`](https://github.com/uglow/cz-customizable-ghooks), which requires [**`ghooks`**](https://github.com/ghooks-org/ghooks).
   >
   > Node v18 doesn't allow you to run extensionless files (such as `.git/hooks/commit-msg`), which `ghooks` poops out, so [**`patch-ghooks`**](./scripts/patch-ghooks.sh) adds `.js` at the end of each pooped out file (e.g., `.git/hooks/commit-msg.js`).
   >
@@ -211,9 +211,9 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 
   > This runs [**`patch-package`**](https://github.com/ds300/patch-package), which reads from the [**`patches`**](./patches) directory and applies the `diff` to the corresponding package in *your* `node_modules`.
   >
-  > [Patch for `@smogon/calc`](./patches/%40smogon%2Bcalc%2B0.7.0.patch) incorporates all the changes up to the [`0422360`](https://github.com/smogon/damage-calc/tree/04223605907163b7315b138ef0aa5a2b45cf228c) commit, which adds support for Gen 9 & revealed DLC mechanics. These changes are unpublished in the [v0.7.0 release on npm](https://npmjs.com/package/@smogon/calc/v/0.7.0) (at the time of writing on 2023/03/28). Not all Gen 9 mechanics are supported however, so the Calcdex will handle some of these mechanics until native support for them are added. Additionally, the patch adds support for independently toggling the [*Protosynthesis*](https://smogon.com/dex/sv/abilities/protosynthesis) & [*Quark Drive*](https://smogon.com/dex/sv/abilities/quark-drive) abilities without the need for the [*Booster Energy*](https://smogon.com/dex/sv/items/booster-energy) item or updating field conditions, which can affect damage calculations (e.g., [*Knock Off*](https://smogon.com/dex/sv/moves/knock-off), [*Acrobatics*](https://smogon.com/dex/sv/moves/acrobatics), [Fire/Water-type moves from the Sun](https://smogon.com/dex/sv/moves/sunny-day)).
+  > [Patches for `@babel/*`](./patches/%40babel%2Bhelper-replace-supers%2B%2B%40babel%2Bhighlight%2B7.18.6.patch) replaces the `require()` calls when importing [`chalk`](https://npmjs.org/package/chalk), built using ESM, in each internal `@babel/*` package's unique installation of [`@babel/highlight`](https://npmjs.org/package/%40babel%2fhighlight) with dynamic `import()` calls, which is necessary to `import()` ESM modules into CJS modules. Without applying these patches, webpack will throw an `ERR_REQUIRE_ESM` error as you cannot call `require()` on ESM in CJS. There are 5 different internal `@babel/*` patches: [`@babel/helper-replace-supers/@babel/highlight`](./patches/%40babel%2Bhelper-replace-supers%2B%2B%40babel%2Bhighlight%2B7.18.6.patch), [`@babel/helper-wrap-function/@babel/highlight`](./patches/%40babel%2Bhelper-wrap-function%2B%2B%40babel%2Bhighlight%2B7.18.6.patch), [`@babel/plugin-transform-modules-umd/@babel/highlight`](./patches/%40babel%2Bplugin-transform-modules-umd%2B%2B%40babel%2Bhighlight%2B7.18.6.patch), [`@babel/template/@babel/highlight`](./patches/%40babel%2Btemplate%2B%2B%40babel%2Bhighlight%2B7.18.6.patch) & [`@babel/traverse/@babel/highlight`](./patches/%40babel%2Btraverse%2B%2B%40babel%2Bhighlight%2B7.18.6.patch).
   >
-  > [Patch for `react-select`](./patches/react-select%2B5.4.0.patch) wraps the [`scrollIntoView()` call in the `componentDidUpdate()` of the `Select` component](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/Select.tsx#L735-L743) in a `setTimeout()` so that the internal [`menuListRef`](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/Select.tsx#L1928-L1931) is available when the menu first opens.
+  > [Patch for `@smogon/calc`](./patches/%40smogon%2Bcalc%2B0.7.0.patch) incorporates all the changes up to the [`0422360`](https://github.com/smogon/damage-calc/tree/04223605907163b7315b138ef0aa5a2b45cf228c) commit, which adds support for Gen 9 & revealed DLC mechanics. These changes are unpublished in the [v0.7.0 release on npm](https://npmjs.com/package/@smogon/calc/v/0.7.0) (at the time of writing on 2023/03/28). Not all Gen 9 mechanics are supported however, so the Calcdex will handle some of these mechanics until native support for them are added. Additionally, the patch adds support for independently toggling the [*Protosynthesis*](https://smogon.com/dex/sv/abilities/protosynthesis) & [*Quark Drive*](https://smogon.com/dex/sv/abilities/quark-drive) abilities without the need for the [*Booster Energy*](https://smogon.com/dex/sv/items/booster-energy) item or updating field conditions, which can affect damage calculations (e.g., [*Knock Off*](https://smogon.com/dex/sv/moves/knock-off), [*Acrobatics*](https://smogon.com/dex/sv/moves/acrobatics), [Fire/Water-type moves from the Sun](https://smogon.com/dex/sv/moves/sunny-day)).
   >
   > [`scrollIntoView()`](https://github.com/JedWatson/react-select/blob/4b8468636bcfadf0cfe45f9a7a6c1db5dca08d9a/packages/react-select/src/utils.ts#L234-L259) is responsible for auto-scrolling the `MenuList` to the focused option that is overflowed (i.e., out of view). It's also responsible for auto-scrolling to the selected option when the `MenuList` first opens. When used in conjunction with [`simplebar`](https://github.com/Grsmto/simplebar) (via [`Scrollable`](./src/components/ui/Scrollable/Scrollable.tsx)), the `scrollRef` of `Scrollable` may not be available as soon as it mounts, so the `setTimeout()` gives the `menuListRef` time to set (by placing the `scrollIntoView()` call at the top of the call stack).
   >
@@ -405,12 +405,13 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 >
 > If possible, including the following would be **immensely** helpful!
 >
-> * **OS** (e.g., Windows, macOS, Android, etc.)
-> * **Browser** (e.g., Chrome, Firefox, etc.)
+> * **Device** (e.g., Custom PC, MacBook Pro 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
+> * **OS** & **Version** (e.g., Windows 11, macOS Ventura, Ubuntu 22, Android 14, etc.)
+> * **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
 > * **Showdex Version** (e.g., v1.1.5)
 > * **Format**, if applicable (e.g., Gen 9 National Dex AG)
 >
-> If you would like to be [credited for your contribution](#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
+> If you would like to be [credited for your contribution](#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
 
 &nbsp;[Create a GitHub Issue](https://github.com/doshidak/showdex/issues/new)&nbsp;
 --- |
@@ -426,7 +427,16 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 <br>
 
-> **Not on Smogon Forums?** Still, no problem!
+> **Not on Smogon Forums?** All good!
+>
+> We also created a Discord community with channels where you can report bugs, request features & get help.
+
+&nbsp;[Join Our Discord](https://discord.gg/2PXVGGCkm2)&nbsp;
+--- |
+
+<br>
+
+> **No Discord?** Still, no problem!
 >
 > Feel free to contact me directly via email.
 
@@ -463,7 +473,7 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 big thank to:
 
-* [**camdawgboi**](https://smogon.com/forums/members/camboi.435338) for the idea & UI/UX design,
+* [**analogcam**](https://smogon.com/forums/members/camboi.435338) for the idea & UI / UX design,
 * [**ttoki**](https://smogon.com/forums/members/ttoki.606212) for being our first tester,
 * [**Smogon Dev Team**](https://github.com/smogon) & the [**`@smogon/calc` Maintainers & Contributors**](https://github.com/smogon/damage-calc) for the sauce,
 * [**pre**](https://smogon.com/forums/members/pre.10544) & [**pkmn.cc**](https://pkmn.cc) for keeping the Smogon sets hot, fresh & downloadable,
@@ -479,44 +489,50 @@ big thank to:
 
 big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to these fine individuals for their generous support!
 
-### Patrons
+### [Patrons](https://patreon.com/showdex)
 
 <table>
   <tbody>
     <tr>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/benzyne"><strong>benzyne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goddessmina"><strong>goddess mina</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/bruhmomentmaker"><strong>BruhMomentMaker</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/dastardlydwarf"><strong>Dastardlydwarf</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/benzyne"><strong>benzyne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goddessmina"><strong>goddess mina</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/bruhmomentmaker"><strong>BruhMomentMaker</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
 </table>
 
-&nbsp;&nbsp;**(づ￣ ³￣)づ**
+&nbsp;&nbsp;**༼ つ  ͡° ͜ʖ ͡° ༽つ**
 
-### Donors
+### [Donors](https://paypal.com/donate/?hosted_button_id=ZUYJAGAVX6MBN)
 
 <table>
   <tbody>
     <tr>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Angie L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fubwubs"><strong>Fubwubs</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Timothy B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Angie L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fubwubs"><strong>Fubwubs</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Timothy B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://smogon.com/forums/members/genone.306383"><strong>GenOne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/lunarvania"><strong>Lunarvania</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/bongphan"><strong>Bongphan</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://smogon.com/forums/members/genone.306383"><strong>GenOne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Peter T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fr1e5"><strong>FR1E5</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/lunarvania"><strong>Lunarvania</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
-      <td width="205px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goldengottago"><strong>goldengottago</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Peter T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fr1e5"><strong>FR1E5</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goldengottago"><strong>GoldenGottaGo</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -532,8 +548,8 @@ another big thank to these fine people for helping with development!
 <table>
   <tbody>
     <tr>
-      <td width="210px" align="center"><a href="https://github.com/SpiffyTheSpaceman"><strong>SpiffyTheSpaceman</strong></a></td>
-      <td width="210px" align="center"><a href="https://smogon.com/forums/members/malaow3.507739"><strong>malaow3</strong></a> · <a href="https://github.com/malaow3">GitHub</a></td>
+      <td width="220px" align="center"><a href="https://github.com/SpiffyTheSpaceman"><strong>SpiffyTheSpaceman</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/malaow3.507739"><strong>malaow3</strong></a> · <a href="https://github.com/malaow3">GitHub</a></td>
     </tr>
   </tbody>
 </table>
@@ -615,19 +631,24 @@ another big thank to these fine people for helping with development!
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GitHub</a></td>
     </tr>
     <tr>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/shrikenw.628342"><strong>ShrikeNW</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GitHub</a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/sorrica.367602"><strong>Sorrica</strong></a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/surgent-james.483985"><strong>Surgent James</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
-    </tr>
-    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/timboberino.619145"><strong>Timboberino</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/timboberino.619145"><strong>Timboberino</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/turtlek.604739"><strong>Turtlek</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/zooki2006"><strong>zooki2006</strong></a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GitHub</a></td>
     </tr>
   </tbody>
