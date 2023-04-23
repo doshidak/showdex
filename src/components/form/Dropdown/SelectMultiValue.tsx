@@ -30,7 +30,7 @@ export const SelectMultiValue = <
     innerProps={{
       className: cx(
         styles.multiValue,
-        isDisabled && styles.disabled,
+        (isDisabled || data?.disabled) && styles.disabled,
         className,
       ),
       ...innerProps,

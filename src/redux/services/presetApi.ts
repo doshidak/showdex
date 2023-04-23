@@ -1,17 +1,17 @@
 import { HttpMethod } from '@showdex/consts/core';
-import { PokemonReduxTagType } from '@showdex/consts/redux';
-import { env, runtimeFetch } from '@showdex/utils/core';
+import { createTagProvider } from '@showdex/redux/helpers';
 import {
-  createTagProvider,
   transformFormatPresetResponse,
   transformFormatStatsResponse,
   transformPresetResponse,
   transformRandomsPresetResponse,
   transformRandomsStatsResponse,
-} from '@showdex/utils/redux';
+} from '@showdex/redux/transformers';
+import { env, runtimeFetch } from '@showdex/utils/core';
 import type { GenerationNum } from '@smogon/calc';
 import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { PokemonReduxTagType } from './tagTypes';
 import { pkmnApi } from './pkmnApi';
 
 /**

@@ -8,13 +8,9 @@ import { syncBattle } from '@showdex/redux/actions';
 import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
-  // createSideRoom,
-  // getActiveBattle,
   getAuthUsername,
   getBattleRoom,
   getCalcdexRoomId,
-  // getCalcdexRoomId,
-  // getSideRooms,
   hasSinglePanel,
 } from '@showdex/utils/app';
 import {
@@ -36,8 +32,8 @@ import type {
   ShowdexSliceState,
 } from '@showdex/redux/store';
 import { Calcdex } from './Calcdex';
+import { CalcdexProvider } from './CalcdexContext';
 import { CalcdexError } from './CalcdexError';
-import { CalcdexProvider } from './CalcdexProvider';
 import styles from './Calcdex.module.scss';
 
 /**
@@ -54,27 +50,34 @@ export interface BattleRoomOverride<
   native: TFunc;
 }
 
+/**
+ * Renders the React-based Calcdex interface.
+ *
+ * * Only required fields are a `dom` created by `ReactDOM.createRoot()`, a `store` containing the
+ *   `CalcdexSliceState` & a `battleId` inside the `CalcdexSliceState`.
+ *   - You'd typically only provide `battleRoom` for active battles, which primarily contain G-Max
+ *     forme data about an auth player's `Showdown.ServerPokemon`.
+ * * As of v1.1.5, if you used `createCalcdexRoom()` & provided the optional `rootElement` argument,
+ *   you can use the embedded `reactRoot` property for `dom` in the returned `Showdown.HtmlRoom`.
+ *   - e.g., If `calcdexRoom` stores the return value of `createCalcdexRoom()`, you can pass in
+ *     `calcdexRoom.reactRoot` for the `dom` argument of this function.
+ * * Note that this is `export`'d & used by other outside components, like the Hellodex.
+ *
+ * @since 1.0.3
+ */
 export const renderCalcdex = (
   dom: ReactDOM.Root,
   store: RootStore,
   battleId: string,
-  // battle?: Showdown.Battle | string,
   battleRoom?: Showdown.BattleRoom,
 ): void => dom.render((
   <ReduxProvider store={store}>
     <ErrorBoundary
       component={CalcdexError}
       battleId={battleId}
-      // battleId={typeof battle === 'string' ? battle : battle?.id}
     >
-      <CalcdexProvider
-        battleId={battleId}
-        // battleId={typeof battle === 'string' ? battle : battle?.id}
-        // battle={typeof battle === 'string' ? undefined : battle}
-        // request={battleRoom?.request}
-      >
+      <CalcdexProvider battleId={battleId}>
         <Calcdex
-          // overlayVisible={typeof battle !== 'string' && battle?.calcdexOverlayVisible}
           // note: if we dispatch overlayClosed to false, the battleRoom and the injected Calcdex button
           // won't properly update to reflect the closed state, so we must provide this prop
           onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
@@ -90,6 +93,7 @@ export const renderCalcdex = (
  * * Specify the `forceResult` argument when you know the `battle` object might not be available.
  *   - `battle` wouldn't be typically available in a `ForfeitPopup`, for instance.
  *
+ * @todo Refactor this into a Redux actionator like `syncBattle()`.
  * @since 1.0.6
  */
 const updateBattleRecord = (
@@ -285,7 +289,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
   // update (2023/02/01): used to be in the battle object as calcdexReactRoot, but post-refactor, we no longer
   // need to keep a reference in the battle object (Hellodex will create a new root via ReactDOM.createRoot() btw)
-  let calcdexReactRoot: ReactDOM.Root;
+  // update (2023/04/22): jk, we need a reference to it now in order to call calcdexReactRoot.unmount() --
+  // just in the debug logs that the React roots of already closed battles (in the same session) are still mounted!
+  // the ReactDOM.Root will be stored in battle.calcdexRoom.reactRoot for panel tabs & (rather confusingly)
+  // battle.calcdexReactRoot for battle overlays (potentially could rename it to calcdexOverlayReactRoot... LOL)
+  // let calcdexReactRoot: ReactDOM.Root;
 
   const openAsPanel = !calcdexSettings?.openAs
     || calcdexSettings.openAs === 'panel'
@@ -293,6 +301,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
   if (openAsPanel) {
     // create the calcdexRoom if it doesn't already exist (shouldn't tho)
+    // update (2023/04/22): createCalcdexRoom() will also create a ReactDOM.Root under reactRoot
     if (!battle.calcdexRoom) {
       battle.calcdexRoom = createCalcdexRoom(roomid, true, store);
     }
@@ -344,7 +353,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       return true;
     };
 
-    calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
+    // update (2023/04/22): we're now creating the ReactDOM.Root automatically in createCalcdexRoom(),
+    // which will also automatically call unmount() when the room's requestLeave() is invoked
+    // battle.calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
   } else { // must be opening as an overlay here
     // set the initial visibility of the overlay
     // update (2023/02/01): after refactoring the Calcdex to not touch the battle object within React,
@@ -562,7 +573,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // (couldn't get it to play nicely when injecting into $chatFrame sadge)
     // (also, $rootContainer's className is the .overlayContainer module to position it appropriately)
     $el.append($rootContainer);
-    calcdexReactRoot = ReactDOM.createRoot($rootContainer[0]);
+    battle.calcdexReactRoot = ReactDOM.createRoot($rootContainer[0]);
 
     // handle destroying the Calcdex when leaving the battleRoom
     const requestLeave = battleRoom.requestLeave.bind(battleRoom) as typeof battleRoom.requestLeave;
@@ -585,8 +596,14 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
 
           forfeitPopup.submit = (data) => {
+            // clean up allocated memory from React & Redux for this Calcdex instance
+            battle?.calcdexReactRoot?.unmount?.();
             store.dispatch(calcdexSlice.actions.destroy(roomid));
+
+            // update the Hellodex W/L battle record
             updateBattleRecord(store, battleRoom?.battle, 'loss');
+
+            // call the original function
             submitForfeit(data);
           };
         }
@@ -601,6 +618,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         store.dispatch(calcdexSlice.actions.destroy(battleId));
 
         if (battle?.id) {
+          battle.calcdexReactRoot?.unmount?.();
           battle.calcdexDestroyed = true;
         }
       }
@@ -950,6 +968,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
         // sets battle.calcdexDestroyed to true and `delete`s the calcdexRoom property
         // update (2023/02/01): no longer `delete`s the calcdexReactRoot since it's not stored in the battle anymore
+        // update (2023/04/22): overwritten calcdexRoom.requestLeave() handler (invoked by app.leaveRoom())
+        // will automatically call calcdexRoom.reactRoot.unmount(); additionally, the battle's calcdexReactRoot is
+        // exclusively being used for battle overlays now (as of v1.1.5)
         app.leaveRoom(calcdexRoomId);
       }
 
@@ -998,6 +1019,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   // dispatching battle updates (we're dispatching them out here in the bootstrapper).
   // state mutations in Redux should trigger necessary UI re-renders within React.
   // (also probably no longer need to reference the calcdexReactRoot in the battle object now tbh)
+  // update (2023/04/22): nope -- we still do! we have to call calcdexReactRoot.unmount(),
+  // which obviously won't be available on subsequent bootstrapper invocations as a local var,
+  // so... back in the `battle` (for overlays) or `calcdexRoom` (for tabs) you go!
+  const calcdexReactRoot = battle.calcdexReactRoot || battle.calcdexRoom?.reactRoot;
+
   if (calcdexReactRoot) {
     l.debug(
       'Rendering Calcdex for', battle.id || roomid,

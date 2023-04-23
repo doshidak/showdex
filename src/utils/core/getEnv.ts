@@ -1,8 +1,9 @@
-import type { EnvDict } from './createEnvParser';
 import { createEnvParser } from './createEnvParser';
 
-const processEnv: EnvDict = {
+export const env = createEnvParser({
   BUILD_DATE: process.env.BUILD_DATE,
+  BUILD_NAME: process.env.BUILD_NAME,
+  BUILD_SUFFIX: process.env.BUILD_SUFFIX,
   BUILD_TARGET: process.env.BUILD_TARGET,
 
   CALCDEX_DEFAULT_GEN: process.env.CALCDEX_DEFAULT_GEN,
@@ -10,6 +11,7 @@ const processEnv: EnvDict = {
   CALCDEX_POKEMON_MAX_LEGAL_EVS: process.env.CALCDEX_POKEMON_MAX_LEGAL_EVS,
 
   HELLODEX_BUGS_URL: process.env.HELLODEX_BUGS_URL,
+  HELLODEX_COMMUNITY_URL: process.env.HELLODEX_COMMUNITY_URL,
   HELLODEX_DONATION_URL: process.env.HELLODEX_DONATION_URL,
   HELLODEX_ENABLED: process.env.HELLODEX_ENABLED,
   HELLODEX_FEATURES_URL: process.env.HELLODEX_FEATURES_URL,
@@ -20,8 +22,12 @@ const processEnv: EnvDict = {
 
   NODE_ENV: process.env.NODE_ENV,
 
+  PACKAGE_AUTHOR_EMAIL: process.env.PACKAGE_AUTHOR_EMAIL,
+  PACKAGE_AUTHOR_NAME: process.env.PACKAGE_AUTHOR_NAME,
+  PACKAGE_DESCRIPTION: process.env.PACKAGE_DESCRIPTION,
   PACKAGE_NAME: process.env.PACKAGE_NAME,
   PACKAGE_VERSION: process.env.PACKAGE_VERSION,
+  PACKAGE_VERSION_SUFFIX: process.env.PACKAGE_VERSION_SUFFIX,
   PACKAGE_URL: process.env.PACKAGE_URL,
 
   PKMN_PRESETS_BASE_URL: process.env.PKMN_PRESETS_BASE_URL,
@@ -39,6 +45,4 @@ const processEnv: EnvDict = {
   STORAGE_TEAMBUILDER_KEY: process.env.STORAGE_TEAMBUILDER_KEY,
 
   UUID_NAMESPACE: process.env.UUID_NAMESPACE,
-};
-
-export const env = createEnvParser(processEnv, 'DEBUG');
+}, 'DEBUG');

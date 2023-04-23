@@ -3,21 +3,17 @@ import { AllPlayerKeys } from '@showdex/consts/battle';
 import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
 import { formatId } from '@showdex/utils/app';
 import {
-  appliedPreset,
+  countActivePlayers,
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
   detectLegacyGen,
   detectPlayerKeyFromBattle,
   detectPlayerKeyFromPokemon,
-  getPresetFormes,
-  getTeamSheetPresets,
   legalLockedFormat,
   mergeRevealedMoves,
   sanitizePlayerSide,
   sanitizePokemon,
   sanitizeVolatiles,
-  syncField,
-  syncPokemon,
   toggleRuinAbilities,
   usedDynamax,
   usedTerastallization,
@@ -25,6 +21,11 @@ import {
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import {
+  appliedPreset,
+  getPresetFormes,
+  getTeamSheetPresets,
+} from '@showdex/utils/presets';
 import type { GenerationNum } from '@smogon/calc';
 import type {
   CalcdexBattleState,
@@ -32,6 +33,8 @@ import type {
   CalcdexPokemon,
   RootState,
 } from '@showdex/redux/store';
+import { syncField } from './syncField';
+import { syncPokemon } from './syncPokemon';
 
 export interface SyncBattlePayload {
   battle: Showdown.Battle;
@@ -1064,10 +1067,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const teraStep = battle.stepQueue.find((q) => q.startsWith('|-terastallize|') && q.includes(`|${playerKey}`));
         const [, name] = /p\d+[a-z]:\x20(.+)\|/.exec(teraStep) || [];
 
+        // if we found a name (e.g., 'p2a: Walking Wake' -> name = 'Walking Wake'), then toggle off
+        // `terastallized` for any *other* *Terastallized* Pokemon (not the one referenced in `name`)
+        // (note: `name` is not guaranteed to be the species forme since it also could be a given nickname!)
+        // (also, multiple Terastallized Pokemon could exist when the user manually toggles them on,
+        // but probably will forget to turn it off, so that's where this bit comes in)
         if (name) {
           // see note in playerState.usedMax for why this still mutates the pokemon `p`, despite using filter()
           playerState.pokemon
-            .filter((p) => p.terastallized && (p.name !== name || !p.speciesForme.includes(name)))
+            .filter((p) => p.terastallized && !p.name.includes(name) && !p.speciesForme.includes(name))
             .forEach((p) => { p.terastallized = false; });
         }
       }
@@ -1098,6 +1106,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         };
       }
     }
+
+    // now that all players were processed, recount the number of players
+    // (typically required for FFA, when players 3 & 4 need to be invited, so the playerCount never updates)
+    battleState.playerCount = countActivePlayers(battleState);
 
     const syncedField = syncField(
       battleState,

@@ -20,19 +20,20 @@ I'm not a stickler for how these should be formatted; just make sure you provide
 
 If possible, including the following would be **immensely** helpful!
 
-* **OS** (e.g., Windows, macOS, Android, etc.)
-* **Browser** (e.g., Chrome, Firefox, etc.)
-* **Showdex Version** (e.g., v1.1.4)
+* **Device** (e.g., Custom PC, MacBook Pro 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
+* **OS** & **Version** (e.g., Windows 11, macOS Ventura, Ubuntu 22, Android 14, etc.)
+* **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
+* **Showdex Version** (e.g., v1.1.5)
 * **Format**, if applicable (e.g., Gen 9 National Dex AG)
 
-If you would like to be [credited for your contribution](../README.md#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
+If you would like to be [credited for your contribution](../README.md#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
 
 > **Don't feel like creating a GitHub issue?** No problem!
 >
-> We're active on our Showdex thread on Smogon Forums. You can also email me directly as well!
+> We're active on our Showdex thread on Smogon Forums & have a Discord community. If you're not on those platforms, you can also email me directly as well!
 
-&nbsp;[Post on Smogon Forums](https://www.smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265)&nbsp; | &nbsp;[Slide Into My Inbox](mailto:keith@tize.io)&nbsp;
---- | --- |
+&nbsp;[Post on Smogon Forums](https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265)&nbsp; | &nbsp;[Join Our Discord](https://discord.gg/2PXVGGCkm2)&nbsp; | &nbsp;[Slide Into My Inbox](mailto:keith@tize.io)&nbsp;
+--- | --- | --- |
 
 <br>
 

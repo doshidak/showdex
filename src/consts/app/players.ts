@@ -4,6 +4,9 @@
  * * Do not include the file extension for `icon`!
  *   - e.g., `'check-circle'` instead of `'check-circle.svg'`.
  * * `iconDescription` will be the value of the `<desc>` tag in the icon `<svg>`.
+ * * `color` will apply to both the icon & the player's name, unless `iconColor` is also defined.
+ *   - `iconColor` must be defined for the current color scheme, otherwise,
+ *     will fallback to the color scheme in `color`.
  * * Each user specified in `userIds` should have their username parsed through `formatId()`.
  *   - e.g., `formatId('showdex_testee')` becomes `'showdextestee'`,
  *     which should be the value in `userIds`.
@@ -18,6 +21,7 @@ export interface ShowdexPlayerTitle {
   icon?: string;
   iconDescription?: string;
   color?: Partial<Record<Showdown.ColorScheme, string>>;
+  iconColor?: Partial<Record<Showdown.ColorScheme, string>>;
   userIds: (string | [userId: string, title: string])[];
 }
 
@@ -86,8 +90,11 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   },
 
   userIds: [
+    'bongphan',
     'fr1e5',
     'fubwubs',
+    'genone',
+    'goldengottago',
     'lunarvania',
     'momalaharris',
   ],
@@ -101,7 +108,9 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     dark: '#F44336',
   },
 
-  userIds: [],
+  userIds: [
+    ['bruhmomentmaker', 'First Blaziken Patron'],
+  ],
 }, {
   title: 'Pop Bomb Patron',
   icon: 'mouse',
@@ -112,7 +121,10 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     dark: '#29B6F6',
   },
 
-  userIds: [],
+  userIds: [
+    ['benzyne', 'First Showdex Patron'],
+    'goddessmina',
+  ],
 }, {
   title: 'Supreme Overlord Patron',
   icon: 'winged-sword',
@@ -124,4 +136,22 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   },
 
   userIds: [],
+}, {
+  title: 'First Supreme Overlord',
+  icon: 'dragon',
+  iconDescription: 'Dragon Head Icon',
+
+  color: {
+    light: '#D5AD1C',
+    dark: '#FFC800',
+  },
+
+  iconColor: {
+    light: '#FF6F00',
+    dark: '#FF6F00',
+  },
+
+  userIds: [
+    'dastardlydwarf',
+  ],
 }];

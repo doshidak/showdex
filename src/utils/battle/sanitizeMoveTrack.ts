@@ -1,7 +1,7 @@
+import { getDexForFormat } from '@showdex/utils/dex';
 import type { GenerationNum } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-import { getDexForFormat } from './getDexForFormat';
 
 /**
  * Sanitizes the `moveTrack` from the passed-in `pokemon` and constructs the `revealedMoves`

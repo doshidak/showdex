@@ -1,32 +1,27 @@
 import webpack from 'webpack';
-import { config, env as webpackEnv, printableEnv } from '../webpack.config';
+import { buildTargets, config, env } from '../webpack.config';
+
+if (!env.PACKAGE_VERSION) {
+  console.error('Please run this script through npm or yarn.');
+  process.exit(1);
+}
 
 // note: this doesn't apply to the webpack config since it's imported before
 process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';
 
-// if ('chromeExtension' in config) {
-//   delete config.chromeExtension;
-// }
+if (!buildTargets.includes(env.BUILD_TARGET)) {
+  console.error(`"${env.BUILD_TARGET}" is not a valid BUILD_TARGET`);
+  console.error('Valid BUILD_TARGET values are:', buildTargets.join(', '));
+  process.exit(1);
+}
 
 config.mode = 'production';
 
-const packageInfo = [
-  process.env.npm_package_name,
-  `v${process.env.npm_package_version}`,
-  `b${printableEnv.BUILD_DATE}`,
-  `(${printableEnv.BUILD_TARGET || 'unknown target'})`,
-];
-
-console.log(
-  'Building',
-  ...packageInfo,
-  'for production...',
-);
-
-console.log('Loaded webpack env:', printableEnv);
-console.log('Entry:', config.entry);
-console.log('Output:', config.output);
+console.log('Building', env.BUILD_NAME, 'for production...');
+console.log('env:', env);
+console.log('entry:', config.entry);
+console.log('output.path:', config.output.path);
 
 webpack(config, (err) => {
   if (err) {
@@ -34,9 +29,5 @@ webpack(config, (err) => {
     process.exit(1);
   }
 
-  console.log(
-    'Build for',
-    ...packageInfo,
-    'successful!',
-  );
+  console.log('Build for', env.BUILD_NAME, 'successful!');
 });

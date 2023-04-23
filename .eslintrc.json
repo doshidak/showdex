@@ -117,7 +117,8 @@
     "react/function-component-definition": [
       2,
       {
-        "namedComponents": "arrow-function"
+        "namedComponents": "arrow-function",
+        "unnamedComponents": "arrow-function"
       }
     ],
     "react/jsx-no-duplicate-props": [

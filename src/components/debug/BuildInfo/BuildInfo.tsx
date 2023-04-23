@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { bullop } from '@showdex/consts/core';
 import { useColorScheme } from '@showdex/redux/store';
 import { printBuildInfo } from '@showdex/utils/debug';
 import styles from './BuildInfo.module.scss';
@@ -41,7 +42,7 @@ export const BuildInfo = ({
         !hideCredits &&
         <>
           <br />
-          by sumfuk/doshidak &amp; camdawgboi
+          by BOT{bullop}Keith &amp; analogcam
         </>
       }
     </div>

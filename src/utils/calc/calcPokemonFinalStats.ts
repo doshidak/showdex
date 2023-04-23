@@ -9,18 +9,16 @@ import {
   countRuinAbilities,
   detectGenFromFormat,
   detectLegacyGen,
-  findHighestStat,
-  getDexForFormat,
-  notFullyEvolved,
   ruinAbilitiesActive,
 } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { getDexForFormat, notFullyEvolved, shouldIgnoreItem } from '@showdex/utils/dex';
 import type { GenerationNum } from '@smogon/calc';
 import type { CalcdexBattleField, CalcdexPlayer, CalcdexPokemon } from '@showdex/redux/store';
 import type { CalcdexStatModRecording } from './statModRecorder';
 import { calcPokemonHp } from './calcPokemonHp';
-import { shouldIgnoreItem } from './shouldIgnoreItem';
+import { findHighestStat } from './findHighestStat';
 import { statModRecorder } from './statModRecorder';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
@@ -330,8 +328,8 @@ export const calcPokemonFinalStats = (
     // note: see WeatherMap in weather consts for the sanitized value
     // (e.g., `weather` will be `'sand'`, not `'sandstorm'`)
     if (weather === 'sand') {
-      // 50% SPD boost if Rock type w/ darude sandstorm
-      if (types.includes('Rock')) {
+      // 50% SPD boost if Rock type w/ darude sandstorm (gens 4+)
+      if (types.includes('Rock') && gen > 3) {
         record.apply('spd', 1.5, 'field', 'Darude Sandstorm');
       }
 

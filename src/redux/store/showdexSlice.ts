@@ -1,10 +1,13 @@
 import { createSlice, current } from '@reduxjs/toolkit';
+import {
+  dehydrateShowdexSettings,
+  hydrateShowdexSettings,
+} from '@showdex/redux/helpers';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { dehydrateShowdexSettings, hydrateShowdexSettings } from '@showdex/utils/redux';
 import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/calc';
+import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/ui';
 import type { CalcdexPlayerKey, CalcdexRenderMode } from './calcdexSlice';
 import { useDispatch, useSelector } from './hooks';
 
@@ -190,21 +193,6 @@ export interface ShowdexCalcdexSettings {
    */
   destroyOnClose: boolean;
 
-  /*
-   * Whether to perserve the component rendering states of an overlayed Calcdex by hiding instead of blocking renders.
-   *
-   * * If `true` (default), will simply slap a `display: none;` instead of returning `null`,
-   *   allowing for instantaneous opening and closing.
-   * * If `false`, there may be a noticeable delay when reopening the Calcdex overlay as the components
-   *   reinitialize their states.
-   * * Has no effect if `openAs` is `'panel'` (default).
-   *
-   * @deprecated As of v1.1.2, this setting has been removed and will always be enabled.
-   * @default true
-   * @since 1.0.3
-   */
-  // preserveRenderStates: boolean;
-
   /**
    * Default auto-select settings per side.
    *
@@ -283,15 +271,6 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.6
    */
   openSmogonPage: boolean;
-
-  /*
-   * Whether to allow all possible formes to be switched to, if any, even if a forme is revealed.
-   *
-   * @deprecated As of v1.1.2, this is no longer being used since the `PokeFormeTooltip` exists.
-   * @default true
-   * @since 1.0.3
-   */
-  // showAllFormes?: boolean;
 
   /**
    * Whether to show all possible abilities/items/moves in legal-locked formats.
@@ -429,6 +408,21 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.6
    */
   editPokemonTypes: 'always' | 'meta' | 'never';
+
+  /**
+   * Whether to lock the *Tera* toggle button in the moves table once used by the player.
+   *
+   * * This may be useful for remembering if a player can Terastallize still.
+   *   - Note that this information will also be shown when hovering over the toggle button
+   *     while the battle is active, regardless of the value of `showUiTooltips`.
+   * * Once the battle ends, the toggle button will be re-enabled.
+   * * This is off by default (i.e., `false`) to make this setting opt-in based on user feedback.
+   * * Only applies to Gen 9, obviously.
+   *
+   * @default false
+   * @since 1.1.5
+   */
+  lockUsedTera: boolean;
 
   /**
    * When to show the *Edit* button in the moves table.

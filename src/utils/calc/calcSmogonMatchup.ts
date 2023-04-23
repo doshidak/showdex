@@ -1,7 +1,13 @@
 import { calculate } from '@smogon/calc';
 // import { formatId } from '@showdex/utils/app';
-import { getGenDexForFormat } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
+import { getGenDexForFormat } from '@showdex/utils/dex';
+import {
+  formatDamageRange,
+  formatKoChance,
+  getKoColor,
+  parseDescription,
+} from '@showdex/utils/ui';
 import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
@@ -10,14 +16,10 @@ import type {
   CalcdexPokemon,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
-import type { CalcdexMatchupParsedDescription } from './parseDescription';
+import type { CalcdexMatchupParsedDescription } from '@showdex/utils/ui';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
 import { createSmogonPokemon } from './createSmogonPokemon';
-import { formatDamageRange } from './formatDamageRange';
-import { formatKoChance } from './formatKoChance';
-import { getKoColor } from './getKoColor';
-import { parseDescription } from './parseDescription';
 
 export interface CalcdexMatchupResult {
   /**

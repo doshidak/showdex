@@ -1,7 +1,7 @@
 import { createSlice, current } from '@reduxjs/toolkit';
-import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
+import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
+import { countActivePlayers, detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -1808,7 +1808,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         sheets: [],
       };
 
-      state[battleId].playerCount = AllPlayerKeys.filter((k) => state[battleId][k].active).length;
+      // state[battleId].playerCount = AllPlayerKeys.filter((k) => state[battleId][k].active).length;
+      state[battleId].playerCount = countActivePlayers(state[battleId]);
 
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',

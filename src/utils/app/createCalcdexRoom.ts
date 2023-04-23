@@ -1,3 +1,4 @@
+import * as ReactDOM from 'react-dom/client';
 import { calcdexSlice } from '@showdex/redux/store';
 import type { RootStore, ShowdexSliceState } from '@showdex/redux/store';
 import { createHtmlRoom } from './createHtmlRoom';
@@ -11,6 +12,10 @@ import { getBattleRoom } from './getBattleRoom';
  * * Provide the optional Redux `store` argument to supply the room's `requestLeave()` handler,
  *   which will update the corresponding `BattleRoom` and `CalcdexBattleState`, if any,
  *   when the user leaves the room.
+ * * As of v1.1.5, this will create a `ReactDOM.Root` from the `Showdown.HtmlRoom`'s `el`
+ *   (`HTMLDivElement`), accessible under the `reactRoot` property.
+ *   - When this room's `requestLeave()` is called (typically by `app.leaveRoom()` or the user
+ *     closing the tab), `reactRoot.unmount()` will be automatically called.
  *
  * @since 1.0.3
  */
@@ -40,6 +45,8 @@ export const createCalcdexRoom = (
     return null;
   }
 
+  calcdexRoom.reactRoot = ReactDOM.createRoot(calcdexRoom.el);
+
   if (typeof store?.getState === 'function') {
     calcdexRoom.requestLeave = () => {
       // check if there's a corresponding BattleRoom for this Calcdex room
@@ -48,17 +55,25 @@ export const createCalcdexRoom = (
 
       if (battle?.id) {
         delete battle.calcdexRoom;
-        // delete battle.calcdexReactRoot; // update (2023/02/01): no longer exists in battle
       }
+
+      // unmount the reactRoot we created earlier
+      // (if destroyOnClose is false, the reactRoot will be recreated when the user selects the
+      // battle in the Hellodex instances list [via openCalcdexInstance() -> createCalcdexRoom()])
+      calcdexRoom.reactRoot?.unmount?.();
 
       // we need to grab a fresher version of the state when this function runs
       // (i.e., do NOT use calcdexSettings here! it may contain a stale version of the settings)
       const freshSettings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
 
       if (freshSettings?.destroyOnClose) {
+        // clean up allocated memory from Redux for this Calcdex instance
         store.dispatch(calcdexSlice.actions.destroy(battleId));
 
         if (battle?.id) {
+          // technically calcdexReactRoot would only exist for battle-overlayed Calcdexes,
+          // but calling it here just in case I screwed something up LOL
+          battle.calcdexReactRoot?.unmount?.();
           battle.calcdexDestroyed = true;
         }
       }

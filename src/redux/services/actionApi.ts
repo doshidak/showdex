@@ -1,9 +1,9 @@
 import qs from 'qs';
 import { HttpMethod } from '@showdex/consts/core';
-import { ShowdownReduxTagType } from '@showdex/consts/redux';
 import { env, runtimeFetch, safeJsonParse } from '@showdex/utils/core';
-import { createTagProvider } from '@showdex/utils/redux';
-import type { ReduxBasePayload } from '@showdex/utils/redux';
+import { createTagProvider } from '@showdex/redux/helpers';
+import type { ReduxBasePayload } from '@showdex/redux/helpers';
+import { ShowdownReduxTagType } from './tagTypes';
 import { showdownApi } from './showdownApi';
 
 /**

@@ -1,6 +1,3 @@
-// import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
-// import { flattenAlts } from '@showdex/utils/battle';
-// import { env } from '@showdex/utils/core';
 import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcCalcdexId } from './calcCalcdexId';
 

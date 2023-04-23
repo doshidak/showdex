@@ -10,14 +10,13 @@ import { getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
 import type { DropdownOption } from '@showdex/components/form';
 import type { CalcdexPlayerKey } from '@showdex/redux/store';
-import { useCalcdexContext } from './CalcdexProvider';
-import { CloseCalcdexButton } from './CloseCalcdexButton';
+import { useCalcdexContext } from './CalcdexContext';
+import { CloseButton } from './CloseButton';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
 import styles from './Calcdex.module.scss';
 
 export interface CalcdexProps {
-  // overlayVisible?: boolean;
   onRequestOverlayClose?: () => void;
 }
 
@@ -34,16 +33,13 @@ export const Calcdex = ({
   const {
     state,
     settings,
-    // shouldRender,
   } = useCalcdexContext();
 
   const colorScheme = useColorScheme();
   const mobile = useMobileViewport();
 
   const {
-    // battleId,
     renderMode,
-    // overlayVisible,
     playerCount,
     playerKey,
     authPlayerKey,
@@ -53,26 +49,29 @@ export const Calcdex = ({
 
   const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
     playerCount > 2 && AllPlayerKeys
-      .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
+      // .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
+      .filter((k) => state[k]?.active)
       .map((k) => {
         const { name: playerName } = state[k];
         const playerTitle = findPlayerTitle(playerName);
 
+        const labelColor = playerTitle?.color?.[colorScheme];
+        const iconColor = playerTitle?.iconColor?.[colorScheme];
+
         return {
           labelClassName: styles.playerOption,
-          labelStyle: playerTitle?.color?.[colorScheme] ? {
-            color: playerTitle.color[colorScheme],
-          } : undefined,
+          labelStyle: labelColor ? { color: labelColor } : undefined,
           label: (
             <>
               <div className={styles.label}>
-                {playerName}
+                {playerName || '--'}
               </div>
 
               {
                 !!playerTitle?.icon &&
                 <Svg
                   className={styles.icon}
+                  style={iconColor ? { color: iconColor } : undefined}
                   description={playerTitle.iconDescription}
                   src={getResourceUrl(`${playerTitle.icon}.svg`)}
                 />
@@ -82,30 +81,17 @@ export const Calcdex = ({
           rightLabel: k.toUpperCase(),
           subLabel: playerTitle?.title,
           value: k,
+          disabled: !playerName,
         };
       })
   ) || null, [
-    authPlayerKey,
+    // authPlayerKey,
     colorScheme,
     playerCount,
     state,
   ]);
 
   const renderAsOverlay = renderMode === 'overlay';
-
-  // if (renderAsOverlay && !overlayVisible) {
-  //   return null;
-  // }
-
-  // if authPlayerKey = playerKey = 'p1' and opponentKey = 'p2',
-  // then topKey = 'p2' if authPosition is 'bottom' and 'p1' otherwise;
-  // if authPlayerKey = playerKey = 'p2' and opponentKey = 'p1',
-  // then topKey = 'p1' if authPosition is 'bottom' or 'auto', and 'p2' otherwise;
-  // const topKey = authPlayerKey && playerKey === authPlayerKey
-  //   ? settings?.authPosition === 'bottom'
-  //     ? opponentKey
-  //     : (settings?.authPosition === 'auto' ? 'p1' : playerKey)
-  //   : playerKey;
 
   const topKey = (
     !!authPlayerKey
@@ -137,7 +123,7 @@ export const Calcdex = ({
 
         {
           (renderAsOverlay && mobile) &&
-          <CloseCalcdexButton
+          <CloseButton
             className={styles.topCloseButton}
             onPress={onRequestOverlayClose}
           />
@@ -149,7 +135,7 @@ export const Calcdex = ({
           playerKey={topKey}
           defaultName="Player 1"
           containerSize={size}
-          playerOptions={(!authPlayerKey || topKey !== authPlayerKey) && playerOptions}
+          playerOptions={playerOptions}
         />
 
         <FieldCalc
@@ -165,12 +151,12 @@ export const Calcdex = ({
           playerKey={bottomKey}
           defaultName="Player 2"
           containerSize={size}
-          playerOptions={(!authPlayerKey || bottomKey !== authPlayerKey) && playerOptions}
+          playerOptions={playerOptions}
         />
 
         {
           renderAsOverlay &&
-          <CloseCalcdexButton
+          <CloseButton
             className={cx(
               styles.bottomCloseButton,
               mobile && styles.mobile,

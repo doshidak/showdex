@@ -14,10 +14,6 @@
   @include transition.apply(background-color);
   overflow: hidden;
 
-  // &, *, *::before, *::after {
-  //   box-sizing: border-box;
-  // }
-
   &.light {
     color: colors.$black;
     background-color: color.alpha(colors.$showdown-background-light, 0.85);
@@ -25,34 +21,15 @@
 
   &.dark {
     color: colors.$white;
-    // background-color: color.alpha(colors.$showdown-background-dark, 0.8);
     background-color: color.alpha(#121212, 0.8);
   }
-
-  // &::before {
-  //   content: '';
-  //   @include position.absolute-fill;
-  //   pointer-events: none;
-  //   z-index: -1;
-  // }
-
-  // &.light::before {
-  //   background-color: color.alpha(colors.$showdown-background-light, 0.4);
-  // }
-
-  // &.dark::before {
-  //   background-color: color.alpha(colors.$showdown-background-dark, 0.6);
-  // }
 }
 
 .content {
   @include position.absolute-fill;
   @include flex.column($justify: space-between);
-  // @include spacing.padding-xy($x: 15px, $y: 10px);
-  // @include spacing.padding-all(15px);
   @include font.apply(fonts.$primary);
   font-size: 12px;
-  // overflow: hidden auto;
   z-index: 1;
 }
 
@@ -84,7 +61,6 @@
 .banner {
   position: relative;
   @include flex.column-center;
-  // @include spacing.margin($bottom: 15px);
   @include spacing.padding($top: 30px);
   text-align: center;
   user-select: none;
@@ -92,13 +68,10 @@
 
 .authors {
   @include flex.row-center;
-  // @include spacing.padding($left: 7px); // accounting for letter-spacing bug
   font-weight: 300;
   font-size: 12px;
-  // letter-spacing: 7px;
   text-transform: uppercase;
   opacity: 0.75;
-  // user-select: none;
 }
 
 .ampersand {
@@ -110,33 +83,29 @@
   color: inherit;
 
   .label {
-    @include spacing.margin($right: -0.3em);
+    @include spacing.margin($right: -0.2em);
     font-size: 12px;
     color: inherit;
-    // opacity: 0.75;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
 }
 
 .presents {
+  @include spacing.margin($right: -0.2em);
   font-weight: 300;
   font-size: 12px;
-  letter-spacing: 0.3em;
-  text-indent: 0.3em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   opacity: 0.75;
-  // user-select: none;
 }
 
 .extensionName {
-  // @include spacing.padding($top: 5px);
   @include spacing.margin($right: -0.2em);
   font-weight: 700;
   font-size: 40px;
   color: colors.$transparent;
   letter-spacing: 0.2em;
-  // text-indent: 0.2em;
   text-transform: uppercase;
   text-shadow: 0 0 15px color.alpha(colors.$black, 0.3);
   background: linear-gradient(65deg, #4A9AC7 1%, #F148CC 99%) 0 0 / 100% 100%;
@@ -147,8 +116,6 @@
     (background-position, 10s),
     (background-size, 10s),
   );
-  // user-select: none;
-  // z-index: 1;
 
   &:hover {
     @include spacing.margin($right: -0.5em);
@@ -159,28 +126,16 @@
 }
 
 .extensionVersion {
-  // width: 375px;
-  // @include spacing.margin($top: -18px);
-  // @include spacing.padding-xy($x: 25px, $y: 15px);
-  // @include spacing.padding($top: 10px, $bottom: 7px);
-  // @include spacing.padding-xy($y: 5px);
+  @include spacing.margin($right: -0.15em);
   @include font.apply(fonts.$mono);
   font-size: 10px;
   letter-spacing: 0.15em;
-  text-indent: 0.15em;
-  // background-color: color.alpha(color.shade(colors.$blue, 30%), 0.75);
-  // background-color: color.alpha(colors.$blue, 0.3);
-  // border-radius: 50px;
+  // text-indent: 0.15em;
   opacity: 0.65;
-  // z-index: 2;
 
-  // .light & {
-  //   mix-blend-mode: multiply;
-  // }
-
-  // .dark & {
-  //   mix-blend-mode: screen;
-  // }
+  .extensionVersionSuffix {
+    opacity: 0.5;
+  }
 }
 
 .instancesContainer {
@@ -210,7 +165,6 @@
 
   .light & {
     background-color: color.alpha(colors.$white, 0.65);
-    // border-color: color.alpha(colors.$white, 0.3);
     box-shadow: (
       0 0 1px color.alpha(colors.$black, 0.15),
       0 0 15px color.alpha(colors.$gray-dark, 0.15),
@@ -219,7 +173,6 @@
 
   .dark & {
     background-color: color.alpha(colors.$black, 0.5);
-    // border-color: color.alpha(colors.$black, 0.3);
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.3),
       0 0 15px color.alpha(colors.$black, 0.5),
@@ -245,17 +198,6 @@
   row-gap: 10px;
   width: 100%;
   height: 100%;
-  // height: 30vh;
-  // height: 20em;
-  // max-height: 250px;
-  // @include spacing.margin-xy($y: 25px);
-  // @include spacing.padding-all(10px);
-  // border: 2px solid;
-  // border-radius: 15px;
-  // box-shadow: 0 0 10px color.alpha(colors.$black, 0.15);
-  // @include transition.apply(background-color, box-shadow);
-  // overflow: hidden auto;
-  // z-index: 1;
 
   .verySmol & {
     grid-template-columns: minmax(0, 1fr);
@@ -314,13 +256,11 @@ button.spectateButton {
 }
 
 .donations {
-  // max-width: 375px;
-  // @include spacing.margin($top: 25px, $right: auto, $left: auto);
   @include spacing.margin-xy($x: auto);
   font-size: 10px;
   text-align: center;
+  line-height: 14px;
   user-select: none;
-  // z-index: 1;
 
   &.withBattleRecord {
     @include spacing.margin($top: 40px);
@@ -328,81 +268,7 @@ button.spectateButton {
 }
 
 .donateButton {
-  position: relative;
-  // width: 300px;
-  // height: 45px;
   @include spacing.margin($right: auto, $left: auto);
-  @include spacing.padding-xy($x: 35px, $y: 12px);
-  @include font.apply(fonts.$primary);
-  font-size: 14px;
-  color: colors.$transparent;
-  letter-spacing: 3px;
-  text-align: center;
-  text-transform: uppercase;
-  // background-color: #000000;
-  // background: linear-gradient(55deg, #4265BE 5%, #C3373D 95%) 0 0 / 200% 100%;
-  background: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
-  background-clip: text;
-  border-radius: 100px;
-  // mix-blend-mode: lighten;
-  // @include transition.apply(color, (background-position, 500ms));
-  @include transition.apply(color, box-shadow);
-  // user-select: none;
-
-  .light & {
-    box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.3),
-      0 0 5px color.alpha(colors.$gray-dark, 0.3),
-    );
-  }
-
-  .dark & {
-    box-shadow: (
-      0 0 1px color.alpha(colors.$white, 0.5),
-      0 0 10px color.alpha(colors.$black, 0.5),
-    );
-  }
-
-  &::before {
-    content: '';
-    @include position.absolute-fill;
-    background: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
-    border-radius: 100px;
-    opacity: 0;
-    // mix-blend-mode: multiply;
-    @include transition.apply((background-position, 1.5s), opacity);
-    // @include transition.apply(opacity);
-    z-index: -1;
-  }
-
-  &:hover {
-    // color: color.alpha(colors.$blue, 0.75);
-    color: colors.$white;
-    background-clip: border-box;
-    // background-position: 100% 0;
-
-    &::before {
-      background-position: 100% 0;
-      opacity: 0.65;
-    }
-  }
-
-  .labelThicc {
-    font-weight: 600;
-  }
-
-  .labelThin {
-    // @include spacing.padding-xy($x: 5px);
-    font-weight: 300;
-    // text-indent: 5px;
-  }
-
-  // .paypalLogo {
-  //   // @include spacing.margin($left: 7px);
-  //   @include spacing.margin($right: -3px);
-  //   height: 20px;
-  //   min-height: 20px;
-  // }
 }
 
 .donateFootnote {
@@ -420,7 +286,6 @@ button.spectateButton {
   flex: 0 0 73px;
   width: 100%;
   height: 73px;
-  // @include spacing.padding($top: 24px, $right: 25px, $bottom: 22px, $left: 25px);
   @include spacing.padding-xy($x: 25px);
   backdrop-filter: blur(3px);
   border-top: 2px solid;
@@ -448,31 +313,43 @@ button.spectateButton {
   .light & {
     color: colors.$gray-dark;
   }
+}
 
-  & > .linkButton:not(.forumButton):not(:last-child) {
-    @include spacing.margin($right: 7px);
+.linkItem {
+  &:not(:last-child) {
+    @include spacing.margin($right: 25px);
 
     .verySmol & {
-      @include spacing.margin($right: 2px);
+      @include spacing.margin($right: 15px);
     }
   }
 }
 
 .settingsButton {
-  width: 48px;
+  width: 50px;
   height: 45px;
-  @include spacing.margin($right: 20px);
 
-  .verySmol & {
-    @include spacing.margin($right: 12px);
-  }
+  // bad idea, looks weird on non-Retina displays while changing color
+  // .settingsIcon {
+  //   @include transition.apply((transform, 10s));
+  // }
+
+  // &:hover .settingsIcon {
+  //   transform: rotateZ(360deg);
+  // }
 }
 
-.forumButton {
-  @include spacing.margin($right: 15px);
+.linkSeparator {
+  width: 1px;
+  height: 28px;
+  @include transition.apply(background-color);
 
-  .verySmol & {
-    @include spacing.margin($right: 7px);
+  .light & {
+    background-color: color.alpha(#121212, 0.15);
+  }
+
+  .dark & {
+    background-color: color.alpha(colors.$white, 0.15);
   }
 }
 
@@ -490,31 +367,37 @@ button.spectateButton {
 
   .settingsVisible & {
     .light & {
-      // color: color.alpha(colors.$black, 0.5);
       opacity: 0.5;
     }
 
     .dark & {
-      // color: color.alpha(colors.$white, 0.5);
       opacity: 0.5;
     }
   }
 
-  .sparkleIcon {
+  .signpostIcon {
     transform: scale(0.9);
   }
 
-  .bugIcon {
-    transform: rotateZ(90deg);
-  }
+  // .sparkleIcon {
+  //   transform: scale(0.9);
+  // }
 
-  .clipboardIcon {
-    transform: scale(0.85);
-  }
+  // .bugIcon {
+  //   transform: rotateZ(90deg);
+  // }
+
+  // .clipboardIcon {
+  //   transform: scale(0.85);
+  // }
+}
+
+.linkButtonLabel {
+  @include spacing.margin($right: -0.01px);
+  letter-spacing: 0.01px;
 }
 
 .credits {
-  // @include spacing.margin-xy($y: 30px);
   font-size: 10px;
   text-align: right;
   opacity: 0.6;
@@ -541,7 +424,6 @@ button.spectateButton {
 }
 
 .tizeLogo {
-  // @include spacing.margin($bottom: 10px);
   height: 35px;
   min-height: 35px;
 }

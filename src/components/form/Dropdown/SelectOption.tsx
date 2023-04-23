@@ -135,7 +135,7 @@ export const SelectOption = <
           styles.optionItem,
           isFocused && styles.focused,
           isSelected && styles.selected,
-          isDisabled && styles.disabled,
+          (isDisabled || data?.disabled) && styles.disabled,
           className,
         )}
         {...innerProps}

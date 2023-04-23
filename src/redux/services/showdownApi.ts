@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ShowdownReduxTagType } from '@showdex/consts/redux';
 import { env } from '@showdex/utils/core';
+import { ShowdownReduxTagType } from './tagTypes';
 
 /**
  * Serves as the base query for all calls to Showdown's client API.

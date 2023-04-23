@@ -1,11 +1,10 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { renderCalcdex } from '@showdex/pages/Calcdex';
 import { calcdexSlice, showdexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
-  createHtmlRoom,
+  createHellodexRoom,
   formatId,
   getBattleRoom,
   getCalcdexRoomId,
@@ -13,13 +12,10 @@ import {
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import type { ShowdexBootstrapper } from '@showdex/main';
-import type { CalcdexSliceState, ShowdexSliceState } from '@showdex/redux/store';
+import type { CalcdexSliceState } from '@showdex/redux/store';
 import { Hellodex } from './Hellodex';
 
 const l = logger('@showdex/pages/Hellodex/Hellodex.bootstrap');
-
-// Hellodex should only open once during initialization of the Showdown client
-// let opened = false;
 
 export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
   l.debug(
@@ -69,15 +65,6 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
 
     return;
   }
-
-  // if (opened) {
-  //   l.debug(
-  //     'Hellodex bootstrap request was ignored',
-  //     'since it has been opened already.',
-  //   );
-  //
-  //   return;
-  // }
 
   const openCalcdexInstance = (battleId: string) => {
     if (typeof app === 'undefined' || !Object.keys(app.rooms || {}).length || !battleId) {
@@ -137,10 +124,9 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       // at this point, we need to recreate the room
       // (we should also be in the 'panel' renderMode now)
       const calcdexRoom = createCalcdexRoom(battleId, true, store);
-      const calcdexReactRoot = ReactDOM.createRoot(calcdexRoom.el);
 
       renderCalcdex(
-        calcdexReactRoot,
+        calcdexRoom.reactRoot,
         store,
         battleRoom?.battle?.id || battleId,
         // battleRoom,
@@ -160,23 +146,24 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
     }
   };
 
-  const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.hellodex;
+  const hellodexRoom = createHellodexRoom(store);
 
-  const hellodexRoom = createHtmlRoom('view-hellodex', 'Hellodex', {
-    side: true,
-    icon: Math.random() > 0.5 ? 'smile-o' : 'heart',
-    focus: !settings?.focusRoomsRoom,
-  });
+  if (!hellodexRoom?.reactRoot) {
+    l.error(
+      'ReactDOM root has not been initialized by createHellodexRoom().',
+      'Something is horribly wrong here!',
+      '\n', 'hellodexRoom', '(type)', typeof hellodexRoom, '(now)', hellodexRoom,
+      '\n', 'reactRoot', '(type)', typeof hellodexRoom?.reactRoot, '(now)', hellodexRoom?.reactRoot,
+    );
 
-  const hellodexReactRoot = ReactDOM.createRoot(hellodexRoom.el);
+    return;
+  }
 
-  hellodexReactRoot.render((
+  hellodexRoom.reactRoot.render((
     <ReduxProvider store={store}>
       <Hellodex
         openCalcdexInstance={openCalcdexInstance}
       />
     </ReduxProvider>
   ));
-
-  // opened = true;
 };

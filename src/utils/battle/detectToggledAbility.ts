@@ -1,7 +1,7 @@
 import { formatId } from '@showdex/utils/app';
 import { calcPokemonHp } from '@showdex/utils/calc';
+import { toggleableAbility } from '@showdex/utils/dex';
 import type { CalcdexBattleState, CalcdexPokemon } from '@showdex/redux/store';
-import { toggleableAbility } from './toggleableAbility';
 
 /**
  * Determines whether the Pokemon's toggleable ability is active (if applicable).

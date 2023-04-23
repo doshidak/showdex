@@ -1,7 +1,7 @@
 // import * as React from 'react';
 import { teamdexSlice } from '@showdex/redux/store';
-import { getTeambuilderPresets } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
+import { getTeambuilderPresets } from '@showdex/utils/presets';
 import type { ShowdexBootstrapper } from '@showdex/main';
 // import type { ShowdexSliceState } from '@showdex/redux/store';
 

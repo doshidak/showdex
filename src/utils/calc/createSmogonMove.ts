@@ -1,23 +1,15 @@
 import { Move as SmogonMove } from '@smogon/calc';
 import { formatId } from '@showdex/utils/app';
-import {
-  getGenDexForFormat,
-  // getMaxMove,
-  // getZMove,
-  // detectGenFromFormat,
-} from '@showdex/utils/battle';
-// import { env } from '@showdex/utils/core';
 import { clamp } from '@showdex/utils/core';
-// import type { GenerationNum } from '@smogon/calc';
+import {
+  determineCriticalHit,
+  determineMoveTargets,
+  getGenDexForFormat,
+  shouldBoostTeraStab,
+} from '@showdex/utils/dex';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type { CalcdexPokemon } from '@showdex/redux/store';
-// import { alwaysCriticalHits } from './alwaysCriticalHits';
-// import { calcHiddenPower } from './calcHiddenPower';
 import { calcMoveBasePower } from './calcMoveBasePower';
-// import { calcRageFist } from './calcRageFist';
-import { determineCriticalHit } from './determineCriticalHit';
-import { determineMoveTargets } from './determineMoveTargets';
-import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Overrides for `SmogonMove`.
@@ -39,7 +31,6 @@ export const createSmogonMove = (
 ): SmogonMove => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
-  // const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   if (!dex || !format || !pokemon?.speciesForme || !moveName) {
     return null;
@@ -68,29 +59,6 @@ export const createSmogonMove = (
     ...determineMoveTargets(format, pokemon, moveName),
   };
 
-  // recalculate the base power if the move is Hidden Power (gens 2+) or Rage Fist (gen 9)
-  // if (moveId.startsWith('hiddenpower')) {
-  //   overrides.basePower = calcHiddenPower(format, pokemon);
-  // }
-
-  // if (moveId === 'ragefist') {
-  //   overrides.basePower = calcRageFist(pokemon);
-  // }
-
-  // if (typeof overrides.basePower !== 'number') {
-  //   overrides.basePower = dex.moves.get(<ID> moveName)?.basePower || 0;
-  // }
-
-  // if (basePowerMods?.length) {
-  //   basePowerMods.forEach((mod) => {
-  //     if (typeof mod !== 'number' || mod < 0) {
-  //       return;
-  //     }
-  //
-  //     overrides.basePower = Math.floor(overrides.basePower * mod);
-  //   });
-  // }
-
   // check if the user specified any overrides for this move
   const {
     type: typeOverride,
@@ -107,21 +75,9 @@ export const createSmogonMove = (
     overrides.type = typeOverride;
   }
 
-  // if (['electromorphosis', 'windpower'].includes(abilityId) && 'charge' in (pokemon.volatiles || {}) && overrides.basePower > 0) {
-  //   const moveType = overrides.type || dex.moves.get(<ID> moveName)?.type;
-  //
-  //   if (moveType === 'Electric') {
-  //     overrides.basePower = Math.floor(overrides.basePower * 2);
-  //   }
-  // }
-
   if (categoryOverride) {
     overrides.category = categoryOverride;
   }
-
-  // if (typeof basePowerOverride === 'number') {
-  //   overrides.basePower = Math.max(basePowerOverride, 0);
-  // }
 
   const overrodeBasePower = typeof basePowerOverride === 'number';
 
@@ -135,7 +91,7 @@ export const createSmogonMove = (
   const removeBasePowerOverride = overrides.basePower < 1 || (
     !overrodeBasePower && (
       abilityId === 'supremeoverlord'
-        || shouldBoostTeraStab(format, pokemon, moveName)
+        || shouldBoostTeraStab(format, pokemon, moveName, overrides.basePower)
     )
   );
 

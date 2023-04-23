@@ -36,6 +36,7 @@ export const PokemonPresetFuckedFormes: string[] = [
   'Furfrou', // -> Furfrou-Dandy -> Furfrou-Debutante -> Furfrou-Diamond -> Furfrou-Heart -> Furfrou-Kabuki -> Furfrou-La Reine -> Furfrou-Matron -> Furfrou-Pharaoh -> Furfrou-Star
   // 'Gourgeist', // -> Gourgeist-Large -> Gourgeist-Small -> Gourgeist-Super (other formes have their own sets)
   'Gastrodon', // -> Gastrodon-East
+  'Gimmighoul', // -> Gimmighoul-Roaming
   // 'Greninja', // -> Greninja-Ash (other formes have their own sets)
   // 'Indeedee', // -> Indeedee-F (other formes have their own sets)
   'Keldeo', // -> Keldeo-Resolute

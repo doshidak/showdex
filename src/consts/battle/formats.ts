@@ -25,6 +25,7 @@ export const FormatLabels: Record<string, string> = {
   battlestadiumsinglesseries2: 'BSS Series 2',
   battlestadiumsinglesseries3: 'BSS Series 3', // just a lil near-future-proofing lol
   battlestadiumsinglesseries4: 'BSS Series 4',
+  battlestadiumsinglesregulationc: 'BSS Regulation C',
   battlestadiumdoubles: 'BSD',
   battlestadiumdoublesseries13: 'BSD Series 13',
   bdsp3v3singles: 'BDSP 3v3 Singles',
@@ -40,6 +41,7 @@ export const FormatLabels: Record<string, string> = {
   bdspubers: 'BDSP Ubers',
   bdspuu: 'BDSP UU',
   bonustype: 'Bonus Type',
+  brokencup: 'Broken Cup',
   bssfactory: 'BSS Factory',
   camomons: 'Camomons',
   cap: 'CAP', // CreateAPokemon (no cap, always factual)
@@ -127,6 +129,7 @@ export const FormatLabels: Record<string, string> = {
   stadiumou: 'Stadium OU',
   superstaffbros4: 'Super Staff Bros 4',
   tagteamsingles: 'Tag Team Singles',
+  teradonation: 'Tera Donation',
   thelosersgame: 'The Loser\'s Game',
   tiershift: 'Tier Shift',
   tradebacksou: 'Tradebacks OU',
@@ -155,6 +158,7 @@ export const FormatLabels: Record<string, string> = {
   vgc2023series2: 'VGC 2023 Series 2',
   vgc2023series3: 'VGC 2023 Series 3', // just another lil near-future-proofing... lol
   vgc2023series4: 'VGC 2023 Series 4',
+  vgc2023regulationc: 'VGC 2023 Regulation C',
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };

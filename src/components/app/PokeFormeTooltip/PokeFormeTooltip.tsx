@@ -4,7 +4,7 @@ import { Picon } from '@showdex/components/app';
 import { BaseButton, Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
-import { getDexForFormat } from '@showdex/utils/battle';
+import { getDexForFormat } from '@showdex/utils/dex';
 import { useUserAgent } from '@showdex/utils/hooks';
 import type { TooltipProps } from '@showdex/components/ui';
 import type { CalcdexPokemon } from '@showdex/redux/store';
