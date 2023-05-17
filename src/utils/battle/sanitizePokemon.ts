@@ -134,6 +134,10 @@ export const sanitizePokemon = (
     // so this should be its new default, false (was previously true)
     showGenetics: ('showGenetics' in pokemon && pokemon.showGenetics) || false,
 
+    // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
+    // (populated in syncPokemon() & used in createSmogonPokemon())
+    boostedStat: ('boostedStat' in pokemon && pokemon.boostedStat) || null,
+
     boosts: {
       atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,
       def: typeof pokemon?.boosts?.def === 'number' ? pokemon.boosts.def : 0,

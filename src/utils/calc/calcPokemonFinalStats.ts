@@ -137,7 +137,7 @@ export const calcPokemonFinalStats = (
   // find out what the highest *boosted* stat is (excluding HP) for use in some abilities,
   // particularly Protosynthesis & Quark Drive (gen 9),
   // which will boost the highest stat after stage boosts are applied
-  const highestBoostedStat = findHighestStat(record.stats());
+  const highestBoostedStat = pokemon.boostedStat || findHighestStat(record.stats());
 
   // apply status condition effects
   if (pokemon.status) {
@@ -473,16 +473,18 @@ export const calcPokemonFinalStats = (
      */
 
     // 30% highest stat boost (or 1.5x SPE modifier) if ability is "Protosynthesis" or "Quark Drive"
+    // update (2023/05/15): highest boosted stat can now be overwritten by specifying pokemon.boostedStat
+    // (which it is, wherever highestBoostedStat is declared above)
     if (['protosynthesis', 'quarkdrive'].includes(ability) && highestBoostedStat) {
       // if the Pokemon has a booster volatile, use its reported stat
       // e.g., 'protosynthesisatk' -> boosterVolatileStat = 'atk'
-      const boosterVolatile = Object.keys(pokemon.volatiles || {}).find((k) => /^(?:proto|quark)/i.test(k));
-      const boosterVolatileStat = <Showdown.StatNameNoHp> boosterVolatile?.replace(/(?:protosynthesis|quarkdrive)/i, '');
-      const stat = boosterVolatileStat || highestBoostedStat;
+      // const boosterVolatile = Object.keys(pokemon.volatiles || {}).find((k) => /^(?:proto|quark)/i.test(k));
+      // const boosterVolatileStat = <Showdown.StatNameNoHp> boosterVolatile?.replace(/(?:protosynthesis|quarkdrive)/i, '');
+      // const stat = boosterVolatileStat || highestBoostedStat;
 
       record.apply(
-        stat,
-        stat === 'spe' ? 1.5 : 1.3,
+        highestBoostedStat,
+        highestBoostedStat === 'spe' ? 1.5 : 1.3,
         'ability',
         dex.abilities.get(ability)?.name || ability,
       );
