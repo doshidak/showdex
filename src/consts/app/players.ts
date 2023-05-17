@@ -80,7 +80,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     ['nails', 'VGC Legend'],
   ],
 }, {
-  title: 'Showdex Supporter',
+  title: 'Paid Pal',
   icon: 'sparkle',
   iconDescription: 'Sparkle Icon',
 
@@ -91,12 +91,14 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     'bongphan',
-    'fr1e5',
+    ['fr1e5', 'First Paid Pal'],
     'fubwubs',
     'genone',
     'goldengottago',
     'lunarvania',
     'momalaharris',
+    'pastgenoufan',
+    'weavileisasin',
   ],
 }, {
   title: 'Blaziken Patron',
@@ -123,7 +125,6 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     ['benzyne', 'First Showdex Patron'],
-    'goddessmina',
   ],
 }, {
   title: 'Supreme Overlord Patron',
@@ -135,7 +136,9 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     dark: '#FFB300',
   },
 
-  userIds: [],
+  userIds: [
+    'zzodz',
+  ],
 }, {
   title: 'First Supreme Overlord',
   icon: 'dragon',
@@ -153,5 +156,18 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     'dastardlydwarf',
+  ],
+}, {
+  title: 'Aww what a cute teddy bear! <3 uwu',
+  icon: 'teddy-bear',
+  iconDescription: 'Teddy Bear Icon',
+
+  color: {
+    light: '#5D4037',
+    dark: '#A1887F',
+  },
+
+  userIds: [
+    ['goddessmina', 'warning: ratch af'],
   ],
 }];
