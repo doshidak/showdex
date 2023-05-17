@@ -144,7 +144,7 @@ export const PatronagePane = ({
                   Please visit our Patreon for specifics on awarded benefits.
                 </div>
 
-                {ShowdexDonorTiers.map(PatronageTierRenderer('DonorTier'))}
+                {ShowdexDonorTiers.map(PatronageTierRenderer('DonorTier', colorScheme))}
               </div>
 
               <div className={styles.buttonContainer}>
@@ -175,7 +175,7 @@ export const PatronagePane = ({
                   Batteries not included.
                 </div>
 
-                {ShowdexPatronTiers.map(PatronageTierRenderer('PatronTier'))}
+                {ShowdexPatronTiers.map(PatronageTierRenderer('PatronTier', colorScheme, true))}
               </div>
 
               <div className={styles.buttonContainer}>

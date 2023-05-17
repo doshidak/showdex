@@ -1,8 +1,11 @@
 import * as React from 'react';
+import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { Button } from '@showdex/components/ui';
+import { format, formatDistance, isValid } from 'date-fns';
+import { Button, Tooltip } from '@showdex/components/ui';
 import { bullop } from '@showdex/consts/core';
-import { formatId, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
+import { env, getResourceUrl } from '@showdex/utils/core';
 import type { ShowdexSupporterTier } from '@showdex/consts/app';
 import styles from './PatronagePane.module.scss';
 
@@ -24,12 +27,15 @@ import styles from './PatronagePane.module.scss';
  */
 export const PatronageTierRenderer = (
   key: string,
+  colorScheme: Showdown.ColorScheme = 'light',
+  showTitles?: boolean,
 ) => (
   tier: ShowdexSupporterTier,
   index?: number,
 ): JSX.Element => {
   const {
     title,
+    term,
     names,
   } = tier || {};
 
@@ -41,6 +47,9 @@ export const PatronageTierRenderer = (
   const containerKey = `PatronagePane:${key}:${formatId(title)}`;
   const notFirstTier = index > 0;
   const namesCount = names.length;
+
+  const buildDateMs = parseInt(env('build-date'), 16) || null;
+  const buildDate = isValid(buildDateMs) ? new Date(buildDateMs) : null;
 
   return (
     <React.Fragment key={containerKey}>
@@ -64,37 +73,112 @@ export const PatronageTierRenderer = (
             return null;
           }
 
+          const startIsoDate = Array.isArray(n) ? n[2] : null;
+          const startDate = startIsoDate?.includes('-') && isValid(new Date(startIsoDate))
+            ? new Date(startIsoDate)
+            : null;
+
+          const endIsoDate = Array.isArray(n) ? n[3] : null;
+          const endDate = endIsoDate?.includes('-') && isValid(new Date(endIsoDate))
+            ? new Date(endIsoDate)
+            : null;
+
           const username = formatId(name);
           const nameKey = `${key}:${username}`;
 
-          const active = !Array.isArray(n) || n[1];
-          const nameStyle: React.CSSProperties = active ? undefined : {
-            opacity: 0.5,
+          const userTitle = findPlayerTitle(username);
+          const userLabelColor = userTitle?.color?.[colorScheme];
+          const userIconColor = userTitle?.iconColor?.[colorScheme];
+
+          const active = term === 'once' || (
+            !!startDate // start date string (should exist)
+              && !endDate // end date string (should not exist)
+          );
+
+          const nameStyle: React.CSSProperties = {
+            ...(showTitles && userLabelColor ? { color: userLabelColor } : undefined),
+            ...(active ? undefined : { opacity: 0.5 }),
           };
 
-          const user = Array.isArray(n) && n[2];
+          const showdownUser = Array.isArray(n) && n[1];
           const notLastChild = i < namesCount - 1;
+
+          const renderedUsername = (
+            <>
+              <span>{name}</span>
+
+              {
+                (showTitles && !!userTitle?.icon) &&
+                <Svg
+                  className={styles.usernameIcon}
+                  style={userIconColor ? { color: userIconColor } : undefined}
+                  description={userTitle.iconDescription}
+                  src={getResourceUrl(`${userTitle.icon}.svg`)}
+                />
+              }
+            </>
+          );
+
+          const renderedTooltip = userTitle?.title || startDate ? (
+            <div className={styles.tooltipContent}>
+              {showTitles && userTitle?.title && startDate ? (
+                <strong><em>{userTitle.title}</em></strong>
+              ) : showTitles && userTitle?.title ? (
+                <em>{userTitle.title}</em>
+              ) : null}
+
+              {startDate && term === 'once' ? (
+                <>
+                  {showTitles && <br />}
+                  Donated on
+                  <br />
+                  {format(startDate, 'PPPP')}
+                </>
+              ) : startDate && (endDate || buildDate) && term === 'monthly' ? (
+                <>
+                  {showTitles && <br />}
+                  {endDate ? 'Supported' : 'Supporter'}{' '}
+                  for{' '}
+                  {formatDistance(
+                    startDate,
+                    endDate || buildDate,
+                  ).replace(/1(?=\x20)/, 'a')}
+                </>
+              ) : null}
+            </div>
+          ) : showdownUser ? (
+            <div className={styles.tooltipContent}>
+              Open <strong>{name}</strong>'s Profile
+            </div>
+          ) : null;
 
           return (
             <React.Fragment key={nameKey}>
-              {user ? (
+              {showdownUser ? (
                 <Button
                   display="inline"
                   className={styles.userButton}
-                  labelStyle={nameStyle}
-                  label={name}
-                  tooltip={(
-                    <div className={styles.tooltipContent}>
-                      Open <strong>{name}</strong>'s Profile
-                    </div>
-                  )}
+                  style={nameStyle}
+                  tooltip={renderedTooltip}
                   absoluteHover
                   onPress={() => openUserPopup(name)}
-                />
+                >
+                  {renderedUsername}
+                </Button>
               ) : (
-                <span style={nameStyle}>
-                  {name}
-                </span>
+                <Tooltip
+                  content={renderedTooltip}
+                  placement="top"
+                  offset={[0, 10]}
+                  delay={[1000, 50]}
+                  trigger="mouseenter"
+                  touch={['hold', 500]}
+                  disabled={!renderedTooltip}
+                >
+                  <span className={styles.userButtonless}>
+                    {renderedUsername}
+                  </span>
+                </Tooltip>
               )}
               {
                 notLastChild &&
