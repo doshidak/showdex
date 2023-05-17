@@ -377,6 +377,16 @@ export const syncPokemon = (
           syncedPokemon.transformedForme = formeChange;
         }
 
+        // check for Protosynthesis & Quark Drive boosted stats
+        const boosterVolatile = Object.keys(volatiles)
+          .find((k) => /^(?:proto|quark)/i.test(k));
+
+        syncedPokemon.boostedStat = <Showdown.StatNameNoHp> (
+          // e.g., 'protosynthesisatk' -> 'atk'
+          !!boosterVolatile
+            && boosterVolatile.replace(/^(?:protosynthesis|quarkdrive)/i, '')
+        ) || null;
+
         // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
         value = sanitizeVolatiles(clientPokemon);
 
