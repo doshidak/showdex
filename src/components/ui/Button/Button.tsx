@@ -75,12 +75,15 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
       >
         {childrenFirst && children}
 
-        <label
-          className={cx(styles.label, labelClassName)}
-          style={labelStyle}
-        >
-          {label}
-        </label>
+        {
+          !!label &&
+          <label
+            className={cx(styles.label, labelClassName)}
+            style={labelStyle}
+          >
+            {label}
+          </label>
+        }
 
         {!childrenFirst && children}
       </BaseButton>
