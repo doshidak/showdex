@@ -61,6 +61,17 @@ export const detectToggledAbility = (
     return !item || volatilesKeys.includes('itemremoved');
   }
 
+  // handle type-change abilities (i.e., Protean & Libero)
+  if (['protean', 'libero'].includes(ability)) {
+    // idea is that if these abilities are enabled, then STAB will apply to all damaging moves;
+    // otherwise, due to the handling of the 'typechange' volatile in createSmogonPokemon()
+    // where the changed type is passed to @smogon/calc, only damaging moves of the changed type
+    // will have STAB; additionally, when the user modifies the Pokemon's types via dirtyTypes[],
+    // this should be toggled off as well, regardless of the 'typechange' volatile
+    return !('typechange' in pokemon.volatiles)
+      && !pokemon.dirtyTypes?.length;
+  }
+
   // handle Ruin abilities
   // (note: smart Ruin ability toggling is done in setSelectionIndex() of useCalcdex())
   if (ability.endsWith('ofruin') && pokemon.playerKey && state?.[pokemon.playerKey]?.sideid) {

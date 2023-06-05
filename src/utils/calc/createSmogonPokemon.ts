@@ -31,7 +31,7 @@ export const createSmogonPokemon = (
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
 
-  if (!dex || gen < 1 || !pokemon?.calcdexId) {
+  if (!dex || gen < 1 || !pokemon?.calcdexId || !pokemon?.speciesForme) {
     return null;
   }
 
@@ -41,16 +41,6 @@ export const createSmogonPokemon = (
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
   const item = (gen > 1 && (pokemon.dirtyItem ?? pokemon.item)) || null;
-
-  // megas require special handling (like for the item), so make sure we detect these
-  // const isMega = hasMegaForme(pokemon.speciesForme);
-
-  // const speciesForme = SmogonPokemon.getForme(
-  //   dex,
-  //   pokemon.speciesForme.replace('-Gmax', ''),
-  //   isMega ? null : item,
-  //   moveName,
-  // );
 
   // shouldn't happen, but just in case, ja feel
   if (!pokemon.speciesForme) {
@@ -200,7 +190,7 @@ export const createSmogonPokemon = (
       // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
       // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
       types: <SmogonPokemonOverrides['types']> [
-        ...pokemon.types,
+        ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : pokemon.types),
         null,
         null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
       ].slice(0, 2),
@@ -257,7 +247,11 @@ export const createSmogonPokemon = (
 
   // calc will apply STAB boosts for ALL moves regardless of the Pokemon's changed type and the move's type
   // if the Pokemon has Protean or Libero; we don't want this to happen since the client reports the changed typings
-  if (['protean', 'libero'].includes(abilityId)) {
+  // update (2023/05/17): it appears people want this back, so allowing it unless the 'typechange' volatile exists
+  // (note: there's no volatile for when the Pokemon Terastallizes, so we're good on that front; @smogon/calc will
+  // also ignore Protean STAB once Terastallized, so we're actually doubly good)
+  // update (2023/06/02): imagine working on this for 2 weeks. naw I finally have some time at 4 AM to do this lol
+  if (['protean', 'libero'].includes(abilityId) && !pokemon.abilityToggled) {
     options.ability = 'Pressure';
   }
 

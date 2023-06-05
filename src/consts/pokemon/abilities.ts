@@ -12,9 +12,11 @@ export const PokemonToggleAbilities: AbilityName[] = [
   <AbilityName> 'Beads of Ruin',
   <AbilityName> 'Flash Fire',
   // <AbilityName> 'Intimidate', // applies the ATK reduction within `boosts`, so no need to "toggle" this
+  <AbilityName> 'Libero', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
   <AbilityName> 'Minus',
   <AbilityName> 'Multiscale', // special case based off the HP, but specified here to allow toggling in the UI
   <AbilityName> 'Plus',
+  <AbilityName> 'Protean', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
   <AbilityName> 'Protosynthesis', // introduced gen 9
   <AbilityName> 'Quark Drive', // introduced gen 9
   <AbilityName> 'Shadow Shield', // basically another multiscale lmao
