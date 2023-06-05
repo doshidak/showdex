@@ -753,7 +753,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               }
             }
 
-            if (hasTeraData && syncedPokemon.teraType !== moveData.canTerastallize) {
+            if (hasTeraData && syncedPokemon.revealedTeraType !== moveData.canTerastallize) {
               syncedPokemon.revealedTeraType = moveData.canTerastallize;
               syncedPokemon.teraType = syncedPokemon.revealedTeraType;
             }
