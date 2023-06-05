@@ -21,6 +21,7 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
+import { similarArrays } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { toggleableAbility } from '@showdex/utils/dex';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
@@ -98,27 +99,11 @@ export const CalcdexProvider = ({
   // battle,
   battleId,
   // battleId: battleIdFromProps,
-  // request,
   children,
 }: CalcdexProviderProps): JSX.Element => {
-  // const battleId = battle?.id || battleIdFromProps;
-  // const authUser = getAuthUsername();
-
   const calcdexSettings = useCalcdexSettings();
   const battleState = useCalcdexBattleState(battleId);
   const dispatch = useDispatch();
-
-  // const debugBattle = React.useMemo(() => ({
-  //   id: battleId || '(missing battleId)',
-  //   nonce: ['nonce', '(prev)', battleState?.battleNonce, '(now)', battle?.nonce],
-  //   info: ['gen', battleState?.gen, 'format', battleState?.format, 'turn', battleState?.turn],
-  //   vs: [battleState?.p1?.name || '(p1)', 'vs', battleState?.p2?.name || '(p2)'],
-  //   state: ['battle', battle, '\n', 'state', battleState],
-  // }), [
-  //   battle,
-  //   battleId,
-  //   battleState,
-  // ]);
 
   l.debug(
     'Providing Context for', battleId || '???',
@@ -126,200 +111,9 @@ export const CalcdexProvider = ({
     '\n', 'state', battleState,
   );
 
-  // determine if this Calcdex is set up by the bootstrapper to open as an overlay
-  // const renderAsOverlay = !!calcdexSettings?.openAs
-  //   // && calcdexSettings.openAs === 'overlay' // bad cause user can change the setting post-bootstrap :o
-  //   && !battle?.calcdexRoom // shouldn't be present in overlay mode
-  //   && typeof battle?.calcdexOverlayVisible === 'boolean'; // should've been set by the bootstrapper
-
-  // const renderMode: CalcdexRenderMode = renderAsOverlay ? 'overlay' : 'panel';
-
-  // determine if the Calcdex should render
-  // const shouldRender = !battle?.calcdexDestroyed
-  //   // && (!renderAsOverlay || calcdexSettings?.preserveRenderStates || battle?.calcdexOverlayVisible);
-  //   && (!renderAsOverlay || battle?.calcdexOverlayVisible);
-
-  // handle `battle` changes from the client
-  // (this is the sauce that invokes the syncBattle())
-  // React.useEffect(() => {
-  //   if (!battle?.id) {
-  //     return;
-  //   }
-  //
-  //   if (AllPlayerKeys.every((key) => !battle[key])) {
-  //     // l.debug(
-  //     //   'Ignoring battle update for', debugBattle.id, 'due to missing players... w0t ???',
-  //     //   '\n', ...debugBattle.info,
-  //     //   '\n', ...debugBattle.vs,
-  //     //   '\n', 'p1', battle?.p1,
-  //     //   '\n', 'p2', battle?.p2,
-  //     //   // '\n', 'p3', battle?.p3,
-  //     //   // '\n', 'p4', battle?.p4,
-  //     //   '\n', ...debugBattle.nonce,
-  //     //   '\n', ...debugState.state,
-  //     // );
-  //
-  //     return;
-  //   }
-  //
-  //   if (battle.calcdexDestroyed) {
-  //     l.debug(
-  //       'Ignoring battle update for', debugBattle.id, 'due to destroyed state',
-  //       '\n', ...debugBattle.info,
-  //       '\n', ...debugBattle.vs,
-  //       '\n', ...debugBattle.nonce,
-  //       '\n', ...debugBattle.state,
-  //     );
-  //
-  //     return;
-  //   }
-  //
-  //   // check for the injected `nonce` to make sure `battle` passed through the bootstrapper
-  //   if (!battle.nonce) {
-  //     l.debug(
-  //       'Ignoring battle update for', debugBattle.id, 'due to missing nonce',
-  //       '\n', ...debugBattle.info,
-  //       '\n', ...debugBattle.vs,
-  //       '\n', ...debugBattle.nonce,
-  //       '\n', ...debugBattle.state,
-  //     );
-  //
-  //     return;
-  //   }
-  //
-  //   l.debug(
-  //     'Received battle update for', debugBattle.id,
-  //     '\n', ...debugBattle.info,
-  //     '\n', ...debugBattle.vs,
-  //     '\n', ...debugBattle.nonce,
-  //     '\n', ...debugBattle.state,
-  //   );
-  //
-  //   // check if we need to initialize a new Calcdex state for the current `battle`
-  //   if (!battleState?.battleId) {
-  //     l.debug(
-  //       'Initializing Calcdex state for', debugBattle.id,
-  //       '\n', ...debugBattle.info,
-  //       '\n', ...debugBattle.vs,
-  //       '\n', ...debugBattle.nonce,
-  //       '\n', ...debugBattle.state,
-  //     );
-  //
-  //     const joinedUsers = Array.from(new Set(
-  //       battle.stepQueue
-  //         ?.filter?.((q) => q?.startsWith('|j|☆'))
-  //         .map((q) => q.replace('|j|☆', ''))
-  //       || [],
-  //     ));
-  //
-  //     const p1Name = battle.p1?.name || joinedUsers[0] || null;
-  //     const p2Name = battle.p2?.name || joinedUsers[1] || null;
-  //     const p3Name = battle.p3?.name || joinedUsers[2] || null;
-  //     const p4Name = battle.p4?.name || joinedUsers[3] || null;
-  //
-  //     dispatch(calcdexSlice.actions.init({
-  //       battleId,
-  //       battleNonce: battle.nonce,
-  //       gen: battle.gen as GenerationNum,
-  //       format: battle.id.split('-')?.[1],
-  //       turn: battle.turn || 0,
-  //       active: !battle.ended,
-  //       renderMode,
-  //
-  //       p1: {
-  //         active: !!p1Name,
-  //         name: p1Name,
-  //         rating: battle.p1?.rating,
-  //         autoSelect: !!authUser && p1Name === authUser
-  //           ? calcdexSettings.defaultAutoSelect?.auth
-  //           : calcdexSettings.defaultAutoSelect?.p1,
-  //         usedMax: usedDynamax('p1', battle.stepQueue),
-  //         usedTera: usedTerastallization('p1', battle.stepQueue),
-  //       },
-  //
-  //       p2: {
-  //         active: !!p2Name,
-  //         name: p2Name,
-  //         rating: battle.p2?.rating,
-  //         autoSelect: !!authUser && p2Name === authUser
-  //           ? calcdexSettings.defaultAutoSelect?.auth
-  //           : calcdexSettings.defaultAutoSelect?.p2,
-  //         usedMax: usedDynamax('p2', battle.stepQueue),
-  //         usedTera: usedTerastallization('p2', battle.stepQueue),
-  //       },
-  //
-  //       p3: {
-  //         active: !!p3Name,
-  //         name: p3Name,
-  //         rating: battle.p3?.rating,
-  //         autoSelect: !!authUser && p3Name === authUser
-  //           ? calcdexSettings.defaultAutoSelect?.auth
-  //           : calcdexSettings.defaultAutoSelect?.p3,
-  //         usedMax: usedDynamax('p3', battle.stepQueue),
-  //         usedTera: usedTerastallization('p3', battle.stepQueue),
-  //       },
-  //
-  //       p4: {
-  //         active: !!p4Name,
-  //         name: p4Name,
-  //         rating: battle.p3?.rating || null,
-  //         autoSelect: !!authUser && p4Name === authUser
-  //           ? calcdexSettings.defaultAutoSelect?.auth
-  //           : calcdexSettings.defaultAutoSelect?.p4,
-  //         usedMax: usedDynamax('p4', battle.stepQueue),
-  //         usedTera: usedTerastallization('p4', battle.stepQueue),
-  //       },
-  //     }));
-  //
-  //     return;
-  //   }
-  //
-  //   // otherwise, check if we should sync the updated `battle` from its `nonce`
-  //   if (battleState?.battleNonce && battle.nonce === battleState.battleNonce) {
-  //     // l.debug(
-  //     //   'Ignoring battle update for', debugBattle.id, 'due to same nonce',
-  //     //   '\n', ...debugBattle.info,
-  //     //   '\n', ...debugBattle.vs,
-  //     //   '\n', ...debugBattle.nonce,
-  //     //   '\n', ...debugBattle.state,
-  //     // );
-  //
-  //     return;
-  //   }
-  //
-  //   l.debug(
-  //     'Syncing battle update for', debugBattle.id,
-  //     '\n', ...debugBattle.info,
-  //     '\n', ...debugBattle.vs,
-  //     '\n', ...debugBattle.nonce,
-  //     '\n', ...debugBattle.state,
-  //   );
-  //
-  //   // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
-  //   // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
-  //   void dispatch(syncBattle({
-  //     battle,
-  //     request,
-  //   }));
-  // }, [
-  //   authUser,
-  //   battle,
-  //   battle?.nonce,
-  //   battleId,
-  //   battleState,
-  //   calcdexSettings,
-  //   debugBattle,
-  //   dispatch,
-  //   renderMode,
-  //   request,
-  // ]);
-
   const consumables = React.useMemo<CalcdexContextConsumables>(() => ({
     state: battleState || ({} as CalcdexBattleState),
     settings: calcdexSettings || ({} as ShowdexCalcdexSettings),
-
-    // renderMode,
-    // shouldRender,
 
     updatePokemon: (playerKey, pokemon, scopeFromArgs) => {
       const updatedState = structuredClone(battleState);
@@ -374,6 +168,14 @@ export const CalcdexProvider = ({
 
         if (types?.length) {
           payload.types = [...types];
+
+          // since the types change, clear the dirtyTypes, unless specified in the `pokemon` payload
+          // (nothing stopping you from passing both speciesForme & dirtyTypes in the payload!)
+          // (btw, even if pokemon.dirtyTypes[] was length 0 to clear it, for instance, we're still
+          // setting it to an empty array, so all good fam... inb4 the biggest bug in Showdex hist--)
+          if (!pokemon.dirtyTypes?.length) {
+            payload.dirtyTypes = [];
+          }
         }
 
         if (Object.keys(baseStats || {}).length) {
@@ -416,6 +218,11 @@ export const CalcdexProvider = ({
         }
       }
 
+      // handle clearing dirtyTypes if it matches the current types
+      if (Array.isArray(pokemon.dirtyTypes) && similarArrays(payload.types, payload.dirtyTypes)) {
+        payload.dirtyTypes = [];
+      }
+
       // clear the dirtyAbility, if any, if it matches the ability
       if ('dirtyAbility' in pokemon && pokemon.dirtyAbility === prevPokemon.ability) {
         payload.dirtyAbility = null;
@@ -437,7 +244,10 @@ export const CalcdexProvider = ({
       }
 
       // recheck for toggleable abilities if changed
-      if ('ability' in pokemon || 'dirtyAbility' in pokemon) {
+      // update (2023/06/04): now checking for dirtyTypes in the `pokemon` payload for Libero/Protean toggles
+      // (designed to toggle off in detectToggledAbility() when dirtyTypes[] is present, i.e., the user manually
+      // modifies the Pokemon's types; btw, dirtyTypes[] should've been processed by now if it was present)
+      if ('ability' in pokemon || 'dirtyAbility' in pokemon || 'dirtyTypes' in pokemon) {
         payload.abilityToggleable = toggleableAbility(payload);
 
         if (payload.abilityToggleable) {

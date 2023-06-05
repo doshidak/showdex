@@ -114,10 +114,6 @@ export const PokeInfo = ({
       || field?.gameType === 'Doubles'
   );
 
-  // const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
-  //   ? 'defenderSide'
-  //   : 'attackerSide';
-
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = pokemon?.abilityToggleable
     && formatId(abilityName)?.endsWith('ofruin')
@@ -303,15 +299,11 @@ export const PokeInfo = ({
                 )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
                 item: itemName,
               }}
-              // tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
               tooltip={settings?.reverseIconName ? undefined : smogonPageTooltip}
-              // tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
               tooltipDelay={[1000, 50]}
-              // tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
               tooltipDisabled={settings?.reverseIconName || !settings?.showUiTooltips}
               shadow
               disabled={piconDisabled}
-              // onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
               onPress={settings?.reverseIconName ? toggleFormesTooltip : openSmogonPage}
             />
           </PokeFormeTooltip>
@@ -334,16 +326,11 @@ export const PokeInfo = ({
                 )}
                 labelClassName={styles.nameLabel}
                 label={nickname || pokemon?.speciesForme || 'MissingNo.'}
-                // tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
                 tooltip={settings?.reverseIconName ? smogonPageTooltip : undefined}
-                // tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
                 tooltipDelay={[1000, 50]}
-                // tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
                 tooltipDisabled={settings?.reverseIconName && !settings?.showUiTooltips}
                 hoverScale={1}
-                // absoluteHover
                 disabled={nameDisabled}
-                // onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
                 onPress={settings?.reverseIconName ? openSmogonPage : toggleFormesTooltip}
               />
             </PokeFormeTooltip>
@@ -361,14 +348,18 @@ export const PokeInfo = ({
               multi
               input={{
                 name: `PokeInfo:Types:${pokemonKey}`,
-                value: [...(pokemon?.types || [])],
+                // value: [...(pokemon?.types || [])],
+                value: [...(pokemon?.dirtyTypes || [])],
                 onChange: (types: Showdown.TypeName[]) => updatePokemon({
-                  types: [...(types || [])],
+                  // types: [...(types || [])],
+                  dirtyTypes: [...(types || [])],
                 }, `${baseScope}:PokeTypeField:input.onChange()`),
               }}
               tooltipPlacement="bottom-start"
               containerSize={gen > 8 ? containerSize : null}
               highlight={gen < 9 || !pokemon?.terastallized}
+              highlightTypes={pokemon?.types}
+              revealedTypes={pokemon?.types}
               readOnly={!editableTypes}
               disabled={!pokemon?.speciesForme}
             />
@@ -396,6 +387,9 @@ export const PokeInfo = ({
                   ...flattenAlts(pokemon?.altTeraTypes),
                   pokemon?.revealedTeraType,
                 ])).filter(Boolean)}
+                revealedTypes={pokemon?.revealedTeraType ? [
+                  pokemon.revealedTeraType,
+                ] : undefined}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}
               />
@@ -608,12 +602,6 @@ export const PokeInfo = ({
             <Dropdown
               aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : '???'}
-              // tooltip={abilityDescription ? (
-              //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-              //     {abilityDescription}
-              //   </div>
-              // ) : null}
-              // optionTooltip={abilityOptionTooltip}
               optionTooltip={PokeAbilityOptionTooltip}
               optionTooltipProps={{
                 format,

@@ -1,6 +1,6 @@
 import { PokemonNatures } from '@showdex/consts/pokemon';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { env, similarArrays } from '@showdex/utils/core';
 import { getDexForFormat, toggleableAbility } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 import type { GenerationNum } from '@smogon/calc';
@@ -76,6 +76,7 @@ export const sanitizePokemon = (
     types: typeChanged
       ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
       : ('types' in pokemon && pokemon.types) || [],
+    dirtyTypes: ('dirtyTypes' in pokemon && pokemon.dirtyTypes) || [],
     teraType: ('teraType' in pokemon && pokemon.teraType)
       || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
       || null,
@@ -250,11 +251,6 @@ export const sanitizePokemon = (
         ]
         : [];
 
-    // make sure we don't got any bunk formes like Hisuian formes
-    // update (2023/01/05): probably ok to allow Hisuian formes now
-    // sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
-    //   .filter((f) => !!f && !f.includes('-Hisui'));
-
     // if this Pokemon can G-max, add the appropriate formes
     if (sanitizedPokemon.dmaxable && species.canGigantamax) {
       sanitizedPokemon.altFormes = sanitizedPokemon.altFormes.length
@@ -293,10 +289,16 @@ export const sanitizePokemon = (
 
     // only update the types if the dex returned types
     // (checking against typeChanged since if true, should've been already updated above)
-    if (!typeChanged && (transformedSpecies || species)?.types?.length) {
-      sanitizedPokemon.types = [
-        ...(<Showdown.TypeName[]> (transformedSpecies || species).types),
-      ];
+    const speciesTypes = <Showdown.TypeName[]> (transformedSpecies || species)?.types;
+
+    if (!typeChanged && speciesTypes?.length) {
+      sanitizedPokemon.types = [...speciesTypes];
+    }
+
+    // clear the dirtyTypes if it matches the current types
+    // (since we're using diffArrays(), the order of the elements doesn't matter)
+    if (sanitizedPokemon.dirtyTypes.length && similarArrays(sanitizedPokemon.types, sanitizedPokemon.dirtyTypes)) {
+      sanitizedPokemon.dirtyTypes = [];
     }
 
     // if no teraType in gen 9, default to the Pokemon's first type

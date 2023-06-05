@@ -590,6 +590,7 @@ export const syncPokemon = (
   const {
     altFormes,
     transformedForme, // yeah ik this is already set above, but double-checking lol
+    dirtyTypes,
     dirtyAbility,
     abilities,
     transformedAbilities,
@@ -602,6 +603,11 @@ export const syncPokemon = (
     state?.format,
     showAllFormes,
   );
+
+  // clear the dirtyTypes (only if it's populated) if sanitizePokemon() cleared them
+  if (syncedPokemon.dirtyTypes.length && !dirtyTypes.length) {
+    syncedPokemon.dirtyTypes = [];
+  }
 
   // update the abilities (including transformedAbilities) if they're different from what was stored prior
   // (note: only checking if they're arrays instead of their length since th ability list could be empty)
