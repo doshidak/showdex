@@ -175,6 +175,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   types?: Showdown.TypeName[];
 
   /**
+   * User-modified types of the Pokemon.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.1.6
+   */
+  dirtyTypes?: Showdown.TypeName[];
+
+  /**
    * Terastallizing type that the terastallizable Pokemon can terastallizingly terastallize into during terastallization.
    *
    * @default null
@@ -202,6 +213,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - Sounds like a good idea though.
    *   - I'll leave it like this for now as to not break anything.
    *
+   * @todo Update (2023/06/04 @ v1.1.6): fuck lmao gotta refactor the names for sure
    * @default null
    * @since 1.1.3
    */
@@ -568,7 +580,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *     `calcPokemonFinalStats()`, if specified.
    *
    * @default null
-   * @since 1.2.0
+   * @since 1.1.6
    */
   boostedStat?: Showdown.StatNameNoHp;
 
