@@ -12,6 +12,7 @@ export interface ButtonProps<
 > extends BaseButtonProps<T> {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
+  forceColorScheme?: Showdown.ColorScheme;
   label?: string;
   tooltip?: React.ReactNode;
   tooltipPlacement?: TooltipProps['placement'];
@@ -34,6 +35,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   className,
   labelClassName,
   labelStyle,
+  forceColorScheme,
   label,
   tooltip,
   tooltipPlacement = 'top',
@@ -50,7 +52,9 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   ...props
 }: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
-  const colorScheme = useColorScheme();
+
+  const currentColorScheme = useColorScheme();
+  const colorScheme = forceColorScheme || currentColorScheme;
 
   React.useImperativeHandle(
     forwardedRef,
