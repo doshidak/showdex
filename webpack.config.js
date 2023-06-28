@@ -209,6 +209,13 @@ const copyPatterns = [{
           'main.js.map',
         );
 
+        if (__DEV__) {
+          parsed.web_accessible_resources[0].resources.unshift(
+            '*.hot-update.js.map',
+            '*.hot-update.json',
+          );
+        }
+
         // no permissions are needed on Chrome
         parsed.permissions = [];
 
@@ -249,6 +256,13 @@ const copyPatterns = [{
           'main.js.map',
           ...resources,
         ];
+
+        if (__DEV__) {
+          parsed.web_accessible_resources.unshift(
+            '*.hot-update.js.map',
+            '*.hot-update.json',
+          );
+        }
 
         break;
       }
