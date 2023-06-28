@@ -20,14 +20,12 @@ export type LoggerLogFactory = (
   level?: LoggerLevel,
 ) => LoggerLogFunction;
 
-export type LoggerLevelConfig = {
+export interface LoggerLevelConfig {
   label: string;
   color: AnsiColor;
   htmlColor?: string;
   print: LoggerLogFunction;
-};
-
-export type LoggerLevelConfigs = Record<LoggerLevel, LoggerLevelConfig>;
+}
 
 export interface LoggerLevelFunctions extends Record<LoggerLevel, LoggerLogFunction> {
   scope?: string;
@@ -49,7 +47,7 @@ const timestamp = (): string => chalk.dim(format(
   __DEV__ ? 'HH:mm:ss.SSS' : 'yyyy-MM-dd HH:mm:ss.SSSXX',
 ));
 
-const levels: LoggerLevelConfigs = {
+const levels: Record<LoggerLevel, LoggerLevelConfig> = {
   silly: {
     label: 'SILL',
     color: HighIntensityAnsiColor.Gray,
