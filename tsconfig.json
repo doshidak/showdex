@@ -21,7 +21,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": false,
-    "target": "ES6",
+    "target": "ESNext",
   },
 
   "include": [
@@ -30,13 +30,13 @@
   ],
 
   "exclude": [
+    "*.cjs",
+    "*.js",
     "build",
     "cache",
     "dist",
     "node_modules",
     "patches",
     "scripts",
-    "./*.cjs",
-    "./*.js",
   ],
 }
