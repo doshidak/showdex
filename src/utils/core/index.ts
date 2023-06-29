@@ -7,6 +7,7 @@ export * from './getEnv';
 export * from './getExtensionId';
 export * from './getExtensionProtocol';
 export * from './getResourceUrl';
+export * from './nonEmptyObject';
 export * from './reverseObjectKv';
 export * from './runtimeFetch';
 export * from './safeJsonParse';
