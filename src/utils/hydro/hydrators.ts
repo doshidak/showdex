@@ -1,11 +1,17 @@
-import type { CalcdexPlayerKey, CalcdexPlayerSide } from '@showdex/redux/store';
+import {
+  type CalcdexPlayerKey,
+  type CalcdexPlayerSide,
+  type CalcdexPokemonAlt,
+} from '@showdex/redux/store';
 
 /**
  * Hydrates a string `value` into a `boolean`, where `'y'` becomes `true` and `false` otherwise.
  *
  * @since 1.0.3
  */
-export const hydrateBoolean = (value: string): boolean => value === 'y';
+export const hydrateBoolean = (value: string): boolean => (
+  value?.toLowerCase?.() === 'y'
+);
 
 /**
  * Hydrates a string `value` into a string.
@@ -23,17 +29,78 @@ export const hydrateString = (value: string): string => (
  *
  * @since 1.0.3
  */
-export const hydrateNumber = (value: string): number => Number(hydrateString(value));
+export const hydrateNumber = (value: string): number => {
+  const hydratedString = hydrateString(value);
+
+  if (!value) {
+    return null;
+  }
+
+  return Number(hydratedString.replace(/\,/g, ''));
+};
+
+/* eslint-disable @typescript-eslint/indent */
+
+/**
+ * Hydrates a string `value` into a determined primitive type.
+ *
+ * @since 1.1.6
+ */
+export const hydrateValue = <
+  T extends string | number | boolean = string | number | boolean,
+>(
+  value: string,
+): T => (
+  /^[0-9-\.][0-9\.\,]*(?:e[0-9+-]+)*$/i.test(value)
+    ? hydrateNumber(value) as T extends number ? Extract<T, number> : never
+    : /^(?:y|n)$/i.test(value)
+      ? hydrateBoolean(value) as T extends boolean ? Extract<T, boolean> : never
+      : hydrateString(value) as T extends string ? Extract<T, string> : never
+);
+
+/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Hydrates a string `value` into an array.
  *
  * @since 1.0.3
  */
-export const hydrateArray = <T extends string>(
+export const hydrateArray = <T extends unknown[] = string[]>(
   value: string,
   delimiter = '/',
-): T[] => <T[]> (value?.split(delimiter) ?? []);
+): T => (value?.split(delimiter) ?? []) as T;
+
+/**
+ * Hydrates a string `value` into a `CalcdexPokemonAlt<T>`.
+ *
+ * @since 1.1.6
+ */
+export const hydrateAlt = <T extends string>(
+  value: string,
+  delimiter = '@',
+): CalcdexPokemonAlt<T> => {
+  if (!value) {
+    return null;
+  }
+
+  if (value.includes(delimiter)) {
+    const [
+      name,
+      usage,
+    ] = value.split(delimiter);
+
+    const parsedUsage = hydrateNumber(usage);
+
+    if (name && typeof parsedUsage === 'number' && parsedUsage >= 0) {
+      return [
+        name as T,
+        parsedUsage,
+      ];
+    }
+  }
+
+  return value as T;
+};
 
 /**
  * Hydrates a string `value` into a `Showdown.StatsTable`.
@@ -74,7 +141,7 @@ export const hydrateFieldSide = (
 ): CalcdexPlayerSide => {
   const entries = value
     ?.split(delimiter)
-    .map((v) => <[keyof CalcdexPlayerSide, string]> v?.split('='))
+    .map((v) => v?.split('=') as [keyof CalcdexPlayerSide, string])
     .filter(Boolean)
     || [];
 

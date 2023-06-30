@@ -1,7 +1,7 @@
 import base64 from 'base-64';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { env } from '@showdex/utils/core';
-import type { CalcdexBattleState } from '@showdex/redux/store';
+import { type CalcdexBattleState } from '@showdex/redux/store';
 import {
   dehydrateArray,
   dehydrateBoolean,
