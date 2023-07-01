@@ -1,9 +1,10 @@
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonAlt, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat } from '@showdex/utils/battle';
 import { reverseObjectKv } from '@showdex/utils/core';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
 import { DehydrationPresetMap } from './dehydratePreset';
-import { hydrateAlt, hydrateValue, hydrateStatsTable } from './hydrators';
+import { hydrateNumber, hydrateValue } from './hydratePrimitives';
+import { hydrateStatsTable } from './hydrateStatsTable';
 
 /**
  * Reverse mapping of `string` opcodes to their `CalcdexPokemonPreset` properties.
@@ -22,6 +23,38 @@ const HydrationPresetMap = reverseObjectKv(DehydrationPresetMap);
  * @since 1.1.6
  */
 const HydrationPresetDefaultName = 'de_cache';
+
+/**
+ * Hydrates a string `value` into a `CalcdexPokemonAlt<T>`.
+ *
+ * @since 1.1.6
+ */
+export const hydrateAlt = <T extends string>(
+  value: string,
+  delimiter = '@',
+): CalcdexPokemonAlt<T> => {
+  if (!value) {
+    return null;
+  }
+
+  if (value.includes(delimiter)) {
+    const [
+      name,
+      usage,
+    ] = value.split(delimiter);
+
+    const parsedUsage = hydrateNumber(usage);
+
+    if (name && typeof parsedUsage === 'number' && parsedUsage >= 0) {
+      return [
+        name as T,
+        parsedUsage,
+      ];
+    }
+  }
+
+  return value as T;
+};
 
 /**
  * Hydrates a dehydrated `value` into a hydrated `CalcdexPokemonPreset`.

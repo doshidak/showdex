@@ -1,14 +1,40 @@
 import base64 from 'base-64';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { env } from '@showdex/utils/core';
-import { type CalcdexBattleState } from '@showdex/redux/store';
-import {
-  dehydrateArray,
-  dehydrateBoolean,
-  dehydratePlayerSide,
-  dehydrateStatsTable,
-  dehydrateValue,
-} from './dehydrators';
+import { HydroDescriptor } from '@showdex/interfaces/hydro';
+// import { env } from '@showdex/utils/core';
+import { type CalcdexBattleState, type CalcdexPlayerSide } from '@showdex/redux/store';
+import { dehydrateHeader } from './dehydrateHeader';
+import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
+import { dehydrateStatsTable } from './dehydrateStatsTable';
+
+/**
+ * Dehydrates a player side `value`, filtering out properties with falsy values and
+ * joining the resulting dehydrated property values with the `delimiter`.
+ *
+ * * Key and value of each property is deliminated by an equals (`'='`).
+ * * Does not dehydrate the `conditions` object at the moment.
+ *
+ * @example
+ * ```ts
+ * dehydratePlayerSide({
+ *   spikes: 0,
+ *   isSR: true,
+ *   isReflect: true,
+ *   isLightScreen: false,
+ *   isAuroraVeil: false,
+ * });
+ *
+ * 'isSR=y/isReflect=y'
+ * ```
+ * @since 1.0.3
+ */
+export const dehydratePlayerSide = (
+  value: CalcdexPlayerSide,
+  delimiter = '/',
+): string => Object.entries(value || {})
+  .filter((e) => !!e?.[0] && e[0] !== 'conditions' && !!e[1])
+  .map(([k, v]) => `${k}=${dehydrateValue(v)}`)
+  .join(delimiter);
 
 /**
  * Dehydrates (serializes) the passed-in Calcdex `state`.
@@ -20,24 +46,13 @@ import {
  * * `p` refers to the player keys in the battle.
  * * `p#` refers to each player in the battle (e.g., `state.p1`, `state.p2`).
  * * `f` refers to the battle field (`state.field`).
- *
- * With additional properties that may be useful for debugging:
- *
- * * `v` refers to the package version (`process.env.PACKAGE_VERSION`).
- * * `b` refers to the build date (`process.env.BUILD_DATE`).
- * * `t` refers to the build target (`process.env.BUILD_TARGET`).
- * * `e` refers to the Node environment (`process.env.NODE_ENV`).
- *   - `'p'` refers to a `'production'` environment.
- *   - `'d'` refers to a `'development'` environment.
  * * `s` refers to the base-64 encoded error message, if any.
  *
  * Dehydrated `state`, whose properties are deliminated by a semi-colon (`';'`), is in the following format:
  *
  * ```
- * v:{package_version};
- * b:{build_date};
- * t:{build_target};
- * e:{node_env === 'development' ? 'd' : 'p'};
+ * {...header};
+ * s:{error};
  * g:{gen};
  * m:{format};
  * p:{authPlayerKey}/{playerKey}/{opponentKey};
@@ -111,10 +126,6 @@ import {
  * @example
  * ```ts
  * `
- * v:1.0.3;
- * b:1664325002779;
- * t:chrome;
- * e:d;
  * s:VHlwZUVycm9yOiBDYW5ub3QgcmVhZCBwcm9wZXJ0aWVzIG9mIHVuZGVmaW5lZCAocmVhZGluZyAnZGVlek51dHMnKQ==;
  * g:8;
  * m:gen8nationaldexag;
@@ -159,10 +170,11 @@ export const dehydrateCalcdex = (
   } = state;
 
   const output: string[] = [
-    `v:${env('package-version', '?')}`,
-    `b:${env('build-date', '?')}`,
-    `t:${env('build-target', '?')}`,
-    `e:${__DEV__ ? 'd' : 'p'}`,
+    dehydrateHeader(HydroDescriptor.Calcdex),
+    // `v:${env('package-version', '?')}`,
+    // `b:${env('build-date', '?')}`,
+    // `t:${env('build-target', '?')}`,
+    // `e:${__DEV__ ? 'd' : 'p'}`,
     `s:${error?.message ? base64.encode(error.message) : '?'}`,
     `g:${dehydrateValue(gen)}`,
     `m:${dehydrateValue(format)}`,

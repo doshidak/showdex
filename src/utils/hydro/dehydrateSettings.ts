@@ -1,17 +1,13 @@
 import { HydroDescriptor } from '@showdex/interfaces/hydro';
 import {
+  type CalcdexPlayerKey,
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,
 } from '@showdex/redux/store';
 // import { env } from '@showdex/utils/core';
 import { dehydrateHeader } from './dehydrateHeader';
-import {
-  dehydrateArray,
-  dehydrateBoolean,
-  dehydratePerSide,
-  dehydrateValue,
-} from './dehydrators';
+import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
 
 /**
  * Opcode mappings for the dehydrated root `ShowdexSettings`.
@@ -91,6 +87,48 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
 };
 
 /**
+ * Dehydrates a per-side settings `value`.
+ *
+ * @example
+ * ```ts
+ * dehydratePerSide({
+ *   auth: false,
+ *   p1: true,
+ *   p2: true,
+ *   p3: true,
+ *   p4: true,
+ * });
+ *
+ * 'n/y/y/y/y'
+ * ```
+ * @example
+ * ```ts
+ * dehydratePerSide({
+ *   auth: [],
+ *   p1: ['iv', 'ev'],
+ *   p2: ['iv', 'ev'],
+ *   p3: ['iv', 'ev'],
+ *   p4: ['iv', 'ev'],
+ * });
+ *
+ * '/iv,ev/iv,ev/iv,ev/iv,ev'
+ * ```
+ * @since 1.0.3
+ */
+export const dehydratePerSide = (
+  value: Record<'auth' | CalcdexPlayerKey, unknown>,
+  delimiter = '/',
+  arrayDelimiter = ',',
+): string => Object.keys(value || {})
+  .sort()
+  .map((key: 'auth' | CalcdexPlayerKey) => (
+    Array.isArray(value[key])
+      ? dehydrateArray(value[key] as unknown[], arrayDelimiter)
+      : dehydrateValue(value[key])
+  ))
+  .join(delimiter);
+
+/**
  * Dehydrates (serializes) the passed-in `settings`, typically for storing in `LocalStorage`.
  *
  * Follows a similar pattern to `dehydrateCalcdex()`, with each "root" property of the `settings` given its own "opcode":
@@ -110,7 +148,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
  * Dehydrated `settings`, whose properties are deliminated by a semi-colon (`';'`), is in the following format:
  *
  * ```
- * v:{package_version};
+ * {...header};
  * fc:{forcedColorScheme};
  * dm:{developerMode};
  * hd:{hellodexSettings};

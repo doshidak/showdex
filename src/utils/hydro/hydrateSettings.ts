@@ -1,4 +1,5 @@
 import {
+  type CalcdexPlayerKey,
   type ShowdexSettings,
   type ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
@@ -14,10 +15,9 @@ import { hydrateHeader } from './hydrateHeader';
 import {
   hydrateArray,
   hydrateBoolean,
-  hydratePerSide,
   hydrateString,
   hydrateValue,
-} from './hydrators';
+} from './hydratePrimitives';
 
 /**
  * Reverse opcode-to-key mappings for the hydrated root `ShowdexSettings`.
@@ -49,6 +49,37 @@ const IgnoredDehydratedShowdexKeys = [
   // DehydratedShowdexSettingsMap.packageVersion,
   // DehydratedShowdexSettingsMap.buildDate,
 ];
+
+/**
+ * Hydrates a string `value` into per-side settings.
+ *
+ * @since 1.0.3
+ */
+export const hydratePerSide = (
+  value: string,
+  delimiter = '/',
+  arrayDelimiter = ',',
+): Record<'auth' | CalcdexPlayerKey, unknown> => {
+  const [
+    auth,
+    p1,
+    p2,
+    p3,
+    p4,
+  ] = value?.split(delimiter).map((v) => (
+    v?.includes(arrayDelimiter)
+      ? hydrateArray(v, arrayDelimiter)
+      : hydrateBoolean(v)
+  )) || [];
+
+  return {
+    auth,
+    p1,
+    p2,
+    p3,
+    p4,
+  };
+};
 
 const l = logger('@showdex/redux/helpers/hydrateSettings()');
 
@@ -263,17 +294,17 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
             DehydratedCalcdexSettingsMap.nhkoColors,
             DehydratedCalcdexSettingsMap.nhkoLabels,
           ].includes(dehydratedCalcdexKey)
-            ? <ShowdexCalcdexSettings[typeof hydratedCalcdexKey]> hydrateArray(dehydratedCalcdexValue)
+            ? hydrateArray<Extract<ShowdexCalcdexSettings[typeof hydratedCalcdexKey], unknown[]>>(dehydratedCalcdexValue)
             : [
               DehydratedCalcdexSettingsMap.defaultAutoSelect,
               DehydratedCalcdexSettingsMap.defaultAutoMoves,
               // DehydratedCalcdexSettingsMap.defaultShowGenetics,
               DehydratedCalcdexSettingsMap.lockGeneticsVisibility,
             ].includes(dehydratedCalcdexKey)
-              ? (<ShowdexCalcdexSettings[typeof hydratedCalcdexKey]> hydratePerSide(dehydratedCalcdexValue))
+              ? hydratePerSide(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey]
               : ['y', 'n'].includes(dehydratedCalcdexValue)
                 ? hydrateBoolean(dehydratedCalcdexValue)
-                : <ShowdexCalcdexSettings[typeof hydratedCalcdexKey]> hydrateString(dehydratedCalcdexValue);
+                : hydrateString(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
         });
 
         break;

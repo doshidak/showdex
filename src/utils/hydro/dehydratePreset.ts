@@ -1,7 +1,8 @@
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectUsageAlts } from '@showdex/utils/presets';
-import { dehydrateArray, dehydrateStatsTable, dehydrateValue } from './dehydrators';
+import { dehydrateArray, dehydrateValue } from './dehydratePrimitives';
+import { dehydrateStatsTable } from './dehydrateStatsTable';
 
 /* eslint-disable @typescript-eslint/indent */
 
