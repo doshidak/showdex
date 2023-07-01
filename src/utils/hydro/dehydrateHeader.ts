@@ -1,5 +1,6 @@
 import { type HydroDescriptor } from '@showdex/interfaces/hydro';
 import { env } from '@showdex/utils/core';
+import { dehydrateDate } from './dehydratePrimitives';
 
 /**
  * Outputs standardized header information describing the dehydrated content.
@@ -36,6 +37,6 @@ export const dehydrateHeader = (
 ): string => (!descriptor ? null : [
   `v:${env('package-version', 'X.X.X')}`,
   `@:${env('build-name', '?').replace(new RegExp(delimiter, 'g'), '')}`,
-  `#:${Date.now().toString(16).toUpperCase()}`,
+  `#:${dehydrateDate()}`,
   `$:${descriptor}`,
 ].join(delimiter));

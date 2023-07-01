@@ -1,3 +1,5 @@
+import { toDate } from 'date-fns';
+
 /**
  * Hydrates a string `value` into a `boolean`, where `'y'` becomes `true` and `false` otherwise.
  *
@@ -63,3 +65,19 @@ export const hydrateArray = <T extends unknown[] = string[]>(
   value: string,
   delimiter = '/',
 ): T => (value?.split(delimiter) ?? []) as T;
+
+/**
+ * Hydrates a string `value` into a `Date`.
+ *
+ * * `null` will be returned if hydration fails for whatever reason.
+ *   - Including `'?'`, which is the default value for failed dehydrations.
+ *
+ * @since 1.1.6
+ */
+export const hydrateDate = (
+  value: string,
+): Date => (
+  value && value !== '?' && /^[0-9A-F]+$/i.test(value)
+    ? toDate(parseInt(value, 16))
+    : null
+);

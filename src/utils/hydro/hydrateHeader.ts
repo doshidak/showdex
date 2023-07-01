@@ -1,5 +1,5 @@
-import { toDate } from 'date-fns';
 import { HydroDescriptor, type HydroHeader } from '@showdex/interfaces/hydro';
+import { hydrateDate } from './hydratePrimitives';
 
 /**
  * Hydrates a string `value` into a `HydroHeader`.
@@ -92,10 +92,7 @@ export const hydrateHeader = (
 
       case '#': {
         header.timestamp = partValue;
-
-        if (/^[0-9A-F]+$/i.test(partValue)) {
-          header.date = toDate(parseInt(partValue, 16));
-        }
+        header.date = hydrateDate(header.timestamp);
 
         break;
       }
