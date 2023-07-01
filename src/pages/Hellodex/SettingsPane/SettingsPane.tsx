@@ -6,6 +6,8 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Segmented, Switch, TextField } from '@showdex/components/form';
 import {
+  type BadgeInstance,
+  type BaseButtonProps,
   Badge,
   BaseButton,
   Button,
@@ -14,10 +16,7 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import {
-  dehydrateShowdexSettings,
-  hydrateShowdexSettings,
-} from '@showdex/redux/helpers';
-import {
+  type ShowdexSettings,
   useAuthUsername,
   useColorScheme,
   useShowdexSettings,
@@ -31,8 +30,7 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { BadgeInstance, BaseButtonProps } from '@showdex/components/ui';
-import type { ShowdexSettings } from '@showdex/redux/store';
+import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import styles from './SettingsPane.module.scss';
 
 export interface SettingsPaneProps {
@@ -101,7 +99,7 @@ export const SettingsPane = ({
 
     try {
       if (DehydratedRegex.test(prevSettings)) {
-        const rehydratedPrev = hydrateShowdexSettings(prevSettings);
+        const rehydratedPrev = hydrateSettings(prevSettings);
 
         if (importUndoTimeout.current) {
           clearTimeout(importUndoTimeout.current);
@@ -136,7 +134,7 @@ export const SettingsPane = ({
         return;
       }
 
-      const dehydratedCurrent = dehydrateShowdexSettings(settings);
+      const dehydratedCurrent = dehydrateSettings(settings);
 
       if (DehydratedRegex.test(dehydratedCurrent)) {
         setPrevSettings(dehydratedCurrent);
@@ -151,7 +149,7 @@ export const SettingsPane = ({
         }, 5000);
       }
 
-      const hydratedSettings = hydrateShowdexSettings(importedSettings);
+      const hydratedSettings = hydrateSettings(importedSettings);
 
       if (!hydratedSettings) {
         l.debug(
@@ -184,7 +182,7 @@ export const SettingsPane = ({
 
   const handleSettingsExport = () => void (async () => {
     try {
-      const dehydratedSettings = dehydrateShowdexSettings(settings);
+      const dehydratedSettings = dehydrateSettings(settings);
 
       if (!DehydratedRegex.test(dehydratedSettings)) {
         l.debug(
@@ -223,8 +221,8 @@ export const SettingsPane = ({
 
     void (async () => {
       try {
-        const hydratedDefaults = hydrateShowdexSettings();
-        const dehydratedDefaults = dehydrateShowdexSettings(hydratedDefaults);
+        const hydratedDefaults = hydrateSettings();
+        const dehydratedDefaults = dehydrateSettings(hydratedDefaults);
 
         if (!DehydratedRegex.test(dehydratedDefaults)) {
           l.debug(

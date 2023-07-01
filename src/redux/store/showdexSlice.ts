@@ -1,14 +1,16 @@
-import { createSlice, current } from '@reduxjs/toolkit';
 import {
-  dehydrateShowdexSettings,
-  hydrateShowdexSettings,
-} from '@showdex/redux/helpers';
+  type Draft,
+  type PayloadAction,
+  type SliceCaseReducers,
+  createSlice,
+  current,
+} from '@reduxjs/toolkit';
+import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/ui';
-import type { CalcdexPlayerKey, CalcdexRenderMode } from './calcdexSlice';
+import { type SmogonMatchupNhkoColors, type SmogonMatchupNhkoLabels } from '@showdex/utils/ui';
+import { type CalcdexPlayerKey, type CalcdexRenderMode } from './calcdexSlice';
 import { useDispatch, useSelector } from './hooks';
 
 /**
@@ -701,7 +703,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
 
   initialState: {
     authUsername: getAuthUsername(), // won't probably exist on init btw
-    settings: hydrateShowdexSettings(getStoredItem('storage-settings-key')),
+    settings: hydrateSettings(getStoredItem('storage-settings-key')),
   },
 
   reducers: {
@@ -758,7 +760,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       });
 
       const stateSnapshot = current(state);
-      const dehydratedSettings = dehydrateShowdexSettings(stateSnapshot.settings);
+      const dehydratedSettings = dehydrateSettings(stateSnapshot.settings);
 
       if (dehydratedSettings) {
         setStoredItem('storage-settings-key', dehydratedSettings);
@@ -808,11 +810,11 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
         '\n', 'state', __DEV__ && current(state),
       );
 
-      // defaults are stored in hydrateShowdexSettings(),
+      // defaults are stored in hydrateSettings(),
       // which is returned by passing in no args
-      const defaultSettings = hydrateShowdexSettings();
+      const defaultSettings = hydrateSettings();
 
-      // hydrateShowdexSettings() creates a new object every time,
+      // hydrateSettings() creates a new object every time,
       // so no worries about deep-copying here (I say that now tho...)
       state.settings = defaultSettings;
 

@@ -1,9 +1,11 @@
-import { env } from '@showdex/utils/core';
-import type {
-  ShowdexCalcdexSettings,
-  ShowdexHellodexSettings,
-  ShowdexSettings,
+import { HydroDescriptor } from '@showdex/interfaces/hydro';
+import {
+  type ShowdexCalcdexSettings,
+  type ShowdexHellodexSettings,
+  type ShowdexSettings,
 } from '@showdex/redux/store';
+// import { env } from '@showdex/utils/core';
+import { dehydrateHeader } from './dehydrateHeader';
 import {
   dehydrateArray,
   dehydrateBoolean,
@@ -16,9 +18,7 @@ import {
  *
  * @since 1.0.3
  */
-export const DehydratedShowdexSettingsMap: Record<'packageVersion' | keyof ShowdexSettings, string> = {
-  packageVersion: 'v',
-  // buildDate: 'b',
+export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string> = {
   colorScheme: 'cs',
   forcedColorScheme: 'fc',
   developerMode: 'dm',
@@ -123,49 +123,25 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
  * where `{hellodexSettings}`, whose properties are deliminated by a pipe (`'|'`), is in the following format:
  *
  * ```
- * OOS~{openOnStart}
- * FRR~{focusRoomsRoom}
+ * oos~{openOnStart}
+ * frr~{focusRoomsRoom}
  * ```
  *
  * and `{calcdexSettings}`, whose properties are deliminated by a pipe (`'|'`), is in the following format:
  *
  * ```
- * OOS~{openOnStart}|
- * OAS~{openAs}|
- * OOP~{openOnPanel}|
- * CON~{closeOn}|
- * DOC~{destroyOnClose}|
- * DAS~{defaultAutoSelect}|
- * APS~{authPosition}|
- * SNN~{showNicknames}|
- * RIN~{reverseIconName}|
- * OSP~{openSmogonPage}|
- * SAO~{showAllOptions}|
- * SND~{showNonDamageRanges}|
- * DSP~{downloadSmogonPresets}|
- * DUS~{downloadUsageStats}|
- * PUS~{prioritizeUsageStats}|
- * ITB~{includeTeambuilder}|
- * AEO~{autoExportOpponent}|
- * DAM~{defaultAutoMoves}|
- * SME~{showMoveEditor}|
- * SBS~{showBaseStats}|
- * LGV~{lockGeneticsVisibility}|
- * SAT~{showAbilityTooltip}|
- * SIT~{showItemTooltip}|
- * SMV~{showMoveTooltip}|
- * SMU~{showMatchupTooltip}|
- * PMD~{prettifyMatchupDescription}|
- * SDA~{showMatchupDamageAmounts}|
- * CMD~{copyMatchupDescription}|
- * SFT~{showFieldTooltips}|
- * NCL~{nhkoColors}|
- * NLB~{nhkoLabels}
+ * oos~{openOnStart}|
+ * oas~{openAs}|
+ * oop~{openOnPanel}|
+ * con~{closeOn}|
+ * ...
  * ```
+ *
+ * * Update (2023/07/01): ya this list in the jsdoc became a bitch to maintain, so just hitting you with those `...`'s c:
  *
  * @since 1.0.3
  */
-export const dehydrateShowdexSettings = (settings: ShowdexSettings): string => {
+export const dehydrateSettings = (settings: ShowdexSettings): string => {
   if (!Object.keys(settings || {}).length) {
     return null;
   }
@@ -178,7 +154,8 @@ export const dehydrateShowdexSettings = (settings: ShowdexSettings): string => {
   } = settings;
 
   const output: string[] = [
-    `${DehydratedShowdexSettingsMap.packageVersion}:${env('package-version', '?')}`,
+    dehydrateHeader(HydroDescriptor.Settings),
+    // `${DehydratedShowdexSettingsMap.packageVersion}:${env('package-version', '?')}`,
     // `${DehydratedShowdexSettingsMap.buildDate}:${env('build-date', '?')}`,
     `${DehydratedShowdexSettingsMap.forcedColorScheme}:${dehydrateValue(forcedColorScheme)}`,
     `${DehydratedShowdexSettingsMap.developerMode}:${dehydrateBoolean(developerMode)}`,
@@ -198,7 +175,7 @@ export const dehydrateShowdexSettings = (settings: ShowdexSettings): string => {
 
     const dehydratedValue = dehydrateValue(value);
 
-    return `${dehydratedKey.toUpperCase()}~${dehydratedValue}`;
+    return `${dehydratedKey.toLowerCase()}~${dehydratedValue}`;
   }).filter(Boolean);
 
   output.push(`${DehydratedShowdexSettingsMap.hellodex}:${hellodexOutput.join('|')}`);
@@ -221,7 +198,7 @@ export const dehydrateShowdexSettings = (settings: ShowdexSettings): string => {
         ? dehydratePerSide(value)
         : dehydrateValue(value);
 
-    return `${dehydratedKey.toUpperCase()}~${dehydratedValue}`;
+    return `${dehydratedKey.toLowerCase()}~${dehydratedValue}`;
   }).filter(Boolean);
 
   output.push(`${DehydratedShowdexSettingsMap.calcdex}:${calcdexOutput.join('|')}`);

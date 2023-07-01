@@ -1,21 +1,22 @@
+import {
+  type ShowdexSettings,
+  type ShowdexCalcdexSettings,
+} from '@showdex/redux/store';
 import { getColorScheme } from '@showdex/utils/app';
 import { reverseObjectKv } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type {
-  ShowdexSettings,
-  ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
 import {
   DehydratedCalcdexSettingsMap,
   DehydratedHellodexSettingsMap,
   DehydratedShowdexSettingsMap,
-} from './dehydrateShowdexSettings';
+} from './dehydrateSettings';
+import { hydrateHeader } from './hydrateHeader';
 import {
   hydrateArray,
   hydrateBoolean,
-  hydrateNumber,
   hydratePerSide,
   hydrateString,
+  hydrateValue,
 } from './hydrators';
 
 /**
@@ -45,11 +46,11 @@ export const HydratedCalcdexSettingsMap = reverseObjectKv(DehydratedCalcdexSetti
  * @since 1.0.3
  */
 const IgnoredDehydratedShowdexKeys = [
-  DehydratedShowdexSettingsMap.packageVersion,
+  // DehydratedShowdexSettingsMap.packageVersion,
   // DehydratedShowdexSettingsMap.buildDate,
 ];
 
-const l = logger('@showdex/redux/helpers/hydrateShowdexSettings');
+const l = logger('@showdex/redux/helpers/hydrateSettings()');
 
 /**
  * Hydrates the passed-in dehydrated `settings`, typically for restoring settings stored in `LocalStorage`.
@@ -58,7 +59,7 @@ const l = logger('@showdex/redux/helpers/hydrateShowdexSettings');
  *
  * @since 1.0.3
  */
-export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
+export const hydrateSettings = (value?: string): ShowdexSettings => {
   // these settings have their default values, which will be individually overwritten with the hydrated values
   // from the dehydrated settings in the passed-in `value` (otherwise, the default settings will be returned)
   const settings: ShowdexSettings = {
@@ -166,7 +167,8 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
     return settings;
   }
 
-  const dehydratedSettings = value.split(';') || [];
+  // const dehydratedSettings = value.split(';') || [];
+  const [, dehydratedSettings] = hydrateHeader(value);
 
   if (!dehydratedSettings.length) {
     l.debug(
@@ -291,11 +293,7 @@ export const hydrateShowdexSettings = (value?: string): ShowdexSettings => {
           break;
         }
 
-        settings[hydratedKey] = ['y', 'n'].includes(dehydratedValue)
-          ? hydrateBoolean(dehydratedValue)
-          : /^\d+$/.test(dehydratedValue)
-            ? hydrateNumber(dehydratedValue)
-            : hydrateString(dehydratedValue);
+        settings[hydratedKey] = hydrateValue(dehydratedValue);
 
         break;
       }
