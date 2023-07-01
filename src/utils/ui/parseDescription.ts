@@ -1,6 +1,6 @@
-import { PokemonStatNames } from '@showdex/consts/pokemon';
+import { type Result } from '@smogon/calc';
+import { PokemonStatNames } from '@showdex/consts/dex';
 import { logger } from '@showdex/utils/debug';
-import type { Result } from '@smogon/calc';
 
 /**
  * Parsed matchup description from the calculated `result.desc()`.
@@ -62,7 +62,7 @@ export interface CalcdexMatchupParsedDescription {
   koChance?: string;
 }
 
-const l = logger('@showdex/utils/calc/parseDescription');
+const l = logger('@showdex/utils/calc/parseDescription()');
 
 /**
  * Formats the description string from `result.desc()` into separate parts.

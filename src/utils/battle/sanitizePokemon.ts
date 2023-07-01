@@ -1,11 +1,15 @@
-import { PokemonNatures } from '@showdex/consts/pokemon';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+} from '@smogon/calc/dist/data/interface';
+import { PokemonNatures } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env, similarArrays } from '@showdex/utils/core';
 import { getDexForFormat, toggleableAbility } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
-import type { GenerationNum } from '@smogon/calc';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { detectLegacyGen } from './detectLegacyGen';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';

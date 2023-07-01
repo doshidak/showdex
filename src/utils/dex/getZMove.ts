@@ -1,9 +1,9 @@
-import { PokemonSpecialZMoves, PokemonZMoves } from '@showdex/consts/pokemon';
+import { type ItemName, type MoveName } from '@smogon/calc/dist/data/interface';
+import { PokemonSpecialZMoves, PokemonZMoves } from '@showdex/consts/dex';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { ItemName, MoveName } from '@smogon/calc/dist/data/interface';
 
-const l = logger('@showdex/utils/dex/getZMove');
+const l = logger('@showdex/utils/dex/getZMove()');
 
 /**
  * Returns the corresponding Z move for a given move.

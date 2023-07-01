@@ -1,6 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { type GenerationNum } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { PokemonNatures, PokemonTypes } from '@showdex/consts/pokemon';
+import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
+import {
+  type CalcdexBattleState,
+  type CalcdexPlayerKey,
+  type CalcdexPokemon,
+  type RootState,
+} from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import {
   countActivePlayers,
@@ -20,19 +27,12 @@ import {
 } from '@showdex/utils/battle';
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
+import { logger, runtimer } from '@showdex/utils/debug';
 import {
   appliedPreset,
   getPresetFormes,
   getTeamSheetPresets,
 } from '@showdex/utils/presets';
-import type { GenerationNum } from '@smogon/calc';
-import type {
-  CalcdexBattleState,
-  CalcdexPlayerKey,
-  CalcdexPokemon,
-  RootState,
-} from '@showdex/redux/store';
 import { syncField } from './syncField';
 import { syncPokemon } from './syncPokemon';
 
@@ -43,8 +43,7 @@ export interface SyncBattlePayload {
 
 export const SyncBattleActionType = 'calcdex:sync';
 
-const defaultMinPokemon = env.int('calcdex-player-min-pokemon', 0);
-const l = logger('@showdex/redux/actions/syncBattle');
+const l = logger('@showdex/redux/actions/syncBattle()');
 
 /**
  * Syncs the Showdown `battle` state with an existing `CalcdexBattleState`.
@@ -59,6 +58,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battle,
       request,
     } = payload || {};
+
+    const endTimer = runtimer(l.scope, l);
 
     const rootState = <RootState> api.getState();
     const settings = rootState?.showdex?.settings?.calcdex;
@@ -237,7 +238,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine the max amount of Pokemon
-      const maxPokemon = Math.max(player?.totalPokemon || 0, defaultMinPokemon);
+      const maxPokemon = Math.max(
+        player?.totalPokemon || 0,
+        env.int('calcdex-player-min-pokemon', 0),
+      );
 
       if (playerState.maxPokemon !== maxPokemon) {
         playerState.maxPokemon = maxPokemon;
@@ -284,14 +288,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               ))?.calcdexId
           ) || calcPokemonCalcdexId(pokemon, playerKey);
 
-          l.debug(
-            'Assigned calcdexId', pokemon.calcdexId, 'to', pokemon.speciesForme,
-            'for player', playerKey,
-            '\n', 'battleId', battleId,
-            '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
-            '\n', 'source', 'getIdent' in pokemon ? 'client' : 'server',
-            '\n', 'pokemon', pokemon,
-          );
+          // l.debug(
+          //   'Assigned calcdexId', pokemon.calcdexId, 'to', pokemon.speciesForme,
+          //   'for player', playerKey,
+          //   '\n', 'battleId', battleId,
+          //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+          //   '\n', 'source', 'getIdent' in pokemon ? 'client' : 'server',
+          //   '\n', 'pokemon', pokemon,
+          // );
         }
 
         if (isMyPokemonSide && hasMyPokemon && !('getIdent' in pokemon)) {
@@ -313,15 +317,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           if (clientPokemon) {
             clientPokemon.calcdexId = pokemon.calcdexId;
 
-            l.debug(
-              'Assigned calcdexId', pokemon.calcdexId,
-              'to matched clientPokemon', clientPokemon.speciesForme,
-              'for player', playerKey,
-              '\n', 'battleId', battleId,
-              '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
-              '\n', 'clientPokemon', clientPokemon,
-              '\n', 'serverPokemon', pokemon,
-            );
+            // l.debug(
+            //   'Assigned calcdexId', pokemon.calcdexId,
+            //   'to matched clientPokemon', clientPokemon.speciesForme,
+            //   'for player', playerKey,
+            //   '\n', 'battleId', battleId,
+            //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+            //   '\n', 'clientPokemon', clientPokemon,
+            //   '\n', 'serverPokemon', pokemon,
+            // );
           }
         }
 
@@ -368,7 +372,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // so convert the ServerPokemon into a partially-filled Pokemon object
         return <DeepPartial<Showdown.Pokemon>> {
           calcdexId: serverPokemon.calcdexId,
-          // slot: i,
           ident: serverPokemon.ident,
           searchid: serverPokemon.searchid,
           name: serverPokemon.name,
@@ -728,17 +731,17 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               || (syncedPokemon.ident !== reqIdent && syncedPokemon.details !== reqDetails);
               // || !syncedPokemon.altFormes.some((f) => f.endsWith('-Gmax'));
 
-            l.debug(
-              'Processing move request for', reqIdent || reqDetails,
-              '\n', 'battleId', battleId,
-              '\n', 'shouldIgnore?', shouldIgnore,
-              '\n', 'moveData', moveData,
-              '\n', 'Gmax?', moveData?.maxMoves?.gigantamax, // ? = partial, i.e., could be null/undefined
-              '\n', 'Tera?', moveData?.canTerastallize,
-              '\n', 'sidePokemon', side.pokemon?.[j],
-              '\n', 'request', request,
-              '\n', 'battle', battle,
-            );
+            // l.debug(
+            //   'Processing move request for', reqIdent || reqDetails,
+            //   '\n', 'battleId', battleId,
+            //   '\n', 'shouldIgnore?', shouldIgnore,
+            //   '\n', 'moveData', moveData,
+            //   '\n', 'Gmax?', moveData?.maxMoves?.gigantamax, // ? = partial, i.e., could be null/undefined
+            //   '\n', 'Tera?', moveData?.canTerastallize,
+            //   '\n', 'sidePokemon', side.pokemon?.[j],
+            //   '\n', 'request', request,
+            //   '\n', 'battle', battle,
+            // );
 
             if (shouldIgnore) {
               continue;
@@ -881,7 +884,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 'Ignoring', syncedPokemon.speciesForme, 'for player', playerKey,
                 'since they have the max number of Pokemon.',
                 '\n', 'battleId', battleId,
-                '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
+                '\n', 'calcdexId', clientPokemon.calcdexId,
                 '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
                 '\n', 'clientPokemon', clientPokemon,
                 '\n', 'serverPokemon', serverPokemon,
@@ -921,35 +924,35 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
           playerState.pokemon.push(syncedPokemon);
 
-          l.debug(
-            'Added new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
-            '\n', 'battleId', battleId,
-            '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
-            '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
-            '\n', 'clientPokemon', clientPokemon,
-            '\n', 'serverPokemon', serverPokemon,
-            '\n', 'syncedPokemon', syncedPokemon,
-            '\n', 'playerState.pokemon', playerState.pokemon,
-            '\n', 'pokemonOrder', playerState.pokemonOrder,
-            '\n', 'battle', battle,
-            '\n', 'battleState', battleState,
-          );
+          // l.debug(
+          //   'Added new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
+          //   '\n', 'battleId', battleId,
+          //   '\n', 'calcdexId', clientPokemon.calcdexId,
+          //   '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
+          //   '\n', 'clientPokemon', clientPokemon,
+          //   '\n', 'serverPokemon', serverPokemon,
+          //   '\n', 'syncedPokemon', syncedPokemon,
+          //   '\n', 'playerState.pokemon', playerState.pokemon,
+          //   '\n', 'pokemonOrder', playerState.pokemonOrder,
+          //   '\n', 'battle', battle,
+          //   '\n', 'battleState', battleState,
+          // );
         } else {
           playerState.pokemon[matchedPokemonIndex] = syncedPokemon;
 
-          l.debug(
-            'Updated existing Pokemon', syncedPokemon.speciesForme,
-            'at index', matchedPokemonIndex, 'for player', playerKey,
-            '\n', 'battleId', battleId,
-            '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
-            '\n', 'clientPokemon', clientPokemon,
-            '\n', 'serverPokemon', serverPokemon,
-            '\n', 'syncedPokemon', syncedPokemon,
-            '\n', 'playerState.pokemon', playerState.pokemon,
-            '\n', 'pokemonOrder', playerState.pokemonOrder,
-            '\n', 'battle', battle,
-            '\n', 'battleState', battleState,
-          );
+          // l.debug(
+          //   'Updated existing Pokemon', syncedPokemon.speciesForme,
+          //   'at index', matchedPokemonIndex, 'for player', playerKey,
+          //   '\n', 'battleId', battleId,
+          //   '\n', 'calcdexId', clientPokemon.calcdexId,
+          //   '\n', 'clientPokemon', clientPokemon,
+          //   '\n', 'serverPokemon', serverPokemon,
+          //   '\n', 'syncedPokemon', syncedPokemon,
+          //   '\n', 'playerState.pokemon', playerState.pokemon,
+          //   '\n', 'pokemonOrder', playerState.pokemonOrder,
+          //   '\n', 'battle', battle,
+          //   '\n', 'battleState', battleState,
+          // );
         }
       }
 
@@ -1139,6 +1142,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     if (battleNonce) {
       battleState.battleNonce = battleNonce;
     }
+
+    endTimer();
 
     l.debug(
       'Dispatching synced battleState for', battleState.battleId || '???',

@@ -1,13 +1,17 @@
-import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/pokemon';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+} from '@smogon/calc/dist/data/interface';
+import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
-import type { GenerationNum } from '@smogon/calc';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemonPreset, CalcdexPokemonPresetSource } from '@showdex/redux/store';
 
 // note: speciesForme should be handled last since it will test() true against any line technically
 const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> = {

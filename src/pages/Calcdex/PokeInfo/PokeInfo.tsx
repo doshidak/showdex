@@ -1,5 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { type AbilityName, type ItemName } from '@smogon/calc/dist/data/interface';
 import {
   PiconButton,
   PokeFormeTooltip,
@@ -8,18 +9,20 @@ import {
 } from '@showdex/components/app';
 import { Dropdown, PokeTypeField } from '@showdex/components/form';
 import {
+  type BadgeInstance,
   Badge,
   Button,
   ToggleButton,
   Tooltip,
 } from '@showdex/components/ui';
-import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
-import { useColorScheme } from '@showdex/redux/store';
+import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/dex';
+import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
 import { formatId, openSmogonUniversity } from '@showdex/utils/app';
 import { detectToggledAbility, legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -27,10 +30,6 @@ import {
   flattenAlts,
   importPokePaste,
 } from '@showdex/utils/presets';
-import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
-import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexPlayerSide } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';

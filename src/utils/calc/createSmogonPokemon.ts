@@ -1,11 +1,11 @@
 import { Pokemon as SmogonPokemon } from '@smogon/calc';
-import { PokemonToggleAbilities } from '@showdex/consts/pokemon';
+import { type MoveName, type Specie } from '@smogon/calc/dist/data/interface';
+import { PokemonToggleAbilities } from '@showdex/consts/dex';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import { getGenDexForFormat, notFullyEvolved } from '@showdex/utils/dex';
-import type { MoveName, Specie } from '@smogon/calc/dist/data/interface';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHp } from './calcPokemonHp';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];

@@ -1,9 +1,15 @@
+import { type GenerationNum } from '@smogon/calc';
 // import { times } from '@showdex/consts/core';
 import {
   // PokemonInitialStats,
   PokemonSpeedReductionItems,
   PokemonStatNames,
-} from '@showdex/consts/pokemon';
+} from '@showdex/consts/dex';
+import {
+  type CalcdexBattleField,
+  type CalcdexPlayer,
+  type CalcdexPokemon,
+} from '@showdex/redux/store';
 import { formatId as id } from '@showdex/utils/app';
 import {
   countRuinAbilities,
@@ -14,12 +20,9 @@ import {
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { getDexForFormat, notFullyEvolved, shouldIgnoreItem } from '@showdex/utils/dex';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexPlayer, CalcdexPokemon } from '@showdex/redux/store';
-import type { CalcdexStatModRecording } from './statModRecorder';
 import { calcPokemonHp } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
-import { statModRecorder } from './statModRecorder';
+import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
 

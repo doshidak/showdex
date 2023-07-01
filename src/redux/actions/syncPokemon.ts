@@ -1,4 +1,15 @@
-import { PokemonBoostNames, PokemonTypes } from '@showdex/consts/pokemon';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+} from '@smogon/calc/dist/data/interface';
+import { PokemonBoostNames, PokemonTypes } from '@showdex/consts/dex';
+import {
+  type CalcdexBattleState,
+  type CalcdexPokemon,
+  type CalcdexPokemonPreset,
+} from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import {
   detectGenFromFormat,
@@ -20,11 +31,8 @@ import { env } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 import { flattenAlts, guessTeambuilderPreset } from '@showdex/utils/presets';
-import type { GenerationNum } from '@smogon/calc';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexBattleState, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
-// const l = logger('@showdex/redux/actions/syncPokemon');
+// const l = logger('@showdex/redux/actions/syncPokemon()');
 
 export const syncPokemon = (
   pokemon: CalcdexPokemon,

@@ -1,19 +1,22 @@
 import * as React from 'react';
+import { type FieldRenderProps } from 'react-final-form';
 // import { sticky } from 'tippy.js';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
-import { BaseButton, ToggleButton, Tooltip } from '@showdex/components/ui';
-import { PokemonTypes } from '@showdex/consts/pokemon';
-import { useColorScheme } from '@showdex/redux/store';
+import {
+  type ButtonElement,
+  type TooltipProps,
+  BaseButton,
+  ToggleButton,
+  Tooltip,
+} from '@showdex/components/ui';
+import { PokemonTypes } from '@showdex/consts/dex';
+import { type CalcdexPokemonUsageAlt, useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { similarArrays } from '@showdex/utils/core';
-import { useUserAgent } from '@showdex/utils/hooks';
+import { type ElementSizeLabel, useUserAgent } from '@showdex/utils/hooks';
 import { percentage } from '@showdex/utils/humanize';
 import { flattenAlts, sortUsageAlts } from '@showdex/utils/presets';
-import type { FieldRenderProps } from 'react-final-form';
-import type { ButtonElement, TooltipProps } from '@showdex/components/ui';
-import type { CalcdexPokemonUsageAlt } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import styles from './PokeTypeField.module.scss';
 
 export interface PokeTypeFieldProps<

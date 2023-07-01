@@ -1,15 +1,14 @@
-import { PokemonNatures } from '@showdex/consts/pokemon';
+import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interface';
+import { PokemonNatures } from '@showdex/consts/dex';
+import { type PkmnSmogonFormatStatsResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { processUsageAlts } from '@showdex/utils/presets';
-import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
-// const l = logger('@showdex/redux/transformers/transformFormatStatsResponse');
+// const l = logger('@showdex/redux/transformers/transformFormatStatsResponse()');
 
 /**
  * Transforms the JSON response from the Gen Format Stats API by converting the object into an array of `CalcdexPokemonPreset`s.

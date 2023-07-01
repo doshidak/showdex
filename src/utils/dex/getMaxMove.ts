@@ -1,14 +1,14 @@
+import { type AbilityName, type MoveName } from '@smogon/calc/dist/data/interface';
 import {
   PokemonDmaxMoves,
   PokemonDmaxAbilityMoves,
   PokemonGmaxMoves,
-} from '@showdex/consts/pokemon';
+} from '@showdex/consts/dex';
 import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
-import type { AbilityName, MoveName } from '@smogon/calc/dist/data/interface';
 import { getDexForFormat } from './getDexForFormat';
 
-const l = logger('@showdex/utils/app/getMaxMove');
+const l = logger('@showdex/utils/app/getMaxMove()');
 
 /**
  * Returns the corresponding Max/G-Max move for a given move.

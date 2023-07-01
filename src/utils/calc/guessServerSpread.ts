@@ -1,12 +1,12 @@
-import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/pokemon';
+import { type GenerationNum } from '@smogon/calc';
+import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/dex';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPokemonStat } from './calcPokemonStat';
 
-const l = logger('@showdex/utils/calc/guessServerSpread');
+const l = logger('@showdex/utils/calc/guessServerSpread()');
 
 /**
  * Attempts to guess the spread (nature/EVs/IVs) of the passed-in `pokemon`.

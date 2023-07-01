@@ -1,9 +1,8 @@
-import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
+import { PokemonPokePasteStatMap } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { getDexForFormat, hasNickname } from '@showdex/utils/dex';
-// import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 
 /**
  * Internally-used helper function to export a `Showdown.StatsTable` to the PokePaste syntax.

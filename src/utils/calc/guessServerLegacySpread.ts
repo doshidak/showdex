@@ -1,13 +1,13 @@
-import { PokemonStatNames } from '@showdex/consts/pokemon';
+import { type GenerationNum } from '@smogon/calc';
+import { PokemonStatNames } from '@showdex/consts/dex';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcLegacyHpDv, convertLegacyDvToIv } from './convertLegacyStats';
 import { calcPokemonStat } from './calcPokemonStat';
 
-const l = logger('@showdex/utils/calc/guessServerLegacySpread');
+const l = logger('@showdex/utils/calc/guessServerLegacySpread()');
 
 /**
  * Attempts to guess a legacy spread (DVs) of the passed-in `pokemon`.

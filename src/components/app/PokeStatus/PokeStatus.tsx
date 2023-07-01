@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokemonStatusAbbreviations } from '@showdex/consts/pokemon';
+import { PokemonStatusAbbreviations } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import styles from './PokeStatus.module.scss';
 

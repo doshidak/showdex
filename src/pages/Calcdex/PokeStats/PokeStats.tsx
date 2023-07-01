@@ -8,14 +8,14 @@ import {
   PokemonBoostNames,
   PokemonNatureBoosts,
   PokemonStatNames,
-} from '@showdex/consts/pokemon';
+} from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import { legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import styles from './PokeStats.module.scss';
 

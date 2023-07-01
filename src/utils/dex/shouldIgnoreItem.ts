@@ -1,6 +1,6 @@
-import { PokemonSpeedReductionItems } from '@showdex/consts/pokemon';
+import { PokemonSpeedReductionItems } from '@showdex/consts/dex';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
 import { hasMegaForme } from './hasMegaForme';
 
 /**
