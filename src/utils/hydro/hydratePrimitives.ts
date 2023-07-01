@@ -72,6 +72,12 @@ export const hydrateArray = <T extends unknown[] = string[]>(
  * * `null` will be returned if hydration fails for whatever reason.
  *   - Including `'?'`, which is the default value for failed dehydrations.
  *
+ * @example
+ * ```ts
+ * hydrateDate('18912AD3FA0').toString()
+ *
+ * 'Sat Jul 01 2023 11:18:11 GMT-0700 (Pacific Daylight Time)'
+ * ```
  * @since 1.1.6
  */
 export const hydrateDate = (
