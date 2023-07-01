@@ -1,4 +1,4 @@
-import { HydroDescriptor } from '@showdex/interfaces/hydro';
+import { HydroDescriptor } from '@showdex/consts/hydro';
 import {
   type CalcdexPlayerKey,
   type ShowdexCalcdexSettings,

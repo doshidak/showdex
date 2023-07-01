@@ -1,4 +1,4 @@
-import { type Json } from '@showdex/interfaces/core';
+import { type Json } from '@showdex/consts/core';
 import { logger } from '@showdex/utils/debug';
 
 const l = logger('@showdex/utils/core/safeJsonParse');
