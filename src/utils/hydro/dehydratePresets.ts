@@ -1,68 +1,15 @@
+import {
+  type HydroPresetsDehydrationKeys,
+  HydroDescriptor,
+  HydroPresetsDehydrationAltMap,
+  HydroPresetsDehydrationMap,
+} from '@showdex/consts/hydro';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectUsageAlts } from '@showdex/utils/presets';
-import { dehydrateArray, dehydrateValue } from './dehydratePrimitives';
+import { dehydrateHeader } from './dehydrateHeader';
+import { dehydrateArray, dehydrateDate, dehydrateValue } from './dehydratePrimitives';
 import { dehydrateStatsTable } from './dehydrateStatsTable';
-
-/* eslint-disable @typescript-eslint/indent */
-
-export type DehydrationPresetKeys = Exclude<keyof CalcdexPokemonPreset,
-  | 'id'
-  | 'gen'
-  | 'ability'
-  | 'item'
-  | 'moves'
->;
-
-/* eslint-enable @typescript-eslint/indent */
-
-/**
- * Mapping of `CalcdexPokemonPreset` properties to their `string` opcodes.
- *
- * @since 1.1.6
- */
-export const DehydrationPresetMap: Record<DehydrationPresetKeys, string> = {
-  calcdexId: 'cid',
-  source: 'src',
-  name: 'nom',
-  playerName: 'pln',
-  format: 'fmt',
-  nickname: 'nkn',
-  usage: 'usg',
-  speciesForme: 'fme',
-  level: 'lvl',
-  gender: 'gdr',
-  hiddenPowerType: 'hpt',
-  teraTypes: 'trt',
-  shiny: 'shy',
-  happiness: 'hpy',
-  dynamaxLevel: 'dml',
-  gigantamax: 'gmx',
-  altAbilities: 'abl',
-  altItems: 'itm',
-  altMoves: 'mov',
-  nature: 'ntr',
-  ivs: 'ivs',
-  evs: 'evs',
-  pokeball: 'pkb',
-};
-
-/**
- * Mapping of `CalcdexPokemonPreset` properties that are `CalcdexPokemonAlt<T>[]`'s to their non-alt properties.
- *
- * * Typically used for dehydrating non-`'smogon'` & non-`'usage'` presets.
- *   - Alt properties like `altAbilities[]` are typically only populated if derived from the aforementioned sources.
- *   - Otherwise, we'll only dehydrate the `ability` (unless that's unavailable too LOL -- no biggie tho).
- * * If there is no mapping (i.e., value is falsy like `null`), then no property override will be performed.
- *
- * @since 1.1.6
- */
-export const DehydrationPresetAltMap: Partial<Record<DehydrationPresetKeys, keyof CalcdexPokemonPreset>> = {
-  teraTypes: null,
-  altAbilities: 'ability',
-  altItems: 'item',
-  altMoves: 'moves',
-};
 
 /**
  * Dehydrates (serializes) a single `preset` into a hydratable `string`.
@@ -117,8 +64,9 @@ export const DehydrationPresetAltMap: Partial<Record<DehydrationPresetKeys, keyo
  *
  * * Primarily used for caching the dehydrated presets in client's `LocalStorage`.
  * * Note that this only dehydrates a **single** `CalcdexPokemonPreset`!
- *   - You must assemble the entire dehydrated payload (including the standardized header via
- *     `dehydrateHeader()`) yourself.
+ *   - ~~You must assemble the entire dehydrated payload (including the standardized header via
+ *     `dehydrateHeader()`) yourself.~~
+ *   - Update (2023/07/01): jk, just use `dehydratePresets()` instead!
  *
  * @since 1.1.6
  */
@@ -137,7 +85,7 @@ export const dehydratePreset = (
     value: string,
   ) => output.push(`${opcode}~${value}`);
 
-  Object.entries(DehydrationPresetMap).forEach(([
+  Object.entries(HydroPresetsDehydrationMap).forEach(([
     key,
     opcode,
   ]: [
@@ -165,8 +113,8 @@ export const dehydratePreset = (
       // if `source` is empty, check if there's a mapped non-alt property to use instead
       if (!source) {
         const hasNonAlt = (
-          key in DehydrationPresetAltMap
-            && DehydrationPresetAltMap[key as DehydrationPresetKeys]
+          key in HydroPresetsDehydrationAltMap
+            && HydroPresetsDehydrationAltMap[key as HydroPresetsDehydrationKeys]
         ) || null;
 
         if (!hasNonAlt) {
@@ -192,10 +140,43 @@ export const dehydratePreset = (
 
     const dehydratedValue = ['ivs', 'evs'].includes(key) && nonEmptyObject(value)
       ? dehydrateStatsTable(value as Showdown.StatsTable, '/')
-      : dehydrateValue(value);
+      : key === 'format' && !String(value)?.startsWith(`gen${preset.gen}`)
+        ? `gen${preset.gen}${dehydrateValue(value)}`
+        : dehydrateValue(value);
 
     push(opcode, dehydratedValue);
   });
 
   return output.join(delimiter);
+};
+
+/**
+ * Dehydrates all of the provided `presets` into a hydratable `string`.
+ *
+ * * Also includes the standardized header via `dehydrateHeader()`.
+ *
+ * @since 1.1.6
+ */
+export const dehydratePresets = (
+  presets: CalcdexPokemonPreset[],
+  delimiter = ';',
+  presetDelimiter = ',',
+): string => {
+  if (!presets?.length) {
+    return null;
+  }
+
+  const dehydratedPresets = presets
+    .map((p) => dehydratePreset(p, presetDelimiter))
+    .filter(Boolean);
+
+  if (!dehydratedPresets.length) {
+    return null;
+  }
+
+  return [
+    dehydrateHeader(HydroDescriptor.Presets),
+    `u:${dehydrateDate()}`,
+    ...dehydratedPresets.map((p) => `p:${p}`),
+  ].join(delimiter);
 };

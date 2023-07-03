@@ -1,28 +1,16 @@
+import { type GenerationNum } from '@smogon/calc';
+import {
+  type HydroPresetsHydration,
+  HydroPresetsDefaultName,
+  HydroPresetsDehydrationMap,
+  HydroPresetsHydrationMap,
+} from '@showdex/consts/hydro';
 import { type CalcdexPokemonAlt, type CalcdexPokemonPreset } from '@showdex/redux/store';
-import { detectGenFromFormat } from '@showdex/utils/battle';
-import { reverseObjectKv } from '@showdex/utils/core';
+import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
-import { DehydrationPresetMap } from './dehydratePreset';
+import { hydrateHeader } from './hydrateHeader';
 import { hydrateNumber, hydrateValue } from './hydratePrimitives';
 import { hydrateStatsTable } from './hydrateStatsTable';
-
-/**
- * Reverse mapping of `string` opcodes to their `CalcdexPokemonPreset` properties.
- *
- * @example
- * ```ts
- * HydrationPresetMap.cid // 'calcdexId'
- * ```
- * @since 1.1.6
- */
-const HydrationPresetMap = reverseObjectKv(DehydrationPresetMap);
-
-/**
- * lol
- *
- * @since 1.1.6
- */
-const HydrationPresetDefaultName = 'de_cache';
 
 /**
  * Hydrates a string `value` into a `CalcdexPokemonAlt<T>`.
@@ -99,7 +87,7 @@ export const hydratePreset = (
   arrayDelimiter = '/',
   altDelimiter = '@',
 ): CalcdexPokemonPreset => {
-  if (!value?.includes(delimiter) || !value.includes(`${DehydrationPresetMap.calcdexId}${opcodeDelimiter}`)) {
+  if (!value?.includes(delimiter) || !value.includes(`${HydroPresetsDehydrationMap.calcdexId}${opcodeDelimiter}`)) {
     return null;
   }
 
@@ -107,8 +95,7 @@ export const hydratePreset = (
     calcdexId: null,
     id: null,
     source: null,
-    playerName: null,
-    name: HydrationPresetDefaultName,
+    name: HydroPresetsDefaultName,
     gen: null,
     format: null,
     speciesForme: null,
@@ -137,11 +124,11 @@ export const hydratePreset = (
       partValue,
     ] = partRegex.exec(part) || [];
 
-    if (!opcode || !(opcode in HydrationPresetMap) || !partValue) {
+    if (!opcode || !(opcode in HydroPresetsHydrationMap) || !partValue) {
       return;
     }
 
-    const key = HydrationPresetMap[opcode];
+    const key = HydroPresetsHydrationMap[opcode];
 
     if (!key) {
       return;
@@ -149,6 +136,13 @@ export const hydratePreset = (
 
     // hydrate most properties here, but some like `id` & `ability` will be populated after
     switch (key) {
+      case 'format': {
+        output.gen = detectGenFromFormat(partValue);
+        output.format = getGenlessFormat(partValue);
+
+        break;
+      }
+
       case 'teraTypes':
       case 'altAbilities':
       case 'altItems':
@@ -198,17 +192,12 @@ export const hydratePreset = (
     }
   });
 
-  if (!output.calcdexId || !output.format || !output.speciesForme) {
+  if (!output.calcdexId || !output.gen || !output.format || !output.speciesForme) {
     return null;
   }
 
   // populate id, gen, ability, item & moves properties
   output.id = output.calcdexId;
-  output.gen = detectGenFromFormat(output.format);
-
-  if (!output.gen) {
-    return null;
-  }
 
   if (output.altAbilities?.length) {
     output.ability = flattenAlt(output.altAbilities[0]);
@@ -226,9 +215,77 @@ export const hydratePreset = (
   }
 
   // jk one more
-  if (output.name === HydrationPresetDefaultName) {
+  if (output.name === HydroPresetsDefaultName) {
     output.name += ` (${output.calcdexId.split('-')[0] || 'HUH'})`;
   }
+
+  return output;
+};
+
+/**
+ * Hydrates an entire dehydrated preset `value` string.
+ *
+ * * Optionally provide a `format` to filter which presets get hydrated.
+ *   - `GenerationNum` types for `format` will filter by generation.
+ *   - `string` types will filter by `format`, such as `'gen9randombattle'`.
+ *   - Providing no `format` will hydrate all presets, which may affect performance.
+ * * Doesn't determine if the `value` is considered "fresh" since this is designed to be use-case agnostic.
+ *   - i.e., Caching may not be the only use-case for preset serialization!
+ *   - Callers should perform additional checks on their own.
+ * * Note that even if hydration was successful, the returned `presets[]` can still be empty!
+ * * `null` will be returned if hydration fails for whatever reason.
+ *
+ * @since 1.1.6
+ */
+export const hydratePresets = (
+  value: string,
+  format?: GenerationNum | string,
+  delimiter = ';',
+  opcodeDelimiter = ':',
+  presetDelimiter = ',',
+  presetOpcodeDelimiter = '~',
+  presetArrayDelimiter?: string,
+  presetAltDelimiter?: string,
+): HydroPresetsHydration => {
+  if (!value?.includes(delimiter)) {
+    return null;
+  }
+
+  const [
+    header,
+    remaining,
+  ] = hydrateHeader(value, delimiter, opcodeDelimiter);
+
+  if (!header?.descriptorValid || !remaining?.length) {
+    return null;
+  }
+
+  const output: HydroPresetsHydration = {
+    ...header,
+    presets: null,
+  };
+
+  // create the format filter preset opcode, if provided
+  const parsedFormat = typeof format === 'number' && format > 0
+    ? `gen${format}`
+    : format;
+
+  // e.g., format = 9 -> formatFilter = 'fmt~gen9'
+  // format = 'gen9randombattle' -> formatFilter = 'fmt~gen9randombattle'
+  const formatFilter = parsedFormat
+    ? `${HydroPresetsDehydrationMap.format}${presetOpcodeDelimiter}${parsedFormat}`
+    : undefined;
+
+  output.presets = remaining
+    .filter((p) => p?.startsWith(`p${opcodeDelimiter}`) && (!formatFilter || p.includes(formatFilter)))
+    .map((p) => hydratePreset(
+      p.replace(`p${opcodeDelimiter}`, ''), // e.g., 'p:cid~...' -> 'cid~...'
+      presetDelimiter,
+      presetOpcodeDelimiter,
+      presetArrayDelimiter,
+      presetAltDelimiter,
+    ))
+    .filter(Boolean);
 
   return output;
 };
