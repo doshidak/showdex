@@ -182,7 +182,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
 
             const breakOptions = options
               ?.slice(startIndex, endIndex)
-              .filter((o) => !!o?.value && !o.hidden);
+              .filter((o) => o?.value !== undefined && o.value !== null && !o.hidden);
 
             if (!breakOptions?.length) {
               return null;
