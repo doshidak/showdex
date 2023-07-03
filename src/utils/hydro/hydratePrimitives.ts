@@ -28,7 +28,7 @@ export const hydrateString = (value: string): string => (
 export const hydrateNumber = (value: string): number => {
   const hydratedString = hydrateString(value);
 
-  if (!value) {
+  if (!hydratedString) {
     return null;
   }
 
