@@ -1,15 +1,21 @@
 import * as React from 'react';
+// import LzString from 'lz-string';
 import {
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
   usePokemonRandomsStatsQuery,
 } from '@showdex/redux/services';
-import { useCalcdexSettings } from '@showdex/redux/store';
+import {
+  type CalcdexPokemon,
+  type CalcdexPokemonPreset,
+  useCalcdexSettings,
+} from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
 // import { logger } from '@showdex/utils/debug';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+// import { fileSize } from '@showdex/utils/humanize';
+// import { dehydratePresets, hydratePresets } from '@showdex/utils/hydro';
 import { getPresetFormes } from './getPresetFormes';
 
 /**
@@ -133,7 +139,7 @@ const selectPresetsFromResult = (
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
-// const l = logger('@showdex/utils/presets/usePresets');
+// const l = logger('@showdex/utils/presets/usePresets()');
 
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
@@ -152,29 +158,15 @@ export const usePresets = ({
 }): CalcdexPresetsHookInterface => {
   const settings = useCalcdexSettings();
 
-  // const dex = getDexForFormat(format);
-  const gen = detectGenFromFormat(format);
+  const maxAge: Duration = settings?.maxPresetAge
+    ? { days: settings.maxPresetAge }
+    : null;
 
+  const gen = detectGenFromFormat(format);
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randomsFormat = genlessFormat?.includes('random') ?? false;
 
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
-  // const dexForme = speciesForme?.includes('-') ? dex?.species.get(speciesForme) : null;
-
-  // const baseForme = dexForme?.baseSpecies; // e.g., 'Necrozma'
-  // const checkBaseForme = !!baseForme && baseForme !== speciesForme;
-
-  // const battleFormes = Array.isArray(dexForme?.battleOnly)
-  //   ? dexForme.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']
-  //   : [dexForme?.battleOnly].filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
-
-  // const formes = Array.from(new Set([
-  //   speciesForme, // e.g., 'Necrozma-Ultra' (typically wouldn't have any sets)
-  //   !!battleFormes.length && battleFormes.find((f) => PokemonUsageFuckedFormes.includes(f)), // e.g., 'Necrozma-Dawn-Wings' (sets would match this forme)
-  //   !battleFormes.length && checkBaseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
-  //   randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`, // e.g., (for some other Pokemon) 'Gengar-Gmax'
-  // ].filter(Boolean))).map((f) => formatId(f));
-
   const formes = getPresetFormes(speciesForme, format, true);
 
   const shouldSkip = disabled
@@ -191,8 +183,9 @@ export const usePresets = ({
   } = usePokemonFormatPresetQuery({
     gen,
     format,
-    formatOnly: genlessFormat?.includes('bdsp'),
+    // formatOnly: genlessFormat?.includes('bdsp'),
     // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
+    maxAge,
   }, {
     skip: shouldSkipFormats,
 
@@ -219,6 +212,7 @@ export const usePresets = ({
   } = usePokemonFormatStatsQuery({
     gen,
     format,
+    maxAge,
   }, {
     skip: shouldSkipFormatStats,
 
@@ -237,7 +231,8 @@ export const usePresets = ({
     randomsLoading,
   } = usePokemonRandomsPresetQuery({
     gen,
-    format, // if it's BDSP, the query will automatically fetch from `gen8bdsprandombattle.json`
+    format,
+    maxAge,
   }, {
     skip: shouldSkipRandoms,
 
@@ -256,7 +251,8 @@ export const usePresets = ({
     randomsStatsLoading,
   } = usePokemonRandomsStatsQuery({
     gen,
-    format, // supplying both this and `gen`, but `format` will take precedence over `gen`
+    format,
+    maxAge,
   }, {
     skip: shouldSkipRandomsStats,
 
@@ -336,6 +332,25 @@ export const usePresets = ({
     shouldSkipRandoms,
     shouldSkipRandomsStats,
   ]);
+
+  // if (!loading && (presets?.length || usages?.length)) {
+  //   const sourcePresets = [
+  //     ...presets,
+  //     ...usages,
+  //   ];
+  //
+  //   const dehydratedPresets = dehydratePresets(sourcePresets);
+  //   const rehydratedPresets = hydratePresets(dehydratedPresets);
+  //
+  //   l.debug(
+  //     'Testing rehydration of', sourcePresets.length, 'presets for', speciesForme,
+  //     '\n', 'source', sourcePresets,
+  //     '\n', 'dehydrated (raw size)', fileSize(dehydratedPresets.length * 2),
+  //     '(compressed size)', fileSize(LzString.compressToUTF16(dehydratedPresets).length * 2),
+  //     '\n', 'dehydrated (value)', dehydratedPresets,
+  //     '\n', 'rehydrated', rehydratedPresets,
+  //   );
+  // }
 
   // l.debug(
   //   'gen', gen, 'format', format,
