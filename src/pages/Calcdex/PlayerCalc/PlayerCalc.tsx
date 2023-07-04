@@ -76,13 +76,43 @@ export const PlayerCalc = ({
   const playerPokemon = playerParty?.[playerIndex];
 
   // only fetch the rating if the battle didn't provide it to us
+  // (with a terribly-implemented delay timer to give some CPU time for drawing the UI)
+  const [delayedQuery, setDelayedQuery] = React.useState(true);
+  const delayedQueryTimeout = React.useRef<NodeJS.Timeout>(null);
+
+  const skipLadderQuery = !settings?.showPlayerRatings
+    || !playerId
+    || !format
+    || !!ratingFromBattle;
+
+  React.useEffect(() => {
+    // checking `playerId` in case the component hasn't received its props yet;
+    // once `delayedQuery` is `false`, we no longer bother refetching
+    if (!playerId || !delayedQuery || skipLadderQuery) {
+      return;
+    }
+
+    delayedQueryTimeout.current = setTimeout(
+      () => setDelayedQuery(false),
+      9669, // arbitrary af
+    );
+
+    return () => {
+      if (delayedQueryTimeout.current) {
+        clearTimeout(delayedQueryTimeout.current);
+        delayedQueryTimeout.current = null;
+      }
+    };
+  }, [
+    delayedQuery,
+    playerId,
+    skipLadderQuery,
+  ]);
+
   const {
     ladder,
   } = useUserLadderQuery(playerId, {
-    skip: !settings?.showPlayerRatings
-      || !playerId
-      || !format
-      || !!ratingFromBattle,
+    skip: skipLadderQuery || delayedQuery,
 
     selectFromResult: ({ data }) => ({
       // map 'gen8unratedrandombattle' (for instance) to 'gen8randombattle'
