@@ -326,6 +326,17 @@ export interface ShowdexCalcdexSettings {
   downloadUsageStats: boolean;
 
   /**
+   * Maximum age of cached presets in *days*.
+   *
+   * @default
+   * ```ts
+   * 7 // a week
+   * ```
+   * @since 1.1.6
+   */
+  maxPresetAge: number;
+
+  /**
    * Whether the first preset applied to the Pokemon should be from the Showdown usage stats.
    *
    * * Has no effect if `downloadUsageStats` is `false`.
