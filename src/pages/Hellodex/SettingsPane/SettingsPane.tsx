@@ -26,10 +26,12 @@ import { findPlayerTitle } from '@showdex/utils/app';
 import {
   env,
   getResourceUrl,
+  getStoredItem,
   readClipboardText,
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { fileSize } from '@showdex/utils/humanize';
 import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import styles from './SettingsPane.module.scss';
 
@@ -268,6 +270,32 @@ export const SettingsPane = ({
   // }, null, [
   //   onRequestClose,
   // ]);
+
+  const [presetCacheSize, setPresetCacheSize] = React.useState(0);
+  const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
+
+  React.useEffect(() => {
+    if (presetCacheTimeout.current) {
+      return;
+    }
+
+    const updateCacheSize = () => {
+      const presetCache = getStoredItem('storage-preset-cache-key');
+      const cachedPresetsSize = (presetCache?.length ?? 0) * 2;
+
+      setPresetCacheSize(cachedPresetsSize);
+    };
+
+    presetCacheTimeout.current = setTimeout(updateCacheSize, 30000);
+    updateCacheSize();
+
+    return () => {
+      if (presetCacheTimeout.current) {
+        clearTimeout(presetCacheTimeout.current);
+        presetCacheTimeout.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div
@@ -907,6 +935,90 @@ export const SettingsPane = ({
                       value?.downloadRandomsPresets && 'randoms',
                       value?.downloadUsageStats && 'usage',
                     ] as ('smogon' | 'randoms' | 'usage')[]).filter(Boolean)}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['maxPresetAge'], HTMLDivElement, number>
+                    name="calcdex.maxPresetAge"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label={[
+                      'Cache Sets',
+                      presetCacheSize && `(${fileSize(presetCacheSize, {
+                        precision: 1,
+                        omitSymbolPrefix: true,
+                      })})`,
+                      'for',
+                    ].filter(Boolean).join(' ')}
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: '1 Day',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>1 Day</strong>,
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 1,
+                    }, {
+                      label: '1 Week',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>1 Week</strong> (7 days),
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 7,
+                    }, {
+                      label: '2 Weeks',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>2 Weeks</strong> (14 days),
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 14,
+                    }, {
+                      label: '1 Month',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>1 Month</strong> (30 days),
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 30,
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets once per session, but doesn't store them in-between.
+                          This means sets will be downloaded again the next time you open Showdown.
+                          <br />
+                          <br />
+                          This is the default behavior prior to v1.1.6.
+                        </div>
+                      ),
+                      value: 0,
+                    }]}
+                    disabled={(
+                      !values.calcdex?.downloadSmogonPresets
+                        && !values.calcdex?.downloadRandomsPresets
+                        && !values.calcdex?.downloadUsageStats
+                    )}
                   />
 
                   <Field<ShowdexSettings['calcdex']['includeTeambuilder']>
