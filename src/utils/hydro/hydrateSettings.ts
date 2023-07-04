@@ -134,6 +134,7 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,
       downloadUsageStats: true,
+      maxPresetAge: 14,
       prioritizeUsageStats: false,
       includeTeambuilder: 'always',
       autoImportTeamSheets: true,
