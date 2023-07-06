@@ -23,9 +23,8 @@ export const FormatLabels: Record<string, string> = {
   battlestadiumsingles: 'BSS',
   battlestadiumsinglesseries1: 'BSS Series 1',
   battlestadiumsinglesseries2: 'BSS Series 2',
-  battlestadiumsinglesseries3: 'BSS Series 3', // just a lil near-future-proofing lol
-  battlestadiumsinglesseries4: 'BSS Series 4',
   battlestadiumsinglesregulationc: 'BSS Regulation C',
+  battlestadiumsinglesregulationd: 'BSS Regulation D',
   battlestadiumdoubles: 'BSD',
   battlestadiumdoublesseries13: 'BSD Series 13',
   bdsp3v3singles: 'BDSP 3v3 Singles',
@@ -63,10 +62,11 @@ export const FormatLabels: Record<string, string> = {
   doublesuu: 'Doubles UU',
   draft: 'Draft',
   flipped: 'Flipped',
+  forceofthefallen: 'Force of the Fallen',
   freeforall: 'FFA',
   freeforallrandombattle: 'FFA Randoms',
   fullpotential: 'Full Potential',
-  galardexdraft: 'Galar Dex Draft',
+  galardexdraft: 'Galar Draft',
   gbusingles: 'GBU Singles',
   godlygift: 'Godly Gift',
   hackmonscup: 'Hackmons Cup',
@@ -105,7 +105,7 @@ export const FormatLabels: Record<string, string> = {
   nu: 'NU', // NeverUsed
   ou: 'OU', // OverUsed
   oublitz: 'OU Blitz', // went w/ BZ for Blitz cause BL = BanList! (like in PUBL, UUBL, etc.)
-  paldeadexdraft: 'Paldea Dex Draft',
+  paldeadexdraft: 'Paldea Draft',
   partnersincrime: 'Partners-in-Crime',
   pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
   pokebilities: 'Pokebilities',
@@ -119,6 +119,7 @@ export const FormatLabels: Record<string, string> = {
   randombattlepotd: 'Randoms PotD', // Pokemon of the Day
   randomdex: 'Randoms Dex',
   randomdoublesbattle: 'Randoms Doubles',
+  randomroulette: 'Randoms Roulette',
   revelationmons: 'Revelationmons',
   ru: 'RU', // RarelyUsed
   sharedpower: 'Shared Power',
@@ -130,6 +131,7 @@ export const FormatLabels: Record<string, string> = {
   superstaffbros4: 'Super Staff Bros 4',
   tagteamsingles: 'Tag Team Singles',
   teradonation: 'Tera Donation',
+  terapreviewpaldeadexdraft: 'Tera Preview Paldea Draft',
   thelosersgame: 'The Loser\'s Game',
   tiershift: 'Tier Shift',
   tradebacksou: 'Tradebacks OU',
@@ -156,9 +158,8 @@ export const FormatLabels: Record<string, string> = {
   vgc2023: 'VGC 2023',
   vgc2023series1: 'VGC 2023 Series 1',
   vgc2023series2: 'VGC 2023 Series 2',
-  vgc2023series3: 'VGC 2023 Series 3', // just another lil near-future-proofing... lol
-  vgc2023series4: 'VGC 2023 Series 4',
   vgc2023regulationc: 'VGC 2023 Regulation C',
+  vgc2023regulationd: 'VGC 2023 Regulation D',
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
