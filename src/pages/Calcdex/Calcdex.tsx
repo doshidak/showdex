@@ -3,13 +3,12 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { BuildInfo } from '@showdex/components/debug';
+import { type DropdownOption } from '@showdex/components/form';
 import { Scrollable } from '@showdex/components/ui';
-import { useColorScheme } from '@showdex/redux/store';
+import { type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
-import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexPlayerKey } from '@showdex/redux/store';
 import { useCalcdexContext } from './CalcdexContext';
 import { CloseButton } from './CloseButton';
 import { FieldCalc } from './FieldCalc';
@@ -53,7 +52,7 @@ export const Calcdex = ({
       .filter((k) => state[k]?.active)
       .map((k) => {
         const { name: playerName } = state[k];
-        const playerTitle = findPlayerTitle(playerName);
+        const playerTitle = findPlayerTitle(playerName, true);
 
         const labelColor = playerTitle?.color?.[colorScheme];
         const iconColor = playerTitle?.iconColor?.[colorScheme];

@@ -60,7 +60,7 @@ export const SettingsPane = ({
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
   const authName = useAuthUsername();
-  const authTitle = findPlayerTitle(authName);
+  const authTitle = findPlayerTitle(authName, true);
 
   const colorScheme = useColorScheme();
   const settings = useShowdexSettings();

@@ -49,7 +49,7 @@ export const Hellodex = ({
   });
 
   const authName = useAuthUsername();
-  const authTitle = findPlayerTitle(authName);
+  const authTitle = findPlayerTitle(authName, true);
 
   // globally listen for left/right key presses to mimic native keyboard navigation behaviors
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
