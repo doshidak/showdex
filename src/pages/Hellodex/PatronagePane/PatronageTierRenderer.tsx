@@ -44,6 +44,10 @@ export const PatronageTierRenderer = (
     return null;
   }
 
+  const tooltipColorScheme: Showdown.ColorScheme = colorScheme === 'light'
+    ? 'dark'
+    : 'light';
+
   const containerKey = `PatronagePane:${key}:${formatId(title)}`;
   const notFirstTier = index > 0;
   const namesCount = names.length;
@@ -73,6 +77,9 @@ export const PatronageTierRenderer = (
             return null;
           }
 
+          const showdownUser = Array.isArray(n) && n[1];
+          const notLastChild = i < namesCount - 1;
+
           const startIsoDate = Array.isArray(n) ? n[2] : null;
           const startDate = startIsoDate?.includes('-') && isValid(new Date(startIsoDate))
             ? new Date(startIsoDate)
@@ -83,11 +90,9 @@ export const PatronageTierRenderer = (
             ? new Date(endIsoDate)
             : null;
 
-          const username = formatId(name);
-          const nameKey = `${key}:${username}`;
-
-          const userTitle = findPlayerTitle(username);
+          const userTitle = findPlayerTitle(name, showdownUser);
           const userLabelColor = userTitle?.color?.[colorScheme];
+          const userTooltipLabelColor = userTitle?.color?.[tooltipColorScheme];
           const userIconColor = userTitle?.iconColor?.[colorScheme];
 
           const active = term === 'once' || (
@@ -97,18 +102,15 @@ export const PatronageTierRenderer = (
 
           const nameStyle: React.CSSProperties = {
             ...(showTitles && userLabelColor ? { color: userLabelColor } : undefined),
-            ...(active ? undefined : { opacity: 0.5 }),
+            ...(active ? undefined : { opacity: 0.56 }),
           };
-
-          const showdownUser = Array.isArray(n) && n[1];
-          const notLastChild = i < namesCount - 1;
 
           const renderedUsername = (
             <>
               <span>{name}</span>
 
               {
-                (showTitles && !!userTitle?.icon) &&
+                (showTitles && showdownUser && !!userTitle?.icon) &&
                 <Svg
                   className={styles.usernameIcon}
                   style={userIconColor ? { color: userIconColor } : undefined}
@@ -121,23 +123,47 @@ export const PatronageTierRenderer = (
 
           const renderedTooltip = userTitle?.title || startDate ? (
             <div className={styles.tooltipContent}>
-              {showTitles && userTitle?.title && startDate ? (
-                <strong><em>{userTitle.title}</em></strong>
-              ) : showTitles && userTitle?.title ? (
-                <em>{userTitle.title}</em>
-              ) : null}
+              {
+                showTitles &&
+                <>
+                  {
+                    (userTitle?.custom && !!userTitle?.icon) &&
+                    <>
+                      <Svg
+                        className={styles.customTitleIcon}
+                        style={{ color: userIconColor || userLabelColor }}
+                        description={userTitle.iconDescription}
+                        src={getResourceUrl(`${userTitle.icon}.svg`)}
+                      />
+                      <br />
+                    </>
+                  }
+
+                  {
+                    !!userTitle?.title &&
+                    <>
+                      <span
+                        className={styles.tooltipPlayerTitle}
+                        style={userTooltipLabelColor ? { color: userTooltipLabelColor } : undefined}
+                      >
+                        {userTitle.title}
+                      </span>
+                      <br />
+                    </>
+                  }
+                </>
+              }
 
               {startDate && term === 'once' ? (
                 <>
-                  {showTitles && <br />}
                   Donated on
                   <br />
-                  {format(startDate, 'PPPP')}
+                  {format(startDate, 'PP \'at\' pp')}
                 </>
               ) : startDate && (endDate || buildDate) && term === 'monthly' ? (
                 <>
-                  {showTitles && <br />}
-                  {endDate ? 'Supported' : 'Supporter'}{' '}
+                  {/* {endDate ? 'Supported' : 'Supporter'}{' '} */}
+                  {endDate && 'Supported '}
                   for{' '}
                   {formatDistance(
                     startDate,
@@ -153,7 +179,7 @@ export const PatronageTierRenderer = (
           ) : null;
 
           return (
-            <React.Fragment key={nameKey}>
+            <React.Fragment key={`${key}:${formatId(name)}`}>
               {showdownUser ? (
                 <Button
                   display="inline"
@@ -175,11 +201,15 @@ export const PatronageTierRenderer = (
                   touch={['hold', 500]}
                   disabled={!renderedTooltip}
                 >
-                  <span className={styles.userButtonless}>
+                  <span
+                    className={styles.userButtonless}
+                    style={nameStyle}
+                  >
                     {renderedUsername}
                   </span>
                 </Tooltip>
               )}
+
               {
                 notLastChild &&
                 <span style={{ opacity: 0.3 }}>

@@ -266,3 +266,17 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
   white-space: normal;
   user-select: none;
 }
+
+.tooltipPlayerTitle {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.customTitleIcon {
+  display: inline-block;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
