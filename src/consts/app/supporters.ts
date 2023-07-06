@@ -1,7 +1,7 @@
 /**
  * Term of the supporter tier.
  *
- * @since 1.2.0
+ * @since 1.1.6
  */
 export type ShowdexSupporterTierTerm =
   | 'once'
@@ -17,6 +17,19 @@ export type ShowdexSupporterTierTerm =
  */
 export interface ShowdexSupporterTier {
   /**
+   * Unique ID of the supporter tier.
+   *
+   * * Primarily used to link a `ShowdexPlayerTitle` to a `ShowdexSupporterTier`,
+   *   particularly in instances where the user's name is **not** a Showdown user ID.
+   *   - `findPlayerTitle()` won't know which styling to apply for non-Showdown user IDs
+   *     in the `PatronagePageRenderer`.
+   *
+   * @example 'tier-3-pokemane-sub'
+   * @since 1.1.6
+   */
+  id?: string;
+
+  /**
    * Name of the supporter tier.
    *
    * @example 'Tier 3 Pokemane Sub'
@@ -27,8 +40,8 @@ export interface ShowdexSupporterTier {
   /**
    * Term of the supporter tier.
    *
-   * @default 'once'
-   * @since 1.2.0
+   * @default 'monthly'
+   * @since 1.1.6
    */
   term?: ShowdexSupporterTierTerm;
 
@@ -72,25 +85,28 @@ export interface ShowdexSupporterTier {
  * @since 1.1.3
  */
 export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
+  id: 'donor',
   title: 'Paid Pals',
   term: 'once',
   names: [
-    ['Angie L', false, '2022-12-31T07:26:59Z'],
-    ['Fubwubs', true, '2022-12-30T14:38:03Z'],
-    ['Timothy B', false, '2023-03-08T08:08:19Z'],
-    ['PastGenOUFan', true, '2023-05-10T11:52:57Z'],
-    ['Michael L', false, '2022-11-08T13:17:33Z'],
-    ['Bongphan', true, '2023-04-17T09:56:43Z'],
-    ['GenOne', true, '2023-03-18T06:56:43Z'],
-    ['Lunarvania', true, '2022-12-30T03:24:14Z'],
-    ['Leman T', false, '2022-12-01T04:08:37Z'],
-    ['Sunny B', false, '2023-01-03T00:12:09Z'],
-    ['Peter T', false, '2023-01-29T11:50:05Z'],
-    ['Sam P', false, '2023-05-07T20:35:08Z'],
-    ['momalaharris', true, '2022-12-23T02:48:45Z'],
-    ['FR1E5', true, '2022-10-22T02:18:20Z'],
-    ['Tanuj C', false, '2023-02-06T14:39:25Z'],
-    ['GoldenGottaGo', true, '2023-02-13T20:14:18Z'],
+    ['Angie L', false, '2022-12-31T23:26:59Z'],
+    ['Fubwubs', true, '2022-12-31T06:38:03Z'],
+    ['Timothy B', false, '2023-03-09T00:08:19Z'],
+    ['PastGenOUFan', true, '2023-05-11T01:52:57Z'],
+    ['joshtheking7', true, '2023-05-17T22:21:31Z'],
+    ['Michael L', false, '2022-11-09T05:17:33Z'],
+    ['Bongphan', true, '2023-04-17T23:56:43Z'],
+    ['GenOne', true, '2023-03-18T20:56:43Z'],
+    ['Lunarvania', true, '2022-12-30T19:24:14Z'],
+    ['Leman T', false, '2022-12-01T20:08:37Z'],
+    ['Sunny B', false, '2023-01-03T16:12:09Z'],
+    ['Peter T', false, '2023-01-30T03:50:05Z'],
+    ['Sam P', false, '2023-05-08T10:35:08Z'],
+    ['PokePastry', true, '2023-05-17T22:21:31Z'],
+    ['momalaharris', true, '2022-12-23T18:48:45Z'],
+    ['FR1E5', true, '2022-10-22T16:18:20Z'],
+    ['Tanuj C', false, '2023-02-07T06:39:25Z'],
+    ['GoldenGottaGo', true, '2023-02-14T12:14:18Z'],
   ],
 }];
 
@@ -100,23 +116,37 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
  * @since 1.1.3
  */
 export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
+  id: 'patreon-tier-03',
   title: 'Supreme Overlords',
   term: 'monthly',
   names: [
-    ['Dastardlydwarf', true, '2023-04-12T07:25:18Z', null],
-    ['goddess mina', true, '2023-04-10T02:17:09Z', null],
-    ['Zzodz', true, '2023-05-12T10:02:51Z', null],
+    ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', null],
+    ['goddess mina', true, '2023-04-10T16:17:09Z', null],
+    ['Zzodz', true, '2023-05-13T00:02:51Z', null],
   ],
 }, {
+  id: 'patreon-tier-02',
   title: 'Pop Bombers',
   term: 'monthly',
   names: [
-    ['benzyne', true, '2023-03-30T16:12:04Z', null],
+    ['benzyne', true, '2023-03-31T06:12:04Z', null],
   ],
 }, {
+  id: 'patreon-tier-01',
   title: 'Blazikens',
   term: 'monthly',
   names: [
-    ['BruhMomentMaker', true, '2023-04-09T23:35:32Z', null],
+    ['BruhMomentMaker', true, '2023-04-10T13:35:32Z', null],
+    ['Christopher Y', false, '2023-07-02T21:05:52Z', null],
   ],
 }];
+
+/**
+ * Combined list of all Showdex supporters.
+ *
+ * @since 1.1.6
+ */
+export const ShowdexSupporterTiers: ShowdexSupporterTier[] = [
+  ...ShowdexDonorTiers,
+  ...ShowdexPatronTiers,
+];
