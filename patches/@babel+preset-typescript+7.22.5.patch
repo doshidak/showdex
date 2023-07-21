@@ -1,0 +1,76 @@
+diff --git a/node_modules/@babel/preset-typescript/lib/index.js b/node_modules/@babel/preset-typescript/lib/index.js
+index 04d056c..7bff534 100644
+--- a/node_modules/@babel/preset-typescript/lib/index.js
++++ b/node_modules/@babel/preset-typescript/lib/index.js
+@@ -18,7 +18,8 @@ function normalizeOptions(options = {}) {
+   let {
+     allowNamespaces = true,
+     jsxPragma,
+-    onlyRemoveTypeImports
++    onlyRemoveTypeImports,
++    yeetEmptyImportElisions
+   } = options;
+   const TopLevelOptions = {
+     ignoreExtensions: "ignoreExtensions",
+@@ -27,6 +28,7 @@ function normalizeOptions(options = {}) {
+     jsxPragma: "jsxPragma",
+     jsxPragmaFrag: "jsxPragmaFrag",
+     onlyRemoveTypeImports: "onlyRemoveTypeImports",
++    yeetEmptyImportElisions: "yeetEmptyImportElisions",
+     optimizeConstEnums: "optimizeConstEnums",
+     allExtensions: "allExtensions",
+     isTSX: "isTSX"
+@@ -54,6 +56,7 @@ function normalizeOptions(options = {}) {
+     jsxPragma,
+     jsxPragmaFrag,
+     onlyRemoveTypeImports,
++    yeetEmptyImportElisions,
+     optimizeConstEnums
+   };
+   {
+@@ -74,6 +77,7 @@ var index = helperPluginUtils.declarePreset((api, opts) => {
+     jsxPragma,
+     jsxPragmaFrag,
+     onlyRemoveTypeImports,
++    yeetEmptyImportElisions,
+     optimizeConstEnums
+   } = normalizeOptions(opts);
+   const pluginOptions = disallowAmbiguousJSXLike => ({
+@@ -83,6 +87,7 @@ var index = helperPluginUtils.declarePreset((api, opts) => {
+     jsxPragma,
+     jsxPragmaFrag,
+     onlyRemoveTypeImports,
++    yeetEmptyImportElisions,
+     optimizeConstEnums
+   });
+   const getPlugins = (isTSX, disallowAmbiguousJSXLike) => {
+diff --git a/node_modules/@babel/preset-typescript/lib/normalize-options.js b/node_modules/@babel/preset-typescript/lib/normalize-options.js
+index 37e394a..617cbf5 100644
+--- a/node_modules/@babel/preset-typescript/lib/normalize-options.js
++++ b/node_modules/@babel/preset-typescript/lib/normalize-options.js
+@@ -10,7 +10,8 @@ function normalizeOptions(options = {}) {
+   let {
+     allowNamespaces = true,
+     jsxPragma,
+-    onlyRemoveTypeImports
++    onlyRemoveTypeImports,
++    yeetEmptyImportElisions
+   } = options;
+   const TopLevelOptions = {
+     ignoreExtensions: "ignoreExtensions",
+@@ -19,6 +20,7 @@ function normalizeOptions(options = {}) {
+     jsxPragma: "jsxPragma",
+     jsxPragmaFrag: "jsxPragmaFrag",
+     onlyRemoveTypeImports: "onlyRemoveTypeImports",
++    yeetEmptyImportElisions: "yeetEmptyImportElisions",
+     optimizeConstEnums: "optimizeConstEnums",
+     allExtensions: "allExtensions",
+     isTSX: "isTSX"
+@@ -47,6 +49,7 @@ function normalizeOptions(options = {}) {
+     jsxPragma,
+     jsxPragmaFrag,
+     onlyRemoveTypeImports,
++    yeetEmptyImportElisions,
+     optimizeConstEnums
+   };
+   {

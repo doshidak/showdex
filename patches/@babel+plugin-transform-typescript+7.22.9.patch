@@ -1,0 +1,39 @@
+diff --git a/node_modules/@babel/plugin-transform-typescript/lib/index.js b/node_modules/@babel/plugin-transform-typescript/lib/index.js
+index 5b53d5b..2e3fdc3 100644
+--- a/node_modules/@babel/plugin-transform-typescript/lib/index.js
++++ b/node_modules/@babel/plugin-transform-typescript/lib/index.js
+@@ -67,6 +67,7 @@ var _default = (0, _helperPluginUtils.declare)((api, opts) => {
+     jsxPragma = "React.createElement",
+     jsxPragmaFrag = "React.Fragment",
+     onlyRemoveTypeImports = false,
++    yeetEmptyImportElisions = false, // purposefully named terribly so that I remember I manually spliced this in lmao
+     optimizeConstEnums = false
+   } = opts;
+   {
+@@ -196,7 +197,25 @@ var _default = (0, _helperPluginUtils.declare)((api, opts) => {
+               if (!NEEDS_EXPLICIT_ESM.has(state.file.ast.program)) {
+                 NEEDS_EXPLICIT_ESM.set(state.file.ast.program, true);
+               }
+-              if (stmt.node.importKind === "type") {
++              // our super secret spicy spliced setting
++              const itsAllTypeSpecifiers = yeetEmptyImportElisions
++                // this check allows for `import {} from 'foo';` & `import 'foo';` (handled below in line 226)
++                && stmt.node.specifiers.length > 0
++                // basically looking for: `import { type Foo, type Bar, type Sum, type Fuk } from 'foo';`,
++                // which without enabling yeetEmptyImportElisions, would result in `import {} from 'foo';`
++                // still present in the output, which could inadvertently cause circular dependencies all
++                // from seemingly benign type imports -- I guess you would just write the original example
++                // as `import type { Foo, Bar, Sum, Fuk } from 'foo';` if you were only intentionally
++                // "importing" a circular dependency for its types (in quotes cause the import would be removed,
++                // so not really an import, duh!); now that I think about it, it makes sense what the original
++                // example implies, i.e., of one of the imported modules in `'foo'`, there'd be one actual import
++                // like `import { type Foo, type Bar, ActualModule } from `'foo'`;`, which would just transform
++                // into `import { ActualModule } from `'foo';` ... but you know what, I'm too far into this now
++                // & I just like braindead writing import statements in the same syntax so I'm gunna leave this here
++                // cause it works for me c:
++                && stmt.node.specifiers.every((specifier) => specifier.type === 'ImportSpecifier' && specifier.importKind === 'type');
++              // if (stmt.node.source?.value?.includes('redux/helpers')) console.log('statement node', stmt.node);
++              if (stmt.node.importKind === "type" || itsAllTypeSpecifiers) {
+                 for (const specifier of stmt.node.specifiers) {
+                   registerGlobalType(programScope, specifier.local.name);
+                 }
