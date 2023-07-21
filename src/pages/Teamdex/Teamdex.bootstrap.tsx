@@ -1,9 +1,8 @@
 // import * as React from 'react';
+import { type ShowdexBootstrapper } from '@showdex/main';
 import { teamdexSlice } from '@showdex/redux/store';
-import { logger } from '@showdex/utils/debug';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { getTeambuilderPresets } from '@showdex/utils/presets';
-import type { ShowdexBootstrapper } from '@showdex/main';
-// import type { ShowdexSliceState } from '@showdex/redux/store';
 
 const l = logger('@showdex/pages/Teamdex/Teamdex.bootstrap');
 
@@ -15,14 +14,21 @@ export const teamdexBootstrapper: ShowdexBootstrapper = (store) => {
 
   // create a local helper function to dispatch an update
   const updateTeambuilderPresets = () => {
+    // used for debugging purposes only
+    const endTimer = runtimer(`${l.scope}:updateTeambuilderPresets()`, l);
+
     const presets = getTeambuilderPresets();
 
     if (!presets.length) {
-      return;
+      return endTimer('(no presets)');
     }
 
     store.dispatch(teamdexSlice.actions.setPresets(presets));
+
+    endTimer();
   };
+
+  const endTimer = runtimer(l.scope, l);
 
   // override app.user.trigger() to listen for 'saveteams', in order to update the converted presets
   if (typeof app.user?.trigger === 'function' && !app.user.teamdexInit) {
@@ -55,4 +61,6 @@ export const teamdexBootstrapper: ShowdexBootstrapper = (store) => {
     // fuck it, attempt to update it anyways
     updateTeambuilderPresets();
   }
+
+  endTimer('(bootstrap complete)');
 };
