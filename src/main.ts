@@ -1,7 +1,6 @@
 import { calcdexBootstrapper, hellodexBootstrapper, teamdexBootstrapper } from '@showdex/pages';
-import { createStore, showdexSlice } from '@showdex/redux/store';
+import { type RootStore, createStore, showdexSlice } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
-import type { RootStore } from '@showdex/redux/store';
 import '@showdex/styles/global.scss';
 
 export type ShowdexBootstrapper = (
@@ -31,7 +30,7 @@ const bootstrappers: ShowdexBootstrapper[] = [
 l.debug('Hooking into the client\'s app.receive()...');
 
 // make a binded copy of the original app.recieve()
-const appReceive = <typeof app.receive> app.receive.bind(app);
+const appReceive = app.receive.bind(app) as typeof app.receive;
 
 app.receive = (data: string) => {
   const receivedRoom = data?.startsWith?.('>');
@@ -68,7 +67,7 @@ const colorSchemeObserver = new MutationObserver((mutationList) => {
   }
 
   // determine the color scheme from the presence of a 'dark' class in <html>
-  const { className } = (<typeof document.documentElement> mutation.target) || {};
+  const { className } = (mutation.target as typeof document.documentElement) || {};
   const colorScheme: Showdown.ColorScheme = className?.includes('dark') ? 'dark' : 'light';
 
   store.dispatch(showdexSlice.actions.setColorScheme(colorScheme));
