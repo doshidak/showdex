@@ -1,7 +1,7 @@
+import { type GenerationNum } from '@smogon/calc';
 import slugify from 'slugify';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
 
 export type SmogonUniversityDexCategory =
   | 'pokemon'
@@ -11,7 +11,7 @@ export type SmogonUniversityDexCategory =
   | 'types'
   | 'formats';
 
-const l = logger('@showdex/utils/app/openSmogonUniversity');
+const l = logger('@showdex/utils/app/openSmogonUniversity()');
 
 const SmogonUniversityGenSlugs: string[] = [
   null, // gen 0? kekw
@@ -139,9 +139,9 @@ export const openSmogonUniversity = (
   // cause they're not consistent between Showdown and Smogon, unfortunately
   const actualFormat = format ? format.replace(`gen${gen}`, '').toLowerCase() : null; // e.g., 'gen8bdspou' -> 'bdspou'
 
-  let slugifiedFormat = actualFormat in SmogonUniversityFormatSlugs ?
-    SmogonUniversityFormatSlugs[actualFormat] :
-    null;
+  let slugifiedFormat = actualFormat in SmogonUniversityFormatSlugs
+    ? SmogonUniversityFormatSlugs[actualFormat]
+    : null;
 
   if (!slugifiedFormat) {
     if (actualFormat.includes('doubles')) {

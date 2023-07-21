@@ -42,7 +42,7 @@ export interface HtmlRoomOptions {
   maxWidth?: number;
 }
 
-const l = logger('@src/utils/app/createHtmlRoom');
+const l = logger('@src/utils/app/createHtmlRoom()');
 
 /**
  * Abstraction that creates an `HtmlRoom` in the Showdown client.

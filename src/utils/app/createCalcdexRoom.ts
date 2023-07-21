@@ -1,6 +1,5 @@
 import * as ReactDOM from 'react-dom/client';
-import { calcdexSlice } from '@showdex/redux/store';
-import type { RootStore, ShowdexSliceState } from '@showdex/redux/store';
+import { type RootStore, type ShowdexSliceState, calcdexSlice } from '@showdex/redux/store';
 import { createHtmlRoom } from './createHtmlRoom';
 import { getCalcdexRoomId } from './getCalcdexRoomId';
 import { getBattleRoom } from './getBattleRoom';

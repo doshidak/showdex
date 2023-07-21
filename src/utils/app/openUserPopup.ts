@@ -1,6 +1,6 @@
 import { logger } from '@showdex/utils/debug';
 
-const l = logger('@showdex/utils/app/openUserPopup');
+const l = logger('@showdex/utils/app/openUserPopup()');
 
 /**
  * Opens a user popup.
