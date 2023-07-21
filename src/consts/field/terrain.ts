@@ -1,6 +1,6 @@
+import { type Terrain } from '@smogon/calc/dist/data/interface';
 import { times } from '@showdex/consts/core';
-import type { Terrain } from '@smogon/calc/dist/data/interface';
-import type { FieldConditionDescription } from './weather';
+import { type FieldConditionDescription } from './weather';
 
 /**
  * Adapted from `updateWeather()` in `src/battle-animations.ts` (line 960) of `smogon/pokemon-showdown-client`.

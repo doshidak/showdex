@@ -1,5 +1,5 @@
+import { type Weather } from '@smogon/calc/dist/data/interface';
 import { times } from '@showdex/consts/core';
-import type { Weather } from '@smogon/calc/dist/data/interface';
 
 /**
  * Description of a field condition.
