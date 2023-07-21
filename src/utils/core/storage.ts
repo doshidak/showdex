@@ -20,7 +20,7 @@ export const getStoredItem = <T extends string>(envKey: string): T => {
     return null;
   }
 
-  return <T> localStorage.getItem(key) || null;
+  return localStorage.getItem(key) as T || null;
 };
 
 /**

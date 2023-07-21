@@ -22,7 +22,7 @@
  * @since 1.1.6
  */
 export const nonEmptyObject = (
-  obj?: unknown | unknown[],
+  obj?: unknown,
 ): boolean => {
   if (typeof obj !== 'object') {
     return false;
