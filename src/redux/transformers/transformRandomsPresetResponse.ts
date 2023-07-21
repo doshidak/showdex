@@ -1,12 +1,12 @@
-import { detectLegacyGen } from '@showdex/utils/battle';
+import { type GenerationNum } from '@smogon/calc';
+import { type PkmnSmogonRandomsPresetResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { PkmnSmogonRandomsPresetResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
-// const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse');
+// const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse()');
 
 /**
  * Transforms the JSON response from the Randoms API by converting the object into an array of `CalcdexPokemonPreset`s.

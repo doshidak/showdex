@@ -2,7 +2,7 @@ import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interf
 import { PokemonNatures } from '@showdex/consts/dex';
 import { type PkmnSmogonFormatStatsResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
