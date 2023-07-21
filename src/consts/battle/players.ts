@@ -1,4 +1,4 @@
-import type { CalcdexPlayerKey } from '@showdex/redux/store';
+import { type CalcdexPlayerKey } from '@showdex/redux/store';
 
 /**
  * All player keys available in the `battle` object.
