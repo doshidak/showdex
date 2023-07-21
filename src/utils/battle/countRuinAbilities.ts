@@ -1,4 +1,4 @@
-import type { CalcdexPlayerSide } from '@showdex/redux/store';
+import { type CalcdexPlayerSide } from '@showdex/redux/store';
 
 /**
  * Since the *Ruin* ability counters are stored per-side (in `CalcdexPlayerSide`),

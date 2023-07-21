@@ -1,4 +1,4 @@
-import type { GenerationNum } from '@smogon/calc';
+import { type GenerationNum } from '@smogon/calc';
 
 // update (2023/01/30): from a Teambuilder dump that brokenmotor shared, there's apparently a format called
 // 'gen8350cup', which results in a gen number of 8350 LOL. right, so I can only assume a single digit gen for now,

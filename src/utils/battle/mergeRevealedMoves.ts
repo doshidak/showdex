@@ -2,7 +2,7 @@ import { type MoveName } from '@smogon/calc/dist/data/interface';
 import { PokemonPivotMoves } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
-import { flattenAlts } from '@showdex/utils/presets';
+import { flattenAlts } from '@showdex/utils/presets/flattenAlts'; /** @todo reorganize me */
 
 /**
  * Intelligently uses hardcoded intelligence to merge the `pokemon`'s currently set `moves`
@@ -118,7 +118,7 @@ export const mergeRevealedMoves = (
       const stabMoveIndex = nonRevealedMoves.findIndex((m) => (
         (!!m?.category && m.category !== 'Status')
           && types.includes(m.type)
-          && !PokemonPivotMoves.includes(<MoveName> m.name)
+          && !PokemonPivotMoves.includes(m.name as MoveName)
       ));
 
       if (stabMoveIndex > -1) {

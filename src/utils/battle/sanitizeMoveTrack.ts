@@ -1,7 +1,6 @@
+import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interface';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
-import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 
 /**
  * Sanitizes the `moveTrack` from the passed-in `pokemon` and constructs the `revealedMoves`
@@ -36,11 +35,11 @@ export const sanitizeMoveTrack = (
 
   const dexMoveTrack = pokemon.moveTrack
     .filter((t) => Array.isArray(t) && !!t[0])
-    .map(([moveName, ppUsed]) => <[move: Showdown.Move, ppUsed: number]> [
+    .map(([moveName, ppUsed]) => [
       // transformed moves will sometimes have an asterisk (*) in the name
       dex.moves.get(moveName?.replace('*', '')),
       ppUsed || 0,
-    ])
+    ] as [move: Showdown.Move, ppUsed: number])
     .filter(([move]) => move?.exists && !!move.name);
 
   if (!dexMoveTrack.length) {
@@ -48,15 +47,15 @@ export const sanitizeMoveTrack = (
   }
 
   output.moveTrack = dexMoveTrack
-    .map(([move, ppUsed]) => <[moveName: MoveName, ppUsed: number]> [
+    .map(([move, ppUsed]) => [
       move?.name,
       ppUsed,
-    ]);
+    ] as [moveName: MoveName, ppUsed: number]);
 
   // filter out any Z/Max moves from the moveTrack
   output.revealedMoves = dexMoveTrack
     .filter(([move]) => !move.isZ && !move.isMax)
-    .map(([move]) => <MoveName> move.name);
+    .map(([move]) => move.name as MoveName);
 
   return output;
 };

@@ -1,5 +1,5 @@
+import { type CalcdexPlayerKey } from '@showdex/redux/store';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import type { CalcdexPlayerKey } from '@showdex/redux/store';
 
 /**
  * Determines if the player with the `playerKey` has used Dynamax in the battle.

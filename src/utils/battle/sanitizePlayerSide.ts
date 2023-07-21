@@ -1,10 +1,11 @@
-import { formatId } from '@showdex/utils/app';
+import { type GenerationNum } from '@smogon/calc';
+import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 // import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPlayer, CalcdexPlayerSide } from '@showdex/redux/store';
 import { countSideRuinAbilities } from './countSideRuinAbilities';
 
-// const l = logger('@showdex/utils/battle/sanitizePlayerSide');
+// const l = logger('@showdex/utils/battle/sanitizePlayerSide()');
 
 /**
  * Sanitizes a player side (e.g., `p1`, `p2`, etc.) from the `battle` state.

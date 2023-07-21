@@ -1,5 +1,6 @@
-import { formatId } from '@showdex/utils/app';
-import type { CalcdexPlayer, CalcdexPlayerSide } from '@showdex/redux/store';
+import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 
 /**
  * Counts the number of each *Ruin* ability for the `CalcdexPlayerSide` of the provided `player`.

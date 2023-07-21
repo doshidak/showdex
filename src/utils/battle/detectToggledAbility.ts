@@ -1,7 +1,8 @@
-import { formatId } from '@showdex/utils/app';
+import { type CalcdexBattleState, type CalcdexPokemon } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { toggleableAbility } from '@showdex/utils/dex';
-import type { CalcdexBattleState, CalcdexPokemon } from '@showdex/redux/store';
 
 /**
  * Determines whether the Pokemon's toggleable ability is active (if applicable).

@@ -1,5 +1,5 @@
+import { type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/redux/store';
 import { getAuthUsername } from '@showdex/utils/app';
-import type { CalcdexPlayerKey, CalcdexPokemon } from '@showdex/redux/store';
 import { detectPokemonIdent } from './detectPokemonIdent';
 
 /**
@@ -16,7 +16,7 @@ export const detectPlayerKeyFromPokemon = (
     return null;
   }
 
-  return <CalcdexPlayerKey> ident.slice(0, ident.indexOf(':'));
+  return ident.slice(0, ident.indexOf(':')) as CalcdexPlayerKey;
 };
 
 /**
