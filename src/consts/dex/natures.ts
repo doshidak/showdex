@@ -26,13 +26,13 @@ export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.
   Timid: ['spe', 'atk'],
 };
 
-export const PokemonNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts);
+export const PokemonNatures = Object.keys(PokemonNatureBoosts) as Showdown.PokemonNature[];
 
-export const PokemonBoostedNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts)
-  .filter((nature) => PokemonNatureBoosts[<Showdown.PokemonNature> nature].length);
+export const PokemonBoostedNatures = (Object.keys(PokemonNatureBoosts) as Showdown.PokemonNature[])
+  .filter((nature) => !!PokemonNatureBoosts[nature]?.length);
 
-export const PokemonNeutralNatures = <Showdown.PokemonNature[]> Object.keys(PokemonNatureBoosts)
-  .filter((nature) => !PokemonNatureBoosts[<Showdown.PokemonNature> nature].length);
+export const PokemonNeutralNatures = (Object.keys(PokemonNatureBoosts) as Showdown.PokemonNature[])
+  .filter((nature) => !PokemonNatureBoosts[nature]?.length);
 
 /**
 * These are used by the nature/EV/IV finding algorithm,

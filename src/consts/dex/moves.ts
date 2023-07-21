@@ -7,25 +7,25 @@ import { type MoveName } from '@smogon/calc/dist/data/interface';
  */
 export const PokemonZMoves: Record<Showdown.TypeName, MoveName> = {
   '???': null,
-  Poison: <MoveName> 'Acid Downpour',
-  Fighting: <MoveName> 'All-Out Pummeling',
-  Dark: <MoveName> 'Black Hole Eclipse',
-  Grass: <MoveName> 'Bloom Doom',
-  Normal: <MoveName> 'Breakneck Blitz',
-  Rock: <MoveName> 'Continental Crush',
-  Steel: <MoveName> 'Corkscrew Crash',
-  Dragon: <MoveName> 'Devastating Drake',
-  Electric: <MoveName> 'Gigavolt Havoc',
-  Water: <MoveName> 'Hydro Vortex',
-  Fire: <MoveName> 'Inferno Overdrive',
-  Ghost: <MoveName> 'Never-Ending Nightmare',
-  Bug: <MoveName> 'Savage Spin-Out',
-  Psychic: <MoveName> 'Shattered Psyche',
-  Ice: <MoveName> 'Subzero Slammer',
-  Flying: <MoveName> 'Supersonic Skystrike',
-  Ground: <MoveName> 'Tectonic Rage',
-  Fairy: <MoveName> 'Twinkle Tackle',
-};
+  Poison: 'Acid Downpour',
+  Fighting: 'All-Out Pummeling',
+  Dark: 'Black Hole Eclipse',
+  Grass: 'Bloom Doom',
+  Normal: 'Breakneck Blitz',
+  Rock: 'Continental Crush',
+  Steel: 'Corkscrew Crash',
+  Dragon: 'Devastating Drake',
+  Electric: 'Gigavolt Havoc',
+  Water: 'Hydro Vortex',
+  Fire: 'Inferno Overdrive',
+  Ghost: 'Never-Ending Nightmare',
+  Bug: 'Savage Spin-Out',
+  Psychic: 'Shattered Psyche',
+  Ice: 'Subzero Slammer',
+  Flying: 'Supersonic Skystrike',
+  Ground: 'Tectonic Rage',
+  Fairy: 'Twinkle Tackle',
+} as Record<Showdown.TypeName, MoveName>;
 
 /**
  * Special Z moves by pre-Z move, then by Z Crystal.
@@ -36,24 +36,24 @@ export const PokemonZMoves: Record<Showdown.TypeName, MoveName> = {
  * @since 1.0.3
  */
 export const PokemonSpecialZMoves: Record<string, Record<string, MoveName>> = {
-  clangingscales: { kommoniumz: <MoveName> 'Clangorous Soulblaze' },
-  darkestlariat: { inciniumz: <MoveName> 'Malicious Moonsault' },
-  gigaimpact: { snorliumz: <MoveName> 'Pulverizing Pancake' },
-  moongeistbeam: { lunaliumz: <MoveName> 'Menacing Moonraze Maelstrom' },
-  naturesmadness: { tapuniumz: <MoveName> 'Guardian of Alola' },
-  photongeyser: { ultranecroziumz: <MoveName> 'Light That Burns the Sky' },
-  playrough: { mimikiumz: <MoveName> "Let's Snuggle Forever" },
-  psychic: { mewniumz: <MoveName> 'Genesis Supernova' },
-  sparklingaria: { primariumz: <MoveName> 'Oceanic Operetta' },
-  spectralthief: { marshadiumz: <MoveName> 'Soul-Stealing 7-Star Strike' },
-  spiritshackle: { decidiumz: <MoveName> 'Sinister Arrow Raid' },
-  stoneedge: { lycaniumz: <MoveName> 'Splintered Stormshards' },
-  sunsteelstrike: { solganiumz: <MoveName> 'Searing Sunraze Smash' },
+  clangingscales: { kommoniumz: 'Clangorous Soulblaze' as MoveName },
+  darkestlariat: { inciniumz: 'Malicious Moonsault' as MoveName },
+  gigaimpact: { snorliumz: 'Pulverizing Pancake' as MoveName },
+  moongeistbeam: { lunaliumz: 'Menacing Moonraze Maelstrom' as MoveName },
+  naturesmadness: { tapuniumz: 'Guardian of Alola' as MoveName },
+  photongeyser: { ultranecroziumz: 'Light That Burns the Sky' as MoveName },
+  playrough: { mimikiumz: "Let's Snuggle Forever" as MoveName },
+  psychic: { mewniumz: 'Genesis Supernova' as MoveName },
+  sparklingaria: { primariumz: 'Oceanic Operetta' as MoveName },
+  spectralthief: { marshadiumz: 'Soul-Stealing 7-Star Strike' as MoveName },
+  spiritshackle: { decidiumz: 'Sinister Arrow Raid' as MoveName },
+  stoneedge: { lycaniumz: 'Splintered Stormshards' as MoveName },
+  sunsteelstrike: { solganiumz: 'Searing Sunraze Smash' as MoveName },
   thunderbolt: {
-    aloraichiumz: <MoveName> 'Stoked Sparksurfer',
-    pikashuniumz: <MoveName> '10,000,000 Volt Thunderbolt',
+    aloraichiumz: 'Stoked Sparksurfer' as MoveName,
+    pikashuniumz: '10,000,000 Volt Thunderbolt' as MoveName,
   },
-  volttackle: { pikaniumz: <MoveName> 'Catastropika' },
+  volttackle: { pikaniumz: 'Catastropika' as MoveName },
 };
 
 /**
@@ -63,25 +63,25 @@ export const PokemonSpecialZMoves: Record<string, Record<string, MoveName>> = {
  */
 export const PokemonDmaxMoves: Record<Showdown.TypeName, MoveName> = {
   '???': null,
-  Flying: <MoveName> 'Max Airstream',
-  Dark: <MoveName> 'Max Darkness',
-  Fire: <MoveName> 'Max Flare',
-  Bug: <MoveName> 'Max Flutterby',
-  Water: <MoveName> 'Max Geyser',
-  Ice: <MoveName> 'Max Hailstorm',
-  Fighting: <MoveName> 'Max Knuckle',
-  Electric: <MoveName> 'Max Lightning',
-  Psychic: <MoveName> 'Max Mindstorm',
-  Poison: <MoveName> 'Max Ooze',
-  Grass: <MoveName> 'Max Overgrowth',
-  Ghost: <MoveName> 'Max Phantasm',
-  Ground: <MoveName> 'Max Quake',
-  Rock: <MoveName> 'Max Rockfall',
-  Fairy: <MoveName> 'Max Starfall',
-  Steel: <MoveName> 'Max Steelspike',
-  Normal: <MoveName> 'Max Strike',
-  Dragon: <MoveName> 'Max Wyrmwind',
-};
+  Flying: 'Max Airstream',
+  Dark: 'Max Darkness',
+  Fire: 'Max Flare',
+  Bug: 'Max Flutterby',
+  Water: 'Max Geyser',
+  Ice: 'Max Hailstorm',
+  Fighting: 'Max Knuckle',
+  Electric: 'Max Lightning',
+  Psychic: 'Max Mindstorm',
+  Poison: 'Max Ooze',
+  Grass: 'Max Overgrowth',
+  Ghost: 'Max Phantasm',
+  Ground: 'Max Quake',
+  Rock: 'Max Rockfall',
+  Fairy: 'Max Starfall',
+  Steel: 'Max Steelspike',
+  Normal: 'Max Strike',
+  Dragon: 'Max Wyrmwind',
+} as Record<Showdown.TypeName, MoveName>;
 
 /**
  * Dynamax moves by abilities that override the Normal typing.
@@ -111,52 +111,52 @@ export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName
   '???': null,
   Bug: null,
   Dark: {
-    grimmsnarl: <MoveName> 'G-Max Snooze',
-    urshifu: <MoveName> 'G-Max One Blow',
+    grimmsnarl: 'G-Max Snooze' as MoveName,
+    urshifu: 'G-Max One Blow' as MoveName,
   },
-  Dragon: { duraludon: <MoveName> 'G-Max Depletion' },
+  Dragon: { duraludon: 'G-Max Depletion' as MoveName },
   Electric: {
-    pikachu: <MoveName> 'G-Max Volt Crash',
-    toxtricity: <MoveName> 'G-Max Stun Shock',
+    pikachu: 'G-Max Volt Crash' as MoveName,
+    toxtricity: 'G-Max Stun Shock' as MoveName,
   },
   Fairy: {
-    alcremie: <MoveName> 'G-Max Finale',
-    hatterene: <MoveName> 'G-Max Smite',
+    alcremie: 'G-Max Finale' as MoveName,
+    hatterene: 'G-Max Smite' as MoveName,
   },
-  Fighting: { machamp: <MoveName> 'G-Max Chi Strike' },
+  Fighting: { machamp: 'G-Max Chi Strike' as MoveName },
   Fire: {
-    centiskorch: <MoveName> 'G-Max Centiferno',
-    charizard: <MoveName> 'G-Max Wildfire',
-    cinderace: <MoveName> 'G-Max Fireball',
+    centiskorch: 'G-Max Centiferno' as MoveName,
+    charizard: 'G-Max Wildfire' as MoveName,
+    cinderace: 'G-Max Fireball' as MoveName,
   },
-  Flying: { corviknight: <MoveName> 'G-Max Wind Rage' },
-  Ghost: { gengar: <MoveName> 'G-Max Terror' },
+  Flying: { corviknight: 'G-Max Wind Rage' as MoveName },
+  Ghost: { gengar: 'G-Max Terror' as MoveName },
   Grass: {
-    appletun: <MoveName> 'G-Max Sweetness',
-    flapple: <MoveName> 'G-Max Tartness',
-    rillaboom: <MoveName> 'G-Max Drum Solo',
-    venusaur: <MoveName> 'G-Max Vine Lash',
+    appletun: 'G-Max Sweetness' as MoveName,
+    flapple: 'G-Max Tartness' as MoveName,
+    rillaboom: 'G-Max Drum Solo' as MoveName,
+    venusaur: 'G-Max Vine Lash' as MoveName,
   },
-  Ground: { sandaconda: <MoveName> 'G-Max Sandblast' },
-  Ice: { lapras: <MoveName> 'G-Max Resonance' },
+  Ground: { sandaconda: 'G-Max Sandblast' as MoveName },
+  Ice: { lapras: 'G-Max Resonance' as MoveName },
   Normal: {
-    eevee: <MoveName> 'G-Max Cuddle',
-    meowth: <MoveName> 'G-Max Gold Rush',
-    snorlax: <MoveName> 'G-Max Replenish',
+    eevee: 'G-Max Cuddle' as MoveName,
+    meowth: 'G-Max Gold Rush' as MoveName,
+    snorlax: 'G-Max Replenish' as MoveName,
   },
-  Poison: { garbodor: <MoveName> 'G-Max Malodor' },
-  Psychic: { orbeetle: <MoveName> 'G-Max Gravitas' },
-  Rock: { coalossal: <MoveName> 'G-Max Volcalith' },
+  Poison: { garbodor: 'G-Max Malodor' as MoveName },
+  Psychic: { orbeetle: 'G-Max Gravitas' as MoveName },
+  Rock: { coalossal: 'G-Max Volcalith' as MoveName },
   Steel: {
-    copperajah: <MoveName> 'G-Max Steelsurge',
-    melmetal: <MoveName> 'G-Max Meltdown',
+    copperajah: 'G-Max Steelsurge' as MoveName,
+    melmetal: 'G-Max Meltdown' as MoveName,
   },
   Water: {
-    blastoise: <MoveName> 'G-Max Cannonade',
-    drednaw: <MoveName> 'G-Max Stonesurge',
-    inteleon: <MoveName> 'G-Max Hydrosnipe',
-    kingler: <MoveName> 'G-Max Foam Burst',
-    urshifurapidstrike: <MoveName> 'G-Max Rapid Flow',
+    blastoise: 'G-Max Cannonade' as MoveName,
+    drednaw: 'G-Max Stonesurge' as MoveName,
+    inteleon: 'G-Max Hydrosnipe' as MoveName,
+    kingler: 'G-Max Foam Burst' as MoveName,
+    urshifurapidstrike: 'G-Max Rapid Flow' as MoveName,
   },
 };
 
@@ -168,13 +168,13 @@ export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName
  * @since 1.0.3
  */
 export const PokemonCriticalHitMoves: MoveName[] = [
-  <MoveName> 'Flower Trick',
-  <MoveName> 'Frost Breath',
-  <MoveName> 'Storm Throw',
-  <MoveName> 'Surging Strikes',
-  <MoveName> 'Wicked Blow',
-  <MoveName> 'Zippy Zap',
-];
+  'Flower Trick',
+  'Frost Breath',
+  'Storm Throw',
+  'Surging Strikes',
+  'Wicked Blow',
+  'Zippy Zap',
+] as MoveName[];
 
 /**
  * Moves that allow the target Pokemon to switch.
@@ -185,11 +185,11 @@ export const PokemonCriticalHitMoves: MoveName[] = [
  * @since 1.0.7
  */
 export const PokemonPivotMoves: MoveName[] = [
-  <MoveName> 'Baton Pass',
-  <MoveName> 'Flip Turn',
-  <MoveName> 'Parting Shot',
-  <MoveName> 'Shed Tail', // gen 9 :o
-  <MoveName> 'Teleport',
-  <MoveName> 'U-turn',
-  <MoveName> 'Volt Switch',
-];
+  'Baton Pass',
+  'Flip Turn',
+  'Parting Shot',
+  'Shed Tail', // gen 9 :o
+  'Teleport',
+  'U-turn',
+  'Volt Switch',
+] as MoveName[];

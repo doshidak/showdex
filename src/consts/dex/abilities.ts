@@ -9,21 +9,21 @@ import { type AbilityName } from '@smogon/calc/dist/data/interface';
  * @since 0.1.2
  */
 export const PokemonToggleAbilities: AbilityName[] = [
-  <AbilityName> 'Beads of Ruin',
-  <AbilityName> 'Flash Fire',
-  // <AbilityName> 'Intimidate', // applies the ATK reduction within `boosts`, so no need to "toggle" this
-  <AbilityName> 'Libero', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
-  <AbilityName> 'Minus',
-  <AbilityName> 'Multiscale', // special case based off the HP, but specified here to allow toggling in the UI
-  <AbilityName> 'Plus',
-  <AbilityName> 'Protean', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
-  <AbilityName> 'Protosynthesis', // introduced gen 9
-  <AbilityName> 'Quark Drive', // introduced gen 9
-  <AbilityName> 'Shadow Shield', // basically another multiscale lmao
-  <AbilityName> 'Slow Start',
-  <AbilityName> 'Stakeout',
-  <AbilityName> 'Sword of Ruin',
-  <AbilityName> 'Tablets of Ruin',
-  <AbilityName> 'Unburden',
-  <AbilityName> 'Vessel of Ruin',
-];
+  'Beads of Ruin',
+  'Flash Fire',
+  // 'Intimidate', // applies the ATK reduction within `boosts`, so no need to "toggle" this
+  'Libero', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
+  'Minus',
+  'Multiscale', // special case based off the HP, but specified here to allow toggling in the UI
+  'Plus',
+  'Protean', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
+  'Protosynthesis', // introduced gen 9
+  'Quark Drive', // introduced gen 9
+  'Shadow Shield', // basically another multiscale lmao
+  'Slow Start',
+  'Stakeout',
+  'Sword of Ruin',
+  'Tablets of Ruin',
+  'Unburden',
+  'Vessel of Ruin',
+] as AbilityName[];

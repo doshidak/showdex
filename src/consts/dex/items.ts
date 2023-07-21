@@ -1,11 +1,11 @@
 import { type ItemName } from '@smogon/calc/dist/data/interface';
 
 export const PokemonSpeedReductionItems: ItemName[] = [
-  <ItemName> 'Macho Brace',
-  <ItemName> 'Power Anklet',
-  <ItemName> 'Power Band',
-  <ItemName> 'Power Belt',
-  <ItemName> 'Power Bracer',
-  <ItemName> 'Power Lens',
-  <ItemName> 'Power Weight',
-];
+  'Macho Brace',
+  'Power Anklet',
+  'Power Band',
+  'Power Belt',
+  'Power Bracer',
+  'Power Lens',
+  'Power Weight',
+] as ItemName[];
