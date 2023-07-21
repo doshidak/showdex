@@ -34,7 +34,8 @@ const url = `${host}:${port}`;
     allowedHosts: 'all',
     client: false,
     https: false,
-    // hot: false,
+    hot: 'only', // default: true
+    liveReload: false, // default: true
 
     headers: {
       'Access-Control-Allow-Origin': '*',
