@@ -19,7 +19,7 @@ export const showdownApi = createApi({
 
   tagTypes: [
     ShowdownReduxTagType,
-  ].flatMap((type) => <string[]> Object.values(type)),
+  ].flatMap((type) => Object.values(type) as string[]),
 
   // do not add endpoints here; inject them in other files for code-splitting
   endpoints: () => ({}),
