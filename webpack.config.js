@@ -6,6 +6,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import ZipPlugin from 'zip-webpack-plugin';
+import CircularDependencyPlugin from 'circular-dependency-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import manifest from './src/manifest' assert { type: 'json' };
 
@@ -124,7 +125,7 @@ const moduleRules = [{
       sourceMap: true,
       sassOptions: {
         // allows for `@use 'mixins/flex';` instead of `@use '../../../styles/mixins/flex';`
-        includePaths: [path.join(__dirname, 'src/styles')],
+        includePaths: [path.join(__dirname, 'src', 'styles')],
       },
     },
   }],
@@ -140,7 +141,14 @@ const moduleRules = [{
 }, {
   test: /\.(?:jsx?|tsx?)$/i,
   use: [
-    'babel-loader',
+    // 'babel-loader',
+    {
+      loader: 'babel-loader',
+      options: {
+        cacheDirectory: path.join(__dirname, 'node_modules', '.cache', 'babel'), // default: false
+        // cacheCompression: false, // default: true
+      },
+    },
     'source-map-loader',
   ],
   exclude: /node_modules/,
@@ -289,6 +297,23 @@ const plugins = [
   new CopyWebpackPlugin({ patterns: copyPatterns }),
 
   ...[
+    __DEV__
+      && new CircularDependencyPlugin({
+        exclude: /node_modules/,
+        include: /src/,
+        failOnError: false, // true = errors, false = warnings
+        // allowAsyncCycles: false,
+        cwd: __dirname,
+
+        onDetected({ module, paths, compilation }) {
+          if (paths?.[0]?.endsWith?.('index.ts')) {
+            return;
+          }
+
+          compilation.warnings.push(new Error(paths.join(' -> ')));
+        },
+      }),
+
     (!__DEV__ || env.BUILD_TARGET === 'firefox')
       && new ZipPlugin({
         // spit out the file in either `build` or `dist`
@@ -315,11 +340,22 @@ const envConfig = {
   // due to an 'unsafe-eval' EvalError thrown when trying to first init the extension)
   devtool: __DEV__ ? 'cheap-module-source-map' : 'source-map',
 
+  // development
+  ...(__DEV__ && {
+    cache: {
+      type: 'filesystem',
+      allowCollectingMemory: true,
+      cacheDirectory: path.join(__dirname, 'node_modules', '.cache', 'webpack'),
+      compression: false,
+      hashAlgorithm: 'md4',
+    }
+  }),
+
   // production
   ...(!__DEV__ && {
     optimization: {
       minimize: true,
-      minimizer: [new TerserPlugin({ extractComments: true })],
+      minimizer: [new TerserPlugin()],
 
       // not required on dev cause you can load a single big ass file no problemo (even into Firefox!)
       /** @todo Find a way to get the names of the generated chunks and inject it as an env or something (for use in content). */
