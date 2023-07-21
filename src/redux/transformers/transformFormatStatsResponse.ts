@@ -21,7 +21,7 @@ import { processUsageAlts } from '@showdex/utils/presets';
 export const transformFormatStatsResponse = (
   response: PkmnSmogonFormatStatsResponse,
   _meta: unknown,
-  args: Omit<PkmnSmogonPresetRequest, 'formatOnly'>,
+  args: PkmnSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   const { pokemon: pokemonStats } = response || {};
 
