@@ -1,12 +1,18 @@
 import { NIL as NIL_UUID, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { type CalcdexPlayerKey, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
-import type { CalcdexPlayerKey, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
-export const serializePayload = <T>(payload: T): string => Object.entries(payload || {})
-  .map(([key, value]) => `${key}:${value?.toString?.() ?? 'undefined'}`)
+/* eslint-disable @typescript-eslint/indent */
+
+export const serializePayload = <T>(
+  payload: T,
+): string => Object.entries(payload || {})
+  .map(([key, value]) => `${key}:${(typeof value === 'object' ? JSON.stringify(value) : String(value)) ?? '???'}`)
   .join('|');
+
+/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Calculatingly calculates the Calcdex ID from the calculated checksum
@@ -19,9 +25,9 @@ export const serializePayload = <T>(payload: T): string => Object.entries(payloa
  * @since 0.1.0
  */
 export const calcCalcdexId = <T>(payload: T): string => {
-  const serialized = Object.keys(payload || {}).length ?
-    serializePayload<T>(payload) :
-    null;
+  const serialized = nonEmptyObject(payload)
+    ? serializePayload<T>(payload)
+    : null;
 
   if (!serialized) {
     return null;

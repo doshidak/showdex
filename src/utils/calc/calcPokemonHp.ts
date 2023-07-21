@@ -1,5 +1,5 @@
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { clamp } from '@showdex/utils/core';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 
 /**
  * Name is a bit misleading because this returns the **percentage** of the Pokemon's

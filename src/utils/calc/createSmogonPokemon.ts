@@ -7,11 +7,12 @@ import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
 import { getGenDexForFormat, notFullyEvolved } from '@showdex/utils/dex';
 import { calcPokemonHp } from './calcPokemonHp';
+import { nonEmptyObject } from '../core';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
 export type SmogonPokemonOverrides = SmogonPokemonOptions['overrides'];
 
-const l = logger('@showdex/utils/calc/createSmogonPokemon');
+const l = logger('@showdex/utils/calc/createSmogonPokemon()');
 
 /**
  * Factory that essentially converts a `CalcdexPokemon` into an instantiated `Pokemon` class from `@smogon/calc`.
@@ -64,7 +65,9 @@ export const createSmogonPokemon = (
   // if applicable, convert the '???' status into an empty string
   // (don't apply the status if the Pokemon is fainted tho)
   const status = pokemon.hp
-    ? pokemon.status === '???' ? null : pokemon.status
+    ? pokemon.status === '???'
+      ? null
+      : pokemon.status
     : null;
 
   const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
@@ -121,7 +124,7 @@ export const createSmogonPokemon = (
     // if the move has been manually overridden, don't specify this property
     // (e.g., don't apply Supreme Overlord boosts when user overrides a move's base power)
     alliesFainted: (
-      (!moveName || !Object.keys(pokemon.moveOverrides?.[moveName] || {}).length)
+      (!moveName || !nonEmptyObject(pokemon.moveOverrides?.[moveName]))
         && pokemon.faintCounter
     ) || null,
 
@@ -170,7 +173,7 @@ export const createSmogonPokemon = (
     overrides: {
       // update (2022/11/06): now allowing base stat editing as a setting
       baseStats: {
-        ...(<Required<Showdown.StatsTable>> pokemon.baseStats),
+        ...(pokemon.baseStats as Required<Showdown.StatsTable>),
 
         // only spread non-negative numerical values
         ...Object.entries(pokemon.dirtyBaseStats || {}).reduce((prev, [stat, value]) => {
@@ -189,11 +192,11 @@ export const createSmogonPokemon = (
       // for instance, Greninja, who has the types ['Water', 'Dark'] and the Protean ability
       // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
       // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
-      types: <SmogonPokemonOverrides['types']> [
+      types: [
         ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : pokemon.types),
         null,
         null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
-      ].slice(0, 2),
+      ].slice(0, 2) as SmogonPokemonOverrides['types'],
     },
   };
 
@@ -279,8 +282,8 @@ export const createSmogonPokemon = (
       transformedBaseStats,
     } = pokemon;
 
-    (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats = {
-      ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats = {
+      ...(transformedBaseStats as Required<Omit<Showdown.StatsTable, 'hp'>>),
       hp: baseStats.hp,
     };
   }
@@ -291,8 +294,8 @@ export const createSmogonPokemon = (
     options,
   );
 
-  if (smogonPokemon?.species && typeof smogonPokemon.species?.nfe !== 'boolean') {
-    (<Writable<Specie>> smogonPokemon.species).nfe = notFullyEvolved(pokemon.speciesForme);
+  if (typeof smogonPokemon?.species?.nfe !== 'boolean') {
+    (smogonPokemon.species as Writable<Specie>).nfe = notFullyEvolved(pokemon.speciesForme);
   }
 
   return smogonPokemon;

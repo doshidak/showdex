@@ -2,7 +2,7 @@ import { type GenerationNum } from '@smogon/calc';
 import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { calcPokemonStat } from './calcPokemonStat';
 
@@ -66,7 +66,7 @@ export const guessServerSpread = (
     return null;
   }
 
-  if (!Object.keys(pokemon.baseStats || {}).length) {
+  if (!nonEmptyObject(pokemon.baseStats)) {
     if (__DEV__) {
       l.warn(
         'No baseStats were found for Pokemon', pokemon.ident || pokemon.speciesForme,
@@ -227,7 +227,7 @@ export const guessServerSpread = (
     guessedSpread.evs = {};
   }
 
-  if (!Object.keys({ ...guessedSpread.ivs, ...guessedSpread.evs }).length) {
+  if (!nonEmptyObject({ ...guessedSpread.ivs, ...guessedSpread.evs })) {
     l.debug(
       'Failed to find the actual spread for Pokemon', pokemon.ident || pokemon.speciesForme,
       '\n', 'guessedSpread', guessedSpread,

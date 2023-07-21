@@ -1,6 +1,6 @@
+import { type GenerationNum } from '@smogon/calc';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { detectGenFromFormat } from '@showdex/utils/battle';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 import { convertIvToLegacyDv } from './convertLegacyStats';
 
 /**

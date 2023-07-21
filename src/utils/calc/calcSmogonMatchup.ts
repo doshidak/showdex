@@ -2,12 +2,6 @@ import { calculate } from '@smogon/calc';
 // import { formatId } from '@showdex/utils/app';
 import { logger } from '@showdex/utils/debug';
 import { getGenDexForFormat } from '@showdex/utils/dex';
-import {
-  formatDamageRange,
-  formatKoChance,
-  getKoColor,
-  parseDescription,
-} from '@showdex/utils/ui';
 import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc';
 import type { MoveName } from '@smogon/calc/dist/data/interface';
 import type {
@@ -16,10 +10,13 @@ import type {
   CalcdexPokemon,
   ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
-import type { CalcdexMatchupParsedDescription } from '@showdex/utils/ui';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
 import { createSmogonPokemon } from './createSmogonPokemon';
+import { formatMatchupNhko } from './formatMatchupNhko';
+import { getMatchupNhkoColor } from './getMatchupNhkoColor';
+import { getMatchupRange } from './getMatchupRange';
+import { type CalcdexMatchupParsedDescription, parseMatchupDescription } from './parseMatchupDescription';
 
 export interface CalcdexMatchupResult {
   /**
@@ -90,7 +87,7 @@ export interface CalcdexMatchupResult {
   koColor?: string;
 }
 
-const l = logger('@showdex/utils/calc/calcSmogonMatchup');
+const l = logger('@showdex/utils/calc/calcSmogonMatchup()');
 
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.
@@ -178,10 +175,10 @@ export const calcSmogonMatchup = (
       smogonField,
     );
 
-    matchup.description = parseDescription(result);
-    matchup.damageRange = formatDamageRange(result);
-    matchup.koChance = formatKoChance(result, settings?.nhkoLabels);
-    matchup.koColor = getKoColor(result, settings?.nhkoColors);
+    matchup.description = parseMatchupDescription(result);
+    matchup.damageRange = getMatchupRange(result);
+    matchup.koChance = formatMatchupNhko(result, settings?.nhkoLabels);
+    matchup.koColor = getMatchupNhkoColor(result, settings?.nhkoColors);
 
     // l.debug(
     //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
@@ -197,7 +194,7 @@ export const calcSmogonMatchup = (
     // which is separate from 'N/A' damage (e.g., status moves).
     // typically occurs when the opposing Pokemon is immune to the damaging move,
     // like using Earthquake against a Lando-T, which is immune due to its Flying type.
-    if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
+    if (__DEV__ && !(error as Error)?.message?.includes('=== 0')) {
       l.error(
         'Exception while calculating the damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
         '\n', 'dex.num', dex.num,

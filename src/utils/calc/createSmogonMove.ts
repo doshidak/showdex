@@ -1,4 +1,6 @@
 import { Move as SmogonMove } from '@smogon/calc';
+import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { clamp } from '@showdex/utils/core';
 import {
@@ -7,8 +9,6 @@ import {
   getGenDexForFormat,
   shouldBoostTeraStab,
 } from '@showdex/utils/dex';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcMoveBasePower } from './calcMoveBasePower';
 
 /**

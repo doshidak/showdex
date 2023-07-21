@@ -2,6 +2,7 @@ import { type GenerationNum } from '@smogon/calc';
 import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { detectLegacyGen } from '@showdex/utils/battle';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { calcPokemonStat } from './calcPokemonStat';
 
 /**
@@ -23,7 +24,7 @@ export const calcPokemonSpreadStats = (
   format: GenerationNum | string,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): Partial<Showdown.StatsTable> => {
-  if (!Object.keys(pokemon?.baseStats || {}).length) {
+  if (!nonEmptyObject(pokemon?.baseStats)) {
     return { ...PokemonInitialStats };
   }
 
@@ -31,11 +32,11 @@ export const calcPokemonSpreadStats = (
 
   return PokemonStatNames.reduce((prev, stat) => {
     // update (2023/02/07): cleaned up the baseStat fuckery that existed before
-    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? <number> (
+    const baseStat = pokemon.dirtyBaseStats?.[stat] ?? (
       pokemon.transformedForme && stat !== 'hp'
         ? pokemon.transformedBaseStats
         : pokemon.baseStats
-    )?.[stat];
+    )?.[stat] as number;
 
     prev[stat] = calcPokemonStat(
       format,
