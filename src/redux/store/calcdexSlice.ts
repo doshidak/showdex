@@ -1,13 +1,23 @@
-import { createSlice, current } from '@reduxjs/toolkit';
+import {
+  type Draft,
+  type PayloadAction,
+  type SliceCaseReducers,
+  createSlice,
+  current,
+} from '@reduxjs/toolkit';
+import { type State as SmogonState } from '@smogon/calc';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+} from '@smogon/calc/dist/data/interface';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { countActivePlayers, detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
-import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type { GenerationNum, State as SmogonState } from '@smogon/calc';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { useSelector } from './hooks';
 
 /* eslint-disable @typescript-eslint/indent */
@@ -1809,12 +1819,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
   reducers: {
     init: (state, action) => {
-      l.debug(
-        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
-        '\n', 'battleId', action.payload?.battleId || '???',
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      const endTimer = runtimer(`calcdexSlice.init() via ${action.payload?.scope || '(anon)'}`, l);
+
+      // l.debug(
+      //   'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+      //   '\n', 'battleId', action.payload?.battleId || '???',
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const {
         scope, // used for debugging; not used here, but destructuring it from `...payload`
@@ -1917,6 +1929,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       // state[battleId].playerCount = AllPlayerKeys.filter((k) => state[battleId][k].active).length;
       state[battleId].playerCount = countActivePlayers(state[battleId]);
 
+      endTimer();
+
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
         '\n', 'battleId', battleId || '???',
@@ -1926,12 +1940,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
     },
 
     update: (state, action) => {
-      l.debug(
-        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
-        '\n', 'battleId', action.payload?.battleId || '???',
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      const endTimer = runtimer(`calcdexSlice.update() via ${action.payload?.scope || '(anon)'}`, l);
+
+      // l.debug(
+      //   'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+      //   '\n', 'battleId', action.payload?.battleId || '???',
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const {
         battleId,
@@ -1981,6 +1997,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         state[battleId].active = active;
       }
 
+      endTimer();
+
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
         '\n', 'battleId', battleId || '???',
@@ -1990,12 +2008,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
     },
 
     updateField: (state, action) => {
-      l.debug(
-        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
-        '\n', 'battleId', action.payload?.battleId || '???',
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      const endTimer = runtimer(`calcdexSlice.updateField() via ${action.payload?.scope || '(anon)'}`, l);
+
+      // l.debug(
+      //   'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+      //   '\n', 'battleId', action.payload?.battleId || '???',
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const {
         battleId,
@@ -2038,6 +2058,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         // },
       };
 
+      endTimer();
+
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
         '\n', 'battleId', battleId || '???',
@@ -2047,12 +2069,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
     },
 
     updatePlayer: (state, action) => {
-      l.debug(
-        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
-        '\n', 'battleId', action.payload?.battleId || '???',
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      const endTimer = runtimer(`calcdexSlice.updatePlayer() via ${action.payload?.scope || '(anon)'}`, l);
+
+      // l.debug(
+      //   'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+      //   '\n', 'battleId', action.payload?.battleId || '???',
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const { battleId } = action.payload;
 
@@ -2090,6 +2114,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         };
       });
 
+      endTimer();
+
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
         '\n', 'battleId', battleId || '???',
@@ -2099,12 +2125,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
     },
 
     updatePokemon: (state, action) => {
-      l.debug(
-        'RECV', action.type, 'from', action.payload?.scope || '(anon)',
-        '\n', 'battleId', action.payload?.battleId || '???',
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      const endTimer = runtimer(`calcdexSlice.updatePokemon() via ${action.payload?.scope || '(anon)'}`, l);
+
+      // l.debug(
+      //   'RECV', action.type, 'from', action.payload?.scope || '(anon)',
+      //   '\n', 'battleId', action.payload?.battleId || '???',
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const {
         battleId,
@@ -2163,6 +2191,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...pokemon,
       };
 
+      endTimer();
+
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
         '\n', 'battleId', battleId || '???',
@@ -2172,11 +2202,11 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
     },
 
     destroy: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'battleId (payload)', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'battleId (payload)', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       if (!action.payload || !(action.payload in state)) {
         if (__DEV__) {

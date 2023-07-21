@@ -7,9 +7,9 @@ import {
 } from '@reduxjs/toolkit';
 import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
+import { type CalcdexMatchupNhkoColors, type CalcdexMatchupNhkoLabels } from '@showdex/utils/calc';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { type SmogonMatchupNhkoColors, type SmogonMatchupNhkoLabels } from '@showdex/utils/ui';
 import { type CalcdexPlayerKey, type CalcdexRenderMode } from './calcdexSlice';
 import { useDispatch, useSelector } from './hooks';
 
@@ -613,7 +613,7 @@ export interface ShowdexCalcdexSettings {
    * ```
    * @since 1.0.3
    */
-  nhkoColors: SmogonMatchupNhkoColors;
+  nhkoColors: CalcdexMatchupNhkoColors;
 
   /**
    * Labels for the NHKO values, up to 4HKO.
@@ -635,7 +635,7 @@ export interface ShowdexCalcdexSettings {
    * ```
    * @since 1.0.3
    */
-  nhkoLabels: SmogonMatchupNhkoLabels;
+  nhkoLabels: CalcdexMatchupNhkoLabels;
 }
 
 /**
@@ -758,10 +758,11 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
           Object.entries(value).forEach((
             [objKey, objValue]: [
               keyof ShowdexHellodexSettings | keyof ShowdexCalcdexSettings,
+              // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
               ShowdexHellodexSettings[keyof ShowdexHellodexSettings] | ShowdexCalcdexSettings[keyof ShowdexCalcdexSettings],
             ],
           ) => {
-            state.settings[<keyof ShowdexSettings> key][objKey] = objValue;
+            state.settings[key as keyof ShowdexSettings][objKey] = objValue;
           });
 
           return;
