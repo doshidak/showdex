@@ -1,6 +1,12 @@
+import { type ItemName } from '@smogon/calc/dist/data/interface';
+import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
-import { formatId } from '@showdex/utils/app';
-import { guessTableFormatKey, legalLockedFormat } from '@showdex/utils/battle';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+// import { guessTableFormatKey, legalLockedFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { guessTableFormatKey } from '@showdex/utils/battle/guessTableFormatKey'; /** @todo reorganize me */
+import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { getDexForFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
@@ -10,9 +16,6 @@ import {
   usageAltPercentFinder,
   usageAltPercentSorter,
 } from '@showdex/utils/presets';
-import type { ItemName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
-import type { DropdownOption } from '@showdex/components/form';
 
 export type CalcdexPokemonItemOption = DropdownOption<ItemName>;
 
@@ -125,7 +128,7 @@ export const buildItemOptions = (
 
   if (typeof BattleTeambuilderTable === 'undefined' || !format || !BattleTeambuilderTable.items?.length) {
     const allItems = Object.values(BattleItems || {})
-      .map((item) => <ItemName> item?.name)
+      .map((item) => item?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
@@ -161,7 +164,7 @@ export const buildItemOptions = (
   if (popularStartIndex > -1 && popularEndIndex > -1) {
     const popularItems = items
       .slice(popularStartIndex, popularEndIndex + 1)
-      .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
+      .map((itemId: string) => Dex.items.get(itemId)?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
@@ -182,7 +185,7 @@ export const buildItemOptions = (
   if (itemsStartIndex > -1 && itemsEndIndex > -1) {
     const itemsItems = items // 10/10 name lmao
       .slice(itemsStartIndex, itemsEndIndex + 1)
-      .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
+      .map((itemId: string) => Dex.items.get(itemId)?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
@@ -203,7 +206,7 @@ export const buildItemOptions = (
   if (specificStartIndex > -1 && specificEndIndex > -1) {
     const specificItems = items
       .slice(specificStartIndex, specificEndIndex + 1)
-      .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
+      .map((itemId: string) => Dex.items.get(itemId)?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
@@ -224,7 +227,7 @@ export const buildItemOptions = (
   if (usuallyUselessStartIndex > -1 && usuallyUselessEndIndex > -1) {
     const usuallyUselessItems = items
       .slice(usuallyUselessStartIndex, usuallyUselessEndIndex + 1)
-      .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
+      .map((itemId: string) => Dex.items.get(itemId)?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
@@ -245,7 +248,7 @@ export const buildItemOptions = (
   if (uselessStartIndex > -1 && uselessEndIndex > -1) {
     const uselessItems = items
       .slice(uselessStartIndex, uselessEndIndex + 1)
-      .map((itemId: string) => <ItemName> Dex.items.get(itemId)?.name)
+      .map((itemId: string) => Dex.items.get(itemId)?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
@@ -265,7 +268,7 @@ export const buildItemOptions = (
 
   if (showAll || !legalLockedFormat(format)) {
     const otherItems = Object.values(BattleItems || {})
-      .map((item) => <ItemName> item?.name)
+      .map((item) => item?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 

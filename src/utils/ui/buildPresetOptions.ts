@@ -1,8 +1,8 @@
+import { type DropdownOption } from '@showdex/components/form';
 import { FormatLabels } from '@showdex/consts/battle';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { getGenlessFormat } from '@showdex/utils/battle';
 import { percentage } from '@showdex/utils/humanize';
-import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 

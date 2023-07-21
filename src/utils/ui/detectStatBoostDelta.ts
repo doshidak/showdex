@@ -1,4 +1,5 @@
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { nonEmptyObject } from '@showdex/utils/core';
 
 export type PokemonStatBoostDelta =
   | 'positive'
@@ -18,46 +19,12 @@ export const detectStatBoostDelta = (
   finalStats: Showdown.StatsTable,
   stat: Showdown.StatName,
 ): PokemonStatBoostDelta => {
-  // if (stat === 'hp') {
-  //   return null;
-  // }
+  if (!nonEmptyObject(pokemon?.spreadStats) || !nonEmptyObject(finalStats)) {
+    return null;
+  }
 
-  // check for boosts from abilities
-  // if ('slowstart' in (pokemon?.volatiles || {}) && pokemon?.abilityToggled) {
-  //   if (['atk', 'spe'].includes(stat)) {
-  //     return 'negative';
-  //   }
-  // }
-
-  // check for status-dependent boosts from abilities
-  // const abilitySearchString = pokemon?.ability?.toLowerCase?.();
-  // const hasGuts = abilitySearchString === 'guts';
-  // const hasQuickFeet = abilitySearchString === 'quick feet';
-
-  // if (pokemon?.status && pokemon.status !== '???') {
-  //   if (hasGuts && stat === 'atk') {
-  //     return 'positive';
-  //   }
-  //
-  //   if (hasQuickFeet && stat === 'spe') {
-  //     return 'positive';
-  //   }
-  //
-  //   // may be problematic since we're not using the Pokemon's base stats,
-  //   // but oh well, this ok for now lmaoo
-  //   if (pokemon.status === 'brn' && stat === 'atk') {
-  //     return 'negative';
-  //   }
-  //
-  //   if (pokemon.status === 'par' && stat === 'spe') {
-  //     return 'negative';
-  //   }
-  // }
-
-  // const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
-
-  const spreadStat = pokemon?.spreadStats?.[stat] ?? 0;
-  const finalStat = finalStats?.[stat] ?? 0;
+  const spreadStat = pokemon.spreadStats[stat] ?? 0;
+  const finalStat = finalStats[stat] ?? 0;
 
   if (finalStat > spreadStat) {
     return 'positive';
