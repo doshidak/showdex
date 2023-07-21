@@ -1,8 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Button } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { ButtonElement, ButtonProps } from '@showdex/components/ui';
+import { type ButtonElement, type ButtonProps, Button } from '../Button';
 import styles from './ToggleButton.module.scss';
 
 export interface ToggleButtonProps extends Omit<ButtonProps, 'display'> {

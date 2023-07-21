@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { type TippyProps } from '@tippyjs/react';
 import Tippy from '@tippyjs/react/headless';
-import type { TippyProps } from '@tippyjs/react';
 
 /**
  * Will only render the `content` or `render` elements if the Tippy is mounted to the DOM.

@@ -1,10 +1,13 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { TooltipProps } from '@showdex/components/ui';
-import type { BaseButtonProps, ButtonElement, ButtonElementType } from './BaseButton';
-import { BaseButton } from './BaseButton';
+import { type TooltipProps, Tooltip } from '../Tooltip';
+import {
+  type BaseButtonProps,
+  type ButtonElement,
+  type ButtonElementType,
+  BaseButton,
+} from './BaseButton';
 import styles from './Button.module.scss';
 
 export interface ButtonProps<
