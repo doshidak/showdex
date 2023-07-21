@@ -1,8 +1,8 @@
-import { sanitizeField } from '@showdex/utils/battle';
+import { type CalcdexBattleField, type CalcdexBattleState } from '@showdex/redux/store';
+import { cloneField, sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { CalcdexBattleField, CalcdexBattleState } from '@showdex/redux/store';
 
-const l = logger('@showdex/redux/actions/syncField');
+const l = logger('@showdex/redux/actions/syncField()');
 
 export const syncField = (
   state: Partial<CalcdexBattleState>,
@@ -23,7 +23,9 @@ export const syncField = (
 
   // create a sanitized `Field` from the passed-in `battle`, then compare each result for changes
   // (works similarly to `syncPokemon`)
-  const newField = structuredClone(state.field);
+  // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+  // const newField = structuredClone(state.field);
+  const newField = cloneField(state.field);
   const updatedField = sanitizeField(battle);
 
   const fieldSideKeys = <(keyof CalcdexBattleField)[]> ['attackerSide', 'defenderSide'];

@@ -8,15 +8,16 @@ import {
   type CalcdexPokemon,
   type RootState,
 } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency when importing here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import {
+  cloneBattleState,
+  clonePlayerSideConditions,
   countActivePlayers,
   detectAuthPlayerKeyFromBattle,
   detectBattleRules,
-  detectLegacyGen,
   detectPlayerKeyFromBattle,
   detectPlayerKeyFromPokemon,
-  legalLockedFormat,
   mergeRevealedMoves,
   sanitizePlayerSide,
   sanitizePokemon,
@@ -25,6 +26,8 @@ import {
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
+import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
+import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
@@ -93,7 +96,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     // yooo native deep-copying lessgo baby
-    const battleState: CalcdexBattleState = structuredClone(state[battleId]);
+    // update (2023/07/17): turns out structuredClone() is the slowest thing ever (no surprises there tbh)
+    // & therefore most be eradicated from the codebase effective immediately >:(
+    // const battleState: CalcdexBattleState = structuredClone(state[battleId]);
+    const battleState = cloneBattleState(state[battleId]);
 
     // l.debug(
     //   '\n', 'pre-copied battleState', state[battleId],
@@ -444,8 +450,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           clientPokemon,
           serverPokemon,
           battleState,
-          // settings?.showAllFormes, // update (2023/01/05): no longer a setting
-          true,
           (!isMyPokemonSide || !hasMyPokemon)
             // update (2023/02/03): defaultAutoMoves.auth is always false since we'd normally have myPokemon,
             // but in cases of old replays, myPokemon won't be available, so we'd want to respect the user's setting
@@ -639,14 +643,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               // targetPokemonState.ability = syncedPokemon.ability;
               mutations.ability = syncedPokemon.ability;
 
-              l.debug(
-                'Set ability of', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
-                '\n', 'ability', syncedPokemon.ability,
-                '\n', 'mutations', mutations,
-                '\n', 'targetClientPokemon', targetClientPokemon,
-                // '\n', 'targetPokemonState', targetPokemonState,
-                '\n', 'syncedPokemon', syncedPokemon,
-              );
+              // l.debug(
+              //   'Set ability of', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
+              //   '\n', 'ability', syncedPokemon.ability,
+              //   '\n', 'mutations', mutations,
+              //   '\n', 'targetClientPokemon', targetClientPokemon,
+              //   // '\n', 'targetPokemonState', targetPokemonState,
+              //   '\n', 'syncedPokemon', syncedPokemon,
+              // );
             }
 
             if (syncedPokemon.transformedMoves.length) {
@@ -657,14 +661,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               //   targetPokemonState.moves = [...syncedPokemon.transformedMoves];
               // }
 
-              l.debug(
-                'Set revealedMoves of', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
-                '\n', 'revealedMoves', syncedPokemon.transformedMoves,
-                '\n', 'mutations', mutations,
-                '\n', 'targetClientPokemon', targetClientPokemon,
-                // '\n', 'targetPokemonState', targetPokemonState,
-                '\n', 'syncedPokemon', syncedPokemon,
-              );
+              // l.debug(
+              //   'Set revealedMoves of', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
+              //   '\n', 'revealedMoves', syncedPokemon.transformedMoves,
+              //   '\n', 'mutations', mutations,
+              //   '\n', 'targetClientPokemon', targetClientPokemon,
+              //   // '\n', 'targetPokemonState', targetPokemonState,
+              //   '\n', 'syncedPokemon', syncedPokemon,
+              // );
             }
 
             futureMutations[targetPlayerKey].push(mutations);
@@ -1097,7 +1101,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       if (playerState.active) {
         // sync the sideConditions from the battle
         // (this is first so that it'll be available in sanitizePlayerSide(), just in case)
-        playerState.side.conditions = structuredClone(player.sideConditions || {});
+        // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+        // playerState.side.conditions = structuredClone(player.sideConditions || {});
+        playerState.side.conditions = clonePlayerSideConditions(player);
 
         playerState.side = {
           conditions: playerState.side.conditions,
