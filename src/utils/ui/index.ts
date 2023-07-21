@@ -4,8 +4,4 @@ export * from './buildMoveOptions';
 export * from './buildPresetOptions';
 export * from './detectStatBoostDelta';
 export * from './formatDamageAmounts';
-export * from './formatDamageRange';
-export * from './formatKoChance';
 export * from './formatStatBoost';
-export * from './getKoColor';
-export * from './parseDescription';

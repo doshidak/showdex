@@ -1,8 +1,8 @@
+import { type Result } from '@smogon/calc';
 import { clamp } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Result } from '@smogon/calc';
 
-export type SmogonMatchupNhkoColors = [
+export type CalcdexMatchupNhkoColors = [
   one: string,
   two: string,
   three: string,
@@ -18,7 +18,7 @@ export type SmogonMatchupNhkoColors = [
  *
  * @since 0.1.2
  */
-const SmogonMatchupDefaultNhkoColors: SmogonMatchupNhkoColors = [
+const CalcdexMatchupDefaultNhkoColors: CalcdexMatchupNhkoColors = [
   '#4CAF50', // 1HKO -- (styles/config/colors.scss) colors.$green
   '#FF9800', // 2HKO -- MD Orange 500
   '#FF9800', // 3HKO -- MD Orange 500
@@ -26,16 +26,16 @@ const SmogonMatchupDefaultNhkoColors: SmogonMatchupNhkoColors = [
   '#F44336', // 5+HKO -- (styles/config/colors.scss) colors.$red
 ];
 
-const l = logger('@showdex/utils/ui/getKoColor');
+const l = logger('@showdex/utils/calc/getMatchupNhkoColor()');
 
 /**
  * Returns the color based on the NHKO (`n`) value from `result.kochance()`.
  *
  * @since 0.1.2
  */
-export const getKoColor = (
+export const getMatchupNhkoColor = (
   result: Result,
-  colors?: SmogonMatchupNhkoColors,
+  colors?: CalcdexMatchupNhkoColors,
 ): string => {
   if (!result?.damage || typeof result.kochance !== 'function') {
     return null;
@@ -61,14 +61,13 @@ export const getKoColor = (
     return null;
   }
 
-  // const koColorIndex = Math.min(
-  //   koChance.n,
-  //   SmogonMatchupKoColors.length - 1,
-  // );
-
-  const koColorIndex = clamp(0, koChance.n - 1, SmogonMatchupDefaultNhkoColors.length - 1);
+  const koColorIndex = clamp(
+    0,
+    koChance.n - 1,
+    CalcdexMatchupDefaultNhkoColors.length - 1,
+  );
 
   return (/^#(?:[0-9A-F]{3}|[0-9A-F]{6})$/i.test(colors?.[koColorIndex]) && colors[koColorIndex])
-    || SmogonMatchupDefaultNhkoColors[koColorIndex]
+    || CalcdexMatchupDefaultNhkoColors[koColorIndex]
     || null;
 };

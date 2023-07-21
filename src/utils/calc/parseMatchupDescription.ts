@@ -62,7 +62,7 @@ export interface CalcdexMatchupParsedDescription {
   koChance?: string;
 }
 
-const l = logger('@showdex/utils/calc/parseDescription()');
+const l = logger('@showdex/utils/calc/parseMatchupDescription()');
 
 /**
  * Formats the description string from `result.desc()` into separate parts.
@@ -72,7 +72,7 @@ const l = logger('@showdex/utils/calc/parseDescription()');
  *
  * @example
  * ```ts
- * > parseDescription(result);
+ * > parseMatchupDescription(result);
  * {
  *   raw: '252 Atk Weavile Knock Off (97.5 BP) vs. 252 HP / 0 Def Heatran: 144-169 (37.3 - 43.7%) -- guaranteed 2HKO after Stealth Rock and 2 layers of Spikes',
  *   attacker: '252 ATK Weavile Knock Off (97.5 BP)',
@@ -84,7 +84,7 @@ const l = logger('@showdex/utils/calc/parseDescription()');
  * ```
  * @since 1.0.2
  */
-export const parseDescription = (result: Result): CalcdexMatchupParsedDescription => {
+export const parseMatchupDescription = (result: Result): CalcdexMatchupParsedDescription => {
   const output: CalcdexMatchupParsedDescription = {
     raw: null,
     attacker: null,

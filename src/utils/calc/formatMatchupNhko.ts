@@ -1,15 +1,15 @@
+import { type Result } from '@smogon/calc';
 import { clamp } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Result } from '@smogon/calc';
 
-export type SmogonMatchupNhkoLabels = [
+export type CalcdexMatchupNhkoLabels = [
   one: string,
   two: string,
   three: string,
   four: string,
 ];
 
-const l = logger('@showdex/utils/ui/formatKoChance');
+const l = logger('@showdex/utils/calc/formatMatchupNhko()');
 
 /**
  * Formats the KO chance object returned by `result.kochance()` into a nice `string`.
@@ -17,9 +17,9 @@ const l = logger('@showdex/utils/ui/formatKoChance');
  * @example '69% 2HKO'
  * @since 0.1.0
  */
-export const formatKoChance = (
+export const formatMatchupNhko = (
   result: Result,
-  labels?: SmogonMatchupNhkoLabels,
+  labels?: CalcdexMatchupNhkoLabels,
 ): string => {
   if (!result?.damage || typeof result.kochance !== 'function') {
     return null;

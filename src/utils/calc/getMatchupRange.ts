@@ -1,17 +1,20 @@
+import { type Result } from '@smogon/calc';
 import { logger } from '@showdex/utils/debug';
-import type { Result } from '@smogon/calc';
 
-const l = logger('@showdex/utils/ui/formatDamageRange');
+const l = logger('@showdex/utils/calc/getMatchupRange()');
 
 /**
  * Extracts the damage range from the `result.desc()`.
  *
- * * If the range is `'0 - 0%'`, `'N/A'` will be returned.
+ * * If the range is `'0 - 0%'`, the `zeroLabel` (defaulting to `'N/A'`) will be returned.
  *
  * @example '37.3 - 43.7%'
  * @since 0.1.0
  */
-export const formatDamageRange = (result: Result): string => {
+export const getMatchupRange = (
+  result: Result,
+  zeroLabel = 'N/A',
+): string => {
   if (typeof result?.desc !== 'function') {
     return null;
   }
@@ -21,7 +24,7 @@ export const formatDamageRange = (result: Result): string => {
   try {
     description = result.desc();
   } catch (error) {
-    if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
+    if (__DEV__ && !(error as Error)?.message?.includes('=== 0')) {
       l.warn(
         'Failed to obtain result description via result.desc()', error,
         '\n', 'result', result,
@@ -36,12 +39,15 @@ export const formatDamageRange = (result: Result): string => {
     return null;
   }
 
-  const [, extractedRange] = /\(([\d.]+\s-\s[\d.]+%)\)/.exec(description) || [];
+  const [
+    ,
+    extractedRange,
+  ] = /\(([\d.]+\s-\s[\d.]+%)\)/.exec(description) || [];
 
   if (!extractedRange) {
     return null;
   }
 
   // e.g., '0 - 0%' -> 'N/A'
-  return extractedRange.replace('0 - 0%', 'N/A');
+  return extractedRange.replace('0 - 0%', zeroLabel);
 };
