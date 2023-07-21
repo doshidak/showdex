@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Dropdown } from '@showdex/components/form';
+import { type Weather } from '@smogon/calc/dist/data/interface';
+import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
 import {
@@ -11,13 +12,11 @@ import {
   TerrainNames,
   WeatherDescriptions,
 } from '@showdex/consts/field';
-import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+import { type CalcdexBattleField, type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
-import type { Weather } from '@smogon/calc/dist/data/interface';
-import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexBattleField, CalcdexPlayerKey } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexContext } from '../CalcdexContext';
 import styles from './FieldCalc.module.scss';
 

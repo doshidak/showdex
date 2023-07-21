@@ -7,7 +7,8 @@ import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
-import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';

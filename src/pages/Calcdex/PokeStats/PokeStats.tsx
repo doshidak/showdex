@@ -10,7 +10,7 @@ import {
   PokemonStatNames,
 } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
-import { legalLockedFormat } from '@showdex/utils/battle';
+import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';

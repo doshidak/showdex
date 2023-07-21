@@ -1,7 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Button } from '@showdex/components/ui';
-import type { ButtonElement, ButtonProps } from '@showdex/components/ui';
+import { type ButtonElement, type ButtonProps, Button } from '@showdex/components/ui';
 import styles from './CloseButton.module.scss';
 
 export type CloseButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' | 'absoluteHover' | 'children'>;

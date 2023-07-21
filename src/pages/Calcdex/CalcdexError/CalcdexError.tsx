@@ -2,14 +2,13 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import { QRCodeCanvas } from 'qrcode.react';
 import cx from 'classnames';
-import lzutf8 from 'lzutf8';
-import { BuildInfo } from '@showdex/components/debug';
+import LzString from 'lz-string';
+import { type ErrorBoundaryComponentProps, BuildInfo } from '@showdex/components/debug';
 import { Button, Scrollable } from '@showdex/components/ui';
-import { dehydrateCalcdex } from '@showdex/redux/helpers';
 import { useCalcdexBattleState } from '@showdex/redux/store';
 import { getResourceUrl } from '@showdex/utils/core';
 import { sanitizeStackTrace } from '@showdex/utils/debug';
-import type { ErrorBoundaryComponentProps } from '@showdex/components/debug';
+import { dehydrateCalcdex } from '@showdex/utils/hydro';
 import styles from './CalcdexError.module.scss';
 
 export interface CalcdexErrorProps extends ErrorBoundaryComponentProps {
@@ -53,11 +52,7 @@ export const CalcdexError = ({
       return;
     }
 
-    lzutf8.compressAsync(dehydratedState, {
-      outputEncoding: 'Base64',
-    }, (output: string, compressError) => {
-      setCompressed(compressError ? null : output);
-    });
+    setCompressed(LzString.compressToBase64(dehydratedState));
   }, [
     compressed,
     dehydratedState,

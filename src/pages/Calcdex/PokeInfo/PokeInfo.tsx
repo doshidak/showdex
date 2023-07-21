@@ -17,8 +17,10 @@ import {
 } from '@showdex/components/ui';
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
-import { formatId, openSmogonUniversity } from '@showdex/utils/app';
-import { detectToggledAbility, legalLockedFormat } from '@showdex/utils/battle';
+import { openSmogonUniversity } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { detectToggledAbility } from '@showdex/utils/battle';
+import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';

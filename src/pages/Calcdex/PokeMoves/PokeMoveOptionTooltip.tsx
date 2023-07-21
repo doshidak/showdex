@@ -1,8 +1,10 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { type MoveName } from '@smogon/calc/dist/data/interface';
 import { PokeType } from '@showdex/components/app';
-// import { useCalcdexSettings } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app';
+import { type SelectOptionTooltipProps } from '@showdex/components/form';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { calcHiddenPower } from '@showdex/utils/calc';
 import {
   formatDexDescription,
@@ -10,10 +12,7 @@ import {
   getMoveOverrideDefaults,
   hasMoveOverrides,
 } from '@showdex/utils/dex';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { SelectOptionTooltipProps } from '@showdex/components/form';
-import type { CalcdexPokemon } from '@showdex/redux/store';
-import type { PokemonStatBoostDelta } from '@showdex/utils/ui';
+import { type PokemonStatBoostDelta } from '@showdex/utils/ui';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<MoveName> {

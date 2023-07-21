@@ -1,22 +1,21 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { type MoveName } from '@smogon/calc/dist/data/interface';
 import { Dropdown, PokeTypeField, ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import {
+  type BadgeInstance,
   Badge,
   Button,
   ToggleButton,
   Tooltip,
 } from '@showdex/components/ui';
-import { useColorScheme } from '@showdex/redux/store';
+import { type CalcdexMoveOverride, useColorScheme } from '@showdex/redux/store';
 import { legalLockedFormat } from '@showdex/utils/battle';
 import { clamp, upsizeArray, writeClipboardText } from '@showdex/utils/core';
 import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/dex';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { formatDamageAmounts } from '@showdex/utils/ui';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexMoveOverride } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';

@@ -1,19 +1,28 @@
 import * as React from 'react';
+import { type MoveName } from '@smogon/calc/dist/data/interface';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 // import { syncBattle } from '@showdex/redux/actions';
 import {
+  type CalcdexBattleState,
+  type CalcdexMoveOverride,
+  type CalcdexPlayer,
+  type CalcdexPlayerKey,
+  type ShowdexCalcdexSettings,
   calcdexSlice,
   useCalcdexBattleState,
   useCalcdexSettings,
   useDispatch,
 } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import {
+  cloneAllPokemon,
+  clonePlayer,
+  countSideRuinAbilities,
   detectToggledAbility,
   toggleRuinAbilities,
   sanitizePlayerSide,
   sanitizePokemon,
-  countSideRuinAbilities,
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpDv,
@@ -21,20 +30,14 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
-import { similarArrays } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
+import { nonEmptyObject, similarArrays } from '@showdex/utils/core';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { toggleableAbility } from '@showdex/utils/dex';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type {
-  CalcdexBattleState,
-  CalcdexMoveOverride,
-  CalcdexPlayer,
-  // CalcdexPlayerKey,
-  // CalcdexRenderMode,
-  ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
-import type { CalcdexContextConsumables, CalcdexPokemonMutation } from './CalcdexContext';
-import { CalcdexContext } from './CalcdexContext';
+import {
+  type CalcdexContextConsumables,
+  type CalcdexPokemonMutation,
+  CalcdexContext,
+} from './CalcdexContext';
 
 /**
  * Props passable to the `CalcdexProvider` for initializing the Calcdex Context.
@@ -116,25 +119,32 @@ export const CalcdexProvider = ({
     settings: calcdexSettings || ({} as ShowdexCalcdexSettings),
 
     updatePokemon: (playerKey, pokemon, scopeFromArgs) => {
-      const updatedState = structuredClone(battleState);
-      const playerState = updatedState[playerKey];
+      // used for debugging purposes only
+      const scope = `${baseScope}:updatePokemon()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!playerKey || !battleState?.[playerKey]?.active || !nonEmptyObject(pokemon)) {
+        return endTimer('(invalid args)');
+      }
+
+      // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase;
+      // should be fine for updatePokemon() that we're shallow-cloning instead
+      // const updatedState = structuredClone(battleState);
+      const playerState = clonePlayer(battleState[playerKey]);
 
       const pokemonIndex = playerState.pokemon
         ?.findIndex((p) => p?.calcdexId === pokemon?.calcdexId)
         ?? -1;
 
       if (pokemonIndex < 0) {
-        return;
+        return endTimer('(bad pokemonIndex)');
       }
 
       const prevPokemon = playerState.pokemon[pokemonIndex];
 
       if (!prevPokemon?.calcdexId) {
-        return;
+        return endTimer('(bad calcdexId)');
       }
-
-      // used for debugging purposes only
-      const scope = scopeFromArgs || `${baseScope}:updatePokemon()`;
 
       // this is what we'll be replacing the one at pokemonIndex (i.e., the prevPokemon)
       const payload: CalcdexPokemonMutation = {
@@ -155,7 +165,7 @@ export const CalcdexProvider = ({
           abilities,
           baseStats,
           types,
-        } = sanitizePokemon(payload, updatedState.format);
+        } = sanitizePokemon(payload, battleState.format);
 
         if (abilities?.length) {
           payload.abilities = [...abilities];
@@ -197,7 +207,7 @@ export const CalcdexProvider = ({
       }
 
       // perform special processing for IVs if we're in a legacy gen
-      if (updatedState.legacy) {
+      if (battleState.legacy) {
         // update SPA and SPD to equal each other since we don't keep track of SPC separately
         payload.ivs.spa = convertLegacyDvToIv(getLegacySpcDv(payload.ivs));
         payload.ivs.spd = payload.ivs.spa;
@@ -212,7 +222,7 @@ export const CalcdexProvider = ({
         delete payload.nature;
 
         // note: only items were introduced in gen 2
-        if (updatedState.gen === 1) {
+        if (battleState.gen === 1) {
           delete payload.item;
           delete payload.dirtyItem;
         }
@@ -251,7 +261,7 @@ export const CalcdexProvider = ({
         payload.abilityToggleable = toggleableAbility(payload);
 
         if (payload.abilityToggleable) {
-          payload.abilityToggled = detectToggledAbility(payload, updatedState);
+          payload.abilityToggled = detectToggledAbility(payload, battleState);
         }
       }
 
@@ -311,7 +321,7 @@ export const CalcdexProvider = ({
       }
 
       // recalculate the stats with the updated base stats/EVs/IVs
-      payload.spreadStats = calcPokemonSpreadStats(updatedState.format, payload);
+      payload.spreadStats = calcPokemonSpreadStats(battleState.format, payload);
 
       // clear any dirtyBoosts that match the current boosts
       Object.entries(prevPokemon.boosts).forEach(([
@@ -334,86 +344,138 @@ export const CalcdexProvider = ({
       playerState.pokemon[pokemonIndex] = payload;
 
       // smart toggle Ruin abilities (gen 9), but only when abilityToggled was not explicitly updated
-      if (updatedState.gen > 8 && !('abilityToggled' in pokemon)) {
+      if (battleState.gen > 8 && !('abilityToggled' in pokemon)) {
         toggleRuinAbilities(
           playerState,
           pokemonIndex,
-          updatedState.field?.gameType,
+          battleState.field?.gameType,
         );
       }
 
       // because of Ruin abilities, I have to do this, so here it is:
       // this is the payload that will be dispatched below (after placing the `payload` at `pokemonIndex` above)
-      const playerPayload: Partial<CalcdexPlayer> = {
-        pokemon: playerState.pokemon,
-      };
+      // const playerPayload: Partial<CalcdexPlayer> = {
+      //   pokemon: playerState.pokemon,
+      // };
 
       // handle recounting Ruin abilities when something changes of the Pokemon
-      if (updatedState.gen > 8) {
-        playerPayload.side = {
-          ...playerPayload.side,
+      // if (battleState.gen > 8) {
+      //   playerPayload.side = {
+      //     ...playerPayload.side,
+      //     ...countSideRuinAbilities(playerState),
+      //   };
+      // }
+
+      // dispatch(calcdexSlice.actions.updatePlayer({
+      //   scope,
+      //   battleId,
+      //   [playerKey]: playerPayload,
+      // }));
+
+      const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
+        [playerKey]: {
+          pokemon: playerState.pokemon,
+        },
+      };
+
+      // handle recounting Ruin abilities when something changes about the Pokemon (including for other players!)
+      if (battleState.gen > 8) {
+        playersPayload[playerKey].side = {
+          ...playersPayload[playerKey].side,
           ...countSideRuinAbilities(playerState),
         };
+
+        const otherPlayerKeys = AllPlayerKeys
+          .filter((k) => k !== playerKey && battleState[k]?.active);
+
+        // update (2023/07/18): turns out my dumbass forgot that the updatePlayer() action
+        // actually accepts multiple players, as long as their CalcdexPlayerKey exists in the
+        // dispatched object, so no need dispatch() so many times!!
+        // otherPlayerKeys.forEach((otherPlayerKey) => {
+        //   dispatch(calcdexSlice.actions.updatePlayer({
+        //     scope,
+        //     battleId,
+        //     [otherPlayerKey]: {
+        //       side: countSideRuinAbilities(updatedState[otherPlayerKey]),
+        //     },
+        //   }));
+        // });
+
+        otherPlayerKeys.forEach((key) => {
+          playersPayload[key] = {
+            side: countSideRuinAbilities(battleState[key]),
+          };
+        });
       }
 
       dispatch(calcdexSlice.actions.updatePlayer({
         scope,
         battleId,
-        [playerKey]: playerPayload,
+        ...playersPayload,
       }));
 
-      // handle recounting Ruin abilities for other players
-      if (updatedState.gen > 8) {
-        const otherPlayerKeys = AllPlayerKeys
-          .filter((k) => k !== playerKey && updatedState[k]?.active);
-
-        otherPlayerKeys.forEach((otherPlayerKey) => {
-          dispatch(calcdexSlice.actions.updatePlayer({
-            scope,
-            battleId,
-            [otherPlayerKey]: {
-              side: countSideRuinAbilities(updatedState[otherPlayerKey]),
-            },
-          }));
-        });
-      }
+      endTimer('(update complete)');
     },
 
-    updateSide: (playerKey, side, scope) => {
-      const updatedState = structuredClone(battleState);
-      const playerState = updatedState[playerKey];
+    updateSide: (playerKey, side, scopeFromArgs) => {
+      // used for debugging purposes only
+      const scope = `${baseScope}:updateSide()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
 
-      if (!playerState?.sideid || !Object.keys(side || {}).length) {
-        return;
+      if (!playerKey || !battleState?.[playerKey]?.active || !nonEmptyObject(side)) {
+        return endTimer('(invalid args)');
       }
 
+      // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase;
+      // also, no need to deep-clone anything here, it looks like
+      // const updatedState = structuredClone(battleState);
+      const playerState = battleState[playerKey];
+
       dispatch(calcdexSlice.actions.updatePlayer({
-        scope: scope || `${baseScope}:updateSide()`,
+        scope,
         battleId,
         [playerKey]: {
           side: {
             ...playerState.side,
             ...side,
+
+            conditions: {
+              ...playerState.side?.conditions,
+              ...side?.conditions,
+            },
           },
         },
       }));
+
+      endTimer('(update complete)');
     },
 
     updateField: (field, scopeFromArgs) => {
-      const scope = scopeFromArgs || `${baseScope}:updateField()`;
+      // used for debugging purposes only
+      const scope = `${baseScope}:updateField()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!nonEmptyObject(field)) {
+        return endTimer('(invalid args)');
+      }
 
       if (battleState.gen > 8 && ('weather' in field || 'terrain' in field)) {
-        const updatedState = structuredClone(battleState);
+        // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+        // const updatedState = structuredClone(battleState);
 
-        updatedState.field = {
-          ...updatedState.field,
+        const updatedField = {
+          ...battleState.field,
           ...field,
-          // attackerSide: { ...updatedState.field.attackerSide, ...field?.attackerSide },
-          // defenderSide: { ...updatedState.field.defenderSide, ...field?.defenderSide },
         };
 
+        const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {};
+
         AllPlayerKeys.forEach((playerKey) => {
-          const { pokemon = [] } = updatedState[playerKey];
+          if (!battleState[playerKey]?.active) {
+            return;
+          }
+
+          const pokemon = cloneAllPokemon(battleState[playerKey].pokemon);
 
           const retoggleIds = pokemon
             .filter((p) => ['protosynthesis', 'quarkdrive'].includes(formatId(p?.dirtyAbility || p?.ability)))
@@ -423,6 +485,15 @@ export const CalcdexProvider = ({
             return;
           }
 
+          const shallowState = {
+            ...battleState,
+            field: updatedField,
+            [playerKey]: {
+              ...battleState[playerKey],
+              pokemon,
+            },
+          };
+
           retoggleIds.forEach((id) => {
             const mon = pokemon.find((p) => p.calcdexId === id);
 
@@ -430,15 +501,21 @@ export const CalcdexProvider = ({
               return;
             }
 
-            mon.abilityToggled = detectToggledAbility(mon, updatedState);
+            mon.abilityToggled = detectToggledAbility(mon, shallowState);
           });
 
+          playersPayload[playerKey] = {
+            pokemon,
+          };
+        });
+
+        if (nonEmptyObject(playersPayload)) {
           dispatch(calcdexSlice.actions.updatePlayer({
             scope,
             battleId,
-            [playerKey]: { pokemon },
+            ...playersPayload,
           }));
-        });
+        }
       }
 
       dispatch(calcdexSlice.actions.updateField({
@@ -446,101 +523,165 @@ export const CalcdexProvider = ({
         battleId,
         field,
       }));
+
+      endTimer('(update complete)');
     },
 
-    setActiveIndex: (playerKey, activeIndex, scope) => dispatch(
-      calcdexSlice.actions.updatePlayer({
-        scope: scope || `${baseScope}:setActiveIndex()`,
+    setActiveIndex: (playerKey, activeIndex, scopeFromArgs) => {
+      // used for debugging purposes only
+      const scope = `${baseScope}:setActiveIndex()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!playerKey || !battleState?.[playerKey]?.active) {
+        return endTimer('(invalid args)');
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope,
         battleId,
         [playerKey]: { activeIndex },
-      }),
-    ),
+      }));
 
-    setActiveIndices: (playerKey, activeIndices, scope) => dispatch(
-      calcdexSlice.actions.updatePlayer({
-        scope: scope || `${baseScope}:setActiveIndices()`,
+      endTimer('(update complete)');
+    },
+
+    setActiveIndices: (playerKey, activeIndices, scopeFromArgs) => {
+      // used for debugging purposes only
+      const scope = `${baseScope}:setActiveIndices()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!playerKey || !battleState?.[playerKey]?.active || !nonEmptyObject(activeIndices)) {
+        return endTimer('(invalid args)');
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope,
         battleId,
         [playerKey]: { activeIndices },
-      }),
-    ),
+      }));
 
-    setSelectionIndex: (playerKey, selectionIndex, scope) => {
-      if (!playerKey || !(playerKey in battleState) || selectionIndex < 0) {
-        return;
+      endTimer('(update complete)');
+    },
+
+    setSelectionIndex: (playerKey, selectionIndex, scopeFromArgs) => {
+      // used for debugging purposes only
+      const scope = `${baseScope}:setSelectionIndex()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!playerKey || !battleState?.[playerKey]?.active || selectionIndex < 0) {
+        return endTimer('(invalid args)');
       }
 
-      const updatedState = structuredClone(battleState);
-      const playerState = updatedState[playerKey];
+      // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+      // const updatedState = structuredClone(battleState);
+      const playerState = clonePlayer(battleState[playerKey]);
 
-      // purposefully made fatal (from "selectionIndex of null/undefined" errors) cause it shouldn't be
-      // null/undefined by the time this helper function is invoked
-      if (playerState.selectionIndex !== selectionIndex) {
-        playerState.selectionIndex = selectionIndex;
+      if (selectionIndex === playerState.selectionIndex) {
+        return endTimer('(no change)');
       }
+
+      // technically don't need to specify this since toggleRuinAbilities() accepts a selectionIndex
+      // override as its second argument, but just in case we forget to accept the same override for
+      // future functions I may write & use here LOL
+      playerState.selectionIndex = selectionIndex;
+
+      const playerPayload: Partial<CalcdexPlayer> = {
+        selectionIndex,
+      };
 
       // smart toggle Ruin abilities (gen 9)
+      // (note: toggleRuinAbilities() will directly mutate each CalcdexPokemon in the player's pokemon[])
       if (battleState.gen > 8) {
         toggleRuinAbilities(
           playerState,
           selectionIndex,
-          updatedState.field?.gameType,
+          battleState.field?.gameType,
         );
+
+        playerPayload.pokemon = playerState.pokemon;
       }
 
-      const playerPayload: Partial<CalcdexPlayer> = {
-        selectionIndex: playerState.selectionIndex,
-        pokemon: playerState.pokemon,
-
-        // in gen 1, field conditions (i.e., only Reflect and Light Screen) is a volatile applied to
-        // the Pokemon itself, not in the Side, which is the case for gen 2+.
-        // regardless, we update the field here for screens in gen 1 and hazards in gen 2+.
-        side: sanitizePlayerSide(
-          updatedState.gen,
-          playerState,
-          // battle[playerKey],
-        ),
-      };
+      // in gen 1, field conditions (i.e., only Reflect & Light Screen) are volatiles applied to the
+      // Pokemon itself, not in the `sideConditions` of Showdown.Side, which is the case for gen 2+.
+      // regardless, we update the field here for screens in gen 1 & hazards in gen 2+.
+      playerPayload.side = sanitizePlayerSide(
+        battleState.gen,
+        playerState,
+        // battle[playerKey],
+      );
 
       // don't sync screens here, otherwise, user's values will be overwritten when switching Pokemon
       // (normally should only be overwritten per sync at the end of the turn, via syncBattle())
-      if (updatedState.gen > 1) {
+      if (battleState.gen > 1) {
         delete playerPayload.side.isReflect;
         delete playerPayload.side.isLightScreen;
         delete playerPayload.side.isAuroraVeil;
       }
 
       dispatch(calcdexSlice.actions.updatePlayer({
-        scope: scope || `${baseScope}:setSelectionIndex()`,
+        scope,
         battleId,
         [playerKey]: playerPayload,
       }));
+
+      endTimer('(update complete)');
     },
 
-    setAutoSelect: (playerKey, autoSelect, scope) => dispatch(
-      calcdexSlice.actions.updatePlayer({
-        scope: scope || `${baseScope}:setAutoSelect()`,
+    setAutoSelect: (playerKey, autoSelect, scopeFromArgs) => {
+      // for debugging purposes only
+      const scope = `${baseScope}:setAutoSelect()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!playerKey || !battleState?.[playerKey]?.active || typeof autoSelect !== 'boolean') {
+        return endTimer('(invalid args)');
+      }
+
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope,
         battleId,
         [playerKey]: { autoSelect },
-      }),
-    ),
+      }));
 
-    setPlayerKey: (playerKey, scope) => dispatch(
-      calcdexSlice.actions.update({
-        scope: scope || `${baseScope}:setPlayerKey()`,
+      endTimer('(update complete)');
+    },
+
+    setPlayerKey: (playerKey, scopeFromArgs) => {
+      // for debugging purposes only
+      const scope = `${baseScope}:setPlayerKey()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!playerKey || !battleState?.[playerKey]?.active) {
+        return endTimer('(invalid args)');
+      }
+
+      dispatch(calcdexSlice.actions.update({
+        scope,
         battleId,
         playerKey,
         opponentKey: battleState[battleState.opponentKey === playerKey ? 'playerKey' : 'opponentKey'],
-      }),
-    ),
+      }));
 
-    setOpponentKey: (opponentKey, scope) => dispatch(
-      calcdexSlice.actions.update({
-        scope: scope || `${baseScope}:setOpponentKey()`,
+      endTimer('(update complete)');
+    },
+
+    setOpponentKey: (opponentKey, scopeFromArgs) => {
+      // for debugging purposes only
+      const scope = `${baseScope}:setOpponentKey()${scopeFromArgs ? ` via ${scopeFromArgs}` : ''}`;
+      const endTimer = runtimer(scope, l);
+
+      if (!opponentKey || !battleState?.[opponentKey]?.active) {
+        return endTimer('(invalid args)');
+      }
+
+      dispatch(calcdexSlice.actions.update({
+        scope,
         battleId,
         playerKey: battleState[battleState.playerKey === opponentKey ? 'opponentKey' : 'playerKey'],
         opponentKey,
-      }),
-    ),
+      }));
+
+      endTimer('(update complete)');
+    },
   }), [
     // battle,
     battleId,

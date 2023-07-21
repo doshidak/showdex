@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type CalcdexPlayerKey, type CalcdexPokemonUsageAlt } from '@showdex/redux/store';
 import { mergeRevealedMoves } from '@showdex/utils/battle';
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
@@ -20,11 +21,8 @@ import {
   buildMoveOptions,
   buildPresetOptions,
 } from '@showdex/utils/ui';
-import type { CalcdexPlayerKey, CalcdexPokemonUsageAlt } from '@showdex/redux/store';
-import type { CalcdexPokemonMutation } from '../CalcdexContext';
-import type { CalcdexPokeContextConsumables } from './CalcdexPokeContext';
-import { useCalcdexContext } from '../CalcdexContext';
-import { CalcdexPokeContext } from './CalcdexPokeContext';
+import { type CalcdexPokemonMutation, useCalcdexContext } from '../CalcdexContext';
+import { type CalcdexPokeContextConsumables, CalcdexPokeContext } from './CalcdexPokeContext';
 
 /**
  * Props passable to the `CalcdexPokeProvider` for initializing the Context for a specific Pokemon.
