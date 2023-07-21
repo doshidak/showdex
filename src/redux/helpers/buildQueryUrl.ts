@@ -1,4 +1,5 @@
 import qs from 'qs';
+import { nonEmptyObject } from '@showdex/utils/core';
 
 export interface ReduxBasePayload {
   id: string;
@@ -16,6 +17,6 @@ export const buildQueryUrl = <TPayload extends ReduxBasePayload>(
     url,
 
     // even if the URL length was client-enforced, someone could easily just `curl` a looong URL lol
-    !!Object.keys(query || {}) && qs.stringify(query),
+    nonEmptyObject(query) && qs.stringify(query),
   ].filter(Boolean).join('?');
 };

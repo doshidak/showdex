@@ -1,10 +1,5 @@
-import type { ReduxTagType } from '@showdex/redux/services';
-import type { ReduxBasePayload } from './buildQueryUrl';
-
-export interface ReduxProvidedTag {
-  type: ReduxTagType;
-  id: string;
-}
+import { type ReduxProvidedTag, type ReduxTagType } from '@showdex/redux/services';
+import { type ReduxBasePayload } from './buildQueryUrl';
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -15,9 +10,9 @@ export const createTagProvider = <TPayload extends ReduxBasePayload>(
 ) => (
   result: TPayload[],
 ): ReduxProvidedTag[] => {
-  const tags = typeof additionalTags === 'function' ?
-    additionalTags(result) :
-    additionalTags;
+  const tags = typeof additionalTags === 'function'
+    ? additionalTags(result)
+    : additionalTags;
 
   if (!tagType || !Array.isArray(result)) {
     return Array.isArray(tags) ? tags.filter(Boolean) : [];

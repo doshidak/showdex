@@ -3,7 +3,8 @@ import { type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { cachePresets, getCachedPresets } from '@showdex/utils/presets';
+import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
+import { getCachedPresets } from '@showdex/utils/presets/getCachedPresets'; /** @todo fix circular dependency import */
 
 const l = logger('@showdex/redux/helpers/buildPresetQuery()');
 
@@ -63,10 +64,11 @@ export const buildPresetQuery = <TResponse>(
     ].some((f) => format.includes(f)))
       // e.g., 'gen9vgc2023series1' -> 'gen9vgc2023';
       // 'gen9battlestadiumsinglesregulationd' -> 'gen9battlestadiumsingles';
+      // 'gen9randombattleblitz' -> 'gen9randombattle';
       // 'gen9unratedrandombattle' -> 'gen9randombattle';
       // 'gen9randomdoublesbattle' -> 'gen9randomdoublesbattle' (no change);
       // 'gen8bdspou' -> 'gen8bdspou' (no change) -- you get the idea lol
-      ? format.replace(/(?:unrated|series\d+$|regulation[a-z]$)/i, '')
+      ? format.replace(/series\d+$|regulation[a-z]$|blitz|unrated/i, '')
       // e.g., 'gen9'
       : `gen${gen}`;
 
