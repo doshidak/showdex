@@ -2,8 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { BaseTextFieldProps } from './BaseTextField';
-import { BaseTextField } from './BaseTextField';
+import { type BaseTextFieldProps, BaseTextField } from './BaseTextField';
 import { useTextFieldHandle } from './useTextFieldHandle';
 import styles from './TextField.module.scss';
 

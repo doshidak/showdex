@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import cx from 'classnames';
-import { BaseTextField } from '@showdex/components/form';
 import { useColorScheme } from '@showdex/redux/store';
-import type { BaseTextFieldProps } from '@showdex/components/form';
+import { type BaseTextFieldProps, BaseTextField } from '../TextField';
 import styles from './ValueField.module.scss';
 
 export interface ValueFieldProps extends BaseTextFieldProps<number> {

@@ -1,10 +1,11 @@
 import * as React from 'react';
+import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
 import { ToggleButton, Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import type { FieldRenderProps } from 'react-final-form';
-import type { TextFieldValue } from '@showdex/components/form';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { type TextFieldValue } from '../TextField';
 import styles from './Segmented.module.scss';
 
 export interface SegmentedOption<TValue extends TextFieldValue = string> {
