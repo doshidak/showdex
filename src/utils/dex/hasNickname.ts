@@ -1,5 +1,6 @@
-// import { formatId } from '@showdex/utils/app';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+// import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { getDexForFormat } from './getDexForFormat';
 
 /**

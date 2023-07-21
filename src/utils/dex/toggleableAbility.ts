@@ -1,7 +1,8 @@
 import { type AbilityName } from '@smogon/calc/dist/data/interface';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+// import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 // import { calcPokemonHp } from '@showdex/utils/calc';
 
 /**
@@ -17,7 +18,7 @@ export const toggleableAbility = (
 ): boolean => {
   const ability = 'dirtyAbility' in pokemon
     ? pokemon.dirtyAbility ?? pokemon.ability
-    : <AbilityName> pokemon.ability;
+    : pokemon.ability as AbilityName;
 
   if (!ability) {
     return false;

@@ -1,5 +1,6 @@
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
 
 /**
@@ -20,7 +21,7 @@ export const hasMoveOverrides = (
     return false;
   }
 
-  if (!Object.keys(pokemon.moveOverrides || {}).length || !(moveName in pokemon.moveOverrides)) {
+  if (!nonEmptyObject(pokemon.moveOverrides) || !(moveName in pokemon.moveOverrides)) {
     return false;
   }
 

@@ -1,6 +1,6 @@
+import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/redux/store';
 import { calcMoveBasePower } from '@showdex/utils/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon, CalcdexMoveOverride } from '@showdex/redux/store';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
 import { determineMoveTargets } from './determineMoveTargets';
 import { getDexForFormat } from './getDexForFormat';

@@ -1,9 +1,11 @@
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat } from '@showdex/utils/battle';
+import { type GenerationNum } from '@smogon/calc';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+// import { detectGenFromFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
 
-const l = logger('@showdex/utils/dex/getDexForFormat');
+const l = logger('@showdex/utils/dex/getDexForFormat()');
 
 /**
  * Returns the appropriate `Dex` object for the passed-in `format`.

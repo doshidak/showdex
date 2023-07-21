@@ -1,12 +1,14 @@
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/battle';
+import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interface';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+// import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { guessTableFormatKey } from '@showdex/utils/battle/guessTableFormatKey'; /** @todo reorganize me */
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
 import { getDexForFormat } from './getDexForFormat';
 
-const l = logger('@showdex/utils/dex/getPokemonLearnset');
+const l = logger('@showdex/utils/dex/getPokemonLearnset()');
 
 /**
  * Returns the legal learnsets of the passed-in `speciesForme`.
@@ -144,7 +146,7 @@ export const getPokemonLearnset = (
         // e.g., { attract: '45678pqg', auroraveil: '8g', ... }
         return Object.entries(learnsets[learnsetKey])
           .filter(([, gens]) => ignoreGen || gens.includes(String(gen)))
-          .map(([id]) => <MoveName> dex.moves.get(id)?.name)
+          .map(([id]) => dex.moves.get(id)?.name as MoveName)
           .filter(Boolean);
       }),
     ),

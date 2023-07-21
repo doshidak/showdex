@@ -1,7 +1,8 @@
-import { formatId } from '@showdex/utils/app';
+import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { calcHiddenPower } from '@showdex/utils/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from './getDexForFormat';
 
 /**

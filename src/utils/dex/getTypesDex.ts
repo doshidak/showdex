@@ -1,5 +1,5 @@
+import { type GenerationNum } from '@smogon/calc';
 import { Types } from '@smogon/calc/dist/data/types';
-import type { GenerationNum } from '@smogon/calc';
 
 /**
  * Returns the `types` property used in the `Generation` class.
