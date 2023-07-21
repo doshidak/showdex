@@ -1,5 +1,4 @@
-import type { ShowdexEventDetail } from './createShowdexEvent';
-import { createShowdexEvent, getShowdexEventName } from './createShowdexEvent';
+import { type ShowdexEventDetail, createShowdexEvent, getShowdexEventName } from './createShowdexEvent';
 
 /* eslint-disable @typescript-eslint/indent */
 

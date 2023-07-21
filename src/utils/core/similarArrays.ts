@@ -1,5 +1,4 @@
-import type { ArrayDifferentiatorArgs } from './diffArrays';
-import { diffArrays } from './diffArrays';
+import { type ArrayDifferentiatorArgs, diffArrays } from './diffArrays';
 
 /**
  * Whether `arrayA` & `arrayB` contain the same elements, but not necessarily in the same order.

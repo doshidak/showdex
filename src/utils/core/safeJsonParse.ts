@@ -1,7 +1,7 @@
 import { type Json } from '@showdex/consts/core';
 import { logger } from '@showdex/utils/debug';
 
-const l = logger('@showdex/utils/core/safeJsonParse');
+const l = logger('@showdex/utils/core/safeJsonParse()');
 
 /**
  * Only detects if `value` might have a JSON-parsable structure.
