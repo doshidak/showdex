@@ -8,6 +8,16 @@ export type ReduxTagType =
   | ShowdownReduxTagType;
 
 /**
+ * For use with RTK Query tag providers only.
+ *
+ * @since 0.1.3
+ */
+export interface ReduxProvidedTag {
+  type: ReduxTagType;
+  id: string;
+}
+
+/**
  * For use with RTK Query endpoints from `pkmnApi` only.
  *
  * @since 0.1.3
