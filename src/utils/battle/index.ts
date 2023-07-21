@@ -1,3 +1,5 @@
+export * from './cloneBattleState';
+export * from './clonePlayerSideConditions';
 export * from './countActivePlayers';
 export * from './countRuinAbilities';
 export * from './countSideRuinAbilities';
