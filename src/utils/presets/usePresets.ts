@@ -11,8 +11,11 @@ import {
   type CalcdexPokemonPreset,
   useCalcdexSettings,
 } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+// import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { getGenlessFormat } from '@showdex/utils/battle/getGenlessFormat'; /** @todo reorganize me */
 // import { logger } from '@showdex/utils/debug';
 // import { fileSize } from '@showdex/utils/humanize';
 // import { dehydratePresets, hydratePresets } from '@showdex/utils/hydro';
@@ -102,12 +105,16 @@ const sortPresets = (
   // at this point, we should've gotten all the hard matches, so we can do partial matching
   // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
   // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
+  // update (2023/07/19): apparently all the sets are flipped in the order they're received from the API,
+  // so we'll apply this one secret trick they don't want you to know
   if (a.format.endsWith(format)) {
-    return -1;
+    // return -1;
+    return 1;
   }
 
   if (b.format.endsWith(format)) {
-    return 1;
+    // return 1;
+    return -1; // shhh ;)
   }
 
   return 0;

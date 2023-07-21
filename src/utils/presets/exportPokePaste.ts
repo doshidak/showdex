@@ -1,7 +1,11 @@
 import { PokemonPokePasteStatMap } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+// import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
+import { nonEmptyObject } from '@showdex/utils/core';
 import { getDexForFormat, hasNickname } from '@showdex/utils/dex';
 
 /**
@@ -197,7 +201,7 @@ export const exportPokePaste = (
   // IVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 31 [or 30, if legacy])
   // EVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 0) -- only in non-legacy
   // (where <stat> is HP, Atk, Def, SpA, SpD, or Spe)
-  if (Object.keys(ivs || {}).length) {
+  if (nonEmptyObject(ivs)) {
     // in legacy gens, max DV is 15, which equates to 30 IVs (NOT 31!)
     // additionally in gen 1 only, Showdown exports SPC as SPA, so SPD is unused
     const exportedIvs = exportStatsTable(
@@ -211,7 +215,7 @@ export const exportPokePaste = (
     }
   }
 
-  if (!legacy && Object.keys(evs || {}).length) {
+  if (!legacy && nonEmptyObject(evs)) {
     const exportedEvs = exportStatsTable(evs, 0);
 
     if (exportedEvs) {

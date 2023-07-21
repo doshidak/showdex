@@ -6,8 +6,11 @@ import {
 } from '@smogon/calc/dist/data/interface';
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+// import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
@@ -174,7 +177,7 @@ export const importPokePaste = (
     const [
       key,
       regex,
-    ] = <[keyof CalcdexPokemonPreset, RegExp]> Object.entries(PokePasteLineParsers)
+    ] = (Object.entries(PokePasteLineParsers) as [keyof CalcdexPokemonPreset, RegExp][])
       .find(([, r]) => r.test(line))
       || [];
 
@@ -215,14 +218,14 @@ export const importPokePaste = (
         }
 
         if (detectedGender && dexSpecies.gender !== 'N') {
-          preset.gender = <Showdown.GenderName> detectedGender;
+          preset.gender = detectedGender as Showdown.GenderName;
         }
 
         if (detectedItem) {
           const dexItem = dex?.items.get(detectedItem);
 
           if (dexItem?.exists) {
-            preset.item = <ItemName> dexItem.name;
+            preset.item = dexItem.name as ItemName;
           }
         }
 
@@ -271,7 +274,7 @@ export const importPokePaste = (
           break;
         }
 
-        preset.ability = <AbilityName> dexAbility.name;
+        preset.ability = dexAbility.name as AbilityName;
 
         break;
       }
@@ -348,7 +351,7 @@ export const importPokePaste = (
           break;
         }
 
-        const detectedType = <Showdown.TypeName> capitalize(value);
+        const detectedType = capitalize(value) as Showdown.TypeName;
 
         if (!PokemonTypes.includes(detectedType) || detectedType === '???') {
           break;
@@ -412,7 +415,7 @@ export const importPokePaste = (
           break;
         }
 
-        const parsedNature = <Showdown.PokemonNature> capitalize(detectedNature);
+        const parsedNature = capitalize(detectedNature) as Showdown.PokemonNature;
 
         if (!PokemonNatures.includes(parsedNature)) {
           break;
@@ -457,7 +460,7 @@ export const importPokePaste = (
           break;
         }
 
-        const dexMoveNames = dexMoves.map((m) => <MoveName> m.name);
+        const dexMoveNames = dexMoves.map((m) => m.name as MoveName);
 
         /**
          * @todo Update this once you add support for more than 4 moves.

@@ -1,6 +1,9 @@
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+// import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { getPresetFormes } from './getPresetFormes';
 
 /**
@@ -38,7 +41,7 @@ export const guessTeambuilderPreset = (
     transformedMoves,
   } = pokemon;
 
-  if (!Object.keys(serverStats || {}).length) {
+  if (!nonEmptyObject(serverStats)) {
     return null;
   }
 

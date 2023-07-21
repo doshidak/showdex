@@ -1,6 +1,8 @@
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type GenerationNum } from '@smogon/calc';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+// import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle'; // warning: circular dependency importing from here
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 
 /**
  * Determines if the `pokemon` has the provided `preset` applied.
@@ -10,14 +12,14 @@ import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store'
  *   - Nature (if not legacy),
  *   - Item (for gens 2+),
  *   - Moves (in no particular order as long as all of the `preset`'s moves exist in `pokemon.moves`),
- *   - IVs (DVs if legacy; SPD is ignored for gen 1 since SPA is used for SPC),
- *   - EVs (if not legacy),
+ *   - IVs (DVs if legacy; SPD is ignored for gen 1 since SPA is used for SPC) &
+ *   - EVs (if not legacy).
  * * Note that the `calcdexId` of the `preset` & `pokemon.presetId` and `teraTypes` are not taken into consideration.
  * * Dirty properties are considered for the `pokemon` only, but no alternative properties in `preset` are considered.
  *
  * @example
  * ```ts
- * appliedPreset('gen9ou', <CalcdexPokemon> {
+ * appliedPreset('gen9ou', {
  *   ...,
  *   speciesForme: 'Garganacl',
  *   teraType: 'Water', // not considered btw
@@ -33,7 +35,7 @@ import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store'
  *   ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
  *   evs: { hp: 252, atk: 0, def: 228, spa: 0, spd: 28, spe: 0 },
  *   ...,
- * }, <CalcdexPokemonPreset> {
+ * } as CalcdexPokemon, {
  *   ...,
  *   name: 'Stealth Rock',
  *   gen: 9,
@@ -45,7 +47,7 @@ import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store'
  *   moves: ['Salt Cure', 'Recover', 'Protect', 'Stealth Rock'],
  *   evs: { hp: 252, def: 228, spd: 28 },
  *   ...,
- * });
+ * } as CalcdexPokemonPreset);
  *
  * true
  * ```
