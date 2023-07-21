@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { useTextField } from '@react-aria/textfield';
+import { type FieldRenderProps } from 'react-final-form';
+import { type AriaTextFieldProps } from '@react-types/textfield';
+import { type TextFieldAria as TextFieldAriaInterface, useTextField } from '@react-aria/textfield';
 import cx from 'classnames';
-import type { AriaTextFieldProps } from '@react-types/textfield';
-import type { TextFieldAria as ITextFieldAria } from '@react-aria/textfield';
-import type { FieldRenderProps } from 'react-final-form';
 // import { useTextFieldHandle } from './useTextFieldHandle';
 import styles from './BaseTextField.module.scss';
 
@@ -12,7 +11,7 @@ export type TextFieldValue = string | number;
 
 export interface TextFieldAria<
   T extends TextFieldElement = HTMLInputElement,
-> extends Omit<ITextFieldAria, 'inputProps'> {
+> extends Omit<TextFieldAriaInterface, 'inputProps'> {
   inputProps: T extends HTMLInputElement ? React.InputHTMLAttributes<T> : React.TextareaHTMLAttributes<T>;
 }
 
