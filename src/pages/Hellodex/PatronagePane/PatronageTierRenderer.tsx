@@ -3,10 +3,11 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { format, formatDistance, isValid } from 'date-fns';
 import { Button, Tooltip } from '@showdex/components/ui';
+import { type ShowdexSupporterTier } from '@showdex/consts/app';
 import { bullop } from '@showdex/consts/core';
-import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { env, getResourceUrl } from '@showdex/utils/core';
-import type { ShowdexSupporterTier } from '@showdex/consts/app';
 import styles from './PatronagePane.module.scss';
 
 /**

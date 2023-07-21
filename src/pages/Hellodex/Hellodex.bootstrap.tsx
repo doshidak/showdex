@@ -1,23 +1,24 @@
 import * as React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
+import { type ShowdexBootstrapper } from '@showdex/main';
 import { renderCalcdex } from '@showdex/pages/Calcdex';
-import { calcdexSlice, showdexSlice } from '@showdex/redux/store';
+import { type CalcdexSliceState, calcdexSlice, showdexSlice } from '@showdex/redux/store';
 import {
   createCalcdexRoom,
   createHellodexRoom,
-  formatId,
   getBattleRoom,
   getCalcdexRoomId,
 } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { env } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
-import type { ShowdexBootstrapper } from '@showdex/main';
-import type { CalcdexSliceState } from '@showdex/redux/store';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { Hellodex } from './Hellodex';
 
 const l = logger('@showdex/pages/Hellodex/Hellodex.bootstrap');
 
 export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
+  const endTimer = runtimer(l.scope, l);
+
   l.debug(
     'Hellodex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
@@ -63,7 +64,7 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       'since it has been disabled by the environment.',
     );
 
-    return;
+    return endTimer('(hellodex denied)');
   }
 
   const openCalcdexInstance = (battleId: string) => {
@@ -156,7 +157,7 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       '\n', 'reactRoot', '(type)', typeof hellodexRoom?.reactRoot, '(now)', hellodexRoom?.reactRoot,
     );
 
-    return;
+    return endTimer('(bad reactRoot)');
   }
 
   hellodexRoom.reactRoot.render((
@@ -166,4 +167,6 @@ export const hellodexBootstrapper: ShowdexBootstrapper = (store) => {
       />
     </ReduxProvider>
   ));
+
+  endTimer('(bootstrap complete)');
 };

@@ -5,7 +5,7 @@ import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/c
 import { FormatLabels } from '@showdex/consts/battle';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { detectGenFromFormat } from '@showdex/utils/battle';
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
 import { getResourceUrl } from '@showdex/utils/core';
 import styles from './InstanceButton.module.scss';
 
