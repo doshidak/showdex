@@ -12,12 +12,7 @@ import {
   DehydratedShowdexSettingsMap,
 } from './dehydrateSettings';
 import { hydrateHeader } from './hydrateHeader';
-import {
-  hydrateArray,
-  hydrateBoolean,
-  hydrateString,
-  hydrateValue,
-} from './hydratePrimitives';
+import { hydrateArray, hydrateBoolean, hydrateValue } from './hydratePrimitives';
 
 /**
  * Reverse opcode-to-key mappings for the hydrated root `ShowdexSettings`.
@@ -303,9 +298,12 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
               DehydratedCalcdexSettingsMap.lockGeneticsVisibility,
             ].includes(dehydratedCalcdexKey)
               ? hydratePerSide(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey]
-              : ['y', 'n'].includes(dehydratedCalcdexValue)
-                ? hydrateBoolean(dehydratedCalcdexValue)
-                : hydrateString(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
+              // : ['y', 'n'].includes(dehydratedCalcdexValue)
+              //   ? hydrateBoolean(dehydratedCalcdexValue)
+              //   : /^\d+$/.test(dehydratedCalcdexValue)
+              //     ? hydrateNumber(dehydratedCalcdexValue)
+              //     : hydrateString(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
+              : hydrateValue(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
         });
 
         break;
