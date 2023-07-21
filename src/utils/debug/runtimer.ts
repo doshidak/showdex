@@ -1,5 +1,4 @@
-import type { LoggerLevelFunctions } from './logger';
-import { logger as createLogger } from './logger';
+import { type LoggerLevelFunctions, logger as createLogger } from './logger';
 
 /**
  * Runtime performance timer.
