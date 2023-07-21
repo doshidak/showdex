@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { useButton } from '@react-aria/button';
-import { animated, useSpring } from '@react-spring/web';
+import { type AriaButtonProps } from '@react-types/button';
+import { type ButtonAria as ButtonAriaInterface, useButton } from '@react-aria/button';
+import { type AnimatedProps, animated, useSpring } from '@react-spring/web';
 import { useGesture } from '@use-gesture/react';
 import cx from 'classnames';
-import type { AriaButtonProps } from '@react-types/button';
-import type { ButtonAria as IButtonAria } from '@react-aria/button';
-import type { AnimatedProps } from '@react-spring/web';
 import styles from './BaseButton.module.scss';
 
 export type ButtonElement = HTMLButtonElement & HTMLDivElement;
@@ -13,7 +11,7 @@ export type ButtonElementType = Extract<React.ElementType, 'button' | 'div'>;
 
 export interface ButtonAria<
   T extends HTMLButtonElement = ButtonElement,
-> extends Omit<IButtonAria<T>, 'buttonProps'> {
+> extends Omit<ButtonAriaInterface<T>, 'buttonProps'> {
   buttonProps: React.HTMLAttributes<T>;
 }
 
@@ -98,7 +96,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
     ...props,
     elementType,
     isDisabled: disabled,
-    children,
+    // children,
   }, ref) as ButtonAria<ButtonElement>;
 
   React.useImperativeHandle(
