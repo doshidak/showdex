@@ -2,10 +2,21 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { NIL as NIL_UUID } from 'uuid';
+import { type GenerationNum } from '@smogon/calc';
 import { ErrorBoundary } from '@showdex/components/debug';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type ShowdexBootstrapper } from '@showdex/main';
 import { syncBattle } from '@showdex/redux/actions';
-import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
+import {
+  type CalcdexPlayer,
+  type CalcdexPlayerKey,
+  type CalcdexPokemon,
+  type CalcdexSliceState,
+  type RootStore,
+  type ShowdexSliceState,
+  calcdexSlice,
+  hellodexSlice,
+} from '@showdex/redux/store';
 import {
   createCalcdexRoom,
   getAuthUsername,
@@ -14,23 +25,14 @@ import {
   hasSinglePanel,
 } from '@showdex/utils/app';
 import {
+  clonePlayerSideConditions,
   detectAuthPlayerKeyFromBattle,
   sanitizePlayerSide,
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
-import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { ShowdexBootstrapper } from '@showdex/main';
-import type {
-  CalcdexPlayer,
-  CalcdexPlayerKey,
-  CalcdexPokemon,
-  CalcdexSliceState,
-  RootStore,
-  ShowdexSliceState,
-} from '@showdex/redux/store';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { Calcdex } from './Calcdex';
 import { CalcdexProvider } from './CalcdexContext';
 import { CalcdexError } from './CalcdexError';
@@ -137,6 +139,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   _data,
   roomid,
 ) => {
+  const endTimer = runtimer(baseScope, l);
+
   l.debug(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
@@ -149,7 +153,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       'since it\'s not a BattleRoom',
     );
 
-    return;
+    return endTimer('(wrong room)');
   }
 
   const battleRoom = getBattleRoom(roomid);
@@ -173,7 +177,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         'since no proper battle object exists within the current BattleRoom',
       );
 
-      return;
+      return endTimer('(no battle)');
     }
 
     const battleState = state[roomid];
@@ -188,12 +192,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
     const calcdexRoomId = getCalcdexRoomId(roomid);
 
-    l.debug(
-      '\n', 'settings.closeOn', settings?.closeOn,
-      '\n', 'battleState.renderMode', battleState.renderMode,
-      '\n', 'calcdexRoomId', calcdexRoomId,
-      '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
-    );
+    // l.debug(
+    //   '\n', 'settings.closeOn', settings?.closeOn,
+    //   '\n', 'battleState.renderMode', battleState.renderMode,
+    //   '\n', 'calcdexRoomId', calcdexRoomId,
+    //   '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
+    // );
 
     // this would only apply in the tabbed panel mode, obviously
     if (battleState.renderMode === 'panel' && settings?.closeOn !== 'never' && calcdexRoomId in app.rooms) {
@@ -211,7 +215,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       // update (2023/02/04): did I forget a return here? ...probably cause it keeps triggering the return from
       // the typeof battle?.subscribe check
-      return;
+      return endTimer('(calcdex destroyed)');
     }
 
     l.debug(
@@ -221,7 +225,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     );
 
     // update (2023/02/04): might as well put a return here too since this is part of the !battle?.id handler
-    return;
+    return endTimer('(battle destroyed)');
   }
 
   if (typeof battle?.subscribe !== 'function') {
@@ -230,7 +234,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       typeof battle?.subscribe,
     );
 
-    return;
+    return endTimer('(bad battle)');
   }
 
   const {
@@ -242,7 +246,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
   // don't process this battle if we've already added (or forcibly prevented) the filth
   if (calcdexInit) {
-    return;
+    return endTimer('(already filthy)');
   }
 
   // delaying initialization if the battle hasn't instantiated all the players yet
@@ -255,7 +259,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       '\n', 'battle', battle,
     );
 
-    return;
+    return endTimer('(uninit players)');
   }
 
   // note: anything below here executes once per battle
@@ -283,7 +287,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       //   battle.calcdexDestroyed = true; // just in case lol
       // }
 
-      return;
+      return endTimer('(calcdex denied)');
     }
   }
 
@@ -683,30 +687,30 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             ))
         ));
 
-      l.debug(
-        'side.addPokemon()', 'for', ident || name || details?.split(',')?.[0], 'for player', side.sideid,
-        '\n', 'ident', ident,
-        '\n', 'details', details,
-        '\n', 'replaceSlot', replaceSlot,
-        '\n', 'prevPokemon', prevPokemon,
-        '\n', 'pokemonSearchList', pokemonSearchList,
-        // '\n', 'side', side,
-        // '\n', 'battle', battle,
-      );
+      // l.debug(
+      //   'side.addPokemon()', 'for', ident || name || details?.split(',')?.[0], 'for player', side.sideid,
+      //   '\n', 'ident', ident,
+      //   '\n', 'details', details,
+      //   '\n', 'replaceSlot', replaceSlot,
+      //   '\n', 'prevPokemon', prevPokemon,
+      //   '\n', 'pokemonSearchList', pokemonSearchList,
+      //   // '\n', 'side', side,
+      //   // '\n', 'battle', battle,
+      // );
 
       const newPokemon = addPokemon(name, ident, details, replaceSlot);
 
       if (prevPokemon?.calcdexId) {
         newPokemon.calcdexId = prevPokemon.calcdexId;
 
-        l.debug(
-          'Restored calcdexId', newPokemon.calcdexId,
-          'from prevPokemon', prevPokemon.ident || prevPokemon.speciesForme,
-          'to newPokemon', newPokemon.ident || newPokemon.speciesForme,
-          'for player', side.sideid,
-          '\n', 'prevPokemon', prevPokemon,
-          '\n', 'newPokemon', newPokemon,
-        );
+        // l.debug(
+        //   'Restored calcdexId', newPokemon.calcdexId,
+        //   'from prevPokemon', prevPokemon.ident || prevPokemon.speciesForme,
+        //   'to newPokemon', newPokemon.ident || newPokemon.speciesForme,
+        //   'for player', side.sideid,
+        //   '\n', 'prevPokemon', prevPokemon,
+        //   '\n', 'newPokemon', newPokemon,
+        // );
       }
 
       return newPokemon;
@@ -728,11 +732,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // battleRoom.requests.side.pokemon
     updateSide();
 
-    l.debug(
-      'updateSide()',
-      '\n', 'battleId', roomid,
-      '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
-    );
+    // l.debug(
+    //   'updateSide()',
+    //   '\n', 'battleId', roomid,
+    //   '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
+    // );
 
     let didUpdate = !myPokemon?.length
       && !!battleRoom.battle.myPokemon?.length;
@@ -759,15 +763,15 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     });
 
     if (didUpdate && battleRoom.battle.calcdexInit) {
-      const prevNonce = battleRoom.battle.nonce;
+      // const prevNonce = battleRoom.battle.nonce;
 
       battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle, battleRoom.request);
 
-      l.debug(
-        'Restored previous calcdexId\'s in battle.myPokemon[]',
-        '\n', 'nonce', '(prev)', prevNonce, '(now)', battleRoom.battle.nonce,
-        '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
-      );
+      // l.debug(
+      //   'Restored previous calcdexId\'s in battle.myPokemon[]',
+      //   '\n', 'nonce', '(prev)', prevNonce, '(now)', battleRoom.battle.nonce,
+      //   '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
+      // );
 
       // since myPokemon could be available now, forcibly fire a battle sync
       // (should we check if myPokemon is actually populated? maybe... but I'll leave it like this for now)
@@ -891,8 +895,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             usedTera: usedTerastallization(playerKey, battle.stepQueue),
           };
 
+          // note: sanitizePlayerSide() needs the updated side.conditions, so we're initializing
+          // it like this here first
           prev[playerKey].side = {
-            conditions: structuredClone(player?.sideConditions || {}),
+            // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+            // conditions: structuredClone(player?.sideConditions || {}),
+            conditions: clonePlayerSideConditions(player),
           };
 
           prev[playerKey].side = {
@@ -990,11 +998,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
     // dispatch a battle sync if the nonces are different (i.e., something changed)
     if (battle.nonce === battleState.battleNonce) {
-      l.debug(
-        'Ignoring battle sync due to same nonce for', battle.id || roomid,
-        '\n', 'nonce', '(prev)', battleState.battleNonce, '(now)', battle.nonce,
-        '\n', 'battle', battle,
-      );
+      // l.debug(
+      //   'Ignoring battle sync due to same nonce for', battle.id || roomid,
+      //   '\n', 'nonce', '(prev)', battleState.battleNonce, '(now)', battle.nonce,
+      //   '\n', 'battle', battle,
+      // );
 
       return;
     }
@@ -1025,13 +1033,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   const calcdexReactRoot = battle.calcdexReactRoot || battle.calcdexRoom?.reactRoot;
 
   if (calcdexReactRoot) {
-    l.debug(
-      'Rendering Calcdex for', battle.id || roomid,
-      // '\n', 'nonce', '(now)', battle.nonce || initNonce,
-      // '\n', 'request', battleRoom.request,
-      '\n', 'battle', battle,
-      '\n', 'battleRoom', battleRoom,
-    );
+    // l.debug(
+    //   'Rendering Calcdex for', battle.id || roomid,
+    //   // '\n', 'nonce', '(now)', battle.nonce || initNonce,
+    //   // '\n', 'request', battleRoom.request,
+    //   '\n', 'battle', battle,
+    //   '\n', 'battleRoom', battleRoom,
+    // );
 
     renderCalcdex(
       calcdexReactRoot,
@@ -1048,12 +1056,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // the page mid-battle or join a spectating game; otherwise, the Calcdex won't appear until the players
     // do something (e.g., choose an option, turn on the timer, etc.) that triggers the subscription callback
     if (battle.atQueueEnd) {
-      l.debug(
-        'Forcing a battle sync via battle.subscription() since the battle is atQueueEnd',
-        '\n', 'battle.atQueueEnd', battle.atQueueEnd,
-        '\n', 'battle', battle,
-        '\n', 'battleRoom', battleRoom,
-      );
+      // l.debug(
+      //   'Forcing a battle sync via battle.subscription() since the battle is atQueueEnd',
+      //   '\n', 'battle.atQueueEnd', battle.atQueueEnd,
+      //   '\n', 'battle', battle,
+      //   '\n', 'battleRoom', battleRoom,
+      // );
 
       battle.subscription('atqueueend');
     }
@@ -1069,4 +1077,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   }
 
   battle.calcdexInit = true;
+
+  endTimer('(bootstrap complete)');
 };
