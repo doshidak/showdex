@@ -14,10 +14,11 @@ import {
 } from '@smogon/calc/dist/data/interface';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
-import { countActivePlayers, detectLegacyGen, sanitizeField } from '@showdex/utils/battle';
+import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { detectLegacyGen } from '@showdex/utils/dex';
 import { useSelector } from './hooks';
 
 /* eslint-disable @typescript-eslint/indent */
