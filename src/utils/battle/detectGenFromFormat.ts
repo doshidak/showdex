@@ -20,7 +20,7 @@ export const detectGenFromFormat = (
     return defaultGen;
   }
 
-  const gen = <GenerationNum> (parseInt(format.match(GenFormatRegex)[1], 10) || 0);
+  const gen = (parseInt(format.match(GenFormatRegex)[1], 10) || 0) as GenerationNum;
 
   if (gen < 1) {
     return defaultGen;
