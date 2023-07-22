@@ -1,7 +1,6 @@
 import { type Generation, type GenerationNum, type Specie } from '@smogon/calc/dist/data/interface';
-// import { detectGenFromFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
 import { env } from '@showdex/utils/core';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
 import { getNaturesDex } from './getNaturesDex';
 import { getTypesDex } from './getTypesDex';

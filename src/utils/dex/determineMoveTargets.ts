@@ -1,10 +1,9 @@
 import { Move as SmogonMove } from '@smogon/calc';
 import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interface';
 import { type CalcdexPokemon } from '@showdex/redux/store';
-// import { detectGenFromFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
 import { type SmogonMoveOverrides } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
+import { detectGenFromFormat } from './detectGenFromFormat';
 
 /**
  * Performs a lookup via `@smogon/calc`'s internal dex from the detected `gen` from the passed-in `format`.

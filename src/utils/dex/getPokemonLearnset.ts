@@ -1,12 +1,11 @@
 import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interface';
 // import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
 import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-// import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
-import { guessTableFormatKey } from '@showdex/utils/battle/guessTableFormatKey'; /** @todo reorganize me */
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
+import { guessTableFormatKey } from './guessTableFormatKey';
 
 const l = logger('@showdex/utils/dex/getPokemonLearnset()');
 

@@ -1,7 +1,6 @@
 import { type GenerationNum, type Weather } from '@smogon/calc/dist/data/interface';
-import { LegacyWeatherNames, WeatherMap, WeatherNames } from '@showdex/consts/field';
-// import { detectGenFromFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
+import { LegacyWeatherNames, WeatherMap, WeatherNames } from '@showdex/consts/dex';
+import { detectGenFromFormat } from './detectGenFromFormat';
 
 /**
  * Determines the possible weather conditions for the gen number extracted from the provided `format`.
