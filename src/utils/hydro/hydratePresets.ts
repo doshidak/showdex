@@ -10,7 +10,7 @@ import {
   type CalcdexPokemonPreset,
   type CalcdexPokemonPresetSource,
 } from '@showdex/redux/store';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
+import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
 import { hydrateHeader } from './hydrateHeader';
 import { hydrateNumber, hydrateValue } from './hydratePrimitives';
