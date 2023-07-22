@@ -1,7 +1,7 @@
 import { type GenerationNum } from '@smogon/calc';
 import { type Duration, add, compareAsc } from 'date-fns';
 import LzString from 'lz-string';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { getStoredItem, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { fileSize } from '@showdex/utils/humanize';
@@ -27,6 +27,7 @@ const l = logger('@showdex/utils/presets/getCachedPresets()');
  */
 export const getCachedPresets = (
   format?: GenerationNum | string,
+  source?: CalcdexPokemonPresetSource,
   maxAge?: Duration,
 ): [
   presets?: CalcdexPokemonPreset[],
@@ -52,7 +53,7 @@ export const getCachedPresets = (
     'to', fileSize(decompressed.length * 2),
   );
 
-  const hydration = hydratePresets(decompressed, format);
+  const hydration = hydratePresets(decompressed, format, source);
 
   if (!hydration.descriptorValid) {
     return [];
