@@ -1,10 +1,12 @@
 import { type MoveName } from '@smogon/calc/dist/data/interface';
 import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/redux/store';
-import { calcMoveBasePower } from '@showdex/utils/calc';
-import { alwaysCriticalHits } from './alwaysCriticalHits';
-import { determineMoveTargets } from './determineMoveTargets';
-import { getDexForFormat } from './getDexForFormat';
-import { getMaxMove } from './getMaxMove';
+import {
+  alwaysCriticalHits,
+  determineMoveTargets,
+  getDexForFormat,
+  getMaxMove,
+} from '@showdex/utils/dex';
+import { calcMoveBasePower } from './calcMoveBasePower';
 
 /**
  * Returns a `CalcdexMoveOverride` containing the default values for the passed-in `moveName`.
