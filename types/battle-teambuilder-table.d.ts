@@ -190,7 +190,7 @@ declare namespace Showdown {
      * ```
      */
     overrideTier?: {
-      [speciesFormeId: string]: string | 'Illegal';
+      [speciesFormeId: string]: string;
     };
 
     /**
@@ -266,13 +266,16 @@ declare namespace Showdown {
 
   type BattleTeambuilderTableFormat =
     | 'gen1'
+    | 'gen1lc'
     | 'gen1nfe'
     | 'gen1stadium'
     | 'gen2'
+    | 'gen2lc'
     | 'gen2nfe'
     | 'gen2stadium2'
     | 'gen3'
     | 'gen3doubles'
+    | 'gen3lc'
     | 'gen3nfe'
     | 'gen4'
     | 'gen4doubles'
@@ -280,27 +283,40 @@ declare namespace Showdown {
     | 'gen4vgc'
     | 'gen5'
     | 'gen5doubles'
+    | 'gen5lc'
     | 'gen5nfe'
     | 'gen5vgc'
     | 'gen6'
     | 'gen6doubles'
+    | 'gen6lc'
     | 'gen6nfe'
     | 'gen6vgc'
     | 'gen7'
     | 'gen7doubles'
+    | 'gen7lc'
     | 'gen7letsgo'
     | 'gen7nfe'
     | 'gen7vgc'
-    // | 'gen8' // doesn't exist!
+    | 'gen8' // doesn't exist! -- update (2023/07/21): now it apparently does lol
     | 'gen8bdsp'
     | 'gen8bdspdoubles'
     | 'gen8dlc1'
     | 'gen8dlc1doubles'
     | 'gen8doubles'
+    | 'gen8lc'
+    | 'gen8metronome'
+    | 'gen8natdex'
     | 'gen8nfe'
     | 'gen8vgc'
-    | 'metronome'
-    | 'natdex';
+    | 'gen9' // but this? doesn't exist!
+    | 'gen9doubles'
+    | 'gen9lc'
+    | 'gen9metronome'
+    | 'gen9natdex'
+    | 'gen9nfe'
+    | 'gen9vgc';
+    // | 'metronome' // update (2023/07/21): no longer exists; use 'gen8metronome' or 'gen9metronome' instead
+    // | 'natdex' // update (2023/07/21): no longer exists; use 'gen8natdex' or 'gen9natdex' instead
 
   type BattleTeambuilderTable =
     & Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'overrideTier' | 'tiers' | 'zuBans'>
