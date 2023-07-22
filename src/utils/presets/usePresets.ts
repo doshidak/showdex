@@ -171,7 +171,7 @@ export const usePresets = ({
 
   const gen = detectGenFromFormat(format);
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
-  const randomsFormat = genlessFormat?.includes('random') ?? false;
+  const randoms = genlessFormat?.includes('random');
 
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
   const formes = getPresetFormes(speciesForme, format, true);
@@ -181,7 +181,9 @@ export const usePresets = ({
     || !gen
     || !genlessFormat;
 
-  const shouldSkipFormats = shouldSkip || randomsFormat || !settings?.downloadSmogonPresets;
+  const shouldSkipFormats = shouldSkip
+    || randoms
+    || !settings?.downloadSmogonPresets;
 
   const {
     formatPresets,
@@ -190,8 +192,6 @@ export const usePresets = ({
   } = usePokemonFormatPresetQuery({
     gen,
     format,
-    // formatOnly: genlessFormat?.includes('bdsp'),
-    // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
     maxAge,
   }, {
     skip: shouldSkipFormats,
@@ -210,7 +210,9 @@ export const usePresets = ({
   //   '\n', 'downloadRandomsPresets', settings?.downloadRandomsPresets,
   // );
 
-  const shouldSkipFormatStats = shouldSkip || randomsFormat || !settings?.downloadUsageStats;
+  const shouldSkipFormatStats = shouldSkip
+    || randoms
+    || !settings?.downloadUsageStats;
 
   const {
     formatStatsPresets,
@@ -230,7 +232,9 @@ export const usePresets = ({
     }),
   });
 
-  const shouldSkipRandoms = shouldSkip || !randomsFormat || !settings?.downloadRandomsPresets;
+  const shouldSkipRandoms = shouldSkip
+    || !randoms
+    || !settings?.downloadRandomsPresets;
 
   const {
     randomsPresets,
@@ -250,7 +254,9 @@ export const usePresets = ({
     }),
   });
 
-  const shouldSkipRandomsStats = shouldSkip || !randomsFormat || !settings?.downloadUsageStats;
+  const shouldSkipRandomsStats = shouldSkip
+    || !randoms
+    || !settings?.downloadUsageStats;
 
   const {
     randomsStatsPresets,
@@ -284,22 +290,49 @@ export const usePresets = ({
     pokemon,
   ]);
 
-  const presets = React.useMemo(() => [
-    // ...((!!pokemon?.presets?.length && pokemon.presets) || []),
-    ...nonStoragePresets,
-    ...((!randomsFormat && [
-      ...((!!formatPresets?.length && formatPresets) || []),
-      ...((!!formatStatsPresets?.length && formatStatsPresets) || []),
-    ]) || []).filter(Boolean).sort(sortPresets(genlessFormat)),
-    ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
-    ...storagePresets, // put Teambuilder presets last
-  ].filter(Boolean), [
+  // build the final list of 'smogon'-sourced presets
+  const presets = React.useMemo(() => {
+    const output: CalcdexPokemonPreset[] = [];
+
+    if (nonStoragePresets?.length) {
+      output.push(...nonStoragePresets);
+    }
+
+    // randoms presets
+    if (randoms && randomsPresets?.length) {
+      output.push(...randomsPresets);
+    }
+
+    // non-randoms (e.g., OU, Ubers, etc.) presets
+    if (!randoms) {
+      const sorted: CalcdexPokemonPreset[] = [];
+
+      if (formatPresets?.length) {
+        sorted.push(...formatPresets);
+      }
+
+      if (formatStatsPresets?.length) {
+        sorted.push(...formatStatsPresets);
+      }
+
+      if (sorted.length) {
+        sorted.sort(sortPresets(genlessFormat));
+        output.push(...sorted);
+      }
+    }
+
+    // put Teambuilder presets last
+    if (storagePresets.length) {
+      output.push(...storagePresets);
+    }
+
+    return output;
+  }, [
     genlessFormat,
     formatPresets,
     formatStatsPresets,
     nonStoragePresets,
-    // pokemon,
-    randomsFormat,
+    randoms,
     randomsPresets,
     storagePresets,
   ]);
@@ -307,11 +340,11 @@ export const usePresets = ({
   // note: randoms usage set, though a proper CalcdexPokemonPreset, is only used to access its usage stats data
   // (i.e., it's not included in `presets`; only the 'Randoms' preset is available [in addition to 'Yours', if applicable])
   const usages = React.useMemo(() => [
-    ...((!randomsFormat && !!formatStatsPresets?.length && formatStatsPresets) || []),
-    ...((randomsFormat && !!randomsStatsPresets?.length && randomsStatsPresets) || []),
+    ...((!randoms && !!formatStatsPresets?.length && formatStatsPresets) || []),
+    ...((randoms && !!randomsStatsPresets?.length && randomsStatsPresets) || []),
   ].filter(Boolean), [
     formatStatsPresets,
-    randomsFormat,
+    randoms,
     randomsStatsPresets,
   ]);
 
