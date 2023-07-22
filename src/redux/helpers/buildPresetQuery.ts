@@ -106,7 +106,10 @@ export const buildPresetQuery = <TResponse>(
 
     // build the preset API URL to fetch from
     const url = env('pkmn-presets-base-url')
-      + `${path}/${endpoint}.json`.replace(/\/{2,}/g, '/');
+      // remove any potential double-slashes (or more) in the URL path
+      // e.g., '/smogon/data/sets//gen9ou' -> '/smogon/data/sets/gen9ou'
+      + `${path}/${endpoint}`.replace(/\/{2,}/g, '/')
+      + env('pkmn-presets-endpoint-suffix');
 
     try {
       // fetch the presets
