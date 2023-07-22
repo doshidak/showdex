@@ -8,12 +8,9 @@ import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/co
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 // import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
 import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-// import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
-import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env } from '@showdex/utils/core';
-import { getDexForFormat } from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 
 // note: speciesForme should be handled last since it will test() true against any line technically

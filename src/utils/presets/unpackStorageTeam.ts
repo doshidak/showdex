@@ -1,12 +1,9 @@
 import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc/dist/data/interface';
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
-// import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
-import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { getDexForFormat } from '@showdex/utils/dex';
 import { clamp } from '@showdex/utils/core';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 
 /**
  * Converts a single `packedTeam` from the Teambuilder into `CalcdexPokemonPreset[]`s.

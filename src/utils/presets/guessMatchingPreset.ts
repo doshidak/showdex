@@ -1,4 +1,4 @@
-import { detectGenFromFormat } from '@showdex/utils/battle';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { flattenAlts } from './flattenAlts';
 

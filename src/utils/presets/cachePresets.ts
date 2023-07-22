@@ -1,10 +1,9 @@
 import LzString from 'lz-string';
 import { type GenerationNum } from '@smogon/calc';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
-// import { getGenlessFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { getGenlessFormat } from '@showdex/utils/battle/getGenlessFormat'; /** @todo reorganize me */
 import { clearStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { getGenlessFormat } from '@showdex/utils/dex';
 import { fileSize } from '@showdex/utils/humanize';
 import { dehydratePresets } from '@showdex/utils/hydro';
 import { getCachedPresets } from './getCachedPresets';
