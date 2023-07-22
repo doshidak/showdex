@@ -1,6 +1,7 @@
 import { HttpMethod } from '@showdex/consts/core';
 import { type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
+import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
@@ -56,12 +57,19 @@ export const buildPresetQuery = <TResponse>(
 
     let output: CalcdexPokemonPreset[] = [];
 
+    // if this is false, then we'll fetch ALL presets for the detected gen
+    const filterByFormat = !!format && (
+      source === 'usage'
+        || formatOnly
+        || [
+          'random', // e.g., 'gen9randomdoublesbattle'
+          'bdsp', // e.g., 'gen8bdspou'
+          'letsgo', // e.g., 'gen7letsgoou'
+        ].some((f) => format.includes(f))
+    );
+
     // attempt to guess the endpoint from the args
-    const endpoint = format && (source === 'usage' || formatOnly || [
-      'random', // e.g., 'gen9randomdoublesbattle'
-      'bdsp', // e.g., 'gen8bdspou'
-      'letsgo', // e.g., 'gen7letsgoou'
-    ].some((f) => format.includes(f)))
+    const endpoint = filterByFormat
       // e.g., 'gen9vgc2023series1' -> 'gen9vgc2023';
       // 'gen9battlestadiumsinglesregulationd' -> 'gen9battlestadiumsingles';
       // 'gen9randombattleblitz' -> 'gen9randombattle';
@@ -75,7 +83,15 @@ export const buildPresetQuery = <TResponse>(
     const cacheEnabled = nonEmptyObject(maxAge);
 
     if (cacheEnabled) {
-      const [presets, stale] = getCachedPresets(endpoint, maxAge);
+      const [presets, stale] = getCachedPresets(
+        filterByFormat
+          ? endpoint
+          : typeof format === 'number'
+            ? format
+            : detectGenFromFormat(format, gen),
+        source,
+        maxAge,
+      );
 
       if (presets?.length) {
         output = presets;
