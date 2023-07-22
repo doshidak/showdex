@@ -2,11 +2,11 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
-import { FormatLabels } from '@showdex/consts/battle';
+import { FormatLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
 import { getResourceUrl } from '@showdex/utils/core';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 import styles from './InstanceButton.module.scss';
 
 export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
