@@ -302,78 +302,16 @@ export const presetApi = pkmnApi.injectEndpoints({
 
   endpoints: (build) => ({
     pokemonFormatPreset: build.query<CalcdexPokemonPreset[], PkmnSmogonPresetRequest>({
-      // using the fetchBaseQuery() with runtimeFetch() as the fetchFn doesn't seem to work
-      // (Chrome reports a TypeError when calling fetch() in the background service worker)
-      // query: ({ gen, format }) => ({
-      //   url: [
-      //     env('pkmn-presets-formats-path'), // e.g., '/smogon/data/sets'
-      //     `gen${format?.includes('bdsp') ? 4 : gen}.json`, // e.g., 'gen8.json'
-      //   ].join('/'), // e.g., '/smogon/data/sets/gen8.json'
-      //   method: HttpMethod.GET,
-      // }),
-
-      // since this is the workaround, we must manually fetch the data and transform the response
-      // (not a big deal though... considering the hours I've spent pulling my hair out LOL)
-      // queryFn: async ({ gen, format, formatOnly }) => {
-      //   const response = await runtimeFetch([
-      //     env('pkmn-presets-base-url'),
-      //     env('pkmn-presets-format-path'), // e.g., '/smogon/data/sets'
-      //     `/${formatOnly ? format.replace(/series\d+/i, '') : `gen${gen}`}.json`, // e.g., '/gen8.json'
-      //   ].join(''), {
-      //     method: HttpMethod.GET,
-      //     headers: {
-      //       Accept: 'application/json',
-      //     },
-      //   });
-      //
-      //   const data = response.json();
-      //
-      //   return {
-      //     data: formatOnly ? transformFormatPresetResponse(<PkmnSmogonFormatPresetResponse> data, null, {
-      //       gen,
-      //       format,
-      //       formatOnly,
-      //     }) : transformPresetResponse(<PkmnSmogonPresetResponse> data, null, {
-      //       gen,
-      //       format,
-      //       formatOnly,
-      //     }),
-      //   };
-      // },
-
       queryFn: buildPresetQuery<PkmnSmogonPresetResponse | PkmnSmogonFormatPresetResponse>(
         'smogon',
         env('pkmn-presets-format-path'),
         ({ formatOnly }) => (formatOnly ? transformFormatPresetResponse : transformPresetResponse),
       ),
 
-      // transformResponse: transformPresetResponse,
       providesTags: createTagProvider(PokemonReduxTagType.Preset),
     }),
 
     pokemonFormatStats: build.query<CalcdexPokemonPreset[], Omit<PkmnSmogonPresetRequest, 'formatOnly'>>({
-      // queryFn: async ({ gen, format }) => {
-      //   const response = await runtimeFetch<PkmnSmogonFormatStatsResponse>([
-      //     env('pkmn-presets-base-url'),
-      //     env('pkmn-presets-format-stats-path'), // e.g., '/smogon/data/stats'
-      //     `/${format.replace(/series\d+/i, '')}.json`, // e.g., '/gen8bdspou.json', 'gen9vgc2023series1' -> 'gen9vgc2023.json'
-      //   ].join(''), {
-      //     method: HttpMethod.GET,
-      //     headers: {
-      //       Accept: 'application/json',
-      //     },
-      //   });
-      //
-      //   const data = response.json();
-      //
-      //   return {
-      //     data: transformFormatStatsResponse(data, null, {
-      //       gen,
-      //       format,
-      //     }),
-      //   };
-      // },
-
       queryFn: buildPresetQuery<PkmnSmogonFormatStatsResponse>(
         'usage',
         env('pkmn-presets-format-stats-path'),
@@ -384,70 +322,16 @@ export const presetApi = pkmnApi.injectEndpoints({
     }),
 
     pokemonRandomsPreset: build.query<CalcdexPokemonPreset[], PkmnSmogonPresetRequest>({
-      // (see the comment in the pokemonGensPreset endpoint as to why we're using queryFn here)
-      // query: ({ gen, format }) => ({
-      //   url: [
-      //     env('pkmn-presets-randoms-path'), // e.g., '/randbats/data'
-      //     `gen${format?.includes('bdsp') ? '8bdsp' : gen}randombattle.json`, // e.g., 'gen8randombattle.json'
-      //   ].join('/'), // e.g., '/randbats/data/gen8randombattle.json'
-      //   method: HttpMethod.GET,
-      // }),
-
-      // queryFn: async ({ gen, format }) => {
-      //   const response = await runtimeFetch<PkmnSmogonRandomsPresetResponse>([
-      //     env('pkmn-presets-base-url'),
-      //     env('pkmn-presets-randoms-path'), // e.g., '/randbats/data'
-      //     `/gen${format?.includes('bdsp') ? '8bdsp' : gen}randombattle.json`, // e.g., '/gen8randombattle.json'
-      //   ].join(''), {
-      //     method: HttpMethod.GET,
-      //     headers: {
-      //       Accept: 'application/json',
-      //     },
-      //   });
-      //
-      //   const data = response.json();
-      //
-      //   return {
-      //     data: transformRandomsPresetResponse(data, null, {
-      //       gen,
-      //       format,
-      //     }),
-      //   };
-      // },
-
       queryFn: buildPresetQuery<PkmnSmogonRandomsPresetResponse>(
         'smogon',
         env('pkmn-presets-randoms-path'),
         () => transformRandomsPresetResponse,
       ),
 
-      // transformResponse: transformRandomsPresetResponse,
       providesTags: createTagProvider(PokemonReduxTagType.Preset),
     }),
 
     pokemonRandomsStats: build.query<CalcdexPokemonPreset[], Omit<PkmnSmogonPresetRequest, 'formatOnly'>>({
-      // queryFn: async ({ gen, format }) => {
-      //   const response = await runtimeFetch<PkmnSmogonRandomsStatsResponse>([
-      //     env('pkmn-presets-base-url'),
-      //     env('pkmn-presets-randoms-stats-path'), // e.g., '/randbats/data/stats'
-      //     `/${format || `gen${gen}randombattle`}.json`, // e.g., '/gen8randombattle.json'
-      //   ].join(''), {
-      //     method: HttpMethod.GET,
-      //     headers: {
-      //       Accept: 'application/json',
-      //     },
-      //   });
-      //
-      //   const data = response.json();
-      //
-      //   return {
-      //     data: transformRandomsStatsResponse(data, null, {
-      //       gen,
-      //       format,
-      //     }),
-      //   };
-      // },
-
       queryFn: buildPresetQuery<PkmnSmogonRandomsStatsResponse>(
         'usage',
         env('pkmn-presets-randoms-stats-path'),
