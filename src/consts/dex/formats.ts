@@ -2,7 +2,7 @@
  * Labels for rendering group labels in the Pokemon presets dropdown.
  *
  * * Used to be all abbreviations, but since v0.1.3, these are now spelled out
- *   for less-common formats, like `'AG'` (Anything Goes) and `'BH'` (Balanced Hackmons).
+ *   for less-common formats, like `'AG'` (Anything Goes) & `'BH'` (Balanced Hackmons).
  *
  * @since 0.1.0
  */
@@ -104,7 +104,7 @@ export const FormatLabels: Record<string, string> = {
   nintendocup2000: 'Nintendo Cup 2000',
   nu: 'NU', // NeverUsed
   ou: 'OU', // OverUsed
-  oublitz: 'OU Blitz', // went w/ BZ for Blitz cause BL = BanList! (like in PUBL, UUBL, etc.)
+  oublitz: 'OU Blitz',
   paldeadexdraft: 'Paldea Draft',
   partnersincrime: 'Partners-in-Crime',
   pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
