@@ -5,13 +5,8 @@ import { PokeType } from '@showdex/components/app';
 import { type SelectOptionTooltipProps } from '@showdex/components/form';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 // import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { calcHiddenPower } from '@showdex/utils/calc';
-import {
-  formatDexDescription,
-  getDexForFormat,
-  getMoveOverrideDefaults,
-  hasMoveOverrides,
-} from '@showdex/utils/dex';
+import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
+import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
 import { type PokemonStatBoostDelta } from '@showdex/utils/ui';
 import styles from './PokeMoves.module.scss';
 

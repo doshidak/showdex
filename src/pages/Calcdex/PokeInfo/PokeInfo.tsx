@@ -20,10 +20,9 @@ import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { detectToggledAbility } from '@showdex/utils/battle';
-import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
-import { hasNickname } from '@showdex/utils/dex';
+import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
 import {

@@ -10,9 +10,9 @@ import {
   PokemonStatNames,
 } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
-import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
+import { legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';

@@ -11,9 +11,9 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { type CalcdexMoveOverride, useColorScheme } from '@showdex/redux/store';
-import { legalLockedFormat } from '@showdex/utils/battle';
+import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { clamp, upsizeArray, writeClipboardText } from '@showdex/utils/core';
-import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/dex';
+import { legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
