@@ -7,9 +7,9 @@ import {
   determineCriticalHit,
   determineMoveTargets,
   getGenDexForFormat,
-  shouldBoostTeraStab,
 } from '@showdex/utils/dex';
 import { calcMoveBasePower } from './calcMoveBasePower';
+import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Overrides for `SmogonMove`.

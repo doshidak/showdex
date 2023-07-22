@@ -1,7 +1,7 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonNatureBoosts } from '@showdex/consts/dex';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
 import { clamp } from '@showdex/utils/core';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
 
 /**
  * Truncates `num` to the number of `bits`.

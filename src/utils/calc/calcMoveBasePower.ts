@@ -2,9 +2,10 @@ import { type MoveName } from '@smogon/calc/dist/data/interface';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { clamp } from '@showdex/utils/core';
-import { getDexForFormat, shouldBoostTeraStab } from '@showdex/utils/dex';
+import { getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
 import { type SmogonMoveOverrides } from './createSmogonMove';
+import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Calculates the base power of the provided `moveName` based on conditions of the `pokemon`.

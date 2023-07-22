@@ -1,12 +1,8 @@
 import { Field as SmogonField } from '@smogon/calc';
-import { formatId } from '@showdex/utils/app';
-import {
-  clonePlayerSide,
-  countRuinAbilities,
-  detectGenFromFormat,
-  ruinAbilitiesActive,
-} from '@showdex/utils/battle';
-import type { CalcdexBattleField, CalcdexPlayer } from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayer } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { clonePlayerSide, countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 
 export const createSmogonField = (
   format: string,

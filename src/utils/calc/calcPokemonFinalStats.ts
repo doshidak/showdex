@@ -11,15 +11,16 @@ import {
   type CalcdexPokemon,
 } from '@showdex/redux/store';
 import { formatId as id } from '@showdex/utils/app';
-import {
-  countRuinAbilities,
-  detectGenFromFormat,
-  detectLegacyGen,
-  ruinAbilitiesActive,
-} from '@showdex/utils/battle';
+import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { getDexForFormat, notFullyEvolved, shouldIgnoreItem } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDexForFormat,
+  notFullyEvolved,
+  shouldIgnoreItem,
+} from '@showdex/utils/dex';
 import { calcPokemonHp } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
 import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
