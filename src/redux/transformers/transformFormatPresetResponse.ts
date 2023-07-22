@@ -1,10 +1,10 @@
 import { type GenerationNum } from '@smogon/calc';
 import { type PkmnSmogonFormatPresetResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
-import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
+import { detectLegacyGen } from '@showdex/utils/dex';
 
 // const l = logger('@showdex/redux/transformers/transformFormatPresetResponse()');
 
