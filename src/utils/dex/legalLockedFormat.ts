@@ -1,4 +1,4 @@
-import { LegalLockedFormats } from '@showdex/consts/battle';
+import { LegalLockedFormats } from '@showdex/consts/dex';
 import { getGenlessFormat } from './getGenlessFormat';
 
 /**

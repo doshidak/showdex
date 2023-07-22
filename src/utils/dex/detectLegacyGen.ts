@@ -10,7 +10,9 @@ import { detectGenFromFormat } from './detectGenFromFormat';
  *
  * @since 1.0.2
  */
-export const detectLegacyGen = (format: GenerationNum | string): boolean => {
+export const detectLegacyGen = (
+  format: GenerationNum | string,
+): boolean => {
   const gen = typeof format === 'string'
     ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
     : format;
