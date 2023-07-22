@@ -1,4 +1,4 @@
-import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/field';
+import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/dex';
 import { type CalcdexBattleField } from '@showdex/redux/store';
 // import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
 import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */

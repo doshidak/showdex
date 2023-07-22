@@ -8,10 +8,13 @@ import { PokemonNatures } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env, similarArrays } from '@showdex/utils/core';
-import { getDexForFormat, toggleableAbility } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDexForFormat,
+  toggleableAbility,
+} from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets/flattenAlts'; /** @todo reorganize me */
-import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectLegacyGen } from './detectLegacyGen';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
