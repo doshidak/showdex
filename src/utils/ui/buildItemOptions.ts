@@ -4,10 +4,7 @@ import { eacute } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 // import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
 import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-// import { guessTableFormatKey, legalLockedFormat } from '@showdex/utils/battle'; // warning: circular dependency importing from here
-import { guessTableFormatKey } from '@showdex/utils/battle/guessTableFormatKey'; /** @todo reorganize me */
-import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
-import { getDexForFormat } from '@showdex/utils/dex';
+import { getDexForFormat, guessTableFormatKey, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
