@@ -5,7 +5,11 @@ import {
   HydroPresetsDehydrationMap,
   HydroPresetsHydrationMap,
 } from '@showdex/consts/hydro';
-import { type CalcdexPokemonAlt, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import {
+  type CalcdexPokemonAlt,
+  type CalcdexPokemonPreset,
+  type CalcdexPokemonPresetSource,
+} from '@showdex/redux/store';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
 import { hydrateHeader } from './hydrateHeader';
@@ -229,6 +233,7 @@ export const hydratePreset = (
  *   - `GenerationNum` types for `format` will filter by generation.
  *   - `string` types will filter by `format`, such as `'gen9randombattle'`.
  *   - Providing no `format` will hydrate all presets, which may affect performance.
+ * * You can also provide a `source` to only hydrate presets from the same `CalcdexPokemonPresetSource`.
  * * Doesn't determine if the `value` is considered "fresh" since this is designed to be use-case agnostic.
  *   - i.e., Caching may not be the only use-case for preset serialization!
  *   - Callers should perform additional checks on their own.
@@ -240,6 +245,7 @@ export const hydratePreset = (
 export const hydratePresets = (
   value: string,
   format?: GenerationNum | string,
+  source?: CalcdexPokemonPresetSource,
   delimiter = ';',
   opcodeDelimiter = ':',
   presetDelimiter = ',',
@@ -266,18 +272,29 @@ export const hydratePresets = (
   };
 
   // create the format filter preset opcode, if provided
-  const parsedFormat = typeof format === 'number' && format > 0
-    ? `gen${format}`
+  const parsedFormat = typeof format === 'number'
+    ? (format > 0 ? `gen${format}` : null)
     : format;
+
+  const randoms = parsedFormat?.includes('random');
 
   // e.g., format = 9 -> formatFilter = 'fmt~gen9'
   // format = 'gen9randombattle' -> formatFilter = 'fmt~gen9randombattle'
-  const formatFilter = parsedFormat
-    ? `${HydroPresetsDehydrationMap.format}${presetOpcodeDelimiter}${parsedFormat}`
-    : undefined;
+  const formatDeclaration = `${HydroPresetsDehydrationMap.format}${presetOpcodeDelimiter}`;
+  const formatFilter = parsedFormat ? `${formatDeclaration}${parsedFormat}` : null;
+  const sourceFilter = source ? `${HydroPresetsDehydrationMap.source}${presetOpcodeDelimiter}${source}` : null;
 
   output.presets = remaining
-    .filter((p) => p?.startsWith(`p${opcodeDelimiter}`) && (!formatFilter || p.includes(formatFilter)))
+    .filter((p) => (
+      p?.startsWith(`p${opcodeDelimiter}`) // all dehydrated presets must start with this to indicate it's a dehydrated preset (duh)
+        && (!formatFilter || ( // pass if formatFilter is falsy (due to an invalid `format` arg, e.g., wasn't provided)
+          p.includes(formatFilter) // at this point, formatFilter is truthy, so pass if this contains the dehydrated format
+            // pass if not randoms, or if it is, the dehydrated preset contains the word 'random' in its dehydrated format
+            && (!randoms || new RegExp(`${formatDeclaration}gen\\d.*random`, 'i').test(p))
+        ))
+        // pass if sourceFilter is falsy (due to an invalid `source` arg) or this contains the dehydrated source
+        && (!sourceFilter || p.includes(sourceFilter))
+    ))
     .map((p) => hydratePreset(
       p.replace(`p${opcodeDelimiter}`, ''), // e.g., 'p:cid~...' -> 'cid~...'
       presetDelimiter,
