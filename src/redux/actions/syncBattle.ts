@@ -26,10 +26,9 @@ import {
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
-import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
-import { legalLockedFormat } from '@showdex/utils/battle/legalLockedFormat'; /** @todo reorganize me */
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
+import { detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   appliedPreset,

@@ -14,8 +14,6 @@ import {
   sanitizeMoveTrack,
   sanitizeVolatiles,
 } from '@showdex/utils/battle';
-import { detectGenFromFormat } from '@showdex/utils/battle/detectGenFromFormat'; /** @todo reorganize me */
-import { detectLegacyGen } from '@showdex/utils/battle/detectLegacyGen'; /** @todo reorganize me */
 import {
   calcPokemonSpreadStats,
   calcPresetCalcdexId,
@@ -24,7 +22,7 @@ import {
 } from '@showdex/utils/calc';
 import { diffArrays, env, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { getDexForFormat } from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 import { flattenAlts, guessTeambuilderPreset } from '@showdex/utils/presets';
 
