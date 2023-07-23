@@ -31,22 +31,11 @@ export const getMoveOverrideDefaults = (
   const dex = getDexForFormat(format);
 
   const {
-    // id,
-    // name,
     type,
     category,
-    // basePower: basePowerFromDex,
     zMove,
     maxMove,
   } = dex?.moves.get(moveName) || {};
-
-  // const moveId = id || formatId(name || moveName);
-
-  // const basePower = moveId.startsWith('hiddenpower')
-  //   ? calcHiddenPower(format, pokemon)
-  //   : moveId === 'ragefist'
-  //     ? calcRageFist(pokemon)
-  //     : basePowerFromDex;
 
   // update (2023/02/02): came across G-Max Fireball on a Cinderace-Gmax, which showed 140 BP.
   // turns out we need to separately lookup G-Max moves since maxMove.basePower refers to Max Flare.

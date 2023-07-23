@@ -3,7 +3,7 @@ import {
   ShowdexPlayerTitles,
   ShowdexSupporterTiers,
 } from '@showdex/consts/app';
-import { formatId } from './formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 
 /**
  * Finds a player title for the given `name`.

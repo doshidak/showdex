@@ -1,9 +1,8 @@
-import { type ItemName } from '@smogon/calc/dist/data/interface';
+import { type ItemName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 import { getDexForFormat, guessTableFormatKey, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {

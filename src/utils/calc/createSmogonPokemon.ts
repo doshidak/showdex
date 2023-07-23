@@ -2,8 +2,7 @@ import { Pokemon as SmogonPokemon } from '@smogon/calc';
 import { type MoveName, type Specie } from '@smogon/calc/dist/data/interface';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { nonEmptyObject } from '@showdex/utils/core';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,

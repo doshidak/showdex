@@ -4,7 +4,7 @@ import {
   PokemonDmaxAbilityMoves,
   PokemonGmaxMoves,
 } from '@showdex/consts/dex';
-import { formatId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { getDexForFormat } from './getDexForFormat';
 

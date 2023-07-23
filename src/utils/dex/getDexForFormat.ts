@@ -1,6 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat } from './detectGenFromFormat';
 

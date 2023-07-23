@@ -11,8 +11,7 @@ import {
   type CalcdexPokemonPreset,
   useCalcdexSettings,
 } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 // import { fileSize } from '@showdex/utils/humanize';

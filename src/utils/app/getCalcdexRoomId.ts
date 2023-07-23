@@ -1,4 +1,4 @@
-import { formatId } from './formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 
 export const getCalcdexRoomId = (
   battleId: string,

@@ -10,9 +10,8 @@ import {
   type CalcdexPlayer,
   type CalcdexPokemon,
 } from '@showdex/redux/store';
-import { formatId as id } from '@showdex/utils/app';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { env, formatId as id } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,

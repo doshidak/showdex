@@ -1,6 +1,5 @@
 import { type CalcdexBattleRules } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 
 const createBattleRuleDetector = (
   stepQueue: Showdown.Battle['stepQueue'],

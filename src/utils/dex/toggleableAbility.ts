@@ -1,9 +1,6 @@
 import { type AbilityName } from '@smogon/calc/dist/data/interface';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-// import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-// import { calcPokemonHp } from '@showdex/utils/calc';
 
 /**
  * Determines the value of the `abilityToggleable` property in a `CalcdexPokemon`.
@@ -23,14 +20,6 @@ export const toggleableAbility = (
   if (!ability) {
     return false;
   }
-
-  // Multiscale should only be toggleable if the Pokemon has 0% or 100% HP
-  // (update: if not 0% or 100% HP, createSmogonPokemon() will set the HP to 100% if Multiscale is on)
-  // if (formatId(ability) === 'multiscale') {
-  //   const hpPercentage = calcPokemonHp(pokemon);
-  //
-  //   return !hpPercentage || hpPercentage === 1;
-  // }
 
   return PokemonToggleAbilities.includes(ability);
 };

@@ -1,7 +1,6 @@
 import { type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import { clamp } from '@showdex/utils/core';
+import { clamp, formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
 import { type SmogonMoveOverrides } from './createSmogonMove';

@@ -1,7 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonPresetFuckedFormes } from '@showdex/consts/dex';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 
 /**

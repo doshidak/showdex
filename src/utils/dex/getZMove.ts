@@ -1,6 +1,6 @@
 import { type ItemName, type MoveName } from '@smogon/calc/dist/data/interface';
 import { PokemonSpecialZMoves, PokemonZMoves } from '@showdex/consts/dex';
-import { formatId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 
 const l = logger('@showdex/utils/dex/getZMove()');

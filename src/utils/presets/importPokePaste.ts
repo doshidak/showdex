@@ -3,13 +3,11 @@ import {
   type GenerationNum,
   type ItemName,
   type MoveName,
-} from '@smogon/calc/dist/data/interface';
+} from '@smogon/calc';
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { clamp, env } from '@showdex/utils/core';
+import { clamp, env, formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 

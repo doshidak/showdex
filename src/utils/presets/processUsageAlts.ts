@@ -1,5 +1,5 @@
 import { type CalcdexPokemonUsageAlt } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize CalcdexAlt's */
+import { formatId } from '@showdex/utils/core';
 import { sortUsageAlts } from './sortUsageAlts';
 
 /* eslint-disable @typescript-eslint/indent */

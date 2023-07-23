@@ -1,7 +1,6 @@
 import { type MoveName, Move as SmogonMove } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { clamp } from '@showdex/utils/core';
+import { clamp, formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   determineCriticalHit,
