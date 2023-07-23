@@ -8,8 +8,6 @@ import {
   type CalcdexPokemon,
   type RootState,
 } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency when importing here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import {
   cloneBattleState,
   clonePlayerSideConditions,
@@ -27,7 +25,7 @@ import {
   usedTerastallization,
 } from '@showdex/utils/battle';
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { env, formatId } from '@showdex/utils/core';
 import { detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {

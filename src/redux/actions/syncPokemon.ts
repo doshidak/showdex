@@ -5,7 +5,6 @@ import {
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
 } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import {
   clonePokemon,
   detectToggledAbility,
@@ -20,7 +19,12 @@ import {
   guessServerLegacySpread,
   guessServerSpread,
 } from '@showdex/utils/calc';
-import { diffArrays, env, nonEmptyObject } from '@showdex/utils/core';
+import {
+  diffArrays,
+  env,
+  formatId,
+  nonEmptyObject,
+} from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
