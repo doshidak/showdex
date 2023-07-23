@@ -56,12 +56,6 @@
       "commit-msg": "npx cz-customizable-ghooks $2"
     }
   },
-  "browserslist": [
-    "defaults",
-    "> 0.5%",
-    "last 2 versions",
-    "last 3 iOS versions"
-  ],
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/modifiers": "^6.0.1",
