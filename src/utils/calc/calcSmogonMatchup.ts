@@ -1,15 +1,17 @@
-import { calculate } from '@smogon/calc';
-// import { formatId } from '@showdex/utils/app';
+import {
+  type Move as SmogonMove,
+  type MoveName,
+  type Pokemon as SmogonPokemon,
+  calculate,
+} from '@smogon/calc';
+import {
+  type CalcdexBattleField,
+  type CalcdexPlayer,
+  type CalcdexPokemon,
+  type ShowdexCalcdexSettings,
+} from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import { getGenDexForFormat } from '@showdex/utils/dex';
-import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type {
-  CalcdexBattleField,
-  CalcdexPlayer,
-  CalcdexPokemon,
-  ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
 import { createSmogonPokemon } from './createSmogonPokemon';
@@ -139,27 +141,6 @@ export const calcSmogonMatchup = (
 
     return matchup;
   }
-
-  // const ability = formatId(playerPokemon.dirtyAbility || playerPokemon.ability);
-
-  // apply base power mods
-  // const basePowerMods: number[] = [];
-
-  // const playerSideKey: keyof CalcdexBattleField = playerKey === 'p2' ? 'defenderSide' : 'attackerSide';
-  // const playerSide = field?.[playerSideKey];
-
-  /**
-   * @todo This implementation does not allow us to display the increased base power in the UI,
-   *   like how it's for *Rage Fist*.
-   */
-  // if (ability === 'supremeoverlord' && playerSide?.faintedCount > 0) {
-  //   /** @todo replace `5` with `maxPokemon - 1` from `CalcdexPlayer` whenever you refactor the codebase lmao */
-  //   basePowerMods.push(1 + (0.1 * Math.min(playerSide.faintedCount, 5)));
-  // }
-
-  // if (formatId(opponentPokemon.lastMove) === 'glaiverush') {
-  //   basePowerMods.push(2);
-  // }
 
   const smogonField = createSmogonField(format, field, player, opponent, allPlayers);
 
