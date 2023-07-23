@@ -6,8 +6,7 @@ import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTier } from '@showdex/consts/app';
 import { bullop } from '@showdex/consts/core';
 import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { env, getResourceUrl } from '@showdex/utils/core';
+import { env, formatId, getResourceUrl } from '@showdex/utils/core';
 import styles from './PatronagePane.module.scss';
 
 /**

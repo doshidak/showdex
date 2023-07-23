@@ -9,8 +9,7 @@ import {
   getBattleRoom,
   getCalcdexRoomId,
 } from '@showdex/utils/app';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { env } from '@showdex/utils/core';
+import { env, formatId } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { Hellodex } from './Hellodex';
 
