@@ -9,6 +9,86 @@ import { getCachedPresets } from '@showdex/utils/presets/getCachedPresets'; /** 
 
 const l = logger('@showdex/redux/factories/buildPresetQuery()');
 
+/**
+ * Formats containing any of these keywords will forcibly prevent fetching from the "master list," e.g., `/gen9.json`.
+ *
+ * * In other words, these formats are probably specialized & don't exist in the standard meta formats, so they wouldn't
+ *   be in the aforementioned "master list."
+ * * Also, don't put this in `@showdex/consts/dex/formats` cause it's unique to the pkmn API.
+ *
+ * @since 1.1.6
+ */
+const FormatOnlyKeywords: string[] = [
+  'random', // e.g., 'gen9randomdoublesbattle'
+  'bdsp', // e.g., 'gen8bdspou'
+  'letsgo', // e.g., 'gen7letsgoou'
+];
+
+/**
+ * Following keywords (`RegExp` string notation allowed) will be removed when assembling the API endpoint value.
+ *
+ * * Also, don't put this in `@showdex/consts/dex/formats` cause it's unique to the pkmn API.
+ *
+ * @since 1.1.6
+ */
+const IgnoredFormatKeywords: string[] = [
+  'blitz', // e.g., 'gen9randombattleblitz' -> 'gen9randombattle'
+  'mayhem', // e.g., 'gen9randombattlemayhem' -> 'gen9randombattle'
+  'monotype', // e.g., 'gen9monotyperandombattle' -> 'gen9randombattle'
+  'nodmax', // e.g., 'gen8randombattlenodmax' -> 'gen8randombattle'
+  'regulation[a-z]$', // e.g., 'gen9battlestadiumsinglesregulationd' -> 'gen9battlestadiumsingles'
+  'series\\d+$', // e.g., 'gen9vgc2023series1' -> 'gen9vgc2023'
+  'unrated', // e.g., 'gen9unratedrandombattle' -> 'gen9randombattle'
+];
+
+/**
+ * Following expressions will be `replace()`'d when assembling the API endpoint value.
+ *
+ * * Each element must be a tuple in the following order:
+ *   - First element is the `RegExp` test condition,
+ *   - Second element is the replacement `RegExp` when the test passes, &
+ *   - Third element is the replacement `string` (substring matching allowed, e.g., `'foo-$1-bar'`).
+ * * Specify `null` for the second argument to use the `RegExp` in the first element.
+ *
+ * @since 1.1.6
+ */
+const FormatReplacements: [test: RegExp, replace: RegExp, replacement: string][] = [
+  // only here in order to prevent yeeting 'monotype' in other monotyped formats
+  // (not sure atm if they fall under this case as well, but just to play it safe)
+  // e.g., 'gen9monotyperandombattle' -> 'gen9randombattle'
+  [/monotyperandom/i, null, 'random'],
+
+  // note: this format requires special handling cause the gen number changes, I think
+  // e.g., 'gen9randomroulette' -> 'gen9randombattle'
+  [/randomroulette/i, /roulette/i, 'battle'],
+
+  // FFA Randoms uses Randoms Doubles presets
+  // e.g., 'gen9freeforallrandombattle' -> 'gen9randomdoublesbattle'
+  [/freeforallrandom/i, null, 'randomdoubles'],
+
+  // does anybody play this ??? o_O
+  // e.g., 'gen9multirandombattle' -> 'gen9randomdoublesbattle'
+  [/multirandom/i, null, 'randomdoubles'],
+];
+
+// 10/10 function name
+const formatEndpointFormat = (
+  format: string,
+): string => {
+  if (!format?.length) {
+    return format;
+  }
+
+  const removalExp = new RegExp(IgnoredFormatKeywords.join('|'), 'i');
+  const removed = format.replace(removalExp, '');
+
+  const replacements = FormatReplacements
+    .filter(([test]) => test?.test?.(removed))
+    .reduce((prev, [test, search, replace]) => prev.replace(search || test, replace), removed);
+
+  return replacements;
+};
+
 /* eslint-disable @typescript-eslint/indent */
 
 /**
@@ -61,23 +141,12 @@ export const buildPresetQuery = <TResponse>(
     const filterByFormat = !!format && (
       source === 'usage'
         || formatOnly
-        || [
-          'random', // e.g., 'gen9randomdoublesbattle'
-          'bdsp', // e.g., 'gen8bdspou'
-          'letsgo', // e.g., 'gen7letsgoou'
-        ].some((f) => format.includes(f))
+        || FormatOnlyKeywords.some((f) => format.includes(f))
     );
 
     // attempt to guess the endpoint from the args
     const endpoint = filterByFormat
-      // e.g., 'gen9vgc2023series1' -> 'gen9vgc2023';
-      // 'gen9battlestadiumsinglesregulationd' -> 'gen9battlestadiumsingles';
-      // 'gen9randombattleblitz' -> 'gen9randombattle';
-      // 'gen9unratedrandombattle' -> 'gen9randombattle';
-      // 'gen9randomdoublesbattle' -> 'gen9randomdoublesbattle' (no change);
-      // 'gen8bdspou' -> 'gen8bdspou' (no change) -- you get the idea lol
-      ? format.replace(/series\d+$|regulation[a-z]$|blitz|unrated/i, '')
-      // e.g., 'gen9'
+      ? formatEndpointFormat(format)
       : `gen${gen}`;
 
     const cacheEnabled = nonEmptyObject(maxAge);
