@@ -2,8 +2,7 @@ import * as React from 'react';
 import SimpleBar from 'simplebar';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 import { useUserAgent } from '@showdex/utils/hooks';
 import styles from './Scrollable.module.scss';
 

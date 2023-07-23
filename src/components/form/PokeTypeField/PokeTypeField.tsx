@@ -12,9 +12,7 @@ import {
 } from '@showdex/components/ui';
 import { PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonUsageAlt, useColorScheme } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { similarArrays } from '@showdex/utils/core';
+import { formatId, similarArrays } from '@showdex/utils/core';
 import { type ElementSizeLabel, useUserAgent } from '@showdex/utils/hooks';
 import { percentage } from '@showdex/utils/humanize';
 import { flattenAlts, sortUsageAlts } from '@showdex/utils/presets';
