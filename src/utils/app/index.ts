@@ -2,7 +2,6 @@ export * from './createCalcdexRoom';
 export * from './createHellodexRoom';
 export * from './createHtmlRoom';
 export * from './findPlayerTitle';
-export * from './formatId';
 export * from './getActiveBattle';
 export * from './getAuthUsername';
 export * from './getBattleRoom';

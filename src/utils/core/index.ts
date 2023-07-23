@@ -3,6 +3,7 @@ export * from './clipboard';
 export * from './createShowdexEvent';
 export * from './diffArrays';
 export * from './dispatchShowdexEvent';
+export * from './formatId';
 export * from './getEnv';
 export * from './getExtensionId';
 export * from './getExtensionProtocol';
