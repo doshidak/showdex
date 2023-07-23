@@ -13,6 +13,7 @@ import type {
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
 import { createSmogonPokemon } from './createSmogonPokemon';
+import { determineMoveStrikes } from './determineMoveStrikes';
 import { formatMatchupNhko } from './formatMatchupNhko';
 import { getMatchupNhkoColor } from './getMatchupNhkoColor';
 import { getMatchupRange } from './getMatchupRange';
@@ -166,6 +167,18 @@ export const calcSmogonMatchup = (
   matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
   matchup.defender = createSmogonPokemon(format, opponentPokemon, null, playerPokemon, smogonField);
 
+  // pretty much only used for Beat Up lmao
+  const strikes = determineMoveStrikes(
+    format,
+    playerMove,
+    playerPokemon,
+    opponentPokemon,
+    player,
+    opponent,
+    allPlayers,
+    field,
+  );
+
   try {
     const result = calculate(
       dex,
@@ -173,6 +186,7 @@ export const calcSmogonMatchup = (
       matchup.defender,
       matchup.move,
       smogonField,
+      { strikes },
     );
 
     matchup.description = parseMatchupDescription(result);
@@ -180,15 +194,18 @@ export const calcSmogonMatchup = (
     matchup.koChance = formatMatchupNhko(result, settings?.nhkoLabels);
     matchup.koColor = getMatchupNhkoColor(result, settings?.nhkoColors);
 
-    // l.debug(
-    //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-    //   '\n', 'gen', dex.num,
-    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    //   '\n', 'field', field,
-    //   '\n', 'matchup', matchup,
-    //   '\n', 'result', result,
-    // );
+    if (strikes?.length) {
+      l.debug(
+        'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
+        '\n', 'gen', dex.num,
+        '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+        '\n', 'field', field,
+        '\n', 'matchup', matchup,
+        '\n', 'result', result,
+        '\n', 'strikes', strikes,
+      );
+    }
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
     // which is separate from 'N/A' damage (e.g., status moves).

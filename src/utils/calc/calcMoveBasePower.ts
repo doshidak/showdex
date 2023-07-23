@@ -1,8 +1,8 @@
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/app';
 import { clamp } from '@showdex/utils/core';
-import { getDexForFormat } from '@showdex/utils/dex';
+import { detectGenFromFormat, getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
 import { type SmogonMoveOverrides } from './createSmogonMove';
 import { shouldBoostTeraStab } from './shouldBoostTeraStab';
@@ -28,6 +28,7 @@ export const calcMoveBasePower = (
   overrides?: SmogonMoveOverrides,
 ): number => {
   const dex = getDexForFormat(format);
+  const gen = detectGenFromFormat(format);
 
   const move = dex.moves.get(moveName);
   const moveId = move.id || formatId(moveName);
@@ -35,6 +36,26 @@ export const calcMoveBasePower = (
   let basePower = moveId.startsWith('hiddenpower')
     ? calcHiddenPower(format, pokemon)
     : (move?.exists && move.basePower) || 0;
+
+  // note: the BP returned for Beat Up here is for the current `pokemon` only!
+  // the actual calculations are handled in `determineMoveStrikes()`, whose return value is then passed
+  // into the modified `calculate()` function (from `@smogon/calc`) as the last argument
+  // also note: in gens 2-4, Beat Up has a fixed BP of 10, so there's nothing to do here
+  // also also note: I lied, actually this BP might be used in the event where there are no eligible allies
+  // for Beat Up (including the attacker itself) in gens 5+, so only the attacker actually strikes with
+  // the base power calculated & returned here! c:
+  if (moveId === 'beatup' && !basePower && gen > 4) { // basePower should be 0 in gens 5+
+    const {
+      baseStats,
+      dirtyBaseStats,
+      transformedBaseStats,
+    } = pokemon || {};
+
+    const dexBaseAtk = transformedBaseStats?.atk ?? baseStats?.atk ?? 0;
+    const baseAtk = dirtyBaseStats?.atk ?? dexBaseAtk;
+
+    return Math.floor(baseAtk / 10) + 5;
+  }
 
   if (basePower < 1) {
     return 0;
