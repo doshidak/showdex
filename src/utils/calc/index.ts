@@ -11,6 +11,7 @@ export * from './convertLegacyStats';
 export * from './createSmogonField';
 export * from './createSmogonMove';
 export * from './createSmogonPokemon';
+export * from './determineMoveStrikes';
 export * from './findHighestStat';
 export * from './formatMatchupNhko';
 export * from './getMatchupNhkoColor';
