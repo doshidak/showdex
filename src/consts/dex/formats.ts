@@ -23,8 +23,8 @@ export const FormatLabels: Record<string, string> = {
   battlestadiumsingles: 'BSS',
   battlestadiumsinglesseries1: 'BSS Series 1',
   battlestadiumsinglesseries2: 'BSS Series 2',
-  battlestadiumsinglesregulationc: 'BSS Regulation C',
-  battlestadiumsinglesregulationd: 'BSS Regulation D',
+  battlestadiumsinglesregulationc: 'BSS Reg C',
+  battlestadiumsinglesregulationd: 'BSS Reg D',
   battlestadiumdoubles: 'BSD',
   battlestadiumdoublesseries13: 'BSD Series 13',
   bdsp3v3singles: 'BDSP 3v3 Singles',
@@ -84,9 +84,9 @@ export const FormatLabels: Record<string, string> = {
   monotypebattlefactory: 'B-Factory Monotype',
   monotyperandombattle: 'Monotype Randoms',
   multibility: 'Multibility',
-  multirandombattle: 'Multibility Randoms',
-  natdex4v4doublesdraft: 'NatDex 4v4 Doubles Draft',
-  natdex6v6doublesdraft: 'NatDex 6v6 Doubles Draft',
+  multirandombattle: 'Multi Randoms',
+  natdex4v4doublesdraft: 'NatDex 4v4 Dbls Draft',
+  natdex6v6doublesdraft: 'NatDex 6v6 Dbls Draft',
   natdexdraft: 'NatDex Draft', // update (2023/01/06): think it's 'natdex' and not 'nationaldex' here
   natdexlcdraft: 'NatDex LC Draft',
   nationaldex: 'NatDex',
@@ -131,7 +131,7 @@ export const FormatLabels: Record<string, string> = {
   superstaffbros4: 'Super Staff Bros 4',
   tagteamsingles: 'Tag Team Singles',
   teradonation: 'Tera Donation',
-  terapreviewpaldeadexdraft: 'Tera Preview Paldea Draft',
+  terapreviewpaldeadexdraft: 'Tera Paldea Draft',
   thelosersgame: 'The Loser\'s Game',
   tiershift: 'Tier Shift',
   tradebacksou: 'Tradebacks OU',
@@ -158,19 +158,19 @@ export const FormatLabels: Record<string, string> = {
   vgc2023: 'VGC 2023',
   vgc2023series1: 'VGC 2023 Series 1',
   vgc2023series2: 'VGC 2023 Series 2',
-  vgc2023regulationc: 'VGC 2023 Regulation C',
-  vgc2023regulationd: 'VGC 2023 Regulation D',
+  vgc2023regulationc: 'VGC 2023 Reg C',
+  vgc2023regulationd: 'VGC 2023 Reg D',
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
 
 /**
- * Formats where abilities and moves should be locked to legal values.
+ * Formats where abilities & moves should be locked to legal values.
  *
  * * Do not use this array directly; instead, use the `legalLockedFormat()` utility since some special
  *   handling is required for some formats.
  *   - As of v1.1.1, any format starting **and** ending with a forward-slash (`/`) will be converted
- *     into a `RegExp` and `test()`'d.
+ *     into a `RegExp` & `test()`'d.
  *   - Otherwise, the format after stripping the `'gen#'` prefix will be tested with `endsWith()`.
  * * Formats not in this array should allow any illegal abilities and moves to be selected.
  *   - However, if no Pokemon legal abilities and/or moves are available,
@@ -178,30 +178,16 @@ export const FormatLabels: Record<string, string> = {
  *   - This case would most likely be caused by Pokemon not being present in the `dex`'s generation.
  *   - See `buildAbilityOptions()` and `buildMoveOptions()` for implementation details.
  * * `showAllOptions` of `ShowdexCalcdexSettings` should take precedence over this behavior.
- * * Note that this list is not final and is subject to change in subsequent versions.
+ * * Note that this list is not final & is subject to change in subsequent versions.
  *
  * @since 1.0.1
  */
 export const LegalLockedFormats: string[] = [
   '1v1',
   '2v2doubles',
-  // 'battlefactory',
-  // 'battlestadiumdoublesseries13',
-  // 'battlestadiumsingles',
   '/^battlespot/', // e.g., 'battlespotsingles', 'battlespotdoubles'
   '/^battlestadium/', // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
-  // 'bdspbattlefestivaldoubles',
-  // 'bdspdoublesou',
-  // 'bdsplc',
-  // 'bdspmonotype',
-  // 'bdspnu',
-  // 'bdspou',
-  // 'bdsprandombattle',
-  // 'bdspru',
-  // 'bdspubers',
-  // 'bdspuu',
   '/^bdsp/', // e.g., 'bdspou'
-  // 'bssfactory',
   'computergeneratedteams',
   'doubleslc',
   'doublesou',
@@ -209,13 +195,10 @@ export const LegalLockedFormats: string[] = [
   'doublesuu',
   '/draft$/', // e.g., '6v6doublesdraft'
   '/factory/', // e.g., 'battlefactory', 'bssfactory'
-  // 'freeforallrandombattle',
   'lc',
   'lcuu',
-  // 'letsgorandombattle',
   '/^letsgo/', // e.g., 'letsgorandombattle', 'letsgoou'
   'monotype',
-  // 'multirandombattle',
   'nationaldex',
   'nationaldexmonotype',
   'nationaldexru',
@@ -225,29 +208,10 @@ export const LegalLockedFormats: string[] = [
   'ou',
   'oublitz',
   'pu',
-  // 'randombattle',
-  // 'randombattleblitz',
-  // 'randomdoublesbattle',
   '/random/', // e.g., 'randombattle', 'unratedrandombattle', 'randombattleblitz'
   'ru',
   'ubers',
-  // 'unratedrandombattle',
   'uu',
-  // 'vgc2009',
-  // 'vgc2010',
-  // 'vgc2011',
-  // 'vgc2012',
-  // 'vgc2013',
-  // 'vgc2014',
-  // 'vgc2015',
-  // 'vgc2016',
-  // 'vgc2017',
-  // 'vgc2018',
-  // 'vgc2019',
-  // 'vgc2020',
-  // 'vgc2021',
-  // 'vgc2022',
-  // 'vgc2023',
   '/^vgc/', // e.g., 'vgc2022', 'vgc2023series1'
   'zu',
 ];
