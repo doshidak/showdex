@@ -13,8 +13,7 @@ import {
   WeatherDescriptions,
 } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
+import { formatId } from '@showdex/utils/core';
 import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexContext } from '../CalcdexContext';

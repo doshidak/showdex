@@ -13,8 +13,6 @@ import {
   useCalcdexSettings,
   useDispatch,
 } from '@showdex/redux/store';
-// import { formatId } from '@showdex/utils/app'; // warning: circular dependency importing from here
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
 import {
   cloneAllPokemon,
   clonePlayer,
@@ -30,7 +28,7 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
-import { nonEmptyObject, similarArrays } from '@showdex/utils/core';
+import { formatId, nonEmptyObject, similarArrays } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { toggleableAbility } from '@showdex/utils/dex';
 import {

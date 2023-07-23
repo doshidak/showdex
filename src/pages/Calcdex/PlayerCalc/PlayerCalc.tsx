@@ -8,8 +8,7 @@ import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
-import { formatId } from '@showdex/utils/app/formatId'; /** @todo reorganize me */
-import { env, getResourceUrl } from '@showdex/utils/core';
+import { env, formatId, getResourceUrl } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
