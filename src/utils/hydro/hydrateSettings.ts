@@ -76,7 +76,7 @@ export const hydratePerSide = (
   };
 };
 
-const l = logger('@showdex/redux/helpers/hydrateSettings()');
+const l = logger('@showdex/utils/hydro/hydrateSettings()');
 
 /**
  * Hydrates the passed-in dehydrated `settings`, typically for restoring settings stored in `LocalStorage`.

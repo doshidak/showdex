@@ -24,7 +24,7 @@ import { calcPokemonHp } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
 import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
 
-const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
+const l = logger('@showdex/utils/calc/calcPokemonFinalStats()');
 
 /**
  * Reimplementation of `calculateModifiedStats()` in the Showdown client's `BattleTooltip`.

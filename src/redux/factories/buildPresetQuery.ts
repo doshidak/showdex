@@ -7,7 +7,7 @@ import { detectGenFromFormat } from '@showdex/utils/dex';
 import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
 import { getCachedPresets } from '@showdex/utils/presets/getCachedPresets'; /** @todo fix circular dependency import */
 
-const l = logger('@showdex/redux/helpers/buildPresetQuery()');
+const l = logger('@showdex/redux/factories/buildPresetQuery()');
 
 /* eslint-disable @typescript-eslint/indent */
 
