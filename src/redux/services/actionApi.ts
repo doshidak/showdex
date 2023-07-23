@@ -1,6 +1,6 @@
 import qs from 'qs';
 import { HttpMethod } from '@showdex/consts/core';
-import { type ReduxBasePayload, createTagProvider } from '@showdex/redux/helpers';
+import { type ReduxBasePayload, createTagProvider } from '@showdex/redux/factories';
 import { env, runtimeFetch, safeJsonParse } from '@showdex/utils/core';
 import { showdownApi } from './showdownApi';
 import { ShowdownReduxTagType } from './tagTypes';
