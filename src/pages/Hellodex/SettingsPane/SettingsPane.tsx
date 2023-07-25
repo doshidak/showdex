@@ -1028,6 +1028,10 @@ export const SettingsPane = ({
                           This means sets will be downloaded again the next time you open Showdown.
                           <br />
                           <br />
+                          Selecting this option with sets already in the cache will <strong>clear</strong>{' '}
+                          the cache entirely.
+                          <br />
+                          <br />
                           This is the default behavior prior to v1.1.6.
                         </div>
                       ),
@@ -1896,7 +1900,12 @@ export const SettingsPane = ({
                       Guaranteed NHKO Labels
                     </div>
 
-                    <div className={styles.customFieldRow}>
+                    <div
+                      className={cx(
+                        styles.customFieldRow,
+                        inBattle && styles.centered,
+                      )}
+                    >
                       {Array(4).fill(null).map((_, i) => (
                         <Field<ShowdexSettings['calcdex']['nhkoLabels'][typeof i]>
                           key={`SettingsPane:Field:TextField:nhkoLabel:${i}`}
