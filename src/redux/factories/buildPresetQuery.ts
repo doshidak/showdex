@@ -3,7 +3,6 @@ import { type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { detectGenFromFormat } from '@showdex/utils/dex';
 import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
 import { getCachedPresets } from '@showdex/utils/presets/getCachedPresets'; /** @todo fix circular dependency import */
 
@@ -153,11 +152,7 @@ export const buildPresetQuery = <TResponse>(
 
     if (cacheEnabled) {
       const [presets, stale] = getCachedPresets(
-        filterByFormat
-          ? endpoint
-          : typeof format === 'number'
-            ? format
-            : detectGenFromFormat(format, gen),
+        endpoint,
         source,
         maxAge,
       );
