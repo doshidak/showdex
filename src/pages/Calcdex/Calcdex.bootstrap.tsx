@@ -992,7 +992,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     battle.nonce = calcBattleCalcdexNonce(battle, battleRoom.request);
 
     // this check is to make sure the state has been initialized before attempting to sync
-    if (!battleState.battleNonce) {
+    // update (2023/07/24): ok this is what I get for not using 'strict' mode butt fuck it
+    // (it's a good habit to always check your inputs anyways, especially cause things can go wrong during runtime!)
+    if (!battleState?.battleNonce) {
       return;
     }
 
