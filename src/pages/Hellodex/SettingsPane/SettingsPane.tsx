@@ -24,9 +24,11 @@ import {
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import {
+  clearStoredItem,
   env,
   getResourceUrl,
   getStoredItem,
+  nonEmptyObject,
   readClipboardText,
   writeClipboardText,
 } from '@showdex/utils/core';
@@ -65,26 +67,6 @@ export const SettingsPane = ({
   const colorScheme = useColorScheme();
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
-
-  const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
-    // const {
-    //   colorScheme: newColorScheme,
-    // } = values || {};
-
-    // if (newColorScheme && colorScheme !== newColorScheme) {
-    //   // note: Storage is a native Web API (part of the Web Storage API), but Showdown redefines it with its own Storage() function
-    //   // also, Dex.prefs() is an alias of Storage.prefs(), but w/o the `value` and `save` args
-    //   (Storage as unknown as Showdown.ClientStorage)?.prefs?.('theme', newColorScheme, true);
-    //
-    //   // this is how Showdown natively applies the theme lmao
-    //   // see: https://github.com/smogon/pokemon-showdown-client/blob/1ea5210a360b64ede48813d9572b59b7f3d7365f/js/client.js#L473
-    //   $?.('html').toggleClass('dark', newColorScheme === 'dark');
-    // }
-
-    if (Object.keys(values || {}).length) {
-      updateSettings(values);
-    }
-  };
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
@@ -274,20 +256,27 @@ export const SettingsPane = ({
   const [presetCacheSize, setPresetCacheSize] = React.useState(0);
   const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
 
+  const getPresetCacheSize = () => (getStoredItem('storage-preset-cache-key')?.length ?? 0) * 2;
+
+  // only updates the state when the size actually changes
+  const updatePresetCacheSize = () => {
+    const size = getPresetCacheSize();
+
+    if (size === presetCacheSize) {
+      return;
+    }
+
+    setPresetCacheSize(size);
+  };
+
+  // every 30 sec, check the preset cache size lmfao
   React.useEffect(() => {
     if (presetCacheTimeout.current) {
       return;
     }
 
-    const updateCacheSize = () => {
-      const presetCache = getStoredItem('storage-preset-cache-key');
-      const cachedPresetsSize = (presetCache?.length ?? 0) * 2;
-
-      setPresetCacheSize(cachedPresetsSize);
-    };
-
-    presetCacheTimeout.current = setTimeout(updateCacheSize, 30000);
-    updateCacheSize();
+    presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
+    updatePresetCacheSize();
 
     return () => {
       if (presetCacheTimeout.current) {
@@ -295,7 +284,37 @@ export const SettingsPane = ({
         presetCacheTimeout.current = null;
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- empty deps are intentional to only run on first mount
+
+  const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
+    if (!nonEmptyObject(values)) {
+      return;
+    }
+
+    const {
+      // colorScheme: newColorScheme,
+      calcdex,
+    } = values;
+
+    // if (newColorScheme && colorScheme !== newColorScheme) {
+    //   // note: Storage is a native Web API (part of the Web Storage API), but Showdown redefines it with its own Storage() function
+    //   // also, Dex.prefs() is an alias of Storage.prefs(), but w/o the `value` and `save` args
+    //   (Storage as unknown as Showdown.ClientStorage)?.prefs?.('theme', newColorScheme, true);
+    //
+    //   // this is how Showdown natively applies the theme lmao
+    //   // see: https://github.com/smogon/pokemon-showdown-client/blob/1ea5210a360b64ede48813d9572b59b7f3d7365f/js/client.js#L473
+    //   $?.('html').toggleClass('dark', newColorScheme === 'dark');
+    // }
+
+    // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
+    // intentionally checking 0 as to ignore null & undefined values
+    if (presetCacheSize && calcdex?.maxPresetAge === 0) {
+      clearStoredItem('storage-preset-cache-key');
+      updatePresetCacheSize();
+    }
+
+    updateSettings(values);
+  };
 
   return (
     <div
