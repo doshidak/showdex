@@ -61,7 +61,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     const endTimer = runtimer(l.scope, l);
 
-    const rootState = <RootState> api.getState();
+    const rootState = api.getState() as RootState;
     const settings = rootState?.showdex?.settings?.calcdex;
     const state = rootState?.calcdex;
 
@@ -119,7 +119,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     // update the gen, if provided
     if (typeof gen === 'number' && gen > 0) {
-      battleState.gen = <GenerationNum> gen;
+      battleState.gen = gen as GenerationNum;
     }
 
     // detect the battle's rules
@@ -182,11 +182,16 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     // keep track of CalcdexPokemon mutations from one player to another
     // (e.g., revealed properties of the transform target Pokemon from the current player's transformed Pokemon)
-    const futureMutations = AllPlayerKeys.reduce((prev, key) => {
+    const futureMutations = AllPlayerKeys.reduce<Record<CalcdexPlayerKey, DeepPartial<CalcdexPokemon>[]>>((prev, key) => {
       prev[key] = [];
 
       return prev;
-    }, <Record<CalcdexPlayerKey, DeepPartial<CalcdexPokemon>[]>> {});
+    }, {
+      p1: null,
+      p2: null,
+      p3: null,
+      p4: null,
+    });
 
     for (const playerKey of AllPlayerKeys) {
       // l.debug('Processing player', playerKey);
@@ -373,7 +378,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // at this point, most likely means that the Pokemon is not yet revealed,
         // so convert the ServerPokemon into a partially-filled Pokemon object
-        return <DeepPartial<Showdown.Pokemon>> {
+        return {
           calcdexId: serverPokemon.calcdexId,
           ident: serverPokemon.ident,
           searchid: serverPokemon.searchid,
@@ -384,7 +389,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           level: serverPokemon.level,
           hp: serverPokemon.hp,
           maxhp: serverPokemon.maxhp,
-        };
+        } as DeepPartial<Showdown.Pokemon>;
       });
 
       l.debug(
@@ -568,8 +573,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 syncedPokemon.dirtyItem = null;
               }
 
-              if (matchedPreset.teraTypes?.length && PokemonTypes.includes(<Showdown.TypeName> matchedPreset.teraTypes[0])) {
-                [syncedPokemon.revealedTeraType] = <Showdown.TypeName[]> matchedPreset.teraTypes;
+              if (matchedPreset.teraTypes?.length && PokemonTypes.includes(matchedPreset.teraTypes[0] as Showdown.TypeName)) {
+                [syncedPokemon.revealedTeraType] = matchedPreset.teraTypes as Showdown.TypeName[];
                 syncedPokemon.teraType = syncedPokemon.revealedTeraType;
               }
 
@@ -606,7 +611,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (syncedPokemon.serverSourced && syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
           // since we sanitized the volatiles earlier, we actually need the pointer to the target pokemon
           // from the original Showdown.Pokemon (i.e., the clientPokemon) to retrieve its ident
-          const targetClientPokemon = <Showdown.Pokemon> <unknown> clientPokemon.volatiles.transform[1];
+          const targetClientPokemon = clientPokemon.volatiles.transform[1] as unknown as Showdown.Pokemon;
           const targetPlayerKey = (!!targetClientPokemon?.ident && detectPlayerKeyFromPokemon(targetClientPokemon)) || null;
 
           // update: this isn't fool-proof since the corresponding state of the targetClientPokemon
