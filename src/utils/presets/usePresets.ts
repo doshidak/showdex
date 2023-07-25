@@ -162,7 +162,7 @@ export const usePresets = ({
 }): CalcdexPresetsHookInterface => {
   const settings = useCalcdexSettings();
 
-  const maxAge: Duration = settings?.maxPresetAge
+  const maxAge: Duration = typeof settings?.maxPresetAge === 'number' && settings.maxPresetAge > 0
     ? { days: settings.maxPresetAge }
     : null;
 
