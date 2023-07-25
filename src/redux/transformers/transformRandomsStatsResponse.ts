@@ -1,8 +1,7 @@
-import { type GenerationNum } from '@smogon/calc';
 import { type PkmnSmogonPresetRequest, type PkmnSmogonRandomsStatsResponse } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { detectLegacyGen } from '@showdex/utils/dex';
 import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
@@ -22,22 +21,21 @@ export const transformRandomsStatsResponse = (
   _meta: unknown,
   args: Omit<PkmnSmogonPresetRequest, 'formatOnly'>,
 ): CalcdexPokemonPreset[] => {
-  if (!Object.keys(response || {}).length) {
+  if (!args?.gen || !nonEmptyObject(response)) {
     return [];
   }
 
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen || env.int<GenerationNum>('calcdex-default-gen');
-  const legacy = detectLegacyGen(gen);
+  const legacy = detectLegacyGen(args.gen);
   const defaultIv = legacy ? 30 : 31;
 
   Object.entries(response).forEach(([
     speciesForme,
     usageStats,
   ]) => {
-    if (!speciesForme || !Object.keys(usageStats || {}).length) {
+    if (!speciesForme || !nonEmptyObject(usageStats)) {
       return;
     }
 
@@ -56,8 +54,8 @@ export const transformRandomsStatsResponse = (
       id: null,
       source: 'usage',
       name: 'Showdown Usage',
-      gen,
-      format: args?.format ?? `gen${gen}randombattle`,
+      gen: args.gen,
+      format: args?.format || `gen${args.gen}randombattle`,
 
       speciesForme,
       level,
@@ -99,12 +97,12 @@ export const transformRandomsStatsResponse = (
 
     // note: either `preset` or `rolePreset` will be pushed to the `output` array!
     // (former if there are no roles and latter if there are)
-    if (Object.keys(roles || {}).length) {
+    if (nonEmptyObject(roles)) {
       Object.entries(roles).forEach(([
         roleName,
         roleStats,
       ]) => {
-        if (!roleName || !Object.keys(roleStats?.moves || {}).length) {
+        if (!roleName || !nonEmptyObject(roleStats?.moves)) {
           return;
         }
 
@@ -128,7 +126,7 @@ export const transformRandomsStatsResponse = (
           rolePreset.usage = weight;
         }
 
-        if (Object.keys(roleAbilities || {}).length) {
+        if (nonEmptyObject(roleAbilities)) {
           const altRoleAbilities = processUsageAlts(roleAbilities);
 
           if (altRoleAbilities.length) {
@@ -137,7 +135,7 @@ export const transformRandomsStatsResponse = (
           }
         }
 
-        if (Object.values(roleItems || {}).length) {
+        if (nonEmptyObject(roleItems)) {
           const altRoleItems = processUsageAlts(roleItems);
 
           if (altRoleItems.length) {
@@ -170,7 +168,7 @@ export const transformRandomsStatsResponse = (
           output.push(rolePreset);
         }
       });
-    } else if (Object.keys(moves || {})) {
+    } else if (nonEmptyObject(moves)) {
       preset.altMoves = processUsageAlts(moves);
 
       /**
