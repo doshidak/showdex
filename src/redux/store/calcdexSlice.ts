@@ -5,13 +5,13 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
-import { type State as SmogonState } from '@smogon/calc';
 import {
   type AbilityName,
   type GenerationNum,
   type ItemName,
   type MoveName,
-} from '@smogon/calc/dist/data/interface';
+  type State as SmogonState,
+} from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
@@ -1887,7 +1887,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         opponentKey,
         switchPlayers,
 
-        ...AllPlayerKeys.reduce((prev, currentPlayerKey) => {
+        ...AllPlayerKeys.reduce<Record<CalcdexPlayerKey, CalcdexPlayer>>((prev, currentPlayerKey) => {
           prev[currentPlayerKey] = {
             // all of these can technically be overridden in payload[currentPlayerKey]
             sideid: currentPlayerKey,
@@ -1914,7 +1914,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           };
 
           return prev;
-        }, <Record<CalcdexPlayerKey, CalcdexPlayer>> {
+        }, {
           p1: null,
           p2: null,
           p3: null,
