@@ -38,6 +38,7 @@ export const applyPreset = (
 
   const legacy = detectLegacyGen(gen);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   // this will be our final return value
   const output: Partial<CalcdexPokemon> = {
@@ -64,16 +65,14 @@ export const applyPreset = (
       spe: preset?.ivs?.spe ?? defaultIv,
     },
 
-    // not specifying the 0's may cause any unspecified EVs to remain!
+    // not specifying the defaultEv's may cause any unspecified EVs to remain!
     evs: {
-      ...(!legacy && {
-        hp: preset.evs?.hp || 0,
-        atk: preset.evs?.atk || 0,
-        def: preset.evs?.def || 0,
-        spa: preset.evs?.spa || 0,
-        spd: preset.evs?.spd || 0,
-        spe: preset.evs?.spe || 0,
-      }),
+      hp: preset.evs?.hp ?? defaultEv,
+      atk: preset.evs?.atk ?? defaultEv,
+      def: preset.evs?.def ?? defaultEv,
+      spa: preset.evs?.spa ?? defaultEv,
+      spd: preset.evs?.spd ?? defaultEv,
+      spe: preset.evs?.spe ?? defaultEv,
     },
   };
 

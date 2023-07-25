@@ -50,7 +50,7 @@ import { dehydrateStatsTable } from './dehydrateStatsTable';
  *   - During hydration, `moves[]` will be extracted from the *first* 4 elements of the hydrated array.
  * * `ntr`, representing the `nature` for gens 3+.
  * * `ivs`, representing the `ivs` (or DVs converted into IVs for legacy gens).
- * * `evs`, representing the `evs` for gens 3+.
+ * * `evs`, representing the `evs` (or technically "stat EXP" converted into EVs [hence why they're supposedly used] in legacy gens).
  * * `pkb`, representing the `pokeball`, if any lol.
  *
  * For `CalcdexPokemonAlt<T>[]` properties, specifically `teraTypes` (`ter`), `altAbilities` (`abl`), `altItems` (`itm`), & `altMoves` (`mov`),

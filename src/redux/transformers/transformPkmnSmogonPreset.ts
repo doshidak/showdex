@@ -32,6 +32,7 @@ export const transformPkmnSmogonPreset = (
 
   const legacy = detectLegacyGen(gen);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   const {
     teraTypes: presetTeraTypes,
@@ -75,7 +76,14 @@ export const transformPkmnSmogonPreset = (
       spe: typeof ivs?.spe === 'number' ? ivs.spe : defaultIv,
     },
 
-    evs: { ...(!legacy && evs) },
+    evs: {
+      hp: typeof evs?.hp === 'number' ? evs.hp : defaultEv,
+      atk: typeof evs?.atk === 'number' ? evs.atk : defaultEv,
+      def: typeof evs?.def === 'number' ? evs.def : defaultEv,
+      spa: typeof evs?.spa === 'number' ? evs.spa : defaultEv,
+      spd: typeof evs?.spd === 'number' ? evs.spd : defaultEv,
+      spe: typeof evs?.spe === 'number' ? evs.spe : defaultEv,
+    },
   };
 
   // if the response omitted the `ability`, then grab it from the dex

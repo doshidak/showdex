@@ -536,15 +536,15 @@ export const syncPokemon = (
 
       // in case a post-transformed Ditto breaks the original preset
       const presetValid = (legacy || !!serverPreset.nature)
-        && nonEmptyObject({ ...serverPreset.ivs, ...(!legacy && serverPreset.evs) });
+        && nonEmptyObject({ ...serverPreset.ivs, ...serverPreset.evs });
 
       // apply the serverPreset if it's valid
       if (presetValid) {
         syncedPokemon.ivs = { ...serverPreset.ivs };
+        syncedPokemon.evs = { ...serverPreset.evs };
 
         if (!legacy) {
           syncedPokemon.nature = serverPreset.nature;
-          syncedPokemon.evs = { ...serverPreset.evs };
         }
 
         // calculate the stats with the EVs/IVs from the server preset

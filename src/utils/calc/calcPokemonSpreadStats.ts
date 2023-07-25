@@ -29,6 +29,8 @@ export const calcPokemonSpreadStats = (
   }
 
   const legacy = detectLegacyGen(format);
+  const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   return PokemonStatNames.reduce((prev, stat) => {
     // update (2023/02/07): cleaned up the baseStat fuckery that existed before
@@ -42,8 +44,8 @@ export const calcPokemonSpreadStats = (
       format,
       stat,
       baseStat,
-      pokemon.ivs?.[stat] ?? (legacy ? 30 : 31),
-      legacy ? undefined : pokemon.evs?.[stat] ?? 0,
+      pokemon.ivs?.[stat] ?? defaultIv,
+      pokemon.evs?.[stat] ?? defaultEv,
       pokemon.level ?? 100,
       legacy ? undefined : pokemon.nature,
     );

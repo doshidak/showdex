@@ -33,7 +33,7 @@ export const transformRandomsPresetResponse = (
   // for more info about why 84 EVs is the default value for each stat
   const legacy = detectLegacyGen(args.gen);
   const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 0 : 84;
+  const defaultEv = legacy ? 252 : 84;
 
   // at least this is only O(n)
   // ...stonks
@@ -92,14 +92,12 @@ export const transformRandomsPresetResponse = (
       },
 
       evs: {
-        ...(!legacy && {
-          hp: evs?.hp ?? defaultEv,
-          atk: evs?.atk ?? defaultEv,
-          def: evs?.def ?? defaultEv,
-          spa: evs?.spa ?? defaultEv,
-          spd: evs?.spd ?? defaultEv,
-          spe: evs?.spe ?? defaultEv,
-        }),
+        hp: evs?.hp ?? defaultEv,
+        atk: evs?.atk ?? defaultEv,
+        def: evs?.def ?? defaultEv,
+        spa: evs?.spa ?? defaultEv,
+        spd: evs?.spd ?? defaultEv,
+        spe: evs?.spe ?? defaultEv,
       },
     };
 

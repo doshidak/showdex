@@ -119,6 +119,7 @@ export const importPokePaste = (
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(format);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   // this will be our final return value
   const preset: CalcdexPokemonPreset = {
@@ -143,14 +144,12 @@ export const importPokePaste = (
     },
 
     evs: {
-      ...(!legacy && {
-        hp: 0,
-        atk: 0,
-        def: 0,
-        spa: 0,
-        spd: 0,
-        spe: 0,
-      }),
+      hp: defaultEv,
+      atk: defaultEv,
+      def: defaultEv,
+      spa: defaultEv,
+      spd: defaultEv,
+      spe: defaultEv,
     },
 
     nature: 'Hardy',

@@ -201,12 +201,15 @@ export const exportPokePaste = (
   // IVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 31 [or 30, if legacy])
   // EVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 0) -- only in non-legacy
   // (where <stat> is HP, Atk, Def, SpA, SpD, or Spe)
+  const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
+
   if (nonEmptyObject(ivs)) {
     // in legacy gens, max DV is 15, which equates to 30 IVs (NOT 31!)
     // additionally in gen 1 only, Showdown exports SPC as SPA, so SPD is unused
     const exportedIvs = exportStatsTable(
       ivs,
-      legacy ? 30 : 31,
+      defaultIv,
       gen === 1 ? 'spd' : null,
     );
 
@@ -215,8 +218,8 @@ export const exportPokePaste = (
     }
   }
 
-  if (!legacy && nonEmptyObject(evs)) {
-    const exportedEvs = exportStatsTable(evs, 0);
+  if (nonEmptyObject(evs)) {
+    const exportedEvs = exportStatsTable(evs, defaultEv);
 
     if (exportedEvs) {
       output.push(`EVs: ${exportedEvs}`);

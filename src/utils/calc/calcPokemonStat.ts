@@ -52,7 +52,7 @@ export const calcPokemonStat = (
   // const supportsEvs = !legacy && !supportsAvs;
 
   const actualIv = clamp(0, legacy ? iv - (iv % 2 === 1 ? 1 : 0) : iv);
-  const actualEv = clamp(0, legacy ? 252 : ev || 0);
+  const actualEv = clamp(0, ev ?? (legacy ? 252 : 0));
   const actualLevel = clamp(0, level, 100);
 
   if (stat === 'hp') {

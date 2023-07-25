@@ -23,7 +23,7 @@ import {
   sanitizePokemon,
 } from '@showdex/utils/battle';
 import {
-  calcLegacyHpDv,
+  calcLegacyHpIv,
   calcPokemonSpreadStats,
   convertLegacyDvToIv,
   getLegacySpcDv,
@@ -211,7 +211,7 @@ export const CalcdexProvider = ({
         payload.ivs.spd = payload.ivs.spa;
 
         // recalculate & convert the HP DV into an IV
-        payload.ivs.hp = convertLegacyDvToIv(calcLegacyHpDv(payload.ivs));
+        payload.ivs.hp = calcLegacyHpIv(payload.ivs);
 
         // also, remove any incompatible mechanics (like abilities and natures) from the payload
         // (it's ok that the payload doesn't actually have these properties)

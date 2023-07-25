@@ -30,6 +30,7 @@ export const transformRandomsStatsResponse = (
 
   const legacy = detectLegacyGen(args.gen);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 84;
 
   Object.entries(response).forEach(([
     speciesForme,
@@ -71,14 +72,12 @@ export const transformRandomsStatsResponse = (
       },
 
       evs: {
-        ...(!legacy && {
-          hp: evs?.hp ?? 84,
-          atk: evs?.atk ?? 84,
-          def: evs?.def ?? 84,
-          spa: evs?.spa ?? 84,
-          spd: evs?.spd ?? 84,
-          spe: evs?.spe ?? 84,
-        }),
+        hp: evs?.hp ?? defaultEv,
+        atk: evs?.atk ?? defaultEv,
+        def: evs?.def ?? defaultEv,
+        spa: evs?.spa ?? defaultEv,
+        spd: evs?.spd ?? defaultEv,
+        spe: evs?.spe ?? defaultEv,
       },
     };
 

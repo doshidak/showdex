@@ -35,12 +35,13 @@ export const createSmogonPokemon = (
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
 
-  if (!dex || gen < 1 || !pokemon?.calcdexId || !pokemon?.speciesForme) {
+  if (!dex || gen < 1 || !pokemon?.calcdexId || !pokemon.speciesForme) {
     return null;
   }
 
   const legacy = detectLegacyGen(gen);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
@@ -152,13 +153,13 @@ export const createSmogonPokemon = (
       spe: pokemon.ivs?.spe ?? defaultIv,
     },
 
-    evs: legacy ? undefined : {
-      hp: pokemon.evs?.hp ?? 0,
-      atk: pokemon.evs?.atk ?? 0,
-      def: pokemon.evs?.def ?? 0,
-      spa: pokemon.evs?.spa ?? 0,
-      spd: pokemon.evs?.spd ?? 0,
-      spe: pokemon.evs?.spe ?? 0,
+    evs: {
+      hp: pokemon.evs?.hp ?? defaultEv,
+      atk: pokemon.evs?.atk ?? defaultEv,
+      def: pokemon.evs?.def ?? defaultEv,
+      spa: pokemon.evs?.spa ?? defaultEv,
+      spd: pokemon.evs?.spd ?? defaultEv,
+      spe: pokemon.evs?.spe ?? defaultEv,
     },
 
     // update (2023/05/15): typically only used to provide the client-reported stat

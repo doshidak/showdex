@@ -281,6 +281,7 @@ export const hydratePresets = (
   // e.g., format = 9 -> formatFilter = 'fmt~gen9'
   // format = 'gen9randombattle' -> formatFilter = 'fmt~gen9randombattle'
   const formatDeclaration = `${HydroPresetsDehydrationMap.format}${presetOpcodeDelimiter}`;
+  const randomsRegex = new RegExp(`${formatDeclaration}gen\\d.*random`, 'i');
   const formatFilter = parsedFormat ? `${formatDeclaration}${parsedFormat}` : null;
   const sourceFilter = source ? `${HydroPresetsDehydrationMap.source}${presetOpcodeDelimiter}${source}` : null;
 
@@ -289,8 +290,9 @@ export const hydratePresets = (
       p?.startsWith(`p${opcodeDelimiter}`) // all dehydrated presets must start with this to indicate it's a dehydrated preset (duh)
         && (!formatFilter || ( // pass if formatFilter is falsy (due to an invalid `format` arg, e.g., wasn't provided)
           p.includes(formatFilter) // at this point, formatFilter is truthy, so pass if this contains the dehydrated format
-            // pass if not randoms, or if it is, the dehydrated preset contains the word 'random' in its dehydrated format
-            && (!randoms || new RegExp(`${formatDeclaration}gen\\d.*random`, 'i').test(p))
+            // pass if the format is randoms & the dehydrated preset contains the word 'random' in its dehydrated format
+            // otherwise, make sure the dehydrated format doesn't contain random! (don't want it showing up in an OU game, for instance)
+            && (randoms ? randomsRegex.test(p) : !randomsRegex.test(p))
         ))
         // pass if sourceFilter is falsy (due to an invalid `source` arg) or this contains the dehydrated source
         && (!sourceFilter || p.includes(sourceFilter))
