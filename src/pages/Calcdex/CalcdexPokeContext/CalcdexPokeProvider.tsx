@@ -187,58 +187,21 @@ export const CalcdexPokeProvider = ({
       ? presets.find((p) => p?.calcdexId === presetOrId)
       : presetOrId;
 
-    if (!preset?.calcdexId || appliedPreset(format, playerPokemon, preset)) {
+    if (!preset?.calcdexId) {
       return;
     }
 
-    // const mutation: CalcdexPokemonMutation = {
-    //   ...additionalMutations,
-    //
-    //   calcdexId: playerPokemon?.calcdexId,
-    //   presetId: preset.calcdexId,
-    //
-    //   // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
-    //   // the new preset (don't want alts from a previous set to persist if none are defined)
-    //   altTeraTypes: [],
-    //   altAbilities: [],
-    //   dirtyAbility: preset.ability,
-    //   nature: preset.nature,
-    //   altItems: [],
-    //   dirtyItem: preset.item,
-    //   altMoves: [],
-    //   moves: preset.moves,
-    //
-    //   ivs: {
-    //     hp: preset?.ivs?.hp ?? defaultIv,
-    //     atk: preset?.ivs?.atk ?? defaultIv,
-    //     def: preset?.ivs?.def ?? defaultIv,
-    //     spa: preset?.ivs?.spa ?? defaultIv,
-    //     spd: preset?.ivs?.spd ?? defaultIv,
-    //     spe: preset?.ivs?.spe ?? defaultIv,
-    //   },
-    //
-    //   // not specifying the 0's may cause any unspecified EVs to remain!
-    //   evs: {
-    //     ...(!legacy && {
-    //       hp: preset.evs?.hp || 0,
-    //       atk: preset.evs?.atk || 0,
-    //       def: preset.evs?.def || 0,
-    //       spa: preset.evs?.spa || 0,
-    //       spd: preset.evs?.spd || 0,
-    //       spe: preset.evs?.spe || 0,
-    //     }),
-    //   },
-    // };
-    //
-    // if (!mutation.calcdexId) {
-    //   return;
-    // }
-    //
-    // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
-    // if the preset was for its non-Mega forme (since they could have different abilities)
-    // if (hasMegaForme(playerPokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
-    //   delete mutation.dirtyAbility;
-    // }
+    if (appliedPreset(format, playerPokemon, preset)) {
+      if (playerPokemon.presetId !== preset.calcdexId) {
+        updatePokemon(playerKey, {
+          ...additionalMutations,
+          calcdexId: playerPokemon.calcdexId,
+          presetId: preset.calcdexId,
+        }, scope || `${baseScope}:applyPreset()`);
+      }
+
+      return;
+    }
 
     // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
     // (normally only an issue in Gen 9 Randoms with their role system, which has multiple usage presets)
@@ -439,6 +402,7 @@ export const CalcdexPokeProvider = ({
     updatePokemon(playerKey, {
       ...additionalMutations,
       ...applyPreset(format, playerPokemon, preset, detectedUsage),
+      calcdexId: playerPokemon.calcdexId, // applyPreset() provides this, but just in case lol
     }, `${baseScope}:applyPreset() via ${scope || '(anon)'}`);
   }, [
     // defaultIv,
