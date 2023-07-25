@@ -1,4 +1,5 @@
 export * from './appliedPreset';
+export * from './applyPreset';
 export * from './cachePresets';
 export * from './detectUsageAlt';
 export * from './exportPokePaste';
