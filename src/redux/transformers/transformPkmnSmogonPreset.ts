@@ -3,7 +3,7 @@ import { type PkmnSmogonPreset } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
-import { detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
+import { detectLegacyGen, getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
 
 /**
  * Internal transformer for converting a single `PkmnSmogonPreset` from the pkmn Sets API into a `CalcdexPokemonPreset`.
@@ -52,7 +52,7 @@ export const transformPkmnSmogonPreset = (
     source: 'smogon',
     name: presetName || 'Smogon Set', // e.g., 'Defensive Pivot'
     gen,
-    format: format.replace(`gen${gen}`, ''), // just in case; e.g., 'ou'
+    format: getGenlessFormat(format), // just in case; e.g., 'ou'
 
     speciesForme, // do not sanitize
     ability: Array.isArray(ability) ? ability[0] : ability,

@@ -3,7 +3,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectLegacyGen } from '@showdex/utils/dex';
+import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsStatsResponse()');
@@ -55,7 +55,7 @@ export const transformRandomsStatsResponse = (
       source: 'usage',
       name: 'Showdown Usage',
       gen: args.gen,
-      format: args?.format || `gen${args.gen}randombattle`,
+      format: getGenlessFormat(args?.format) || 'randombattle',
 
       speciesForme,
       level,

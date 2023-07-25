@@ -3,7 +3,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectLegacyGen } from '@showdex/utils/dex';
+import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse()');
 
@@ -61,7 +61,7 @@ export const transformRandomsPresetResponse = (
       source: 'smogon',
       name: 'Randoms',
       gen: args.gen,
-      format: args.format || `gen${args.gen}randombattle`, // e.g., 'gen8randombattle'
+      format: getGenlessFormat(args.format) || 'randombattle',
 
       speciesForme, // do not sanitize
       level,

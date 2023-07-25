@@ -5,6 +5,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
+import { getGenlessFormat } from '@showdex/utils/dex';
 import { processUsageAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/transformers/transformFormatStatsResponse()');
@@ -52,7 +53,7 @@ export const transformFormatStatsResponse = (
       source: 'usage',
       name: 'Showdown Usage',
       gen: args.gen,
-      format: args?.format?.replace(`gen${args.gen}`, ''),
+      format: getGenlessFormat(args?.format),
       speciesForme,
     };
 
