@@ -380,6 +380,20 @@ export const syncPokemon = (
             && boosterVolatile.replace(/^(?:protosynthesis|quarkdrive)/i, '')
         ) as Showdown.StatNameNoHp || null;
 
+        // check for a server-reported faintCounter
+        // e.g., { fallen1: ['fallen1'] }
+        const fallenVolatile = Object.keys(volatiles).find((k) => k?.startsWith('fallen'));
+        const faintCounter = parseInt(fallenVolatile?.replace('fallen', ''), 10) || 0; // e.g., 'fallen1' -> 1
+
+        if (faintCounter) {
+          syncedPokemon.faintCounter = faintCounter;
+
+          // auto-clear the dirtyFaintCounter if the user previously set one
+          if (typeof syncedPokemon.dirtyFaintCounter === 'number') {
+            syncedPokemon.dirtyFaintCounter = null;
+          }
+        }
+
         // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
         value = sanitizeVolatiles(clientPokemon);
 
