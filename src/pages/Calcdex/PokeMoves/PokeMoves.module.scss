@@ -230,6 +230,10 @@ button.damageButton {
   @include flex.row-between;
   @include spacing.margin($left: 5px);
 
+  &.editorHeader {
+    @include flex.row-end;
+  }
+
   .moveProperty {
     font-size: 8px;
     user-select: none;

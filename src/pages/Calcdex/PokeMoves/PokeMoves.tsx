@@ -12,7 +12,12 @@ import {
 } from '@showdex/components/ui';
 import { type CalcdexMoveOverride, useColorScheme } from '@showdex/redux/store';
 import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
-import { clamp, upsizeArray, writeClipboardText } from '@showdex/utils/core';
+import {
+  clamp,
+  formatId,
+  upsizeArray,
+  writeClipboardText,
+} from '@showdex/utils/core';
 import { legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { formatDamageAmounts } from '@showdex/utils/ui';
@@ -78,12 +83,14 @@ export const PokeMoves = ({
     && (nationalDexFormat || (gen === 8 && !format?.includes('bdsp')));
 
   const disableMaxToggle = !pokemon?.speciesForme;
-  //  || (player?.usedMax && battleActive);
 
   const showEditButton = !!pokemon?.speciesForme && (
     settings?.showMoveEditor === 'always'
       || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
   );
+
+  const showFaintCounter = !!pokemon?.speciesForme
+    && formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord';
 
   const handleMoveChange = (name: MoveName, index: number) => {
     const moves = upsizeArray(
@@ -150,11 +157,6 @@ export const PokeMoves = ({
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
             label="Tera"
-            // tooltip={[
-            //   pokemon?.terastallized ? 'Revert' : 'Terastallize',
-            //   'to',
-            //   (pokemon?.terastallized ? pokemon?.types?.join('/') : pokemon?.teraType) || '???',
-            // ].join(' ')}
             tooltip={(
               <div className={styles.descTooltip}>
                 {
@@ -280,12 +282,69 @@ export const PokeMoves = ({
 
       {pokemon?.showMoveOverrides ? (
         <TableGridItem
-          className={cx(styles.header, styles.editorHeader)}
+          className={cx(
+            styles.header,
+            styles.editorHeader,
+            showFaintCounter && styles.editorItem,
+          )}
           header
+          align="right"
         >
           {/* <div className={styles.headerTitle}>
             Properties
           </div> */}
+
+          {
+            showFaintCounter &&
+            <>
+              <ToggleButton
+                className={styles.editorButton}
+                style={{
+                  marginRight: '1em',
+                  ...(pokemon.dirtyFaintCounter ? undefined : { opacity: 0 }),
+                }}
+                label="Reset"
+                tooltip={`Reset to ${pokemon.faintCounter} Fallen`}
+                tooltipDisabled={!settings?.showUiTooltips}
+                primary={!!pokemon.dirtyFaintCounter}
+                disabled={!pokemon.dirtyFaintCounter}
+                onPress={() => updatePokemon({
+                  dirtyFaintCounter: null,
+                }, `${baseScope}:ToggleButton~ResetFaintCounter:onPress()`)}
+              />
+
+              <div
+                className={styles.moveProperty}
+                style={{ marginRight: '0.5em' }}
+              >
+                <ValueField
+                  className={styles.valueField}
+                  label={`Fallen Allies Count for Pokemon ${friendlyPokemonName}`}
+                  hideLabel
+                  hint={pokemon.dirtyFaintCounter || pokemon.faintCounter || 0}
+                  fallbackValue={pokemon.faintCounter || 0}
+                  min={0}
+                  max={player.maxPokemon}
+                  step={1}
+                  shiftStep={2}
+                  clearOnFocus
+                  absoluteHover
+                  input={{
+                    value: pokemon.dirtyFaintCounter || pokemon.faintCounter || 0,
+                    onChange: (value: number) => updatePokemon({
+                      dirtyFaintCounter: value === pokemon.faintCounter
+                        ? null
+                        : value,
+                    }, `${baseScope}:ValueField~FaintCounter:input.onChange()`),
+                  }}
+                />
+
+                <div className={styles.propertyName}>
+                  Fallen
+                </div>
+              </div>
+            </>
+          }
         </TableGridItem>
       ) : (
         <>
@@ -538,7 +597,7 @@ export const PokeMoves = ({
                               moveOverrides: {
                                 [moveName]: { [basePowerKey]: clamp(0, value, 999) },
                               },
-                            }),
+                            }, `${baseScope}:ValueField~BasePower:input.onChange()`),
                           }}
                         />
 
@@ -676,7 +735,7 @@ export const PokeMoves = ({
                       moveOverrides: {
                         [moveName]: null,
                       },
-                    }, `${baseScope}:ToggleButton~Reset:onPress()`)}
+                    }, `${baseScope}:ToggleButton~ResetMoveOverrides:onPress()`)}
                   />
                 </div>
               </TableGridItem>
