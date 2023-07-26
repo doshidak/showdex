@@ -63,7 +63,7 @@ export const calcMoveBasePower = (
   const abilityId = formatId(pokemon?.dirtyAbility || pokemon?.ability);
 
   const hitCounter = clamp(0, pokemon?.hitCounter || 0);
-  const faintCounter = clamp(0, pokemon?.faintCounter || 0);
+  const faintCounter = clamp(0, pokemon?.dirtyFaintCounter || pokemon?.faintCounter || 0);
 
   if (moveId === 'ragefist' && hitCounter > 0) {
     basePower = clamp(0, basePower * (1 + hitCounter), 350);

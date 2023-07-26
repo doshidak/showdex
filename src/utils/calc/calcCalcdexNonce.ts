@@ -34,6 +34,7 @@ const calcPokemonCalcdexNonce = (
   teraType: (!!pokemon?.speciesForme && 'teraType' in pokemon && pokemon.teraType)
     || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
     || null,
+  revealedTeraType: (!!pokemon?.speciesForme && 'revealedTeraType' in pokemon && pokemon.revealedTeraType) || null,
   item: pokemon?.item,
   dirtyItem: (!!pokemon?.speciesForme && 'dirtyItem' in pokemon && pokemon.dirtyItem) || null,
   // altItems: (!!pokemon?.speciesForme && 'altItems' in pokemon && flattenAlts(pokemon.altItems)?.join(';')) || null,
@@ -57,6 +58,7 @@ const calcPokemonCalcdexNonce = (
     || (!!pokemon?.speciesForme && 'timesAttacked' in pokemon && pokemon.timesAttacked?.toString())
     || null,
   faintCounter: (!!pokemon?.speciesForme && 'faintCounter' in pokemon && pokemon.faintCounter?.toString()) || null,
+  dirtyFaintCounter: (!!pokemon?.speciesForme && 'dirtyFaintCounter' in pokemon && pokemon.dirtyFaintCounter?.toString()) || null,
   moves: pokemon?.moves?.join(';'),
   // altMoves: (!!pokemon?.speciesForme && 'altMoves' in pokemon && flattenAlts(pokemon.altMoves)?.join(';')) || null,
   moveTrack: calcCalcdexId((pokemon?.moveTrack as CalcdexPokemon['moveTrack'])?.map((t) => t?.join(':'))?.join(';')),

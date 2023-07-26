@@ -715,8 +715,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * Any move, regardless of it doing damage, can be stored here.
    *   - If the mechanic boosts BP based on consecutive usage, then Status moves would be unaffected, obviously!
    * * Showdown doesn't provide this info, so this information is derived by the Calcdex during battle syncs.
-   *   - As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet (probably in v1.1.4).
    *
+   * @deprecated As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet.
    * @default null
    * @since 1.1.3
    */
@@ -742,8 +742,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - Attacking Pokemon misses the move (e.g., *High Jump Kick* with 90% accuracy),
    *   - Attacking Pokemon's status prevents usage of the move (e.g., Paralysis, Sleep).
    * * Showdown doesn't provide this info, so this information is derived by the Calcdex during battle syncs.
-   *   - As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet (probably in v1.1.4).
    *
+   * @deprecated As of v1.1.3, this is currently unpopulated since the `stepQueue` parser isn't written yet.
    * @default 0
    * @since 1.1.3
    */
@@ -799,11 +799,26 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *     updated on subsequent faints from other Pokemon (i.e., will remain at `2`).
    *   - When refreshing the page on a completed battle, this value will be set to the reported
    *     `faintCounter` minus `1` (minimum `0`) to account for this Pokemon if it were still alive.
+   * * Update (2023/07/25): Apparently this value should only be updated when the Pokemon is **not** active!
+   *   - This applies more in Doubles formats, where allies can faint while the Pokemon is active.
+   *   - This value shouldn't be updated during that time, only when switched out.
    *
    * @default 0
    * @since 1.1.0
    */
   faintCounter?: number;
+
+  /**
+   * Basically `faintCounter`, but user-specified.
+   *
+   * * Use this like any other dirty property like `dirtyAbility`, `dirtyItem`, etc.
+   *   - i.e., Read this value first, then fallback to the non-dirty counterpart (i.e., `faintCounter`).
+   * * Pretty much only used for *Supreme Overlord* (but don't assume just *Kingambit* cause Hackmons lmao).
+   *
+   * @default null
+   * @since 1.1.6
+   */
+  dirtyFaintCounter?: number;
 
   /**
    * Preset that's currently being applied to the Pokemon.

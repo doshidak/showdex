@@ -186,6 +186,7 @@ export const sanitizePokemon = (
     toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter) || pokemon?.statusData?.toxicTurns || 0,
     hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter) || pokemon?.timesAttacked || 0,
     faintCounter: ('faintCounter' in pokemon && pokemon.faintCounter) || 0,
+    dirtyFaintCounter: ('dirtyFaintCounter' in pokemon && pokemon.dirtyFaintCounter) || null,
 
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
     useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
