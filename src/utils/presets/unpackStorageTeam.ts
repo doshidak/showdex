@@ -126,12 +126,12 @@ export const unpackStorageTeam = (
 
       // update (2023/01/05): IV parsing may not happen since the split value could be an empty string
       ivs: {
-        hp: defaultEv,
-        atk: defaultEv,
-        def: defaultEv,
-        spa: defaultEv,
-        spd: defaultEv,
-        spe: defaultEv,
+        hp: defaultIv,
+        atk: defaultIv,
+        def: defaultIv,
+        spa: defaultIv,
+        spd: defaultIv,
+        spe: defaultIv,
       },
 
       // update (2023/07/25): now adding EVs cause apparently they're sometimes used in legacy gens lol
