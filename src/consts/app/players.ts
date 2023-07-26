@@ -136,7 +136,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     ['ttoki', 'twitch.tv/tt0ki'],
   ],
 }, {
-  title: 'Showdex VIP',
+  title: 'Showdex Royalty',
   supporterId: null,
   custom: false,
   icon: 'crown',
@@ -148,10 +148,17 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   },
 
   userIds: [
-    'agentlag',
+    'agentlag', // Lazosful
+    'dbkeith',
     ['finchinator', 'Our Lord and Savior'],
+    'heavancanwait', // DBKEITH
+    'lesarlags', // Lazosful
+    'l4z0s', // Lazosful
     ['mudkipnerd', "What's a King to a God"],
+    'mypaloalto', // DBKEITH
     ['nails', 'VGC Legend'],
+    'nathaneatschicken', // NathanLikesChicken
+    'woahhhchien', // DBKEITH
   ],
 }, {
   title: 'Paid Pal',
@@ -167,13 +174,16 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     'bongphan',
+    'doublecaret',
     ['fr1e5', 'First Paid Pal'],
     'fubwubs',
     'genone',
     'goldengottago',
+    'joshtheking7',
     'lunarvania',
     'momalaharris',
     'pastgenoufan',
+    'pokepastry',
     'weavileisasin',
   ],
 }, {
@@ -190,6 +200,8 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     ['bruhmomentmaker', 'First Blaziken Patron'],
+    'thenexyr',
+    'nexyralt',
   ],
 }, {
   title: 'Pop Bomb Patron',
