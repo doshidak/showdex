@@ -15,19 +15,19 @@ export const serializePayload = <T>(
 /* eslint-enable @typescript-eslint/indent */
 
 /**
- * Calculatingly calculates the Calcdex ID from the calculated checksum
- * of the calculated serialized payload.
+ * Calculatingly calculates the Calcdex ID from the calculated checksum of the calculated serialized payload.
  *
- * * Primary difference between a `calcdexId` and `calcdexNonce` is that
- *   the latter (`calcdexNonce`) includes values that are potentially mutable,
- *   such as a Pokemon's `hp` value.
+ * * Primary difference between a `calcdexId` & `calcdexNonce` is that the latter (`calcdexNonce`) includes values
+ *   that are potentially mutable, such as a Pokemon's `hp` value.
  *
  * @since 0.1.0
  */
 export const calcCalcdexId = <T>(payload: T): string => {
   const serialized = nonEmptyObject(payload)
     ? serializePayload<T>(payload)
-    : null;
+    : ['string', 'number', 'boolean'].includes(typeof payload)
+      ? String(payload)
+      : null;
 
   if (!serialized) {
     return null;
@@ -69,10 +69,11 @@ export const calcPresetCalcdexId = (
 /**
  * Generates a unique ID used by the Calcdex to track Pokemon.
  *
- * * As part of the new IDing mechanism introduced in v1.0.3, since the resulting ID will be attached
- *   to the `Showdown.Pokemon`, `Showdown.ServerPokemon` (if applicable), and `CalcdexPokemon`,
- *   we don't really care about consistently recreating the ID, as long as it's guaranteed unique per call.
+ * * As part of the new IDing mechanism introduced in v1.0.3, since the resulting ID will be attached to the `Showdown.Pokemon`,
+ *   `Showdown.ServerPokemon` (if applicable) & `CalcdexPokemon`, we don't really care about consistently recreating the ID,
+ *   as long as it's guaranteed unique per call.
  *   - Hence the use of `uuidv4()`, which is random.
+ *   - Note (2023/07/26): Holy... what a run-on from me a year ago LOL.
  *
  * @since 0.1.0
  */
