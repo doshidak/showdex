@@ -25,7 +25,7 @@ import {
   usedTerastallization,
 } from '@showdex/utils/battle';
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { env, formatId } from '@showdex/utils/core';
+import { clamp, env, formatId } from '@showdex/utils/core';
 import { detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
@@ -171,6 +171,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     const sheetsNonce = sheetStepQueues.length
       ? calcCalcdexId(sheetStepQueues.join(';'))
       : null;
+
+    // l.debug(
+    //   '\n', 'sheetsNonce', sheetsNonce,
+    //   '\n', 'sheetStepQueues', sheetStepQueues,
+    //   '\n', 'battle.stepQueue', battle.stepQueue,
+    // );
 
     if (sheetsNonce && battleState.sheetsNonce !== sheetsNonce) {
       battleState.sheetsNonce = sheetsNonce;
@@ -771,14 +777,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
         }
 
-        // update the faintCounter from the player side if not fainted (or prev value is 0)
-        if (player.faintCounter > -1 && (syncedPokemon.hp > 0 || !syncedPokemon.faintCounter)) {
-          const reloadOffset = !syncedPokemon.hp && !syncedPokemon.faintCounter ? 1 : 0;
-          const value = Math.max(player.faintCounter - reloadOffset);
-
-          syncedPokemon.faintCounter = value;
-        }
-
         l.debug(
           'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
           '\n', 'battleId', battleId,
@@ -980,10 +978,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           || activePokemon?.calcdexId
           || player.pokemon.find((p) => p === activePokemon)?.calcdexId;
 
-        // update activeIndex (and selectionIndex if autoSelect is enabled)
-        // (hopefully the `ident` exists here!)
+        // update the activeIndex (& the selectionIndex if autoSelect is enabled)
         const activeIndex = activeId
-          // ? playerPokemon.findIndex((p, i) => searchId(p, playerKey, i) === activeSearchId)
           ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
           : -1;
 
@@ -997,12 +993,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // );
 
         if (activeIndex > -1 && !processedIds.includes(activeId)) {
-          // playerState.activeIndex = activeIndex;
-
-          // if (playerState.autoSelect) {
-          //   playerState.selectionIndex = activeIndex;
-          // }
-
           processedIds.push(activeId);
 
           return activeIndex;
@@ -1030,28 +1020,67 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         return null;
       }).filter((n) => typeof n === 'number' && n > -1) || [];
 
-      if (playerState.activeIndices?.length && playerState.autoSelect) {
-        // check for Dondozo & commanding Tatsugiri in Gen 9, selecting the Dondozo if that's the case
-        // (while there is a `commanding` property, it's only available in Showdown.ServerPokemon for some reason)
-        // -- though, just in case, I'm specifically not checking if we're in Gen 9, but rather, only the activePokemon
-        const activePokemon = playerState.pokemon.filter((_, i) => playerState.activeIndices.includes(i));
+      if (playerState.activeIndices.length) {
+        // surprisingly encountered a race-condition with player.faintCounter not being the most up-to-date value,
+        // so we'll just count it ourselves LOL
+        const faintCounter = playerState.pokemon.filter((p) => !p.hp).length;
 
-        // note: since this happens during sync, we don't care about Tatsugiri's dirtyAbility
-        // (Commander should be revealed in-battle)
-        // also, using startsWith() here since Tatsugiri has cosmetic formes, like Tatsugiri-Stretchy lol
-        const selectTatsugiri = activePokemon?.length > 1
-          && !!activePokemon.find((p) => p.speciesForme.startsWith('Dondozo'))
-          && activePokemon.find((p) => p.speciesForme.startsWith('Tatsugiri'))?.ability === 'Commander';
+        // update the faintCounter from the player side if not active on the field & not fainted
+        // OR the Pokemon's current faintCounter is 0 when the battle is inactive (probably from a page reload)
+        if (faintCounter > 0) {
+          const pendingPokemon = playerState.pokemon.filter((p, i) => (
+            // note: Pokemon can have a `/^fallen\d$/` volatile (e.g., `'fallen1'`), which is the server reporting
+            // the actual faintCounter essentially, so if present, we'll assume syncPokemon() has already applied it
+            !Object.keys(p.volatiles || {})
+              .some((k) => k?.startsWith('fallen'))
+          ) && (
+            (!playerState.activeIndices.includes(i) && p.hp > 0)
+              || (!battleState.active && !p.faintCounter)
+          ));
 
-        if (selectTatsugiri) {
-          const dondozoIndex = playerState.pokemon.findIndex((p) => p.speciesForme.startsWith('Dondozo'));
+          pendingPokemon.forEach((pokemon) => {
+            // if the current `pokemon` is dedge & its faintCounter is 0, remove 1 to not include itself
+            const reloadOffset = !pokemon.hp && !pokemon.faintCounter ? 1 : 0;
 
-          if (dondozoIndex > -1) {
-            playerState.selectionIndex = dondozoIndex;
+            pokemon.faintCounter = clamp(0, faintCounter - reloadOffset, maxPokemon);
+
+            // auto-clear the dirtyFaintCounter if the user previously set one
+            if (typeof pokemon.dirtyFaintCounter === 'number') {
+              pokemon.dirtyFaintCounter = null;
+            }
+          });
+
+          // l.debug(
+          //   'Updated faintCounter for some pokemon of player', playerKey,
+          //   '\n', 'faintCounter', '(calc)', faintCounter, '(host)', player.faintCounter,
+          //   '\n', 'playerState.activeIndices', playerState.activeIndices,
+          //   '\n', 'pendingPokemon', pendingPokemon,
+          // );
+        }
+
+        if (playerState.autoSelect) {
+          // check for Dondozo & commanding Tatsugiri in Gen 9, selecting the Dondozo if that's the case
+          // (while there is a `commanding` property, it's only available in Showdown.ServerPokemon for some reason)
+          // -- though, just in case, I'm specifically not checking if we're in Gen 9, but rather, only the activePokemon
+          const activePokemon = playerState.pokemon.filter((_, i) => playerState.activeIndices.includes(i));
+
+          // note: since this happens during sync, we don't care about Tatsugiri's dirtyAbility
+          // (Commander should be revealed in-battle)
+          // also, using startsWith() here since Tatsugiri has cosmetic formes, like Tatsugiri-Stretchy lol
+          const selectTatsugiri = activePokemon?.length > 1
+            && !!activePokemon.find((p) => p.speciesForme.startsWith('Dondozo'))
+            && activePokemon.find((p) => p.speciesForme.startsWith('Tatsugiri'))?.ability === 'Commander';
+
+          if (selectTatsugiri) {
+            const dondozoIndex = playerState.pokemon.findIndex((p) => p.speciesForme.startsWith('Dondozo'));
+
+            if (dondozoIndex > -1) {
+              playerState.selectionIndex = dondozoIndex;
+            }
+          } else if (!playerState.activeIndices.includes(playerState.selectionIndex)) {
+            // update (2023/01/30): only update the selectionIndex if it's not one of the activeIndices
+            [playerState.selectionIndex] = playerState.activeIndices;
           }
-        } else if (!playerState.activeIndices.includes(playerState.selectionIndex)) {
-          // update (2023/01/30): only update the selectionIndex if it's not one of the activeIndices
-          [playerState.selectionIndex] = playerState.activeIndices;
         }
       }
 
