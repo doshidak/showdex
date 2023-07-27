@@ -81,7 +81,10 @@ export const PokeStats = ({
   const showIvsRow = pokemon?.showGenetics
     || (!defaultShowBehavior && lockedVisibilities.includes('iv'));
 
-  const showEvsRow = !legacy && (
+  const showEvsRow = (
+    !legacy
+      || settings?.showLegacyEvs
+  ) && (
     pokemon?.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('ev'))
   );
@@ -95,7 +98,12 @@ export const PokeStats = ({
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
-  const evsLegal = allowIllegalSpreads || totalEvs <= maxLegalEvs + transformedLegalEvs;
+
+  // update (2023/07/26): since showLegacyEvs is now a setting, any amount of EVs in legacy gens
+  // will always be legal! (each stat defaults to 252 anyway, depending on the applied preset)
+  const evsLegal = (legacy && settings?.showLegacyEvs)
+    || allowIllegalSpreads
+    || totalEvs <= maxLegalEvs + transformedLegalEvs;
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
