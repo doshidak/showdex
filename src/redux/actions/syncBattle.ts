@@ -777,6 +777,17 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
         }
 
+        // reset any dirtyBoosts if the user enabled the setting
+        if (settings?.resetDirtyBoosts && Object.values(syncedPokemon.dirtyBoosts || {}).some((v) => v)) {
+          syncedPokemon.dirtyBoosts = {
+            atk: null,
+            def: null,
+            spa: null,
+            spd: null,
+            spe: null,
+          };
+        }
+
         l.debug(
           'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
           '\n', 'battleId', battleId,
