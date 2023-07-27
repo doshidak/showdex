@@ -973,7 +973,21 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const activeId = (
           isMyPokemonSide
             && hasMyPokemon
-            && myPokemon.find((p) => p?.active && !processedIds.includes(p?.calcdexId))?.calcdexId
+            // update (2023/07/26): had to update this logic for Supreme Overlord in Doubles;
+            // without checking the calcdexId (& solely checking `p.active`), the resulting activeIndices
+            // may only include the first active Pokemon in myPokemon[] for this specific case
+            // (also, while active[] in Showdown.Side will set the Showdown.Pokemon to `null` if dead, e.g.,
+            // [null, { speciesForme: 'Kingambit', ... }], the dead Showdown.ServerPokemon in myPokemon[]
+            // will still be `active` !!)
+            && myPokemon.find((p) => (
+              p?.active
+                && p.hp > 0
+                && (
+                  (!p.calcdexId && !activePokemon.calcdexId)
+                    || p.calcdexId === activePokemon.calcdexId
+                )
+                && !processedIds.includes(p?.calcdexId)
+            ))?.calcdexId
         )
           || activePokemon?.calcdexId
           || player.pokemon.find((p) => p === activePokemon)?.calcdexId;
@@ -983,14 +997,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
           : -1;
 
-        // l.debug(
-        //   'Building activeIndices for player', playerKey,
-        //   '\n', 'activeId', activeId,
-        //   '\n', 'activeIndex', activeIndex,
-        //   '\n', 'activePokemon', activePokemon,
-        //   '\n', 'player.active', player.active,
-        //   '\n', `${playerKey}.pokemon`, playerState.pokemon,
-        // );
+        l.debug(
+          'Building activeIndices for player', playerKey,
+          '\n', 'activeId', activeId,
+          '\n', 'activeIndex', activeIndex,
+          '\n', 'activePokemon', activePokemon,
+          '\n', 'player.active', player.active,
+          '\n', `${playerKey}.pokemon`, playerState.pokemon,
+        );
 
         if (activeIndex > -1 && !processedIds.includes(activeId)) {
           processedIds.push(activeId);
