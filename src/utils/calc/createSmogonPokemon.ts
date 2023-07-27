@@ -213,7 +213,12 @@ export const createSmogonPokemon = (
   // in gen 1, we must set any SPA boosts to SPD as well
   // (in gen 2, they're separate boosts)
   if (gen === 1) {
+    options.evs.spd = options.evs.spa;
     options.boosts.spd = options.boosts.spa;
+
+    if (options.overrides.baseStats.spd !== options.overrides.baseStats.spa) {
+      (options.overrides.baseStats as Showdown.StatsTable).spd = options.overrides.baseStats.spa;
+    }
   }
 
   // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
