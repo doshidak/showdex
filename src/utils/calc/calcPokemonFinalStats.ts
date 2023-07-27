@@ -11,7 +11,7 @@ import {
   type CalcdexPokemon,
 } from '@showdex/redux/store';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
-import { env, formatId as id } from '@showdex/utils/core';
+import { env, formatId as id, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,
@@ -163,6 +163,29 @@ export const calcPokemonFinalStats = (
       // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
       if (pokemon.status === 'par') {
         record.apply('spe', gen < 7 ? 0.25 : 0.5, 'status', 'Paralysis');
+      }
+    }
+  }
+
+  // update (2023/07/27): jk, apparently screens in legacy gens boost stats, not incoming damage!
+  // (of course, the only exception is Light Screen in gen 1, which boosts SPC only after taking damage)
+  // (also, the BattleTooltips in the Showdown client don't show this)
+  if (legacy) { // note: we could be in a higher gen here, hence the check!
+    // 100% DEF boost if the "Reflect" volatile is active (gen 1)
+    // (however, we'll check for the "Reflect" player side condition instead, since it allows the user to toggle this)
+    if (gen === 1 && player?.side?.isReflect) {
+      record.apply('def', 2, 'move', 'Reflect');
+    }
+
+    if (gen === 2 && nonEmptyObject(player?.side)) {
+      // 100% DEF boost if the "Reflect" player side condition is active (gen 2)
+      if (player.side.isReflect) {
+        record.apply('def', 2, 'field', 'Reflect');
+      }
+
+      // 100% SPD boost if the "Light Screen" player side condition is active (gen 2)
+      if (player.side.isLightScreen) {
+        record.apply('spd', 2, 'field', 'Light Screen');
       }
     }
   }
