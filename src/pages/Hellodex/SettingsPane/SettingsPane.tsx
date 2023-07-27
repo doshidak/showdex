@@ -1889,6 +1889,25 @@ export const SettingsPane = ({
                     )}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['resetDirtyBoosts']>
+                    name="calcdex.resetDirtyBoosts"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Reset Stage Boosts on Sync"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Resets all modified stage boosts to the reported boosts in-battle
+                        during a battle sync. This has the same effect as clicking on every
+                        blue-colored stage boost value for each Pok&eacute;mon, except
+                        performed automatically.
+                        <br />
+                        <br />
+                        Enable this if you tend to forget to reset your Pok&eacute;mon's
+                        stage boosts between turns.
+                      </div>
+                    )}
+                  />
+
                   <div
                     className={cx(
                       styles.field,
