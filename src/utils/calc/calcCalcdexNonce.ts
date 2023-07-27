@@ -1,4 +1,5 @@
 import { type CalcdexPokemon } from '@showdex/redux/store';
+import { sanitizeVolatiles } from '@showdex/utils/battle';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { calcCalcdexId } from './calcCalcdexId';
 
@@ -46,7 +47,7 @@ const calcPokemonCalcdexNonce = (
   status: pokemon?.status,
   statusData: calcCalcdexId(pokemon?.statusData),
   statusStage: pokemon?.statusStage?.toString(),
-  volatiles: calcCalcdexId(pokemon?.volatiles),
+  volatiles: calcCalcdexId(sanitizeVolatiles(pokemon)),
   turnstatuses: calcCalcdexId(pokemon?.turnstatuses),
   sleepCounter: (!!pokemon?.speciesForme && 'sleepCounter' in pokemon && pokemon.sleepCounter?.toString())
     || (nonEmptyObject(pokemon?.statusData) && pokemon.statusData.sleepTurns?.toString())
