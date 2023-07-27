@@ -148,6 +148,7 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       editPokemonTypes: 'always',
       showMoveEditor: 'meta',
       showBaseStats: 'meta',
+      showLegacyEvs: false,
 
       lockGeneticsVisibility: {
         auth: [],
