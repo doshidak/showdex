@@ -47,7 +47,7 @@ app.receive = (data: string) => {
     l.debug(
       'receive() for', roomId,
       '\n', 'room', room,
-      '\n', 'data', __DEV__ && { data },
+      '\n', 'data', __DEV__ && data,
     );
 
     // call each bootstrapper
