@@ -498,6 +498,14 @@ export interface ShowdexCalcdexSettings {
   allowIllegalSpreads: 'always' | 'meta' | 'never';
 
   /**
+   * Whether to reset any `dirtyBoosts` when the battle syncs.
+   *
+   * @default true
+   * @since 1.1.6
+   */
+  resetDirtyBoosts: boolean;
+
+  /**
    * Whether to show UI tooltips.
    *
    * @default true

@@ -144,6 +144,7 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       },
 
       lockUsedTera: false,
+      resetDirtyBoosts: true,
       editPokemonTypes: 'always',
       showMoveEditor: 'meta',
       showBaseStats: 'meta',
