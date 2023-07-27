@@ -1408,7 +1408,7 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always shows your Pok&eacute;mon's EVs.
-                          Has no effect in legacy gens.
+                          Has no effect in legacy gens, unless <em>Show EVs in Legacy Gens</em> is enabled.
                           <br />
                           <br />
                           Disabling this will cause the EVs row to remain hidden
@@ -1460,7 +1460,7 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always shows your opponent's (or spectating players') Pok&eacute;mon's EVs.
-                          Has no effect in legacy gens.
+                          Has no effect in legacy gens, unless <em>Show EVs in Legacy Gens</em> is enabled.
                           <br />
                           <br />
                           Disabling this will cause the EVs row to remain hidden
@@ -1853,6 +1853,47 @@ export const SettingsPane = ({
                     }]}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['resetDirtyBoosts']>
+                    name="calcdex.resetDirtyBoosts"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Reset Stage Boosts on Sync"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Resets all modified stage boosts to the reported boosts in-battle
+                        during a battle sync. This has the same effect as clicking on every
+                        blue-colored stage boost value for each Pok&eacute;mon, except
+                        performed automatically.
+                        <br />
+                        <br />
+                        Enable this if you tend to forget to reset your Pok&eacute;mon's
+                        stage boosts between turns.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showLegacyEvs']>
+                    name="calcdex.showLegacyEvs"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Show EVs in Legacy Gens"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows EVs in legacy gens, allowing you to edit them for each Pok&eacute;mon.
+                        <br />
+                        <br />
+                        Some sets (most notably in Randoms) will specify 0 EVs for some stats,
+                        which may be helpful to be aware of.
+                        <br />
+                        <br />
+                        Though introduced in gen 3, EVs technically existed in prior legacy gens,
+                        colloquially referred to as <em>stat experience</em>. Resulting damages
+                        influenced by this legacy system &amp; modern EVs are more-or-less the same,
+                        due to rounding effects in the damage formulas.
+                      </div>
+                    )}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['lockUsedTera']>
                     name="calcdex.lockUsedTera"
                     component={Switch}
@@ -1885,25 +1926,6 @@ export const SettingsPane = ({
                         Allows you to select from all possible abilities &amp; moves in
                         legal-locked formats like{' '}
                         <em>OU</em> &amp; <em>Randoms</em>.
-                      </div>
-                    )}
-                  />
-
-                  <Field<ShowdexSettings['calcdex']['resetDirtyBoosts']>
-                    name="calcdex.resetDirtyBoosts"
-                    component={Switch}
-                    className={cx(styles.field, styles.switchField)}
-                    label="Reset Stage Boosts on Sync"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Resets all modified stage boosts to the reported boosts in-battle
-                        during a battle sync. This has the same effect as clicking on every
-                        blue-colored stage boost value for each Pok&eacute;mon, except
-                        performed automatically.
-                        <br />
-                        <br />
-                        Enable this if you tend to forget to reset your Pok&eacute;mon's
-                        stage boosts between turns.
                       </div>
                     )}
                   />
