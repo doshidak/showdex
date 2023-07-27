@@ -1,5 +1,4 @@
-import { Pokemon as SmogonPokemon } from '@smogon/calc';
-import { type MoveName, type Specie } from '@smogon/calc/dist/data/interface';
+import { type MoveName, type Specie, Pokemon as SmogonPokemon } from '@smogon/calc';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
