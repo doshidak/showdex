@@ -228,6 +228,27 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     return endTimer('(battle destroyed)');
   }
 
+  // update (2023/07/27): check for '|noinit|' or '|nonexistent|' in the `data` & if present, ignore initializing this battle,
+  // e.g., '|noinit|nonexistent|The room "battle-gen1ubers-1911645170-ygxif0uoljetvrkksj6dcge3w43xx8wpw" does not exist.'
+  // (typically occurs when you AFK in a BattleRoom, your computer sleeps, you come back later & select "Reconnect", refreshing the page)
+  // note that we're not checking the stepQueue since it could be uninitialized/empty at this point, so we just wanna read what the client
+  // received from the server in this moment (which is formatted as a single stepQueue entry in `data`)
+  const stepFromData = data?.split?.('\n')[1];
+  const shouldNotInit = stepFromData?.startsWith('|noinit|nonexistent|')
+    // these last 2 checks may backfire on me lmao
+    && stepFromData.includes('The room "')
+    && stepFromData.endsWith('" does not exist.');
+
+  if (shouldNotInit) {
+    l.debug(
+      'Calcdex bootstrapper request was ignored for roomid', roomid,
+      'since the battle is marked as nonexistent & shouldn\'t be initialized',
+      '\n', 'stepFromData', stepFromData,
+    );
+
+    return endTimer('(noinit battle)');
+  }
+
   if (typeof battle?.subscribe !== 'function') {
     l.warn(
       'Must have some jank battle object cause battle.subscribe() is apparently type',
