@@ -714,7 +714,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
                 // incorrectly assigning Mewtwo's calcdexId to Mew! (& this breaks sync, as you'd expect) hence endsWith() LOL
                 // || (!!p?.searchid && p.searchid.includes(details))
                 || (!!p?.searchid && p.searchid.endsWith(details))
-                || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
+                // update (2023/07/27): whoops, missed a spot!
+                // || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
+                || (!!p?.speciesForme && details.replace('-*', '') === p.speciesForme.replace('-*', ''))
             ))
         ));
 
