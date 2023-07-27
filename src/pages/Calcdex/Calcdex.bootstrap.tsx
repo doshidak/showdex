@@ -136,7 +136,7 @@ const l = logger(baseScope);
 
 export const calcdexBootstrapper: ShowdexBootstrapper = (
   store,
-  _data,
+  data,
   roomid,
 ) => {
   const endTimer = runtimer(baseScope, l);
@@ -330,7 +330,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
 
           // unlike the battle overlay, we'll only close if configured to (and destroy if closing the room)
-          forfeitPopup.submit = (data) => {
+          forfeitPopup.submit = (...args) => {
             const calcdexRoomId = getCalcdexRoomId(roomid);
 
             // grab the current settings
@@ -345,7 +345,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             updateBattleRecord(store, battleRoom?.battle, 'loss');
 
             // call ForfeitPopup's original submit() handler
-            submitForfeit(data);
+            submitForfeit(...args);
           };
         }
 
@@ -599,7 +599,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
           const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
 
-          forfeitPopup.submit = (data) => {
+          forfeitPopup.submit = (...args) => {
             // clean up allocated memory from React & Redux for this Calcdex instance
             battle?.calcdexReactRoot?.unmount?.();
             store.dispatch(calcdexSlice.actions.destroy(roomid));
@@ -608,7 +608,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             updateBattleRecord(store, battleRoom?.battle, 'loss');
 
             // call the original function
-            submitForfeit(data);
+            submitForfeit(...args);
           };
         }
 
@@ -676,13 +676,23 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       // just js things uwu
       const prevPokemon = (replaceSlot > -1 && pokemonSearchList[replaceSlot])
         || pokemonSearchList.filter((p) => !!p.calcdexId).find((p) => (
+          // e.g., ident = 'p1: CalcdexDemolisher' (nicknamed) or 'p1: Ditto' (unnamed default)
           (!!ident && (
             (!!p?.ident && p.ident === ident)
-              || (!!p?.searchid && p.searchid.includes(ident))
+              // e.g., searchid = 'p1: CalcdexDemolisher|Ditto'
+              // nickname case: pass; default case: fail ('p1: CalcdexDemolisher' !== 'p1: Ditto')
+              // note: not doing startsWith() since 'p1: Mewtwo|Mewtwo' will pass when given ident 'p1: Mew'
+              || (!!p?.searchid?.includes('|') && p.searchid.split('|')[0] === ident)
           ))
+            // e.g., details = 'Ditto'
             || (!!details && (
               (!!p?.details && p.details === details)
-                || (!!p?.searchid && p.searchid.includes(details))
+                // e.g., 'p1: CalcdexDemolisher|Ditto'.endsWith('Ditto')
+                // update (2023/07/27): apparently includes() was a bad idea for this very unique edge case in gen1ubers where
+                // the client first adds 'Mewtwo' (under `details`), then at some point later 'Mew', which then passes this check,
+                // incorrectly assigning Mewtwo's calcdexId to Mew! (& this breaks sync, as you'd expect) hence endsWith() LOL
+                // || (!!p?.searchid && p.searchid.includes(details))
+                || (!!p?.searchid && p.searchid.endsWith(details))
                 || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
             ))
         ));
@@ -751,7 +761,10 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         p.ident === pokemon.ident
           || p.speciesForme === pokemon.speciesForme
           || p.details === pokemon.details
-          || p.details.includes(pokemon.speciesForme)
+          // update (2023/07/27): this check breaks when p.details is 'Mewtwo' & pokemon.speciesForme is 'Mew',
+          // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
+          // || p.details.includes(pokemon.speciesForme)
+          || p.details === pokemon.speciesForme
       ));
 
       if (!prevMyPokemon?.calcdexId) {

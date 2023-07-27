@@ -325,7 +325,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 || p.searchid === pokemon.searchid
                 || p.speciesForme === pokemon.speciesForme
                 || pokemon.searchid.includes(p.ident)
-                || pokemon.speciesForme.includes(p.speciesForme.replace('-*', ''))
+                // update (2023/07/27): this speciesForme check breaks in the case where you have a 'Mewtwo',
+                // but we come across a 'Mew' to initialize, so it'll pass this check! (it shouldn't)
+                // || pokemon.speciesForme.includes(p.speciesForme.replace('-*', ''))
+                || pokemon.speciesForme.replace('-*', '') === p.speciesForme.replace('-*', '')
             ));
 
           if (clientPokemon) {
@@ -778,7 +781,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
 
         // reset any dirtyBoosts if the user enabled the setting
-        if (settings?.resetDirtyBoosts && Object.values(syncedPokemon.dirtyBoosts || {}).some((v) => v)) {
+        const shouldResetDirtyBoosts = settings?.resetDirtyBoosts
+          && Object.values(syncedPokemon.dirtyBoosts || {}).some((v) => typeof v === 'number' && !Number.isNaN(v));
+
+        if (shouldResetDirtyBoosts) {
           syncedPokemon.dirtyBoosts = {
             atk: null,
             def: null,
