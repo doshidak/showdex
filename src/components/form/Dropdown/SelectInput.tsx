@@ -54,6 +54,7 @@ export const SelectInput = <
           isHidden && styles.hidden,
           inputClassName,
         )}
+        inputMode="none" // don't show the virtual keyboard on mobile
         value={value}
         disabled={isDisabled}
         {...innerProps}
