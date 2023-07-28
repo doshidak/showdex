@@ -90,6 +90,10 @@ const sortPresets = (
       if (b.source === 'usage') {
         return -1;
       }
+
+      // update (2023/07/27): WAIT how did I miss this case LMAO no wonder why the presets are backwards HAHAHA
+      // holy shit I'm actually dumb af
+      return 0;
     }
 
     return -1;
@@ -102,9 +106,6 @@ const sortPresets = (
   // at this point, we should've gotten all the hard matches, so we can do partial matching
   // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
   // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
-  // update (2023/07/19): apparently all the sets are flipped in the order they're received from the API,
-  // so we'll apply this one secret trick they don't want you to know
-  // update (2023/07/27): didn't work & too lazy to figure out why, so I'm just gunna reverse() the output in usePresets() lmfao
   if (a.format.endsWith(format)) {
     return -1;
   }
@@ -305,7 +306,8 @@ export const usePresets = ({
 
       if (formatPresets?.length) {
         // update (2023/07/27): this is why they pay me the big bux
-        sorted.push(...formatPresets.reverse());
+        // update (2023/07/27): jk, this is why I'm not working at Google -- see sortPresets() above
+        sorted.push(...formatPresets);
       }
 
       if (formatStatsPresets?.length) {
