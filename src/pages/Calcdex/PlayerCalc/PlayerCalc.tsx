@@ -321,7 +321,7 @@ export const PlayerCalc = ({
               || pokemon?.name
               || pokemon?.speciesForme
               || defaultName
-              || '???';
+              || String(i);
 
             const friendlyPokemonName = pokemon?.speciesForme
               || pokemon?.name
@@ -350,7 +350,7 @@ export const PlayerCalc = ({
 
             return (
               <PiconButton
-                key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}:${i}`}
+                key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}`}
                 className={cx(
                   styles.piconButton,
                   pokemonActive && styles.active,
