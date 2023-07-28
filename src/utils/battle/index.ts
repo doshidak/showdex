@@ -8,6 +8,7 @@ export * from './detectPlayerKey';
 export * from './detectPokemonIdent';
 export * from './detectSpeciesForme';
 export * from './detectToggledAbility';
+export * from './detectToggledMove';
 export * from './mergeRevealedMoves';
 export * from './ruinAbilitiesActive';
 export * from './sanitizeField';
