@@ -170,22 +170,21 @@ export const calcPokemonFinalStats = (
   // update (2023/07/27): jk, apparently screens in legacy gens boost stats, not incoming damage!
   // (of course, the only exception is Light Screen in gen 1, which boosts SPC only after taking damage)
   // (also, the BattleTooltips in the Showdown client don't show this)
-  if (legacy) { // note: we could be in a higher gen here, hence the check!
-    // 100% DEF boost if the "Reflect" volatile is active (gen 1)
-    // (however, we'll check for the "Reflect" player side condition instead, since it allows the user to toggle this)
-    if (gen === 1 && player?.side?.isReflect) {
-      record.apply('def', 2, 'move', 'Reflect');
+  if (legacy && nonEmptyObject(player?.side)) { // note: we could be in a higher gen here, hence the check!
+    // 100% DEF boost if the "Reflect" player side condition is active (gens 1-2)
+    // (note: in gen 1, the side condition is actually a Pokemon volatile & only applies to the Pokemon itself, i.e., effects
+    // are removed once the Pokemon faints or switches out, but we'll check the side condition as the user can toggle it)
+    if (player.side.isReflect) {
+      record.apply('def', 2, gen === 1 ? 'move' : 'field', 'Reflect');
     }
 
-    if (gen === 2 && nonEmptyObject(player?.side)) {
-      // 100% DEF boost if the "Reflect" player side condition is active (gen 2)
-      if (player.side.isReflect) {
-        record.apply('def', 2, 'field', 'Reflect');
-      }
+    // 100% SPD boost if the "Light Screen" player side condition is active (gens 1-2)
+    if (player.side.isLightScreen) {
+      record.apply('spd', 2, gen === 1 ? 'move' : 'field', 'Light Screen');
 
-      // 100% SPD boost if the "Light Screen" player side condition is active (gen 2)
-      if (player.side.isLightScreen) {
-        record.apply('spd', 2, 'field', 'Light Screen');
+      // note: in gen 1, there no SPD, only SPC (Special), so SPA = SPD = SPC
+      if (gen === 1) {
+        record.apply('spa', 2, 'move', 'Light Screen');
       }
     }
   }
