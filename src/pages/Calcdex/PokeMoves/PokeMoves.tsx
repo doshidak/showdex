@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 import { Dropdown, PokeTypeField, ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import {
@@ -10,11 +10,14 @@ import {
   ToggleButton,
   Tooltip,
 } from '@showdex/components/ui';
-import { type CalcdexMoveOverride, useColorScheme } from '@showdex/redux/store';
+import { PokemonToggleMoves } from '@showdex/consts/dex';
+import { type CalcdexMoveOverride, type CalcdexPokemon, useColorScheme } from '@showdex/redux/store';
+import { detectToggledMove } from '@showdex/utils/battle';
 import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
   clamp,
   formatId,
+  nonEmptyObject,
   upsizeArray,
   writeClipboardText,
 } from '@showdex/utils/core';
@@ -91,6 +94,43 @@ export const PokeMoves = ({
 
   const showFaintCounter = !!pokemon?.speciesForme
     && formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord';
+
+  const handleMoveToggle = (name: MoveName) => {
+    if (!name || !PokemonToggleMoves.includes(name)) {
+      return;
+    }
+
+    const moveId = formatId(name);
+    const toggled = detectToggledMove(pokemon, name);
+
+    const payload: Partial<CalcdexPokemon> = {};
+
+    switch (moveId) {
+      case 'powertrick': {
+        payload.volatiles = {
+          ...pokemon?.volatiles,
+        };
+
+        if (toggled) {
+          delete payload.volatiles.powertrick;
+        } else {
+          payload.volatiles.powertrick = ['powertrick'];
+        }
+
+        break;
+      }
+
+      default: {
+        break;
+      }
+    }
+
+    if (!nonEmptyObject(payload)) {
+      return;
+    }
+
+    updatePokemon(payload, `${baseScope}:handleMoveToggle()`);
+  };
 
   const handleMoveChange = (name: MoveName, index: number) => {
     const moves = upsizeArray(
@@ -288,7 +328,7 @@ export const PokeMoves = ({
             showFaintCounter && styles.editorItem,
           )}
           header
-          align="right"
+          align="left"
         >
           {/* <div className={styles.headerTitle}>
             Properties
@@ -297,25 +337,9 @@ export const PokeMoves = ({
           {
             showFaintCounter &&
             <>
-              <ToggleButton
-                className={styles.editorButton}
-                style={{
-                  marginRight: '1em',
-                  ...(pokemon.dirtyFaintCounter ? undefined : { opacity: 0 }),
-                }}
-                label="Reset"
-                tooltip={`Reset to ${pokemon.faintCounter} Fallen`}
-                tooltipDisabled={!settings?.showUiTooltips}
-                primary={!!pokemon.dirtyFaintCounter}
-                disabled={!pokemon.dirtyFaintCounter}
-                onPress={() => updatePokemon({
-                  dirtyFaintCounter: null,
-                }, `${baseScope}:ToggleButton~ResetFaintCounter:onPress()`)}
-              />
-
               <div
                 className={styles.moveProperty}
-                style={{ marginRight: '0.5em' }}
+                // style={{ marginRight: '0.5em' }}
               >
                 <ValueField
                   className={styles.valueField}
@@ -343,6 +367,22 @@ export const PokeMoves = ({
                   Fallen
                 </div>
               </div>
+
+              <ToggleButton
+                className={styles.editorButton}
+                style={{
+                  marginRight: '1em',
+                  ...(pokemon.dirtyFaintCounter ? undefined : { opacity: 0 }),
+                }}
+                label="Reset"
+                tooltip={`Reset to ${pokemon.faintCounter} Fallen`}
+                tooltipDisabled={!settings?.showUiTooltips}
+                primary={!!pokemon.dirtyFaintCounter}
+                disabled={!pokemon.dirtyFaintCounter}
+                onPress={() => updatePokemon({
+                  dirtyFaintCounter: null,
+                }, `${baseScope}:ToggleButton~ResetFaintCounter:onPress()`)}
+              />
             </>
           }
         </TableGridItem>
@@ -401,6 +441,7 @@ export const PokeMoves = ({
 
         // const moveName = calcMove?.name;
         const moveName = pokemon?.moves?.[i] || calcMove?.name;
+        const moveToggled = detectToggledMove(pokemon, moveName);
 
         // getMoveOverrideDefaults() could return null, so spreading here to avoid a "Cannot read properties of null" error
         // (could make it not return null, but too lazy atm lol)
@@ -505,7 +546,10 @@ export const PokeMoves = ({
           <React.Fragment
             key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}
           >
-            <TableGridItem align="left">
+            <TableGridItem
+              className={cx(pokemon?.showMoveOverrides && ['xs', 'sm'].includes(containerSize) && styles.editorItemInput)}
+              align="left"
+            >
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for Pokemon ${friendlyPokemonName}`}
                 hint="--"
@@ -528,7 +572,13 @@ export const PokeMoves = ({
             </TableGridItem>
 
             {pokemon?.showMoveOverrides ? (
-              <TableGridItem className={styles.editorItem}>
+              <TableGridItem
+                className={cx(
+                  styles.editorItem,
+                  ['xs', 'sm'].includes(containerSize) && styles.smol,
+                  damagingMove && styles.withStatTargets,
+                )}
+              >
                 <div className={styles.editorLeft}>
                   <PokeTypeField
                     input={{
@@ -576,6 +626,23 @@ export const PokeMoves = ({
                   />
 
                   {
+                    PokemonToggleMoves.includes(moveName) &&
+                    <ToggleButton
+                      className={styles.editorButton}
+                      label="Active"
+                      tooltip={(
+                        <div className={styles.descTooltip}>
+                          {moveToggled ? 'Deactivate' : 'Activate'}{' '}
+                          <strong>{moveName}</strong>
+                        </div>
+                      )}
+                      tooltipDisabled={!settings?.showUiTooltips}
+                      active={moveToggled}
+                      onPress={() => handleMoveToggle(moveName)}
+                    />
+                  }
+
+                  {
                     damagingMove &&
                     <>
                       <div className={styles.moveProperty}>
@@ -608,116 +675,121 @@ export const PokeMoves = ({
                         </div>
                       </div>
 
-                      {
-                        ['md', 'lg', 'xl'].includes(containerSize) &&
+                      <div
+                        className={styles.moveProperty}
+                        style={{
+                          // marginLeft: '1em',
+                          ...(['xs', 'sm'].includes(containerSize) ? {
+                            paddingTop: 3,
+                            // paddingBottom: 2,
+                          } : {
+                            marginLeft: '1em',
+                          }),
+                        }}
+                      >
+                        <ToggleButton
+                          className={styles.editorButton}
+                          style={{ marginRight: 3 }}
+                          label="ATK"
+                          tooltip={(
+                            <div className={styles.descTooltip}>
+                              Use this Pok&eacute;mon's ATK stat.
+                            </div>
+                          )}
+                          tooltipDisabled={!settings?.showUiTooltips}
+                          primary
+                          active={moveOverrides.offensiveStat === 'atk'}
+                          activeScale={moveOverrides.offensiveStat === 'atk' ? 0.98 : undefined}
+                          onPress={() => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { offensiveStat: 'atk' },
+                            },
+                          }, `${baseScope}:ToggleButton~Offense-ATK:onPress()`)}
+                        />
+                        <ToggleButton
+                          className={styles.editorButton}
+                          style={{ marginRight: '0.8em' }}
+                          label="SPA"
+                          tooltip={(
+                            <div className={styles.descTooltip}>
+                              Use this Pok&eacute;mon's SPA stat.
+                            </div>
+                          )}
+                          tooltipDisabled={!settings?.showUiTooltips}
+                          primary
+                          active={moveOverrides.offensiveStat === 'spa'}
+                          activeScale={moveOverrides.offensiveStat === 'spa' ? 0.98 : undefined}
+                          onPress={() => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { offensiveStat: 'spa' },
+                            },
+                          }, `${baseScope}:ToggleButton~Offense-SPA:onPress()`)}
+                        />
+
                         <div
-                          className={styles.moveProperty}
-                          style={{ marginLeft: '1em' }}
+                          className={styles.propertyName}
+                          style={{ opacity: 0.5 }}
                         >
-                          <ToggleButton
-                            className={styles.editorButton}
-                            style={{ marginRight: 3 }}
-                            label="ATK"
-                            tooltip={(
-                              <div className={styles.descTooltip}>
-                                Use this Pok&eacute;mon's ATK stat.
-                              </div>
-                            )}
-                            tooltipDisabled={!settings?.showUiTooltips}
-                            primary
-                            active={moveOverrides.offensiveStat === 'atk'}
-                            activeScale={moveOverrides.offensiveStat === 'atk' ? 0.98 : undefined}
-                            onPress={() => updatePokemon({
-                              moveOverrides: {
-                                [moveName]: { offensiveStat: 'atk' },
-                              },
-                            }, `${baseScope}:ToggleButton~Offense-ATK:onPress()`)}
-                          />
-                          <ToggleButton
-                            className={styles.editorButton}
-                            style={{ marginRight: '0.8em' }}
-                            label="SPA"
-                            tooltip={(
-                              <div className={styles.descTooltip}>
-                                Use this Pok&eacute;mon's SPA stat.
-                              </div>
-                            )}
-                            tooltipDisabled={!settings?.showUiTooltips}
-                            primary
-                            active={moveOverrides.offensiveStat === 'spa'}
-                            activeScale={moveOverrides.offensiveStat === 'spa' ? 0.98 : undefined}
-                            onPress={() => updatePokemon({
-                              moveOverrides: {
-                                [moveName]: { offensiveStat: 'spa' },
-                              },
-                            }, `${baseScope}:ToggleButton~Offense-SPA:onPress()`)}
-                          />
-
-                          <div
-                            className={styles.propertyName}
-                            style={{ opacity: 0.5 }}
-                          >
-                            vs
-                          </div>
-
-                          <ToggleButton
-                            className={styles.editorButton}
-                            style={{ marginRight: 3, marginLeft: '0.8em' }}
-                            label="DEF"
-                            tooltip={(
-                              <div className={styles.descTooltip}>
-                                Use the opposing Pok&eacute;mon's DEF stat.
-                              </div>
-                            )}
-                            tooltipDisabled={!settings?.showUiTooltips}
-                            primary
-                            active={moveOverrides.defensiveStat === 'def'}
-                            activeScale={moveOverrides.defensiveStat === 'def' ? 0.98 : undefined}
-                            onPress={() => updatePokemon({
-                              moveOverrides: {
-                                [moveName]: { defensiveStat: 'def' },
-                              },
-                            }, `${baseScope}:ToggleButton~Defense-DEF:onPress()`)}
-                          />
-                          <ToggleButton
-                            className={styles.editorButton}
-                            // style={{ marginRight: 3 }}
-                            label="SPD"
-                            tooltip={(
-                              <div className={styles.descTooltip}>
-                                Use the opposing Pok&eacute;mon's SPD stat.
-                              </div>
-                            )}
-                            tooltipDisabled={!settings?.showUiTooltips}
-                            primary
-                            active={moveOverrides.defensiveStat === 'spd'}
-                            activeScale={moveOverrides.defensiveStat === 'spd' ? 0.98 : undefined}
-                            onPress={() => updatePokemon({
-                              moveOverrides: {
-                                [moveName]: { defensiveStat: 'spd' },
-                              },
-                            }, `${baseScope}:ToggleButton~Defense-SPD:onPress()`)}
-                          />
-                          {/* update (2022/11/04): ignoreDefensive in createSmogonMove() doesn't seem to do anything */}
-                          {/* <ToggleButton
-                            className={styles.editorButton}
-                            label="IGN"
-                            tooltip={(
-                              <div className={styles.descTooltip}>
-                                Ignore/bypass the opposing Pok&eactue;mon's defensive stats.
-                              </div>
-                            )}
-                            tooltipDisabled={!settings?.showUiTooltips}
-                            primary
-                            active={moveOverrides.defensiveStat === 'ignore'}
-                            onPress={() => updatePokemon({
-                              moveOverrides: {
-                                [moveName]: { defensiveStat: 'ignore' },
-                              },
-                            })}
-                          /> */}
+                          vs
                         </div>
-                      }
+
+                        <ToggleButton
+                          className={styles.editorButton}
+                          style={{ marginRight: 3, marginLeft: '0.8em' }}
+                          label="DEF"
+                          tooltip={(
+                            <div className={styles.descTooltip}>
+                              Use the opposing Pok&eacute;mon's DEF stat.
+                            </div>
+                          )}
+                          tooltipDisabled={!settings?.showUiTooltips}
+                          primary
+                          active={moveOverrides.defensiveStat === 'def'}
+                          activeScale={moveOverrides.defensiveStat === 'def' ? 0.98 : undefined}
+                          onPress={() => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { defensiveStat: 'def' },
+                            },
+                          }, `${baseScope}:ToggleButton~Defense-DEF:onPress()`)}
+                        />
+                        <ToggleButton
+                          className={styles.editorButton}
+                          // style={{ marginRight: 3 }}
+                          label="SPD"
+                          tooltip={(
+                            <div className={styles.descTooltip}>
+                              Use the opposing Pok&eacute;mon's SPD stat.
+                            </div>
+                          )}
+                          tooltipDisabled={!settings?.showUiTooltips}
+                          primary
+                          active={moveOverrides.defensiveStat === 'spd'}
+                          activeScale={moveOverrides.defensiveStat === 'spd' ? 0.98 : undefined}
+                          onPress={() => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { defensiveStat: 'spd' },
+                            },
+                          }, `${baseScope}:ToggleButton~Defense-SPD:onPress()`)}
+                        />
+                        {/* update (2022/11/04): ignoreDefensive in createSmogonMove() doesn't seem to do anything */}
+                        {/* <ToggleButton
+                          className={styles.editorButton}
+                          label="IGN"
+                          tooltip={(
+                            <div className={styles.descTooltip}>
+                              Ignore/bypass the opposing Pok&eactue;mon's defensive stats.
+                            </div>
+                          )}
+                          tooltipDisabled={!settings?.showUiTooltips}
+                          primary
+                          active={moveOverrides.defensiveStat === 'ignore'}
+                          onPress={() => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { defensiveStat: 'ignore' },
+                            },
+                          })}
+                        /> */}
+                      </div>
                     </>
                   }
                 </div>
