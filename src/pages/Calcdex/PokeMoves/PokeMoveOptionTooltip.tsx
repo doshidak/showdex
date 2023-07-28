@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 import { PokeType } from '@showdex/components/app';
 import { type SelectOptionTooltipProps } from '@showdex/components/form';
 import { type CalcdexPokemon } from '@showdex/redux/store';

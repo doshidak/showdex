@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { type AbilityName } from '@smogon/calc/dist/data/interface';
+import { type AbilityName } from '@smogon/calc';
 import { type SelectOptionTooltipProps } from '@showdex/components/form';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
 import styles from './PokeInfo.module.scss';

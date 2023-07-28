@@ -1,4 +1,4 @@
-import { type Weather } from '@smogon/calc/dist/data/interface';
+import { type Weather } from '@smogon/calc';
 import { times } from '@showdex/consts/core';
 
 /**

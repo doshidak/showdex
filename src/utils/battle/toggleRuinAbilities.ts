@@ -1,4 +1,4 @@
-import { type GameType } from '@smogon/calc/dist/data/interface';
+import { type GameType } from '@smogon/calc';
 import { type CalcdexPlayer } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 

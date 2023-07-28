@@ -1,4 +1,4 @@
-import { type Terrain } from '@smogon/calc/dist/data/interface';
+import { type Terrain } from '@smogon/calc';
 import { times } from '@showdex/consts/core';
 import { type FieldConditionDescription } from './weather';
 

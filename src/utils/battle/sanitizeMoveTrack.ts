@@ -1,4 +1,4 @@
-import { type GenerationNum, type MoveName } from '@smogon/calc/dist/data/interface';
+import { type GenerationNum, type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
 

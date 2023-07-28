@@ -3,7 +3,7 @@ import {
   type GenerationNum,
   type ItemName,
   type MoveName,
-} from '@smogon/calc/dist/data/interface';
+} from '@smogon/calc';
 import { type Duration } from 'date-fns';
 // import { HttpMethod } from '@showdex/consts/core';
 import { buildPresetQuery, createTagProvider } from '@showdex/redux/factories';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { type Weather } from '@smogon/calc/dist/data/interface';
+import { type Weather } from '@smogon/calc';
 import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';

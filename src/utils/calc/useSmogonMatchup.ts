@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 import {
   type CalcdexBattleField,
   type CalcdexPlayer,

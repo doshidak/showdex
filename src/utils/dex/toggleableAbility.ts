@@ -1,4 +1,4 @@
-import { type AbilityName } from '@smogon/calc/dist/data/interface';
+import { type AbilityName } from '@smogon/calc';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 

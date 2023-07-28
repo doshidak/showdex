@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { type AbilityName, type ItemName } from '@smogon/calc/dist/data/interface';
+import { type AbilityName, type ItemName } from '@smogon/calc';
 import {
   PiconButton,
   PokeFormeTooltip,

@@ -1,4 +1,4 @@
-import { type GenerationNum, type Weather } from '@smogon/calc/dist/data/interface';
+import { type GenerationNum, type Weather } from '@smogon/calc';
 import { LegacyWeatherNames, WeatherMap, WeatherNames } from '@showdex/consts/dex';
 import { detectGenFromFormat } from './detectGenFromFormat';
 

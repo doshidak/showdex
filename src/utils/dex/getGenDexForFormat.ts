@@ -1,4 +1,4 @@
-import { type Generation, type GenerationNum, type Specie } from '@smogon/calc/dist/data/interface';
+import { type Generation, type GenerationNum, type Specie } from '@smogon/calc';
 import { env } from '@showdex/utils/core';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';

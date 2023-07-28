@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/redux/store';
 import {
   alwaysCriticalHits,

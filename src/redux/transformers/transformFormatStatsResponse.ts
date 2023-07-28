@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 import { PokemonNatures } from '@showdex/consts/dex';
 import { type PkmnSmogonFormatStatsResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
