@@ -5,6 +5,7 @@ export * from './determineCriticalHit';
 export * from './determineMoveTargets';
 export * from './formatDexDescription';
 export * from './getDexForFormat';
+export * from './getDynamicMoveType';
 export * from './getGenDexForFormat';
 export * from './getGenlessFormat';
 export * from './getMaxMove';
