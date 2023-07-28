@@ -232,6 +232,7 @@ button.damageButton {
   @include spacing.margin($right: 5px);
 
   &.smol {
+    align-items: flex-start;
     align-self: flex-start;
     @include spacing.padding($top: 2px);
 
