@@ -34,7 +34,7 @@ const extensionId = mainUrl?.endsWith('main.js')
   : runtime.id;
 
 const injectables: ContentInjectable<HTMLElement>[] = [
-  <ContentInjectable<HTMLLinkElement>> {
+  {
     id: 'showdex-preconnect-googleapis',
     component: 'link',
     into: 'head',
@@ -42,9 +42,9 @@ const injectables: ContentInjectable<HTMLElement>[] = [
       rel: 'preconnect',
       href: 'https://fonts.googleapis.com',
     },
-  },
+  } as ContentInjectable<HTMLLinkElement>,
 
-  <ContentInjectable<HTMLLinkElement>> {
+  {
     id: 'showdex-stylesheet-work-sans',
     component: 'link',
     into: 'head',
@@ -52,9 +52,9 @@ const injectables: ContentInjectable<HTMLElement>[] = [
       rel: 'stylesheet',
       href: 'https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
     },
-  },
+  } as ContentInjectable<HTMLLinkElement>,
 
-  <ContentInjectable<HTMLLinkElement>> {
+  {
     id: 'showdex-stylesheet-fira-code',
     component: 'link',
     into: 'head',
@@ -62,9 +62,9 @@ const injectables: ContentInjectable<HTMLElement>[] = [
       rel: 'stylesheet',
       href: 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap',
     },
-  },
+  } as ContentInjectable<HTMLLinkElement>,
 
-  <ContentInjectable<HTMLScriptElement>> {
+  {
     id: 'showdex-script-main',
     component: 'script',
     into: 'body',
@@ -73,7 +73,7 @@ const injectables: ContentInjectable<HTMLElement>[] = [
       async: true,
       'data-ext-id': extensionId,
     },
-  },
+  } as ContentInjectable<HTMLScriptElement>,
 ];
 
 l.info(

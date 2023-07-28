@@ -13,7 +13,7 @@ export const processUsageAlts = <
   T extends string,
 >(
   stats: Record<T, number>,
-): CalcdexPokemonUsageAlt<T>[] => (<CalcdexPokemonUsageAlt<T>[]> Object.entries(stats || {}))
+): CalcdexPokemonUsageAlt<T>[] => (Object.entries(stats || {}) as CalcdexPokemonUsageAlt<T>[])
   .filter(([value]) => !!value && formatId(value) !== 'nothing')
   .sort(sortUsageAlts);
 
