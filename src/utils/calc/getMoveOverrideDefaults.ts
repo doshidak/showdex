@@ -4,6 +4,7 @@ import {
   alwaysCriticalHits,
   determineMoveTargets,
   getDexForFormat,
+  getDynamicMoveType,
   getMaxMove,
 } from '@showdex/utils/dex';
 import { calcMoveBasePower } from './calcMoveBasePower';
@@ -31,11 +32,14 @@ export const getMoveOverrideDefaults = (
   const dex = getDexForFormat(format);
 
   const {
-    type,
+    type: typeFromDex,
     category,
     zMove,
     maxMove,
   } = dex?.moves.get(moveName) || {};
+
+  // update (2023/07/27): running the type through getDynamicMoveType() now to handle moves like Raging Bull & Revelation Dance
+  const type = getDynamicMoveType(pokemon, moveName) || typeFromDex;
 
   // update (2023/02/02): came across G-Max Fireball on a Cinderace-Gmax, which showed 140 BP.
   // turns out we need to separately lookup G-Max moves since maxMove.basePower refers to Max Flare.
