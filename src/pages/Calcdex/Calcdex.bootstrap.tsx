@@ -706,7 +706,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
               || (!!p?.searchid?.includes('|') && p.searchid.split('|')[0] === ident)
           ))
             // e.g., details = 'Ditto'
-            || (!!details && (
+            && (!details || (
               (!!p?.details && p.details === details)
                 // e.g., 'p1: CalcdexDemolisher|Ditto'.endsWith('Ditto')
                 // update (2023/07/27): apparently includes() was a bad idea for this very unique edge case in gen1ubers where
@@ -736,14 +736,14 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       if (prevPokemon?.calcdexId) {
         newPokemon.calcdexId = prevPokemon.calcdexId;
 
-        // l.debug(
-        //   'Restored calcdexId', newPokemon.calcdexId,
-        //   'from prevPokemon', prevPokemon.ident || prevPokemon.speciesForme,
-        //   'to newPokemon', newPokemon.ident || newPokemon.speciesForme,
-        //   'for player', side.sideid,
-        //   '\n', 'prevPokemon', prevPokemon,
-        //   '\n', 'newPokemon', newPokemon,
-        // );
+        l.debug(
+          'Restored calcdexId', newPokemon.calcdexId,
+          'from prevPokemon', prevPokemon.ident || prevPokemon.speciesForme,
+          'to newPokemon', newPokemon.ident || newPokemon.speciesForme,
+          'for player', side.sideid,
+          '\n', 'prevPokemon', prevPokemon,
+          '\n', 'newPokemon', newPokemon,
+        );
       }
 
       return newPokemon;
@@ -780,9 +780,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         return;
       }
 
-      const prevMyPokemon = myPokemon.find((p) => (
-        p.ident === pokemon.ident
-          || p.speciesForme === pokemon.speciesForme
+      const prevMyPokemon = myPokemon.find((p) => p.ident === pokemon.ident && (
+        p.speciesForme === pokemon.speciesForme
           || p.details === pokemon.details
           // update (2023/07/27): this check breaks when p.details is 'Mewtwo' & pokemon.speciesForme is 'Mew',
           // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
@@ -796,6 +795,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       pokemon.calcdexId = prevMyPokemon.calcdexId;
       didUpdate = true;
+
+      // l.debug(
+      //   'Restored previous calcdexId for', pokemon.speciesForme, 'in battle.myPokemon[]',
+      //   '\n', 'calcdexId', prevMyPokemon.calcdexId,
+      //   '\n', 'pokemon', '(prev)', prevMyPokemon, '(now)', pokemon,
+      // );
     });
 
     if (didUpdate && battleRoom.battle.calcdexInit) {

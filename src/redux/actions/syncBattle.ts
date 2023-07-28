@@ -295,10 +295,13 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           pokemon.calcdexId = (
             isMyPokemonSide
               && !!pokemon.ident
+              && !!pokemon.details // update (2023/07/27): might be guaranteed to exist actually :o
               && player.pokemon.find((p) => (
                 !!p?.calcdexId
                   && !!p.ident
+                  && !!p.details
                   && p.ident === pokemon.ident
+                  && p.details === (pokemon.details || pokemon.speciesForme)
               ))?.calcdexId
           ) || calcPokemonCalcdexId(pokemon, playerKey);
 
@@ -319,12 +322,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 && !!p.speciesForme
                 && !!p.details
                 && !!p.searchid
+                && p.ident === pokemon.ident
             ) && (
-              p.ident === pokemon.ident
-                || p.details === pokemon.details
+              p.details === pokemon.details
                 || p.searchid === pokemon.searchid
                 || p.speciesForme === pokemon.speciesForme
-                || pokemon.searchid.includes(p.ident)
+                // || pokemon.searchid.includes(p.ident)
                 // update (2023/07/27): this speciesForme check breaks in the case where you have a 'Mewtwo',
                 // but we come across a 'Mew' to initialize, so it'll pass this check! (it shouldn't)
                 // || pokemon.speciesForme.includes(p.speciesForme.replace('-*', ''))
