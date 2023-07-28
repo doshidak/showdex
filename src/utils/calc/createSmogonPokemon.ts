@@ -216,7 +216,7 @@ export const createSmogonPokemon = (
     options.boosts.spd = options.boosts.spa;
 
     if (options.overrides.baseStats.spd !== options.overrides.baseStats.spa) {
-      (options.overrides.baseStats as Showdown.StatsTable).spd = options.overrides.baseStats.spa;
+      (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.spd = options.overrides.baseStats.spa;
     }
   }
 
@@ -294,6 +294,15 @@ export const createSmogonPokemon = (
       ...(transformedBaseStats as Required<Omit<Showdown.StatsTable, 'hp'>>),
       hp: baseStats.hp,
     };
+  }
+
+  // update (2023/07/27): TIL @smogon/calc doesn't implement 'Power Trick' at all LOL
+  // (I'm assuming most people were probably manually switching ATK/DEF in the calc to workaround this)
+  if (nonEmptyObject(pokemon.volatiles) && 'powertrick' in pokemon.volatiles) {
+    const { atk, def } = options.overrides.baseStats;
+
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.atk = def;
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.def = atk;
   }
 
   const smogonPokemon = new SmogonPokemon(
