@@ -198,9 +198,11 @@ export const applyPreset = (
 
   // check if we already have revealed moves (typical of spectating or replaying a battle)
   // update (2023/02/03): merging all of the output to provide altMoves[] (for Hidden Power moves)
-  output.moves = pokemon.transformedForme && pokemon.transformedMoves?.length
-    ? [...pokemon.transformedMoves]
-    : mergeRevealedMoves({ ...pokemon, ...output });
+  // update (2023/07/27): not handling transformedMoves here anymore since it's handled in mergeRevealedMoves()
+  output.moves = mergeRevealedMoves({
+    ...pokemon,
+    ...output,
+  });
 
   // only apply the ability/item (& remove their dirty counterparts) if there's only
   // 1 possible ability/item in the pool (& their actual ability/item hasn't been revealed)
