@@ -273,13 +273,13 @@ export const syncPokemon = (
         const {
           moveTrack,
           revealedMoves,
+          transformedMoves,
         } = sanitizeMoveTrack(clientPokemon, state?.format);
 
         value = moveTrack;
 
-        if (revealedMoves.length) {
-          syncedPokemon.revealedMoves = revealedMoves;
-        }
+        syncedPokemon.revealedMoves = revealedMoves;
+        syncedPokemon.transformedMoves = transformedMoves;
 
         if (autoMoves) {
           syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
@@ -396,6 +396,14 @@ export const syncPokemon = (
 
         // sanitizing to make sure a transformed Pokemon doesn't crash the extension lol
         value = sanitizeVolatiles(clientPokemon);
+
+        // update (2023/07/27): there's an interesting interaction between Transform & Power Trick:
+        // if the Pokemon transforms into a Pokemon w/ Power Trick active, they won't receive the 'powertrick' volatile,
+        // but the copied stats from the transformed Pokemon will have its ATK/DEF swapped. a cool trick we can probably
+        // safely do is detect if the transformedPokemon has the 'powertrick' volatile, then apply it to this Pokemon
+        if (nonEmptyObject(transformedPokemon?.volatiles) && 'powertrick' in transformedPokemon.volatiles) {
+          (value as CalcdexPokemon['volatiles']).powertrick = ['powertrick'];
+        }
 
         break;
       }
@@ -688,7 +696,9 @@ export const syncPokemon = (
   // if the Pokemon is transformed, auto-set the moves
   if (syncedPokemon.transformedMoves?.length) {
     if (transformedForme) {
-      syncedPokemon.moves = [...syncedPokemon.transformedMoves];
+      // update (2023/07/27): mergeRevealedMoves() now handles transformedMoves, so we'll use that instead
+      // syncedPokemon.moves = [...syncedPokemon.transformedMoves];
+      syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
     } else {
       // clear the list of transformed moves since the Pokemon is no longer transformed
       syncedPokemon.transformedMoves = [];
