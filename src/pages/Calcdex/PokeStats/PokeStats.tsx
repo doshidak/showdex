@@ -488,7 +488,7 @@ export const PokeStats = ({
                     >
                       {(mod?.modifier ?? -1) >= 0 ? (
                         <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
-                      ) : null}
+                      ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
                     </div>
                     <div className={styles.statModLabel}>
                       {mod?.label || '??? HUH'}
