@@ -42,6 +42,20 @@ export interface CalcdexStatMod {
   modifier?: number;
 
   /**
+   * Stats that were swapped, if any.
+   *
+   * @example
+   * ```ts
+   * ['atk', 'def']
+   * ```
+   * @since 1.1.6
+   */
+  swapped?: [
+    sourceStat: Showdown.StatNameNoHp,
+    targetStat: Showdown.StatNameNoHp,
+  ];
+
+  /**
    * Previous stat value before the `modifier`.
    *
    * @example 328
@@ -167,6 +181,7 @@ export const statModRecorder = (
       label,
       source,
       modifier: null,
+      swapped: [statA, statB],
       prev: valueA,
       value: valueB,
     });
@@ -175,6 +190,7 @@ export const statModRecorder = (
       label,
       source,
       modifier: null,
+      swapped: [statB, statA],
       prev: valueB,
       value: valueA,
     });
