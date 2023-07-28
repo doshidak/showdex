@@ -104,14 +104,13 @@ const sortPresets = (
   // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
   // update (2023/07/19): apparently all the sets are flipped in the order they're received from the API,
   // so we'll apply this one secret trick they don't want you to know
+  // update (2023/07/27): didn't work & too lazy to figure out why, so I'm just gunna reverse() the output in usePresets() lmfao
   if (a.format.endsWith(format)) {
-    // return -1;
-    return 1;
+    return -1;
   }
 
   if (b.format.endsWith(format)) {
-    // return 1;
-    return -1; // shhh ;)
+    return 1;
   }
 
   return 0;
@@ -305,7 +304,8 @@ export const usePresets = ({
       const sorted: CalcdexPokemonPreset[] = [];
 
       if (formatPresets?.length) {
-        sorted.push(...formatPresets);
+        // update (2023/07/27): this is why they pay me the big bux
+        sorted.push(...formatPresets.reverse());
       }
 
       if (formatStatsPresets?.length) {
