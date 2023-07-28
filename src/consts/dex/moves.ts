@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc/dist/data/interface';
+import { type MoveName } from '@smogon/calc';
 
 /**
  * Z moves by type.
@@ -192,4 +192,17 @@ export const PokemonPivotMoves: MoveName[] = [
   'Teleport',
   'U-turn',
   'Volt Switch',
+] as MoveName[];
+
+/**
+ * Moves with effects that can be toggled.
+ *
+ * * Primarily used in `detectToggledMove()` for determining whether a move's effect can be & is currently toggled.
+ * * Note that there isn't a "catch-all" kind of implementation here; any moves listed here will need to be
+ *   specifically handled wherever their effects may apply.
+ *
+ * @since 1.1.6
+ */
+export const PokemonToggleMoves: MoveName[] = [
+  'Power Trick',
 ] as MoveName[];
