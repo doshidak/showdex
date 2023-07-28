@@ -72,10 +72,13 @@ export const CalcdexPokeProvider = ({
     gen,
     format,
     legacy,
+    playerKey: topKey,
+    opponentKey: bottomKey,
     field,
   } = state;
 
-  const opponentKey: CalcdexPlayerKey = playerKey === 'p1' ? 'p2' : 'p1';
+  // update (2023/07/28): oopsies ... forgot to update this for FFA :o
+  const opponentKey: CalcdexPlayerKey = playerKey === topKey ? bottomKey : topKey;
   const player = React.useMemo(() => state[playerKey] || {}, [playerKey, state]);
   const opponent = React.useMemo(() => state[opponentKey] || {}, [opponentKey, state]);
 
