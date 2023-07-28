@@ -1,19 +1,11 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { type CalcdexPlayerKey } from '@showdex/redux/store';
-// import { mergeRevealedMoves } from '@showdex/utils/battle';
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
-// import { hasMegaForme } from '@showdex/utils/dex';
 import {
   appliedPreset,
   applyPreset,
-  // detectUsageAlt,
-  // flattenAlt,
-  // flattenAlts,
-  // sortUsageAlts,
-  // usageAltPercentFinder,
-  // usageAltPercentSorter,
   usePresets,
   useUsageAltSorter,
 } from '@showdex/utils/presets';
@@ -176,8 +168,6 @@ export const CalcdexPokeProvider = ({
   const sortMovesByUsage = useUsageAltSorter(usage?.altMoves);
 
   // handle applying presets
-  // const defaultIv = legacy ? 30 : 31;
-
   const applyPresetCallback = React.useCallback<CalcdexPokeContextConsumables['applyPreset']>((
     presetOrId,
     additionalMutations,
@@ -209,195 +199,6 @@ export const CalcdexPokeProvider = ({
       || (!!preset.name && usages?.find((u) => u?.source === 'usage' && u.name?.includes(preset.name)))
       || null;
 
-    // const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
-    //
-    // check if we have Tera typing usage data
-    // const teraTypesUsage = detectedUsage?.teraTypes?.filter(detectUsageAlt);
-    //
-    // if (teraTypesUsage?.length) {
-    //   // update the teraType to the most likely one after sorting
-    //   mutation.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
-    //   [mutation.teraType] = mutation.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
-    // } else if (altTeraTypes?.[0]) {
-    //   // apply the first teraType from the preset's teraTypes
-    //   [mutation.teraType] = flattenAlts(altTeraTypes);
-    //   mutation.altTeraTypes = altTeraTypes;
-    // }
-    //
-    // don't apply the dirtyAbility/dirtyItem if we're applying the Pokemon's first preset and
-    // their abilility/item was already revealed or it matches the Pokemon's revealed ability/item
-    // const clearDirtyAbility = (!playerPokemon.presetId && playerPokemon.ability)
-    //   || playerPokemon.ability === preset.ability;
-    //
-    // update (2022/10/07): don't apply the dirtyAbility/dirtyItem at all if their non-dirty
-    // counterparts are revealed already
-    // const clearDirtyAbility = !!playerPokemon.ability && !playerPokemon.transformedForme;
-    //
-    // update (2023/02/07): always clear the dirtyAbility from the preset if its actual ability
-    // has been already revealed (even when transformed)
-    // const clearDirtyAbility = !!playerPokemon.ability;
-    //
-    // if (clearDirtyAbility) {
-    //   mutation.dirtyAbility = null;
-    // }
-    //
-    // const clearDirtyItem = (!playerPokemon.presetId && playerPokemon.item && playerPokemon.item !== '(exists)')
-    //   || playerPokemon.item === preset.item
-    //   || (!playerPokemon.item && playerPokemon.prevItem && playerPokemon.prevItemEffect);
-    // const clearDirtyItem = (playerPokemon.item && playerPokemon.item !== '(exists)')
-    //   || (playerPokemon.prevItem && playerPokemon.prevItemEffect);
-    //
-    // if (clearDirtyItem) {
-    //   mutation.dirtyItem = null;
-    // }
-    //
-    // if (preset.altAbilities?.length) {
-    //   mutation.altAbilities = [...preset.altAbilities];
-    //
-    //   // apply the top usage ability (if available)
-    //   const abilityUsageAvailable = detectedUsage?.altAbilities?.length > 1
-    //     && mutation.altAbilities?.length > 1
-    //     && !clearDirtyAbility;
-    //
-    //   if (abilityUsageAvailable) {
-    //     // update (2023/01/06): can't actually use sortedAbilitiesByUsage() since it may use usage from a prior set
-    //     // (only a problem in Gen 9 Randoms since there are multiple "usages" due to the role system, so the sorters
-    //     // will be referencing the current role's usage and not the one we're trying to switch to... if that makes sense lol)
-    //     const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altAbilities));
-    //     const sortedAbilities = flattenAlts(mutation.altAbilities).sort(sorter);
-    //     const [topAbility] = sortedAbilities;
-    //
-    //     if (sortedAbilities.length === mutation.altAbilities.length) {
-    //       mutation.altAbilities = sortedAbilities;
-    //     }
-    //
-    //     if (topAbility && mutation.dirtyAbility !== topAbility) {
-    //       mutation.dirtyAbility = topAbility;
-    //     }
-    //   }
-    // }
-    //
-    // if (preset.altItems?.length) {
-    //   mutation.altItems = [...preset.altItems];
-    //
-    //   // apply the top usage item (if available)
-    //   const itemUsageAvailable = detectedUsage?.altItems?.length > 1
-    //     && mutation.altItems?.length > 1
-    //     && !clearDirtyItem;
-    //
-    //   if (itemUsageAvailable) {
-    //     const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altItems));
-    //     const sortedItems = flattenAlts(mutation.altItems).sort(sorter);
-    //     const [topItem] = sortedItems;
-    //
-    //     if (sortedItems.length === mutation.altItems.length) {
-    //       mutation.altItems = sortedItems;
-    //     }
-    //
-    //     if (topItem && mutation.dirtyItem !== topItem) {
-    //       mutation.dirtyItem = topItem;
-    //     }
-    //   }
-    // }
-    //
-    // if (preset.altMoves?.length) {
-    //   mutation.altMoves = [...preset.altMoves];
-    //
-    //   // sort the moves by their usage stats (if available) and apply the top 4 moves
-    //   // (otherwise, just apply the moves from the preset)
-    //   const moveUsageAvailable = detectedUsage?.altMoves?.length > 1
-    //     && mutation.altMoves?.length > 1;
-    //
-    //   if (moveUsageAvailable) {
-    //     const sorter = usageAltPercentSorter(usageAltPercentFinder(detectedUsage.altMoves));
-    //     const sortedMoves = flattenAlts(mutation.altMoves).sort(sorter);
-    //
-    //     if (sortedMoves.length) {
-    //       mutation.altMoves = sortedMoves;
-    //
-    //       /**
-    //        * @todo Needs to be updated once we support more than 4 moves.
-    //        */
-    //       mutation.moves = sortedMoves.slice(0, 4);
-    //     }
-    //   }
-    // }
-    //
-    // check if we already have revealed moves (typical of spectating or replaying a battle)
-    // update (2023/02/03): merging all mutations to provide altMoves[] (for Hidden Power moves)
-    // mutation.moves = playerPokemon.transformedForme && playerPokemon.transformedMoves?.length
-    //   ? [...playerPokemon.transformedMoves]
-    //   : mergeRevealedMoves({ ...playerPokemon, ...mutation });
-    //
-    // only apply the ability/item (and remove their dirty counterparts) if there's only
-    // 1 possible ability/item in the pool (and their actual ability/item hasn't been revealed)
-    // update (2022/10/06): nvm on the setting the actual ability/item cause it's screwy when switching formes,
-    // so opting to use their dirty counterparts instead lol
-    // if (preset.format?.includes('random')) {
-    //   // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
-    //   if (preset.speciesForme.endsWith('-Gmax')) {
-    //     mutation.speciesForme = preset.speciesForme;
-    //   }
-    //
-    //   if (!clearDirtyAbility && mutation.altAbilities?.length === 1) {
-    //     [mutation.dirtyAbility] = flattenAlts(mutation.altAbilities);
-    //     // mutation.dirtyAbility = null;
-    //   }
-    //
-    //   if (!playerPokemon.item && !playerPokemon.prevItem && mutation.altItems?.length === 1) {
-    //     [mutation.dirtyItem] = flattenAlts(mutation.altItems);
-    //     // mutation.dirtyItem = null;
-    //   }
-    // }
-    //
-    // carefully apply the spread if Pokemon is transformed and a spread was already present prior
-    // const shouldTransformSpread = !!playerPokemon.transformedForme
-    //   && !!playerPokemon.nature
-    //   && !!Object.values({ ...playerPokemon.ivs, ...playerPokemon.evs }).filter(Boolean).length;
-    //
-    // if (shouldTransformSpread) {
-    //   // since transforms inherit the exact stats of the target Pokemon (except for HP),
-    //   // we actually need to copy the nature from the preset
-    //   // delete mutation.nature;
-    //
-    //   // we'll keep the original HP EVs/IVs (even if possibly illegal) since the max HP
-    //   // of a transformed Pokemon is preserved, which is based off of the HP's base, IV & EV
-    //   mutation.ivs.hp = playerPokemon.ivs.hp;
-    //   mutation.evs.hp = playerPokemon.evs.hp;
-    //
-    //   // if the Pokemon has an item set by a previous preset, ignore this preset's item
-    //   if (playerPokemon.dirtyItem || playerPokemon.item) {
-    //     delete mutation.dirtyItem;
-    //   }
-    // }
-    //
-    // only remove the dirtyAbility/dirtyItem from the mutation if they're undefined (but not null)
-    // (means that the preset didn't define the ability/item, hence the undefined)
-    // if (mutation.dirtyAbility === undefined) {
-    //   delete mutation.dirtyAbility;
-    // }
-    //
-    // if (mutation.dirtyItem === undefined) {
-    //   delete mutation.dirtyItem;
-    // }
-    //
-    // apply the defaultShowGenetics setting if the Pokemon is serverSourced
-    // update (2022/11/15): defaultShowGenetics is deprecated in favor of lockGeneticsVisibility;
-    // showGenetics's initial value is set in syncBattle() when the Pokemon is first init'd into Redux
-    // if (playerPokemon.serverSourced) {
-    //   mutation.showGenetics = settings?.defaultShowGenetics?.auth;
-    // }
-    //
-    // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
-    // const forceShowGenetics = !playerPokemon.showGenetics && (
-    //   !Object.values(mutation.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-    //     || (!legacy && !Object.values(mutation.evs || {}).reduce((sum, val) => sum + (val || 0), 0))
-    // );
-    //
-    // if (forceShowGenetics) {
-    //   mutation.showGenetics = true;
-    // }
-
     // spreadStats will be recalculated in `updatePokemon()` from `CalcdexProvider`
     updatePokemon(playerKey, {
       ...additionalMutations,
@@ -405,17 +206,11 @@ export const CalcdexPokeProvider = ({
       calcdexId: playerPokemon.calcdexId, // applyPreset() provides this, but just in case lol
     }, `${baseScope}:applyPreset() via ${scope || '(anon)'}`);
   }, [
-    // defaultIv,
-    // legacy,
     format,
     playerKey,
     playerPokemon,
     presets,
-    // sortAbilitiesByUsage,
-    // sortItemsByUsage,
-    // sortMovesByUsage,
     updatePokemon,
-    // usage,
     usages,
   ]);
 
@@ -437,14 +232,6 @@ export const CalcdexPokeProvider = ({
     if (!playerPokemon.transformedForme && appliedTransformedPreset.current) {
       appliedTransformedPreset.current = false;
     }
-
-    // const existingPreset = playerPokemon.presetId && presets?.length
-    //   ? presets.find((p) => p?.calcdexId === playerPokemon.presetId && (
-    //     !playerPokemon.transformedForme
-    //       || p.source !== 'server' // i.e., the 'Yours' preset
-    //       || appliedTransformedPreset.current
-    //   ))
-    //   : null;
 
     const existingPreset = (
       !!playerPokemon.presetId
