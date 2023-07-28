@@ -144,7 +144,29 @@ export const PokeMoves = ({
     }
 
     // when move is cleared, `name` will be null/undefined, so coalesce into an empty string
-    moves[index] = (name?.replace('*', '') ?? '') as MoveName;
+    const moveName = (name?.replace('*', '') ?? '') as MoveName;
+
+    // update (2023/07/27): if moveName already exists at a different index in moves[], just swap them
+    // so that you don't have 2 Hydro Pumps at different indices, for example lol
+    // e.g., moves = ['Hydro Pump', 'Ice Beam', 'U-Turn', 'Grass Knot'], name = 'Hydro Pump', index = 1
+    // before this change: ['Hydro Pump', 'Hydro Pump', 'U-Turn', 'Grass Knot']
+    // after: ['Ice Beam', 'Hydro Pump', 'U-Turn', 'Grass Knot']
+    // also, the `!!m` check is to allow users to yeet all the moves if they wish
+    // (otherwise, they'd only be able to yeet one move!)
+    const existingMoveIndex = moves.findIndex((m) => !!m && m === moveName);
+
+    if (existingMoveIndex > -1) {
+      // this is the move that's currently parked at the user-requested `index`
+      // e.g., 'Ice Beam' (from the example above)
+      const moveAtIndex = moves[index];
+
+      // e.g., existingMoveIndex = 0, moves = ['Ice Beam', 'Ice Beam', 'U-Turn', 'Grass Knot']
+      moves[existingMoveIndex] = moveAtIndex;
+    }
+
+    // set the move at the index as normal
+    // e.g., moves = ['Ice Beam', 'Hydro Pump', 'U-Turn', 'Grass Knot']
+    moves[index] = moveName;
 
     updatePokemon({
       moves,
@@ -578,6 +600,7 @@ export const PokeMoves = ({
                   ['xs', 'sm'].includes(containerSize) && styles.smol,
                   damagingMove && styles.withStatTargets,
                 )}
+                style={{ paddingLeft: '0.5em' }}
               >
                 <div className={styles.editorLeft}>
                   <PokeTypeField
