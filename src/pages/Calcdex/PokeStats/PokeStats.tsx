@@ -13,7 +13,7 @@ import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { legalLockedFormat } from '@showdex/utils/dex';
-import { type ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
@@ -52,12 +52,13 @@ export const PokeStats = ({
   } = state;
 
   const colorScheme = useColorScheme();
+  const randomUuid = useRandomUuid();
+
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
+  const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const statNames = PokemonStatNames.filter((stat) => gen !== 1 || stat !== 'spd');
   const boostNames = PokemonBoostNames.filter((stat) => gen !== 1 || stat !== 'spd');
-
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
-  const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const shouldShowBaseStats = settings?.showBaseStats === 'always'
     || (settings?.showBaseStats === 'meta' && !legalLockedFormat(format));

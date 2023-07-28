@@ -22,7 +22,7 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { legalLockedFormat } from '@showdex/utils/dex';
-import { type ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
@@ -60,9 +60,10 @@ export const PokeMoves = ({
   } = state;
 
   const colorScheme = useColorScheme();
+  const randomUuid = useRandomUuid();
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '???';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nationalDexFormat = !!format && [

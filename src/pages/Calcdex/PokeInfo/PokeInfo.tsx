@@ -22,7 +22,7 @@ import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHp } from '@showdex/utils/calc';
 import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
-import { type ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -70,8 +70,9 @@ export const PokeInfo = ({
   } = state;
 
   const colorScheme = useColorScheme();
+  const randomUuid = useRandomUuid();
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nickname = hasNickname(pokemon) && settings?.showNicknames
