@@ -797,6 +797,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           };
         }
 
+        // reset any additional dirty fields
+        if (typeof syncedPokemon.dirtyHp === 'number') {
+          syncedPokemon.dirtyHp = null;
+        }
+
+        if (typeof syncedPokemon.dirtyStatus === 'string') {
+          syncedPokemon.dirtyStatus = null;
+        }
+
         l.debug(
           'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
           '\n', 'battleId', battleId,
