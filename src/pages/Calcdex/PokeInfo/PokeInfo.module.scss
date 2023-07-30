@@ -6,6 +6,7 @@
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
+@use 'mixins/transition';
 
 .container {
   .row:not(:first-child) {
@@ -164,7 +165,7 @@ button.nameButton {
 // }
 
 .hpPercentage {
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin($left: 6px);
 
   .light & {
     color: color.alpha(colors.$black, 0.85);
@@ -177,11 +178,32 @@ button.nameButton {
 
 .statuses {
   @include flex.row($align: center);
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin-xy($x: 4px);
 
   .status:not(:last-child) {
     display: inline-block;
-    @include spacing.margin($right: 0.5em);
+    @include spacing.margin($right: 4px);
+  }
+}
+
+.statusButton {
+  position: relative;
+
+  &::before {
+    content: '';
+    @include position.absolute($top: -2px, $right: 2px, $bottom: -2px, $left: 1px);
+    border-radius: 7px;
+    @include transition.apply(background-color, box-shadow);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light &:hover::before {
+    background-color: color.alpha(colors.$black, 0.05);
+  }
+
+  .dark &:hover::before {
+    background-color: color.alpha(colors.$white, 0.075);
   }
 }
 
