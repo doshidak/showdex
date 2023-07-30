@@ -99,6 +99,7 @@ export const sanitizePokemon = (
     altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
     hp: pokemon?.hp || 0,
+    dirtyHp: 'dirtyHp' in pokemon ? (pokemon.dirtyHp ?? null) : null, // note: 0 = fainted, so null is when the user resets back to `hp`
     maxhp: pokemon?.maxhp || 1,
     fainted: pokemon?.fainted ?? !pokemon?.hp,
 
@@ -160,7 +161,10 @@ export const sanitizePokemon = (
       spe: typeof pokemon?.boosts?.spe === 'number' ? pokemon.boosts.spe : 0,
     },
 
-    /** @todo clean this up lol */
+    // note to self: you can't clean this up in O(1) unless you wanna (a) use a loop, (b) use a ternary where you check
+    // 'dirtyBoosts' in pokemon first, but realize TypeScript is angy, so you end up doing (a) or (c) devise some advanced mainframe
+    // algorithms that does everything in O(1), including earning my Ph.D, when all you need to do was copy a tiny object & fill it
+    // with null's if its value is falsy :o -- wait you mean the `in` operator is O(n) ??? frick
     dirtyBoosts: {
       atk: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.atk) || null,
       def: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.def) || null,
@@ -178,6 +182,7 @@ export const sanitizePokemon = (
     },
 
     status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
+    dirtyStatus: ('dirtyStatus' in pokemon && pokemon.dirtyStatus) || null,
     turnstatuses: pokemon?.turnstatuses,
 
     chainMove: ('chainMove' in pokemon && pokemon.chainMove) || null,

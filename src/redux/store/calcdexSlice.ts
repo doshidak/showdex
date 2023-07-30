@@ -231,6 +231,22 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   revealedTeraType?: Showdown.TypeName;
 
   /**
+   * User-modified *Hit Point* (HP) value.
+   *
+   * * Should be `clamp()`'d between `0` & this Pokemon's `maxhp`.
+   *   - If `maxhp` is `100` (so it seems like a %, i.e., 100 "%" `hp` of 100 "%" `maxhp`), then read the value
+   *     of this Pokemon's `spreadStats.hp` to get an *estimate* of its actual `maxhp` (which depends on the preset!).
+   * * At this point, I feel like this object is just gunna be a clone of all the `Showdown.Pokemon` properties,
+   *   but with a `dirty` prepended to it.
+   *   - hah
+   *   - sounds about right
+   *
+   * @default null
+   * @since 1.1.6
+   */
+  dirtyHp?: number;
+
+  /**
    * Ability of the Pokemon.
    *
    * @default null
@@ -707,6 +723,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   criticalHit?: boolean;
+
+  /**
+   * User-modified non-volatile status condition.
+   *
+   * * In order to allow the user to *forcibly* specify **no** status (aka. "Healthy") when the Pokemon actually has one,
+   *   this takes in the `'ok'` status, which is uniquely handled in `createSmogonPokemon()`.
+   * * `null`, typical of other `dirty*` properties, is used to indicate that the user has not modified the status.
+   *   - & would be the value when resetting the dirty status back to the original `status`.
+   *
+   * @default null
+   * @since 1.1.6
+   */
+  dirtyStatus?: Showdown.PokemonStatus | 'ok';
 
   /**
    * Move last used consecutively.
