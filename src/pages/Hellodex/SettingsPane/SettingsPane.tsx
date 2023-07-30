@@ -1291,7 +1291,7 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['reverseIconName']>
+                  {/* <Field<ShowdexSettings['calcdex']['reverseIconName']>
                     name="calcdex.reverseIconName"
                     component={Switch}
                     className={cx(styles.field, styles.switchField)}
@@ -1305,7 +1305,7 @@ export const SettingsPane = ({
                         clicking on the name will switch its forme, if any.
                       </div>
                     )}
-                  />
+                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['openSmogonPage']>
                     name="calcdex.openSmogonPage"
@@ -1314,8 +1314,8 @@ export const SettingsPane = ({
                     label="Link to Smogon Dex Entries"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Opens the Pok&eacute;mon's Smogon Dex entry as a popup window when the configured
-                        button is clicked on, depending on <em>Swap Icon/Name Behavior</em>.
+                        Opens the Pok&eacute;mon's Smogon Dex entry as a popup window when
+                        the Pok&eacute;mon's icon is clicked on.
                       </div>
                     )}
                   />
@@ -1331,6 +1331,19 @@ export const SettingsPane = ({
                         <br />
                         <br />
                         ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['alwaysShowNonVolatile']>
+                    name="calcdex.alwaysShowNonVolatile"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label={`Always Show Pok${eacute}mon Statuses`}
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Always shows the Pok&eacute;mon's non-volatile status (e.g., BRN, PAR, SLP, etc.),
+                        regardless if it has one. In those cases, the status will display "OK".
                       </div>
                     )}
                   />
