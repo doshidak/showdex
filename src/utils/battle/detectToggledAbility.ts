@@ -1,5 +1,5 @@
 import { type CalcdexBattleState, type CalcdexPokemon } from '@showdex/redux/store';
-import { calcPokemonHp } from '@showdex/utils/calc';
+import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
 import { toggleableAbility } from '@showdex/utils/dex';
 
@@ -42,7 +42,7 @@ export const detectToggledAbility = (
   // (considering that we "reset" the HP to 100% if the Pokemon is dead, i.e., at 0% HP)
   // (also note that Multiscale doesn't exist in pokemon.volatiles, hence the check here)
   if (['multiscale', 'shadowshield'].includes(ability)) {
-    const hpPercentage = calcPokemonHp(pokemon);
+    const hpPercentage = calcPokemonHpPercentage(pokemon);
 
     return !hpPercentage || hpPercentage === 1;
   }

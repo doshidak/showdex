@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { type MoveName } from '@smogon/calc';
+import { SandwichProvider } from '@showdex/components/layout';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 // import { syncBattle } from '@showdex/redux/actions';
 import {
@@ -24,6 +25,8 @@ import {
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpIv,
+  calcPokemonCurrentHp,
+  calcPokemonMaxHp,
   calcPokemonSpreadStats,
   convertLegacyDvToIv,
   getLegacySpcDv,
@@ -291,6 +294,51 @@ export const CalcdexProvider = ({
             delete payload.dirtyBaseStats[stat];
           }
         });
+      }
+
+      // update (2023/07/28): now allowing HP & non-volatile statuses to be edited
+      if (typeof payload.dirtyHp === 'number') {
+        // let clearDirtyHp = false;
+
+        // determine if this value more or less is the current HP
+        const maxHp = calcPokemonMaxHp(payload);
+        const currentHp = calcPokemonCurrentHp(payload, true);
+
+        const clearDirtyHp = !maxHp
+          || payload.dirtyHp === currentHp;
+
+        // if (maxHp) {
+        //   const hpPercentage = Math.floor(payload.hp / maxHp);
+        //   const dirtyHpPercentage = Math.floor(payload.dirtyHp / maxHp);
+        //
+        //   if (dirtyHpPercentage === hpPercentage) {
+        //     clearDirtyHp = true;
+        //   }
+        // } else {
+        //   // probably not valid anyway
+        //   clearDirtyHp = true;
+        // }
+
+        if (clearDirtyHp) {
+          payload.dirtyHp = null;
+        }
+      }
+
+      if ('dirtyStatus' in payload) {
+        const clearDirtyStatus = (payload.dirtyStatus === 'ok' && !payload.status)
+          || (payload.dirtyStatus === payload.status);
+
+        if (clearDirtyStatus) {
+          payload.dirtyStatus = null;
+        }
+      }
+
+      if ('dirtyFaintCounter' in payload) {
+        const clearDirtyFaintCounter = payload.dirtyFaintCounter === payload.faintCounter;
+
+        if (clearDirtyFaintCounter) {
+          payload.dirtyFaintCounter = null;
+        }
       }
 
       // individually spread each overridden move w/ the move's defaults, if any
@@ -692,7 +740,9 @@ export const CalcdexProvider = ({
 
   return (
     <CalcdexContext.Provider value={consumables}>
-      {children}
+      <SandwichProvider>
+        {children}
+      </SandwichProvider>
     </CalcdexContext.Provider>
   );
 };

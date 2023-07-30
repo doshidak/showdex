@@ -9,7 +9,7 @@ import {
   getGenDexForFormat,
   notFullyEvolved,
 } from '@showdex/utils/dex';
-import { calcPokemonHp } from './calcPokemonHp';
+import { calcPokemonHpPercentage } from './calcPokemonHp';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
 export type SmogonPokemonOverrides = SmogonPokemonOptions['overrides'];
@@ -67,11 +67,13 @@ export const createSmogonPokemon = (
 
   // if applicable, convert the '???' status into an empty string
   // (don't apply the status if the Pokemon is fainted tho)
-  const status = pokemon.hp
-    ? pokemon.status === '???'
+  const status = pokemon.dirtyStatus && pokemon.dirtyStatus !== '???'
+    ? pokemon.dirtyStatus === 'ok'
       ? null
-      : pokemon.status
-    : null;
+      : pokemon.dirtyStatus
+    : pokemon.status === '???'
+      ? null
+      : pokemon.status;
 
   const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
   const abilityId = formatId(ability);
@@ -110,7 +112,7 @@ export const createSmogonPokemon = (
         return shouldMultiscale && !pokemon.hp ? maxHp : pokemon.hp;
       }
 
-      const hpPercentage = calcPokemonHp(pokemon);
+      const hpPercentage = calcPokemonHpPercentage(pokemon);
 
       // if the Pokemon is dead, assume it has full HP as to not break the damage calc
       // return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);

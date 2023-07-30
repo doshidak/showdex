@@ -20,7 +20,7 @@ import {
   notFullyEvolved,
   shouldIgnoreItem,
 } from '@showdex/utils/dex';
-import { calcPokemonHp } from './calcPokemonHp';
+import { calcPokemonHpPercentage } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
 import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
 
@@ -80,7 +80,7 @@ export const calcPokemonFinalStats = (
 
   const legacy = detectLegacyGen(gen);
 
-  const hpPercentage = calcPokemonHp(pokemon);
+  const hpPercentage = calcPokemonHpPercentage(pokemon);
   const ability = id(pokemon.dirtyAbility ?? pokemon.ability);
   const opponentAbility = id(opponentPokemon.dirtyAbility ?? opponentPokemon.ability);
 
@@ -143,7 +143,13 @@ export const calcPokemonFinalStats = (
   const highestBoostedStat = pokemon.boostedStat || findHighestStat(record.stats());
 
   // apply status condition effects
-  if (pokemon.status) {
+  const status = pokemon?.dirtyStatus && pokemon.dirtyStatus !== '???'
+    ? pokemon.dirtyStatus === 'ok'
+      ? null
+      : pokemon.dirtyStatus
+    : pokemon.status;
+
+  if (status) {
     if (!legacy && ['guts', 'quickfeet'].includes(ability)) {
       // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
       if (ability === 'guts') {
@@ -156,12 +162,12 @@ export const calcPokemonFinalStats = (
       }
     } else {
       // 50% ATK reduction when burned (all gens... probably)
-      if (pokemon.status === 'brn') {
+      if (status === 'brn') {
         record.apply('atk', 0.5, 'status', 'Burn');
       }
 
       // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
-      if (pokemon.status === 'par') {
+      if (status === 'par') {
         record.apply('spe', gen < 7 ? 0.25 : 0.5, 'status', 'Paralysis');
       }
     }
@@ -416,7 +422,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply additional status effects
-  if (pokemon.status) {
+  if (status) {
     if (ability === 'marvelscale') {
       record.apply('def', 1.5, 'ability', 'Marvel Scale');
     }
