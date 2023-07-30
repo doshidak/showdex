@@ -117,7 +117,7 @@ export const Tooltip = ({
           name: 'arrow',
           options: {
             element: arrow,
-            padding: 15,
+            // padding: 15,
           },
         }],
       }}

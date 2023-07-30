@@ -96,6 +96,18 @@ $arrow: (
     //     @include arrow-mask($mask-deg);
     //   }
     // }
+
+    &::before {
+      @if $placement == top {
+        top: -1px;
+      } @else if ($placement == right) {
+        right: -1px;
+      } @else if ($placement == bottom) {
+        bottom: -1px;
+      } @else if ($placement == left) {
+        left: -1px;
+      }
+    }
   }
 }
 
