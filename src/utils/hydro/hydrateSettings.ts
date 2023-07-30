@@ -121,7 +121,7 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       showPlayerRatings: true,
       authPosition: 'top',
       showNicknames: false,
-      reverseIconName: false,
+      // reverseIconName: false,
       openSmogonPage: true,
       // showAllFormes: true,
       showAllOptions: false,
@@ -143,6 +143,7 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
         p4: true,
       },
 
+      forceNonVolatile: true,
       lockUsedTera: false,
       resetDirtyBoosts: true,
       editPokemonTypes: 'always',

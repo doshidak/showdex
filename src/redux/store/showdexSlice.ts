@@ -249,7 +249,7 @@ export interface ShowdexCalcdexSettings {
    */
   showNicknames: boolean;
 
-  /**
+  /*
    * Whether to reverse the functionality of the Pokemon's icon and name when clicked on.
    *
    * * If `false` (default), the functionality will be as follows:
@@ -259,10 +259,12 @@ export interface ShowdexCalcdexSettings {
    *   - Clicking on the icon will switch the Pokemon's current `speciesForme` if it has defined `altFormes`.
    *   - Clicking on the name will open the Pokemon's *Smogon University* page.
    *
+   * @deprecated As of v1.1.6, this setting has been removed cause I don't think most people even use this,
+   *   let alone even find the forme switcher, so this would make things even more confusing!
    * @default false
    * @since 1.0.3
    */
-  reverseIconName: boolean;
+  // reverseIconName: boolean;
 
   /**
    * Whether to open the Pokemon's *Smogon Univeristy* page when the configured button is clicked on.
@@ -407,6 +409,16 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.3
    */
   defaultAutoMoves: Record<'auth' | CalcdexPlayerKey, boolean>;
+
+  /**
+   * Whether to always show the Pokemon's non-volatile status, even if it has none.
+   *
+   * * Which in that case, "OK" will be shown for the abbreviation shown in the `PokeStatus` component.
+   *
+   * @default true
+   * @since 1.1.6
+   */
+  forceNonVolatile: boolean;
 
   /**
    * When to allow the Pokemon's types to be edited when clicked on.
