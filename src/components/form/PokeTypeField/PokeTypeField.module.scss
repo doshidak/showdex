@@ -122,6 +122,9 @@ $type-option-type: (
       dark: color.alpha(colors.$black, 0.15),
     ),
 
+    // note: confusingly not named after the `highlight` PokeType prop,
+    // but rather refers to a subtle blue background applied to the PokeType
+    // in order to draw the user's attention to it
     highlighted: (
       light: color.alpha(colors.$blue, 0.3),
       dark: color.alpha(color.tint(colors.$blue, 30%), 0.3),
@@ -315,10 +318,10 @@ $revealed-types: (
   }
 }
 
-.typeOptionType {
-  grid-area: span 1 / span 1;
-  z-index: 1;
-}
+// .typeOptionType {
+//   grid-area: span 1 / span 1;
+//   z-index: 1;
+// }
 
 .typeOptionLabel {
   .typeOptionButton:not(.selected):not(.withUsage) & {
@@ -341,7 +344,7 @@ $revealed-types: (
   //   }
   // }
 
-  .typeOptionButton:not(.selected):not(.withUsage):not(.hover) & {
+  .typeOptionButton:not(.selected):not(.withUsage):not(:hover) & {
     .light & {
       background-color: map.get($type-option-type, background-color, default, light);
     }
@@ -351,7 +354,7 @@ $revealed-types: (
     }
   }
 
-  .typeOptionButton:not(.selected):not(.withUsage):not(.hover).highlighted & {
+  .typeOptionButton:not(.selected):not(.withUsage):not(:hover).highlighted & {
     .light & {
       background-color: map.get($type-option-type, background-color, highlighted, light);
     }

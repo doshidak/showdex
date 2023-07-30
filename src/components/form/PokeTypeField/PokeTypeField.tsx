@@ -3,6 +3,7 @@ import { type FieldRenderProps } from 'react-final-form';
 // import { sticky } from 'tippy.js';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
+import { useSandwich } from '@showdex/components/layout';
 import {
   type ButtonElement,
   type TooltipProps,
@@ -80,7 +81,14 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   // keep track of whether the options tooltip is open
-  const [optionsVisible, setOptionsVisible] = React.useState(false);
+  // const [optionsVisible, setOptionsVisible] = React.useState(false);
+
+  const {
+    id: optionsId,
+    active: optionsVisible,
+    requestOpen: requestOptionsOpen,
+    notifyClose: notifyOptionsClose,
+  } = useSandwich();
 
   const colorScheme = useColorScheme();
 
@@ -139,7 +147,8 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
 
     // only close the tooltip if an actual type (not '???') has been selected
     input?.onChange?.(value);
-    setOptionsVisible(false);
+    // setOptionsVisible(false);
+    notifyOptionsClose();
   };
 
   // not scoped w/ handleChange() to avoid the dumbest type assertions
@@ -185,7 +194,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         onPress={() => handleChange(pokemonType)}
       >
         <PokeType
-          className={styles.typeOptionType}
+          // className={styles.typeOptionType}
           labelClassName={styles.typeOptionLabel}
           type={pokemonType}
           reverseColorScheme
@@ -309,7 +318,8 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       // plugins={[sticky]}
       // sticky="popper"
       // disabled={optionsVisible ? undefined : disabled}
-      onClickOutside={() => setOptionsVisible(false)}
+      // onClickOutside={() => setOptionsVisible(false)}
+      onClickOutside={notifyOptionsClose}
     >
       <BaseButton
         ref={containerRef}
@@ -327,11 +337,12 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         aria-label={label}
         tabIndex={readOnly || disabled ? -1 : tabIndex}
         hoverScale={1}
-        onPress={() => setOptionsVisible(!optionsVisible)}
+        // onPress={() => setOptionsVisible(!optionsVisible)}
+        onPress={optionsVisible ? notifyOptionsClose : requestOptionsOpen}
       >
         {value.map((typeValue, i) => renderType(
           typeValue,
-          `PokeTypeField:${input?.name || '?'}:Value:${i}:${typeValue || '?'}`,
+          `PokeTypeField:${input?.name || optionsId || '???'}:Value:${i}:${typeValue || '?'}`,
         ))}
       </BaseButton>
     </Tooltip>
