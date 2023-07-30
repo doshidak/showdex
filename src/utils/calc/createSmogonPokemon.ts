@@ -130,8 +130,8 @@ export const createSmogonPokemon = (
     // (e.g., don't apply Supreme Overlord boosts when user overrides a move's base power)
     alliesFainted: (
       (!moveName || !nonEmptyObject(pokemon.moveOverrides?.[moveName]))
-        && (pokemon.dirtyFaintCounter || pokemon.faintCounter)
-    ) || null,
+        && (pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0))
+    ),
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup

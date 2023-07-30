@@ -368,7 +368,7 @@ export const PokeMoves = ({
                   className={styles.valueField}
                   label={`Fallen Allies Count for Pokemon ${friendlyPokemonName}`}
                   hideLabel
-                  hint={pokemon.dirtyFaintCounter || pokemon.faintCounter || 0}
+                  hint={pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0)}
                   fallbackValue={pokemon.faintCounter || 0}
                   min={0}
                   max={player.maxPokemon}
@@ -377,7 +377,7 @@ export const PokeMoves = ({
                   clearOnFocus
                   absoluteHover
                   input={{
-                    value: pokemon.dirtyFaintCounter || pokemon.faintCounter || 0,
+                    value: pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0),
                     onChange: (value: number) => updatePokemon({
                       dirtyFaintCounter: value === pokemon.faintCounter
                         ? null
@@ -394,14 +394,14 @@ export const PokeMoves = ({
               <ToggleButton
                 className={styles.editorButton}
                 style={{
-                  marginRight: '1em',
-                  ...(pokemon.dirtyFaintCounter ? undefined : { opacity: 0 }),
+                  // marginRight: '1em',
+                  ...(typeof pokemon.dirtyFaintCounter === 'number' ? undefined : { opacity: 0 }),
                 }}
                 label="Reset"
                 tooltip={`Reset to ${pokemon.faintCounter} Fallen`}
                 tooltipDisabled={!settings?.showUiTooltips}
-                primary={!!pokemon.dirtyFaintCounter}
-                disabled={!pokemon.dirtyFaintCounter}
+                primary={typeof pokemon.dirtyFaintCounter === 'number'}
+                disabled={typeof pokemon.dirtyFaintCounter !== 'number'}
                 onPress={() => updatePokemon({
                   dirtyFaintCounter: null,
                 }, `${baseScope}:ToggleButton~ResetFaintCounter:onPress()`)}
