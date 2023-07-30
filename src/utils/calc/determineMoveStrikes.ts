@@ -58,7 +58,7 @@ export const determineMoveStrikes = (
     const eligiblePokemon = player.pokemon.filter((p) => (
       !!p?.calcdexId
         && p.calcdexId !== pokemon.calcdexId
-        && p.hp > 0
+        && (p.dirtyHp ?? (p.hp || 0)) > 0
         && !p.status
     ));
 
