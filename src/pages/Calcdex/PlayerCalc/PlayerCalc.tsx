@@ -8,6 +8,7 @@ import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { calcPokemonCurrentHp } from '@showdex/utils/calc';
 import { env, formatId, getResourceUrl } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
@@ -320,7 +321,7 @@ export const PlayerCalc = ({
               || pokemon?.details
               || pokemon?.name
               || pokemon?.speciesForme
-              || defaultName
+              // || defaultName
               || String(i);
 
             const friendlyPokemonName = pokemon?.speciesForme
@@ -333,6 +334,7 @@ export const PlayerCalc = ({
 
             // const speciesForme = mon?.transformedForme || mon?.speciesForme;
             const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
+            const hp = calcPokemonCurrentHp(pokemon);
             const ability = pokemon?.dirtyAbility || pokemon?.ability;
             const item = pokemon?.dirtyItem ?? pokemon?.item;
 
@@ -355,7 +357,7 @@ export const PlayerCalc = ({
                   styles.piconButton,
                   pokemonActive && styles.active,
                   pokemonSelected && styles.selected,
-                  !pokemon?.hp && styles.fainted,
+                  !hp && styles.fainted,
                 )}
                 piconClassName={styles.picon}
                 display="block"
