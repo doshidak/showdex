@@ -152,6 +152,21 @@ export const getDynamicMoveType = (
       break;
     }
 
+    // Tera Blast, primarily used by every Pokemon, probably lol
+    case 'terablast': {
+      const {
+        teraType,
+        terastallized,
+      } = pokemon;
+
+      // Tera Blast's type only becomes the `teraType` when `terastallized`
+      if (teraType && terastallized) {
+        return teraType;
+      }
+
+      break;
+    }
+
     default: {
       break;
     }
