@@ -156,19 +156,35 @@ export const PatronageTierRenderer = (
 
               {startDate && term === 'once' ? (
                 <>
-                  Donated on
-                  <br />
-                  {format(startDate, 'PP \'at\' pp')}
+                  Donated on{' '}
+                  {/* <br /> */}
+                  {/* {format(startDate, 'PP \'at\' pp')} */}
+                  {format(startDate, 'PP')}
                 </>
               ) : startDate && (endDate || buildDate) && term === 'monthly' ? (
                 <>
                   {/* {endDate ? 'Supported' : 'Supporter'}{' '} */}
-                  {endDate && 'Supported '}
-                  for{' '}
-                  {formatDistance(
+                  {/* {endDate && 'Supported '} */}
+                  {/* for{' '} */}
+                  {/* {formatDistance(
                     startDate,
                     endDate || buildDate,
-                  ).replace(/1(?=\x20)/, 'a')}
+                  ).replace(/1(?=\x20)/, 'a')} */}
+                  {(() => {
+                    const formatted = formatDistance(startDate, endDate || buildDate)
+                      .replace(/1(?=\x20)/, 'a')
+                      .replace('about', '');
+
+                    if (formatted.includes('day')) {
+                      return null;
+                    }
+
+                    if (endDate) {
+                      return `Supported for ${formatted}`;
+                    }
+
+                    return `for ${formatted}`;
+                  })()}
                 </>
               ) : null}
             </div>
