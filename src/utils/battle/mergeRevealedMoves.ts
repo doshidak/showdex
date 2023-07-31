@@ -1,12 +1,12 @@
-import { PokemonPivotMoves } from '@showdex/consts/pokemon';
+import { type MoveName } from '@smogon/calc';
+import { PokemonPivotMoves } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
-import { flattenAlts } from '@showdex/utils/presets';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { flattenAlts } from '@showdex/utils/presets/flattenAlts'; /** @todo reorganize me */
 
 /**
  * Intelligently uses hardcoded intelligence to merge the `pokemon`'s currently set `moves`
- * with its `revealedMoves`.
+ * with its `revealedMoves` or its `transformedMoves`.
  *
  * * Actually not that intelligent.
  *
@@ -20,21 +20,26 @@ export const mergeRevealedMoves = (
     moves,
     altMoves,
     revealedMoves,
+    transformedMoves,
   } = pokemon || {};
 
+  const revealedSource = transformedMoves?.length
+    ? transformedMoves
+    : revealedMoves;
+
   if (!moves?.length) {
-    return revealedMoves?.length ? revealedMoves : [];
+    return revealedSource?.length ? revealedSource : [];
   }
 
   const dex = getDexForFormat();
 
-  if (!dex || !revealedMoves?.length) {
+  if (!dex || !revealedSource?.length) {
     return moves;
   }
 
   // first, find the non-revealed moves in `moves`
   const nonRevealedMoves = moves
-    .filter((m) => !revealedMoves.includes(m))
+    .filter((m) => !revealedSource.includes(m))
     .map((m) => dex.moves.get(m));
 
   // don't do anything if there are no more non-revealed moves
@@ -43,7 +48,7 @@ export const mergeRevealedMoves = (
      * @todo Needs to be updated once we support more than 4 moves.
      */
     if (moves.length < 4) {
-      return Array.from(new Set([...moves, ...revealedMoves])).slice(0, 4);
+      return Array.from(new Set([...moves, ...revealedSource])).slice(0, 4);
     }
 
     return moves;
@@ -55,9 +60,9 @@ export const mergeRevealedMoves = (
   // update (2023/01/06): changed the filter condition since using startsWith() will prevent something like
   // 'Toxic' from merging if 'Toxic Spikes' already exists ('Toxic Spikes'.startsWith('Toxic') -> true ... LOL)
   // update (2023/02/03): renamed this from `mergeableMoveNames` cause its name was confusing af tbh.
-  // e.g., revealedMoves: ['Hidden Power', 'Calm Mind'],
+  // e.g., revealedSource: ['Hidden Power', 'Calm Mind'],
   // moves: ['Diamond Storm', 'Protect', 'Moonblast', 'Hidden Power Fire']
-  const revealedMoveNames = revealedMoves.filter((r) => ( // e.g., m = 'Hidden Power'
+  const revealedMoveNames = revealedSource.filter((r) => ( // e.g., m = 'Hidden Power'
     !moves.some((m) => ( // e.g., n = 'Hidden Power Fire'
       (r.startsWith('Hidden Power') && m.startsWith(r)) // e.g., true, so 'Hidden Power' is ignored
         || m === r
@@ -74,7 +79,7 @@ export const mergeRevealedMoves = (
   // update (2023/02/03): reason why I'm back for round 4/5? of Hidden Power fixes is cause I forgot
   // to merge the altMoves in applyPreset() of the CalcdexPokeProvider (which also happens to be the
   // *only* place calling this utility that can provide an altMoves since they're from presets lmfaoo)
-  if (revealedMoveNames.includes(<MoveName> 'Hidden Power') && altMoves?.length) {
+  if (revealedMoveNames.includes('Hidden Power' as MoveName) && altMoves?.length) {
     const revealedIndex = revealedMoveNames.findIndex((m) => m === 'Hidden Power');
     const hiddenPowerFromAlt = flattenAlts(altMoves).find((m) => m?.startsWith('Hidden Power'));
 
@@ -118,7 +123,7 @@ export const mergeRevealedMoves = (
       const stabMoveIndex = nonRevealedMoves.findIndex((m) => (
         (!!m?.category && m.category !== 'Status')
           && types.includes(m.type)
-          && !PokemonPivotMoves.includes(<MoveName> m.name)
+          && !PokemonPivotMoves.includes(m.name as MoveName)
       ));
 
       if (stabMoveIndex > -1) {

@@ -1,4 +1,4 @@
-import { PokemonStatNames } from '@showdex/consts/pokemon';
+import { PokemonStatNames } from '@showdex/consts/dex';
 
 /**
  * Finds and returns the highest stat value from the provided `stats` table.

@@ -122,6 +122,9 @@ $type-option-type: (
       dark: color.alpha(colors.$black, 0.15),
     ),
 
+    // note: confusingly not named after the `highlight` PokeType prop,
+    // but rather refers to a subtle blue background applied to the PokeType
+    // in order to draw the user's attention to it
     highlighted: (
       light: color.alpha(colors.$blue, 0.3),
       dark: color.alpha(color.tint(colors.$blue, 30%), 0.3),
@@ -142,6 +145,25 @@ $type-option-usage: (
 
 $type-value: (
   spacing: 2px,
+);
+
+$revealed-types: (
+  spacing: 6px,
+
+  title: (
+    spacing: 2px,
+  ),
+
+  content: (
+    padding-x: 2px,
+    padding-y: 2px,
+    border-radius: 7px,
+
+    border-color: (
+      light: color.alpha(colors.$white, 0.15),
+      dark: color.alpha(colors.$black, 0.15),
+    ),
+  ),
 );
 
 .container {
@@ -296,10 +318,10 @@ $type-value: (
   }
 }
 
-.typeOptionType {
-  grid-area: span 1 / span 1;
-  z-index: 1;
-}
+// .typeOptionType {
+//   grid-area: span 1 / span 1;
+//   z-index: 1;
+// }
 
 .typeOptionLabel {
   .typeOptionButton:not(.selected):not(.withUsage) & {
@@ -322,7 +344,7 @@ $type-value: (
   //   }
   // }
 
-  .typeOptionButton:not(.selected):not(.withUsage):not(.hover) & {
+  .typeOptionButton:not(.selected):not(.withUsage):not(:hover) & {
     .light & {
       background-color: map.get($type-option-type, background-color, default, light);
     }
@@ -332,7 +354,7 @@ $type-value: (
     }
   }
 
-  .typeOptionButton:not(.selected):not(.withUsage):not(.hover).highlighted & {
+  .typeOptionButton:not(.selected):not(.withUsage):not(:hover).highlighted & {
     .light & {
       background-color: map.get($type-option-type, background-color, highlighted, light);
     }
@@ -367,4 +389,43 @@ $type-value: (
   &:not(:last-child) {
     @include spacing.margin($right: map.get($type-value, spacing));
   }
+}
+
+.revealedTypes {
+  @include flex.column($justify: center);
+  @include spacing.margin($top: map.get($revealed-types, spacing));
+}
+
+.revealedTypesTitle {
+  @include spacing.margin(
+    $top: 0,
+    $bottom: map.get($revealed-types, title, spacing),
+  );
+}
+
+.revealedTypesContent {
+  width: 100%;
+  @include flex.row-between;
+  @include spacing.padding-xy(
+    $x: map.get($revealed-types, content, padding-x),
+    $y: map.get($revealed-types, content, padding-y),
+  );
+  border: 1px solid colors.$transparent;
+  border-radius: map.get($revealed-types, content, border-radius);
+
+  .light & {
+    border-color: map.get($revealed-types, content, border-color, light);
+  }
+
+  .dark & {
+    border-color: map.get($revealed-types, content, border-color, dark);
+  }
+}
+
+.revealedTypesValue {
+  @include flex.row-start;
+}
+
+button.revealedTypesReset {
+  font-size: 8px;
 }

@@ -1,13 +1,12 @@
-import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
-import { detectLegacyGen } from '@showdex/utils/battle';
+import { type PkmnSmogonPresetRequest, type PkmnSmogonRandomsStatsResponse } from '@showdex/redux/services';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { PkmnSmogonPresetRequest, PkmnSmogonRandomsStatsResponse } from '@showdex/redux/services';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
+import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
 
-// const l = logger('@showdex/redux/transformers/transformRandomsStatsResponse');
+// const l = logger('@showdex/redux/transformers/transformRandomsStatsResponse()');
 
 /**
  * Transforms the JSON response from the pkmn Randoms Stats API by converting the object into an array of `CalcdexPokemonPreset`s.
@@ -22,22 +21,22 @@ export const transformRandomsStatsResponse = (
   _meta: unknown,
   args: Omit<PkmnSmogonPresetRequest, 'formatOnly'>,
 ): CalcdexPokemonPreset[] => {
-  if (!Object.keys(response || {}).length) {
+  if (!args?.gen || !nonEmptyObject(response)) {
     return [];
   }
 
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen || env.int<GenerationNum>('calcdex-default-gen');
-  const legacy = detectLegacyGen(gen);
+  const legacy = detectLegacyGen(args.gen);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 84;
 
   Object.entries(response).forEach(([
     speciesForme,
     usageStats,
   ]) => {
-    if (!speciesForme || !Object.keys(usageStats || {}).length) {
+    if (!speciesForme || !nonEmptyObject(usageStats)) {
       return;
     }
 
@@ -56,8 +55,8 @@ export const transformRandomsStatsResponse = (
       id: null,
       source: 'usage',
       name: 'Showdown Usage',
-      gen,
-      format: args?.format ?? `gen${gen}randombattle`,
+      gen: args.gen,
+      format: getGenlessFormat(args?.format) || 'randombattle',
 
       speciesForme,
       level,
@@ -73,14 +72,12 @@ export const transformRandomsStatsResponse = (
       },
 
       evs: {
-        ...(!legacy && {
-          hp: evs?.hp ?? 84,
-          atk: evs?.atk ?? 84,
-          def: evs?.def ?? 84,
-          spa: evs?.spa ?? 84,
-          spd: evs?.spd ?? 84,
-          spe: evs?.spe ?? 84,
-        }),
+        hp: evs?.hp ?? defaultEv,
+        atk: evs?.atk ?? defaultEv,
+        def: evs?.def ?? defaultEv,
+        spa: evs?.spa ?? defaultEv,
+        spd: evs?.spd ?? defaultEv,
+        spe: evs?.spe ?? defaultEv,
       },
     };
 
@@ -99,12 +96,12 @@ export const transformRandomsStatsResponse = (
 
     // note: either `preset` or `rolePreset` will be pushed to the `output` array!
     // (former if there are no roles and latter if there are)
-    if (Object.keys(roles || {}).length) {
+    if (nonEmptyObject(roles)) {
       Object.entries(roles).forEach(([
         roleName,
         roleStats,
       ]) => {
-        if (!roleName || !Object.keys(roleStats?.moves || {}).length) {
+        if (!roleName || !nonEmptyObject(roleStats?.moves)) {
           return;
         }
 
@@ -128,7 +125,7 @@ export const transformRandomsStatsResponse = (
           rolePreset.usage = weight;
         }
 
-        if (Object.keys(roleAbilities || {}).length) {
+        if (nonEmptyObject(roleAbilities)) {
           const altRoleAbilities = processUsageAlts(roleAbilities);
 
           if (altRoleAbilities.length) {
@@ -137,7 +134,7 @@ export const transformRandomsStatsResponse = (
           }
         }
 
-        if (Object.values(roleItems || {}).length) {
+        if (nonEmptyObject(roleItems)) {
           const altRoleItems = processUsageAlts(roleItems);
 
           if (altRoleItems.length) {
@@ -170,7 +167,7 @@ export const transformRandomsStatsResponse = (
           output.push(rolePreset);
         }
       });
-    } else if (Object.keys(moves || {})) {
+    } else if (nonEmptyObject(moves)) {
       preset.altMoves = processUsageAlts(moves);
 
       /**

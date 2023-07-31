@@ -23,11 +23,18 @@
 export const reverseObjectKv = <
   TKey extends string,
   TValue extends string,
->(value: Record<TKey, TValue>): Record<TValue, TKey> => Object.entries(value || {})
-  .reduce((prev, [k, v]: [TKey, TValue]) => {
-    prev[v] = k;
+>(
+  value: Partial<Record<TKey, TValue>>,
+): Partial<Record<TValue, TKey>> => Object.entries(value || {})
+  .reduce((
+    prev,
+    [k, v]: [TKey, TValue],
+  ) => {
+    if (v) {
+      prev[v] = k;
+    }
 
     return prev;
-  }, <Record<TValue, TKey>> {});
+  }, {} as Partial<Record<TValue, TKey>>);
 
 /* eslint-enable @typescript-eslint/indent */

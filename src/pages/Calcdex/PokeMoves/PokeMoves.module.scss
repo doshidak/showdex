@@ -103,7 +103,7 @@
   @include flex.row($align: center);
 
   &:not(:last-of-type) {
-    @include spacing.margin($right: 0.8em);
+    @include spacing.margin($right: 1em);
   }
 
   .propertyName {
@@ -228,7 +228,22 @@ button.damageButton {
 .editorItem {
   grid-area: span 1 / span 2;
   @include flex.row-between;
-  @include spacing.margin($left: 5px);
+  align-self: center;
+  @include spacing.margin($right: 5px);
+
+  &.smol {
+    align-items: flex-start;
+    align-self: flex-start;
+    @include spacing.padding($top: 2px);
+
+    &.withStatTargets {
+      @include spacing.padding($top: 3px);
+    }
+  }
+
+  &.editorHeader {
+    @include flex.row-between;
+  }
 
   .moveProperty {
     font-size: 8px;
@@ -249,8 +264,13 @@ button.damageButton {
   // }
 }
 
+.editorItemInput {
+  align-self: flex-start;
+}
+
 .editorLeft {
   @include flex.row($align: center);
+  flex-wrap: wrap;
 }
 
 .editorRight {

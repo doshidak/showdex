@@ -8,7 +8,7 @@ export const upsizeArray = <T = unknown>(
     return slice && array.length > size ? array.slice(0, size) : array;
   }
 
-  const upsized = $.extend(true, <T[]> [], array).filter(Boolean);
+  const upsized = $.extend(true, [] as T[], array).filter(Boolean);
   const upsizeCount = Math.max(size - upsized.length, 0);
 
   if (upsizeCount > 0) {

@@ -1,7 +1,7 @@
-import { PokemonPresetFuckedFormes } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
+import { type GenerationNum } from '@smogon/calc';
+import { PokemonPresetFuckedFormes } from '@showdex/consts/dex';
+import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
-import type { GenerationNum } from '@smogon/calc';
 
 /**
  * Returns an array of species formes that `speciesForme`s in `CalcdexPokemonPreset`s should match

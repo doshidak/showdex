@@ -1,5 +1,5 @@
-import { formatId } from '@showdex/utils/app';
-import type { CalcdexBattleRules } from '@showdex/redux/store';
+import { type CalcdexBattleRules } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 
 const createBattleRuleDetector = (
   stepQueue: Showdown.Battle['stepQueue'],

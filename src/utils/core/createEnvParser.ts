@@ -21,18 +21,18 @@ export const createEnvParser = (
   const env = <T extends string = string>(
     key: string,
     defaultValue = '',
-  ): T => <T> (dict?.[constantCase(key)] || defaultValue);
+  ): T => (dict?.[constantCase(key)] || defaultValue) as T;
 
   // env type parsers
   env.int = <T extends number = number>(
     key: string,
     defaultValue = 0,
-  ): T => <T> (parseInt(env(key), 10) || defaultValue);
+  ): T => (parseInt(env(key), 10) || defaultValue) as T;
 
   env.float = <T extends number = number>(
     key: string,
     defaultValue = 0,
-  ): T => <T> (parseFloat(env(key)) || defaultValue);
+  ): T => (parseFloat(env(key)) || defaultValue) as T;
 
   env.bool = (
     key: string,

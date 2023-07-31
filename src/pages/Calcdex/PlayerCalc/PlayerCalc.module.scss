@@ -197,8 +197,8 @@ button.usernameButton {
   // @include position.absolute-anchor($x: -3px, $y: -6px);
   // @include position.absolute-anchor($x: 0px, $y: -3px);
   @include position.absolute-center;
-  width: 39px;
-  height: 39px;
+  width: 38px;
+  height: 38px;
   border: 2px solid colors.$transparent;
   border-radius: 45px;
   @include transition.apply(background-color, border-color);

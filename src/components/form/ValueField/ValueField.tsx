@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import cx from 'classnames';
-import { BaseTextField } from '@showdex/components/form';
 import { useColorScheme } from '@showdex/redux/store';
-import type { BaseTextFieldProps } from '@showdex/components/form';
+import { type BaseTextFieldProps, BaseTextField } from '../TextField';
 import styles from './ValueField.module.scss';
 
 export interface ValueFieldProps extends BaseTextFieldProps<number> {
@@ -78,6 +77,16 @@ export interface ValueFieldProps extends BaseTextFieldProps<number> {
    * @since 0.1.0
    */
   absoluteHover?: boolean;
+
+  /**
+   * Whether to reverse the detected color scheme.
+   *
+   * * Primarily useful for rendering this in a `Tooltip` where the color schemes are typically reversed.
+   *
+   * @default false
+   * @since 1.1.6
+   */
+  reverseColorScheme?: boolean;
 }
 
 /* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
@@ -96,6 +105,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   loopStepsOnly,
   clearOnFocus,
   absoluteHover,
+  reverseColorScheme,
   input,
   disabled,
   ...props
@@ -108,7 +118,14 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   );
 
   // grab the color scheme for applying the theme
-  const colorScheme = useColorScheme();
+  const currentColorScheme = useColorScheme();
+
+  const colorScheme = (!reverseColorScheme && currentColorScheme)
+    || (reverseColorScheme && (
+      (currentColorScheme === 'light' && 'dark')
+        || (currentColorScheme === 'dark' && 'light')
+    ))
+    || null;
 
   // although react-final-form has meta.active,
   // we're keeping track of the focus state ourselves in case we don't wrap this in a Field

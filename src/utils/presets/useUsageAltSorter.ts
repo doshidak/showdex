@@ -1,8 +1,7 @@
 import * as React from 'react';
-import type { CalcdexPokemonAlt } from '@showdex/redux/store';
-import type { CalcdexPokemonUsageAltSorter } from './usageAltPercentSorter';
+import { type CalcdexPokemonAlt } from '@showdex/redux/store';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
-import { usageAltPercentSorter } from './usageAltPercentSorter';
+import { type CalcdexPokemonUsageAltSorter, usageAltPercentSorter } from './usageAltPercentSorter';
 
 /* eslint-disable @typescript-eslint/indent */
 

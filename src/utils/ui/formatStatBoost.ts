@@ -1,5 +1,12 @@
+/**
+ * Formats the provided `boostedStat` value as a `string` for displaying in the UI.
+ *
+ * * Returns an empty string (i.e., `''`) if `boostedStat` isn't a `number` or is `NaN`.
+ *
+ * @since 0.1.3
+ */
 export const formatStatBoost = (boostedStat: number): string => {
-  if (typeof boostedStat !== 'number') {
+  if (typeof boostedStat !== 'number' || Number.isNaN(boostedStat)) {
     return '';
   }
 

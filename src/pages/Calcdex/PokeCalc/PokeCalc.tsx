@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { PokeInfo } from '../PokeInfo';
 import { PokeMoves } from '../PokeMoves';
 import { PokeStats } from '../PokeStats';

@@ -1,15 +1,14 @@
-import { Move as SmogonMove } from '@smogon/calc';
-import { formatId } from '@showdex/utils/app';
-import { clamp } from '@showdex/utils/core';
+import { type MoveName, Move as SmogonMove } from '@smogon/calc';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { clamp, formatId } from '@showdex/utils/core';
 import {
+  detectGenFromFormat,
   determineCriticalHit,
   determineMoveTargets,
   getGenDexForFormat,
-  shouldBoostTeraStab,
 } from '@showdex/utils/dex';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
 import { calcMoveBasePower } from './calcMoveBasePower';
+import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Overrides for `SmogonMove`.
@@ -31,12 +30,13 @@ export const createSmogonMove = (
 ): SmogonMove => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
+  const gen = detectGenFromFormat(format);
 
-  if (!dex || !format || !pokemon?.speciesForme || !moveName) {
+  if (!dex || !gen || !pokemon?.speciesForme || !moveName) {
     return null;
   }
 
-  // const moveId = formatId(moveName);
+  const moveId = formatId(moveName);
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const abilityId = formatId(ability);
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -71,8 +71,11 @@ export const createSmogonMove = (
     offensiveStat: offensiveStatOverride,
   } = pokemon.moveOverrides?.[moveName] || {};
 
-  if (typeOverride) {
-    overrides.type = typeOverride;
+  // pretty much only used for Beat Up (which is typeless in gens 2-4)
+  const forceTypeless = moveId === 'beatup' && gen < 5;
+
+  if (forceTypeless || typeOverride) {
+    overrides.type = forceTypeless ? '???' : typeOverride;
   }
 
   if (categoryOverride) {

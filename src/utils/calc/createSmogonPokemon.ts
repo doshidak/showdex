@@ -1,17 +1,20 @@
-import { Pokemon as SmogonPokemon } from '@smogon/calc';
-import { PokemonToggleAbilities } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+import { type MoveName, type Specie, Pokemon as SmogonPokemon } from '@smogon/calc';
+import { PokemonToggleAbilities } from '@showdex/consts/dex';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { getGenDexForFormat, notFullyEvolved } from '@showdex/utils/dex';
-import type { MoveName, Specie } from '@smogon/calc/dist/data/interface';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
-import { calcPokemonHp } from './calcPokemonHp';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getGenDexForFormat,
+  notFullyEvolved,
+} from '@showdex/utils/dex';
+import { calcPokemonHpPercentage } from './calcPokemonHp';
 
 export type SmogonPokemonOptions = ConstructorParameters<typeof SmogonPokemon>[2];
 export type SmogonPokemonOverrides = SmogonPokemonOptions['overrides'];
 
-const l = logger('@showdex/utils/calc/createSmogonPokemon');
+const l = logger('@showdex/utils/calc/createSmogonPokemon()');
 
 /**
  * Factory that essentially converts a `CalcdexPokemon` into an instantiated `Pokemon` class from `@smogon/calc`.
@@ -31,26 +34,17 @@ export const createSmogonPokemon = (
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
 
-  if (!dex || gen < 1 || !pokemon?.calcdexId) {
+  if (!dex || gen < 1 || !pokemon?.calcdexId || !pokemon.speciesForme) {
     return null;
   }
 
   const legacy = detectLegacyGen(gen);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
   const item = (gen > 1 && (pokemon.dirtyItem ?? pokemon.item)) || null;
-
-  // megas require special handling (like for the item), so make sure we detect these
-  // const isMega = hasMegaForme(pokemon.speciesForme);
-
-  // const speciesForme = SmogonPokemon.getForme(
-  //   dex,
-  //   pokemon.speciesForme.replace('-Gmax', ''),
-  //   isMega ? null : item,
-  //   moveName,
-  // );
 
   // shouldn't happen, but just in case, ja feel
   if (!pokemon.speciesForme) {
@@ -73,9 +67,13 @@ export const createSmogonPokemon = (
 
   // if applicable, convert the '???' status into an empty string
   // (don't apply the status if the Pokemon is fainted tho)
-  const status = pokemon.hp
-    ? pokemon.status === '???' ? null : pokemon.status
-    : null;
+  const status = pokemon.dirtyStatus && pokemon.dirtyStatus !== '???'
+    ? pokemon.dirtyStatus === 'ok'
+      ? null
+      : pokemon.dirtyStatus
+    : pokemon.status === '???'
+      ? null
+      : pokemon.status;
 
   const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
   const abilityId = formatId(ability);
@@ -114,7 +112,7 @@ export const createSmogonPokemon = (
         return shouldMultiscale && !pokemon.hp ? maxHp : pokemon.hp;
       }
 
-      const hpPercentage = calcPokemonHp(pokemon);
+      const hpPercentage = calcPokemonHpPercentage(pokemon);
 
       // if the Pokemon is dead, assume it has full HP as to not break the damage calc
       // return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
@@ -131,9 +129,9 @@ export const createSmogonPokemon = (
     // if the move has been manually overridden, don't specify this property
     // (e.g., don't apply Supreme Overlord boosts when user overrides a move's base power)
     alliesFainted: (
-      (!moveName || !Object.keys(pokemon.moveOverrides?.[moveName] || {}).length)
-        && pokemon.faintCounter
-    ) || null,
+      (!moveName || !nonEmptyObject(pokemon.moveOverrides?.[moveName]))
+        && (pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0))
+    ),
 
     // appears that the SmogonPokemon will automatically double both the HP and max HP if this is true,
     // which I'd imagine affects the damage calculations in the matchup
@@ -156,14 +154,18 @@ export const createSmogonPokemon = (
       spe: pokemon.ivs?.spe ?? defaultIv,
     },
 
-    evs: legacy ? undefined : {
-      hp: pokemon.evs?.hp ?? 0,
-      atk: pokemon.evs?.atk ?? 0,
-      def: pokemon.evs?.def ?? 0,
-      spa: pokemon.evs?.spa ?? 0,
-      spd: pokemon.evs?.spd ?? 0,
-      spe: pokemon.evs?.spe ?? 0,
+    evs: {
+      hp: pokemon.evs?.hp ?? defaultEv,
+      atk: pokemon.evs?.atk ?? defaultEv,
+      def: pokemon.evs?.def ?? defaultEv,
+      spa: pokemon.evs?.spa ?? defaultEv,
+      spd: pokemon.evs?.spd ?? defaultEv,
+      spe: pokemon.evs?.spe ?? defaultEv,
     },
+
+    // update (2023/05/15): typically only used to provide the client-reported stat
+    // from Protosynthesis & Quark Drive (populated in syncPokemon() via `volatiles`)
+    boostedStat: pokemon.boostedStat,
 
     boosts: {
       atk: pokemon.dirtyBoosts?.atk ?? pokemon.boosts?.atk ?? 0,
@@ -176,7 +178,7 @@ export const createSmogonPokemon = (
     overrides: {
       // update (2022/11/06): now allowing base stat editing as a setting
       baseStats: {
-        ...(<Required<Showdown.StatsTable>> pokemon.baseStats),
+        ...(pokemon.baseStats as Required<Showdown.StatsTable>),
 
         // only spread non-negative numerical values
         ...Object.entries(pokemon.dirtyBaseStats || {}).reduce((prev, [stat, value]) => {
@@ -195,11 +197,11 @@ export const createSmogonPokemon = (
       // for instance, Greninja, who has the types ['Water', 'Dark'] and the Protean ability
       // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
       // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
-      types: <SmogonPokemonOverrides['types']> [
-        ...pokemon.types,
+      types: [
+        ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : pokemon.types),
         null,
         null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
-      ].slice(0, 2),
+      ].slice(0, 2) as SmogonPokemonOverrides['types'],
     },
   };
 
@@ -212,7 +214,12 @@ export const createSmogonPokemon = (
   // in gen 1, we must set any SPA boosts to SPD as well
   // (in gen 2, they're separate boosts)
   if (gen === 1) {
+    options.evs.spd = options.evs.spa;
     options.boosts.spd = options.boosts.spa;
+
+    if (options.overrides.baseStats.spd !== options.overrides.baseStats.spa) {
+      (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.spd = options.overrides.baseStats.spa;
+    }
   }
 
   // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
@@ -253,7 +260,11 @@ export const createSmogonPokemon = (
 
   // calc will apply STAB boosts for ALL moves regardless of the Pokemon's changed type and the move's type
   // if the Pokemon has Protean or Libero; we don't want this to happen since the client reports the changed typings
-  if (['protean', 'libero'].includes(abilityId)) {
+  // update (2023/05/17): it appears people want this back, so allowing it unless the 'typechange' volatile exists
+  // (note: there's no volatile for when the Pokemon Terastallizes, so we're good on that front; @smogon/calc will
+  // also ignore Protean STAB once Terastallized, so we're actually doubly good)
+  // update (2023/06/02): imagine working on this for 2 weeks. naw I finally have some time at 4 AM to do this lol
+  if (['protean', 'libero'].includes(abilityId) && !pokemon.abilityToggled) {
     options.ability = 'Pressure';
   }
 
@@ -281,10 +292,19 @@ export const createSmogonPokemon = (
       transformedBaseStats,
     } = pokemon;
 
-    (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats = {
-      ...(<Required<Omit<Showdown.StatsTable, 'hp'>>> transformedBaseStats),
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats = {
+      ...(transformedBaseStats as Required<Omit<Showdown.StatsTable, 'hp'>>),
       hp: baseStats.hp,
     };
+  }
+
+  // update (2023/07/27): TIL @smogon/calc doesn't implement 'Power Trick' at all LOL
+  // (I'm assuming most people were probably manually switching ATK/DEF in the calc to workaround this)
+  if (nonEmptyObject(pokemon.volatiles) && 'powertrick' in pokemon.volatiles) {
+    const { atk, def } = options.overrides.baseStats;
+
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.atk = def;
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.def = atk;
   }
 
   const smogonPokemon = new SmogonPokemon(
@@ -293,8 +313,8 @@ export const createSmogonPokemon = (
     options,
   );
 
-  if (smogonPokemon?.species && typeof smogonPokemon.species?.nfe !== 'boolean') {
-    (<Writable<Specie>> smogonPokemon.species).nfe = notFullyEvolved(pokemon.speciesForme);
+  if (typeof smogonPokemon?.species?.nfe !== 'boolean') {
+    (smogonPokemon.species as Writable<Specie>).nfe = notFullyEvolved(pokemon.speciesForme);
   }
 
   return smogonPokemon;

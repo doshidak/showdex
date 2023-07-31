@@ -5,14 +5,18 @@ import { clamp } from '@showdex/utils/core';
  *
  * @since 1.0.2
  */
-export const convertIvToLegacyDv = (iv: number): number => clamp(0, Math.floor(iv / 2), 15);
+export const convertIvToLegacyDv = (
+  iv: number,
+): number => clamp(0, Math.floor(iv / 2), 15);
 
 /**
  * Converts a legacy DV (Determinant Value) to IV (Individual Value).
  *
  * @since 1.0.2
  */
-export const convertLegacyDvToIv = (dv: number): number => clamp(0, dv * 2, 31);
+export const convertLegacyDvToIv = (
+  dv: number,
+): number => clamp(0, dv * 2, 31);
 
 /**
  * Returns the legacy SPC (Special) DV (Determinant Value) that should be stored under `spa` or `spd`.
@@ -24,7 +28,9 @@ export const convertLegacyDvToIv = (dv: number): number => clamp(0, dv * 2, 31);
  * @default 0
  * @since 1.0.2
  */
-export const getLegacySpcDv = (stats: Showdown.StatsTable): number => convertIvToLegacyDv(stats?.spa ?? stats?.spd ?? 0);
+export const getLegacySpcDv = (
+  stats: Showdown.StatsTable,
+): number => convertIvToLegacyDv(stats?.spa ?? stats?.spd ?? 0);
 
 /**
  * Calculates the legacy HP DV (Determinant Value) from the DVs of other stats.
@@ -35,8 +41,20 @@ export const getLegacySpcDv = (stats: Showdown.StatsTable): number => convertIvT
  * @since 1.0.2
  */
 export const calcLegacyHpDv = (ivs: Showdown.StatsTable): number => (
-  ((convertIvToLegacyDv(ivs?.atk ?? 0) % 2) * 8) +
-  ((convertIvToLegacyDv(ivs?.def ?? 0) % 2) * 4) +
-  ((convertIvToLegacyDv(ivs?.spe ?? 0) % 2) * 2) +
-  (getLegacySpcDv(ivs) % 2)
+  ((convertIvToLegacyDv(ivs?.atk ?? 0) % 2) * 8)
+    + ((convertIvToLegacyDv(ivs?.def ?? 0) % 2) * 4)
+    + ((convertIvToLegacyDv(ivs?.spe ?? 0) % 2) * 2)
+    + (getLegacySpcDv(ivs) % 2)
 );
+
+/**
+ * Calculates the legacy HP DV (Determinant Value) & converts it into an IV (Individual Value).
+ *
+ * * Passed in `ivs` should actually be IVs, **not** DVs.
+ * * Basically does `calcLegacyHpDv()` & passes it to `convertLegacyDvToIv()` for you.
+ *
+ * @since 1.1.6
+ */
+export const calcLegacyHpIv = (
+  ivs: Showdown.StatsTable,
+): number => convertLegacyDvToIv(calcLegacyHpDv(ivs));

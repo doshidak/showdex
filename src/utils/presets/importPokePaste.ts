@@ -1,13 +1,15 @@
-import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+} from '@smogon/calc';
+import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { clamp, env } from '@showdex/utils/core';
-import { getDexForFormat } from '@showdex/utils/dex';
+import { clamp, env, formatId } from '@showdex/utils/core';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
-import type { GenerationNum } from '@smogon/calc';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemonPreset, CalcdexPokemonPresetSource } from '@showdex/redux/store';
 
 // note: speciesForme should be handled last since it will test() true against any line technically
 const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> = {
@@ -117,6 +119,7 @@ export const importPokePaste = (
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(format);
   const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   // this will be our final return value
   const preset: CalcdexPokemonPreset = {
@@ -141,14 +144,12 @@ export const importPokePaste = (
     },
 
     evs: {
-      ...(!legacy && {
-        hp: 0,
-        atk: 0,
-        def: 0,
-        spa: 0,
-        spd: 0,
-        spe: 0,
-      }),
+      hp: defaultEv,
+      atk: defaultEv,
+      def: defaultEv,
+      spa: defaultEv,
+      spd: defaultEv,
+      spe: defaultEv,
     },
 
     nature: 'Hardy',
@@ -170,7 +171,7 @@ export const importPokePaste = (
     const [
       key,
       regex,
-    ] = <[keyof CalcdexPokemonPreset, RegExp]> Object.entries(PokePasteLineParsers)
+    ] = (Object.entries(PokePasteLineParsers) as [keyof CalcdexPokemonPreset, RegExp][])
       .find(([, r]) => r.test(line))
       || [];
 
@@ -211,14 +212,14 @@ export const importPokePaste = (
         }
 
         if (detectedGender && dexSpecies.gender !== 'N') {
-          preset.gender = <Showdown.GenderName> detectedGender;
+          preset.gender = detectedGender as Showdown.GenderName;
         }
 
         if (detectedItem) {
           const dexItem = dex?.items.get(detectedItem);
 
           if (dexItem?.exists) {
-            preset.item = <ItemName> dexItem.name;
+            preset.item = dexItem.name as ItemName;
           }
         }
 
@@ -267,7 +268,7 @@ export const importPokePaste = (
           break;
         }
 
-        preset.ability = <AbilityName> dexAbility.name;
+        preset.ability = dexAbility.name as AbilityName;
 
         break;
       }
@@ -344,7 +345,7 @@ export const importPokePaste = (
           break;
         }
 
-        const detectedType = <Showdown.TypeName> capitalize(value);
+        const detectedType = capitalize(value) as Showdown.TypeName;
 
         if (!PokemonTypes.includes(detectedType) || detectedType === '???') {
           break;
@@ -408,7 +409,7 @@ export const importPokePaste = (
           break;
         }
 
-        const parsedNature = <Showdown.PokemonNature> capitalize(detectedNature);
+        const parsedNature = capitalize(detectedNature) as Showdown.PokemonNature;
 
         if (!PokemonNatures.includes(parsedNature)) {
           break;
@@ -453,7 +454,7 @@ export const importPokePaste = (
           break;
         }
 
-        const dexMoveNames = dexMoves.map((m) => <MoveName> m.name);
+        const dexMoveNames = dexMoves.map((m) => m.name as MoveName);
 
         /**
          * @todo Update this once you add support for more than 4 moves.

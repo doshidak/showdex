@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
 import { ToggleButton, Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import type { FieldRenderProps } from 'react-final-form';
-import type { TextFieldValue } from '@showdex/components/form';
+import { formatId } from '@showdex/utils/core';
+import { type TextFieldValue } from '../TextField';
 import styles from './Segmented.module.scss';
 
 export interface SegmentedOption<TValue extends TextFieldValue = string> {
@@ -182,7 +182,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
 
             const breakOptions = options
               ?.slice(startIndex, endIndex)
-              .filter((o) => !!o?.value && !o.hidden);
+              .filter((o) => o?.value !== undefined && o.value !== null && !o.hidden);
 
             if (!breakOptions?.length) {
               return null;

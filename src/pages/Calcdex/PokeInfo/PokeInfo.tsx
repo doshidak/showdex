@@ -1,25 +1,31 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { type AbilityName, type ItemName } from '@smogon/calc';
 import {
   PiconButton,
   PokeFormeTooltip,
   PokeHpBar,
   PokeStatus,
+  PokeStatusTooltip,
 } from '@showdex/components/app';
 import { Dropdown, PokeTypeField } from '@showdex/components/form';
+import { useSandwich } from '@showdex/components/layout';
 import {
+  type BadgeInstance,
   Badge,
+  BaseButton,
   Button,
   ToggleButton,
-  Tooltip,
 } from '@showdex/components/ui';
-import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/pokemon';
-import { useColorScheme } from '@showdex/redux/store';
-import { formatId, openSmogonUniversity } from '@showdex/utils/app';
-import { detectToggledAbility, legalLockedFormat } from '@showdex/utils/battle';
-import { calcPokemonHp } from '@showdex/utils/calc';
-import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
-import { hasNickname } from '@showdex/utils/dex';
+import { eacute } from '@showdex/consts/core';
+import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/dex';
+import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
+import { openSmogonUniversity } from '@showdex/utils/app';
+import { detectToggledAbility } from '@showdex/utils/battle';
+import { calcPokemonHpPercentage } from '@showdex/utils/calc';
+import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
+import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
+import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -27,10 +33,6 @@ import {
   flattenAlts,
   importPokePaste,
 } from '@showdex/utils/presets';
-import type { AbilityName, ItemName } from '@smogon/calc/dist/data/interface';
-import type { BadgeInstance } from '@showdex/components/ui';
-import type { CalcdexPlayerSide } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
@@ -71,40 +73,16 @@ export const PokeInfo = ({
   } = state;
 
   const colorScheme = useColorScheme();
+  const randomUuid = useRandomUuid();
 
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const nickname = hasNickname(pokemon) && settings?.showNicknames
     ? pokemon.name
     : null;
 
-  const hpPercentage = calcPokemonHp(pokemon);
-
-  // whether we should multiply the current & max HPs by 2 if useMax is enabled
-  // and is NOT from the server or isn't currently Dynamaxed
-  // (server HP will be doubled when Dynamaxed, but not beforehand; client HP will never be doubled,
-  // since it's a percentage)
-  /**
-   * @todo Make this into `calcPokemonHp()` (and rename `calcPokemonHp()` to `calcPokemonHpPercentage()`).
-   *   Also check if the HP Percentage mod is enabled, via the `CalcdexBattleRules`, since we wouldn't
-   *   want to double the client HP if the mod is disabled (as it wouldn't be a percentage, duh).
-   */
-  const shouldDmaxHp = pokemon?.useMax
-    && (!pokemon.serverSourced || !('dynamax' in pokemon.volatiles));
-
-  const currentHp = (
-    pokemon?.serverSourced
-      ? pokemon.hp
-      : Math.floor((pokemon?.spreadStats?.hp ?? 0) * hpPercentage)
-  ) * (shouldDmaxHp ? 2 : 1);
-
-  const maxHp = (
-    (pokemon?.serverSourced && pokemon.maxhp)
-      || pokemon?.spreadStats?.hp
-      || 0
-  ) * (shouldDmaxHp ? 2 : 1);
-
+  const hpPercentage = calcPokemonHpPercentage(pokemon);
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
 
@@ -113,10 +91,6 @@ export const PokeInfo = ({
     !formatId(abilityName)?.endsWith('ofruin')
       || field?.gameType === 'Doubles'
   );
-
-  // const fieldKey: keyof CalcdexBattleField = playerKey === 'p2'
-  //   ? 'defenderSide'
-  //   : 'attackerSide';
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = pokemon?.abilityToggleable
@@ -156,9 +130,19 @@ export const PokeInfo = ({
     && (!!pokemon?.item || !!pokemon?.prevItem)
     && (pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem;
 
-  const [formesVisible, setFormesVisible] = React.useState(false);
-  const toggleFormesTooltip = () => setFormesVisible(!formesVisible);
-  const closeFormesTooltip = () => setFormesVisible(false);
+  const {
+    active: formesVisible,
+    requestOpen: openFormesTooltip,
+    notifyClose: closeFormesTooltip,
+  } = useSandwich();
+
+  const toggleFormesTooltip = formesVisible ? closeFormesTooltip : openFormesTooltip;
+
+  const {
+    active: statusVisible,
+    requestOpen: requestStatusOpen,
+    notifyClose: notifyStatusClose,
+  } = useSandwich();
 
   const smogonPageTooltip = (
     <div className={styles.tooltipContent}>
@@ -183,8 +167,17 @@ export const PokeInfo = ({
 
   const formeDisabled = !pokemon?.altFormes?.length;
   const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
-  const piconDisabled = settings?.reverseIconName ? formeDisabled : smogonDisabled;
-  const nameDisabled = settings?.reverseIconName ? smogonDisabled : formeDisabled;
+
+  const showNonVolatileStatus = !!pokemon?.speciesForme && (
+    settings?.forceNonVolatile
+      || !!pokemon.dirtyStatus
+      || !!pokemon.status
+      || !pokemon.hp // 'fnt' pseudo-status
+  );
+
+  const currentStatus = showNonVolatileStatus
+    ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
+    : null;
 
   const editableTypes = settings?.editPokemonTypes === 'always'
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
@@ -286,35 +279,23 @@ export const PokeInfo = ({
     >
       <div className={styles.row}>
         <div className={styles.piconContainer}>
-          <PokeFormeTooltip
-            pokemon={pokemon}
-            visible={formesVisible}
-            disabled={!settings?.reverseIconName}
-            onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip~Picon:onPokemonChange()`)}
-            onRequestClose={closeFormesTooltip}
-          >
-            <PiconButton
-              piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
-              pokemon={{
-                ...pokemon,
-                speciesForme: (
-                  pokemon?.transformedForme
-                    || pokemon?.speciesForme
-                )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
-                item: itemName,
-              }}
-              // tooltip={settings?.reverseIconName ? nextFormeTooltip : smogonPageTooltip}
-              tooltip={settings?.reverseIconName ? undefined : smogonPageTooltip}
-              // tooltipDelay={[settings?.reverseIconName ? 500 : 1000, 50]}
-              tooltipDelay={[1000, 50]}
-              // tooltipDisabled={settings?.reverseIconName ? !nextForme : !settings?.showUiTooltips}
-              tooltipDisabled={settings?.reverseIconName || !settings?.showUiTooltips}
-              shadow
-              disabled={piconDisabled}
-              // onPress={settings?.reverseIconName ? switchToNextForme : openSmogonPage}
-              onPress={settings?.reverseIconName ? toggleFormesTooltip : openSmogonPage}
-            />
-          </PokeFormeTooltip>
+          <PiconButton
+            piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
+            pokemon={{
+              ...pokemon,
+              speciesForme: (
+                pokemon?.transformedForme
+                  || pokemon?.speciesForme
+              )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
+              item: itemName,
+            }}
+            tooltip={smogonPageTooltip}
+            tooltipDelay={[1000, 50]}
+            tooltipDisabled={!settings?.showUiTooltips}
+            shadow
+            disabled={smogonDisabled}
+            onPress={openSmogonPage}
+          />
         </div>
 
         <div className={styles.infoContainer}>
@@ -322,29 +303,31 @@ export const PokeInfo = ({
             <PokeFormeTooltip
               pokemon={pokemon}
               visible={formesVisible}
-              disabled={settings?.reverseIconName}
-              onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip~Name:onPokemonChange()`)}
+              onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip:onPokemonChange()`)}
               onRequestClose={closeFormesTooltip}
             >
               <Button
                 className={cx(
                   styles.nameButton,
                   !pokemon?.speciesForme && styles.missingForme,
-                  nameDisabled && styles.disabled,
+                  !formeDisabled && styles.withFormes,
+                  formeDisabled && styles.disabled,
                 )}
                 labelClassName={styles.nameLabel}
                 label={nickname || pokemon?.speciesForme || 'MissingNo.'}
-                // tooltip={settings?.reverseIconName ? smogonPageTooltip : nextFormeTooltip}
-                tooltip={settings?.reverseIconName ? smogonPageTooltip : undefined}
-                // tooltipDelay={[settings?.reverseIconName ? 1000 : 500, 50]}
-                tooltipDelay={[1000, 50]}
-                // tooltipDisabled={settings?.reverseIconName ? !settings?.showUiTooltips : !nextForme}
-                tooltipDisabled={settings?.reverseIconName && !settings?.showUiTooltips}
+                suffix={!formeDisabled && (
+                  <i
+                    className={cx(
+                      'fa',
+                      'fa-chevron-down',
+                      styles.formeChevron,
+                      formesVisible && styles.open,
+                    )}
+                  />
+                )}
                 hoverScale={1}
-                // absoluteHover
-                disabled={nameDisabled}
-                // onPress={settings?.reverseIconName ? openSmogonPage : switchToNextForme}
-                onPress={settings?.reverseIconName ? openSmogonPage : toggleFormesTooltip}
+                disabled={formeDisabled}
+                onPress={toggleFormesTooltip}
               />
             </PokeFormeTooltip>
 
@@ -361,14 +344,16 @@ export const PokeInfo = ({
               multi
               input={{
                 name: `PokeInfo:Types:${pokemonKey}`,
-                value: [...(pokemon?.types || [])],
+                value: [...(pokemon?.dirtyTypes || [])],
                 onChange: (types: Showdown.TypeName[]) => updatePokemon({
-                  types: [...(types || [])],
+                  dirtyTypes: [...(types || [])],
                 }, `${baseScope}:PokeTypeField:input.onChange()`),
               }}
               tooltipPlacement="bottom-start"
               containerSize={gen > 8 ? containerSize : null}
               highlight={gen < 9 || !pokemon?.terastallized}
+              highlightTypes={pokemon?.types}
+              revealedTypes={pokemon?.types}
               readOnly={!editableTypes}
               disabled={!pokemon?.speciesForme}
             />
@@ -377,7 +362,7 @@ export const PokeInfo = ({
               (!!pokemon?.speciesForme && gen > 8) &&
               <PokeTypeField
                 className={cx(styles.typesField, styles.teraTypeField)}
-                label={`Tera Type for Pokemon ${friendlyPokemonName}`}
+                label={`Tera Type for Pok${eacute}mon ${friendlyPokemonName}`}
                 title="Tera Type"
                 input={{
                   name: `PokeInfo:TeraType:${pokemonKey}`,
@@ -396,6 +381,9 @@ export const PokeInfo = ({
                   ...flattenAlts(pokemon?.altTeraTypes),
                   pokemon?.revealedTeraType,
                 ])).filter(Boolean)}
+                revealedTypes={pokemon?.revealedTeraType ? [
+                  pokemon.revealedTeraType,
+                ] : undefined}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}
               />
@@ -404,49 +392,46 @@ export const PokeInfo = ({
 
           <div className={styles.secondLine}>
             <PokeHpBar
-              // className={styles.hpBar}
               hp={hpPercentage}
               width={100}
             />
 
-            {
-              !!hpPercentage &&
-              <Tooltip
-                content={(
-                  <div className={styles.tooltipContent}>
-                    {
-                      (!pokemon.serverSourced && hpPercentage !== 1) &&
-                      <>
-                        <em>approx.</em>
-                        <br />
-                      </>
-                    }
-
-                    {currentHp} / {maxHp}
-                  </div>
-                )}
-                offset={[0, 10]}
-                delay={[250, 50]}
-                trigger="mouseenter"
-                touch={['hold', 500]}
-                disabled={!maxHp}
+            <PokeStatusTooltip
+              pokemon={pokemon}
+              visible={statusVisible}
+              disabled={!pokemon?.speciesForme}
+              onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeStatusTooltip:onPokemonChange()`)}
+              onRequestClose={notifyStatusClose}
+            >
+              <BaseButton
+                className={styles.statusButton}
+                display="block"
+                aria-label={`Hit Points & Non-Volatile Status Condition for Pok${eacute}mon ${friendlyPokemonName}`}
+                hoverScale={1}
+                onPress={requestStatusOpen}
+                disabled={!pokemon?.speciesForme}
               >
-                <div className={styles.hpPercentage}>
-                  {`${(hpPercentage * 100).toFixed(0)}%`}
-                </div>
-              </Tooltip>
-            }
+                {
+                  hpPercentage > 0 &&
+                  <div className={styles.hpPercentage}>
+                    {Math.round(hpPercentage * 100)}%
+                  </div>
+                }
 
-            {
-              (!!pokemon?.speciesForme && (!!pokemon.status || !hpPercentage)) &&
-              <div className={styles.statuses}>
-                <PokeStatus
-                  className={styles.status}
-                  status={pokemon.status}
-                  fainted={!hpPercentage}
-                />
-              </div>
-            }
+                {
+                  showNonVolatileStatus &&
+                  <div className={styles.statuses}>
+                    <PokeStatus
+                      status={currentStatus === 'ok' ? undefined : currentStatus}
+                      override={currentStatus === 'ok' ? currentStatus : undefined}
+                      fainted={!hpPercentage}
+                      highlight
+                      containerSize={containerSize}
+                    />
+                  </div>
+                }
+              </BaseButton>
+            </PokeStatusTooltip>
           </div>
         </div>
 
@@ -533,7 +518,7 @@ export const PokeInfo = ({
           </div>
 
           <Dropdown
-            aria-label={`Available Sets for Pokemon ${friendlyPokemonName}`}
+            aria-label={`Available Sets for Pok${eacute}mon ${friendlyPokemonName}`}
             hint="None"
             input={{
               name: `PokeInfo:Preset:${pokemonKey}:Dropdown`,
@@ -606,14 +591,8 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available Abilities for Pokemon ${friendlyPokemonName}`}
+              aria-label={`Available Abilities for Pok${eacute}mon ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : '???'}
-              // tooltip={abilityDescription ? (
-              //   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-              //     {abilityDescription}
-              //   </div>
-              // ) : null}
-              // optionTooltip={abilityOptionTooltip}
               optionTooltip={PokeAbilityOptionTooltip}
               optionTooltipProps={{
                 format,
@@ -637,7 +616,7 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available Natures for Pokemon ${friendlyPokemonName}`}
+              aria-label={`Available Natures for Pok${eacute}mon ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : '???'}
               input={{
                 name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
@@ -698,7 +677,7 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available Items for Pokemon ${friendlyPokemonName}`}
+              aria-label={`Available Items for Pok${eacute}mon ${friendlyPokemonName}`}
               hint={gen === 1 ? 'N/A' : 'None'}
               tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
                 <div
@@ -727,7 +706,6 @@ export const PokeInfo = ({
                   }
                 </div>
               ) : null}
-              // optionTooltip={itemOptionTooltip}
               optionTooltip={PokeItemOptionTooltip}
               optionTooltipProps={{
                 format,

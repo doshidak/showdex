@@ -1,8 +1,8 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { type ItemName } from '@smogon/calc';
+import { type SelectOptionTooltipProps } from '@showdex/components/form';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
-import type { ItemName } from '@smogon/calc/dist/data/interface';
-import type { SelectOptionTooltipProps } from '@showdex/components/form';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeItemOptionTooltipProps extends SelectOptionTooltipProps<ItemName> {

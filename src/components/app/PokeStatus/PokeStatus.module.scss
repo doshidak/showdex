@@ -1,64 +1,223 @@
+@use 'sass:map';
 @use 'config/colors';
 @use 'functions/color';
-@use 'mixins/spacing';
+@use 'mixins/flex';
+// @use 'mixins/spacing';
+@use 'mixins/transition';
 
-$status-unknown-color: #424242;
-$status-colors: (
-  brn: #A84331,
-  frz: #2C9191,
-  par: #DBCB37,
-  psn: #A735A7,
-  slp: #304E7C,
-  tox: #802480,
-  fnt: #607883,
+$statuses: (
+  default-color: (
+    light: colors.$black,
+    dark: colors.$white,
+  ),
+
+  colors: (
+    unknown: #424242,
+    brn: #A84331,
+    frz: #2C9191,
+    par: #DBCB37,
+    psn: #A735A7,
+    slp: #304E7C,
+    tox: #802480,
+    fnt: #607883,
+  ),
+
+  adjustment: (
+    light: 10%,
+    dark: 50%,
+  ),
 );
 
-$status-color-light-shade: 10%;
+$container: (
+  width: (
+    default: 36px,
+    smol: 26px,
+  ),
 
-$label-opacity-light: 1;
-$label-opacity-dark: 1;
-$background-opacity-light: 0.85;
-$background-opacity-fnt-light: 0.3;
-$background-opacity-dark: 0.5;
-$background-opacity-fnt-dark: 0.3;
+  height: 13px,
+  border-radius: 5px,
+
+  default-background-color: (
+    light: #DADDDE,
+    dark: #2D2B2A,
+  ),
+
+  background-opacity: (
+    default: (
+      light: 0.88,
+      dark: 0.88,
+    ),
+
+    highlight: (
+      // light: 1,
+      light: 0.8,
+      // dark: 1,
+      dark: 0.64,
+    ),
+
+    fnt: (
+      light: 0.4,
+      dark: 0.32,
+    ),
+  ),
+);
+
+$label: (
+  font-size: 8px,
+
+  text-shadow: (
+    default: 1px 1px 0 color.alpha(colors.$black, 0.1),
+    highlight: 1px 1px 0 color.alpha(colors.$black, 0.3),
+  ),
+
+  opacity: (
+    default: (
+      light: 0.75,
+      dark: 0.85,
+    ),
+
+    highlight: (
+      light: 1,
+      dark: 1,
+    ),
+  ),
+);
+
+// $status-color-light-shade: 10%;
+// $label-opacity-light: 1;
+// $label-opacity-dark: 1;
+// $background-opacity-light: 0.85;
+// $background-opacity-fnt-light: 0.3;
+// $background-opacity-dark: 0.5;
+// $background-opacity-fnt-dark: 0.3;
 
 .container {
-  display: inline-block;
-  width: 26px;
-  @include spacing.padding-xy($y: 1px);
-  font-size: 8px;
-  text-align: center;
-  text-transform: uppercase;
-  text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
-  border-radius: 5px;
+  // display: inline-block;
+  @include flex.row-center($inline: true);
+  width: map.get($container, width, default);
+  height: map.get($container, height);
+  // @include spacing.padding-xy($y: 1px);
+  // font-size: 8px;
+  // text-align: center;
+  // text-transform: uppercase;
+  // text-shadow: 1px 1px 0 color.alpha(colors.$black, 0.3);
+  border-radius: map.get($container, border-radius);
+  @include transition.apply(background-color);
   user-select: none;
-  pointer-events: none;
+  // pointer-events: none;
+
+  &.smol {
+    width: map.get($container, width, smol);
+  }
 
   &.light {
-    color: color.alpha(colors.$white, $label-opacity-light);
-    background-color: color.alpha($status-unknown-color, $background-opacity-light);
+    // color: color.alpha(colors.$white, $label-opacity-light);
+    // background-color: color.alpha($status-unknown-color, $background-opacity-light);
+    background-color: color.alpha(map.get($container, default-background-color, light), map.get($container, background-opacity, default, light));
+
+    &.highlight {
+      background-color: color.alpha(map.get($statuses, colors, unknown), map.get($container, background-opacity, highlight, light));
+    }
   }
 
   &.dark {
-    color: color.alpha(colors.$white, $label-opacity-dark);
-    background-color: color.alpha($status-unknown-color, $background-opacity-dark);
-  }
+    // color: color.alpha(colors.$white, $label-opacity-dark);
+    // background-color: color.alpha($status-unknown-color, $background-opacity-dark);
+    background-color: color.alpha(map.get($container, default-background-color, dark), map.get($container, background-opacity, default, dark));
 
-  @each $status, $color in $status-colors {
-    $light-opacity: if($status == 'fnt', $background-opacity-fnt-light, $background-opacity-light);
-    $dark-opacity: if($status == 'fnt', $background-opacity-fnt-dark, $background-opacity-dark);
-
-    &.#{$status} {
-      &.light {
-        background-color: color.alpha(
-          color.shade($color, $status-color-light-shade),
-          $light-opacity,
-        );
-      }
-
-      &.dark {
-        background-color: color.alpha($color, $dark-opacity);
-      }
+    &.highlight {
+      background-color: color.alpha(map.get($statuses, colors, unknown), map.get($container, background-opacity, highlight, dark));
     }
   }
+
+  // @each $status, $color in $status-colors {
+  //   $light-opacity: if($status == 'fnt', $background-opacity-fnt-light, $background-opacity-light);
+  //   $dark-opacity: if($status == 'fnt', $background-opacity-fnt-dark, $background-opacity-dark);
+  //
+  //   &.#{$status} {
+  //     &.light {
+  //       background-color: color.alpha(
+  //         color.shade($color, $status-color-light-shade),
+  //         $light-opacity,
+  //       );
+  //     }
+  //
+  //     &.dark {
+  //       background-color: color.alpha($color, $dark-opacity);
+  //     }
+  //   }
+  // }
+}
+
+.label {
+  font-size: map.get($label, font-size);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: map.get($label, text-shadow, default);
+  @include transition.apply(color, text-shadow);
+
+  .light & {
+    color: color.alpha(map.get($statuses, default-color, light), map.get($label, opacity, default, light));
+  }
+
+  .dark & {
+    color: color.alpha(map.get($statuses, default-color, dark), map.get($label, opacity, default, dark));
+  }
+
+  .highlight & {
+    text-shadow: map.get($label, text-shadow, highlight);
+  }
+
+  .highlight.light & {
+    color: color.alpha(colors.$white, map.get($label, opacity, highlight, light));
+  }
+
+  .highlight.dark & {
+    color: color.alpha(colors.$white, map.get($label, opacity, highlight, dark));
+  }
+}
+
+@each $status, $color in map.get($statuses, colors) {
+  @if $status != unknown {
+    $light-color: color.shade($color, map.get($statuses, adjustment, light));
+    $light-highlight-color: $light-color;
+    $dark-color: color.tint($color, map.get($statuses, adjustment, dark));
+    $dark-highlight-color: $color;
+
+    .status-#{$status} {
+      &:not(.highlight) {
+        &.light .label {
+          color: color.alpha($light-color, map.get($label, opacity, default, light));
+        }
+
+        &.dark .label {
+          color: color.alpha($dark-color, map.get($label, opacity, default, dark));
+        }
+      }
+
+      &.highlight {
+        &.light {
+          background-color: color.alpha(
+            $light-highlight-color,
+            if(
+              $status == fnt,
+              map.get($container, background-opacity, fnt, light),
+              map.get($container, background-opacity, highlight, light),
+            ),
+          );
+        }
+
+        &.dark {
+          background-color: color.alpha(
+            $dark-highlight-color,
+            if(
+              $status == fnt,
+              map.get($container, background-opacity, fnt, dark),
+              map.get($container, background-opacity, highlight, dark),
+            ),
+          );
+        }
+      } // end .highlight
+    } // end .status-#{$status}
+  } // end @if
 }

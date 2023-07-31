@@ -93,7 +93,7 @@ export type ThunkyReducerBindedActionatorMap<
  */
 // const parseReducerName = (name: string) => `ThunkyReducer:${name || `untitled-${uuidv4()}`}`;
 
-const l = logger('@showdex/utils/hooks/useThunkyReducer');
+const l = logger('@showdex/utils/hooks/useThunkyReducer()');
 
 /* eslint-disable @typescript-eslint/indent */
 

@@ -1,7 +1,11 @@
-import { configureStore } from '@reduxjs/toolkit';
+import {
+  type Action,
+  type AnyAction,
+  type ConfigureStoreOptions,
+  configureStore,
+} from '@reduxjs/toolkit';
 // import { setupListeners } from '@reduxjs/toolkit/query/react';
 import { logger } from '@showdex/utils/debug';
-import type { Action, AnyAction, ConfigureStoreOptions } from '@reduxjs/toolkit';
 import { pkmnApi, showdownApi } from '../services';
 import { calcdexSlice } from './calcdexSlice';
 import { hellodexSlice } from './hellodexSlice';

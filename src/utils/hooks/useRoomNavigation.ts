@@ -2,7 +2,7 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 // import { logger } from '@showdex/utils/debug';
 
-// const l = logger('@showdex/utils/hooks/useRoomNavigation');
+// const l = logger('@showdex/utils/hooks/useRoomNavigation()');
 
 /**
  * Mimics the room navigation functionality when hitting the left/right arrow keys.

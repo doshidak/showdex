@@ -1,13 +1,12 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { BaseButton } from '@showdex/components/ui';
-import { FormatLabels } from '@showdex/consts/battle';
+import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
+import { FormatLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { detectGenFromFormat } from '@showdex/utils/battle';
 import { getResourceUrl } from '@showdex/utils/core';
-import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 import styles from './InstanceButton.module.scss';
 
 export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
@@ -44,10 +43,10 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     ? opponentNameFromProps
     : playerName;
 
-  const playerTitle = findPlayerTitle(playerName);
+  const playerTitle = findPlayerTitle(playerName, true);
   const playerLabelColor = playerTitle?.color?.[colorScheme];
   const playerIconColor = playerTitle?.iconColor?.[colorScheme];
-  const opponentTitle = findPlayerTitle(opponentName);
+  const opponentTitle = findPlayerTitle(opponentName, true);
   const opponentLabelColor = opponentTitle?.color?.[colorScheme];
   const opponentIconColor = opponentTitle?.iconColor?.[colorScheme];
 

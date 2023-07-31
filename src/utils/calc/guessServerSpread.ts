@@ -1,12 +1,12 @@
-import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/pokemon';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { type GenerationNum } from '@smogon/calc';
+import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/dex';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
 import { calcPokemonStat } from './calcPokemonStat';
 
-const l = logger('@showdex/utils/calc/guessServerSpread');
+const l = logger('@showdex/utils/calc/guessServerSpread()');
 
 /**
  * Attempts to guess the spread (nature/EVs/IVs) of the passed-in `pokemon`.
@@ -66,7 +66,7 @@ export const guessServerSpread = (
     return null;
   }
 
-  if (!Object.keys(pokemon.baseStats || {}).length) {
+  if (!nonEmptyObject(pokemon.baseStats)) {
     if (__DEV__) {
       l.warn(
         'No baseStats were found for Pokemon', pokemon.ident || pokemon.speciesForme,
@@ -227,7 +227,7 @@ export const guessServerSpread = (
     guessedSpread.evs = {};
   }
 
-  if (!Object.keys({ ...guessedSpread.ivs, ...guessedSpread.evs }).length) {
+  if (!nonEmptyObject({ ...guessedSpread.ivs, ...guessedSpread.evs })) {
     l.debug(
       'Failed to find the actual spread for Pokemon', pokemon.ident || pokemon.speciesForme,
       '\n', 'guessedSpread', guessedSpread,

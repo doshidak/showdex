@@ -1,12 +1,7 @@
+import { type Json } from '@showdex/consts/core';
 import { logger } from '@showdex/utils/debug';
 
-export type JsonPrimitive = string | number | boolean | null;
-export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-export type JsonObject = { [JsonKey: string]: JsonValue; };
-export type JsonArray = JsonValue[];
-export type Json = JsonObject | JsonArray;
-
-const l = logger('@showdex/utils/core/safeJsonParse');
+const l = logger('@showdex/utils/core/safeJsonParse()');
 
 /**
  * Only detects if `value` might have a JSON-parsable structure.
@@ -38,7 +33,7 @@ export const safeJsonParse = <T = Json>(value?: unknown): T => {
   }
 
   try {
-    const result = <T> JSON.parse(value);
+    const result = JSON.parse(value) as T;
 
     if (!Array.isArray(result) && typeof result !== 'object') {
       if (__DEV__) {

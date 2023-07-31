@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import cx from 'classnames';
-import type { SwitchProps } from './Switch';
+import { type SwitchProps } from './Switch';
 import styles from './Switch.module.scss';
 
 export interface SwitchTrackProps extends Pick<SwitchProps, 'input'> {

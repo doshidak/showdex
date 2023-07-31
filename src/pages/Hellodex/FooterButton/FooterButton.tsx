@@ -1,9 +1,13 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { BaseButton, Tooltip } from '@showdex/components/ui';
+import {
+  type BaseButtonProps,
+  type ButtonElement,
+  BaseButton,
+  Tooltip,
+} from '@showdex/components/ui';
 import { getResourceUrl } from '@showdex/utils/core';
-import type { BaseButtonProps, ButtonElement } from '@showdex/components/ui';
 import styles from './FooterButton.module.scss';
 
 export interface FooterButtonProps extends Omit<BaseButtonProps, 'display'> {

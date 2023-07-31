@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import styles from './Picon.module.scss';
 
 export interface PiconProps {

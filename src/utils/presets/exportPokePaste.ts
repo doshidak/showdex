@@ -1,9 +1,12 @@
-import { PokemonPokePasteStatMap } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
-import { getDexForFormat, hasNickname } from '@showdex/utils/dex';
-// import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { PokemonPokePasteStatMap } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDexForFormat,
+  hasNickname,
+} from '@showdex/utils/dex';
 
 /**
  * Internally-used helper function to export a `Showdown.StatsTable` to the PokePaste syntax.
@@ -198,12 +201,15 @@ export const exportPokePaste = (
   // IVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 31 [or 30, if legacy])
   // EVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 0) -- only in non-legacy
   // (where <stat> is HP, Atk, Def, SpA, SpD, or Spe)
-  if (Object.keys(ivs || {}).length) {
+  const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
+
+  if (nonEmptyObject(ivs)) {
     // in legacy gens, max DV is 15, which equates to 30 IVs (NOT 31!)
     // additionally in gen 1 only, Showdown exports SPC as SPA, so SPD is unused
     const exportedIvs = exportStatsTable(
       ivs,
-      legacy ? 30 : 31,
+      defaultIv,
       gen === 1 ? 'spd' : null,
     );
 
@@ -212,8 +218,8 @@ export const exportPokePaste = (
     }
   }
 
-  if (!legacy && Object.keys(evs || {}).length) {
-    const exportedEvs = exportStatsTable(evs, 0);
+  if (nonEmptyObject(evs)) {
+    const exportedEvs = exportStatsTable(evs, defaultEv);
 
     if (exportedEvs) {
       output.push(`EVs: ${exportedEvs}`);

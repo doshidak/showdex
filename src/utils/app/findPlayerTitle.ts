@@ -1,12 +1,16 @@
-import { ShowdexPlayerTitles } from '@showdex/consts/app';
-import type { ShowdexPlayerTitle } from '@showdex/consts/app';
-import { formatId } from './formatId';
+import {
+  type ShowdexPlayerTitle,
+  ShowdexPlayerTitles,
+  ShowdexSupporterTiers,
+} from '@showdex/consts/app';
+import { formatId } from '@showdex/utils/core';
 
 /**
- * Finds a player title for the given `username`.
+ * Finds a player title for the given `name`.
  *
- * * `username` will automatically be formatted into an ID, via `formatId()`.
- * * If the `username` is assigned to multiple titles, then the first match in the
+ * * `name` will automatically be formatted into an ID via `formatId()`, only if indicated to be
+ *   a Showdown user ID from the `showdownUser` argument.
+ * * If the `name` is assigned to multiple titles, then the first match in the
  *   `ShowdexPlayerTitles` array will be returned.
  * * Not recommended that you manually sift through the `userIds` in the returned
  *   `ShowdexPlayerTitle` since not all elements will be type `string`!
@@ -16,21 +20,35 @@ import { formatId } from './formatId';
  * @since 1.1.1
  */
 export const findPlayerTitle = (
-  username: string,
+  name: string,
+  showdownUser?: boolean,
 ): ShowdexPlayerTitle => {
-  const userId = formatId(username);
+  const userId = showdownUser ? formatId(name) : name;
 
   if (!userId) {
     return null;
   }
 
   const matchedTitle = ShowdexPlayerTitles.find((t) => (
-    t.userIds.map((id) => (Array.isArray(id) ? id[0] : id))
-      .includes(userId)
-  ));
+    showdownUser
+      ? t.userIds.map((id) => (Array.isArray(id) ? id[0] : id))
+      : t.supporterId
+        ? ShowdexSupporterTiers
+          .find((s) => !!s?.id && s.id === t.supporterId)
+          ?.names
+          ?.filter((n) => Array.isArray(n) && typeof n[1] === 'boolean' && !n[1])
+          .map((n) => n[0])
+          .filter(Boolean)
+          || []
+        : []
+  ).includes(userId));
 
   if (!matchedTitle) {
     return null;
+  }
+
+  if (!showdownUser) {
+    return matchedTitle;
   }
 
   const matchedUserId = matchedTitle.userIds

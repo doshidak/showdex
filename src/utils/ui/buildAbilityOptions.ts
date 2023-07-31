@@ -1,9 +1,12 @@
-import { formatId } from '@showdex/utils/app';
+import { type AbilityName } from '@smogon/calc';
+import { type DropdownOption } from '@showdex/components/form';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   detectLegacyGen,
   legalLockedFormat,
-} from '@showdex/utils/battle';
+} from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -12,9 +15,6 @@ import {
   usageAltPercentFinder,
   usageAltPercentSorter,
 } from '@showdex/utils/presets';
-import type { AbilityName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
-import type { DropdownOption } from '@showdex/components/form';
 
 export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
 
@@ -157,7 +157,7 @@ export const buildAbilityOptions = (
   // no legal abilities are available (probably because the Pokemon doesn't exist in the `dex`'s gen)
   if (showAll || !legalLockedFormat(format) || !abilities?.length) {
     const otherAbilities = Object.values(BattleAbilities || {})
-      .map((a) => <AbilityName> a?.name)
+      .map((a) => a?.name as AbilityName)
       .filter((n) => !!n && formatId(n) !== 'noability' && !filterAbilities.includes(n))
       .sort(usageSorter);
 

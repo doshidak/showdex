@@ -1,5 +1,5 @@
 import * as ReactDOM from 'react-dom/client';
-import type { RootStore, ShowdexSliceState } from '@showdex/redux/store';
+import { type RootStore, type ShowdexSliceState } from '@showdex/redux/store';
 import { createHtmlRoom } from './createHtmlRoom';
 
 /**

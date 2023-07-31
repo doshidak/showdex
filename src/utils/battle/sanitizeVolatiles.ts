@@ -1,8 +1,8 @@
-import { formatId } from '@showdex/utils/app';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 
 /**
- * Pokemon `volatiles` require special love and attention before they get Redux'd.
+ * Pokemon `volatiles` require special love & attention before they get Redux'd.
  *
  * * Ditto
  *   - ...and Mew, I guess
@@ -23,12 +23,12 @@ export const sanitizeVolatiles = (
 
     // we're gunna replace the Pokemon object w/ its ident if it's a transform volatile
     const transformed = formatId(id) === 'transform'
-      && typeof (<Showdown.Pokemon> <unknown> value)?.ident === 'string';
+      && typeof (value as unknown as Showdown.Pokemon)?.ident === 'string';
 
     if (transformed || !value || ['string', 'number'].includes(typeof value)) {
       sanitizedVolatiles[id] = transformed ? [
         id,
-        (<Showdown.Pokemon> <unknown> value).speciesForme,
+        (value as unknown as Showdown.Pokemon).speciesForme,
         ...rest,
       ] : volatile;
     }

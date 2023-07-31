@@ -8,14 +8,14 @@ import {
   PokemonBoostNames,
   PokemonNatureBoosts,
   PokemonStatNames,
-} from '@showdex/consts/pokemon';
+} from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
-import { legalLockedFormat } from '@showdex/utils/battle';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
+import { legalLockedFormat } from '@showdex/utils/dex';
+import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import styles from './PokeStats.module.scss';
 
@@ -52,12 +52,13 @@ export const PokeStats = ({
   } = state;
 
   const colorScheme = useColorScheme();
+  const randomUuid = useRandomUuid();
+
+  const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
+  const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const statNames = PokemonStatNames.filter((stat) => gen !== 1 || stat !== 'spd');
   const boostNames = PokemonBoostNames.filter((stat) => gen !== 1 || stat !== 'spd');
-
-  const pokemonKey = pokemon?.calcdexId || pokemon?.name || '?';
-  const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
   const shouldShowBaseStats = settings?.showBaseStats === 'always'
     || (settings?.showBaseStats === 'meta' && !legalLockedFormat(format));
@@ -81,7 +82,10 @@ export const PokeStats = ({
   const showIvsRow = pokemon?.showGenetics
     || (!defaultShowBehavior && lockedVisibilities.includes('iv'));
 
-  const showEvsRow = !legacy && (
+  const showEvsRow = (
+    !legacy
+      || settings?.showLegacyEvs
+  ) && (
     pokemon?.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('ev'))
   );
@@ -95,7 +99,12 @@ export const PokeStats = ({
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
-  const evsLegal = allowIllegalSpreads || totalEvs <= maxLegalEvs + transformedLegalEvs;
+
+  // update (2023/07/26): since showLegacyEvs is now a setting, any amount of EVs in legacy gens
+  // will always be legal! (each stat defaults to 252 anyway, depending on the applied preset)
+  const evsLegal = (legacy && settings?.showLegacyEvs)
+    || allowIllegalSpreads
+    || totalEvs <= maxLegalEvs + transformedLegalEvs;
 
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
@@ -480,7 +489,7 @@ export const PokeStats = ({
                     >
                       {(mod?.modifier ?? -1) >= 0 ? (
                         <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
-                      ) : null}
+                      ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
                     </div>
                     <div className={styles.statModLabel}>
                       {mod?.label || '??? HUH'}

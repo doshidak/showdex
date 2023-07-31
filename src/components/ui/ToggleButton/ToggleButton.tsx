@@ -1,12 +1,12 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Button } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { ButtonElement, ButtonProps } from '@showdex/components/ui';
+import { type ButtonElement, type ButtonProps, Button } from '../Button';
 import styles from './ToggleButton.module.scss';
 
 export interface ToggleButtonProps extends Omit<ButtonProps, 'display'> {
   activeClassName?: string;
+  forceColorScheme?: Showdown.ColorScheme;
   primary?: boolean;
   active?: boolean;
 }
@@ -15,13 +15,15 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
   className,
   activeClassName,
   // labelClassName,
+  forceColorScheme,
   absoluteHover,
   primary,
   active,
   hoverScale = 1,
   ...props
 }: ToggleButtonProps, forwardedRef): JSX.Element => {
-  const colorScheme = useColorScheme();
+  const currentColorScheme = useColorScheme();
+  const colorScheme = forceColorScheme || currentColorScheme;
 
   return (
     <Button
@@ -39,6 +41,7 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
       //   styles.label,
       //   labelClassName,
       // )}
+      forceColorScheme={forceColorScheme}
       display="inline"
       absoluteHover={!primary && absoluteHover}
       hoverScale={hoverScale}

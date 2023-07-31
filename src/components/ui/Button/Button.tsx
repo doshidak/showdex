@@ -1,10 +1,13 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { TooltipProps } from '@showdex/components/ui';
-import type { BaseButtonProps, ButtonElement, ButtonElementType } from './BaseButton';
-import { BaseButton } from './BaseButton';
+import { type TooltipProps, Tooltip } from '../Tooltip';
+import {
+  type BaseButtonProps,
+  type ButtonElement,
+  type ButtonElementType,
+  BaseButton,
+} from './BaseButton';
 import styles from './Button.module.scss';
 
 export interface ButtonProps<
@@ -12,7 +15,10 @@ export interface ButtonProps<
 > extends BaseButtonProps<T> {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
+  forceColorScheme?: Showdown.ColorScheme;
   label?: string;
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
   tooltip?: React.ReactNode;
   tooltipPlacement?: TooltipProps['placement'];
   tooltipOffset?: TooltipProps['offset'];
@@ -34,7 +40,10 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   className,
   labelClassName,
   labelStyle,
+  forceColorScheme,
   label,
+  prefix,
+  suffix,
   tooltip,
   tooltipPlacement = 'top',
   tooltipOffset = [0, 10],
@@ -50,7 +59,9 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   ...props
 }: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
-  const colorScheme = useColorScheme();
+
+  const currentColorScheme = useColorScheme();
+  const colorScheme = forceColorScheme || currentColorScheme;
 
   React.useImperativeHandle(
     forwardedRef,
@@ -75,12 +86,19 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
       >
         {childrenFirst && children}
 
-        <label
-          className={cx(styles.label, labelClassName)}
-          style={labelStyle}
-        >
-          {label}
-        </label>
+        {prefix}
+
+        {
+          !!label &&
+          <label
+            className={cx(styles.label, labelClassName)}
+            style={labelStyle}
+          >
+            {label}
+          </label>
+        }
+
+        {suffix}
 
         {!childrenFirst && children}
       </BaseButton>

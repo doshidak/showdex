@@ -1,13 +1,13 @@
-import { PokemonStatNames } from '@showdex/consts/pokemon';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { type GenerationNum } from '@smogon/calc';
+import { PokemonStatNames } from '@showdex/consts/dex';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
-import { calcLegacyHpDv, convertLegacyDvToIv } from './convertLegacyStats';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
+import { calcLegacyHpIv, convertLegacyDvToIv } from './convertLegacyStats';
 import { calcPokemonStat } from './calcPokemonStat';
 
-const l = logger('@showdex/utils/calc/guessServerLegacySpread');
+const l = logger('@showdex/utils/calc/guessServerLegacySpread()');
 
 /**
  * Attempts to guess a legacy spread (DVs) of the passed-in `pokemon`.
@@ -55,7 +55,7 @@ export const guessServerLegacySpread = (
     return null;
   }
 
-  if (!Object.keys(pokemon.baseStats || {}).length) {
+  if (!nonEmptyObject(pokemon.baseStats)) {
     if (__DEV__) {
       l.warn(
         'No baseStats were found for Pokemon', pokemon.ident || pokemon.speciesForme,
@@ -88,6 +88,7 @@ export const guessServerLegacySpread = (
   // this is the spread that we'll return after guessing
   const guessedSpread: Partial<CalcdexPokemonPreset> = {
     ivs: {},
+    evs: { hp: 252 },
   };
 
   // logs of each guess (only on development)
@@ -112,54 +113,71 @@ export const guessServerLegacySpread = (
     for (let dv = 15; dv > 0; dv--) {
       const iv = convertLegacyDvToIv(dv);
 
-      // note: for gen 1, SPA and SPD should be the same since only SPC exists
-      calculatedStats[stat] = calcPokemonStat(
-        gen,
-        stat,
-        baseStats[stat],
-        iv,
-        undefined,
-        pokemon.level,
-      );
+      for (const ev of [252, 0]) { // update (2023/07/25): fuck
+        // note: for gen 1, SPA and SPD should be the same since only SPC exists
+        calculatedStats[stat] = calcPokemonStat(
+          gen,
+          stat,
+          baseStats[stat],
+          iv,
+          ev,
+          pokemon.level,
+        );
 
-      if (__DEV__) {
-        logs.push([
-          'TRY ',
-          stat.toUpperCase(),
-          `DV ${dv}`, `(IV ${iv})`, '=',
-          calculatedStats[stat], '===', serverStats[stat], '?',
-          calculatedStats[stat] === serverStats[stat] ? 'PASS' : 'FAIL',
-        ].join(' '));
-      }
-
-      if (calculatedStats[stat] === serverStats[stat]) {
         if (__DEV__) {
           logs.push([
-            'DONE',
+            'TRY ',
             stat.toUpperCase(),
-            `DV ${dv}`, `(IV ${iv})`, '=',
-            calculatedStats[stat],
+            `DV ${dv}`, `(IV ${iv})`, `EV ${ev}`, '=',
+            calculatedStats[stat], '===', serverStats[stat], '?',
+            calculatedStats[stat] === serverStats[stat] ? 'PASS' : 'FAIL',
           ].join(' '));
         }
 
-        guessedSpread.ivs[stat] = iv;
+        if (calculatedStats[stat] === serverStats[stat]) {
+          if (__DEV__) {
+            logs.push([
+              'DONE',
+              stat.toUpperCase(),
+              `DV ${dv}`, `(IV ${iv})`, `EV ${ev}`, '=',
+              calculatedStats[stat],
+            ].join(' '));
+          }
 
+          guessedSpread.ivs[stat] = iv;
+          guessedSpread.evs[stat] = ev;
+
+          break;
+        }
+      }
+
+      if (calculatedStats[stat] === serverStats[stat]) {
         break;
       }
     }
   }
 
   // attempt to calculate the HP stat whether the IVs are available or not
-  guessedSpread.ivs.hp = convertLegacyDvToIv(calcLegacyHpDv(guessedSpread.ivs));
+  guessedSpread.ivs.hp = calcLegacyHpIv(guessedSpread.ivs);
 
   calculatedStats.hp = calcPokemonStat(
     gen,
     'hp',
     baseStats.hp,
     guessedSpread.ivs.hp,
-    undefined,
+    guessedSpread.evs.hp,
     pokemon.level,
   );
+
+  if (__DEV__) {
+    logs.push([
+      'TRY ',
+      'HP',
+      `IV ${guessedSpread.ivs.hp}`, `EV ${guessedSpread.evs.hp}`, '=',
+      calculatedStats.hp, '===', serverStats.hp, '?',
+      calculatedStats.hp === serverStats.hp ? 'PASS' : 'FAIL',
+    ].join(' '));
+  }
 
   // note: for gen 1, calculated SPA and SPD *should* be the same, but we'll check anyways
   // (not the case for gen 2 tho -- calculated SPA and SPD may be very different,

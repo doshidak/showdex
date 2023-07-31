@@ -1,10 +1,12 @@
-import { FormatLabels } from '@showdex/consts/battle';
-import { getGenlessFormat } from '@showdex/utils/battle';
+import { type DropdownOption } from '@showdex/components/form';
+import { FormatLabels } from '@showdex/consts/dex';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { getGenlessFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
+
+const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
 
 /**
  * Builds the value for the `options` prop of the presets `Dropdown` component in `PokeInfo`.
@@ -35,7 +37,7 @@ export const buildPresetOptions = (
     // 'Defensive (Physical Attacker)' -> { label: 'Defensive', subLabel: 'PHYSICAL ATTACKER' },
     // 'Metal Sound + Steelium Z' -> { label: 'Metal Sound', subLabel: '+ STEELIUM Z' },
     // 'The Pex' -> (regex fails) -> { label: 'The Pex' } (untouched lol)
-    if (/\x20+(?:\+\x20+\w[\w\x20]*|\(\w.*\))$/i.test(String(option.label))) {
+    if (SubLabelRegex.test(String(option.label))) {
       // update (2022/10/18): added default `[]` here cause the regex is letting some invalid
       // option.label through and I'm too lazy to find out what that is rn lol
       const [
@@ -43,7 +45,7 @@ export const buildPresetOptions = (
         label,
         plusLabel,
         subLabel,
-      ] = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i.exec(String(option.label)) || [];
+      ] = SubLabelRegex.exec(String(option.label)) || [];
 
       // it'll be one or the other since the capture groups are alternatives in a non-capturing group
       const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;
@@ -51,17 +53,6 @@ export const buildPresetOptions = (
       if (label && actualSubLabel) {
         option.label = label;
         option.subLabel = actualSubLabel;
-
-        // const longSubLabel = actualSubLabel.length > 8;
-        // const loudSubLabel = actualSubLabel.toUpperCase(); // lol
-
-        // remove the '+' (if any) if we're assigning it to the rightLabel
-        // update (2022/11/16): nvm put it back lmao
-        // option[longSubLabel ? 'subLabel' : 'rightLabel'] = longSubLabel
-        //   ? loudSubLabel
-        //   : loudSubLabel.replace(/^\+\s+/, '');
-
-        // option[longSubLabel ? 'subLabel' : 'rightLabel'] = loudSubLabel;
       }
     }
 

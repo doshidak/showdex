@@ -1,8 +1,8 @@
-import { sanitizeField } from '@showdex/utils/battle';
+import { type CalcdexBattleField, type CalcdexBattleState } from '@showdex/redux/store';
+import { cloneField, sanitizeField } from '@showdex/utils/battle';
 import { logger } from '@showdex/utils/debug';
-import type { CalcdexBattleField, CalcdexBattleState } from '@showdex/redux/store';
 
-const l = logger('@showdex/redux/actions/syncField');
+const l = logger('@showdex/redux/actions/syncField()');
 
 export const syncField = (
   state: Partial<CalcdexBattleState>,
@@ -23,11 +23,13 @@ export const syncField = (
 
   // create a sanitized `Field` from the passed-in `battle`, then compare each result for changes
   // (works similarly to `syncPokemon`)
-  const newField = structuredClone(state.field);
+  // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+  // const newField = structuredClone(state.field);
+  const newField = cloneField(state.field);
   const updatedField = sanitizeField(battle);
 
-  const fieldSideKeys = <(keyof CalcdexBattleField)[]> ['attackerSide', 'defenderSide'];
-  const fieldRemainingKeys = (<(keyof CalcdexBattleField)[]> Object.keys(updatedField || {}))
+  const fieldSideKeys = ['attackerSide', 'defenderSide'] as (keyof CalcdexBattleField)[];
+  const fieldRemainingKeys = (Object.keys(updatedField || {}) as (keyof CalcdexBattleField)[])
     .filter((key) => !fieldSideKeys.includes(key));
 
   fieldRemainingKeys.forEach((key) => {
@@ -38,28 +40,8 @@ export const syncField = (
       return;
     }
 
-    (<Record<keyof CalcdexBattleField, unknown>> newField)[key] = value;
+    (newField as Record<keyof CalcdexBattleField, unknown>)[key] = value;
   });
-
-  // update (2023/01/22): fieldSideKeys are now attached to each individual CalcdexPlayer under the `side` property
-  // fieldSideKeys.forEach((sideKey) => {
-  //   Object.keys(newField?.[sideKey] || <CalcdexBattleField> {}).forEach((key) => {
-  //     /** @warning Not really type `string`, but was forcibly casted to keep TypeScript happy lol. */
-  //     const value = <string> (<Record<keyof CalcdexBattleField, unknown>> updatedField?.[sideKey])?.[key];
-  //
-  //     if (value === null || value === undefined) {
-  //       return;
-  //     }
-  //
-  //     const originalValue = <string> (<Record<keyof CalcdexBattleField, unknown>> newField?.[sideKey])?.[key];
-  //
-  //     if (JSON.stringify(value) === JSON.stringify(originalValue)) {
-  //       return;
-  //     }
-  //
-  //     (<Record<keyof CalcdexBattleField, unknown>> newField[sideKey])[key] = value;
-  //   });
-  // });
 
   return newField;
 };

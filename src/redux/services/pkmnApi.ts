@@ -24,9 +24,18 @@ export const pkmnApi = createApi({
     // fetchFn: runtimeFetch,
   }),
 
+  // note: setupListeners() aren't configured, so these have no effect if `true`;
+  // also, these settings are globally applied to any API that injects endpoints into this API (e.g., presetApi)
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
+
+  // warning: you can't set this to `Infinity` since they use this value for math under-the-hood
+  // see: https://github.com/reduxjs/redux-toolkit/discussions/2347#discussioncomment-2873143
+  keepUnusedDataFor: 31536000, // in sec; 1 year, which is fine for our purposes
+
   tagTypes: [
     PokemonReduxTagType,
-  ].flatMap((type) => <string[]> Object.values(type)),
+  ].flatMap((type) => Object.values(type) as string[]),
 
   // do not add endpoints here; inject them in other files for code-splitting
   endpoints: () => ({}),

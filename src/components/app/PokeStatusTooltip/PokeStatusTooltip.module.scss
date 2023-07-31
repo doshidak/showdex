@@ -1,0 +1,407 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$tooltip-container: (
+  padding: 7px,
+);
+
+// $container: (
+//   min-width: 200px,
+// );
+
+$group: (
+  spacing: 6px, // between groups
+
+  header: (
+    min-height: 11px,
+    margin-x: 4px,
+    margin-bottom: 4px,
+    spacing: 8px, // spacing between title & reset-button
+  ),
+
+  title: (
+    font-weight: 600,
+    font-size: 8px,
+
+    color: (
+      light: color.alpha(colors.$white, 0.65),
+      dark: color.alpha(colors.$black, 0.65),
+    ),
+  ),
+
+  reset-button: (
+    font-size: 8px,
+  ),
+);
+
+$hp-fields: (
+  column-gap: 4px,
+  padding-right: 8px,
+  padding-left: 4px,
+
+  slash: (
+    font-weight: 400,
+    font-size: 8px,
+
+    color: (
+      light: color.alpha(colors.$white, 0.32),
+      dark: color.alpha(colors.$black, 0.32),
+    ),
+  ),
+
+  value: (
+    width: 22px,
+    font-size: 10px,
+
+    color: (
+      light: color.alpha(colors.$white, 0.92),
+      dark: color.alpha(colors.$black, 0.92),
+    ),
+  ),
+
+  label: (
+    font-weight: 600,
+    font-size: 9px,
+
+    color: (
+      light: color.alpha(colors.$white, 0.65),
+      dark: color.alpha(colors.$black, 0.65),
+    ),
+  ),
+
+  field: (
+    width: 22px,
+    // spacing: 1px, // additional margin to apply to compensate for the absoluteHover background
+    // font-size: 11px,
+  ),
+
+  reset-button: (
+    spacing: 4px,
+    font-size: 8px,
+  ),
+);
+
+$status-options: (
+  columns: 3,
+  rows: 2,
+  column-gap: 4px,
+  row-gap: 4px,
+);
+
+// note: color schemes are reversed for tooltips!
+$status-option-button: (
+  padding-x: 2px,
+  padding-y: 2px,
+  border-radius: 7px,
+
+  background-color: (
+    default: (
+      light: colors.$transparent,
+      dark: colors.$transparent,
+    ),
+
+    hover: (
+      light: color.alpha(colors.$white, 0.075),
+      dark: color.alpha(colors.$black, 0.05),
+    ),
+
+    selected: (
+      light: color.alpha(colors.$blue, 0.15),
+      dark: color.alpha(colors.$blue, 0.2),
+    ),
+  ),
+
+  box-shadow: (
+    selected: (
+      light: (
+        0 0 1px color.alpha(colors.$blue, 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.75),
+      ),
+
+      dark: (
+        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
+        0 0 3px color.alpha(colors.$blue, 0.75),
+      ),
+    ),
+  ),
+
+  opacity: (
+    default: 0.9,
+    hover: 0.95,
+    selected: 1,
+    disabled: 0.5,
+  ),
+);
+
+// i.e., the PokeStatus in the .statusOptionButton BaseButton
+// (10/10 name, I know)
+$status-option-status: (
+  color: (
+    default: (
+      light: color.alpha(colors.$white, 0.85),
+      dark: color.alpha(colors.$black, 0.75),
+    ),
+  ),
+
+  background-color: (
+    default: (
+      light: color.alpha(colors.$white, 0.15),
+      dark: color.alpha(colors.$black, 0.15),
+    ),
+
+    // note: confusingly not named after the `highlight` PokeStatus prop,
+    // but rather refers to a subtle blue background applied to the PokeStatus
+    // in order to draw the user's attention to it
+    highlighted: (
+      light: color.alpha(colors.$blue, 0.3),
+      dark: color.alpha(color.tint(colors.$blue, 30%), 0.3),
+    ),
+  ),
+);
+
+.tooltipContainer {
+  @include spacing.padding-all(map.get($tooltip-container, padding));
+  z-index: 99;
+}
+
+.container {
+  position: relative;
+  // min-width: map.get($container, min-width);
+}
+
+.group {
+  @include flex.column-center;
+
+  &:not(:last-child) {
+    @include spacing.margin($bottom: map.get($group, spacing));
+  }
+}
+
+.groupHeader {
+  @include flex.row-between;
+  min-height: map.get($group, header, min-height);
+  @include spacing.margin(
+    $right: map.get($group, header, margin-x),
+    $bottom: map.get($group, header, margin-bottom),
+    $left: map.get($group, header, margin-x),
+  );
+}
+
+.groupTitle {
+  font-weight: map.get($group, title, font-weight);
+  font-size: map.get($group, title, font-size);
+  text-transform: uppercase;
+  @include transition.apply(color);
+  user-select: none;
+
+  .light & {
+    color: map.get($group, title, color, light);
+  }
+
+  .dark & {
+    color: map.get($group, title, color, dark);
+  }
+}
+
+button.groupResetButton {
+  font-size: map.get($group, reset-button, font-size);
+
+  .groupTitle ~ & {
+    @include spacing.margin($left: map.get($group, header, spacing));
+  }
+}
+
+.hpFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) min-content minmax(0, 1fr) min-content;
+  grid-template-rows: max-content;
+  column-gap: map.get($hp-fields, column-gap);
+  align-content: center;
+  align-items: center;
+  @include spacing.padding(
+    $right: map.get($hp-fields, padding-right),
+    $left: map.get($hp-fields, padding-left),
+  );
+}
+
+.hpField, .hpValue, .hpSlash, .hpLabel {
+  grid-area: span 1 / span 1;
+  align-self: center;
+}
+
+.hpField {
+  width: map.get($hp-fields, field, width);
+
+  // &.spacingRight {
+  //   @include spacing.margin($right: map.get($hp-fields, field, spacing));
+  // }
+
+  // &.spacingLeft {
+  //   @include spacing.margin($left: map.get($hp-fields, field, spacing));
+  // }
+
+  // input.hpFieldInput {
+  //   font-size: map.get($hp-fields, field, font-size);
+  // }
+}
+
+.hpValue, .hpSlash, .hpLabel {
+  @include flex.row-center;
+  text-align: center;
+  @include transition.apply(color);
+  user-select: none;
+}
+
+.hpValue {
+  width: map.get($hp-fields, value, width);
+  @include font.apply(fonts.$mono);
+  font-size: map.get($hp-fields, value, font-size);
+
+  .light & {
+    color: map.get($hp-fields, value, color, light);
+  }
+
+  .dark & {
+    color: map.get($hp-fields, value, color, dark);
+  }
+}
+
+.hpSlash {
+  font-weight: map.get($hp-fields, slash, font-weight);
+  font-size: map.get($hp-fields, slash, font-size);
+
+  .light & {
+    color: map.get($hp-fields, slash, color, light);
+  }
+
+  .dark & {
+    color: map.get($hp-fields, slash, color, dark);
+  }
+}
+
+.hpLabel {
+  font-weight: map.get($hp-fields, label, font-weight);
+  font-size: map.get($hp-fields, label, font-size);
+
+  .light & {
+    color: map.get($hp-fields, label, color, light);
+  }
+
+  .dark & {
+    color: map.get($hp-fields, label, color, dark);
+  }
+}
+
+button.hpResetButton {
+  @include spacing.margin($left: map.get($hp-fields, reset-button, spacing));
+  font-size: map.get($hp-fields, reset-button, font-size);
+}
+
+.statusOptions {
+  display: grid;
+  grid-template-columns: repeat(map.get($status-options, columns), max-content);
+  grid-template-rows: repeat(map.get($status-options, rows), max-content);
+  align-content: center;
+  column-gap: map.get($status-options, column-gap);
+  row-gap: map.get($status-options, row-gap);
+}
+
+.statusOptionButton {
+  position: relative;
+  grid-area: span 1 / span 1;
+  align-self: center;
+  opacity: map.get($status-option-button, opacity, default);
+  @include transition.apply(opacity);
+  z-index: 1;
+
+  &::before {
+    content: '';
+    @include position.absolute-xy(
+      $x: -(map.get($status-option-button, padding-x)),
+      $y: -(map.get($status-option-button, padding-y)),
+    );
+    border-radius: map.get($status-option-button, border-radius);
+    @include transition.apply(background-color, box-shadow);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light &::before {
+    background-color: map.get($status-option-button, background-color, default, light);
+  }
+
+  .dark &::before {
+    background-color: map.get($status-option-button, background-color, default, dark);
+  }
+
+  &:hover {
+    opacity: map.get($status-option-button, opacity, hover);
+
+    .light &::before {
+      background-color: map.get($status-option-button, background-color, hover, light);
+    }
+
+    .dark &::before {
+      background-color: map.get($status-option-button, background-color, hover, dark);
+    }
+  }
+
+  &.selected {
+    opacity: map.get($status-option-button, opacity, selected);
+
+    .light &::before {
+      background-color: map.get($status-option-button, background-color, selected, light);
+      box-shadow: map.get($status-option-button, box-shadow, selected, light);
+    }
+
+    .dark &::before {
+      background-color: map.get($status-option-button, background-color, selected, dark);
+      box-shadow: map.get($status-option-button, box-shadow, selected, dark);
+    }
+  }
+
+  &.disabled {
+    opacity: map.get($status-option-button, opacity, disabled);
+  }
+}
+
+.statusOptionStatus {
+  .statusOptionButton:not(.selected):not(:hover) & {
+    .light & {
+      background-color: map.get($status-option-status, background-color, default, light);
+    }
+
+    .dark & {
+      background-color: map.get($status-option-status, background-color, default, dark);
+    }
+  }
+
+  .statusOptionButton:not(.selected):not(:hover).highlighted & {
+    .light & {
+      background-color: map.get($status-option-status, background-color, highlighted, light);
+    }
+
+    .dark & {
+      background-color: map.get($status-option-status, background-color, highlighted, dark);
+    }
+  }
+}
+
+.statusOptionStatusLabel {
+  .statusOptionButton:not(.selected) & {
+    .light & {
+      color: map.get($status-option-status, color, default, light);
+    }
+
+    .dark & {
+      color: map.get($status-option-status, color, default, dark);
+    }
+  }
+}

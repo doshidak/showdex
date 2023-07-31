@@ -219,6 +219,21 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
     color: inherit;
   }
 
+  .userButtonless {
+    @include flex.row($align: center, $inline: true);
+  }
+
+  .usernameIcon {
+    display: inline-block;
+    width: 12px;
+    min-width: 12px;
+    height: 12px;
+    min-height: 12px;
+    @include spacing.margin($left: 2px);
+    color: inherit;
+    transform: scale(1.1);
+  }
+
   .value {
     // @include spacing.padding-xy($x: 5px, $y: 3px);
     @include spacing.padding-all(5px);
@@ -250,4 +265,18 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
   text-align: center;
   white-space: normal;
   user-select: none;
+}
+
+.tooltipPlayerTitle {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.customTitleIcon {
+  display: inline-block;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
 }

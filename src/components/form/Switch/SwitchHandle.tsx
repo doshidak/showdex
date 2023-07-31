@@ -3,8 +3,8 @@ import { useButton } from '@react-aria/button';
 import { defaultCoordinates, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import cx from 'classnames';
-import type { ButtonAria, CommonButtonProps } from '@showdex/components/ui';
-import type { CommonToggleFieldProps } from './Switch';
+import { type ButtonAria, type CommonButtonProps } from '@showdex/components/ui';
+import { type CommonToggleFieldProps } from './Switch';
 import styles from './Switch.module.scss';
 
 export interface SwitchHandleProps extends Omit<CommonButtonProps, 'tabIndex'> {
@@ -45,7 +45,7 @@ export const SwitchHandle = ({
   const { buttonProps } = useButton({
     'aria-label': label || `${input?.name} Switch Handle`.trim(),
     ...props,
-    children: label,
+    // children: label,
     isDisabled: disabled,
     onPress,
   }, ref) as ButtonAria<HTMLButtonElement>;

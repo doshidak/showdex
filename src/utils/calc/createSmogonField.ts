@@ -1,7 +1,8 @@
 import { Field as SmogonField } from '@smogon/calc';
-import { formatId } from '@showdex/utils/app';
-import { countRuinAbilities, detectGenFromFormat, ruinAbilitiesActive } from '@showdex/utils/battle';
-import type { CalcdexBattleField, CalcdexPlayer } from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayer } from '@showdex/redux/store';
+import { clonePlayerSide, countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
+import { formatId } from '@showdex/utils/core';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 
 export const createSmogonField = (
   format: string,
@@ -18,10 +19,13 @@ export const createSmogonField = (
 
   // note: using structuredClone() for attackerSide & defenderSide here since we may mutate their
   // properties for hazards, so we don't want to accidentally mutate their original objects from the args!
+  // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
   const processedField: CalcdexBattleField = {
     ...field,
-    attackerSide: structuredClone(player?.side || {}),
-    defenderSide: structuredClone(opponent?.side || {}),
+    // attackerSide: structuredClone(player?.side || {}),
+    // defenderSide: structuredClone(opponent?.side || {}),
+    attackerSide: clonePlayerSide(player?.side),
+    defenderSide: clonePlayerSide(opponent?.side),
   };
 
   // check if we should remove field hazards (e.g., Spikes, Stealth Rocks) if the selected Pokemon

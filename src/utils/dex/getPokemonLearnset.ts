@@ -1,12 +1,11 @@
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { type GenerationNum, type MoveName } from '@smogon/calc';
+import { env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
+import { guessTableFormatKey } from './guessTableFormatKey';
 
-const l = logger('@showdex/utils/dex/getPokemonLearnset');
+const l = logger('@showdex/utils/dex/getPokemonLearnset()');
 
 /**
  * Returns the legal learnsets of the passed-in `speciesForme`.
@@ -144,7 +143,7 @@ export const getPokemonLearnset = (
         // e.g., { attract: '45678pqg', auroraveil: '8g', ... }
         return Object.entries(learnsets[learnsetKey])
           .filter(([, gens]) => ignoreGen || gens.includes(String(gen)))
-          .map(([id]) => <MoveName> dex.moves.get(id)?.name)
+          .map(([id]) => dex.moves.get(id)?.name as MoveName)
           .filter(Boolean);
       }),
     ),

@@ -1,9 +1,9 @@
 import * as React from 'react';
+import { type TippyProps } from '@tippyjs/react';
 import Tippy from '@tippyjs/react/headless';
 import { animated, useSpring } from '@react-spring/web';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
-import type { TippyProps } from '@tippyjs/react';
 // import { LazyTippy } from './LazyTippy';
 import styles from './Tooltip.module.scss';
 
@@ -117,7 +117,7 @@ export const Tooltip = ({
           name: 'arrow',
           options: {
             element: arrow,
-            padding: 15,
+            // padding: 15,
           },
         }],
       }}

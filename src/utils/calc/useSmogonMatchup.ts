@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { calcSmogonMatchup } from '@showdex/utils/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type {
-  CalcdexBattleField,
-  CalcdexPlayer,
-  CalcdexPokemon,
-  ShowdexCalcdexSettings,
+import { type MoveName } from '@smogon/calc';
+import {
+  type CalcdexBattleField,
+  type CalcdexPlayer,
+  type CalcdexPokemon,
+  type ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
-import type { CalcdexMatchupResult } from '@showdex/utils/calc';
+import { type CalcdexMatchupResult, calcSmogonMatchup } from './calcSmogonMatchup';
 
 export type SmogonMatchupHookCalculator = (
   playerMove: MoveName,

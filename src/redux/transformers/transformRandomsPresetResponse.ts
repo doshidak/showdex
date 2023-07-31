@@ -1,12 +1,11 @@
-import { detectLegacyGen } from '@showdex/utils/battle';
+import { type PkmnSmogonRandomsPresetResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { PkmnSmogonRandomsPresetResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
 
-// const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse');
+// const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse()');
 
 /**
  * Transforms the JSON response from the Randoms API by converting the object into an array of `CalcdexPokemonPreset`s.
@@ -23,20 +22,18 @@ export const transformRandomsPresetResponse = (
   _meta: unknown,
   args: PkmnSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
-  if (!Object.keys(response || {}).length) {
+  if (!args?.gen || !nonEmptyObject(response)) {
     return [];
   }
 
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
-  const legacy = detectLegacyGen(gen);
-
   // see notes for the `evs` property in `PkmnSmogonRandomPreset` in `@showdex/redux/services/pkmnApi`
   // for more info about why 84 EVs is the default value for each stat
+  const legacy = detectLegacyGen(args.gen);
   const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 0 : 84;
+  const defaultEv = legacy ? 252 : 84;
 
   // at least this is only O(n)
   // ...stonks
@@ -44,7 +41,7 @@ export const transformRandomsPresetResponse = (
     speciesForme,
     pkmnPreset,
   ]) => {
-    if (!speciesForme || !Object.keys(pkmnPreset || {}).length) {
+    if (!speciesForme || !nonEmptyObject(pkmnPreset)) {
       return;
     }
 
@@ -63,8 +60,8 @@ export const transformRandomsPresetResponse = (
       id: null, // will equal calcdexId, so the same applies as above
       source: 'smogon',
       name: 'Randoms',
-      gen,
-      format: args?.format ?? `gen${gen}randombattle`, // e.g., 'gen8randombattle'
+      gen: args.gen,
+      format: getGenlessFormat(args.format) || 'randombattle',
 
       speciesForme, // do not sanitize
       level,
@@ -95,20 +92,18 @@ export const transformRandomsPresetResponse = (
       },
 
       evs: {
-        ...(!legacy && {
-          hp: evs?.hp ?? defaultEv,
-          atk: evs?.atk ?? defaultEv,
-          def: evs?.def ?? defaultEv,
-          spa: evs?.spa ?? defaultEv,
-          spd: evs?.spd ?? defaultEv,
-          spe: evs?.spe ?? defaultEv,
-        }),
+        hp: evs?.hp ?? defaultEv,
+        atk: evs?.atk ?? defaultEv,
+        def: evs?.def ?? defaultEv,
+        spa: evs?.spa ?? defaultEv,
+        spd: evs?.spd ?? defaultEv,
+        spe: evs?.spe ?? defaultEv,
       },
     };
 
     // note: either `preset` or `rolePreset` will be pushed to the `output` array!
     // (former if there are no roles and latter if there are)
-    if (Object.keys(roles || {}).length) {
+    if (nonEmptyObject(roles)) {
       Object.entries(roles).forEach(([
         roleName,
         role,
@@ -156,7 +151,7 @@ export const transformRandomsPresetResponse = (
 
         // update (2023/01/28): adding support for role-specific EVs/IVs, but for also when Pre eventually
         // moves the EVs/IVs into each role instead of in the parent (only for Gen 9 Randoms btw)
-        if (!legacy && Object.keys(roleEvs || {}).length) {
+        if (!legacy && nonEmptyObject(roleEvs)) {
           rolePreset.evs = {
             hp: roleEvs?.hp ?? defaultEv,
             atk: roleEvs?.atk ?? defaultEv,
@@ -167,7 +162,7 @@ export const transformRandomsPresetResponse = (
           };
         }
 
-        if (Object.keys(roleIvs || {}).length) {
+        if (nonEmptyObject(roleIvs)) {
           rolePreset.ivs = {
             hp: roleIvs?.hp ?? defaultIv,
             atk: roleIvs?.atk ?? defaultIv,

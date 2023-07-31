@@ -1,25 +1,25 @@
 import * as React from 'react';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type {
-  CalcdexBattleField,
-  CalcdexBattleState,
-  CalcdexPlayer,
-  CalcdexPlayerKey,
-  CalcdexPokemon,
-  CalcdexPokemonPreset,
-  ShowdexCalcdexSettings,
+import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
+import {
+  type CalcdexBattleField,
+  type CalcdexBattleState,
+  type CalcdexPlayer,
+  type CalcdexPlayerKey,
+  type CalcdexPokemon,
+  type CalcdexPokemonPreset,
+  type ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
-import type { CalcdexPokemonUsageAltSorter } from '@showdex/utils/presets';
-import type {
-  CalcdexPokemonAbilityOption,
-  CalcdexPokemonItemOption,
-  CalcdexPokemonMoveOption,
-  CalcdexPokemonPresetOption,
+import { type CalcdexMatchupResult } from '@showdex/utils/calc';
+import { type CalcdexPokemonUsageAltSorter } from '@showdex/utils/presets';
+import {
+  type CalcdexPokemonAbilityOption,
+  type CalcdexPokemonItemOption,
+  type CalcdexPokemonMoveOption,
+  type CalcdexPokemonPresetOption,
 } from '@showdex/utils/ui';
-import type { CalcdexMatchupResult } from '@showdex/utils/calc';
-import type {
-  CalcdexContextConsumables,
-  CalcdexPokemonMutation,
+import {
+  type CalcdexContextConsumables,
+  type CalcdexPokemonMutation,
 } from '../CalcdexContext';
 
 /**

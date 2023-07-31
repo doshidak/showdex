@@ -1,10 +1,9 @@
-import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/pokemon';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
+import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
+import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { getDexForFormat } from '@showdex/utils/dex';
 import { clamp } from '@showdex/utils/core';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 
 /**
  * Converts a single `packedTeam` from the Teambuilder into `CalcdexPokemonPreset[]`s.
@@ -88,11 +87,14 @@ export const unpackStorageTeam = (
   const box = rawFormat?.endsWith('-box');
   const format = rawFormat?.replace('-box', '');
   const gen = detectGenFromFormat(format);
-  const legacy = detectLegacyGen(format);
 
   if (!format || !gen) {
     return output;
   }
+
+  const legacy = detectLegacyGen(format);
+  const defaultIv = legacy ? 30 : 31;
+  const defaultEv = legacy ? 252 : 0;
 
   const packedPokemon = packedTeam
     .slice(teamIndex + 1)
@@ -106,8 +108,6 @@ export const unpackStorageTeam = (
   const dex = getDexForFormat(format);
 
   packedPokemon.forEach((packed) => {
-    const maxIv = legacy ? 30 : 31;
-
     const preset: CalcdexPokemonPreset = {
       calcdexId: null,
       id: null,
@@ -126,12 +126,22 @@ export const unpackStorageTeam = (
 
       // update (2023/01/05): IV parsing may not happen since the split value could be an empty string
       ivs: {
-        hp: maxIv,
-        atk: maxIv,
-        def: maxIv,
-        spa: maxIv,
-        spd: maxIv,
-        spe: maxIv,
+        hp: defaultIv,
+        atk: defaultIv,
+        def: defaultIv,
+        spa: defaultIv,
+        spd: defaultIv,
+        spe: defaultIv,
+      },
+
+      // update (2023/07/25): now adding EVs cause apparently they're sometimes used in legacy gens lol
+      evs: {
+        hp: defaultEv,
+        atk: defaultEv,
+        def: defaultEv,
+        spa: defaultEv,
+        spd: defaultEv,
+        spe: defaultEv,
       },
     };
 
@@ -182,7 +192,7 @@ export const unpackStorageTeam = (
       const dexItem = dex.items.get(itemId);
 
       if (dexItem?.exists) {
-        preset.item = <ItemName> dexItem.name;
+        preset.item = dexItem.name as ItemName;
       }
     }
 
@@ -190,7 +200,7 @@ export const unpackStorageTeam = (
       const dexAbility = dex.abilities.get(abilityId);
 
       if (dexAbility?.exists) {
-        preset.ability = <AbilityName> dexAbility.name;
+        preset.ability = dexAbility.name as AbilityName;
       }
     }
 
@@ -202,21 +212,21 @@ export const unpackStorageTeam = (
 
         const dexMove = dex.moves.get(moveId);
 
-        if (!dexMove?.exists || preset.moves.includes(<MoveName> dexMove.name)) {
+        if (!dexMove?.exists || preset.moves.includes(dexMove.name as MoveName)) {
           return;
         }
 
-        preset.moves.push(<MoveName> dexMove.name);
+        preset.moves.push(dexMove.name as MoveName);
       });
     }
 
-    if (PokemonNatures.includes(<Showdown.NatureName> nature)) {
-      preset.nature = PokemonNeutralNatures.includes(<Showdown.NatureName> nature)
+    if (PokemonNatures.includes(nature as Showdown.NatureName)) {
+      preset.nature = PokemonNeutralNatures.includes(nature as Showdown.NatureName)
         ? 'Hardy'
-        : <Showdown.NatureName> nature;
+        : nature as Showdown.NatureName;
     }
 
-    if (!legacy && packedEvs?.includes(',')) {
+    if (packedEvs?.includes(',')) {
       const [
         hpEv,
         atkEv,
@@ -226,18 +236,28 @@ export const unpackStorageTeam = (
         speEv,
       ] = packedEvs.split(',');
 
+      // update (2023/07/25): apparently legacy gens can use this now, so gotta do the gross parsedEvs thing lol
+      const parsedEvs: Showdown.StatsTable = {
+        hp: parseInt(hpEv, 10),
+        atk: parseInt(atkEv, 10),
+        def: parseInt(defEv, 10),
+        spa: parseInt(spaEv, 10),
+        spd: parseInt(spdEv, 10),
+        spe: parseInt(speEv, 10),
+      };
+
       preset.evs = {
-        hp: clamp(0, parseInt(hpEv, 10) || 0, 252),
-        atk: clamp(0, parseInt(atkEv, 10) || 0, 252),
-        def: clamp(0, parseInt(defEv, 10) || 0, 252),
-        spa: clamp(0, parseInt(spaEv, 10) || 0, 252),
-        spd: clamp(0, parseInt(spdEv, 10) || 0, 252),
-        spe: clamp(0, parseInt(speEv, 10) || 0, 252),
+        hp: clamp(0, parsedEvs.hp === 0 ? 0 : (parsedEvs.hp || defaultEv), 252),
+        atk: clamp(0, parsedEvs.atk === 0 ? 0 : (parsedEvs.atk || defaultEv), 252),
+        def: clamp(0, parsedEvs.def === 0 ? 0 : (parsedEvs.def || defaultEv), 252),
+        spa: clamp(0, parsedEvs.spa === 0 ? 0 : (parsedEvs.spa || defaultEv), 252),
+        spd: clamp(0, parsedEvs.spd === 0 ? 0 : (parsedEvs.spd || defaultEv), 252),
+        spe: clamp(0, parsedEvs.spe === 0 ? 0 : (parsedEvs.spe || defaultEv), 252),
       };
     }
 
     if (['M', 'F', 'N'].includes(gender)) {
-      preset.gender = <Showdown.GenderName> gender;
+      preset.gender = gender as Showdown.GenderName;
     }
 
     if (packedIvs?.includes(',')) {
@@ -263,14 +283,14 @@ export const unpackStorageTeam = (
         spe: parseInt(speIv, 10),
       };
 
-      // gross, but we need to differentiate between NaN (i.e., empty string, so maxIv) and 0 (should NOT be maxIv!)
+      // gross, but we need to differentiate between NaN (i.e., empty string, so defaultIv) and 0 (should NOT be defaultIv!)
       preset.ivs = {
-        hp: clamp(0, parsedIvs.hp === 0 ? 0 : (parsedIvs.hp || maxIv), maxIv),
-        atk: clamp(0, parsedIvs.atk === 0 ? 0 : (parsedIvs.atk || maxIv), maxIv),
-        def: clamp(0, parsedIvs.def === 0 ? 0 : (parsedIvs.def || maxIv), maxIv),
-        spa: clamp(0, parsedIvs.spa === 0 ? 0 : (parsedIvs.spa || maxIv), maxIv),
-        spd: clamp(0, parsedIvs.spd === 0 ? 0 : (parsedIvs.spd || maxIv), maxIv),
-        spe: clamp(0, parsedIvs.spe === 0 ? 0 : (parsedIvs.spe || maxIv), maxIv),
+        hp: clamp(0, parsedIvs.hp === 0 ? 0 : (parsedIvs.hp || defaultIv), 31),
+        atk: clamp(0, parsedIvs.atk === 0 ? 0 : (parsedIvs.atk || defaultIv), 31),
+        def: clamp(0, parsedIvs.def === 0 ? 0 : (parsedIvs.def || defaultIv), 31),
+        spa: clamp(0, parsedIvs.spa === 0 ? 0 : (parsedIvs.spa || defaultIv), 31),
+        spd: clamp(0, parsedIvs.spd === 0 ? 0 : (parsedIvs.spd || defaultIv), 31),
+        spe: clamp(0, parsedIvs.spe === 0 ? 0 : (parsedIvs.spe || defaultIv), 31),
       };
     }
 
@@ -296,8 +316,8 @@ export const unpackStorageTeam = (
         preset.happiness = clamp(0, parseInt(happiness, 10) || 255, 255);
       }
 
-      if (PokemonTypes.includes(<Showdown.TypeName> hpType)) {
-        preset.hiddenPowerType = <Showdown.TypeName> hpType;
+      if (PokemonTypes.includes(hpType as Showdown.TypeName)) {
+        preset.hiddenPowerType = hpType as Showdown.TypeName;
       }
 
       if (pokeballId) {
@@ -321,8 +341,8 @@ export const unpackStorageTeam = (
         preset.dynamaxLevel = clamp(0, parseInt(dynamaxLevel, 10) || 10, 10);
       }
 
-      if (PokemonTypes.includes(<Showdown.TypeName> teraType)) {
-        preset.teraTypes = [<Showdown.TypeName> teraType];
+      if (PokemonTypes.includes(teraType as Showdown.TypeName)) {
+        preset.teraTypes = [teraType as Showdown.TypeName];
       }
     }
 

@@ -1,15 +1,14 @@
-import { PokemonNatures } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
+import { type MoveName } from '@smogon/calc';
+import { PokemonNatures } from '@showdex/consts/dex';
+import { type PkmnSmogonFormatStatsResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
+import { getGenlessFormat } from '@showdex/utils/dex';
 import { processUsageAlts } from '@showdex/utils/presets';
-import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { PkmnSmogonFormatStatsResponse, PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 
-// const l = logger('@showdex/redux/transformers/transformFormatStatsResponse');
+// const l = logger('@showdex/redux/transformers/transformFormatStatsResponse()');
 
 /**
  * Transforms the JSON response from the Gen Format Stats API by converting the object into an array of `CalcdexPokemonPreset`s.
@@ -22,24 +21,22 @@ import type { CalcdexPokemonPreset } from '@showdex/redux/store';
 export const transformFormatStatsResponse = (
   response: PkmnSmogonFormatStatsResponse,
   _meta: unknown,
-  args: Omit<PkmnSmogonPresetRequest, 'formatOnly'>,
+  args: PkmnSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   const { pokemon: pokemonStats } = response || {};
 
-  if (!Object.keys(pokemonStats || {}).length) {
+  if (!args?.gen || !nonEmptyObject(pokemonStats)) {
     return [];
   }
 
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
 
-  const gen = args?.gen ?? env.int<GenerationNum>('calcdex-default-gen');
-
   Object.entries(pokemonStats).forEach(([
     speciesForme,
     usageStats,
   ]) => {
-    if (!speciesForme || !Object.keys(usageStats || {}).length) {
+    if (!speciesForme || !nonEmptyObject(usageStats)) {
       return;
     }
 
@@ -55,8 +52,8 @@ export const transformFormatStatsResponse = (
       id: null,
       source: 'usage',
       name: 'Showdown Usage',
-      gen,
-      format: args?.format?.replace(`gen${gen}`, ''),
+      gen: args.gen,
+      format: getGenlessFormat(args?.format),
       speciesForme,
     };
 
@@ -78,7 +75,7 @@ export const transformFormatStatsResponse = (
       // apparently a bug with Showdown Usage where these two Pokemon will have "Iron Head" instead of
       // "Behemoth Blade" (for Zacian-Crowned) or "Behemoth Bash" (for Zamazenta-Crowned) lol
       if (['zaciancrowned', 'zamazentacrowned'].includes(formatId(speciesForme))) {
-        const targetMove = <MoveName> (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade');
+        const targetMove = (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName;
         const ironHeadIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ironhead');
 
         if (ironHeadIndex > -1) {
@@ -95,7 +92,7 @@ export const transformFormatStatsResponse = (
     }
 
     const [topSpread] = processUsageAlts(spreads);
-    const [nature, evSpread] = <[Showdown.NatureName, string]> topSpread?.[0]?.split(':') || [];
+    const [nature, evSpread] = (topSpread?.[0]?.split(':') || []) as [Showdown.NatureName, string];
     const [hpEv, atkEv, defEv, spaEv, spdEv, speEv] = evSpread?.split('/') || [];
 
     if (nature && PokemonNatures.includes(nature)) {

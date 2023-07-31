@@ -1,10 +1,9 @@
 import qs from 'qs';
 import { HttpMethod } from '@showdex/consts/core';
+import { type ReduxBasePayload, createTagProvider } from '@showdex/redux/factories';
 import { env, runtimeFetch, safeJsonParse } from '@showdex/utils/core';
-import { createTagProvider } from '@showdex/redux/helpers';
-import type { ReduxBasePayload } from '@showdex/redux/helpers';
-import { ShowdownReduxTagType } from './tagTypes';
 import { showdownApi } from './showdownApi';
+import { ShowdownReduxTagType } from './tagTypes';
 
 /**
  * Schema of a user's ladder info from the Showdown Actions API.
@@ -88,7 +87,7 @@ export interface ShowdownActionUserLadderInfo extends ReduxBasePayload {
    *   the PVC lubricant *Epoxidized Linseed Oil*, or perhaps an *Extra Long Orifice*.
    *
    * @example '1473.1580443168'
-   * @see https://www.smogon.com/smog/issue43/elo-hello
+   * @see https://smogon.com/smog/issue43/elo-hello
    * @since 1.0.7
    */
   elo: string;
@@ -102,7 +101,7 @@ export interface ShowdownActionUserLadderInfo extends ReduxBasePayload {
    * * Value represents a percentage, already formatted as such without the percent sign (i.e., no need to multiply by `100`).
    *
    * @example '71.4'
-   * @see https://www.smogon.com/forums/threads/gxe-glixare-a-much-better-way-of-estimating-a-players-overall-rating-than-shoddys-cre.51169
+   * @see https://smogon.com/forums/threads/gxe-glixare-a-much-better-way-of-estimating-a-players-overall-rating-than-shoddys-cre.51169
    * @since 1.0.7
    */
   gxe: string;

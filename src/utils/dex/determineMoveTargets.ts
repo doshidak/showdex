@@ -1,10 +1,8 @@
-import { Move as SmogonMove } from '@smogon/calc';
-import { detectGenFromFormat } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
-import type { GenerationNum } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
-import type { SmogonMoveOverrides } from '@showdex/utils/calc';
+import { type MoveName, Move as SmogonMove } from '@smogon/calc';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type SmogonMoveOverrides } from '@showdex/utils/calc';
+import { formatId } from '@showdex/utils/core';
+import { detectGenFromFormat } from './detectGenFromFormat';
 
 /**
  * Performs a lookup via `@smogon/calc`'s internal dex from the detected `gen` from the passed-in `format`.
@@ -30,11 +28,11 @@ export const determineMoveTargets = (
   pokemon: CalcdexPokemon,
   moveName: MoveName,
 ): SmogonMoveOverrides => {
-  if (!pokemon?.speciesForme || !moveName || !format) {
+  const gen = detectGenFromFormat(format);
+
+  if (!gen || !pokemon?.speciesForme || !moveName) {
     return null;
   }
-
-  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // may need to perform an additional lookup using @smogon/calc's internal Generation dex
   // (which is used when passing in a type number for the first constructor parameter)
@@ -45,19 +43,25 @@ export const determineMoveTargets = (
     return null;
   }
 
+  const moveId = formatId(moveName);
+
   const {
     ignoreDefensive,
     overrideDefensivePokemon,
-    overrideDefensiveStat,
+    overrideDefensiveStat: defensiveStat,
     overrideOffensivePokemon,
-    overrideOffensiveStat,
+    overrideOffensiveStat: offensiveStat,
   } = lookupMove;
+
+  // for Beat Up, force using ATK & DEF
+  // (but specifying those here to let the user override them, if they want)
+  const forcePhysical = moveId === 'beatup';
 
   return {
     ignoreDefensive,
     overrideDefensivePokemon,
-    overrideDefensiveStat,
+    overrideDefensiveStat: forcePhysical ? 'def' : defensiveStat,
     overrideOffensivePokemon,
-    overrideOffensiveStat,
+    overrideOffensiveStat: forcePhysical ? 'atk' : offensiveStat,
   };
 };

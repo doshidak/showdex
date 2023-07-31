@@ -1,7 +1,6 @@
-import { LegacyWeatherNames, WeatherMap, WeatherNames } from '@showdex/consts/field';
-import { detectGenFromFormat } from '@showdex/utils/battle';
-import type { GenerationNum } from '@smogon/calc';
-import type { Weather } from '@smogon/calc/dist/data/interface';
+import { type GenerationNum, type Weather } from '@smogon/calc';
+import { LegacyWeatherNames, WeatherMap, WeatherNames } from '@showdex/consts/dex';
+import { detectGenFromFormat } from './detectGenFromFormat';
 
 /**
  * Determines the possible weather conditions for the gen number extracted from the provided `format`.
@@ -36,10 +35,10 @@ export const getWeatherConditions = (
   if (gen < 6) {
     // note: TypeScript infers that `gen > 2 && WeatherMap.hail` can evaluate to `''`,
     // so it arrives at the incompatible typing of `('' | Weather)[]`, hence the type assertion lol
-    return <Weather[]> [
+    return [
       ...LegacyWeatherNames,
       gen > 2 && WeatherMap.hail,
-    ].filter(Boolean);
+    ].filter(Boolean) as Weather[];
   }
 
   // shallow copying the array of strings to modify it

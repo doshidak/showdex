@@ -42,7 +42,7 @@ export interface HtmlRoomOptions {
   maxWidth?: number;
 }
 
-const l = logger('@src/utils/app/createHtmlRoom');
+const l = logger('@src/utils/app/createHtmlRoom()');
 
 /**
  * Abstraction that creates an `HtmlRoom` in the Showdown client.
@@ -77,7 +77,7 @@ export const createHtmlRoom = (
   let room: Showdown.HtmlRoom;
 
   if (id in app.rooms) {
-    room = <Showdown.HtmlRoom> app.rooms[id];
+    room = app.rooms[id] as Showdown.HtmlRoom;
 
     // l.debug(`Found existing ${side ? 'side ' : ''}room with matching room.id`, id);
   } else {
@@ -117,7 +117,7 @@ export const createHtmlRoom = (
   if (icon) {
     // hook directly into renderRoomTab(), which is hacky as hell, but necessary since it gets called pretty frequently
     // (using jQuery to edit the class names isn't viable since the icon will just get replaced again)
-    const originalRenderer = <typeof app.topbar.renderRoomTab> app.topbar.renderRoomTab.bind(app.topbar);
+    const originalRenderer = app.topbar.renderRoomTab.bind(app.topbar) as typeof app.topbar.renderRoomTab;
 
     app.topbar.renderRoomTab = function renderCustomRoomTab(appRoom, appRoomId) {
       const roomId = appRoom?.id || appRoomId;

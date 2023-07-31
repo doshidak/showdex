@@ -1,5 +1,4 @@
-// import { formatId } from '@showdex/utils/app';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from './getDexForFormat';
 
 /**
@@ -16,14 +15,6 @@ export const hasNickname = (
 
   const dex = getDexForFormat();
   const dexSpecies = dex?.species.get(pokemon.speciesForme);
-
-  // return ![
-  //   pokemon.speciesForme,
-  //   dexSpecies?.baseSpecies,
-  //   dexSpecies?.baseForme,
-  //   ...(dexSpecies?.otherFormes || []),
-  //   ...(dexSpecies?.cosmeticFormes || []),
-  // ].filter(Boolean).map((s) => formatId(s)).includes(formatId(pokemon.name));
 
   return !pokemon.name.endsWith('-*')
     && !pokemon.speciesForme.endsWith('-*')

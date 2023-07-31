@@ -1,22 +1,29 @@
 {
-  "sourceMaps": true,
-
   "presets": [
-    "@babel/preset-typescript",
+    [
+      "@babel/preset-typescript",
+      {
+        "onlyRemoveTypeImports": false,
+        "yeetEmptyImportElisions": true
+      }
+    ],
     [
       "@babel/preset-env",
       {
         "debug": false,
         "modules": false,
         "targets": {
-          "node": "current"
+          "browsers": [
+            "defaults",
+            "> 1%",
+            "last 2 versions",
+            "last 3 iOS versions"
+          ]
         }
       }
     ],
     "@babel/preset-react"
   ],
 
-  "plugins": [
-    "@babel/plugin-transform-typescript"
-  ]
+  "plugins": []
 }

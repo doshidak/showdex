@@ -18,7 +18,7 @@ const ShowdownUserWindowFeatures = [
   'status',
 ].join(',');
 
-const l = logger('@showdex/utils/app/openShowdownUser');
+const l = logger('@showdex/utils/app/openShowdownUser()');
 
 /**
  * Opens a popup window for the user's page on Showdown.

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import type {
-  CalcdexBattleField,
-  CalcdexBattleState,
-  CalcdexPlayerKey,
-  CalcdexPlayerSide,
-  CalcdexPokemon,
-  // CalcdexRenderMode,
-  ShowdexCalcdexSettings,
+import {
+  type CalcdexBattleField,
+  type CalcdexBattleState,
+  type CalcdexPlayerKey,
+  type CalcdexPlayerSide,
+  type CalcdexPokemon,
+  // type CalcdexRenderMode,
+  type ShowdexCalcdexSettings,
 } from '@showdex/redux/store';
 
 export type CalcdexPokemonMutation = DeepPartial<CalcdexPokemon>;

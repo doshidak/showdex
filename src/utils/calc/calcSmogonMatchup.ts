@@ -1,25 +1,25 @@
-import { calculate } from '@smogon/calc';
-// import { formatId } from '@showdex/utils/app';
+import {
+  type Move as SmogonMove,
+  type MoveName,
+  type Pokemon as SmogonPokemon,
+  calculate,
+} from '@smogon/calc';
+import {
+  type CalcdexBattleField,
+  type CalcdexPlayer,
+  type CalcdexPokemon,
+  type ShowdexCalcdexSettings,
+} from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import { getGenDexForFormat } from '@showdex/utils/dex';
-import {
-  formatDamageRange,
-  formatKoChance,
-  getKoColor,
-  parseDescription,
-} from '@showdex/utils/ui';
-import type { Move as SmogonMove, Pokemon as SmogonPokemon } from '@smogon/calc';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type {
-  CalcdexBattleField,
-  CalcdexPlayer,
-  CalcdexPokemon,
-  ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
-import type { CalcdexMatchupParsedDescription } from '@showdex/utils/ui';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
 import { createSmogonPokemon } from './createSmogonPokemon';
+import { determineMoveStrikes } from './determineMoveStrikes';
+import { formatMatchupNhko } from './formatMatchupNhko';
+import { getMatchupNhkoColor } from './getMatchupNhkoColor';
+import { getMatchupRange } from './getMatchupRange';
+import { type CalcdexMatchupParsedDescription, parseMatchupDescription } from './parseMatchupDescription';
 
 export interface CalcdexMatchupResult {
   /**
@@ -90,7 +90,7 @@ export interface CalcdexMatchupResult {
   koColor?: string;
 }
 
-const l = logger('@showdex/utils/calc/calcSmogonMatchup');
+const l = logger('@showdex/utils/calc/calcSmogonMatchup()');
 
 /**
  * Verifies that the arguments look *decently* good, then yeets them to `calculate()` from `@smogon/calc`.
@@ -142,32 +142,23 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  // const ability = formatId(playerPokemon.dirtyAbility || playerPokemon.ability);
-
-  // apply base power mods
-  // const basePowerMods: number[] = [];
-
-  // const playerSideKey: keyof CalcdexBattleField = playerKey === 'p2' ? 'defenderSide' : 'attackerSide';
-  // const playerSide = field?.[playerSideKey];
-
-  /**
-   * @todo This implementation does not allow us to display the increased base power in the UI,
-   *   like how it's for *Rage Fist*.
-   */
-  // if (ability === 'supremeoverlord' && playerSide?.faintedCount > 0) {
-  //   /** @todo replace `5` with `maxPokemon - 1` from `CalcdexPlayer` whenever you refactor the codebase lmao */
-  //   basePowerMods.push(1 + (0.1 * Math.min(playerSide.faintedCount, 5)));
-  // }
-
-  // if (formatId(opponentPokemon.lastMove) === 'glaiverush') {
-  //   basePowerMods.push(2);
-  // }
-
   const smogonField = createSmogonField(format, field, player, opponent, allPlayers);
 
   matchup.attacker = createSmogonPokemon(format, playerPokemon, playerMove, opponentPokemon, smogonField);
   matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
   matchup.defender = createSmogonPokemon(format, opponentPokemon, null, playerPokemon, smogonField);
+
+  // pretty much only used for Beat Up lmao
+  const strikes = determineMoveStrikes(
+    format,
+    playerMove,
+    playerPokemon,
+    opponentPokemon,
+    player,
+    opponent,
+    allPlayers,
+    field,
+  );
 
   try {
     const result = calculate(
@@ -176,28 +167,32 @@ export const calcSmogonMatchup = (
       matchup.defender,
       matchup.move,
       smogonField,
+      { strikes },
     );
 
-    matchup.description = parseDescription(result);
-    matchup.damageRange = formatDamageRange(result);
-    matchup.koChance = formatKoChance(result, settings?.nhkoLabels);
-    matchup.koColor = getKoColor(result, settings?.nhkoColors);
+    matchup.description = parseMatchupDescription(result);
+    matchup.damageRange = getMatchupRange(result);
+    matchup.koChance = formatMatchupNhko(result, settings?.nhkoLabels);
+    matchup.koColor = getMatchupNhkoColor(result, settings?.nhkoColors);
 
-    // l.debug(
-    //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-    //   '\n', 'gen', dex.num,
-    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    //   '\n', 'field', field,
-    //   '\n', 'matchup', matchup,
-    //   '\n', 'result', result,
-    // );
+    if (strikes?.length) {
+      l.debug(
+        'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
+        '\n', 'gen', dex.num,
+        '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+        '\n', 'field', field,
+        '\n', 'matchup', matchup,
+        '\n', 'result', result,
+        '\n', 'strikes', strikes,
+      );
+    }
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
     // which is separate from 'N/A' damage (e.g., status moves).
     // typically occurs when the opposing Pokemon is immune to the damaging move,
     // like using Earthquake against a Lando-T, which is immune due to its Flying type.
-    if (__DEV__ && !(<Error> error)?.message?.includes('=== 0')) {
+    if (__DEV__ && !(error as Error)?.message?.includes('=== 0')) {
       l.error(
         'Exception while calculating the damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
         '\n', 'dex.num', dex.num,

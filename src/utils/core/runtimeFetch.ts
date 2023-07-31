@@ -1,5 +1,5 @@
 import { HttpMethod } from '@showdex/consts/core';
-import { logger } from '@showdex/utils/debug';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { getExtensionId } from './getExtensionId';
 import { safeJsonParse } from './safeJsonParse';
 
@@ -22,7 +22,7 @@ interface RuntimeFetchResponse<T = unknown> {
   json: () => T;
 }
 
-const l = logger('@showdex/utils/core/runtimeFetch');
+const l = logger('@showdex/utils/core/runtimeFetch()');
 
 /**
  * Browser-agnostic message sender.
@@ -44,13 +44,13 @@ const sendFetchMessage = async <T = unknown>(
         type: 'fetch',
         ...message,
       }, (response) => {
-        l.debug(
-          'runtimeFetch() <- chrome.runtime.sendMessage() <- fetch()',
-          '\n', 'url', message?.url,
-          '\n', 'extensionId', extensionId,
-          '\n', 'message', message,
-          '\n', (response instanceof Error ? 'error' : 'response'), response,
-        );
+        // l.debug(
+        //   'runtimeFetch() <- chrome.runtime.sendMessage() <- fetch()',
+        //   '\n', 'url', message?.url,
+        //   '\n', 'extensionId', extensionId,
+        //   '\n', 'message', message,
+        //   '\n', (response instanceof Error ? 'error' : 'response'), response,
+        // );
 
         if (response instanceof Error) {
           reject(response);
@@ -102,19 +102,22 @@ export const runtimeFetch = async <T = unknown>(
   url?: RequestInfo,
   options?: RequestInit,
 ): Promise<RuntimeFetchResponse<T>> => {
+  const endTimer = runtimer(l.scope);
   const extensionId = getExtensionId();
 
-  l.debug(
-    'runtimeFetch() -> sendMessage() -> fetch()',
-    '\n', 'url', url,
-    '\n', 'options', options,
-    '\n', 'extensionId', extensionId,
-  );
+  // l.debug(
+  //   'runtimeFetch() -> sendMessage() -> fetch()',
+  //   '\n', 'url', url,
+  //   '\n', 'options', options,
+  //   '\n', 'extensionId', extensionId,
+  // );
 
   const response = await sendFetchMessage<T>(extensionId, {
     url,
     options,
   });
+
+  endTimer('(fetch complete)', 'url', url);
 
   return response;
 };

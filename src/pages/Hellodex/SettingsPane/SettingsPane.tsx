@@ -6,6 +6,8 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { Segmented, Switch, TextField } from '@showdex/components/form';
 import {
+  type BadgeInstance,
+  type BaseButtonProps,
   Badge,
   BaseButton,
   Button,
@@ -14,10 +16,7 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import {
-  dehydrateShowdexSettings,
-  hydrateShowdexSettings,
-} from '@showdex/redux/helpers';
-import {
+  type ShowdexSettings,
   useAuthUsername,
   useColorScheme,
   useShowdexSettings,
@@ -25,14 +24,17 @@ import {
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import {
+  clearStoredItem,
   env,
   getResourceUrl,
+  getStoredItem,
+  nonEmptyObject,
   readClipboardText,
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { BadgeInstance, BaseButtonProps } from '@showdex/components/ui';
-import type { ShowdexSettings } from '@showdex/redux/store';
+import { fileSize } from '@showdex/utils/humanize';
+import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import styles from './SettingsPane.module.scss';
 
 export interface SettingsPaneProps {
@@ -60,31 +62,11 @@ export const SettingsPane = ({
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
   const authName = useAuthUsername();
-  const authTitle = findPlayerTitle(authName);
+  const authTitle = findPlayerTitle(authName, true);
 
   const colorScheme = useColorScheme();
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
-
-  const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
-    // const {
-    //   colorScheme: newColorScheme,
-    // } = values || {};
-
-    // if (newColorScheme && colorScheme !== newColorScheme) {
-    //   // note: Storage is a native Web API (part of the Web Storage API), but Showdown redefines it with its own Storage() function
-    //   // also, Dex.prefs() is an alias of Storage.prefs(), but w/o the `value` and `save` args
-    //   (Storage as unknown as Showdown.ClientStorage)?.prefs?.('theme', newColorScheme, true);
-    //
-    //   // this is how Showdown natively applies the theme lmao
-    //   // see: https://github.com/smogon/pokemon-showdown-client/blob/1ea5210a360b64ede48813d9572b59b7f3d7365f/js/client.js#L473
-    //   $?.('html').toggleClass('dark', newColorScheme === 'dark');
-    // }
-
-    if (Object.keys(values || {}).length) {
-      updateSettings(values);
-    }
-  };
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
@@ -101,7 +83,7 @@ export const SettingsPane = ({
 
     try {
       if (DehydratedRegex.test(prevSettings)) {
-        const rehydratedPrev = hydrateShowdexSettings(prevSettings);
+        const rehydratedPrev = hydrateSettings(prevSettings);
 
         if (importUndoTimeout.current) {
           clearTimeout(importUndoTimeout.current);
@@ -136,7 +118,7 @@ export const SettingsPane = ({
         return;
       }
 
-      const dehydratedCurrent = dehydrateShowdexSettings(settings);
+      const dehydratedCurrent = dehydrateSettings(settings);
 
       if (DehydratedRegex.test(dehydratedCurrent)) {
         setPrevSettings(dehydratedCurrent);
@@ -151,7 +133,7 @@ export const SettingsPane = ({
         }, 5000);
       }
 
-      const hydratedSettings = hydrateShowdexSettings(importedSettings);
+      const hydratedSettings = hydrateSettings(importedSettings);
 
       if (!hydratedSettings) {
         l.debug(
@@ -184,7 +166,7 @@ export const SettingsPane = ({
 
   const handleSettingsExport = () => void (async () => {
     try {
-      const dehydratedSettings = dehydrateShowdexSettings(settings);
+      const dehydratedSettings = dehydrateSettings(settings);
 
       if (!DehydratedRegex.test(dehydratedSettings)) {
         l.debug(
@@ -223,8 +205,8 @@ export const SettingsPane = ({
 
     void (async () => {
       try {
-        const hydratedDefaults = hydrateShowdexSettings();
-        const dehydratedDefaults = dehydrateShowdexSettings(hydratedDefaults);
+        const hydratedDefaults = hydrateSettings();
+        const dehydratedDefaults = dehydrateSettings(hydratedDefaults);
 
         if (!DehydratedRegex.test(dehydratedDefaults)) {
           l.debug(
@@ -270,6 +252,69 @@ export const SettingsPane = ({
   // }, null, [
   //   onRequestClose,
   // ]);
+
+  const [presetCacheSize, setPresetCacheSize] = React.useState(0);
+  const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
+
+  const getPresetCacheSize = () => (getStoredItem('storage-preset-cache-key')?.length ?? 0) * 2;
+
+  // only updates the state when the size actually changes
+  const updatePresetCacheSize = () => {
+    const size = getPresetCacheSize();
+
+    if (size === presetCacheSize) {
+      return;
+    }
+
+    setPresetCacheSize(size);
+  };
+
+  // every 30 sec, check the preset cache size lmfao
+  React.useEffect(() => {
+    if (presetCacheTimeout.current) {
+      return;
+    }
+
+    presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
+    updatePresetCacheSize();
+
+    return () => {
+      if (presetCacheTimeout.current) {
+        clearTimeout(presetCacheTimeout.current);
+        presetCacheTimeout.current = null;
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- empty deps are intentional to only run on first mount
+
+  const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
+    if (!nonEmptyObject(values)) {
+      return;
+    }
+
+    const {
+      // colorScheme: newColorScheme,
+      calcdex,
+    } = values;
+
+    // if (newColorScheme && colorScheme !== newColorScheme) {
+    //   // note: Storage is a native Web API (part of the Web Storage API), but Showdown redefines it with its own Storage() function
+    //   // also, Dex.prefs() is an alias of Storage.prefs(), but w/o the `value` and `save` args
+    //   (Storage as unknown as Showdown.ClientStorage)?.prefs?.('theme', newColorScheme, true);
+    //
+    //   // this is how Showdown natively applies the theme lmao
+    //   // see: https://github.com/smogon/pokemon-showdown-client/blob/1ea5210a360b64ede48813d9572b59b7f3d7365f/js/client.js#L473
+    //   $?.('html').toggleClass('dark', newColorScheme === 'dark');
+    // }
+
+    // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
+    // intentionally checking 0 as to ignore null & undefined values
+    if (presetCacheSize && calcdex?.maxPresetAge === 0) {
+      clearStoredItem('storage-preset-cache-key');
+      updatePresetCacheSize();
+    }
+
+    updateSettings(values);
+  };
 
   return (
     <div
@@ -911,6 +956,94 @@ export const SettingsPane = ({
                     ] as ('smogon' | 'randoms' | 'usage')[]).filter(Boolean)}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['maxPresetAge'], HTMLDivElement, number>
+                    name="calcdex.maxPresetAge"
+                    component={Segmented}
+                    className={cx(
+                      styles.field,
+                      !inBattle && styles.singleColumn,
+                    )}
+                    label={[
+                      'Cache Sets',
+                      presetCacheSize && `(${fileSize(presetCacheSize, {
+                        precision: 1,
+                        omitSymbolPrefix: true,
+                      })})`,
+                      'for',
+                    ].filter(Boolean).join(' ')}
+                    labelPosition={inBattle ? 'top' : 'left'}
+                    options={[{
+                      label: '1 Day',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>1 Day</strong>,
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 1,
+                    }, {
+                      label: '1 Week',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>1 Week</strong> (7 days),
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 7,
+                    }, {
+                      label: '2 Weeks',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>2 Weeks</strong> (14 days),
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 14,
+                    }, {
+                      label: '1 Month',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets &amp; reuses them for <strong>1 Month</strong> (30 days),
+                          persisting between Showdown sessions.
+                          <br />
+                          <br />
+                          Enabling this may improve Calcdex initialization performance.
+                        </div>
+                      ),
+                      value: 30,
+                    }, {
+                      label: 'Never',
+                      tooltip: (
+                        <div className={styles.tooltipContent}>
+                          Downloads sets once per session, but doesn't store them in-between.
+                          This means sets will be downloaded again the next time you open Showdown.
+                          <br />
+                          <br />
+                          Selecting this option with sets already in the cache will <strong>clear</strong>{' '}
+                          the cache entirely.
+                          <br />
+                          <br />
+                          This is the default behavior prior to v1.1.6.
+                        </div>
+                      ),
+                      value: 0,
+                    }]}
+                    disabled={(
+                      !values.calcdex?.downloadSmogonPresets
+                        && !values.calcdex?.downloadRandomsPresets
+                        && !values.calcdex?.downloadUsageStats
+                    )}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['includeTeambuilder']>
                     name="calcdex.includeTeambuilder"
                     component={Segmented}
@@ -1158,7 +1291,7 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['reverseIconName']>
+                  {/* <Field<ShowdexSettings['calcdex']['reverseIconName']>
                     name="calcdex.reverseIconName"
                     component={Switch}
                     className={cx(styles.field, styles.switchField)}
@@ -1172,7 +1305,7 @@ export const SettingsPane = ({
                         clicking on the name will switch its forme, if any.
                       </div>
                     )}
-                  />
+                  /> */}
 
                   <Field<ShowdexSettings['calcdex']['openSmogonPage']>
                     name="calcdex.openSmogonPage"
@@ -1181,8 +1314,8 @@ export const SettingsPane = ({
                     label="Link to Smogon Dex Entries"
                     tooltip={(
                       <div className={styles.tooltipContent}>
-                        Opens the Pok&eacute;mon's Smogon Dex entry as a popup window when the configured
-                        button is clicked on, depending on <em>Swap Icon/Name Behavior</em>.
+                        Opens the Pok&eacute;mon's Smogon Dex entry as a popup window when
+                        the Pok&eacute;mon's icon is clicked on.
                       </div>
                     )}
                   />
@@ -1198,6 +1331,19 @@ export const SettingsPane = ({
                         <br />
                         <br />
                         ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['alwaysShowNonVolatile']>
+                    name="calcdex.alwaysShowNonVolatile"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label={`Always Show Pok${eacute}mon Statuses`}
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Always shows the Pok&eacute;mon's non-volatile status (e.g., BRN, PAR, SLP, etc.),
+                        regardless if it has one. In those cases, the status will display "OK".
                       </div>
                     )}
                   />
@@ -1275,7 +1421,7 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always shows your Pok&eacute;mon's EVs.
-                          Has no effect in legacy gens.
+                          Has no effect in legacy gens, unless <em>Show EVs in Legacy Gens</em> is enabled.
                           <br />
                           <br />
                           Disabling this will cause the EVs row to remain hidden
@@ -1327,7 +1473,7 @@ export const SettingsPane = ({
                       tooltip: (
                         <div className={styles.tooltipContent}>
                           Always shows your opponent's (or spectating players') Pok&eacute;mon's EVs.
-                          Has no effect in legacy gens.
+                          Has no effect in legacy gens, unless <em>Show EVs in Legacy Gens</em> is enabled.
                           <br />
                           <br />
                           Disabling this will cause the EVs row to remain hidden
@@ -1720,6 +1866,47 @@ export const SettingsPane = ({
                     }]}
                   />
 
+                  <Field<ShowdexSettings['calcdex']['resetDirtyBoosts']>
+                    name="calcdex.resetDirtyBoosts"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Reset Stage Boosts on Sync"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Resets all modified stage boosts to the reported boosts in-battle
+                        during a battle sync. This has the same effect as clicking on every
+                        blue-colored stage boost value for each Pok&eacute;mon, except
+                        performed automatically.
+                        <br />
+                        <br />
+                        Enable this if you tend to forget to reset your Pok&eacute;mon's
+                        stage boosts between turns.
+                      </div>
+                    )}
+                  />
+
+                  <Field<ShowdexSettings['calcdex']['showLegacyEvs']>
+                    name="calcdex.showLegacyEvs"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Show EVs in Legacy Gens"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Shows EVs in legacy gens, allowing you to edit them for each Pok&eacute;mon.
+                        <br />
+                        <br />
+                        Some sets (most notably in Randoms) will specify 0 EVs for some stats,
+                        which may be helpful to be aware of.
+                        <br />
+                        <br />
+                        Though introduced in gen 3, EVs technically existed in prior legacy gens,
+                        colloquially referred to as <em>stat experience</em>. Resulting damages
+                        influenced by this legacy system &amp; modern EVs are more-or-less the same,
+                        due to rounding effects in the damage formulas.
+                      </div>
+                    )}
+                  />
+
                   <Field<ShowdexSettings['calcdex']['lockUsedTera']>
                     name="calcdex.lockUsedTera"
                     component={Switch}
@@ -1767,7 +1954,12 @@ export const SettingsPane = ({
                       Guaranteed NHKO Labels
                     </div>
 
-                    <div className={styles.customFieldRow}>
+                    <div
+                      className={cx(
+                        styles.customFieldRow,
+                        inBattle && styles.centered,
+                      )}
+                    >
                       {Array(4).fill(null).map((_, i) => (
                         <Field<ShowdexSettings['calcdex']['nhkoLabels'][typeof i]>
                           key={`SettingsPane:Field:TextField:nhkoLabel:${i}`}

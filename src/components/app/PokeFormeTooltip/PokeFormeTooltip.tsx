@@ -1,13 +1,11 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Picon } from '@showdex/components/app';
-import { BaseButton, Tooltip } from '@showdex/components/ui';
-import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+import { type TooltipProps, BaseButton, Tooltip } from '@showdex/components/ui';
+import { type CalcdexPokemon, useColorScheme } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { useUserAgent } from '@showdex/utils/hooks';
-import type { TooltipProps } from '@showdex/components/ui';
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { Picon } from '../Picon';
 import styles from './PokeFormeTooltip.module.scss';
 
 export interface PokeFormeTooltipProps {

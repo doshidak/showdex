@@ -1,7 +1,7 @@
-import { formatId } from '@showdex/utils/app';
-import { calcPokemonHp } from '@showdex/utils/calc';
+import { type CalcdexBattleState, type CalcdexPokemon } from '@showdex/redux/store';
+import { calcPokemonHpPercentage } from '@showdex/utils/calc';
+import { formatId } from '@showdex/utils/core';
 import { toggleableAbility } from '@showdex/utils/dex';
-import type { CalcdexBattleState, CalcdexPokemon } from '@showdex/redux/store';
 
 /**
  * Determines whether the Pokemon's toggleable ability is active (if applicable).
@@ -42,7 +42,7 @@ export const detectToggledAbility = (
   // (considering that we "reset" the HP to 100% if the Pokemon is dead, i.e., at 0% HP)
   // (also note that Multiscale doesn't exist in pokemon.volatiles, hence the check here)
   if (['multiscale', 'shadowshield'].includes(ability)) {
-    const hpPercentage = calcPokemonHp(pokemon);
+    const hpPercentage = calcPokemonHpPercentage(pokemon);
 
     return !hpPercentage || hpPercentage === 1;
   }
@@ -59,6 +59,17 @@ export const detectToggledAbility = (
   // handle Unburden
   if (ability === 'Unburden') {
     return !item || volatilesKeys.includes('itemremoved');
+  }
+
+  // handle type-change abilities (i.e., Protean & Libero)
+  if (['protean', 'libero'].includes(ability)) {
+    // idea is that if these abilities are enabled, then STAB will apply to all damaging moves;
+    // otherwise, due to the handling of the 'typechange' volatile in createSmogonPokemon()
+    // where the changed type is passed to @smogon/calc, only damaging moves of the changed type
+    // will have STAB; additionally, when the user modifies the Pokemon's types via dirtyTypes[],
+    // this should be toggled off as well, regardless of the 'typechange' volatile
+    return !('typechange' in pokemon.volatiles)
+      && !pokemon.dirtyTypes?.length;
   }
 
   // handle Ruin abilities

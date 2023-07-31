@@ -1,14 +1,14 @@
+import { type AbilityName, type MoveName } from '@smogon/calc';
 import {
   PokemonDmaxMoves,
   PokemonDmaxAbilityMoves,
   PokemonGmaxMoves,
-} from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
+} from '@showdex/consts/dex';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { AbilityName, MoveName } from '@smogon/calc/dist/data/interface';
 import { getDexForFormat } from './getDexForFormat';
 
-const l = logger('@showdex/utils/app/getMaxMove');
+const l = logger('@showdex/utils/dex/getMaxMove()');
 
 /**
  * Returns the corresponding Max/G-Max move for a given move.
@@ -52,7 +52,7 @@ export const getMaxMove = (
   }
 
   if (move.category === 'Status') {
-    return <MoveName> 'Max Guard';
+    return 'Max Guard' as MoveName;
   }
 
   const ability = abilityName ? dex.abilities.get(abilityName) : null;

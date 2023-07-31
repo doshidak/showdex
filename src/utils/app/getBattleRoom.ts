@@ -1,6 +1,6 @@
 // import { logger } from '@showdex/utils/debug';
 
-// const l = logger('@showdex/utils/app/getBattleRoom');
+// const l = logger('@showdex/utils/app/getBattleRoom()');
 
 export const getBattleRoom = (
   roomid: string,
@@ -11,8 +11,8 @@ export const getBattleRoom = (
   // );
 
   if (!roomid?.startsWith?.('battle-') || !(roomid in (app?.rooms || {}))) {
-    return <Showdown.BattleRoom> {};
+    return {} as Showdown.BattleRoom;
   }
 
-  return <Showdown.BattleRoom> (app.rooms[roomid] ?? {});
+  return (app.rooms[roomid] ?? {}) as Showdown.BattleRoom;
 };

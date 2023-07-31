@@ -1,4 +1,6 @@
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
+import { sanitizeVolatiles } from '@showdex/utils/battle';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { calcCalcdexId } from './calcCalcdexId';
 
 /**
@@ -19,6 +21,7 @@ const calcPokemonCalcdexNonce = (
   name: pokemon?.name,
   speciesForme: pokemon?.speciesForme,
   hp: pokemon?.hp?.toString(),
+  dirtyHp: (pokemon as CalcdexPokemon)?.dirtyHp?.toString(),
   maxhp: pokemon?.maxhp?.toString(),
   level: pokemon?.level?.toString(),
   gender: pokemon?.gender,
@@ -33,6 +36,7 @@ const calcPokemonCalcdexNonce = (
   teraType: (!!pokemon?.speciesForme && 'teraType' in pokemon && pokemon.teraType)
     || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
     || null,
+  revealedTeraType: (!!pokemon?.speciesForme && 'revealedTeraType' in pokemon && pokemon.revealedTeraType) || null,
   item: pokemon?.item,
   dirtyItem: (!!pokemon?.speciesForme && 'dirtyItem' in pokemon && pokemon.dirtyItem) || null,
   // altItems: (!!pokemon?.speciesForme && 'altItems' in pokemon && flattenAlts(pokemon.altItems)?.join(';')) || null,
@@ -42,24 +46,25 @@ const calcPokemonCalcdexNonce = (
   ivs: (!!pokemon?.speciesForme && 'ivs' in pokemon && calcCalcdexId(pokemon.ivs)) || null,
   evs: (!!pokemon?.speciesForme && 'evs' in pokemon && calcCalcdexId(pokemon.evs)) || null,
   status: pokemon?.status,
+  dirtyStatus: (pokemon as CalcdexPokemon)?.dirtyStatus,
   statusData: calcCalcdexId(pokemon?.statusData),
   statusStage: pokemon?.statusStage?.toString(),
-  volatiles: calcCalcdexId(pokemon?.volatiles),
+  volatiles: calcCalcdexId(sanitizeVolatiles(pokemon)),
   turnstatuses: calcCalcdexId(pokemon?.turnstatuses),
   sleepCounter: (!!pokemon?.speciesForme && 'sleepCounter' in pokemon && pokemon.sleepCounter?.toString())
-    || (!!Object.keys(pokemon?.statusData || {}).length && pokemon.statusData.sleepTurns?.toString())
+    || (nonEmptyObject(pokemon?.statusData) && pokemon.statusData.sleepTurns?.toString())
     || null,
   toxicCounter: (!!pokemon?.speciesForme && 'toxicCounter' in pokemon && pokemon.toxicCounter?.toString())
-    || (!!Object.keys(pokemon?.statusData || {}).length && pokemon.statusData.toxicTurns?.toString())
+    || (nonEmptyObject(pokemon?.statusData) && pokemon.statusData.toxicTurns?.toString())
     || null,
   hitCounter: (!!pokemon?.speciesForme && 'hitCounter' in pokemon && pokemon.hitCounter?.toString())
     || (!!pokemon?.speciesForme && 'timesAttacked' in pokemon && pokemon.timesAttacked?.toString())
     || null,
-  faintCounter: (!!pokemon?.speciesForme && 'faintCounter' in pokemon && pokemon.faintCounter?.toString())
-    || null,
+  faintCounter: (!!pokemon?.speciesForme && 'faintCounter' in pokemon && pokemon.faintCounter?.toString()) || null,
+  dirtyFaintCounter: (!!pokemon?.speciesForme && 'dirtyFaintCounter' in pokemon && pokemon.dirtyFaintCounter?.toString()) || null,
   moves: pokemon?.moves?.join(';'),
   // altMoves: (!!pokemon?.speciesForme && 'altMoves' in pokemon && flattenAlts(pokemon.altMoves)?.join(';')) || null,
-  moveTrack: calcCalcdexId((<CalcdexPokemon['moveTrack']> pokemon?.moveTrack)?.map((t) => t?.join(':'))?.join(';')),
+  moveTrack: calcCalcdexId((pokemon?.moveTrack as CalcdexPokemon['moveTrack'])?.map((t) => t?.join(':'))?.join(';')),
   // moveState: calcCalcdexId<Partial<CalcdexPokemon['moveState']>>(pokemon?.moveState),
   revealedMoves: (!!pokemon?.speciesForme && 'revealedMoves' in pokemon && calcCalcdexId(pokemon.revealedMoves)) || null,
   boosts: calcCalcdexId(pokemon?.boosts),
@@ -91,8 +96,8 @@ const calcSideCalcdexNonce = (
   name: side?.name,
   rating: side?.rating,
   totalPokemon: side?.totalPokemon?.toString(),
-  active: side?.active?.map((mon) => calcPokemonCalcdexNonce(<CalcdexPokemon> (<unknown> mon))).join(';'), // TypeScript can't infer that string[] is the same as MoveName[] (of type string[])
-  pokemon: side?.pokemon?.map((mon) => calcPokemonCalcdexNonce(<CalcdexPokemon> (<unknown> mon))).join(';'), // once you think you're good, naw, AbilityName is NOT the same thing as string, even tho it's a string. fantastic!
+  active: side?.active?.map((mon) => calcPokemonCalcdexNonce(mon as unknown as CalcdexPokemon)).join(';'), // TypeScript can't infer that string[] is the same as MoveName[] (of type string[])
+  pokemon: side?.pokemon?.map((mon) => calcPokemonCalcdexNonce(mon as unknown as CalcdexPokemon)).join(';'), // once you think you're good, naw, AbilityName is NOT the same thing as string, even tho it's a string. fantastic!
   sideConditions: Object.keys(side?.sideConditions || {}).join(';'),
 });
 
@@ -120,7 +125,7 @@ export const calcBattleCalcdexNonce = (
     tier: battle?.tier,
     gameType: battle?.gameType,
     myPokemon: battle?.myPokemon?.length ? calcCalcdexId(
-      battle.myPokemon.map((p) => calcPokemonCalcdexNonce(<CalcdexPokemon> <unknown> p)).join(';') || 'empty',
+      battle.myPokemon.map((p) => calcPokemonCalcdexNonce(p as unknown as CalcdexPokemon)).join(';') || 'empty',
     ) : null,
     mySide: calcSideCalcdexNonce(battle?.mySide),
     nearSide: calcSideCalcdexNonce(battle?.nearSide),
@@ -134,7 +139,7 @@ export const calcBattleCalcdexNonce = (
     requestType: request?.requestType,
     side: [
       request?.side?.id,
-      (<Showdown.BattleMoveRequest> request)?.active?.map((a) => a?.maxMoves?.gigantamax)?.join('|'),
+      (request as Showdown.BattleMoveRequest)?.active?.map((a) => a?.maxMoves?.gigantamax)?.join('|'),
     ].filter(Boolean).join(': '),
   });
 };

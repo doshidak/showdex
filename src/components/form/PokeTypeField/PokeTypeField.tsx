@@ -1,18 +1,22 @@
 import * as React from 'react';
+import { type FieldRenderProps } from 'react-final-form';
 // import { sticky } from 'tippy.js';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
-import { BaseButton, Tooltip } from '@showdex/components/ui';
-import { PokemonTypes } from '@showdex/consts/pokemon';
-import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import { useUserAgent } from '@showdex/utils/hooks';
+import { useSandwich } from '@showdex/components/layout';
+import {
+  type ButtonElement,
+  type TooltipProps,
+  BaseButton,
+  ToggleButton,
+  Tooltip,
+} from '@showdex/components/ui';
+import { PokemonTypes } from '@showdex/consts/dex';
+import { type CalcdexPokemonUsageAlt, useColorScheme } from '@showdex/redux/store';
+import { formatId, similarArrays } from '@showdex/utils/core';
+import { type ElementSizeLabel, useUserAgent } from '@showdex/utils/hooks';
 import { percentage } from '@showdex/utils/humanize';
 import { flattenAlts, sortUsageAlts } from '@showdex/utils/presets';
-import type { FieldRenderProps } from 'react-final-form';
-import type { ButtonElement, TooltipProps } from '@showdex/components/ui';
-import type { CalcdexPokemonUsageAlt } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
 import styles from './PokeTypeField.module.scss';
 
 export interface PokeTypeFieldProps<
@@ -33,6 +37,7 @@ export interface PokeTypeFieldProps<
   containerSize?: ElementSizeLabel;
   highlight?: boolean;
   highlightTypes?: Showdown.TypeName[];
+  revealedTypes?: Showdown.TypeName[];
   typeUsages?: CalcdexPokemonUsageAlt<Showdown.TypeName>[];
   readOnly?: boolean;
   disabled?: boolean;
@@ -58,6 +63,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   containerSize,
   highlight = true,
   highlightTypes,
+  revealedTypes,
   typeUsages,
   input,
   readOnly,
@@ -75,14 +81,28 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   // keep track of whether the options tooltip is open
-  const [optionsVisible, setOptionsVisible] = React.useState(false);
+  // const [optionsVisible, setOptionsVisible] = React.useState(false);
+
+  const {
+    id: optionsId,
+    active: optionsVisible,
+    requestOpen: requestOptionsOpen,
+    notifyClose: notifyOptionsClose,
+  } = useSandwich();
 
   const colorScheme = useColorScheme();
+
+  // if provided, fallback to using revealedTypes if input.value is empty
+  const inputSource = input?.value?.length
+    ? input.value
+    : revealedTypes?.length
+      ? (multi ? revealedTypes : revealedTypes[0])
+      : (multi ? ['???'] : '???');
 
   const handleChange = (value: Showdown.TypeName) => {
     if (multi) {
       const updatedValue: Showdown.TypeName[] = [
-        ...((input?.value as Showdown.TypeName[]) || []),
+        ...((inputSource as Showdown.TypeName[]) || []),
       ];
 
       const valueIndex = updatedValue.findIndex((t) => t === value);
@@ -116,7 +136,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
     }
 
     // note: at this point, we should be in singular type mode (i.e., `multi` is false)
-    const currentValue = (input?.value as Showdown.TypeName) || '???';
+    const currentValue = (inputSource as Showdown.TypeName) || '???';
 
     // allow the singular type to be "toggled" off
     if (currentValue === value) {
@@ -127,13 +147,14 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
 
     // only close the tooltip if an actual type (not '???') has been selected
     input?.onChange?.(value);
-    setOptionsVisible(false);
+    // setOptionsVisible(false);
+    notifyOptionsClose();
   };
 
   // not scoped w/ handleChange() to avoid the dumbest type assertions
   const value = multi
-    ? [...(input?.value as Showdown.TypeName[] || [])]
-    : [input?.value as Showdown.TypeName].filter(Boolean);
+    ? [...(inputSource as Showdown.TypeName[] || [])]
+    : [inputSource as Showdown.TypeName].filter(Boolean);
 
   const flatTypeUsages = flattenAlts(typeUsages);
   const allTypes = PokemonTypes.filter((t) => !!t && t !== '???');
@@ -147,9 +168,6 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   ] as CalcdexPokemonUsageAlt<Showdown.TypeName>)
     .filter(([, usage]) => (usage || 0) > 0)
     .sort(sortUsageAlts);
-
-  // const gridTypes = (!typeUsages?.length && allTypes)
-  //   || allTypes.filter((t) => !flatTypeUsages.includes(t));
 
   const renderTypeOptionButton = (
     pokemonType: Showdown.TypeName,
@@ -176,7 +194,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         onPress={() => handleChange(pokemonType)}
       >
         <PokeType
-          className={styles.typeOptionType}
+          // className={styles.typeOptionType}
           labelClassName={styles.typeOptionLabel}
           type={pokemonType}
           reverseColorScheme
@@ -185,6 +203,27 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       </BaseButton>
     );
   };
+
+  // I know this is gross, sorry lol
+  const renderType = (
+    pokemonType: Showdown.TypeName,
+    key?: string,
+    reverseColorScheme?: boolean,
+    ignoreTeraTyping?: boolean,
+    ignoreContainerSize?: boolean,
+    highlightRenderedType = highlight,
+  ) => (
+    <PokeType
+      key={key}
+      className={styles.typeValue}
+      type={pokemonType}
+      defaultLabel={defaultTypeLabel}
+      reverseColorScheme={reverseColorScheme}
+      teraTyping={ignoreTeraTyping ? undefined : teraTyping}
+      containerSize={ignoreContainerSize ? undefined : containerSize}
+      highlight={highlightRenderedType}
+    />
+  );
 
   return (
     <Tooltip
@@ -230,6 +269,41 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
               `PokeTypeField:${input?.name || '?'}:AllTypes:Option:${pokemonType || i || '?'}`,
             ))}
           </div>
+
+          {
+            (!!revealedTypes?.length && !similarArrays(revealedTypes, value)) &&
+            <div className={styles.revealedTypes}>
+              <div className={cx(styles.optionsTooltipTitle, styles.revealedTypesTitle)}>
+                Actual
+              </div>
+
+              <div className={styles.revealedTypesContent}>
+                <div className={styles.revealedTypesValue}>
+                  {revealedTypes.map((typeValue, i) => renderType(
+                    typeValue,
+                    `PokeTypeField:${input?.name || '?'}:RevealedType:${i}:${typeValue || '?'}`,
+                    true, // ignoreTeraTyping
+                    true, // ignoreContainerSize
+                    true, // reverseColorScheme
+                    false, // highlightRenderedType
+                  ))}
+                </div>
+
+                <ToggleButton
+                  className={styles.revealedTypesReset}
+                  forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
+                  label="Reset"
+                  // absoluteHover
+                  active
+                  onPress={() => input?.onChange?.(
+                    multi
+                      ? revealedTypes
+                      : revealedTypes[0],
+                  )}
+                />
+              </div>
+            </div>
+          }
         </div>
       )}
       // visible={optionsVisible ? true : undefined}
@@ -244,7 +318,8 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       // plugins={[sticky]}
       // sticky="popper"
       // disabled={optionsVisible ? undefined : disabled}
-      onClickOutside={() => setOptionsVisible(false)}
+      // onClickOutside={() => setOptionsVisible(false)}
+      onClickOutside={notifyOptionsClose}
     >
       <BaseButton
         ref={containerRef}
@@ -262,19 +337,12 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         aria-label={label}
         tabIndex={readOnly || disabled ? -1 : tabIndex}
         hoverScale={1}
-        onPress={() => setOptionsVisible(!optionsVisible)}
+        // onPress={() => setOptionsVisible(!optionsVisible)}
+        onPress={optionsVisible ? notifyOptionsClose : requestOptionsOpen}
       >
-        {value.map((typeValue, i) => (
-          <PokeType
-            key={`PokeTypeField:${input?.name || '?'}:Value:${i}:${typeValue || '?'}`}
-            className={styles.typeValue}
-            type={typeValue}
-            defaultLabel={defaultTypeLabel}
-            // reverseColorScheme
-            teraTyping={teraTyping}
-            containerSize={containerSize}
-            highlight={highlight}
-          />
+        {value.map((typeValue, i) => renderType(
+          typeValue,
+          `PokeTypeField:${input?.name || optionsId || '???'}:Value:${i}:${typeValue || '?'}`,
         ))}
       </BaseButton>
     </Tooltip>

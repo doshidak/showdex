@@ -1,27 +1,33 @@
 import { NIL as NIL_UUID, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { type CalcdexPlayerKey, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
-import type { CalcdexPlayerKey, CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
-export const serializePayload = <T>(payload: T): string => Object.entries(payload || {})
-  .map(([key, value]) => `${key}:${value?.toString?.() ?? 'undefined'}`)
+/* eslint-disable @typescript-eslint/indent */
+
+export const serializePayload = <T>(
+  payload: T,
+): string => Object.entries(payload || {})
+  .map(([key, value]) => `${key}:${(typeof value === 'object' ? JSON.stringify(value) : String(value)) ?? '???'}`)
   .join('|');
 
+/* eslint-enable @typescript-eslint/indent */
+
 /**
- * Calculatingly calculates the Calcdex ID from the calculated checksum
- * of the calculated serialized payload.
+ * Calculatingly calculates the Calcdex ID from the calculated checksum of the calculated serialized payload.
  *
- * * Primary difference between a `calcdexId` and `calcdexNonce` is that
- *   the latter (`calcdexNonce`) includes values that are potentially mutable,
- *   such as a Pokemon's `hp` value.
+ * * Primary difference between a `calcdexId` & `calcdexNonce` is that the latter (`calcdexNonce`) includes values
+ *   that are potentially mutable, such as a Pokemon's `hp` value.
  *
  * @since 0.1.0
  */
 export const calcCalcdexId = <T>(payload: T): string => {
-  const serialized = Object.keys(payload || {}).length ?
-    serializePayload<T>(payload) :
-    null;
+  const serialized = nonEmptyObject(payload)
+    ? serializePayload<T>(payload)
+    : ['string', 'number', 'boolean'].includes(typeof payload)
+      ? String(payload)
+      : null;
 
   if (!serialized) {
     return null;
@@ -63,10 +69,11 @@ export const calcPresetCalcdexId = (
 /**
  * Generates a unique ID used by the Calcdex to track Pokemon.
  *
- * * As part of the new IDing mechanism introduced in v1.0.3, since the resulting ID will be attached
- *   to the `Showdown.Pokemon`, `Showdown.ServerPokemon` (if applicable), and `CalcdexPokemon`,
- *   we don't really care about consistently recreating the ID, as long as it's guaranteed unique per call.
+ * * As part of the new IDing mechanism introduced in v1.0.3, since the resulting ID will be attached to the `Showdown.Pokemon`,
+ *   `Showdown.ServerPokemon` (if applicable) & `CalcdexPokemon`, we don't really care about consistently recreating the ID,
+ *   as long as it's guaranteed unique per call.
  *   - Hence the use of `uuidv4()`, which is random.
+ *   - Note (2023/07/26): Holy... what a run-on from me a year ago LOL.
  *
  * @since 0.1.0
  */

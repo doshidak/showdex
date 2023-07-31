@@ -2,10 +2,21 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { NIL as NIL_UUID } from 'uuid';
+import { type GenerationNum } from '@smogon/calc';
 import { ErrorBoundary } from '@showdex/components/debug';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type ShowdexBootstrapper } from '@showdex/main';
 import { syncBattle } from '@showdex/redux/actions';
-import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
+import {
+  type CalcdexPlayer,
+  type CalcdexPlayerKey,
+  type CalcdexPokemon,
+  type CalcdexSliceState,
+  type RootStore,
+  type ShowdexSliceState,
+  calcdexSlice,
+  hellodexSlice,
+} from '@showdex/redux/store';
 import {
   createCalcdexRoom,
   getAuthUsername,
@@ -14,23 +25,14 @@ import {
   hasSinglePanel,
 } from '@showdex/utils/app';
 import {
+  clonePlayerSideConditions,
   detectAuthPlayerKeyFromBattle,
   sanitizePlayerSide,
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
-import { logger } from '@showdex/utils/debug';
-import type { GenerationNum } from '@smogon/calc';
-import type { ShowdexBootstrapper } from '@showdex/main';
-import type {
-  CalcdexPlayer,
-  CalcdexPlayerKey,
-  CalcdexPokemon,
-  CalcdexSliceState,
-  RootStore,
-  ShowdexSliceState,
-} from '@showdex/redux/store';
+import { logger, runtimer } from '@showdex/utils/debug';
 import { Calcdex } from './Calcdex';
 import { CalcdexProvider } from './CalcdexContext';
 import { CalcdexError } from './CalcdexError';
@@ -134,9 +136,11 @@ const l = logger(baseScope);
 
 export const calcdexBootstrapper: ShowdexBootstrapper = (
   store,
-  _data,
+  data,
   roomid,
 ) => {
+  const endTimer = runtimer(baseScope, l);
+
   l.debug(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
@@ -149,7 +153,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       'since it\'s not a BattleRoom',
     );
 
-    return;
+    return endTimer('(wrong room)');
   }
 
   const battleRoom = getBattleRoom(roomid);
@@ -173,7 +177,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         'since no proper battle object exists within the current BattleRoom',
       );
 
-      return;
+      return endTimer('(no battle)');
     }
 
     const battleState = state[roomid];
@@ -188,12 +192,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     const settings = (store.getState()?.showdex as ShowdexSliceState)?.settings?.calcdex;
     const calcdexRoomId = getCalcdexRoomId(roomid);
 
-    l.debug(
-      '\n', 'settings.closeOn', settings?.closeOn,
-      '\n', 'battleState.renderMode', battleState.renderMode,
-      '\n', 'calcdexRoomId', calcdexRoomId,
-      '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
-    );
+    // l.debug(
+    //   '\n', 'settings.closeOn', settings?.closeOn,
+    //   '\n', 'battleState.renderMode', battleState.renderMode,
+    //   '\n', 'calcdexRoomId', calcdexRoomId,
+    //   '\n', 'calcdexRoomId in app.rooms?', calcdexRoomId in app.rooms,
+    // );
 
     // this would only apply in the tabbed panel mode, obviously
     if (battleState.renderMode === 'panel' && settings?.closeOn !== 'never' && calcdexRoomId in app.rooms) {
@@ -211,7 +215,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       // update (2023/02/04): did I forget a return here? ...probably cause it keeps triggering the return from
       // the typeof battle?.subscribe check
-      return;
+      return endTimer('(calcdex destroyed)');
     }
 
     l.debug(
@@ -221,7 +225,28 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     );
 
     // update (2023/02/04): might as well put a return here too since this is part of the !battle?.id handler
-    return;
+    return endTimer('(battle destroyed)');
+  }
+
+  // update (2023/07/27): check for '|noinit|' or '|nonexistent|' in the `data` & if present, ignore initializing this battle,
+  // e.g., '|noinit|nonexistent|The room "battle-gen1ubers-1911645170-ygxif0uoljetvrkksj6dcge3w43xx8wpw" does not exist.'
+  // (typically occurs when you AFK in a BattleRoom, your computer sleeps, you come back later & select "Reconnect", refreshing the page)
+  // note that we're not checking the stepQueue since it could be uninitialized/empty at this point, so we just wanna read what the client
+  // received from the server in this moment (which is formatted as a single stepQueue entry in `data`)
+  const stepFromData = data?.split?.('\n')[1];
+  const shouldNotInit = stepFromData?.startsWith('|noinit|nonexistent|')
+    // these last 2 checks may backfire on me lmao
+    && stepFromData.includes('The room "')
+    && stepFromData.endsWith('" does not exist.');
+
+  if (shouldNotInit) {
+    l.debug(
+      'Calcdex bootstrapper request was ignored for roomid', roomid,
+      'since the battle is marked as nonexistent & shouldn\'t be initialized',
+      '\n', 'stepFromData', stepFromData,
+    );
+
+    return endTimer('(noinit battle)');
   }
 
   if (typeof battle?.subscribe !== 'function') {
@@ -230,7 +255,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       typeof battle?.subscribe,
     );
 
-    return;
+    return endTimer('(bad battle)');
   }
 
   const {
@@ -242,7 +267,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
   // don't process this battle if we've already added (or forcibly prevented) the filth
   if (calcdexInit) {
-    return;
+    return endTimer('(already filthy)');
   }
 
   // delaying initialization if the battle hasn't instantiated all the players yet
@@ -255,7 +280,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       '\n', 'battle', battle,
     );
 
-    return;
+    return endTimer('(uninit players)');
   }
 
   // note: anything below here executes once per battle
@@ -283,7 +308,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       //   battle.calcdexDestroyed = true; // just in case lol
       // }
 
-      return;
+      return endTimer('(calcdex denied)');
     }
   }
 
@@ -326,7 +351,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
 
           // unlike the battle overlay, we'll only close if configured to (and destroy if closing the room)
-          forfeitPopup.submit = (data) => {
+          forfeitPopup.submit = (...args) => {
             const calcdexRoomId = getCalcdexRoomId(roomid);
 
             // grab the current settings
@@ -341,7 +366,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             updateBattleRecord(store, battleRoom?.battle, 'loss');
 
             // call ForfeitPopup's original submit() handler
-            submitForfeit(data);
+            submitForfeit(...args);
           };
         }
 
@@ -595,7 +620,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
           const submitForfeit = forfeitPopup.submit.bind(forfeitPopup) as typeof forfeitPopup.submit;
 
-          forfeitPopup.submit = (data) => {
+          forfeitPopup.submit = (...args) => {
             // clean up allocated memory from React & Redux for this Calcdex instance
             battle?.calcdexReactRoot?.unmount?.();
             store.dispatch(calcdexSlice.actions.destroy(roomid));
@@ -604,7 +629,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             updateBattleRecord(store, battleRoom?.battle, 'loss');
 
             // call the original function
-            submitForfeit(data);
+            submitForfeit(...args);
           };
         }
 
@@ -665,6 +690,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         ident: p.ident,
         // name: p.name,
         speciesForme: p.speciesForme,
+        gender: p.gender,
         details: p.details,
         searchid: p.searchid,
       }));
@@ -672,27 +698,45 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       // just js things uwu
       const prevPokemon = (replaceSlot > -1 && pokemonSearchList[replaceSlot])
         || pokemonSearchList.filter((p) => !!p.calcdexId).find((p) => (
-          (!!ident && (
+          // e.g., ident = 'p1: CalcdexDemolisher' (nicknamed) or 'p1: Ditto' (unnamed default)
+          // update (2023/07/30): while `ident` is mostly available, when viewing a replay (i.e., an old saved battle), it's not!
+          (!ident || (
             (!!p?.ident && p.ident === ident)
-              || (!!p?.searchid && p.searchid.includes(ident))
+              // e.g., searchid = 'p1: CalcdexDemolisher|Ditto'
+              // nickname case: pass; default case: fail ('p1: CalcdexDemolisher' !== 'p1: Ditto')
+              // note: not doing startsWith() since 'p1: Mewtwo|Mewtwo' will pass when given ident 'p1: Mew'
+              || (!!p?.searchid?.includes('|') && p.searchid.split('|')[0] === ident)
           ))
-            || (!!details && (
+            // e.g., details = 'Ditto'
+            // update (2023/07/30): for replays, the only guaranteed fields are `name` (typically the speciesForme), `speciesForme` & `details`
+            && (!!details && (
               (!!p?.details && p.details === details)
-                || (!!p?.searchid && p.searchid.includes(details))
-                || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
+                // e.g., 'p1: CalcdexDemolisher|Ditto'.endsWith('Ditto')
+                // update (2023/07/27): apparently includes() was a bad idea for this very unique edge case in gen1ubers where
+                // the client first adds 'Mewtwo' (under `details`), then at some point later 'Mew', which then passes this check,
+                // incorrectly assigning Mewtwo's calcdexId to Mew! (& this breaks sync, as you'd expect) hence endsWith() LOL
+                // || (!!p?.searchid && p.searchid.includes(details))
+                || (!!p?.searchid && p.searchid.endsWith(details))
+                // update (2023/07/27): whoops, missed a spot!
+                // || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
+                // update (2023/07/30): oh ye, forgot that `details` includes the gender, if applicable (e.g., 'Reuniclus, M')
+                || (!!p?.speciesForme && details.replace('-*', '') === [
+                  p.speciesForme.replace('-*', ''),
+                  p.gender !== 'N' && p.gender,
+                ].filter(Boolean).join(', '))
             ))
         ));
 
-      l.debug(
-        'side.addPokemon()', 'for', ident || name || details?.split(',')?.[0], 'for player', side.sideid,
-        '\n', 'ident', ident,
-        '\n', 'details', details,
-        '\n', 'replaceSlot', replaceSlot,
-        '\n', 'prevPokemon', prevPokemon,
-        '\n', 'pokemonSearchList', pokemonSearchList,
-        // '\n', 'side', side,
-        // '\n', 'battle', battle,
-      );
+      // l.debug(
+      //   'side.addPokemon()', 'for', ident || name || details?.split(',')?.[0], 'for player', side.sideid,
+      //   '\n', 'ident', ident,
+      //   '\n', 'details', details,
+      //   '\n', 'replaceSlot', replaceSlot,
+      //   '\n', 'prevPokemon', prevPokemon,
+      //   '\n', 'pokemonSearchList', pokemonSearchList,
+      //   // '\n', 'side', side,
+      //   // '\n', 'battle', battle,
+      // );
 
       const newPokemon = addPokemon(name, ident, details, replaceSlot);
 
@@ -728,11 +772,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // battleRoom.requests.side.pokemon
     updateSide();
 
-    l.debug(
-      'updateSide()',
-      '\n', 'battleId', roomid,
-      '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
-    );
+    // l.debug(
+    //   'updateSide()',
+    //   '\n', 'battleId', roomid,
+    //   '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
+    // );
 
     let didUpdate = !myPokemon?.length
       && !!battleRoom.battle.myPokemon?.length;
@@ -743,11 +787,19 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         return;
       }
 
-      const prevMyPokemon = myPokemon.find((p) => (
-        p.ident === pokemon.ident
-          || p.speciesForme === pokemon.speciesForme
+      // note (2023/07/30): leave the `ident` check as is here since viewing a replay wouldn't trigger this function
+      // (there are no myPokemon when viewing a replay, even if you were viewing your own battle!)
+      const prevMyPokemon = myPokemon.find((p) => p.ident === pokemon.ident && (
+        p.speciesForme === pokemon.speciesForme
           || p.details === pokemon.details
-          || p.details.includes(pokemon.speciesForme)
+          // update (2023/07/27): this check breaks when p.details is 'Mewtwo' & pokemon.speciesForme is 'Mew',
+          // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
+          // || p.details.includes(pokemon.speciesForme)
+          // update (2023/07/30): `details` can include the gender, if applicable (e.g., 'Reuniclus, M')
+          || p.details === [
+            pokemon.speciesForme.replace('-*', ''),
+            pokemon.gender !== 'N' && pokemon.gender,
+          ].filter(Boolean).join(', ')
       ));
 
       if (!prevMyPokemon?.calcdexId) {
@@ -756,18 +808,24 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
 
       pokemon.calcdexId = prevMyPokemon.calcdexId;
       didUpdate = true;
+
+      // l.debug(
+      //   'Restored previous calcdexId for', pokemon.speciesForme, 'in battle.myPokemon[]',
+      //   '\n', 'calcdexId', prevMyPokemon.calcdexId,
+      //   '\n', 'pokemon', '(prev)', prevMyPokemon, '(now)', pokemon,
+      // );
     });
 
     if (didUpdate && battleRoom.battle.calcdexInit) {
-      const prevNonce = battleRoom.battle.nonce;
+      // const prevNonce = battleRoom.battle.nonce;
 
       battleRoom.battle.nonce = calcBattleCalcdexNonce(battleRoom.battle, battleRoom.request);
 
-      l.debug(
-        'Restored previous calcdexId\'s in battle.myPokemon[]',
-        '\n', 'nonce', '(prev)', prevNonce, '(now)', battleRoom.battle.nonce,
-        '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
-      );
+      // l.debug(
+      //   'Restored previous calcdexId\'s in battle.myPokemon[]',
+      //   '\n', 'nonce', '(prev)', prevNonce, '(now)', battleRoom.battle.nonce,
+      //   '\n', 'myPokemon', '(prev)', myPokemon, '(now)', battleRoom.battle.myPokemon,
+      // );
 
       // since myPokemon could be available now, forcibly fire a battle sync
       // (should we check if myPokemon is actually populated? maybe... but I'll leave it like this for now)
@@ -891,8 +949,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
             usedTera: usedTerastallization(playerKey, battle.stepQueue),
           };
 
+          // note: sanitizePlayerSide() needs the updated side.conditions, so we're initializing
+          // it like this here first
           prev[playerKey].side = {
-            conditions: structuredClone(player?.sideConditions || {}),
+            // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+            // conditions: structuredClone(player?.sideConditions || {}),
+            conditions: clonePlayerSideConditions(player),
           };
 
           prev[playerKey].side = {
@@ -984,17 +1046,19 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     battle.nonce = calcBattleCalcdexNonce(battle, battleRoom.request);
 
     // this check is to make sure the state has been initialized before attempting to sync
-    if (!battleState.battleNonce) {
+    // update (2023/07/24): ok this is what I get for not using 'strict' mode butt fuck it
+    // (it's a good habit to always check your inputs anyways, especially cause things can go wrong during runtime!)
+    if (!battleState?.battleNonce) {
       return;
     }
 
     // dispatch a battle sync if the nonces are different (i.e., something changed)
     if (battle.nonce === battleState.battleNonce) {
-      l.debug(
-        'Ignoring battle sync due to same nonce for', battle.id || roomid,
-        '\n', 'nonce', '(prev)', battleState.battleNonce, '(now)', battle.nonce,
-        '\n', 'battle', battle,
-      );
+      // l.debug(
+      //   'Ignoring battle sync due to same nonce for', battle.id || roomid,
+      //   '\n', 'nonce', '(prev)', battleState.battleNonce, '(now)', battle.nonce,
+      //   '\n', 'battle', battle,
+      // );
 
       return;
     }
@@ -1025,13 +1089,13 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   const calcdexReactRoot = battle.calcdexReactRoot || battle.calcdexRoom?.reactRoot;
 
   if (calcdexReactRoot) {
-    l.debug(
-      'Rendering Calcdex for', battle.id || roomid,
-      // '\n', 'nonce', '(now)', battle.nonce || initNonce,
-      // '\n', 'request', battleRoom.request,
-      '\n', 'battle', battle,
-      '\n', 'battleRoom', battleRoom,
-    );
+    // l.debug(
+    //   'Rendering Calcdex for', battle.id || roomid,
+    //   // '\n', 'nonce', '(now)', battle.nonce || initNonce,
+    //   // '\n', 'request', battleRoom.request,
+    //   '\n', 'battle', battle,
+    //   '\n', 'battleRoom', battleRoom,
+    // );
 
     renderCalcdex(
       calcdexReactRoot,
@@ -1048,12 +1112,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     // the page mid-battle or join a spectating game; otherwise, the Calcdex won't appear until the players
     // do something (e.g., choose an option, turn on the timer, etc.) that triggers the subscription callback
     if (battle.atQueueEnd) {
-      l.debug(
-        'Forcing a battle sync via battle.subscription() since the battle is atQueueEnd',
-        '\n', 'battle.atQueueEnd', battle.atQueueEnd,
-        '\n', 'battle', battle,
-        '\n', 'battleRoom', battleRoom,
-      );
+      // l.debug(
+      //   'Forcing a battle sync via battle.subscription() since the battle is atQueueEnd',
+      //   '\n', 'battle.atQueueEnd', battle.atQueueEnd,
+      //   '\n', 'battle', battle,
+      //   '\n', 'battleRoom', battleRoom,
+      // );
 
       battle.subscription('atqueueend');
     }
@@ -1069,4 +1133,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
   }
 
   battle.calcdexInit = true;
+
+  endTimer('(bootstrap complete)');
 };

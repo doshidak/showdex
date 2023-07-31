@@ -2,18 +2,17 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { PiconButton } from '@showdex/components/app';
-import { Dropdown } from '@showdex/components/form';
+import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { useUserLadderQuery } from '@showdex/redux/services';
-import { useColorScheme } from '@showdex/redux/store';
-import { findPlayerTitle, formatId, openUserPopup } from '@showdex/utils/app';
-import { env, getResourceUrl } from '@showdex/utils/core';
+import { type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
+import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { calcPokemonCurrentHp } from '@showdex/utils/calc';
+import { env, formatId, getResourceUrl } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
-import type { DropdownOption } from '@showdex/components/form';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
-import type { CalcdexPlayerKey } from '@showdex/redux/store';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { CalcdexPokeProvider } from '../CalcdexPokeContext';
 import { useCalcdexContext } from '../CalcdexContext';
 import { PokeCalc } from '../PokeCalc';
@@ -70,19 +69,49 @@ export const PlayerCalc = ({
   } = player;
 
   const playerId = formatId(name);
-  const playerTitle = findPlayerTitle(playerId);
+  const playerTitle = findPlayerTitle(playerId, true);
   const playerLabelColor = playerTitle?.color?.[colorScheme];
   const playerIconColor = playerTitle?.iconColor?.[colorScheme];
   const playerPokemon = playerParty?.[playerIndex];
 
   // only fetch the rating if the battle didn't provide it to us
+  // (with a terribly-implemented delay timer to give some CPU time for drawing the UI)
+  const [delayedQuery, setDelayedQuery] = React.useState(true);
+  const delayedQueryTimeout = React.useRef<NodeJS.Timeout>(null);
+
+  const skipLadderQuery = !settings?.showPlayerRatings
+    || !playerId
+    || !format
+    || !!ratingFromBattle;
+
+  React.useEffect(() => {
+    // checking `playerId` in case the component hasn't received its props yet;
+    // once `delayedQuery` is `false`, we no longer bother refetching
+    if (!playerId || !delayedQuery || skipLadderQuery) {
+      return;
+    }
+
+    delayedQueryTimeout.current = setTimeout(
+      () => setDelayedQuery(false),
+      9669, // arbitrary af
+    );
+
+    return () => {
+      if (delayedQueryTimeout.current) {
+        clearTimeout(delayedQueryTimeout.current);
+        delayedQueryTimeout.current = null;
+      }
+    };
+  }, [
+    delayedQuery,
+    playerId,
+    skipLadderQuery,
+  ]);
+
   const {
     ladder,
   } = useUserLadderQuery(playerId, {
-    skip: !settings?.showPlayerRatings
-      || !playerId
-      || !format
-      || !!ratingFromBattle,
+    skip: skipLadderQuery || delayedQuery,
 
     selectFromResult: ({ data }) => ({
       // map 'gen8unratedrandombattle' (for instance) to 'gen8randombattle'
@@ -292,8 +321,8 @@ export const PlayerCalc = ({
               || pokemon?.details
               || pokemon?.name
               || pokemon?.speciesForme
-              || defaultName
-              || '???';
+              // || defaultName
+              || String(i);
 
             const friendlyPokemonName = pokemon?.speciesForme
               || pokemon?.name
@@ -305,6 +334,7 @@ export const PlayerCalc = ({
 
             // const speciesForme = mon?.transformedForme || mon?.speciesForme;
             const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
+            const hp = calcPokemonCurrentHp(pokemon);
             const ability = pokemon?.dirtyAbility || pokemon?.ability;
             const item = pokemon?.dirtyItem ?? pokemon?.item;
 
@@ -322,12 +352,12 @@ export const PlayerCalc = ({
 
             return (
               <PiconButton
-                key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}:${i}`}
+                key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}`}
                 className={cx(
                   styles.piconButton,
                   pokemonActive && styles.active,
                   pokemonSelected && styles.selected,
-                  !pokemon?.hp && styles.fainted,
+                  !hp && styles.fainted,
                 )}
                 piconClassName={styles.picon}
                 display="block"

@@ -1,14 +1,16 @@
-import { createSlice, current } from '@reduxjs/toolkit';
 import {
-  dehydrateShowdexSettings,
-  hydrateShowdexSettings,
-} from '@showdex/redux/helpers';
+  type Draft,
+  type PayloadAction,
+  type SliceCaseReducers,
+  createSlice,
+  current,
+} from '@reduxjs/toolkit';
+import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
+import { type CalcdexMatchupNhkoColors, type CalcdexMatchupNhkoLabels } from '@showdex/utils/calc';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import type { SmogonMatchupNhkoColors, SmogonMatchupNhkoLabels } from '@showdex/utils/ui';
-import type { CalcdexPlayerKey, CalcdexRenderMode } from './calcdexSlice';
+import { type CalcdexPlayerKey, type CalcdexRenderMode } from './calcdexSlice';
 import { useDispatch, useSelector } from './hooks';
 
 /**
@@ -247,7 +249,7 @@ export interface ShowdexCalcdexSettings {
    */
   showNicknames: boolean;
 
-  /**
+  /*
    * Whether to reverse the functionality of the Pokemon's icon and name when clicked on.
    *
    * * If `false` (default), the functionality will be as follows:
@@ -257,10 +259,12 @@ export interface ShowdexCalcdexSettings {
    *   - Clicking on the icon will switch the Pokemon's current `speciesForme` if it has defined `altFormes`.
    *   - Clicking on the name will open the Pokemon's *Smogon University* page.
    *
+   * @deprecated As of v1.1.6, this setting has been removed cause I don't think most people even use this,
+   *   let alone even find the forme switcher, so this would make things even more confusing!
    * @default false
    * @since 1.0.3
    */
-  reverseIconName: boolean;
+  // reverseIconName: boolean;
 
   /**
    * Whether to open the Pokemon's *Smogon Univeristy* page when the configured button is clicked on.
@@ -322,6 +326,17 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.3
    */
   downloadUsageStats: boolean;
+
+  /**
+   * Maximum age of cached presets in *days*.
+   *
+   * @default
+   * ```ts
+   * 7 // a week
+   * ```
+   * @since 1.1.6
+   */
+  maxPresetAge: number;
 
   /**
    * Whether the first preset applied to the Pokemon should be from the Showdown usage stats.
@@ -396,6 +411,16 @@ export interface ShowdexCalcdexSettings {
   defaultAutoMoves: Record<'auth' | CalcdexPlayerKey, boolean>;
 
   /**
+   * Whether to always show the Pokemon's non-volatile status, even if it has none.
+   *
+   * * Which in that case, "OK" will be shown for the abbreviation shown in the `PokeStatus` component.
+   *
+   * @default true
+   * @since 1.1.6
+   */
+  forceNonVolatile: boolean;
+
+  /**
    * When to allow the Pokemon's types to be edited when clicked on.
    *
    * * `'always'` will always allow the types to be edited.
@@ -451,6 +476,38 @@ export interface ShowdexCalcdexSettings {
   showBaseStats: 'always' | 'meta' | 'never';
 
   /**
+   * Whether to show EVs in legacy gens.
+   *
+   * * Note that while the EV system itself wasn't introduced until gen 3, some semblance of this system did technically exist
+   *   in the legacy gens of 1 & 2.
+   *   - In those gens, the EV system is colloquially referred to as *stat experience*, which has a maximum value of 65535.
+   *   - (Fun fact: Nintendo officially called them *base stats*, but you can see how that'd be *really* confusing!)
+   *   - Each time your Pokemon defeats another, their base stats values are awarded to your Pokemon's *stat experience*,
+   *     which is mechanically similar to the modern EV system, except for the amount of "EVs" awarded.
+   *   - Damage formula square roots the *stat experience* value when the Pokemon is level 100, which coincidentally, taking the
+   *     square root of 65535 is 255.99, which is rounded down & divided by 4 when calculating damage (of which the resulting
+   *     number is also rounded down).
+   *     - Final resulting number of 255 ÷ 4 is 63.75, which is rounded down to 63.
+   *     - 63 also happens to be the maximum value that EVs introduced in gens 3+ can produce in the stat formula.
+   *     - Since 252 EVs are the max, 252 ÷ 4 is 63, which redundantly (to prove a point) rounds down to 63.
+   *     - EVs, though not directly, influence the resulting values of the attack & defense variables used in the damage formula.
+   * * For these reasons, this setting (now) exists.
+   *   - Though, nobody actually requested for this setting to exist.
+   *   - I just thought it might not be a bad idea to have this option available, just in case!
+   * * Additionally, some Randoms presets in legacy gens include 0 EVs, so might be useful to be able to see that in the Calcdex.
+   *   - Yes, this rabbit hole of research stemmed from a bug where `guessServerLegacySpread()` failed to guess the `serverStats`
+   *     in legacy gen Randoms cause some presets explicitly set some stats to 0 EVs.
+   *   - Guesser never considered EVs would be 0, so no possible combination could be found always assuming 252 EVs.
+   *   - Then in my confused state, I learned EVs *technically* do exist in legacy gens.
+   *   - So I went back & undid all of the hard EV omissions in the codebase if legacy lmao.
+   *
+   * @see https://bulbapedia.bulbagarden.net/wiki/Effort_values#Stat_experience
+   * @default false
+   * @since 1.1.6
+   */
+  showLegacyEvs: boolean;
+
+  /**
    * Whether to always show the Pokemon's stats in the stats table, regardless of the `CalcdexPokemon`'s `showGenetics` value.
    *
    * * If included in the array for the specific player, the row should always be shown.
@@ -483,6 +540,14 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.6
    */
   allowIllegalSpreads: 'always' | 'meta' | 'never';
+
+  /**
+   * Whether to reset any `dirtyBoosts` when the battle syncs.
+   *
+   * @default true
+   * @since 1.1.6
+   */
+  resetDirtyBoosts: boolean;
 
   /**
    * Whether to show UI tooltips.
@@ -600,7 +665,7 @@ export interface ShowdexCalcdexSettings {
    * ```
    * @since 1.0.3
    */
-  nhkoColors: SmogonMatchupNhkoColors;
+  nhkoColors: CalcdexMatchupNhkoColors;
 
   /**
    * Labels for the NHKO values, up to 4HKO.
@@ -622,7 +687,7 @@ export interface ShowdexCalcdexSettings {
    * ```
    * @since 1.0.3
    */
-  nhkoLabels: SmogonMatchupNhkoLabels;
+  nhkoLabels: CalcdexMatchupNhkoLabels;
 }
 
 /**
@@ -701,7 +766,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
 
   initialState: {
     authUsername: getAuthUsername(), // won't probably exist on init btw
-    settings: hydrateShowdexSettings(getStoredItem('storage-settings-key')),
+    settings: hydrateSettings(getStoredItem('storage-settings-key')),
   },
 
   reducers: {
@@ -745,10 +810,11 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
           Object.entries(value).forEach((
             [objKey, objValue]: [
               keyof ShowdexHellodexSettings | keyof ShowdexCalcdexSettings,
+              // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
               ShowdexHellodexSettings[keyof ShowdexHellodexSettings] | ShowdexCalcdexSettings[keyof ShowdexCalcdexSettings],
             ],
           ) => {
-            state.settings[<keyof ShowdexSettings> key][objKey] = objValue;
+            state.settings[key as keyof ShowdexSettings][objKey] = objValue;
           });
 
           return;
@@ -758,7 +824,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       });
 
       const stateSnapshot = current(state);
-      const dehydratedSettings = dehydrateShowdexSettings(stateSnapshot.settings);
+      const dehydratedSettings = dehydrateSettings(stateSnapshot.settings);
 
       if (dehydratedSettings) {
         setStoredItem('storage-settings-key', dehydratedSettings);
@@ -808,11 +874,11 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
         '\n', 'state', __DEV__ && current(state),
       );
 
-      // defaults are stored in hydrateShowdexSettings(),
+      // defaults are stored in hydrateSettings(),
       // which is returned by passing in no args
-      const defaultSettings = hydrateShowdexSettings();
+      const defaultSettings = hydrateSettings();
 
-      // hydrateShowdexSettings() creates a new object every time,
+      // hydrateSettings() creates a new object every time,
       // so no worries about deep-copying here (I say that now tho...)
       state.settings = defaultSettings;
 

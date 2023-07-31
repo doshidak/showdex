@@ -2,13 +2,17 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
-import { BaseButton, Scrollable, Tooltip } from '@showdex/components/ui';
+import {
+  type BaseButtonProps,
+  BaseButton,
+  Scrollable,
+  Tooltip,
+} from '@showdex/components/ui';
 import { ShowdexDonorTiers, ShowdexPatronTiers } from '@showdex/consts/app';
 import { useAuthUsername, useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
-import type { BaseButtonProps } from '@showdex/components/ui';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { GradientButton } from '../GradientButton';
 import { PatronageTierRenderer } from './PatronageTierRenderer';
 import styles from './PatronagePane.module.scss';
@@ -30,7 +34,7 @@ export const PatronagePane = ({
   onRequestClose,
 }: PatronagePaneProps): JSX.Element => {
   const authUser = useAuthUsername();
-  const authTitle = findPlayerTitle(authUser);
+  const authTitle = findPlayerTitle(authUser, true);
   const colorScheme = useColorScheme();
 
   return (
@@ -144,7 +148,7 @@ export const PatronagePane = ({
                   Please visit our Patreon for specifics on awarded benefits.
                 </div>
 
-                {ShowdexDonorTiers.map(PatronageTierRenderer('DonorTier'))}
+                {ShowdexDonorTiers.map(PatronageTierRenderer('DonorTier', colorScheme))}
               </div>
 
               <div className={styles.buttonContainer}>
@@ -175,7 +179,7 @@ export const PatronagePane = ({
                   Batteries not included.
                 </div>
 
-                {ShowdexPatronTiers.map(PatronageTierRenderer('PatronTier'))}
+                {ShowdexPatronTiers.map(PatronageTierRenderer('PatronTier', colorScheme, true))}
               </div>
 
               <div className={styles.buttonContainer}>

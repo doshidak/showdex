@@ -1,15 +1,21 @@
 import * as React from 'react';
+// import LzString from 'lz-string';
 import {
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
   usePokemonRandomsStatsQuery,
 } from '@showdex/redux/services';
-import { useCalcdexSettings } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/battle';
+import {
+  type CalcdexPokemon,
+  type CalcdexPokemonPreset,
+  useCalcdexSettings,
+} from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
+import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
+// import { fileSize } from '@showdex/utils/humanize';
+// import { dehydratePresets, hydratePresets } from '@showdex/utils/hydro';
 import { getPresetFormes } from './getPresetFormes';
 
 /**
@@ -84,6 +90,10 @@ const sortPresets = (
       if (b.source === 'usage') {
         return -1;
       }
+
+      // update (2023/07/27): WAIT how did I miss this case LMAO no wonder why the presets are backwards HAHAHA
+      // holy shit I'm actually dumb af
+      return 0;
     }
 
     return -1;
@@ -133,7 +143,7 @@ const selectPresetsFromResult = (
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
-// const l = logger('@showdex/utils/presets/usePresets');
+// const l = logger('@showdex/utils/presets/usePresets()');
 
 /**
  * Provides convenient tools to access the presets stored in RTK Query.
@@ -152,29 +162,15 @@ export const usePresets = ({
 }): CalcdexPresetsHookInterface => {
   const settings = useCalcdexSettings();
 
-  // const dex = getDexForFormat(format);
-  const gen = detectGenFromFormat(format);
+  const maxAge: Duration = typeof settings?.maxPresetAge === 'number' && settings.maxPresetAge > 0
+    ? { days: settings.maxPresetAge }
+    : null;
 
+  const gen = detectGenFromFormat(format);
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
-  const randomsFormat = genlessFormat?.includes('random') ?? false;
+  const randoms = genlessFormat?.includes('random');
 
   const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
-  // const dexForme = speciesForme?.includes('-') ? dex?.species.get(speciesForme) : null;
-
-  // const baseForme = dexForme?.baseSpecies; // e.g., 'Necrozma'
-  // const checkBaseForme = !!baseForme && baseForme !== speciesForme;
-
-  // const battleFormes = Array.isArray(dexForme?.battleOnly)
-  //   ? dexForme.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']
-  //   : [dexForme?.battleOnly].filter(Boolean); // e.g., (for some other Pokemon) 'Darmanitan-Galar' -> ['Darmanitan-Galar']
-
-  // const formes = Array.from(new Set([
-  //   speciesForme, // e.g., 'Necrozma-Ultra' (typically wouldn't have any sets)
-  //   !!battleFormes.length && battleFormes.find((f) => PokemonUsageFuckedFormes.includes(f)), // e.g., 'Necrozma-Dawn-Wings' (sets would match this forme)
-  //   !battleFormes.length && checkBaseForme && PokemonUsageFuckedFormes.includes(baseForme) && baseForme, // e.g., 'Necrozma' (wouldn't apply here tho)
-  //   randomsFormat && !!speciesForme && !speciesForme.endsWith('-Gmax') && `${speciesForme}-Gmax`, // e.g., (for some other Pokemon) 'Gengar-Gmax'
-  // ].filter(Boolean))).map((f) => formatId(f));
-
   const formes = getPresetFormes(speciesForme, format, true);
 
   const shouldSkip = disabled
@@ -182,7 +178,9 @@ export const usePresets = ({
     || !gen
     || !genlessFormat;
 
-  const shouldSkipFormats = shouldSkip || randomsFormat || !settings?.downloadSmogonPresets;
+  const shouldSkipFormats = shouldSkip
+    || randoms
+    || !settings?.downloadSmogonPresets;
 
   const {
     formatPresets,
@@ -191,8 +189,7 @@ export const usePresets = ({
   } = usePokemonFormatPresetQuery({
     gen,
     format,
-    formatOnly: genlessFormat?.includes('bdsp'),
-    // formatOnly: genlessFormat.includes('nationaldex'), // eh, gen8.json already includes nationaldex sets
+    maxAge,
   }, {
     skip: shouldSkipFormats,
 
@@ -210,7 +207,9 @@ export const usePresets = ({
   //   '\n', 'downloadRandomsPresets', settings?.downloadRandomsPresets,
   // );
 
-  const shouldSkipFormatStats = shouldSkip || randomsFormat || !settings?.downloadUsageStats;
+  const shouldSkipFormatStats = shouldSkip
+    || randoms
+    || !settings?.downloadUsageStats;
 
   const {
     formatStatsPresets,
@@ -219,6 +218,7 @@ export const usePresets = ({
   } = usePokemonFormatStatsQuery({
     gen,
     format,
+    maxAge,
   }, {
     skip: shouldSkipFormatStats,
 
@@ -229,7 +229,9 @@ export const usePresets = ({
     }),
   });
 
-  const shouldSkipRandoms = shouldSkip || !randomsFormat || !settings?.downloadRandomsPresets;
+  const shouldSkipRandoms = shouldSkip
+    || !randoms
+    || !settings?.downloadRandomsPresets;
 
   const {
     randomsPresets,
@@ -237,7 +239,8 @@ export const usePresets = ({
     randomsLoading,
   } = usePokemonRandomsPresetQuery({
     gen,
-    format, // if it's BDSP, the query will automatically fetch from `gen8bdsprandombattle.json`
+    format,
+    maxAge,
   }, {
     skip: shouldSkipRandoms,
 
@@ -248,7 +251,9 @@ export const usePresets = ({
     }),
   });
 
-  const shouldSkipRandomsStats = shouldSkip || !randomsFormat || !settings?.downloadUsageStats;
+  const shouldSkipRandomsStats = shouldSkip
+    || !randoms
+    || !settings?.downloadUsageStats;
 
   const {
     randomsStatsPresets,
@@ -256,7 +261,8 @@ export const usePresets = ({
     randomsStatsLoading,
   } = usePokemonRandomsStatsQuery({
     gen,
-    format, // supplying both this and `gen`, but `format` will take precedence over `gen`
+    format,
+    maxAge,
   }, {
     skip: shouldSkipRandomsStats,
 
@@ -281,22 +287,51 @@ export const usePresets = ({
     pokemon,
   ]);
 
-  const presets = React.useMemo(() => [
-    // ...((!!pokemon?.presets?.length && pokemon.presets) || []),
-    ...nonStoragePresets,
-    ...((!randomsFormat && [
-      ...((!!formatPresets?.length && formatPresets) || []),
-      ...((!!formatStatsPresets?.length && formatStatsPresets) || []),
-    ]) || []).filter(Boolean).sort(sortPresets(genlessFormat)),
-    ...((randomsFormat && !!randomsPresets?.length && randomsPresets) || []),
-    ...storagePresets, // put Teambuilder presets last
-  ].filter(Boolean), [
+  // build the final list of 'smogon'-sourced presets
+  const presets = React.useMemo(() => {
+    const output: CalcdexPokemonPreset[] = [];
+
+    if (nonStoragePresets?.length) {
+      output.push(...nonStoragePresets);
+    }
+
+    // randoms presets
+    if (randoms && randomsPresets?.length) {
+      output.push(...randomsPresets);
+    }
+
+    // non-randoms (e.g., OU, Ubers, etc.) presets
+    if (!randoms) {
+      const sorted: CalcdexPokemonPreset[] = [];
+
+      if (formatPresets?.length) {
+        // update (2023/07/27): this is why they pay me the big bux
+        // update (2023/07/27): jk, this is why I'm not working at Google -- see sortPresets() above
+        sorted.push(...formatPresets);
+      }
+
+      if (formatStatsPresets?.length) {
+        sorted.push(...formatStatsPresets);
+      }
+
+      if (sorted.length) {
+        sorted.sort(sortPresets(genlessFormat));
+        output.push(...sorted);
+      }
+    }
+
+    // put Teambuilder presets last
+    if (storagePresets.length) {
+      output.push(...storagePresets);
+    }
+
+    return output;
+  }, [
     genlessFormat,
     formatPresets,
     formatStatsPresets,
     nonStoragePresets,
-    // pokemon,
-    randomsFormat,
+    randoms,
     randomsPresets,
     storagePresets,
   ]);
@@ -304,11 +339,11 @@ export const usePresets = ({
   // note: randoms usage set, though a proper CalcdexPokemonPreset, is only used to access its usage stats data
   // (i.e., it's not included in `presets`; only the 'Randoms' preset is available [in addition to 'Yours', if applicable])
   const usages = React.useMemo(() => [
-    ...((!randomsFormat && !!formatStatsPresets?.length && formatStatsPresets) || []),
-    ...((randomsFormat && !!randomsStatsPresets?.length && randomsStatsPresets) || []),
+    ...((!randoms && !!formatStatsPresets?.length && formatStatsPresets) || []),
+    ...((randoms && !!randomsStatsPresets?.length && randomsStatsPresets) || []),
   ].filter(Boolean), [
     formatStatsPresets,
-    randomsFormat,
+    randoms,
     randomsStatsPresets,
   ]);
 
@@ -336,6 +371,25 @@ export const usePresets = ({
     shouldSkipRandoms,
     shouldSkipRandomsStats,
   ]);
+
+  // if (!loading && (presets?.length || usages?.length)) {
+  //   const sourcePresets = [
+  //     ...presets,
+  //     ...usages,
+  //   ];
+  //
+  //   const dehydratedPresets = dehydratePresets(sourcePresets);
+  //   const rehydratedPresets = hydratePresets(dehydratedPresets);
+  //
+  //   l.debug(
+  //     'Testing rehydration of', sourcePresets.length, 'presets for', speciesForme,
+  //     '\n', 'source', sourcePresets,
+  //     '\n', 'dehydrated (raw size)', fileSize(dehydratedPresets.length * 2),
+  //     '(compressed size)', fileSize(LzString.compressToUTF16(dehydratedPresets).length * 2),
+  //     '\n', 'dehydrated (value)', dehydratedPresets,
+  //     '\n', 'rehydrated', rehydratedPresets,
+  //   );
+  // }
 
   // l.debug(
   //   'gen', gen, 'format', format,

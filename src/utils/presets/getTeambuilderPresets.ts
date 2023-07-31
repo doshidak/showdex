@@ -1,8 +1,7 @@
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/battle';
-import { env, getStoredItem } from '@showdex/utils/core';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type GenerationNum } from '@smogon/calc';
+import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { env, formatId, getStoredItem } from '@showdex/utils/core';
+import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
 import { unpackStorageTeam } from './unpackStorageTeam';
 
 /**
@@ -51,7 +50,7 @@ export const getTeambuilderPresets = (
 
   // update (2023/01/24): either grab the teams from Storage.teams (solves the cross-origin issue on other psim sites)
   // or fallback to accessing the teams from LocalStorage
-  const packedTeams = (<Showdown.ClientStorage> <unknown> Storage).teams
+  const packedTeams = (Storage as unknown as Showdown.ClientStorage).teams
     ?.map((team) => (team?.format && team.team ? `${team.format}${(team.capacity ?? 0) > 6 ? '-box' : ''}]${team.name}|${team.team}` : null))
     .filter(Boolean)
     || getStoredItem('storage-teambuilder-key')?.split('\n')
@@ -69,7 +68,7 @@ export const getTeambuilderPresets = (
     return [];
   }
 
-  return matchedTeams.flatMap(unpackStorageTeam).reduce((prev, preset) => {
+  return matchedTeams.flatMap(unpackStorageTeam).reduce<CalcdexPokemonPreset[]>((prev, preset) => {
     const {
       calcdexId,
       format: presetFormat,
@@ -97,5 +96,5 @@ export const getTeambuilderPresets = (
     }
 
     return prev;
-  }, <CalcdexPokemonPreset[]> []);
+  }, []);
 };

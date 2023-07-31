@@ -6,6 +6,7 @@
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
+@use 'mixins/transition';
 
 .container {
   .row:not(:first-child) {
@@ -85,6 +86,7 @@ button.toggleButton {
 
 button.nameButton {
   flex: 0 1 auto;
+  @include flex.row-center;
   // max-width: 100%;
   @include spacing.margin-xy($x: -5px, $y: -1px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
@@ -111,6 +113,25 @@ button.nameButton {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+
+  .withFormes & {
+    @include spacing.margin($right: 3px);
+  }
+}
+
+.formeChevron {
+  @include spacing.margin($right: 5px);
+  font-size: 10px;
+  opacity: 0.3;
+  @include transition.apply(opacity, transform);
+
+  .nameButton:hover & {
+    opacity: 0.95;
+  }
+
+  &.open {
+    transform: rotate(-180deg);
+  }
 }
 
 .level {
@@ -164,7 +185,7 @@ button.nameButton {
 // }
 
 .hpPercentage {
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin($left: 6px);
 
   .light & {
     color: color.alpha(colors.$black, 0.85);
@@ -177,11 +198,32 @@ button.nameButton {
 
 .statuses {
   @include flex.row($align: center);
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin-xy($x: 4px);
 
   .status:not(:last-child) {
     display: inline-block;
-    @include spacing.margin($right: 0.5em);
+    @include spacing.margin($right: 4px);
+  }
+}
+
+.statusButton {
+  position: relative;
+
+  &::before {
+    content: '';
+    @include position.absolute($top: -2px, $right: 2px, $bottom: -2px, $left: 1px);
+    border-radius: 7px;
+    @include transition.apply(background-color, box-shadow);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light &:hover::before {
+    background-color: color.alpha(colors.$black, 0.05);
+  }
+
+  .dark &:hover::before {
+    background-color: color.alpha(colors.$white, 0.075);
   }
 }
 

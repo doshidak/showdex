@@ -1,13 +1,20 @@
-import { PokemonNatures } from '@showdex/consts/pokemon';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+} from '@smogon/calc';
+import { PokemonNatures } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
-import { getDexForFormat, toggleableAbility } from '@showdex/utils/dex';
-import { flattenAlts } from '@showdex/utils/presets';
-import type { GenerationNum } from '@smogon/calc';
-import type { AbilityName, ItemName, MoveName } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPokemon } from '@showdex/redux/store';
-import { detectGenFromFormat } from './detectGenFromFormat';
-import { detectLegacyGen } from './detectLegacyGen';
+import { env, similarArrays } from '@showdex/utils/core';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDexForFormat,
+  toggleableAbility,
+} from '@showdex/utils/dex';
+import { flattenAlts } from '@showdex/utils/presets/flattenAlts'; /** @todo reorganize me */
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
@@ -33,20 +40,26 @@ export const sanitizePokemon = (
   showAllFormes?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
+
   const gen = typeof format === 'string'
     ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
     : format;
 
   const legacy = detectLegacyGen(format);
   const defaultIv = legacy ? 30 : 31;
-  // const defaultEv = legacy ? 252 : 0; // update: actually, changed my mind; better to have evs as an empty object
+
+  // update: actually, changed my mind; better to have evs as an empty object
+  // update (2023/07/24): TIL EVs do exist in legacy gens as "stats EXP", which goes up to 65535 &
+  // eventually gets square rooted when you're level 100, which equates about 252 LOL
+  // (also in Randoms, some of the Pokemon randomly have 0 EVs, so we need to record that now oof)
+  // ... no regrets
+  const defaultEv = legacy ? 252 : 0;
 
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];
 
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: ('calcdexId' in pokemon && pokemon.calcdexId) || null,
-    // calcdexNonce: ('calcdexNonce' in pokemon && pokemon.calcdexNonce) || null,
     serverSourced: ('serverSourced' in pokemon && pokemon.serverSourced) || false,
     playerKey: ('playerKey' in pokemon && pokemon.playerKey)
       || detectPlayerKeyFromPokemon(pokemon)
@@ -62,7 +75,7 @@ export const sanitizePokemon = (
     altFormes: ('altFormes' in pokemon && !!pokemon.altFormes?.length && pokemon.altFormes) || [],
     transformedForme: transformed
       ? typeof pokemon.volatiles.transform[1] === 'object'
-        ? (<Showdown.Pokemon> <unknown> pokemon.volatiles.transform[1])?.speciesForme || null
+        ? (pokemon.volatiles.transform[1] as unknown as Showdown.Pokemon)?.speciesForme || null
         : pokemon.volatiles.transform[1] || null
       : null,
 
@@ -74,8 +87,9 @@ export const sanitizePokemon = (
     gmaxable: ('gmaxable' in pokemon && pokemon.gmaxable) || false,
 
     types: typeChanged
-      ? <Showdown.TypeName[]> pokemon.volatiles.typechange[1].split('/') || []
+      ? pokemon.volatiles.typechange[1].split('/') as Showdown.TypeName[] || []
       : ('types' in pokemon && pokemon.types) || [],
+    dirtyTypes: ('dirtyTypes' in pokemon && pokemon.dirtyTypes) || [],
     teraType: ('teraType' in pokemon && pokemon.teraType)
       || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
       || null,
@@ -85,25 +99,26 @@ export const sanitizePokemon = (
     altTeraTypes: ('altTeraTypes' in pokemon && !!pokemon.altTeraTypes?.length && pokemon.altTeraTypes) || [],
 
     hp: pokemon?.hp || 0,
+    dirtyHp: 'dirtyHp' in pokemon ? (pokemon.dirtyHp ?? null) : null, // note: 0 = fainted, so null is when the user resets back to `hp`
     maxhp: pokemon?.maxhp || 1,
     fainted: pokemon?.fainted ?? !pokemon?.hp,
 
-    ability: (!legacy && <AbilityName> pokemon?.ability) || null,
+    ability: (!legacy && pokemon?.ability as AbilityName) || null,
     dirtyAbility: ('dirtyAbility' in pokemon && pokemon.dirtyAbility) || null,
     // abilityToggled: 'abilityToggled' in pokemon ? pokemon.abilityToggled : detectToggledAbility(pokemon),
-    baseAbility: <AbilityName> pokemon?.baseAbility?.replace(/no\s?ability/i, ''),
+    baseAbility: pokemon?.baseAbility?.replace(/no\s?ability/i, '') as AbilityName,
     abilities: (!legacy && 'abilities' in pokemon && pokemon.abilities) || [],
     altAbilities: (!legacy && 'altAbilities' in pokemon && pokemon.altAbilities) || [],
     transformedAbilities: (!legacy && 'transformedAbilities' in pokemon && pokemon.transformedAbilities) || [],
 
     item: gen > 1 && pokemon?.item && pokemon.item !== '(exists)'
-      ? <ItemName> dex.items.get(pokemon.item)?.name
+      ? dex.items.get(pokemon.item)?.name as ItemName
       : null,
 
     dirtyItem: ('dirtyItem' in pokemon && pokemon.dirtyItem) || null,
     altItems: (gen > 1 && 'altItems' in pokemon && pokemon.altItems) || [],
     itemEffect: pokemon?.itemEffect || null,
-    prevItem: <ItemName> pokemon?.prevItem || null,
+    prevItem: pokemon?.prevItem as ItemName || null,
     prevItemEffect: pokemon?.prevItemEffect || null,
 
     nature: !legacy
@@ -111,40 +126,45 @@ export const sanitizePokemon = (
       : null,
 
     ivs: {
-      hp: ('ivs' in pokemon && pokemon.ivs?.hp) || defaultIv,
-      atk: ('ivs' in pokemon && pokemon.ivs?.atk) || defaultIv,
-      def: ('ivs' in pokemon && pokemon.ivs?.def) || defaultIv,
-      spa: ('ivs' in pokemon && pokemon.ivs?.spa) || defaultIv,
-      spd: ('ivs' in pokemon && pokemon.ivs?.spd) || defaultIv,
-      spe: ('ivs' in pokemon && pokemon.ivs?.spe) || defaultIv,
+      hp: 'ivs' in pokemon && typeof pokemon.ivs?.hp === 'number' ? pokemon.ivs.hp : defaultIv,
+      atk: 'ivs' in pokemon && typeof pokemon.ivs?.atk === 'number' ? pokemon.ivs.atk : defaultIv,
+      def: 'ivs' in pokemon && typeof pokemon.ivs?.def === 'number' ? pokemon.ivs.def : defaultIv,
+      spa: 'ivs' in pokemon && typeof pokemon.ivs?.spa === 'number' ? pokemon.ivs.spa : defaultIv,
+      spd: 'ivs' in pokemon && typeof pokemon.ivs?.spd === 'number' ? pokemon.ivs.spd : defaultIv,
+      spe: 'ivs' in pokemon && typeof pokemon.ivs?.spe === 'number' ? pokemon.ivs.spe : defaultIv,
     },
 
     evs: {
-      ...(!legacy && {
-        hp: ('evs' in pokemon && pokemon.evs?.hp) || 0,
-        atk: ('evs' in pokemon && pokemon.evs?.atk) || 0,
-        def: ('evs' in pokemon && pokemon.evs?.def) || 0,
-        spa: ('evs' in pokemon && pokemon.evs?.spa) || 0,
-        spd: ('evs' in pokemon && pokemon.evs?.spd) || 0,
-        spe: ('evs' in pokemon && pokemon.evs?.spe) || 0,
-      }),
+      hp: 'evs' in pokemon && typeof pokemon.evs?.hp === 'number' ? pokemon.evs.hp : defaultEv,
+      atk: 'evs' in pokemon && typeof pokemon.evs?.atk === 'number' ? pokemon.evs.atk : defaultEv,
+      def: 'evs' in pokemon && typeof pokemon.evs?.def === 'number' ? pokemon.evs.def : defaultEv,
+      spa: 'evs' in pokemon && typeof pokemon.evs?.spa === 'number' ? pokemon.evs.spa : defaultEv,
+      spd: 'evs' in pokemon && typeof pokemon.evs?.spd === 'number' ? pokemon.evs.spd : defaultEv,
+      spe: 'evs' in pokemon && typeof pokemon.evs?.spe === 'number' ? pokemon.evs.spe : defaultEv,
     },
 
     // update (2022/11/14): defaultShowGenetics setting is now deprecated in favor of lockGeneticsVisibility,
     // so this should be its new default, false (was previously true)
     showGenetics: ('showGenetics' in pokemon && pokemon.showGenetics) || false,
 
+    // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
+    // (populated in syncPokemon() & used in createSmogonPokemon())
+    boostedStat: ('boostedStat' in pokemon && pokemon.boostedStat) || null,
+
     boosts: {
       atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,
       def: typeof pokemon?.boosts?.def === 'number' ? pokemon.boosts.def : 0,
-      spa: 'spc' in (pokemon?.boosts || {}) && typeof (<Showdown.Pokemon> pokemon).boosts.spc === 'number'
-        ? (<Showdown.Pokemon> pokemon).boosts.spc
+      spa: 'spc' in (pokemon?.boosts || {}) && typeof (pokemon as Showdown.Pokemon).boosts.spc === 'number'
+        ? (pokemon as Showdown.Pokemon).boosts.spc
         : typeof pokemon?.boosts?.spa === 'number' ? pokemon.boosts.spa : 0,
       spd: typeof pokemon?.boosts?.spd === 'number' ? pokemon.boosts.spd : 0,
       spe: typeof pokemon?.boosts?.spe === 'number' ? pokemon.boosts.spe : 0,
     },
 
-    /** @todo clean this up lol */
+    // note to self: you can't clean this up in O(1) unless you wanna (a) use a loop, (b) use a ternary where you check
+    // 'dirtyBoosts' in pokemon first, but realize TypeScript is angy, so you end up doing (a) or (c) devise some advanced mainframe
+    // algorithms that does everything in O(1), including earning my Ph.D, when all you need to do was copy a tiny object & fill it
+    // with null's if its value is falsy :o -- wait you mean the `in` operator is O(n) ??? frick
     dirtyBoosts: {
       atk: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.atk) || null,
       def: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.def) || null,
@@ -162,6 +182,7 @@ export const sanitizePokemon = (
     },
 
     status: pokemon?.fainted || !pokemon?.hp ? null : pokemon?.status,
+    dirtyStatus: ('dirtyStatus' in pokemon && pokemon.dirtyStatus) || null,
     turnstatuses: pokemon?.turnstatuses,
 
     chainMove: ('chainMove' in pokemon && pokemon.chainMove) || null,
@@ -170,14 +191,15 @@ export const sanitizePokemon = (
     toxicCounter: ('toxicCounter' in pokemon && pokemon.toxicCounter) || pokemon?.statusData?.toxicTurns || 0,
     hitCounter: ('hitCounter' in pokemon && pokemon.hitCounter) || pokemon?.timesAttacked || 0,
     faintCounter: ('faintCounter' in pokemon && pokemon.faintCounter) || 0,
+    dirtyFaintCounter: ('dirtyFaintCounter' in pokemon && pokemon.dirtyFaintCounter) || null,
 
     useZ: (!legacy && 'useZ' in pokemon && pokemon.useZ) || false,
     useMax: (!legacy && 'useMax' in pokemon && pokemon.useMax) || false,
     terastallized: (!legacy && typeof pokemon?.terastallized === 'boolean' && pokemon.terastallized) || false,
     criticalHit: ('criticalHit' in pokemon && pokemon.criticalHit) || false,
 
-    lastMove: <MoveName> pokemon?.lastMove || null,
-    moves: <MoveName[]> pokemon?.moves || [],
+    lastMove: pokemon?.lastMove as MoveName || null,
+    moves: pokemon?.moves as MoveName[] || [],
     serverMoves: ('serverMoves' in pokemon && pokemon.serverMoves) || [],
     transformedMoves: ('transformedMoves' in pokemon && pokemon.transformedMoves) || [],
     altMoves: ('altMoves' in pokemon && pokemon.altMoves) || [],
@@ -233,7 +255,7 @@ export const sanitizePokemon = (
         )
       ? [
         transformedBaseSpeciesForme,
-        ...(<string[]> transformedBaseSpecies.otherFormes),
+        ...(transformedBaseSpecies.otherFormes as string[]),
       ]
       : baseSpecies?.otherFormes?.length
           && (
@@ -242,14 +264,9 @@ export const sanitizePokemon = (
           )
         ? [
           baseSpeciesForme,
-          ...(<string[]> baseSpecies.otherFormes),
+          ...(baseSpecies.otherFormes as string[]),
         ]
         : [];
-
-    // make sure we don't got any bunk formes like Hisuian formes
-    // update (2023/01/05): probably ok to allow Hisuian formes now
-    // sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
-    //   .filter((f) => !!f && !f.includes('-Hisui'));
 
     // if this Pokemon can G-max, add the appropriate formes
     if (sanitizedPokemon.dmaxable && species.canGigantamax) {
@@ -283,16 +300,22 @@ export const sanitizePokemon = (
       // Transform ability doesn't copy the base HP stat
       // (uses the original Pokemon's base HP stat)
       if ('hp' in sanitizedPokemon.transformedBaseStats) {
-        delete (<Showdown.StatsTable> sanitizedPokemon.transformedBaseStats).hp;
+        delete (sanitizedPokemon.transformedBaseStats as Showdown.StatsTable).hp;
       }
     }
 
     // only update the types if the dex returned types
     // (checking against typeChanged since if true, should've been already updated above)
-    if (!typeChanged && (transformedSpecies || species)?.types?.length) {
-      sanitizedPokemon.types = [
-        ...(<Showdown.TypeName[]> (transformedSpecies || species).types),
-      ];
+    const speciesTypes = (transformedSpecies || species)?.types as Showdown.TypeName[];
+
+    if (!typeChanged && speciesTypes?.length) {
+      sanitizedPokemon.types = [...speciesTypes];
+    }
+
+    // clear the dirtyTypes if it matches the current types
+    // (since we're using diffArrays(), the order of the elements doesn't matter)
+    if (sanitizedPokemon.dirtyTypes.length && similarArrays(sanitizedPokemon.types, sanitizedPokemon.dirtyTypes)) {
+      sanitizedPokemon.dirtyTypes = [];
     }
 
     // if no teraType in gen 9, default to the Pokemon's first type
@@ -306,12 +329,12 @@ export const sanitizePokemon = (
     // problematic for Mega Pokemon who have one legal ability compared to their non-Mega'd counterparts
     sanitizedPokemon.abilities = Array.from(new Set([
       // ...(sanitizedPokemon.abilities || []),
-      ...(<AbilityName[]> Object.values(species?.abilities || {})),
+      ...(Object.values(species?.abilities || {}) as AbilityName[]),
     ].filter(Boolean)));
 
     // if transformed, update the legal abilities of the transformed Pokemon
     sanitizedPokemon.transformedAbilities = [
-      ...(<AbilityName[]> Object.values(transformedSpecies?.abilities || {})),
+      ...(Object.values(transformedSpecies?.abilities || {}) as AbilityName[]),
     ].filter(Boolean);
 
     // check if we should auto-set the ability

@@ -1,4 +1,4 @@
-import type { CalcdexPokemonAlt, CalcdexPokemonUsageAlt } from '@showdex/redux/store';
+import { type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/redux/store';
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -18,5 +18,18 @@ export const detectUsageAlt = <
 ): alt is CalcdexPokemonUsageAlt<T> => Array.isArray(alt)
   && !!alt[0]
   && typeof alt[1] === 'number';
+
+/**
+ * Detects whether the provided `alts` contains an array of usage percentages.
+ *
+ * @since 1.1.6
+ */
+export const detectUsageAlts = <
+  T extends string,
+>(
+  alts: unknown[],
+): alts is CalcdexPokemonUsageAlt<T>[] => Array.isArray(alts)
+  && Array.isArray(alts[0])
+  && detectUsageAlt(alts[0]);
 
 /* eslint-enable @typescript-eslint/indent */

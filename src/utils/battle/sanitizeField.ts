@@ -1,6 +1,6 @@
-import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/field';
-import { formatId } from '@showdex/utils/app';
-import type { CalcdexBattleField } from '@showdex/redux/store';
+import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/dex';
+import { type CalcdexBattleField } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 
 /**
  * Reads properties from the `battle` to construct a new `CalcdexBattleField`,

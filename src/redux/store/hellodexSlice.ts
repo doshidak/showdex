@@ -1,6 +1,11 @@
-import { createSlice, current } from '@reduxjs/toolkit';
+import {
+  type Draft,
+  type PayloadAction,
+  type SliceCaseReducers,
+  createSlice,
+  current,
+} from '@reduxjs/toolkit';
 import { logger } from '@showdex/utils/debug';
-import type { Draft, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from './hooks';
 
 /**

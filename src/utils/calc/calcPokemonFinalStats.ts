@@ -1,27 +1,30 @@
+import { type GenerationNum } from '@smogon/calc';
 // import { times } from '@showdex/consts/core';
 import {
   // PokemonInitialStats,
   PokemonSpeedReductionItems,
   PokemonStatNames,
-} from '@showdex/consts/pokemon';
-import { formatId as id } from '@showdex/utils/app';
+} from '@showdex/consts/dex';
 import {
-  countRuinAbilities,
+  type CalcdexBattleField,
+  type CalcdexPlayer,
+  type CalcdexPokemon,
+} from '@showdex/redux/store';
+import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
+import { env, formatId as id, nonEmptyObject } from '@showdex/utils/core';
+import { logger } from '@showdex/utils/debug';
+import {
   detectGenFromFormat,
   detectLegacyGen,
-  ruinAbilitiesActive,
-} from '@showdex/utils/battle';
-import { env } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
-import { getDexForFormat, notFullyEvolved, shouldIgnoreItem } from '@showdex/utils/dex';
-import type { GenerationNum } from '@smogon/calc';
-import type { CalcdexBattleField, CalcdexPlayer, CalcdexPokemon } from '@showdex/redux/store';
-import type { CalcdexStatModRecording } from './statModRecorder';
-import { calcPokemonHp } from './calcPokemonHp';
+  getDexForFormat,
+  notFullyEvolved,
+  shouldIgnoreItem,
+} from '@showdex/utils/dex';
+import { calcPokemonHpPercentage } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
-import { statModRecorder } from './statModRecorder';
+import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
 
-const l = logger('@showdex/utils/calc/calcPokemonFinalStats');
+const l = logger('@showdex/utils/calc/calcPokemonFinalStats()');
 
 /**
  * Reimplementation of `calculateModifiedStats()` in the Showdown client's `BattleTooltip`.
@@ -77,7 +80,7 @@ export const calcPokemonFinalStats = (
 
   const legacy = detectLegacyGen(gen);
 
-  const hpPercentage = calcPokemonHp(pokemon);
+  const hpPercentage = calcPokemonHpPercentage(pokemon);
   const ability = id(pokemon.dirtyAbility ?? pokemon.ability);
   const opponentAbility = id(opponentPokemon.dirtyAbility ?? opponentPokemon.ability);
 
@@ -137,10 +140,16 @@ export const calcPokemonFinalStats = (
   // find out what the highest *boosted* stat is (excluding HP) for use in some abilities,
   // particularly Protosynthesis & Quark Drive (gen 9),
   // which will boost the highest stat after stage boosts are applied
-  const highestBoostedStat = findHighestStat(record.stats());
+  const highestBoostedStat = pokemon.boostedStat || findHighestStat(record.stats());
 
   // apply status condition effects
-  if (pokemon.status) {
+  const status = pokemon?.dirtyStatus && pokemon.dirtyStatus !== '???'
+    ? pokemon.dirtyStatus === 'ok'
+      ? null
+      : pokemon.dirtyStatus
+    : pokemon.status;
+
+  if (status) {
     if (!legacy && ['guts', 'quickfeet'].includes(ability)) {
       // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
       if (ability === 'guts') {
@@ -153,13 +162,35 @@ export const calcPokemonFinalStats = (
       }
     } else {
       // 50% ATK reduction when burned (all gens... probably)
-      if (pokemon.status === 'brn') {
+      if (status === 'brn') {
         record.apply('atk', 0.5, 'status', 'Burn');
       }
 
       // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
-      if (pokemon.status === 'par') {
+      if (status === 'par') {
         record.apply('spe', gen < 7 ? 0.25 : 0.5, 'status', 'Paralysis');
+      }
+    }
+  }
+
+  // update (2023/07/27): jk, apparently screens in legacy gens boost stats, not incoming damage!
+  // (of course, the only exception is Light Screen in gen 1, which boosts SPC only after taking damage)
+  // (also, the BattleTooltips in the Showdown client don't show this)
+  if (legacy && nonEmptyObject(player?.side)) { // note: we could be in a higher gen here, hence the check!
+    // 100% DEF boost if the "Reflect" player side condition is active (gens 1-2)
+    // (note: in gen 1, the side condition is actually a Pokemon volatile & only applies to the Pokemon itself, i.e., effects
+    // are removed once the Pokemon faints or switches out, but we'll check the side condition as the user can toggle it)
+    if (player.side.isReflect) {
+      record.apply('def', 2, gen === 1 ? 'move' : 'field', 'Reflect');
+    }
+
+    // 100% SPD boost if the "Light Screen" player side condition is active (gens 1-2)
+    if (player.side.isLightScreen) {
+      record.apply('spd', 2, gen === 1 ? 'move' : 'field', 'Light Screen');
+
+      // note: in gen 1, there no SPD, only SPC (Special), so SPA = SPD = SPC
+      if (gen === 1) {
+        record.apply('spa', 2, 'move', 'Light Screen');
       }
     }
   }
@@ -391,7 +422,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply additional status effects
-  if (pokemon.status) {
+  if (status) {
     if (ability === 'marvelscale') {
       record.apply('def', 1.5, 'ability', 'Marvel Scale');
     }
@@ -473,16 +504,18 @@ export const calcPokemonFinalStats = (
      */
 
     // 30% highest stat boost (or 1.5x SPE modifier) if ability is "Protosynthesis" or "Quark Drive"
+    // update (2023/05/15): highest boosted stat can now be overwritten by specifying pokemon.boostedStat
+    // (which it is, wherever highestBoostedStat is declared above)
     if (['protosynthesis', 'quarkdrive'].includes(ability) && highestBoostedStat) {
       // if the Pokemon has a booster volatile, use its reported stat
       // e.g., 'protosynthesisatk' -> boosterVolatileStat = 'atk'
-      const boosterVolatile = Object.keys(pokemon.volatiles || {}).find((k) => /^(?:proto|quark)/i.test(k));
-      const boosterVolatileStat = <Showdown.StatNameNoHp> boosterVolatile?.replace(/(?:protosynthesis|quarkdrive)/i, '');
-      const stat = boosterVolatileStat || highestBoostedStat;
+      // const boosterVolatile = Object.keys(pokemon.volatiles || {}).find((k) => /^(?:proto|quark)/i.test(k));
+      // const boosterVolatileStat = <Showdown.StatNameNoHp> boosterVolatile?.replace(/(?:protosynthesis|quarkdrive)/i, '');
+      // const stat = boosterVolatileStat || highestBoostedStat;
 
       record.apply(
-        stat,
-        stat === 'spe' ? 1.5 : 1.3,
+        highestBoostedStat,
+        highestBoostedStat === 'spe' ? 1.5 : 1.3,
         'ability',
         dex.abilities.get(ability)?.name || ability,
       );

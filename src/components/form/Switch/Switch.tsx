@@ -1,8 +1,12 @@
 import * as React from 'react';
+import { type FieldRenderProps } from 'react-final-form';
+import { type AriaSwitchProps } from '@react-types/switch';
 import { useSwitch } from '@react-aria/switch';
 import { VisuallyHidden } from '@react-aria/visually-hidden';
 import { useToggleState } from '@react-stately/toggle';
 import {
+  type DragEndEvent,
+  type DragMoveEvent,
   DndContext,
   MouseSensor,
   TouchSensor,
@@ -17,9 +21,6 @@ import {
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { AriaSwitchProps } from '@react-types/switch';
-import type { FieldRenderProps } from 'react-final-form';
-import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core';
 import { SwitchHandle } from './SwitchHandle';
 import { SwitchTrack } from './SwitchTrack';
 import styles from './Switch.module.scss';

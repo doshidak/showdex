@@ -1,8 +1,8 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PokemonTypeLabels } from '@showdex/consts/pokemon';
+import { PokemonTypeLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
-import type { ElementSizeLabel } from '@showdex/utils/hooks';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import styles from './PokeType.module.scss';
 
 export interface PokeTypeProps {

@@ -1,6 +1,6 @@
-import { PokemonSpeedReductionItems } from '@showdex/consts/pokemon';
-import { formatId } from '@showdex/utils/app';
-import type { CalcdexBattleField, CalcdexPokemon } from '@showdex/redux/store';
+import { PokemonSpeedReductionItems } from '@showdex/consts/dex';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { hasMegaForme } from './hasMegaForme';
 
 /**
@@ -21,7 +21,7 @@ export const shouldIgnoreItem = (
   const ability = formatId(pokemon.dirtyAbility || pokemon.ability);
   const item = formatId(pokemon.dirtyItem ?? pokemon.item);
 
-  return 'embargo' in pokemon.volatiles // Embargo is a move
+  return 'embargo' in (pokemon.volatiles || {}) // Embargo is a move
     || hasMegaForme(speciesForme)
     || field?.isMagicRoom
     || (ability === 'klutz' && !PokemonSpeedReductionItems.map((i) => formatId(i).includes(item)));

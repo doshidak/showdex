@@ -1,6 +1,6 @@
-import { formatId } from '@showdex/utils/app';
-import type { GameType } from '@smogon/calc/dist/data/interface';
-import type { CalcdexPlayer } from '@showdex/redux/store';
+import { type GameType } from '@smogon/calc';
+import { type CalcdexPlayer } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 
 /**
  * Auto-toggles each applicable Pokemon's `abilityToggled` if they have a *Ruin* ability.

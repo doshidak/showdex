@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react",
     "lib": [
       "DOM",
       "DOM.Iterable",
@@ -21,7 +22,8 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": false,
-    "target": "ES6",
+    "target": "ESNext",
+    "verbatimModuleSyntax": false,
   },
 
   "include": [
@@ -30,13 +32,14 @@
   ],
 
   "exclude": [
+    "*.cjs",
+    "*.js",
+    "*.mjs",
     "build",
     "cache",
     "dist",
     "node_modules",
     "patches",
     "scripts",
-    "./*.cjs",
-    "./*.js",
   ],
 }

@@ -1,11 +1,15 @@
+import { type MoveName } from '@smogon/calc';
+import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
-import { formatId } from '@showdex/utils/app';
-import { detectGenFromFormat, legalLockedFormat } from '@showdex/utils/battle';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import {
+  detectGenFromFormat,
   getDexForFormat,
   getMaxMove,
   getZMove,
   getPokemonLearnset,
+  legalLockedFormat,
 } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
@@ -15,9 +19,6 @@ import {
   usageAltPercentFinder,
   usageAltPercentSorter,
 } from '@showdex/utils/presets';
-import type { MoveName } from '@smogon/calc/dist/data/interface';
-import type { DropdownOption } from '@showdex/components/form';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 
 export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
 
@@ -171,12 +172,14 @@ export const buildMoveOptions = (
     filterMoves.push(...filteredRevealedMoves);
   }
 
+  // const hasUsageStats = !!altMoves?.length && altMoves
+  //   .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+  const hasUsageStats = !!usageAltSource?.length;
+
   if (altMoves?.length) {
     const unsortedPoolMoves = altMoves
       .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
-
-    const hasUsageStats = !!altMoves?.length && altMoves
-      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
     const poolMoves = hasUsageStats
       ? unsortedPoolMoves // should be sorted already (despite the name)
@@ -192,6 +195,27 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...flattenAlts(poolMoves));
+  }
+
+  const remainingUsageMoves = hasUsageStats
+    ? usageAltSource.filter((a) => (
+      !!a
+        && !!(detectUsageAlt(a) || findUsagePercent(a))
+        && !filterMoves.includes(flattenAlt(a))
+    ))
+    : null;
+
+  if (remainingUsageMoves?.length) {
+    options.push({
+      label: 'Usage',
+      options: remainingUsageMoves.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
+        value: flattenAlt(alt),
+      })),
+    });
+
+    filterMoves.push(...flattenAlts(remainingUsageMoves));
   }
 
   const learnset = getPokemonLearnset(format, speciesForme, showAllMoves);
@@ -228,7 +252,7 @@ export const buildMoveOptions = (
     // regex filters out 'hiddenpowerfighting70', which is 'hiddenpowerfighting' (BP 60),
     // but with a BP of 70 lol (don't care about the BP here though, we just need the name)
     const unsortedHpMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
+      .map((moveid) => dex.moves.get(moveid)?.name as MoveName)
       .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
 
     // using a Set makes sure we have no duplicate entries in the array
@@ -249,7 +273,7 @@ export const buildMoveOptions = (
   // show all possible moves if the format is not legal-locked or no learnset is available
   if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
-      .map((moveid) => <MoveName> dex.moves.get(moveid)?.name)
+      .map((moveid) => dex.moves.get(moveid)?.name as MoveName)
       .filter((n) => !!n && !/^(?:G-)?Max\s+|Hidden\s*Power/i.test(n) && !filterMoves.includes(n))
       .sort(usageSorter);
 

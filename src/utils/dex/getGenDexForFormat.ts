@@ -1,7 +1,6 @@
-import { detectGenFromFormat } from '@showdex/utils/battle';
+import { type Generation, type GenerationNum, type Specie } from '@smogon/calc';
 import { env } from '@showdex/utils/core';
-import type { GenerationNum } from '@smogon/calc';
-import type { Generation, Specie } from '@smogon/calc/dist/data/interface';
+import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
 import { getNaturesDex } from './getNaturesDex';
 import { getTypesDex } from './getTypesDex';
@@ -26,7 +25,7 @@ export const getGenDexForFormat = (format: string | GenerationNum): Generation =
     return null;
   }
 
-  const gen = <GenerationNum> dex.gen
+  const gen = dex.gen as GenerationNum
     || (
       typeof format === 'string'
         ? detectGenFromFormat(format)
@@ -37,24 +36,24 @@ export const getGenDexForFormat = (format: string | GenerationNum): Generation =
   // since it's not provided by Showdown's global Dex
   // (otherwise, Eviolite won't work since the mechanics file calls this again!)
   const species: Generation['species'] = {
-    ...(<Generation['species']> <unknown> dex.species),
+    ...(dex.species as unknown as Generation['species']),
 
     get: (id) => {
-      const specie = <Specie> <unknown> dex.species.get(id);
+      const specie = dex.species.get(id) as unknown as Specie;
 
       if (typeof specie?.nfe !== 'boolean') {
-        (<Writable<Specie>> specie).nfe = notFullyEvolved(id);
+        (specie as Writable<Specie>).nfe = notFullyEvolved(id);
       }
 
       return specie;
     },
   };
 
-  return <Generation> <unknown> {
+  return {
     ...dex,
     num: gen,
     natures: getNaturesDex(),
     species,
     types: getTypesDex(gen),
-  };
+  } as unknown as Generation;
 };

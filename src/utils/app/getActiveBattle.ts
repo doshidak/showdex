@@ -1,1 +1,1 @@
-export const getActiveBattle = (): Showdown.Battle => (<Showdown.BattleRoom> app?.curRoom)?.battle;
+export const getActiveBattle = (): Showdown.Battle => (app?.curRoom as Showdown.BattleRoom)?.battle;

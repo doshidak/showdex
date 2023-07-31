@@ -1,4 +1,4 @@
-import type { CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 
 export const detectSpeciesForme = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},

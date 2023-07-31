@@ -2,9 +2,8 @@ import * as React from 'react';
 import SimpleBar from 'simplebar';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/core';
 import { useUserAgent } from '@showdex/utils/hooks';
-// import type { Options as SimpleBarOptions } from 'simplebar';
 import styles from './Scrollable.module.scss';
 
 export interface ScrollableProps extends Omit<JSX.IntrinsicElements['div'], 'ref'> {
