@@ -301,7 +301,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                   && !!p.ident
                   && !!p.details
                   && p.ident === pokemon.ident
-                  && p.details === (pokemon.details || pokemon.speciesForme)
+                  // update (2023/07/30): `details` can include the gender, if applicable (e.g., 'Reuniclus, M')
+                  // && p.details === (pokemon.details || pokemon.speciesForme)
+                  && (
+                    p.details === pokemon.details
+                      || p.details === [
+                        pokemon.speciesForme,
+                        pokemon.gender !== 'N' && pokemon.gender,
+                      ].filter(Boolean).join(', ')
+                  )
               ))?.calcdexId
           ) || calcPokemonCalcdexId(pokemon, playerKey);
 

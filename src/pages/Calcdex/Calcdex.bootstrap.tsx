@@ -690,6 +690,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         ident: p.ident,
         // name: p.name,
         speciesForme: p.speciesForme,
+        gender: p.gender,
         details: p.details,
         searchid: p.searchid,
       }));
@@ -698,7 +699,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       const prevPokemon = (replaceSlot > -1 && pokemonSearchList[replaceSlot])
         || pokemonSearchList.filter((p) => !!p.calcdexId).find((p) => (
           // e.g., ident = 'p1: CalcdexDemolisher' (nicknamed) or 'p1: Ditto' (unnamed default)
-          (!!ident && (
+          // update (2023/07/30): while `ident` is mostly available, when viewing a replay (i.e., an old saved battle), it's not!
+          (!ident || (
             (!!p?.ident && p.ident === ident)
               // e.g., searchid = 'p1: CalcdexDemolisher|Ditto'
               // nickname case: pass; default case: fail ('p1: CalcdexDemolisher' !== 'p1: Ditto')
@@ -706,7 +708,8 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
               || (!!p?.searchid?.includes('|') && p.searchid.split('|')[0] === ident)
           ))
             // e.g., details = 'Ditto'
-            && (!details || (
+            // update (2023/07/30): for replays, the only guaranteed fields are `name` (typically the speciesForme), `speciesForme` & `details`
+            && (!!details && (
               (!!p?.details && p.details === details)
                 // e.g., 'p1: CalcdexDemolisher|Ditto'.endsWith('Ditto')
                 // update (2023/07/27): apparently includes() was a bad idea for this very unique edge case in gen1ubers where
@@ -716,7 +719,11 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
                 || (!!p?.searchid && p.searchid.endsWith(details))
                 // update (2023/07/27): whoops, missed a spot!
                 // || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
-                || (!!p?.speciesForme && details.replace('-*', '') === p.speciesForme.replace('-*', ''))
+                // update (2023/07/30): oh ye, forgot that `details` includes the gender, if applicable (e.g., 'Reuniclus, M')
+                || (!!p?.speciesForme && details.replace('-*', '') === [
+                  p.speciesForme.replace('-*', ''),
+                  p.gender !== 'N' && p.gender,
+                ].filter(Boolean).join(', '))
             ))
         ));
 
@@ -780,13 +787,19 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         return;
       }
 
+      // note (2023/07/30): leave the `ident` check as is here since viewing a replay wouldn't trigger this function
+      // (there are no myPokemon when viewing a replay, even if you were viewing your own battle!)
       const prevMyPokemon = myPokemon.find((p) => p.ident === pokemon.ident && (
         p.speciesForme === pokemon.speciesForme
           || p.details === pokemon.details
           // update (2023/07/27): this check breaks when p.details is 'Mewtwo' & pokemon.speciesForme is 'Mew',
           // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
           // || p.details.includes(pokemon.speciesForme)
-          || p.details === pokemon.speciesForme
+          // update (2023/07/30): `details` can include the gender, if applicable (e.g., 'Reuniclus, M')
+          || p.details === [
+            pokemon.speciesForme.replace('-*', ''),
+            pokemon.gender !== 'N' && pokemon.gender,
+          ].filter(Boolean).join(', ')
       ));
 
       if (!prevMyPokemon?.calcdexId) {
