@@ -172,12 +172,14 @@ export const buildMoveOptions = (
     filterMoves.push(...filteredRevealedMoves);
   }
 
+  // const hasUsageStats = !!altMoves?.length && altMoves
+  //   .some((a) => Array.isArray(a) && typeof a[1] === 'number');
+
+  const hasUsageStats = !!usageAltSource?.length;
+
   if (altMoves?.length) {
     const unsortedPoolMoves = altMoves
       .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
-
-    const hasUsageStats = !!altMoves?.length && altMoves
-      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
     const poolMoves = hasUsageStats
       ? unsortedPoolMoves // should be sorted already (despite the name)
@@ -193,6 +195,27 @@ export const buildMoveOptions = (
     });
 
     filterMoves.push(...flattenAlts(poolMoves));
+  }
+
+  const remainingUsageMoves = hasUsageStats
+    ? usageAltSource.filter((a) => (
+      !!a
+        && !!(detectUsageAlt(a) || findUsagePercent(a))
+        && !filterMoves.includes(flattenAlt(a))
+    ))
+    : null;
+
+  if (remainingUsageMoves?.length) {
+    options.push({
+      label: 'Usage',
+      options: remainingUsageMoves.map((alt) => ({
+        label: flattenAlt(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
+        value: flattenAlt(alt),
+      })),
+    });
+
+    filterMoves.push(...flattenAlts(remainingUsageMoves));
   }
 
   const learnset = getPokemonLearnset(format, speciesForme, showAllMoves);
