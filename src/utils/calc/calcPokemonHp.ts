@@ -73,7 +73,7 @@ export const calcPokemonCurrentHp = (
     return Math.floor(hp * dmaxMod);
   }
 
-  const estHp = Math.floor((spreadStats?.hp || 0) * (hp / maxhp));
+  const estHp = Math.round((spreadStats?.hp || 0) * (hp / maxhp));
 
   return Math.floor(estHp * dmaxMod);
 };

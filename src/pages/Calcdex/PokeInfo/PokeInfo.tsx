@@ -406,7 +406,7 @@ export const PokeInfo = ({
               <BaseButton
                 className={styles.statusButton}
                 display="block"
-                aria-label={`Non-Volatile Status Condition for Pok${eacute}mon ${friendlyPokemonName}`}
+                aria-label={`Hit Points & Non-Volatile Status Condition for Pok${eacute}mon ${friendlyPokemonName}`}
                 hoverScale={1}
                 onPress={requestStatusOpen}
                 disabled={!pokemon?.speciesForme}
@@ -414,7 +414,7 @@ export const PokeInfo = ({
                 {
                   hpPercentage > 0 &&
                   <div className={styles.hpPercentage}>
-                    {`${Math.floor(hpPercentage * 100)}%`}
+                    {Math.round(hpPercentage * 100)}%
                   </div>
                 }
 
