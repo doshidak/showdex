@@ -31,7 +31,12 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
-import { formatId, nonEmptyObject, similarArrays } from '@showdex/utils/core';
+import {
+  formatId,
+  nonEmptyObject,
+  similarArrays,
+  tolerance,
+} from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { toggleableAbility } from '@showdex/utils/dex';
 import {
@@ -302,22 +307,13 @@ export const CalcdexProvider = ({
 
         // determine if this value more or less is the current HP
         const maxHp = calcPokemonMaxHp(payload);
-        const currentHp = calcPokemonCurrentHp(payload, true);
+        const currentHp = calcPokemonCurrentHp(payload, true); // ignoreDirty = true (second arg)
 
+        // update (2023/07/30): due to rounding errors, the percentage might be "close enough" to the currentHp,
+        // but won't clear since they don't *exactly* match, hence the use of the tolerance() util
         const clearDirtyHp = !maxHp
-          || payload.dirtyHp === currentHp;
-
-        // if (maxHp) {
-        //   const hpPercentage = Math.floor(payload.hp / maxHp);
-        //   const dirtyHpPercentage = Math.floor(payload.dirtyHp / maxHp);
-        //
-        //   if (dirtyHpPercentage === hpPercentage) {
-        //     clearDirtyHp = true;
-        //   }
-        // } else {
-        //   // probably not valid anyway
-        //   clearDirtyHp = true;
-        // }
+          // || payload.dirtyHp === currentHp;
+          || tolerance(currentHp, 1)(payload.dirtyHp);
 
         if (clearDirtyHp) {
           payload.dirtyHp = null;
