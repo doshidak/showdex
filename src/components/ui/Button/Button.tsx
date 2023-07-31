@@ -17,6 +17,8 @@ export interface ButtonProps<
   labelStyle?: React.CSSProperties;
   forceColorScheme?: Showdown.ColorScheme;
   label?: string;
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
   tooltip?: React.ReactNode;
   tooltipPlacement?: TooltipProps['placement'];
   tooltipOffset?: TooltipProps['offset'];
@@ -40,6 +42,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   labelStyle,
   forceColorScheme,
   label,
+  prefix,
+  suffix,
   tooltip,
   tooltipPlacement = 'top',
   tooltipOffset = [0, 10],
@@ -82,6 +86,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
       >
         {childrenFirst && children}
 
+        {prefix}
+
         {
           !!label &&
           <label
@@ -91,6 +97,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
             {label}
           </label>
         }
+
+        {suffix}
 
         {!childrenFirst && children}
       </BaseButton>
