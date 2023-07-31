@@ -11,7 +11,7 @@ import { eacute } from '@showdex/consts/core';
 import { PokemonStatuses, PokemonStatusTitles } from '@showdex/consts/dex';
 import { type CalcdexPokemon, useColorScheme } from '@showdex/redux/store';
 import { calcPokemonCurrentHp, calcPokemonHpPercentage, calcPokemonMaxHp } from '@showdex/utils/calc';
-import { clamp, formatId } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 import { useUserAgent } from '@showdex/utils/hooks';
 import { PokeStatus } from '../PokeStatus';
 import styles from './PokeStatusTooltip.module.scss';
@@ -45,55 +45,20 @@ export const PokeStatusTooltip = ({
   const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   const {
-    // calcdexId,
     ident,
     speciesForme,
-    // serverSourced,
     hp: rawHp,
     dirtyHp,
-    // maxhp,
     status: currentStatus,
     dirtyStatus,
-    // spreadStats,
-    // useMax,
-    // volatiles,
   } = pokemon || {};
 
   const friendlyPokemonKey = ident || speciesForme;
   // const pokemonKey = calcdexId || friendlyPokemonKey;
 
-  // const shouldDmaxHp = pokemon?.useMax
-  //   && (!pokemon.serverSourced || !('dynamax' in pokemon.volatiles));
-
-  // const shouldDmaxHp = useMax && (!serverSourced || (nonEmptyObject(volatiles) && !('dynamax' in volatiles)));
-  // const dmaxMod = shouldDmaxHp ? 2 : 1;
-
-  // const maxHp = (
-  //   (pokemon?.serverSourced && pokemon.maxhp)
-  //   || pokemon?.spreadStats?.hp
-  //   || 0
-  // ) * (shouldDmaxHp ? 2 : 1);
-
-  // const maxHp = (spreadStats?.hp || maxhp || 0) * dmaxMod;
-
-  // const currentHp = (
-  //   pokemon?.serverSourced
-  //     ? pokemon.hp
-  //     : Math.floor((pokemon?.spreadStats?.hp ?? 0) * hpPercentage)
-  // ) * (shouldDmaxHp ? 2 : 1);
-
-  // const currentHp = (speciesForme ? (
-  //   serverSourced
-  //     ? rawHp
-  //     : Math.floor((spreadStats?.hp || 0) * (rawHp / maxhp))
-  // ) : 0) * dmaxMod;
-
-  // const hp = dirtyHp ?? currentHp;
-  // const hpPercentage = maxHp > 0 ? Math.floor((hp / maxHp) * 100) : 0;
-
   const maxHp = calcPokemonMaxHp(pokemon);
   const hp = calcPokemonCurrentHp(pokemon);
-  const hpPercentage = Math.floor(calcPokemonHpPercentage(pokemon) * 100);
+  const hpPercentage = Math.round(calcPokemonHpPercentage(pokemon) * 100);
 
   const status = dirtyStatus ?? (currentStatus || 'ok');
 
@@ -186,7 +151,7 @@ export const PokeStatusTooltip = ({
                 input={{
                   value: hpPercentage,
                   onChange: (value: number) => onPokemonChange?.({
-                    dirtyHp: Math.ceil(maxHp * (value / 100)),
+                    dirtyHp: Math.round(maxHp * (value / 100)),
                   }),
                 }}
               />
@@ -233,13 +198,6 @@ export const PokeStatusTooltip = ({
 
                 // Pokemon must be alive in order to have one of these statuses
                 // (we're not showing the FNT/RIP status here, but implied via the HP inputs & disabled status buttons)
-                // const selected = alive && (
-                //   ok
-                //     // dirtyStatus must be 'ok' (i.e., forced "Healthy", despite not being actually healthy),
-                //     // otherwise, check if it's actually healthy (i.e., currentStatus is falsy)
-                //     ? ((!!dirtyStatus && dirtyStatus === option) || !currentStatus)
-                //     : option === (dirtyStatus || currentStatus)
-                // );
                 const selected = alive && status === option;
 
                 const highlighted = alive
