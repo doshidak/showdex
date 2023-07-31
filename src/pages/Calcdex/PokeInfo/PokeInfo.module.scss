@@ -86,6 +86,7 @@ button.toggleButton {
 
 button.nameButton {
   flex: 0 1 auto;
+  @include flex.row-center;
   // max-width: 100%;
   @include spacing.margin-xy($x: -5px, $y: -1px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
@@ -112,6 +113,25 @@ button.nameButton {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+
+  .withFormes & {
+    @include spacing.margin($right: 3px);
+  }
+}
+
+.formeChevron {
+  @include spacing.margin($right: 5px);
+  font-size: 10px;
+  opacity: 0.3;
+  @include transition.apply(opacity, transform);
+
+  .nameButton:hover & {
+    opacity: 0.95;
+  }
+
+  &.open {
+    transform: rotate(-180deg);
+  }
 }
 
 .level {

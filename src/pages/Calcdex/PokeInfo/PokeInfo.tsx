@@ -16,7 +16,6 @@ import {
   BaseButton,
   Button,
   ToggleButton,
-  // Tooltip,
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/dex';
@@ -131,18 +130,13 @@ export const PokeInfo = ({
     && (!!pokemon?.item || !!pokemon?.prevItem)
     && (pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem;
 
-  // const [formesVisible, setFormesVisible] = React.useState(false);
-  // const toggleFormesTooltip = () => setFormesVisible(!formesVisible);
-  // const closeFormesTooltip = () => setFormesVisible(false);
-
   const {
     active: formesVisible,
-    requestOpen: requestFormesOpen,
-    notifyClose: notifyFormesClose,
+    requestOpen: openFormesTooltip,
+    notifyClose: closeFormesTooltip,
   } = useSandwich();
 
-  const toggleFormesTooltip = formesVisible ? notifyFormesClose : requestFormesOpen;
-  const closeFormesTooltip = notifyFormesClose;
+  const toggleFormesTooltip = formesVisible ? closeFormesTooltip : openFormesTooltip;
 
   const {
     active: statusVisible,
@@ -171,11 +165,8 @@ export const PokeInfo = ({
     format,
   );
 
-  // update (2023/07/28): reverseIconName has been removed & will behave as if it was `false`
   const formeDisabled = !pokemon?.altFormes?.length;
   const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
-  // const piconDisabled = settings?.reverseIconName ? formeDisabled : smogonDisabled;
-  // const nameDisabled = settings?.reverseIconName ? smogonDisabled : formeDisabled;
 
   const showNonVolatileStatus = !!pokemon?.speciesForme && (
     settings?.forceNonVolatile
@@ -288,13 +279,6 @@ export const PokeInfo = ({
     >
       <div className={styles.row}>
         <div className={styles.piconContainer}>
-          {/* <PokeFormeTooltip
-            pokemon={pokemon}
-            visible={formesVisible}
-            disabled={!settings?.reverseIconName}
-            onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip~Picon:onPokemonChange()`)}
-            onRequestClose={closeFormesTooltip}
-          > */}
           <PiconButton
             piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
             pokemon={{
@@ -305,18 +289,13 @@ export const PokeInfo = ({
               )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
               item: itemName,
             }}
-            // tooltip={settings?.reverseIconName ? undefined : smogonPageTooltip}
             tooltip={smogonPageTooltip}
             tooltipDelay={[1000, 50]}
-            // tooltipDisabled={settings?.reverseIconName || !settings?.showUiTooltips}
             tooltipDisabled={!settings?.showUiTooltips}
             shadow
-            // disabled={piconDisabled}
             disabled={smogonDisabled}
-            // onPress={settings?.reverseIconName ? toggleFormesTooltip : openSmogonPage}
             onPress={openSmogonPage}
           />
-          {/* </PokeFormeTooltip> */}
         </div>
 
         <div className={styles.infoContainer}>
@@ -324,7 +303,6 @@ export const PokeInfo = ({
             <PokeFormeTooltip
               pokemon={pokemon}
               visible={formesVisible}
-              // disabled={settings?.reverseIconName}
               onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeFormeTooltip:onPokemonChange()`)}
               onRequestClose={closeFormesTooltip}
             >
@@ -332,18 +310,23 @@ export const PokeInfo = ({
                 className={cx(
                   styles.nameButton,
                   !pokemon?.speciesForme && styles.missingForme,
-                  // nameDisabled && styles.disabled,
+                  !formeDisabled && styles.withFormes,
                   formeDisabled && styles.disabled,
                 )}
                 labelClassName={styles.nameLabel}
                 label={nickname || pokemon?.speciesForme || 'MissingNo.'}
-                // tooltip={settings?.reverseIconName ? smogonPageTooltip : undefined}
-                // tooltipDelay={[1000, 50]}
-                // tooltipDisabled={settings?.reverseIconName && !settings?.showUiTooltips}
+                suffix={!formeDisabled && (
+                  <i
+                    className={cx(
+                      'fa',
+                      'fa-chevron-down',
+                      styles.formeChevron,
+                      formesVisible && styles.open,
+                    )}
+                  />
+                )}
                 hoverScale={1}
-                // disabled={nameDisabled}
                 disabled={formeDisabled}
-                // onPress={settings?.reverseIconName ? openSmogonPage : toggleFormesTooltip}
                 onPress={toggleFormesTooltip}
               />
             </PokeFormeTooltip>
@@ -361,10 +344,8 @@ export const PokeInfo = ({
               multi
               input={{
                 name: `PokeInfo:Types:${pokemonKey}`,
-                // value: [...(pokemon?.types || [])],
                 value: [...(pokemon?.dirtyTypes || [])],
                 onChange: (types: Showdown.TypeName[]) => updatePokemon({
-                  // types: [...(types || [])],
                   dirtyTypes: [...(types || [])],
                 }, `${baseScope}:PokeTypeField:input.onChange()`),
               }}
@@ -411,49 +392,9 @@ export const PokeInfo = ({
 
           <div className={styles.secondLine}>
             <PokeHpBar
-              // className={styles.hpBar}
               hp={hpPercentage}
               width={100}
             />
-
-            {/* {
-              !!hpPercentage &&
-              <Tooltip
-                content={(
-                  <div className={styles.tooltipContent}>
-                    {
-                      (!pokemon.serverSourced && hpPercentage !== 1) &&
-                      <>
-                        <em>approx.</em>
-                        <br />
-                      </>
-                    }
-
-                    {currentHp} / {maxHp}
-                  </div>
-                )}
-                offset={[0, 10]}
-                delay={[250, 50]}
-                trigger="mouseenter"
-                touch={['hold', 500]}
-                disabled={!maxHp}
-              >
-                <div className={styles.hpPercentage}>
-                  {`${(hpPercentage * 100).toFixed(0)}%`}
-                </div>
-              </Tooltip>
-            } */}
-
-            {/* {
-              (!!pokemon?.speciesForme && (!!pokemon.status || !hpPercentage)) &&
-              <div className={styles.statuses}>
-                <PokeStatus
-                  className={styles.status}
-                  status={pokemon.status}
-                  fainted={!hpPercentage}
-                />
-              </div>
-            } */}
 
             <PokeStatusTooltip
               pokemon={pokemon}
@@ -765,7 +706,6 @@ export const PokeInfo = ({
                   }
                 </div>
               ) : null}
-              // optionTooltip={itemOptionTooltip}
               optionTooltip={PokeItemOptionTooltip}
               optionTooltipProps={{
                 format,
