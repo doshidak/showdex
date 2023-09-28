@@ -1283,6 +1283,13 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
 }
 
 /**
+ * Convenient type alias of the `sideConditions` property in `Showdown.Side`.
+ *
+ * @since 1.1.7
+ */
+export type CalcdexPlayerSideConditions = Showdown.Side['sideConditions'];
+
+/**
  * Field conditions on the player's side.
  *
  * * Additional properties that will be unused by the `Side` constructor are included
@@ -1300,7 +1307,7 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    *
    * @since 1.1.3
    */
-  conditions?: Showdown.Side['sideConditions'];
+  conditions?: CalcdexPlayerSideConditions;
 
   isProtected?: boolean;
   isSeeded?: boolean;
