@@ -33,6 +33,13 @@ declare namespace Showdown {
     | 'toxicspikes'
     | 'waterpledge';
 
+  type SideConditionState = [
+    effectName: string,
+    levels: number,
+    minDuration: number,
+    maxDuration: number,
+  ];
+
   interface Side {
     battle: Battle;
 
@@ -105,14 +112,7 @@ declare namespace Showdown {
     /**
      * `[effectName, levels, minDuration, maxDuration]`
      */
-    sideConditions: {
-      [name?: SideConditionName | string]: [
-        effectName: string,
-        levels: number,
-        minDuration: number,
-        maxDuration: number,
-      ];
-    };
+    sideConditions: Partial<Record<SideConditionName, SideConditionState>>;
 
     /**
      * Whether we overwrote the `addPokemon()` method.
