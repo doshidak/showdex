@@ -30,7 +30,7 @@ export const transformRandomsStatsResponse = (
 
   const legacy = detectLegacyGen(args.gen);
   const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 84;
+  const defaultEv = legacy ? 252 : 85;
 
   Object.entries(response).forEach(([
     speciesForme,

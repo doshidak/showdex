@@ -227,10 +227,12 @@ export interface PkmnSmogonRandomPreset {
    *   - Also for non-Chinese EVs, you typically apply 252 EVs to 2 stats and the remaining 4 EVs
    *     to another, so 252 + 252 + 4 = 508.
    *   - Showdown's Teambuilder also reports a max of 508 EVs.
+   * * Update (2023/09/27): In the `pokemon-showdown` server source code, it's rounded to 85.
+   *   - This results in a maximum possible overage of 2 EVs (85 * 6 = 510), but oh well.
    *
    * @example
    * ```ts
-   * // results in EVs: 84 HP, 84 ATK, 84 DEF, 84 SPA, 84 SPD, 0 SPE
+   * // results in EVs: 85 HP, 85 ATK, 85 DEF, 85 SPA, 85 SPD, 0 SPE
    * // (yes, this doesn't add up to 508 EVs, but that's how random sets work apparently)
    * { spe: 0 }
    * ```
