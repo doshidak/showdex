@@ -1185,7 +1185,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // (this is first so that it'll be available in sanitizePlayerSide(), just in case)
         // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
         // playerState.side.conditions = structuredClone(player.sideConditions || {});
-        playerState.side.conditions = clonePlayerSideConditions(player);
+        playerState.side.conditions = clonePlayerSideConditions(player.sideConditions);
 
         playerState.side = {
           conditions: playerState.side.conditions,

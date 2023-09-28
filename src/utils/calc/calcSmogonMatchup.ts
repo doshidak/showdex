@@ -175,18 +175,16 @@ export const calcSmogonMatchup = (
     matchup.koChance = formatMatchupNhko(result, settings?.nhkoLabels);
     matchup.koColor = getMatchupNhkoColor(result, settings?.nhkoColors);
 
-    if (strikes?.length) {
-      l.debug(
-        'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-        '\n', 'gen', dex.num,
-        '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-        '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-        '\n', 'field', field,
-        '\n', 'matchup', matchup,
-        '\n', 'result', result,
-        '\n', 'strikes', strikes,
-      );
-    }
+    // l.debug(
+    //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
+    //   '\n', 'gen', dex.num,
+    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
+    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
+    //   '\n', 'field', field,
+    //   '\n', 'matchup', matchup,
+    //   '\n', 'result', result,
+    //   '\n', 'strikes', strikes,
+    // );
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
     // which is separate from 'N/A' damage (e.g., status moves).
