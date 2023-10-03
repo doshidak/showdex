@@ -165,7 +165,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // determine if we should look for team sheets
     const sheetStepQueues = (
       !!settings?.autoImportTeamSheets
-        && battle.stepQueue?.filter((q) => (q.startsWith('|c|') && q.includes('/raw')) || q.startsWith('|uhtml|ots|'))
+        && battle.stepQueue?.filter((q) => (q.startsWith('|c|') && q.includes('/raw')) || q.startsWith('|uhtml|ots|') || q.includes('|raw|<div class="infobox" style="margin-top:5px">'))
     ) || [];
 
     const sheetsNonce = sheetStepQueues.length

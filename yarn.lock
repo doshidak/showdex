@@ -1767,12 +1767,12 @@
     redux-thunk "^2.4.2"
     reselect "^4.1.8"
 
-"@smogon/calc@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@smogon/calc/-/calc-0.7.0.tgz#4145f73971210f0b1efdb3f7356ce0ef73a4eb89"
-  integrity sha512-2+AGILYtqwRBceIIYkxH1dvtLwzSdyEwAAFWDfjYVwwNohmsNKjU5RVsDal8matpmNJptHF2FekSbHONNZTlUg==
+"@smogon/calc@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@smogon/calc/-/calc-0.8.0.tgz#913b76733929571a3b9d86ae24190e7b15d6badc"
+  integrity sha512-HQHzmTqGRhsYl0KBdNdSd8up9rIiqb4siN9qhm6MYn28Ppp5mCnmpGLrQPKlF2AmTgWcyK0wvKVglIxM/mXXxg==
   dependencies:
-    "@types/node" "^18.11.9"
+    "@types/node" "^18.14.2"
 
 "@swc/helpers@^0.5.0":
   version "0.5.1"
@@ -1955,10 +1955,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.8.tgz#50d680c8a8a78fe30abe6906453b21ad8ab0ad7b"
   integrity sha512-YofkM6fGv4gDJq78g4j0mMuGMkZVxZDgtU0JRdx6FgiJDG+0fY0GKVolOV8WqVmEhLCXkQRjwDdKyPxJp/uucg==
 
-"@types/node@^18.11.9":
-  version "18.11.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.9.tgz#02d013de7058cea16d36168ef2fc653464cfbad4"
-  integrity sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==
+"@types/node@^18.14.2":
+  version "18.18.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.18.3.tgz#e5188135fc2909b46530c798ef49be65083be3fd"
+  integrity sha512-0OVfGupTl3NBFr8+iXpfZ8NR7jfFO+P1Q+IO/q0wbo02wYkP5gy36phojeYWpLQ6WAMjl+VfmqUk2YbUfp0irA==
 
 "@types/node@^20.4.2":
   version "20.4.2"

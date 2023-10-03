@@ -1,6 +1,6 @@
 {
   "name": "showdex",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "description": "Pokémon Showdown extension that harnesses the power of parabolic calculus to strategically extract your opponents' Elo.",
   "author": "Keith Choison <keith@tize.io>",
   "license": "AGPL-3.0",
@@ -68,7 +68,7 @@
     "@react-spring/web": "^9.7.3",
     "@react-stately/toggle": "^3.6.0",
     "@reduxjs/toolkit": "^1.9.5",
-    "@smogon/calc": "^0.7.0",
+    "@smogon/calc": "^0.8.0",
     "@tippyjs/react": "^4.2.6",
     "@use-gesture/react": "^10.2.27",
     "base-64": "^1.0.0",
