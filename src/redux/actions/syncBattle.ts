@@ -117,6 +117,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       return;
     }
 
+    if (battleState.format.endsWith('bo3')) {
+      battleState.format = battleState.format.slice(0, -3);
+    }
     // update the gen, if provided
     if (typeof gen === 'number' && gen > 0) {
       battleState.gen = gen as GenerationNum;
