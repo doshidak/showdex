@@ -26,7 +26,7 @@ import {
 } from '@showdex/utils/battle';
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
-import { detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
+import { detectLegacyGen, getDexForFormat, legalLockedFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   appliedPreset,
@@ -117,6 +117,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       return;
     }
 
+    if (battleState.format.endsWith('bo3')) {
+      battleState.format = battleState.format.slice(0, -3);
+    }
     // update the gen, if provided
     if (typeof gen === 'number' && gen > 0) {
       battleState.gen = gen as GenerationNum;
@@ -165,7 +168,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // determine if we should look for team sheets
     const sheetStepQueues = (
       !!settings?.autoImportTeamSheets
-        && battle.stepQueue?.filter((q) => (q.startsWith('|c|') && q.includes('/raw')) || q.startsWith('|uhtml|ots|'))
+        && battle.stepQueue?.filter((q) => (q.startsWith('|c|') && q.includes('/raw')) || q.startsWith('|uhtml|ots|') || q.includes('|raw|<div class="infobox" style="margin-top:5px">'))
     ) || [];
 
     const sheetsNonce = sheetStepQueues.length
@@ -511,6 +514,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
 
         // attach presets derived from team sheets matching the specific player AND Pokemon, if available
+        const dex = getDexForFormat(battleState.format);
         if (battleState.sheets.length) {
           // filter for matching sheet presets, then sort them with the highest allocated EVs first
           // (handles case where open team sheets are available, which has no EVs, then !showteam is invoked, which has EVs)
@@ -613,6 +617,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                   spd: matchedPreset.ivs.spd ?? defaultIv,
                   spe: matchedPreset.ivs.spe ?? defaultIv,
                 };
+              }
+
+              // Update the battle form if the preset has a different forme
+              // Specifically for Urshifu... this mon is annoying.
+              if (matchedPreset.speciesForme && matchedPreset.speciesForme !== syncedPokemon.speciesForme) {
+                syncedPokemon.speciesForme = matchedPreset.speciesForme;
+                const dexSpecies = dex.species.get(matchedPreset.speciesForme);
+                syncedPokemon.types = [...dexSpecies.types];
               }
 
               // only set this if the matchedPreset is a complete preset, typically from !showteam, but not open team sheets,

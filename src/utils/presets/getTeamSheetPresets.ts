@@ -172,6 +172,12 @@ export const getTeamSheetPresets = (
   if (stepQueue.startsWith('|c|')) {
     return parseRevealedTeamSheet(format, stepQueue);
   }
+  if (stepQueue.includes('|raw|<div class="infobox" style="margin-top:5px">')) {
+    // Replace the `|raw|` with `|uhtml|ots|` so we can parse it like an accepted teamsheet.
+    stepQueue = stepQueue.replace('|raw|', '|uhtml|ots|');
+    // Trim everything before the first `|uhtml|ots|` so we can parse it like an accepted teamsheet.
+    stepQueue = stepQueue.slice(stepQueue.indexOf('|uhtml|ots|'));
+  }
 
   // if it ain't this either, then probably something we don't know how to parse
   // (in which case, this will just return an empty array anyways)
