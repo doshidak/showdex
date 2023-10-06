@@ -57,6 +57,11 @@ export const getPresetFormes = (
   const { baseSpecies: baseForme } = dexSpecies; // e.g., 'Necrozma'
   const checkBaseForme = !!baseForme && baseForme !== dexSpecies.name;
 
+  // Special check for urshifu
+  if (dexSpecies.name === 'Urshifu') {
+    output.push('Urshifu-Rapid-Strike');
+  }
+
   const battleFormes = (
     Array.isArray(dexSpecies.battleOnly)
       ? dexSpecies.battleOnly // e.g., ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']

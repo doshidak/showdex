@@ -160,6 +160,7 @@ export const FormatLabels: Record<string, string> = {
   vgc2023series2: 'VGC 2023 Series 2',
   vgc2023regulationc: 'VGC 2023 Reg C',
   vgc2023regulationd: 'VGC 2023 Reg D',
+  vgc2023regulatione: 'VGC 2023 Reg E',
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };

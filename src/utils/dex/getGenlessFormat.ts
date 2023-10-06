@@ -14,4 +14,11 @@ import { GenFormatRegex } from './detectGenFromFormat';
  */
 export const getGenlessFormat = (
   format: string,
-): string => format?.replace?.(GenFormatRegex, '') || null;
+): string => {
+  let clean_format = format?.replace?.(GenFormatRegex, '') || null;
+  // TEMPORARY TODO: remove there are actual bo3 usage stats
+  if (clean_format?.endsWith?.('bo3')) {
+    clean_format = clean_format.slice(0, -3);
+  }
+  return clean_format;
+};

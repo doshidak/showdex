@@ -92,6 +92,39 @@ export const getDynamicMoveType = (
       break;
     }
 
+    // Ivy Cudgel, Ogerpon signature move
+    case 'ivycudgel': {
+      const { speciesForme } = pokemon;
+
+      // attempt to determine the type from the forme
+      const formeId = formatId(speciesForme);
+
+      switch (formeId) {
+        case 'ogerpon': // Regular Ogerpon
+        case 'ogerpontealtera': { // Regular Ogerpon tera
+          return 'Grass';
+        }
+        case 'ogerponwellspring': // Ogerpon-Wellspring
+        case 'ogerponwellspringtera': { // Ogerpon-Wellspring-tera
+          return 'Water';
+        }
+        case 'ogerponhearthflame': // Ogerpon-Hearthflame
+        case 'ogerponhearthflametera': { // Ogerpon-Hearthflame-tera
+          return 'Fire';
+        }
+        case 'ogerponcornerstone': // Ogerpon-Corenerstone
+        case 'ogerponcornerstonetera': { // Ogerpon-Corenerstone-tera
+          return 'Rock';
+        }
+
+        default: {
+          break;
+        }
+      }
+
+      break;
+    }
+
     // Revelation Dance, primarily used by Oricorio
     case 'revelationdance': {
       const {
