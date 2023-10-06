@@ -93,6 +93,30 @@ export const transformFormatStatsResponse = (
           altMoves[ivycudgelIndex][0] = targetMove;
         }
       }
+      // Oops.. looks like all DLC moves have this annoying quirk.
+      if (['sinistcha'].includes(formatId(speciesForme))) {
+        const targetMove = 'Matcha Gotcha' as MoveName;
+        const matchagotchaIndex = altMoves.findIndex((m) => formatId(m[0]) === 'matchagotcha');
+        if (matchagotchaIndex > -1) {
+          altMoves[matchagotchaIndex][0] = targetMove;
+        }
+      }
+      if (['ursaluna', 'ursalunabloodmoon'].includes(formatId(speciesForme))) {
+        const targetMove = 'Blood Moon' as MoveName;
+        const bloodmoonIndex = altMoves.findIndex((m) => formatId(m[0]) === 'bloodmoon');
+        if (bloodmoonIndex > -1) {
+          altMoves[bloodmoonIndex][0] = targetMove;
+        }
+      }
+      // TODO FIXME!! Going to have to update this when this things evolution gets released.
+      if (['dipplin'].includes(formatId(speciesForme))) {
+        const targetMove = 'Syrup Bomb' as MoveName;
+        const syrupbombIndex = altMoves.findIndex((m) => formatId(m[0]) === 'syrupbomb');
+        if (syrupbombIndex > -1) {
+          altMoves[syrupbombIndex][0] = targetMove;
+        }
+      }
+
 
       preset.altMoves = altMoves;
 
