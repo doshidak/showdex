@@ -83,6 +83,17 @@ export const transformFormatStatsResponse = (
         }
       }
 
+      // For some reason ivydudgel doesn't get transformed into Ivy Cudgel.
+      // Let's just manually do it here.
+      // I hate Ogerpon just a little bit for this...
+      if (['ogerponwellspring', 'ogerponhearthflame', 'ogerpon', 'ogerponcornerstone', 'ogerponwellspringtera', 'ogerponhearthflametera', 'ogerpontera', 'ogerponcornerstonetera'].includes(formatId(speciesForme))) {
+        const targetMove = 'Ivy Cudgel' as MoveName;
+        const ivycudgelIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ivycudgel');
+        if (ivycudgelIndex > -1) {
+          altMoves[ivycudgelIndex][0] = targetMove;
+        }
+      }
+
       preset.altMoves = altMoves;
 
       /**
