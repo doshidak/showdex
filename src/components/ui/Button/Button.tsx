@@ -17,6 +17,7 @@ export interface ButtonProps<
   labelStyle?: React.CSSProperties;
   forceColorScheme?: Showdown.ColorScheme;
   label?: string;
+  hideLabel?: boolean;
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
   tooltip?: React.ReactNode;
@@ -42,6 +43,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   labelStyle,
   forceColorScheme,
   label,
+  hideLabel,
   prefix,
   suffix,
   tooltip,
@@ -89,7 +91,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         {prefix}
 
         {
-          !!label &&
+          (!!label && !hideLabel) &&
           <label
             className={cx(styles.label, labelClassName)}
             style={labelStyle}

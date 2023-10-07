@@ -20,6 +20,7 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
   primary,
   active,
   hoverScale = 1,
+  children,
   ...props
 }: ToggleButtonProps, forwardedRef): JSX.Element => {
   const currentColorScheme = useColorScheme();
@@ -45,6 +46,8 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
       display="inline"
       absoluteHover={!primary && absoluteHover}
       hoverScale={hoverScale}
-    />
+    >
+      {children}
+    </Button>
   );
 });
