@@ -81,8 +81,8 @@ export const transformRandomsStatsResponse = (
       },
     };
 
-    const altAbilities = processUsageAlts(abilities);
-    const altItems = processUsageAlts(items);
+    const altAbilities = processUsageAlts(abilities, args.gen, 'abilities');
+    const altItems = processUsageAlts(items, args.gen, 'items');
 
     if (altAbilities.length) {
       preset.altAbilities = altAbilities;
@@ -126,7 +126,7 @@ export const transformRandomsStatsResponse = (
         }
 
         if (nonEmptyObject(roleAbilities)) {
-          const altRoleAbilities = processUsageAlts(roleAbilities);
+          const altRoleAbilities = processUsageAlts(roleAbilities, args.gen, 'abilities');
 
           if (altRoleAbilities.length) {
             rolePreset.altAbilities = altRoleAbilities;
@@ -135,7 +135,7 @@ export const transformRandomsStatsResponse = (
         }
 
         if (nonEmptyObject(roleItems)) {
-          const altRoleItems = processUsageAlts(roleItems);
+          const altRoleItems = processUsageAlts(roleItems, args.gen, 'items');
 
           if (altRoleItems.length) {
             rolePreset.altItems = altRoleItems;
@@ -149,7 +149,7 @@ export const transformRandomsStatsResponse = (
           rolePreset.teraTypes = altTeraTypes;
         }
 
-        rolePreset.altMoves = processUsageAlts(roleMoves);
+        rolePreset.altMoves = processUsageAlts(roleMoves, args.gen, 'moves');
 
         /**
          * @todo Needs to be updated once we support more than 4 moves.
@@ -168,7 +168,7 @@ export const transformRandomsStatsResponse = (
         }
       });
     } else if (nonEmptyObject(moves)) {
-      preset.altMoves = processUsageAlts(moves);
+      preset.altMoves = processUsageAlts(moves, args.gen, 'moves');
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.
