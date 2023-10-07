@@ -97,7 +97,7 @@ export const PokeStats = ({
     || (settings?.allowIllegalSpreads === 'meta' && !legalLockedFormat(format));
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
-  const maxLegalEvs = env.int(format.includes('random') ? 'calcdex-pokemon-max-legal-randoms-evs' : 'calcdex-pokemon-max-legal-evs');
+  const maxLegalEvs = env.int(format?.includes('random') ? 'calcdex-pokemon-max-legal-randoms-evs' : 'calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
 
   // update (2023/07/26): since showLegacyEvs is now a setting, any amount of EVs in legacy gens
