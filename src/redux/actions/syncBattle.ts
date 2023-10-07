@@ -168,7 +168,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // determine if we should look for team sheets
     const sheetStepQueues = (
       !!settings?.autoImportTeamSheets
-        && battle.stepQueue?.filter((q) => (q.startsWith('|c|') && q.includes('/raw')) || q.startsWith('|uhtml|ots|') || q.includes('|raw|<div class="infobox" style="margin-top:5px">'))
+        && battle.stepQueue?.filter((q) => (
+          (q.startsWith('|c|') && q.includes('/raw'))
+            || q.startsWith('|uhtml|ots|')
+            || (q.includes('|raw|') && q.includes('infobox'))
+        ))
     ) || [];
 
     const sheetsNonce = sheetStepQueues.length
@@ -1097,7 +1101,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             !Object.keys(p.volatiles || {})
               .some((k) => k?.startsWith('fallen'))
           ) && (
-            (!playerState.activeIndices.includes(i) && p.hp > 0)
+            // update (2023/10/07): apparently the "only-update-the-faintCounter-when-switched-out" mechanic only
+            // applies to Supreme Overlord, so everything else (like Last Respects on Houndstone) should always sync
+            // (as long as the Pokemon isn't dedge, of course) ... LOL ty gam frek
+            ((formatId(p.dirtyAbility || p.ability) !== 'supremeoverlord' || !playerState.activeIndices.includes(i)) && p.hp > 0)
               || (!battleState.active && !p.faintCounter)
           ));
 

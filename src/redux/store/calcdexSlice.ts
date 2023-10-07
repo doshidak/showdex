@@ -831,6 +831,9 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * Update (2023/07/25): Apparently this value should only be updated when the Pokemon is **not** active!
    *   - This applies more in Doubles formats, where allies can faint while the Pokemon is active.
    *   - This value shouldn't be updated during that time, only when switched out.
+   * * Update (2023/10/07): Apparently the last apparent point wasn't *entirely* true.
+   *   - Restriction only applies to *Supreme Overlord* & not other things like *Last Respects*.
+   *   - In other words, we should be syncing this value always when not *Supreme Overlord*.
    *
    * @default 0
    * @since 1.1.0
@@ -918,7 +921,7 @@ export interface CalcdexMoveOverride {
   maxBasePower?: number;
   alwaysCriticalHits?: boolean;
   offensiveStat?: Showdown.StatNameNoHp;
-  defensiveStat?: Showdown.StatNameNoHp | 'ignore';
+  defensiveStat?: Showdown.StatNameNoHp;
 }
 
 /**
