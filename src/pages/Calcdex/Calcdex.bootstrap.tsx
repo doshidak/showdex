@@ -954,7 +954,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           prev[playerKey].side = {
             // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
             // conditions: structuredClone(player?.sideConditions || {}),
-            conditions: clonePlayerSideConditions(player),
+            conditions: clonePlayerSideConditions(player?.sideConditions),
           };
 
           prev[playerKey].side = {
