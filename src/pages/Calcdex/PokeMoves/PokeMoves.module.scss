@@ -107,6 +107,7 @@
   }
 
   .propertyName {
+    @include flex.row-center;
     font-weight: 500;
     text-transform: uppercase;
     opacity: 0.75;
@@ -231,18 +232,19 @@ button.damageButton {
   align-self: center;
   @include spacing.margin($right: 5px);
 
-  &.smol {
-    align-items: flex-start;
-    align-self: flex-start;
-    @include spacing.padding($top: 2px);
-
-    &.withStatTargets {
-      @include spacing.padding($top: 3px);
-    }
-  }
+  // &.smol {
+  //   align-items: flex-start;
+  //   align-self: flex-start;
+  //   @include spacing.padding($top: 2px);
+  //
+  //   &.withStatTargets {
+  //     @include spacing.padding($top: 3px);
+  //   }
+  // }
 
   &.editorHeader {
     @include flex.row-between;
+    @include spacing.margin($bottom: 0);
   }
 
   .moveProperty {
@@ -264,9 +266,9 @@ button.damageButton {
   // }
 }
 
-.editorItemInput {
-  align-self: flex-start;
-}
+// .editorItemInput {
+//   align-self: flex-start;
+// }
 
 .editorLeft {
   @include flex.row($align: center);
@@ -287,8 +289,20 @@ button.editorButton {
   }
 }
 
-button.categoryButton {
-  width: 32px;
-  @include spacing.margin-xy($x: 0.8em);
-  font-weight: 500;
+// button.categoryButton {
+//   width: 32px;
+//   @include spacing.margin-xy($x: 0.8em);
+//   font-weight: 500;
+// }
+
+.categoryField {
+  @include spacing.margin-xy($x: 6px);
+}
+
+.statVsLabel {
+  @include spacing.margin-xy($x: 3px);
+  @include font.apply(fonts.$mono, ( font-weight: 600 ));
+  font-size: 6px;
+  letter-spacing: 0.25px;
+  opacity: 0.64;
 }
