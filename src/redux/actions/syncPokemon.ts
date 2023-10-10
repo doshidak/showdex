@@ -26,7 +26,12 @@ import {
   nonEmptyObject,
 } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDexForFormat,
+  toggleableAbility,
+} from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 import { flattenAlts, guessTeambuilderPreset } from '@showdex/utils/presets';
 
@@ -618,7 +623,7 @@ export const syncPokemon = (
     dirtyAbility,
     abilities,
     transformedAbilities,
-    abilityToggleable,
+    // abilityToggleable, // update (2023/10/09): there's now a `gameType` arg to toggleableAbility() lol
     // abilityToggled, // update (2022/12/09): recalculating this w/ the `field` arg below for gen 9 support
     baseStats,
     transformedBaseStats,
@@ -651,9 +656,9 @@ export const syncPokemon = (
   }
 
   // check for toggleable abilities
-  syncedPokemon.abilityToggleable = abilityToggleable;
+  syncedPokemon.abilityToggleable = toggleableAbility(syncedPokemon, state?.gameType);
 
-  if (abilityToggleable) {
+  if (syncedPokemon.abilityToggleable) {
     syncedPokemon.abilityToggled = detectToggledAbility(syncedPokemon, state);
   }
 

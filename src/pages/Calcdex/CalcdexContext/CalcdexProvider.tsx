@@ -264,7 +264,7 @@ export const CalcdexProvider = ({
       // (designed to toggle off in detectToggledAbility() when dirtyTypes[] is present, i.e., the user manually
       // modifies the Pokemon's types; btw, dirtyTypes[] should've been processed by now if it was present)
       if ('ability' in pokemon || 'dirtyAbility' in pokemon || 'dirtyTypes' in pokemon) {
-        payload.abilityToggleable = toggleableAbility(payload);
+        payload.abilityToggleable = toggleableAbility(payload, battleState.gameType);
 
         if (payload.abilityToggleable) {
           payload.abilityToggled = detectToggledAbility(payload, battleState);
@@ -390,7 +390,7 @@ export const CalcdexProvider = ({
         toggleRuinAbilities(
           playerState,
           pokemonIndex,
-          battleState.field?.gameType,
+          battleState.gameType,
         );
       }
 
@@ -637,7 +637,7 @@ export const CalcdexProvider = ({
         toggleRuinAbilities(
           playerState,
           selectionIndex,
-          battleState.field?.gameType,
+          battleState.gameType,
         );
 
         playerPayload.pokemon = playerState.pokemon;

@@ -32,7 +32,7 @@ export const detectToggledAbility = (
   pokemon: DeepPartial<CalcdexPokemon> = {},
   state?: DeepPartial<CalcdexBattleState>,
 ): boolean => {
-  if (!toggleableAbility(pokemon)) {
+  if (!toggleableAbility(pokemon, state?.gameType)) {
     return false;
   }
 
@@ -95,7 +95,7 @@ export const detectToggledAbility = (
     }
 
     // only initially activate if the Pokemon is selected or active on the field
-    if (state.field?.gameType === 'Singles') {
+    if (state.gameType === 'Singles') {
       return selectionIndex > -1 && pokemonIndex === selectionIndex;
     }
 
