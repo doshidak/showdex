@@ -350,7 +350,11 @@ export const PokeInfo = ({
                 }, `${baseScope}:PokeTypeField:input.onChange()`),
               }}
               tooltipPlacement="bottom-start"
-              containerSize={gen > 8 ? containerSize : null}
+              containerSize={gen > 8 && (
+                pokemon?.dirtyTypes?.length
+                  || pokemon?.types?.length
+                  || 0
+              ) !== 1 ? containerSize : null}
               highlight={gen < 9 || !pokemon?.terastallized}
               highlightTypes={pokemon?.types}
               revealedTypes={pokemon?.types}
@@ -375,7 +379,11 @@ export const PokeInfo = ({
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel="Tera"
                 teraTyping
-                containerSize={containerSize}
+                containerSize={(
+                  pokemon?.dirtyTypes?.length
+                    || pokemon?.types?.length
+                    || 0
+                ) !== 1 ? containerSize : null}
                 highlight={pokemon?.terastallized}
                 highlightTypes={Array.from(new Set([
                   ...flattenAlts(pokemon?.altTeraTypes),
