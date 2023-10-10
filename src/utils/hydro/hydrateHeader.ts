@@ -1,4 +1,4 @@
-import { HydroDescriptor, type HydroHeader } from '@showdex/consts/hydro';
+import { type HydroHeader, HydroDescriptor } from '@showdex/consts/hydro';
 import { hydrateDate } from './hydratePrimitives';
 
 /**
