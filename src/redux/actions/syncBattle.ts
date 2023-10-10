@@ -16,7 +16,9 @@ import {
   detectBattleRules,
   detectPlayerKeyFromBattle,
   detectPlayerKeyFromPokemon,
+  detectPokemonDetails,
   mergeRevealedMoves,
+  parsePokemonDetails,
   sanitizePlayerSide,
   sanitizePokemon,
   sanitizeVolatiles,
@@ -25,7 +27,12 @@ import {
   usedTerastallization,
 } from '@showdex/utils/battle';
 import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { clamp, env, formatId } from '@showdex/utils/core';
+import {
+  clamp,
+  diffArrays,
+  env,
+  formatId,
+} from '@showdex/utils/core';
 import { detectLegacyGen, getDexForFormat, legalLockedFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
@@ -117,6 +124,9 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       return;
     }
 
+    /**
+     * @todo
+     */
     if (battleState.format.endsWith('bo3')) {
       battleState.format = battleState.format.slice(0, -3);
     }
@@ -130,14 +140,21 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.rules = detectBattleRules(stepQueue);
     }
 
-    // update the current turn number
-    battleState.turn = turn || 0;
-
     // update the battle's active state, but only allow it to go from true -> false
     // as to avoid updating the HellodexBattleRecord from replays and battle re-inits)
     if (battleState.active && typeof ended === 'boolean' && ended) {
       battleState.active = !ended;
     }
+
+    // check if the user hit the replay button
+    // (we'll use this value later to reset the Pokemon back to full health, kinda like a Pokemon Center,
+    // but not as exciting when you realize it's just `pokemon.hp = pokemon.maxhp` lol)
+    const startedReplay = !battleState.active
+      && battleState.turn > 1
+      && !turn;
+
+    // update the current turn number
+    battleState.turn = turn || 0;
 
     // update the authPlayerKey (if any)
     battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
@@ -255,6 +272,37 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           );
         }
 
+        // reset this Pokemon back to full if this is the first turn of the replay
+        // (should only happen once per replay, during this specific edge case)
+        if (!startedReplay) {
+          continue;
+        }
+
+        playerState.pokemon.forEach((pokemon) => {
+          pokemon.hp = pokemon.maxhp;
+          pokemon.dirtyHp = null;
+          pokemon.fainted = false;
+          pokemon.faintCounter = 0;
+          pokemon.dirtyFaintCounter = null;
+          pokemon.hitCounter = 0;
+          pokemon.status = null;
+          pokemon.dirtyStatus = null;
+
+          if (pokemon.ability) {
+            pokemon.dirtyAbility = null;
+          }
+
+          if (pokemon.item && !pokemon.prevItem) {
+            pokemon.dirtyItem = null;
+          }
+
+          if (!pokemon.item && pokemon.prevItem) {
+            pokemon.item = pokemon.prevItem;
+            pokemon.prevItem = null;
+            pokemon.prevItemEffect = null;
+          }
+        });
+
         continue;
       }
 
@@ -271,30 +319,38 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       // determine if `myPokemon` belongs to the current player
       const isMyPokemonSide = !!battleState.playerKey
         && playerKey === battleState.playerKey;
-        // && !!myPokemon?.length;
 
       const hasMyPokemon = !!myPokemon?.length;
 
       // if we're in an active battle and the logged-in user is also a player,
       // but did not receieve myPokemon from the server yet, don't process any Pokemon!
       // (we need the calcdexId to be assigned to myPokemon first, then mapped to the clientPokemon)
-      const initialPokemon = battleState.active
-        && isMyPokemonSide
-        && battleState.authPlayerKey === playerKey
-        ? myPokemon || []
-        : player.pokemon;
+      const initialPokemon = (
+        battleState.active
+          && isMyPokemonSide
+          && battleState.authPlayerKey === playerKey
+          ? myPokemon
+          : player.pokemon
+      ) || [];
 
-      const currentOrder = initialPokemon?.map((
+      const currentOrder = initialPokemon.map((
         pokemon: Showdown.ServerPokemon | Showdown.Pokemon,
       ) => {
-        // l.debug(
-        //   'Ordering Pokemon', pokemon.speciesForme, 'for player', playerKey,
-        //   '\n', 'battleId', battleId,
-        //   '\n', 'pokemon.calcdexId', pokemon.calcdexId,
-        //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
-        //   '\n', 'source', 'getIdent' in pokemon ? 'client' : 'server',
-        //   '\n', 'pokemon', pokemon,
-        // );
+        const clientSourced = 'getIdent' in pokemon;
+
+        // note: purposefully not passing in the `format` arg here to avoid base forme replacement
+        // (i.e., we want any formes to remain as-is for what we're doing here atm)
+        const details = detectPokemonDetails(pokemon);
+
+        l.debug(
+          'Ordering', pokemon.speciesForme, 'for player', playerKey,
+          '\n', 'battleId', battleId,
+          '\n', 'calcdexId', pokemon.calcdexId,
+          '\n', 'details', '(detected)', details,
+          '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+          // '\n', 'source', clientSourced ? 'client' : 'server',
+          '\n', `${clientSourced ? 'client' : 'server'}Pokemon`, pokemon,
+        );
 
         if (!pokemon.calcdexId) {
           // update (2022/10/18): found a case where the client Pokemon was given before
@@ -310,27 +366,31 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                   && p.ident === pokemon.ident
                   // update (2023/07/30): `details` can include the gender, if applicable (e.g., 'Reuniclus, M')
                   // && p.details === (pokemon.details || pokemon.speciesForme)
-                  && (
-                    p.details === pokemon.details
-                      || p.details === [
-                        pokemon.speciesForme,
-                        pokemon.gender !== 'N' && pokemon.gender,
-                      ].filter(Boolean).join(', ')
-                  )
+                  // update (2023/10/08): `details` can also include the level, if not 100 (e.g., 'Zoroark, L84, M')
+                  // && (
+                  //   p.details === pokemon.details
+                  //     || p.details === [
+                  //       pokemon.speciesForme,
+                  //       pokemon.gender !== 'N' && pokemon.gender,
+                  //     ].filter(Boolean).join(', ')
+                  // )
+                  && p.details === details
               ))?.calcdexId
           ) || calcPokemonCalcdexId(pokemon, playerKey);
 
-          // l.debug(
-          //   'Assigned calcdexId', pokemon.calcdexId, 'to', pokemon.speciesForme,
-          //   'for player', playerKey,
-          //   '\n', 'battleId', battleId,
-          //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
-          //   '\n', 'source', 'getIdent' in pokemon ? 'client' : 'server',
-          //   '\n', 'pokemon', pokemon,
-          // );
+          l.debug(
+            'Assigned calcdexId', pokemon.calcdexId,
+            'to the', `${clientSourced ? 'client' : 'server'}Pokemon`, pokemon.speciesForme,
+            'for player', playerKey,
+            '\n', 'battleId', battleId,
+            '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+            '\n', 'details', '(detected)', details,
+            // '\n', 'source', clientSourced ? 'client' : 'server',
+            '\n', `${clientSourced ? 'client' : 'server'}Pokemon`, pokemon,
+          );
         }
 
-        if (isMyPokemonSide && hasMyPokemon && !('getIdent' in pokemon)) {
+        if (isMyPokemonSide && hasMyPokemon && !clientSourced) {
           const clientPokemon = player.pokemon
             .find((p) => !p.calcdexId && (
               !!p.ident
@@ -339,7 +399,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 && !!p.searchid
                 && p.ident === pokemon.ident
             ) && (
-              p.details === pokemon.details
+              p.details === details
                 || p.searchid === pokemon.searchid
                 || p.speciesForme === pokemon.speciesForme
                 // || pokemon.searchid.includes(p.ident)
@@ -354,7 +414,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
             // l.debug(
             //   'Assigned calcdexId', pokemon.calcdexId,
-            //   'to matched clientPokemon', clientPokemon.speciesForme,
+            //   'to the serverPokemon', pokemon.speciesForme, 'from a matching clientPokemon',
             //   'for player', playerKey,
             //   '\n', 'battleId', battleId,
             //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
@@ -365,24 +425,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
 
         return pokemon.calcdexId;
-      }) ?? [];
-
-      if (currentOrder.length >= playerState.pokemonOrder.length) {
-        playerState.pokemonOrder = currentOrder;
-
-        // l.debug(
-        //   'Set Pokemon ordering for player', playerKey,
-        //   '\n', 'pokemonOrder', playerState.pokemonOrder,
-        //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
-        //   '\n', 'initialPokemon', initialPokemon,
-        //   '\n', 'battle', battle,
-        //   '\n', 'battleState', battleState,
-        // );
-      }
+      });
 
       // reconstruct a full list of the current player's Pokemon, whether revealed or not
       // (but if we don't have the relevant info [i.e., !isMyPokemonSide], then just access the player's `pokemon`)
-      const playerPokemon = playerState.pokemonOrder.map((calcdexId) => {
+      const playerPokemon = currentOrder.map((calcdexId) => {
         // try to find a matching clientPokemon that has already been revealed using the ident,
         // which is seemingly consistent between the player's `pokemon` (Pokemon[]) and `myPokemon` (ServerPokemon[])
         const clientPokemonIndex = player.pokemon.findIndex((p) => p.calcdexId === calcdexId);
@@ -418,6 +465,79 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           maxhp: serverPokemon.maxhp,
         } as DeepPartial<Showdown.Pokemon>;
       });
+
+      // check if we got Zoroark'd right off the bat
+      // (covering the case where you replay an old battle, so the full battle state is available)
+      if (playerPokemon.length > maxPokemon) {
+        const existingDetails: string[] = [];
+
+        const removalIndices: number[] = playerPokemon.map((pokemon, i) => {
+          // note: purposefully not passing in the level here cause of formats like Randoms & LC,
+          // so a 'Cinderace, L77, M' & 'Cinderace, L84, M' would go undetected !! :o
+          // (we want something like 'Cinderace, M' & 'Cinderace, M', respectively, instead)
+          const details = detectPokemonDetails({
+            ...pokemon,
+            level: null,
+          }, battleState.format);
+
+          if (!details || !existingDetails.includes(details)) {
+            if (details) {
+              existingDetails.push(details);
+            }
+
+            return null;
+          }
+
+          // just double-checking the indices line-up lol
+          if (currentOrder[i] !== pokemon.calcdexId) {
+            return null;
+          }
+
+          return i;
+        }).filter((v) => typeof v === 'number');
+
+        // l.debug(
+        //   'Detected', removalIndices.length, '(probably) Illusion Pokemon',
+        //   'from player', playerKey,
+        //   '\n', 'battleId', battleId,
+        //   '\n', 'existingDetails', existingDetails,
+        //   '\n', 'removalIndices', removalIndices,
+        //   '\n', 'playerPokemon', playerPokemon,
+        //   '\n', 'currentOrder', currentOrder,
+        // );
+
+        if (removalIndices.length) {
+          removalIndices.forEach((index) => {
+            currentOrder.splice(index, 1);
+            playerPokemon.splice(index, 1);
+          });
+
+          // l.debug(
+          //   'Removed', removalIndices.length, '(probably) Illusion Pokemon',
+          //   'from player', playerKey,
+          //   '\n', 'battleId', battleId,
+          //   '\n', 'existingDetails', existingDetails,
+          //   '\n', 'removalIndices', removalIndices,
+          //   '\n', 'playerPokemon', playerPokemon,
+          //   '\n', 'currentOrder', currentOrder,
+          //   '\n', 'battle', battle,
+          //   '\n', 'battleState', battleState,
+          // );
+        }
+      }
+
+      if (diffArrays(currentOrder, playerState.pokemonOrder || []).length) {
+        playerState.pokemonOrder = currentOrder;
+
+        // l.debug(
+        //   'Set Pokemon ordering for player', playerKey,
+        //   '\n', 'pokemonOrder', playerState.pokemonOrder,
+        //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+        //   '\n', 'initialPokemon', initialPokemon,
+        //   '\n', 'battle', battle,
+        //   '\n', 'battleState', battleState,
+        // );
+      }
 
       l.debug(
         'Preparing to process', playerPokemon.length, 'of', '(max)', maxPokemon, 'Pokemon',
@@ -519,6 +639,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // attach presets derived from team sheets matching the specific player AND Pokemon, if available
         const dex = getDexForFormat(battleState.format);
+
         if (battleState.sheets.length) {
           // filter for matching sheet presets, then sort them with the highest allocated EVs first
           // (handles case where open team sheets are available, which has no EVs, then !showteam is invoked, which has EVs)
@@ -740,12 +861,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             }
           }));
 
-          l.debug(
-            'Applied pendingMutations for', syncedPokemon.ident,
-            '\n', 'pendingMutations', pendingMutations,
-            '\n', 'futureMutations', futureMutations,
-            '\n', 'syncedPokemon', syncedPokemon,
-          );
+          // l.debug(
+          //   'Applied pendingMutations for', syncedPokemon.ident,
+          //   '\n', 'pendingMutations', pendingMutations,
+          //   '\n', 'futureMutations', futureMutations,
+          //   '\n', 'syncedPokemon', syncedPokemon,
+          // );
         }
 
         // extract Gmax/Tera info from the BattleRoom's `request` object, if available
@@ -771,7 +892,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               || (!reqIdent && !reqDetails)
               || (!!reqCalcdexId && syncedPokemon.calcdexId !== reqCalcdexId)
               || (syncedPokemon.ident !== reqIdent && syncedPokemon.details !== reqDetails);
-              // || !syncedPokemon.altFormes.some((f) => f.endsWith('-Gmax'));
 
             // l.debug(
             //   'Processing move request for', reqIdent || reqDetails,
@@ -809,7 +929,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // reset any dirtyBoosts if the user enabled the setting
         const shouldResetDirtyBoosts = settings?.resetDirtyBoosts
-          && Object.values(syncedPokemon.dirtyBoosts || {}).some((v) => typeof v === 'number' && !Number.isNaN(v));
+          && Object.values(syncedPokemon.dirtyBoosts || {})
+            .some((v) => typeof v === 'number' && !Number.isNaN(v));
 
         if (shouldResetDirtyBoosts) {
           syncedPokemon.dirtyBoosts = {
@@ -830,17 +951,17 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           syncedPokemon.dirtyStatus = null;
         }
 
-        l.debug(
-          'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
-          '\n', 'battleId', battleId,
-          '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
-          '\n', 'clientPokemon', clientPokemon,
-          '\n', 'serverPokemon', serverPokemon,
-          '\n', 'syncedPokemon', syncedPokemon,
-          '\n', 'pokemonOrder', playerState.pokemonOrder,
-          '\n', 'battle', battle,
-          '\n', 'battleState', battleState,
-        );
+        // l.debug(
+        //   'Synced Pokemon', syncedPokemon.speciesForme, 'for player', playerKey,
+        //   '\n', 'battleId', battleId,
+        //   '\n', 'slot', i, 'calcdexId', clientPokemon.calcdexId,
+        //   '\n', 'clientPokemon', clientPokemon,
+        //   '\n', 'serverPokemon', serverPokemon,
+        //   '\n', 'syncedPokemon', syncedPokemon,
+        //   '\n', 'pokemonOrder', playerState.pokemonOrder,
+        //   '\n', 'battle', battle,
+        //   '\n', 'battleState', battleState,
+        // );
 
         // add the pokemon to the player's Calcdex state (if not maxed already)
         if (!matchedPokemon) {
@@ -850,56 +971,83 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // see: https://github.com/smogon/pokemon-showdown-client/blob/4e5002411cc80ff8044fd586bd0db2f80979b8f6/src/battle.ts#L747-L808
           if (playerState.pokemon.length >= playerState.maxPokemon || speciesClause) {
             const existingTable: Record<string, number> = {};
-            let removalId: string = null;
+            let removalDetails: string = null;
 
-            const {
-              // calcdexId: syncedCalcdexId,
-              searchid: syncedSearchId,
-            } = syncedPokemon;
+            // update (2023/10/08): if not level 100, the searchid will include the level (e.g., 'p1: Zikachu|Zoroark, L84, M'),
+            // which is commonly a thing in Randoms, where Zoroark also runs rampant lmao
+            // const {
+            //   // calcdexId: syncedCalcdexId,
+            //   searchid: syncedSearchId,
+            // } = syncedPokemon;
+
+            // note: purposefully ignoring level here
+            const syncedDetails = detectPokemonDetails({
+              ...syncedPokemon,
+              level: null,
+            }, battleState.format);
 
             for (let j = 0; j < player.pokemon.length; j++) {
-              const pokemon1 = player.pokemon[j];
+              const pokemonA = player.pokemon[j];
 
-              const {
-                // calcdexId: pokemon1CalcdexId,
-                searchid: pokemon1SearchId,
-              } = pokemon1 || {};
+              // const {
+              //   // calcdexId: pokemon1CalcdexId,
+              //   searchid: pokemon1SearchId,
+              // } = pokemonA || {};
 
-              if (!pokemon1SearchId) {
+              const detailsA = detectPokemonDetails({
+                ...pokemonA,
+                level: null,
+              }, battleState.format);
+
+              if (!detailsA) {
                 continue;
               }
 
-              if (!(pokemon1SearchId in existingTable)) {
-                existingTable[pokemon1SearchId] = j;
+              if (!detailsA || !(detailsA in existingTable)) {
+                if (detailsA) {
+                  existingTable[detailsA] = j;
+                }
 
                 continue;
               }
 
-              const pokemon2Index = existingTable[pokemon1SearchId];
-              const pokemon2 = player.pokemon[pokemon2Index];
+              const indexB = existingTable[detailsA];
+              const pokemonB = player.pokemon[indexB];
 
-              const {
-                // calcdexId: pokemon2CalcdexId,
-                searchid: pokemon2SearchId,
-              } = pokemon2 || {};
+              // const {
+              //   // calcdexId: pokemon2CalcdexId,
+              //   searchid: pokemon2SearchId,
+              // } = pokemonB || {};
 
-              if (!pokemon2SearchId) {
+              const detailsB = detectPokemonDetails({
+                ...pokemonB,
+                level: null,
+              }, battleState.format);
+
+              if (!detailsB) {
                 continue;
               }
 
-              if (syncedSearchId === pokemon1SearchId) {
-                removalId = pokemon2SearchId;
-              } else if (syncedSearchId === pokemon2SearchId) {
-                removalId = pokemon1SearchId;
-              } else if (player.active.includes(pokemon1)) {
-                removalId = pokemon2SearchId;
-              } else if (player.active.includes(pokemon2)) {
-                removalId = pokemon1SearchId;
-              } else if (pokemon1.fainted && !pokemon2.fainted) {
-                removalId = pokemon2SearchId;
-              } else {
-                removalId = pokemon1SearchId;
-              }
+              // if (syncedSearchId === pokemon1SearchId) {
+              //   removalId = pokemon2SearchId;
+              // } else if (syncedSearchId === pokemon2SearchId) {
+              //   removalId = pokemon1SearchId;
+              // } else if (player.active.includes(pokemon1)) {
+              //   removalId = pokemon2SearchId;
+              // } else if (player.active.includes(pokemon2)) {
+              //   removalId = pokemon1SearchId;
+              // } else if (pokemon1.fainted && !pokemon2.fainted) {
+              //   removalId = pokemon2SearchId;
+              // } else {
+              //   removalId = pokemon1SearchId;
+              // }
+
+              // check if we should remove pokemonB
+              const targetB = syncedDetails === detailsA
+                || player.active.includes(pokemonA)
+                || (!pokemonA.hp && (pokemonB.hp || 0) > 0);
+
+              removalDetails = targetB ? detailsB : detailsA;
 
               break;
             }
@@ -907,7 +1055,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             // note: unlike in addPokemon() of Showdown.Side, we don't care about updating the Illusion Pokemon,
             // only removing it so that the real Pokemon can be tracked in the Calcdex
             const removalIndex = playerState.pokemon
-              .findIndex((p) => !!p.searchid && p.searchid === removalId);
+              .findIndex((p) => detectPokemonDetails(p, battleState.format) === removalDetails);
 
             const removalPokemon = removalIndex > -1
               ? playerState.pokemon[removalIndex]
@@ -919,7 +1067,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               l.debug(
                 'Removed Illusion Pokemon', removalPokemon.speciesForme, 'for player', playerKey,
                 '\n', 'battleId', battleId,
-                '\n', 'removalIndex', removalIndex, 'removalId', removalId,
+                '\n', 'removalIndex', removalIndex, 'removalDetails', removalDetails,
                 '\n', 'length', '(prev)', playerState.pokemon.length + 1,
                 '(now)', playerState.pokemon.length,
                 '(max)', playerState.maxPokemon,
@@ -981,35 +1129,35 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
           playerState.pokemon.push(syncedPokemon);
 
-          // l.debug(
-          //   'Added new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
-          //   '\n', 'battleId', battleId,
-          //   '\n', 'calcdexId', clientPokemon.calcdexId,
-          //   '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
-          //   '\n', 'clientPokemon', clientPokemon,
-          //   '\n', 'serverPokemon', serverPokemon,
-          //   '\n', 'syncedPokemon', syncedPokemon,
-          //   '\n', 'playerState.pokemon', playerState.pokemon,
-          //   '\n', 'pokemonOrder', playerState.pokemonOrder,
-          //   '\n', 'battle', battle,
-          //   '\n', 'battleState', battleState,
-          // );
+          l.debug(
+            'Added new Pokemon', syncedPokemon.speciesForme, 'to player', playerKey,
+            '\n', 'battleId', battleId,
+            '\n', 'calcdexId', clientPokemon.calcdexId,
+            '\n', 'length', '(now)', playerState.pokemon.length, '(max)', playerState.maxPokemon,
+            '\n', 'clientPokemon', clientPokemon,
+            '\n', 'serverPokemon', serverPokemon,
+            '\n', 'syncedPokemon', syncedPokemon,
+            '\n', 'playerState.pokemon', playerState.pokemon,
+            '\n', 'pokemonOrder', playerState.pokemonOrder,
+            '\n', 'battle', battle,
+            '\n', 'battleState', battleState,
+          );
         } else {
           playerState.pokemon[matchedPokemonIndex] = syncedPokemon;
 
-          // l.debug(
-          //   'Updated existing Pokemon', syncedPokemon.speciesForme,
-          //   'at index', matchedPokemonIndex, 'for player', playerKey,
-          //   '\n', 'battleId', battleId,
-          //   '\n', 'calcdexId', clientPokemon.calcdexId,
-          //   '\n', 'clientPokemon', clientPokemon,
-          //   '\n', 'serverPokemon', serverPokemon,
-          //   '\n', 'syncedPokemon', syncedPokemon,
-          //   '\n', 'playerState.pokemon', playerState.pokemon,
-          //   '\n', 'pokemonOrder', playerState.pokemonOrder,
-          //   '\n', 'battle', battle,
-          //   '\n', 'battleState', battleState,
-          // );
+          l.debug(
+            'Updated existing Pokemon', syncedPokemon.speciesForme,
+            'at index', matchedPokemonIndex, 'for player', playerKey,
+            '\n', 'battleId', battleId,
+            '\n', 'calcdexId', clientPokemon.calcdexId,
+            '\n', 'clientPokemon', clientPokemon,
+            '\n', 'serverPokemon', serverPokemon,
+            '\n', 'syncedPokemon', syncedPokemon,
+            '\n', 'playerState.pokemon', playerState.pokemon,
+            '\n', 'pokemonOrder', playerState.pokemonOrder,
+            '\n', 'battle', battle,
+            '\n', 'battleState', battleState,
+          );
         }
       }
 
@@ -1018,12 +1166,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
       playerState.activeIndices = player.active?.map((activePokemon) => {
         // particularly in FFA, there may be a Pokemon belonging to another player in active[]
-        if (!activePokemon || detectPlayerKeyFromPokemon(activePokemon) !== playerKey) {
+        if (!activePokemon?.details || detectPlayerKeyFromPokemon(activePokemon) !== playerKey) {
           return null;
         }
 
         // checking myPokemon first (if it's available) for Illusion/Zoroark
-        const activeId = (
+        let activeId = (
           isMyPokemonSide
             && hasMyPokemon
             // update (2023/07/26): had to update this logic for Supreme Overlord in Doubles;
@@ -1037,6 +1185,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 && p.hp > 0
                 && (
                   (!p.calcdexId && !activePokemon.calcdexId)
+                    // update (2023/10/09): you know who it is baby
+                    || formatId(p.ability || p.baseAbility) === 'illusion'
                     || p.calcdexId === activePokemon.calcdexId
                 )
                 && !processedIds.includes(p?.calcdexId)
@@ -1045,10 +1195,45 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           || activePokemon?.calcdexId
           || player.pokemon.find((p) => p === activePokemon)?.calcdexId;
 
-        // update the activeIndex (& the selectionIndex if autoSelect is enabled)
-        const activeIndex = activeId
-          ? playerState.pokemon.findIndex((p) => p.calcdexId === activeId)
+        // note: leave as `let` for those dank console logs
+        let activeIndex = -1;
+
+        if (activeId) {
+          activeIndex = playerState.pokemon.findIndex((p) => p.calcdexId === activeId);
+        }
+
+        // update (2023/10/08): hey there demons, it's me, ya boy
+        const illusionIndex = activeIndex < 0
+          ? playerState.pokemon.findIndex((p) => formatId(p.dirtyAbility || p.ability) === 'illusion')
           : -1;
+
+        if (illusionIndex > -1) {
+          const illusionPokemon = playerState.pokemon[illusionIndex];
+
+          // note: purposefully not implementing Illusion detection for activePokemon beyond checking their levels,
+          // which wouldn't be always present in formats like OU where every Pokemon is level 100 unless you're temp6t
+          // (i.e., too much handholding if we check if this "Cinderace" could legally learn Dark Pulse lol)
+          const parsedDetails = parsePokemonDetails(activePokemon.details);
+
+          // e.g., activePokemon.details = 'Cinderace, L84, M' (but actually 'Zoroark, L84, M' tho)
+          // suspect.details = 'Cinderace, L77, M' (actual Cinderace)
+          const suspect = (
+            !!parsedDetails?.speciesForme
+              && (parsedDetails.level || 0) > 0
+              && playerState.pokemon.find((p) => p.speciesForme === parsedDetails.speciesForme)
+          ) || null;
+
+          // e.g., suspect.level = 77,
+          // activePokemon.level (as parsedDetails.level) = 84
+          const sus = !!illusionPokemon?.calcdexId
+            && (suspect?.level || 0) > 0
+            && suspect.level !== parsedDetails.level;
+
+          if (sus) {
+            activeId = illusionPokemon.calcdexId;
+            activeIndex = illusionIndex;
+          }
+        }
 
         l.debug(
           'Building activeIndices for player', playerKey,
