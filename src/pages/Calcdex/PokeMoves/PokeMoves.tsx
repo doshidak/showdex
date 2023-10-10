@@ -379,7 +379,12 @@ export const PokeMoves = ({
                   hint={pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0)}
                   fallbackValue={pokemon.faintCounter || 0}
                   min={0}
-                  max={player.maxPokemon}
+                  max={(
+                    formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord'
+                      && !pokemon.moves.includes('Last Respects' as MoveName)
+                      ? Math.max(player.maxPokemon - 1, 0)
+                      : 100 // Last Respects is capped at 100 LOL
+                  )}
                   step={1}
                   shiftStep={2}
                   clearOnFocus
