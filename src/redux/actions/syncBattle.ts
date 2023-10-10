@@ -1378,7 +1378,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         toggleRuinAbilities(
           playerState,
           null,
-          battleState.field?.gameType,
+          battleState.gameType,
           true, // update the selected Pokemon's abilityToggled value too
         );
       }
@@ -1411,7 +1411,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battle,
     );
 
-    if (!syncedField?.gameType) {
+    if (!syncedField) {
       if (__DEV__) {
         l.warn(
           'Failed to sync the field state from the battle.',

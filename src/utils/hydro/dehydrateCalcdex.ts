@@ -41,7 +41,7 @@ export const dehydratePlayerSide = (
  *
  * Each "root" property of the `state` is given its own "opcode":
  *
- * * `g` refers to the gen number (`state.gen`).
+ * * `g` refers to the gen number (`state.gen`) & game type (`state.gameType`).
  * * `m` refers to the battle format (`state.format`).
  * * `p` refers to the player keys in the battle.
  * * `p#` refers to each player in the battle (e.g., `state.p1`, `state.p2`).
@@ -53,7 +53,7 @@ export const dehydratePlayerSide = (
  * ```
  * {...header};
  * s:{error};
- * g:{gen};
+ * g:{gen}/{gameType};
  * m:{format};
  * p:{authPlayerKey}/{playerKey}/{opponentKey};
  * p1:{player};
@@ -108,7 +108,6 @@ export const dehydratePlayerSide = (
  * and `{field}`, whose properties are deliminated by a pipe (`'|'`), is in the following format:
  *
  * ```
- * {gameType === 'Doubles' ? 'd' : 's'}|
  * {weather}|
  * {terrain}|
  * {Object.keys(attackerSide)[0]}={Object.values(attackerSide)[0]}[/...]|
@@ -127,7 +126,7 @@ export const dehydratePlayerSide = (
  * ```ts
  * `
  * s:VHlwZUVycm9yOiBDYW5ub3QgcmVhZCBwcm9wZXJ0aWVzIG9mIHVuZGVmaW5lZCAocmVhZGluZyAnZGVlek51dHMnKQ==;
- * g:8;
+ * g:8/s;
  * m:gen8nationaldexag;
  * n:1;
  * p:p1/p1/p2;
@@ -145,7 +144,7 @@ export const dehydratePlayerSide = (
  *   |3/c,Gengar,Gengar>?,M,100,n,Ghost/Poison>?,1000/1000/n,?/0/0/0,y,?/?~Cursed Body/n/n,?~Gengarite/?/?/?,Timid,60/65>?/60>?/130>?/75>?/110>?,31/31/31/31/31/31,248/0/0/0/8/252,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,323/149/156/296/188/350,,n/n/n/n,Perish Song/Encore/Substitute/Destiny Bond,,
  *   |4/c,Melmetal,Melmetal>?,N,100,n,Steel>?,1000/1000/n,?/0/0/0,y,?/?~Iron Fist/n/n,?~Protective Pads/?/?/?,Adamant,135/143>?/143>?/80>?/65>?/34>?,31/31/31/31/31/31,40/252/0/0/104/112,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,421/423/322/176/192/132,,n/n/n/n,Double Iron Bash/Superpower/Thunder Punch/Thunder Wave,,
  *   |5/c,Venusaur,Venusaur>?,F,100,n,Grass/Poison>?,1000/1000/n,?/0/0/0,y,?/?~Chlorophyll/n/n,?~Life Orb/?/?/?,Modest,80/82>?/83>?/100>?/100>?/80>?,31/31/31/31/31/31,0/0/0/252/4/252,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,301/180/202/328/237/259,,n/n/n/n,Growth/Giga Drain/Weather Ball/Sludge Bomb,,;
- * f:s|Harsh Sunshine|Electric
+ * f:Harsh Sunshine|Electric
  * `
  * ```
  * @since 1.0.3
@@ -171,12 +170,8 @@ export const dehydrateCalcdex = (
 
   const output: string[] = [
     dehydrateHeader(HydroDescriptor.Calcdex),
-    // `v:${env('package-version', '?')}`,
-    // `b:${env('build-date', '?')}`,
-    // `t:${env('build-target', '?')}`,
-    // `e:${__DEV__ ? 'd' : 'p'}`,
     `s:${error?.message ? base64.encode(error.message) : '?'}`,
-    `g:${dehydrateValue(gen)}`,
+    `g:${dehydrateValue(gen)}/${dehydrateValue(state.gameType)}`,
     `m:${dehydrateValue(format)}`,
     'p:' + dehydrateArray([
       authPlayerKey,
@@ -329,8 +324,9 @@ export const dehydrateCalcdex = (
 
   // update (2023/02/06): attackerSide & defenderSide (of type CalcdexPlayerSide) are now attached to
   // the individual players (of type CalcdexPlayer), i.e., they're no longer in the CalcdexBattleField
+  // update (2023/10/10): gameType is now up a level in CalcdexBattleState
   const {
-    gameType,
+    // gameType,
     weather,
     terrain,
     // attackerSide,
@@ -338,7 +334,7 @@ export const dehydrateCalcdex = (
   } = field || {};
 
   const fieldOutput: string[] = [
-    gameType === 'Doubles' ? 'd' : 's',
+    // gameType === 'Doubles' ? 'd' : 's',
     dehydrateValue(weather),
     dehydrateValue(terrain),
     // dehydrateFieldSide(attackerSide),

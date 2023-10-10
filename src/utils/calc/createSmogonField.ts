@@ -1,11 +1,12 @@
-import { Field as SmogonField } from '@smogon/calc';
+import { type GameType, Field as SmogonField, State as SmogonState } from '@smogon/calc';
 import { type CalcdexBattleField, type CalcdexPlayer } from '@showdex/redux/store';
 import { clonePlayerSide, countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
-import { formatId } from '@showdex/utils/core';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat } from '@showdex/utils/dex';
 
 export const createSmogonField = (
   format: string,
+  gameType: GameType,
   field: CalcdexBattleField,
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
@@ -13,15 +14,16 @@ export const createSmogonField = (
 ): SmogonField => {
   const gen = detectGenFromFormat(format);
 
-  if (!format || !gen || !field?.gameType) {
+  if (!format || !gen || !nonEmptyObject(field)) {
     return null;
   }
 
   // note: using structuredClone() for attackerSide & defenderSide here since we may mutate their
   // properties for hazards, so we don't want to accidentally mutate their original objects from the args!
   // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
-  const processedField: CalcdexBattleField = {
+  const processedField: Partial<SmogonState.Field> = {
     ...field,
+    gameType,
     // attackerSide: structuredClone(player?.side || {}),
     // defenderSide: structuredClone(opponent?.side || {}),
     attackerSide: clonePlayerSide(player?.side),
@@ -66,11 +68,11 @@ export const createSmogonField = (
   // update (2023/01/30): @smogon/calc now implemented the Ruin effects if the Pokemon has them
   // (before they did nothing), so we don't need to rely on these field toggles if not Doubles
   // (more processing, such as Ruin abilities canceling each other out, is done in createSmogonPokemon(), btw)
-  const doubles = processedField.gameType === 'Doubles';
+  // const doubles = processedField.gameType === 'Doubles';
 
   // note that this will apply for the playerPokemon only to calculate the current matchup
   // (specifically the playerPokemon's playerMove in calcSmogonMatchup())
-  if (hasActiveRuin && doubles) {
+  if (hasActiveRuin && gameType === 'Doubles') {
     const ruinCounts = countRuinAbilities(...allPlayerSides);
 
     // update (2023/01/31): check if any of the Pokemon in the 1v1 matchup (Pokemon at the selectionIndex for both players)

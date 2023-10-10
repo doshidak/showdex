@@ -339,6 +339,7 @@ export const CalcdexPokeProvider = ({
   // calculate the current matchup
   const calculateMatchup = useSmogonMatchup(
     format,
+    state?.gameType,
     playerPokemon,
     opponentPokemon,
     player,

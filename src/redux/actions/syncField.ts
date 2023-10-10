@@ -1,5 +1,6 @@
 import { type CalcdexBattleField, type CalcdexBattleState } from '@showdex/redux/store';
 import { cloneField, sanitizeField } from '@showdex/utils/battle';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 
 const l = logger('@showdex/redux/actions/syncField()');
@@ -8,7 +9,7 @@ export const syncField = (
   state: Partial<CalcdexBattleState>,
   battle: Partial<Showdown.Battle>,
 ): CalcdexBattleField => {
-  if (!state?.field?.gameType || !battle?.p1) {
+  if (!nonEmptyObject(state?.field) || !battle?.p1) {
     if (__DEV__) {
       l.warn(
         'Received invalid field and/or battle args',

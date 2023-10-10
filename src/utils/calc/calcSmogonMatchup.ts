@@ -1,4 +1,5 @@
 import {
+  type GameType,
   type Move as SmogonMove,
   type MoveName,
   type Pokemon as SmogonPokemon,
@@ -101,6 +102,7 @@ const l = logger('@showdex/utils/calc/calcSmogonMatchup()');
  */
 export const calcSmogonMatchup = (
   format: string,
+  gameType: GameType,
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   playerMove: MoveName,
@@ -122,12 +124,11 @@ export const calcSmogonMatchup = (
   const dex = getGenDexForFormat(format);
   // const gen = detectGenFromFormat(format);
 
-  if (!dex || !format || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
+  if (!dex || !format || !gameType || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
     if (__DEV__ && playerMove) {
       l.debug(
         'Calculation ignored due to invalid arguments.',
-        // '\n', 'dex.num', dex?.num,
-        '\n', 'format', format, 'dex', dex,
+        '\n', 'format', format, 'gameType', gameType, 'gen', dex?.num,
         '\n', 'playerPokemon', playerPokemon?.name || playerPokemon?.speciesForme || '???', playerPokemon,
         '\n', 'opponentPokemon', opponentPokemon?.name || opponentPokemon?.speciesForme || '???', opponentPokemon,
         '\n', 'playerMove', playerMove,
@@ -142,11 +143,11 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  const smogonField = createSmogonField(format, field, player, opponent, allPlayers);
+  const smogonField = createSmogonField(format, gameType, field, player, opponent, allPlayers);
 
-  matchup.attacker = createSmogonPokemon(format, playerPokemon, playerMove, opponentPokemon, smogonField);
+  matchup.attacker = createSmogonPokemon(format, gameType, playerPokemon, playerMove, opponentPokemon);
   matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
-  matchup.defender = createSmogonPokemon(format, opponentPokemon, null, playerPokemon, smogonField);
+  matchup.defender = createSmogonPokemon(format, gameType, opponentPokemon, null, playerPokemon);
 
   // pretty much only used for Beat Up lmao
   const strikes = determineMoveStrikes(
@@ -177,7 +178,7 @@ export const calcSmogonMatchup = (
 
     // l.debug(
     //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-    //   '\n', 'gen', dex.num,
+    //   '\n', 'gameType', gameType, 'gen', dex.num,
     //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
     //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
     //   '\n', 'field', field,
@@ -193,7 +194,7 @@ export const calcSmogonMatchup = (
     if (__DEV__ && !(error as Error)?.message?.includes('=== 0')) {
       l.error(
         'Exception while calculating the damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-        '\n', 'dex.num', dex.num,
+        '\n', 'gameType', gameType, 'gen', dex.num,
         '\n', 'playerPokemon', playerPokemon.name || playerPokemon.speciesForme || '???', playerPokemon,
         '\n', 'opponentPokemon', opponentPokemon.name || opponentPokemon.speciesForme || '???', opponentPokemon,
         '\n', 'playerMove', playerMove,

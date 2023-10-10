@@ -7,6 +7,7 @@ import {
 } from '@reduxjs/toolkit';
 import {
   type AbilityName,
+  type GameType,
   type GenerationNum,
   type ItemName,
   type MoveName,
@@ -1383,11 +1384,12 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
  * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
  * * Checking the source code for the `Field` class (see link below),
  *   the constructor accepts these missing properties.
+ * * As of v1.1.7, the `gameType` property has been moved up to the `CalcdexBattleState`.
  *
  * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
  * @since 0.1.3
  */
-export interface CalcdexBattleField extends SmogonState.Field {
+export interface CalcdexBattleField extends Omit<SmogonState.Field, 'gameType'> {
   isMagicRoom?: boolean;
   isWonderRoom?: boolean;
   isAuraBreak?: boolean;
@@ -1624,6 +1626,14 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * @since 0.1.0
    */
   format: string;
+
+  /**
+   * Game type, whether `'Singles'` or `'Doubles'`.
+   *
+   * @default 'Singles'
+   * @since 0.1.0
+   */
+  gameType: GameType;
 
   /**
    * Whether the gen uses legacy battle mechanics.
@@ -1888,6 +1898,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleId,
         gen = env.int<GenerationNum>('calcdex-default-gen'),
         format = null,
+        gameType = 'Singles',
         rules = {},
         turn = 0,
         active = false,
@@ -1927,6 +1938,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         gen,
         format,
+        gameType,
         legacy: detectLegacyGen(format || gen),
         rules,
         turn,

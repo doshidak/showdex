@@ -929,6 +929,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         battleNonce: initNonce,
         gen: battle.gen as GenerationNum,
         format: battle.id.split('-')?.[1],
+        gameType: battle.gameType === 'doubles' ? 'Doubles' : 'Singles',
         turn: Math.max(battle.turn || 0, 0),
         active: !battle.ended,
         renderMode: openAsPanel ? 'panel' : 'overlay',
