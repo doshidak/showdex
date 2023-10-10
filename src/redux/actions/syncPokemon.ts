@@ -700,14 +700,23 @@ export const syncPokemon = (
 
   // if the Pokemon is transformed, auto-set the moves
   if (syncedPokemon.transformedMoves?.length) {
-    if (transformedForme) {
-      // update (2023/07/27): mergeRevealedMoves() now handles transformedMoves, so we'll use that instead
-      // syncedPokemon.moves = [...syncedPokemon.transformedMoves];
-      syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
-    } else {
+    // update (2023/10/10): think I forgot to call mergeRevealedMoves() again after clearing transformedMoves[]
+    // cause *my* Ditto (i.e., serverSourced = true) still be retaining its transformed moves, but blank in the UI lmao
+    // if (transformedForme) {
+    //   // update (2023/07/27): mergeRevealedMoves() now handles transformedMoves, so we'll use that instead
+    //   // syncedPokemon.moves = [...syncedPokemon.transformedMoves];
+    //   syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
+    // } else {
+    //   // clear the list of transformed moves since the Pokemon is no longer transformed
+    //   syncedPokemon.transformedMoves = [];
+    // }
+
+    if (!transformedForme) {
       // clear the list of transformed moves since the Pokemon is no longer transformed
       syncedPokemon.transformedMoves = [];
     }
+
+    syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
   }
 
   // exhibit the big smart sync technology by utilizing the power of hardcoded game sense
@@ -733,7 +742,8 @@ export const syncPokemon = (
         // altItems could be potentially sorted by usage stats from the Calcdex
         syncedPokemon.dirtyItem = (
           !!syncedPokemon.altItems?.length
-            && flattenAlts(syncedPokemon.altItems).find((i) => !!i && formatId(i) !== 'boosterenergy')
+            && flattenAlts(syncedPokemon.altItems)
+              .find((i) => !!i && formatId(i) !== 'boosterenergy')
         ) || null;
 
         // could've been previously toggled, so make sure the ability is toggled off
