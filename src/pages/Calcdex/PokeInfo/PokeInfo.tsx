@@ -18,12 +18,12 @@ import {
   ToggleButton,
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
-import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/dex';
+import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
 import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
-import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
+import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
@@ -57,7 +57,7 @@ export const PokeInfo = ({
     // playerKey,
     player,
     playerPokemon: pokemon,
-    field, // don't use the one from state btw
+    // field, // don't use the one from state btw
     presetsLoading,
     abilityOptions,
     itemOptions,
@@ -87,15 +87,18 @@ export const PokeInfo = ({
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
 
   // for Ruin abilities (gen 9), only show the ability toggle in Doubles
-  const showAbilityToggle = pokemon?.abilityToggleable && (
-    !formatId(abilityName)?.endsWith('ofruin')
-      || field?.gameType === 'Doubles'
-  );
+  // update (2023/10/09): abilityToggleable will be false for Ruin abilities if not Doubles
+  // const showAbilityToggle = pokemon?.abilityToggleable && (
+  //   !formatId(abilityName)?.endsWith('ofruin')
+  //     || field?.gameType === 'Doubles'
+  // );
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = pokemon?.abilityToggleable
-    && formatId(abilityName)?.endsWith('ofruin')
-    && field?.gameType === 'Doubles'
+    // && formatId(abilityName)?.endsWith('ofruin')
+    && PokemonRuinAbilities.includes(abilityName)
+    // update (2023/10/09): no need to check this cause abilityToggleable will be false if not Doubles
+    // && field?.gameType === 'Doubles'
     && !pokemon.abilityToggled
     && ([
       'ruinBeadsCount',
@@ -554,7 +557,7 @@ export const PokeInfo = ({
               Ability
 
               {
-                showAbilityToggle &&
+                pokemon?.abilityToggleable &&
                 <ToggleButton
                   className={styles.toggleButton}
                   label="Active"

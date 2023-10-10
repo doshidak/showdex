@@ -52,7 +52,7 @@ export const FieldCalc = ({
   } = state;
 
   const {
-    gameType,
+    // gameType,
     weather,
     terrain,
     // attackerSide: p1Side,
@@ -103,7 +103,7 @@ export const FieldCalc = ({
     settings,
   ]);
 
-  const doubles = gameType === 'Doubles';
+  const doubles = state?.gameType === 'Doubles';
 
   const sideFieldMap = {
     ...PlayerSideScreensToggleMap,
