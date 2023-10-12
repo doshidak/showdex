@@ -46,7 +46,7 @@ export const calcPokemonSpreadStats = (
       baseStat,
       pokemon.ivs?.[stat] ?? defaultIv,
       pokemon.evs?.[stat] ?? defaultEv,
-      pokemon.level ?? 100,
+      (stat !== 'hp' && pokemon.transformedLevel) || (pokemon.level ?? 100),
       legacy ? undefined : pokemon.nature,
     );
 

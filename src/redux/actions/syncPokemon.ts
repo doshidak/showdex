@@ -348,6 +348,7 @@ export const syncPokemon = (
         ) || null;
 
         syncedPokemon.transformedForme = transformedPokemon?.speciesForme || null;
+        syncedPokemon.transformedLevel = transformedPokemon?.level || null;
 
         // check for (untransformed) forme changes
         const formeChange = (

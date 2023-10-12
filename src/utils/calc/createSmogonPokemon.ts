@@ -151,6 +151,16 @@ export const createSmogonPokemon = (
     nature: legacy ? null : pokemon.nature,
     moves: pokemon.moves,
 
+    // update (2023/10/10): this is a special property I added into the @smogon/calc patch that when specified,
+    // will bypass @smogon/calc's internal spread stats calculator (which is required by Showdex to properly handle Ditto)
+    // update: fuck nvm keeps getting recalculated based on its species baseStats >:(
+    // update (2023/10/11): trying the new rawStats param, which overrides rawStats instead of stats
+    // (internally in the mechanics files, computeFinalStats() seems to write to `stats` based on `rawStats`)
+    // update: actually, `stats` would've worked (since I internally passed it to this.rawStats of the Pokemon class anyway),
+    // but I just had forgot purge the webpack cache for Showdex ... sooo don't forget to run `yarn cache:purge` when you
+    // change anything in node_modules lol
+    rawStats: { ...pokemon.spreadStats } as SmogonPokemonOptions['rawStats'],
+
     ivs: {
       hp: pokemon.ivs?.hp ?? defaultIv,
       atk: pokemon.ivs?.atk ?? defaultIv,

@@ -232,6 +232,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   revealedTeraType?: Showdown.TypeName;
 
   /**
+   * Original level of the *Transform*-target Pokemon.
+   *
+   * * Apparently when the base stats are copied (i.e., `transformedBaseStats`), they're calculated at the level of
+   *   the target Pokemon, not the Pokemon doing the *Transform*.
+   *   - HP is still calculated at the level of the Pokemon doing the *Transform*, of course.
+   *   - Nice.
+   *
+   * @default null
+   * @since 1.1.7
+   */
+  transformedLevel?: number;
+
+  /**
    * User-modified *Hit Point* (HP) value.
    *
    * * Should be `clamp()`'d between `0` & this Pokemon's `maxhp`.

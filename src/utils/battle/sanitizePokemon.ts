@@ -80,6 +80,7 @@ export const sanitizePokemon = (
       : null,
 
     level: pokemon?.level || 0,
+    transformedLevel: ('transformedLevel' in pokemon && pokemon.transformedLevel) || null,
     gender: pokemon?.gender || 'N',
 
     shiny: pokemon?.shiny || false,
