@@ -60,6 +60,8 @@ export const calcMoveBasePower = (
     return 0;
   }
 
+  // note: dirtyItem can be set to an empty string (i.e., '') to "clear" the item
+  const itemId = formatId(pokemon?.dirtyItem ?? pokemon?.item);
   const abilityId = formatId(pokemon?.dirtyAbility || pokemon?.ability);
 
   const hitCounter = clamp(0, pokemon?.hitCounter || 0);
@@ -84,6 +86,12 @@ export const calcMoveBasePower = (
   }
 
   const basePowerMods: number[] = [];
+
+  // note: had to manually disable the auto-boost in @smogon/calc (specifically in the gen56 & gen789 mechanics files),
+  // which is included in this project's @smogon/calc patch
+  if (moveId === 'acrobatics' && !itemId) {
+    basePowerMods.push(2);
+  }
 
   if (['electromorphosis', 'windpower'].includes(abilityId) && 'charge' in (pokemon?.volatiles || {})) {
     const moveType = overrides?.type || move.type;
