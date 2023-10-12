@@ -54,7 +54,8 @@ export const calcPresetCalcdexId = (
   nature: preset?.nature,
   item: preset?.item,
   // altItems: preset?.altItems?.join(','),
-  moves: preset?.moves?.sort().join(','), // sort moves in ABC order
+  // update (2023/10/11): HOLY FUCKKKKKKKKK the mystery of the sorting moves[] has been solved !!
+  moves: [...(preset?.moves || [])].sort().join(','), // sort moves in ABC order
   // altMoves: preset?.moves?.join(','),
   ivs: calcCalcdexId<Showdown.StatsTable>(preset?.ivs),
   evs: calcCalcdexId<Showdown.StatsTable>(preset?.evs),
