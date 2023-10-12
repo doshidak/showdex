@@ -4,6 +4,7 @@ export * from './detectLegacyGen';
 export * from './determineCriticalHit';
 export * from './determineMoveTargets';
 export * from './formatDexDescription';
+export * from './getDefaultSpreadValue';
 export * from './getDexForFormat';
 export * from './getDynamicMoveType';
 export * from './getGenDexForFormat';
