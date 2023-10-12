@@ -3,7 +3,7 @@ import {
   type CalcdexPokemonPreset,
   type CalcdexPokemonUsageAlt,
 } from '@showdex/redux/store';
-import { mergeRevealedMoves } from '@showdex/utils/battle';
+// import { mergeRevealedMoves } from '@showdex/utils/battle';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, hasMegaForme } from '@showdex/utils/dex';
 import { detectUsageAlt } from './detectUsageAlt';
@@ -206,10 +206,13 @@ export const applyPreset = (
   // check if we already have revealed moves (typical of spectating or replaying a battle)
   // update (2023/02/03): merging all of the output to provide altMoves[] (for Hidden Power moves)
   // update (2023/07/27): not handling transformedMoves here anymore since it's handled in mergeRevealedMoves()
+  // update (2023/10/11): actually this fricks things up more being here, especially with all the Ditto shiz I'm doing rn
+  /*
   output.moves = mergeRevealedMoves({
     ...pokemon,
     ...output,
   });
+  */
 
   // only apply the ability/item (& remove their dirty counterparts) if there's only
   // 1 possible ability/item in the pool (& their actual ability/item hasn't been revealed)

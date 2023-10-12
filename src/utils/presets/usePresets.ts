@@ -126,6 +126,8 @@ const selectPresetsFromResult = (
   }
 
   // attempt to find presets of speciesFormes that match exactly with the firstForme
+  // update (2023/10/11): fucc it, release the flood gates
+  /*
   const [firstForme] = formes;
   const firstFormePresets = presets
     .filter((p) => !!p?.speciesForme && formatId(p.speciesForme) === firstForme);
@@ -138,6 +140,7 @@ const selectPresetsFromResult = (
   if (formes.length === 1) {
     return [];
   }
+  */
 
   // return any preset assigned to the current speciesForme (which at this point won't exist, probably) and baseForme
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
@@ -170,8 +173,13 @@ export const usePresets = ({
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randoms = genlessFormat?.includes('random');
 
-  const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
-  const formes = getPresetFormes(speciesForme, format, true);
+  // const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
+  // const formes = getPresetFormes(speciesForme, format, true);
+
+  const formes = [
+    ...getPresetFormes(pokemon?.speciesForme, format, true),
+    ...(pokemon?.transformedForme ? getPresetFormes(pokemon.transformedForme, format, true) : []),
+  ];
 
   const shouldSkip = disabled
     || !format

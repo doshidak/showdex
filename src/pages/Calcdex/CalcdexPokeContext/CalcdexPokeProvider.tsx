@@ -160,7 +160,9 @@ export const CalcdexPokeProvider = ({
   const presetOptions = React.useMemo(() => buildPresetOptions(
     presets,
     usages,
+    playerPokemon?.speciesForme,
   ), [
+    playerPokemon,
     presets,
     usages,
   ]);
@@ -232,7 +234,10 @@ export const CalcdexPokeProvider = ({
     // used for debugging purposes only
     const scope = `${baseScope}:React.useEffect()`;
 
-    if (!playerPokemon.transformedForme && appliedTransformedPreset.current) {
+    // used for non-debugging purposes only
+    const transformed = !!playerPokemon.transformedForme;
+
+    if (!transformed && appliedTransformedPreset.current) {
       appliedTransformedPreset.current = false;
     }
 
@@ -247,12 +252,16 @@ export const CalcdexPokeProvider = ({
         // auto-preset if one hasn't been found or no longer exists in `presets`
         !existingPreset?.calcdexId
           // allow another round of auto-presetting if they are transformed
-          || (!!playerPokemon.transformedForme && !appliedTransformedPreset.current)
+          || (transformed && !appliedTransformedPreset.current)
       )
       && (
         !existingPreset?.source
           // don't auto-preset if we already know the exact preset or usage is currently applied
           || !['server', 'sheet', 'usage'].includes(existingPreset.source)
+          // update (2023/10/11): ... you know, after all these years, you'd think Ditto would've been defeated by now,
+          // but nope, its ghost still haunts me. think you wanna code Pokemon? think again buckaroo
+          || existingPreset.speciesForme !== playerPokemon.speciesForme
+          || (transformed && existingPreset.speciesForme !== playerPokemon.transformedForme)
       );
 
     if (!shouldAutoPreset) {
@@ -278,7 +287,7 @@ export const CalcdexPokeProvider = ({
     // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
     // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
     // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
-    if (playerPokemon.transformedForme) {
+    if (transformed) {
       // [, initialPreset] = presets; // readability 100; fancy JS way of writing initialPresets = presets[1]
       const nonServerPreset = presets.find((p) => p.source !== 'server');
 

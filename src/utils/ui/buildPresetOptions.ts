@@ -1,4 +1,5 @@
 import { type DropdownOption } from '@showdex/components/form';
+import { bull } from '@showdex/consts/core';
 import { FormatLabels } from '@showdex/consts/dex';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { getGenlessFormat } from '@showdex/utils/dex';
@@ -11,11 +12,16 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
 /**
  * Builds the value for the `options` prop of the presets `Dropdown` component in `PokeInfo`.
  *
+ * * As of v1.1.7, you can provide the optional `speciesForme` argument to append the preset's `speciesForme`
+ *   to the option's `subLabel` if it doesn't match.
+ *   - This is useful for distinguishing presets of differing `speciesForme`'s, or even `transformedForme`'s.
+ *
  * @since 1.0.3
  */
 export const buildPresetOptions = (
   presets: CalcdexPokemonPreset[],
   usages?: CalcdexPokemonPreset[],
+  speciesForme?: string,
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
 
@@ -54,6 +60,16 @@ export const buildPresetOptions = (
         option.label = label;
         option.subLabel = actualSubLabel;
       }
+    }
+
+    if (speciesForme && preset.speciesForme !== speciesForme) {
+      if (option.subLabel) {
+        (option.subLabel as string) += ` ${bull} `;
+      } else {
+        option.subLabel = '';
+      }
+
+      (option.subLabel as string) += preset.speciesForme;
     }
 
     // attempt to find this preset's usage percentage (typically only in Gen 9 Randoms)

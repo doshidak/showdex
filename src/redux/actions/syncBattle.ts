@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { type GenerationNum } from '@smogon/calc';
+import { type GenerationNum, type MoveName } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
 import {
@@ -342,15 +342,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // (i.e., we want any formes to remain as-is for what we're doing here atm)
         const details = detectPokemonDetails(pokemon);
 
-        l.debug(
-          'Ordering', pokemon.speciesForme, 'for player', playerKey,
-          '\n', 'battleId', battleId,
-          '\n', 'calcdexId', pokemon.calcdexId,
-          '\n', 'details', '(detected)', details,
-          '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
-          // '\n', 'source', clientSourced ? 'client' : 'server',
-          '\n', `${clientSourced ? 'client' : 'server'}Pokemon`, pokemon,
-        );
+        // l.debug(
+        //   'Ordering', pokemon.speciesForme, 'for player', playerKey,
+        //   '\n', 'battleId', battleId,
+        //   '\n', 'calcdexId', pokemon.calcdexId,
+        //   '\n', 'details', '(detected)', details,
+        //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
+        //   // '\n', 'source', clientSourced ? 'client' : 'server',
+        //   '\n', `${clientSourced ? 'client' : 'server'}Pokemon`, pokemon,
+        // );
 
         if (!pokemon.calcdexId) {
           // update (2022/10/18): found a case where the client Pokemon was given before
@@ -686,6 +686,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             if (shouldApplyPreset) {
               const defaultIv = battleState.legacy ? 30 : 31;
 
+              // gens 3+ only
               if (!battleState.legacy) {
                 // note: since team sheets contain the Pokemon's actual ability and items, we're setting them as
                 // ability and item, respectively, instead of dirtyAbility and dirtyItem, also respectively
@@ -697,7 +698,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 // don't apply the default neutral nature from importPokePaste()
                 // (sets the nature to 'Hardy' by default if a nature couldn't be parsed from the PokePaste)
                 // update (2023/02/07): allow 'Hardy' natures if we're in Randoms
-                if (PokemonNatures.includes(matchedPreset.nature) && (battleState.format.includes('random') || matchedPreset.nature !== 'Hardy')) {
+                const shouldApplyNature = PokemonNatures.includes(matchedPreset.nature) && (
+                  battleState.format.includes('random')
+                    || matchedPreset.nature !== 'Hardy'
+                );
+
+                if (shouldApplyNature) {
                   syncedPokemon.nature = matchedPreset.nature;
                 }
 
@@ -713,18 +719,18 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                     spe: matchedPreset.evs.spe ?? 0,
                   };
                 }
-              }
+
+                if (matchedPreset.teraTypes?.length && PokemonTypes.includes(matchedPreset.teraTypes[0] as Showdown.TypeName)) {
+                  [syncedPokemon.revealedTeraType] = matchedPreset.teraTypes as Showdown.TypeName[];
+                  syncedPokemon.teraType = syncedPokemon.revealedTeraType;
+                }
+              } // end gens 3+ only
 
               // checking prevItem to make sure to not apply the item if their actual item was knocked off, for instance
               // (in which case prevItem would be 'Focus Sash' and prevItemEffect would be 'knocked off')
               if (battleState.gen > 1 && matchedPreset.item && !syncedPokemon.prevItem) {
                 syncedPokemon.item = matchedPreset.item;
                 syncedPokemon.dirtyItem = null;
-              }
-
-              if (matchedPreset.teraTypes?.length && PokemonTypes.includes(matchedPreset.teraTypes[0] as Showdown.TypeName)) {
-                [syncedPokemon.revealedTeraType] = matchedPreset.teraTypes as Showdown.TypeName[];
-                syncedPokemon.teraType = syncedPokemon.revealedTeraType;
               }
 
               if (matchedPreset.moves?.length) {
@@ -762,27 +768,24 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           } // end shouldAddPresets
         } // end battleState.sheets.length
 
-        // detect if Pokemon is transformed and to which player & which Pokemon,
-        // so we can apply those known properties to that Pokemon in that player's state
-        // (note: we'd only know these properties from the server, i.e., the auth user is also a player)
-        if (syncedPokemon.serverSourced && syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
-          // since we sanitized the volatiles earlier, we actually need the pointer to the target pokemon
+        // if the Pokemon is transformed, see which one it's transformed as
+        if (syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
+          // since we sanitized the volatiles earlier, we actually need the pointer to the target Pokemon
           // from the original Showdown.Pokemon (i.e., the clientPokemon) to retrieve its ident
           const targetClientPokemon = clientPokemon.volatiles.transform[1] as unknown as Showdown.Pokemon;
-          const targetPlayerKey = (!!targetClientPokemon?.ident && detectPlayerKeyFromPokemon(targetClientPokemon)) || null;
 
-          // update: this isn't fool-proof since the corresponding state of the targetClientPokemon
-          // may not have initialized fully yet! (e.g., we're p1, transformed Pokemon belongs to p2, but p2 isn't init'd yet)
-          // const targetPokemonState = (
-          //   AllPlayerKeys.includes(targetPlayerKey)
-          //     && battleState[targetPlayerKey].pokemon?.find((p) => (
-          //       (!!targetClientPokemon.calcdexId && p?.calcdexId === targetClientPokemon.calcdexId)
-          //         || p?.ident === targetClientPokemon.ident
-          //     ))
-          // ) || null;
+          const targetPlayerKey = (
+            !!targetClientPokemon?.ident
+              && detectPlayerKeyFromPokemon(targetClientPokemon)
+          ) || null;
 
-          // at this point, we'd know both targetClientPokemon & targetPlayerKey are valid
-          if (AllPlayerKeys.includes(targetPlayerKey)) {
+          const mutations: Partial<CalcdexPokemon> = {
+            calcdexId: targetClientPokemon.calcdexId, // may not exist
+            ident: targetClientPokemon.ident, // using this as a fallback
+          };
+
+          // if the Pokemon is also serverSourced, we can apply some known info as revealed info of the target Pokemon
+          if (syncedPokemon.serverSourced && AllPlayerKeys.includes(targetPlayerKey)) {
             l.debug(
               'Adding revealed info for', targetClientPokemon.ident, 'from transformed', syncedPokemon.ident,
               '\n', 'targetPlayerKey', targetPlayerKey,
@@ -792,11 +795,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               '\n', 'battle', battle,
               '\n', 'battleState', battleState,
             );
-
-            const mutations: DeepPartial<CalcdexPokemon> = {
-              calcdexId: targetClientPokemon.calcdexId, // may not exist
-              ident: targetClientPokemon.ident, // using this as a fallback
-            };
 
             if (syncedPokemon.ability) {
               // targetPokemonState.ability = syncedPokemon.ability;
@@ -829,10 +827,43 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               //   '\n', 'syncedPokemon', syncedPokemon,
               // );
             }
+          }
 
+          // if the target Pokemon has any presets[], copy them over to the transformed Pokemon
+          // (this would typically only apply to 'Shown Team' presets)
+          // (also note: this doesn't affect futureMutations at all, pretty much hijacking this if-statement,
+          // which makes you a bad programmer for increasing the code's spaghetti... or a badass one for optimizing hehehe)
+          const syncedPokemonPresetIds = syncedPokemon.presets.map((p) => p.calcdexId);
+          const targetPokemonPresets = !!mutations.calcdexId
+            && battleState[targetPlayerKey]?.pokemon?.find((p) => p.calcdexId === mutations.calcdexId)?.presets
+              ?.filter((p) => !syncedPokemonPresetIds.includes(p.calcdexId));
+
+          if (targetPokemonPresets?.length) {
+            syncedPokemon.presets.push(...targetPokemonPresets);
+          }
+
+          // the `2` includes the initial calcdexId & ident properties earlier
+          // (so if we only have 2 still, then we know there aren't any mutations to add to futureMutations)
+          if (Object.keys(mutations).length > 2) {
             futureMutations[targetPlayerKey].push(mutations);
-          } // end targetPokemonState?.speciesForme
-        } // end syncedPokemon.serverSourced && syncedPokemon.transformedForme && ...
+          }
+        } // end syncedPokemon.transformedForme && ...
+
+        // if the Pokemon isn't transformed, yeet any of its presets[] that don't belong to it
+        // (possibly added from when it was transformed)
+        const checkTransformedPresets = !!syncedPokemon.presets.length
+          && !syncedPokemon.transformedForme
+          && (
+            formatId(syncedPokemon.dirtyAbility || syncedPokemon.ability) === 'imposter'
+              || syncedPokemon.moves.includes('Transform' as MoveName)
+          );
+
+        if (checkTransformedPresets) {
+          const validFormes = getPresetFormes(syncedPokemon.speciesForme, battleState.format);
+
+          syncedPokemon.presets = syncedPokemon.presets
+            .filter((p) => validFormes.includes(p.speciesForme));
+        }
 
         // apply any applicable futureMutations
         const pendingMutations = futureMutations[playerKey]?.filter((m) => (
@@ -1235,14 +1266,14 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
         }
 
-        l.debug(
-          'Building activeIndices for player', playerKey,
-          '\n', 'activeId', activeId,
-          '\n', 'activeIndex', activeIndex,
-          '\n', 'activePokemon', activePokemon,
-          '\n', 'player.active', player.active,
-          '\n', `${playerKey}.pokemon`, playerState.pokemon,
-        );
+        // l.debug(
+        //   'Building activeIndices for player', playerKey,
+        //   '\n', 'activeId', activeId,
+        //   '\n', 'activeIndex', activeIndex,
+        //   '\n', 'activePokemon', activePokemon,
+        //   '\n', 'player.active', player.active,
+        //   '\n', `${playerKey}.pokemon`, playerState.pokemon,
+        // );
 
         if (activeIndex > -1 && !processedIds.includes(activeId)) {
           processedIds.push(activeId);
