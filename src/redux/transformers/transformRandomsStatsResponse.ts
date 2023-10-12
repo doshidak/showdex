@@ -3,7 +3,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
+import { getDefaultSpreadValue, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsStatsResponse()');
@@ -25,12 +25,13 @@ export const transformRandomsStatsResponse = (
     return [];
   }
 
+  const format = args.format || `gen${args.gen}randombattle`;
+
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
+
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
-
-  const legacy = detectLegacyGen(args.gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 85;
 
   Object.entries(response).forEach(([
     speciesForme,
@@ -56,7 +57,7 @@ export const transformRandomsStatsResponse = (
       source: 'usage',
       name: 'Showdown Usage',
       gen: args.gen,
-      format: getGenlessFormat(args?.format) || 'randombattle',
+      format: getGenlessFormat(format),
 
       speciesForme,
       level,

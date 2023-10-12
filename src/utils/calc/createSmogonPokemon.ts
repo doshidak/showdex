@@ -11,6 +11,7 @@ import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,
   detectLegacyGen,
+  getDefaultSpreadValue,
   getGenDexForFormat,
   notFullyEvolved,
 } from '@showdex/utils/dex';
@@ -44,8 +45,8 @@ export const createSmogonPokemon = (
   }
 
   const legacy = detectLegacyGen(gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)

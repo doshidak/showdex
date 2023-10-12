@@ -3,7 +3,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
+import { detectLegacyGen, getDefaultSpreadValue, getGenlessFormat } from '@showdex/utils/dex';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse()');
 
@@ -26,15 +26,17 @@ export const transformRandomsPresetResponse = (
     return [];
   }
 
-  // this will be our final return value
-  const output: CalcdexPokemonPreset[] = [];
+  const format = args.format || `gen${args.gen}randombattle`;
+  const legacy = detectLegacyGen(args.gen);
 
   // see notes for the `evs` property in `PkmnSmogonRandomPreset` in `@showdex/redux/services/pkmnApi`
   // for more info about why 84 EVs is the default value for each stat
   // update (2023/09/27): apparently in the pokemon-showdown server source code, it's 85!
-  const legacy = detectLegacyGen(args.gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 85;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
+
+  // this will be our final return value
+  const output: CalcdexPokemonPreset[] = [];
 
   // at least this is only O(n)
   // ...stonks
@@ -62,7 +64,7 @@ export const transformRandomsPresetResponse = (
       source: 'smogon',
       name: 'Randoms',
       gen: args.gen,
-      format: getGenlessFormat(args.format) || 'randombattle',
+      format: getGenlessFormat(format),
 
       speciesForme, // do not sanitize
       level,

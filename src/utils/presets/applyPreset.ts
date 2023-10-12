@@ -5,7 +5,12 @@ import {
 } from '@showdex/redux/store';
 // import { mergeRevealedMoves } from '@showdex/utils/battle';
 import { nonEmptyObject } from '@showdex/utils/core';
-import { detectGenFromFormat, detectLegacyGen, hasMegaForme } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDefaultSpreadValue,
+  hasMegaForme,
+} from '@showdex/utils/dex';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { sortUsageAlts } from './sortUsageAlts';
@@ -37,8 +42,8 @@ export const applyPreset = (
   }
 
   const legacy = detectLegacyGen(gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // this will be our final return value
   const output: Partial<CalcdexPokemon> = {

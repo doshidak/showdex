@@ -11,6 +11,7 @@ import { env, similarArrays } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   detectLegacyGen,
+  getDefaultSpreadValue,
   getDexForFormat,
   toggleableAbility,
 } from '@showdex/utils/dex';
@@ -36,7 +37,7 @@ import { sanitizeVolatiles } from './sanitizeVolatiles';
  */
 export const sanitizePokemon = (
   pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-  format?: GenerationNum | string,
+  format?: string | GenerationNum,
   showAllFormes?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
@@ -46,14 +47,15 @@ export const sanitizePokemon = (
     : format;
 
   const legacy = detectLegacyGen(format);
-  const defaultIv = legacy ? 30 : 31;
+
+  const defaultIv = getDefaultSpreadValue('iv', format);
 
   // update: actually, changed my mind; better to have evs as an empty object
   // update (2023/07/24): TIL EVs do exist in legacy gens as "stats EXP", which goes up to 65535 &
   // eventually gets square rooted when you're level 100, which equates about 252 LOL
   // (also in Randoms, some of the Pokemon randomly have 0 EVs, so we need to record that now oof)
   // ... no regrets
-  const defaultEv = legacy ? 252 : 0;
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   const typeChanged = !!pokemon.volatiles?.typechange?.[1];
   const transformed = !!pokemon.volatiles?.transform?.[1];

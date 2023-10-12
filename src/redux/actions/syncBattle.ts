@@ -33,7 +33,12 @@ import {
   env,
   formatId,
 } from '@showdex/utils/core';
-import { detectLegacyGen, getDexForFormat, legalLockedFormat } from '@showdex/utils/dex';
+import {
+  detectLegacyGen,
+  getDefaultSpreadValue,
+  getDexForFormat,
+  legalLockedFormat,
+} from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   appliedPreset,
@@ -684,8 +689,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               && !appliedPreset(battleState.format, syncedPokemon, matchedPreset);
 
             if (shouldApplyPreset) {
-              const defaultIv = battleState.legacy ? 30 : 31;
-
               // gens 3+ only
               if (!battleState.legacy) {
                 // note: since team sheets contain the Pokemon's actual ability and items, we're setting them as
@@ -710,13 +713,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                 // update (2023/02/07): only apply EVs from the team sheet if the sum of all of them is > 0
                 // (this prevents open team sheets, which doesn't include EVs, from overwriting existing EVs from another preset)
                 if (Object.values(matchedPreset.evs || {}).reduce((sum, value) => sum + (value || 0), 0)) {
+                  const defaultEv = getDefaultSpreadValue('ev', battleState.format);
+
                   syncedPokemon.evs = {
-                    hp: matchedPreset.evs.hp ?? 0,
-                    atk: matchedPreset.evs.atk ?? 0,
-                    def: matchedPreset.evs.def ?? 0,
-                    spa: matchedPreset.evs.spa ?? 0,
-                    spd: matchedPreset.evs.spd ?? 0,
-                    spe: matchedPreset.evs.spe ?? 0,
+                    hp: matchedPreset.evs.hp ?? defaultEv,
+                    atk: matchedPreset.evs.atk ?? defaultEv,
+                    def: matchedPreset.evs.def ?? defaultEv,
+                    spa: matchedPreset.evs.spa ?? defaultEv,
+                    spd: matchedPreset.evs.spd ?? defaultEv,
+                    spe: matchedPreset.evs.spe ?? defaultEv,
                   };
                 }
 
@@ -740,6 +745,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
               // update (2023/02/07): perform the same treatment for IVs as we did for EVs earlier
               if (Object.values(matchedPreset.ivs || {}).reduce((sum, value) => sum + (value || 0), 0)) {
+                const defaultIv = getDefaultSpreadValue('iv', battleState.format);
+
                 syncedPokemon.ivs = {
                   hp: matchedPreset.ivs.hp ?? defaultIv,
                   atk: matchedPreset.ivs.atk ?? defaultIv,

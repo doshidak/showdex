@@ -3,7 +3,7 @@ import { type PkmnSmogonPreset } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
-import { detectLegacyGen, getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
+import { getDefaultSpreadValue, getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
 
 /**
  * Internal transformer for converting a single `PkmnSmogonPreset` from the pkmn Sets API into a `CalcdexPokemonPreset`.
@@ -30,9 +30,8 @@ export const transformPkmnSmogonPreset = (
     return null;
   }
 
-  const legacy = detectLegacyGen(gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   const {
     teraTypes: presetTeraTypes,

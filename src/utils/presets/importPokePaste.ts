@@ -8,7 +8,12 @@ import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/co
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
-import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDefaultSpreadValue,
+  getDexForFormat,
+} from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 
 // note: speciesForme should be handled last since it will test() true against any line technically
@@ -118,8 +123,9 @@ export const importPokePaste = (
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(format);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // this will be our final return value
   const preset: CalcdexPokemonPreset = {

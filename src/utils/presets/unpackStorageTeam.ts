@@ -3,7 +3,7 @@ import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/co
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp } from '@showdex/utils/core';
-import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
+import { detectGenFromFormat, getDefaultSpreadValue, getDexForFormat } from '@showdex/utils/dex';
 
 /**
  * Converts a single `packedTeam` from the Teambuilder into `CalcdexPokemonPreset[]`s.
@@ -92,9 +92,8 @@ export const unpackStorageTeam = (
     return output;
   }
 
-  const legacy = detectLegacyGen(format);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   const packedPokemon = packedTeam
     .slice(teamIndex + 1)
