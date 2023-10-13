@@ -191,8 +191,9 @@ declare namespace Showdown {
     fainted?: boolean;
   }
 
-  type PokemonStats = { [K in StatNameNoHp]: number; };
+  type PokemonStats = { [K in StatName]: number; };
   type StatsTable = { [K in StatName]?: number; };
+  type StatsTableNoHp = { [K in StatNameNoHp]?: number; };
 
   /**
    * Note that unlike `Pokemon`, this is a POJO (Plain Ol' JavaScript Object), not a class.
