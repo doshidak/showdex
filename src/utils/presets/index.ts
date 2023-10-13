@@ -11,6 +11,7 @@ export * from './getTeamSheetPresets';
 export * from './guessTeambuilderPreset';
 export * from './importPokePaste';
 export * from './processUsageAlts';
+export * from './sortPresetsByFormat';
 export * from './sortUsageAlts';
 export * from './unpackStorageTeam';
 export * from './usageAltPercentFinder';
