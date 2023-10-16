@@ -1,22 +1,34 @@
 import { type AbilityName, type GameType } from '@smogon/calc';
 
 /**
- * Abilities that can be forcibly toggled on/off by reporting its ability as *Pressure* when "off."
+ * Abilities that activate when the Pokemon is at full "health" (i.e., max hit points, 100% HP).
  *
- * * When toggled "off," the Pokémon's ability is reported as *Pressure* in `createSmogonPokemon()`,
- *   which has no effect in damage calculations.
- * * This is primarily to circumvent some of the "features" of `@smogon/calc` when these abilities are set,
- *   which may cause duplicate stat boosts when Showdown also reports the same.
+ * * Why isn't *Sturdy* in here?
+ *   - idk, initially started with just *Multiscale* lol
+ *   - so I guess this is technically a list of *Sturdy*-like abilities that reduce incoming damages when at 100%?
+ *   - also, *Sturdy* would just affect the NHKO (but not the damage) by adding 1 more hit before KO no ? lol
+ *   - or I suppose it caps the maximum final damage at the max HP – 1, so you'd be left with 1 HP at the very least,
+ *     so inherently N+1HKO ... yeess o_O
+ * * ... but but but why is this called `Pokemon`**`Sturdy`**`Abilities[]` then ???
+ *   - ¯\\\_(ツ)_/¯
  *
  * @since 1.1.7
  */
-export const PokemonPseudoToggleAbilities: AbilityName[] = [
-  'Libero', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
+export const PokemonSturdyAbilities: AbilityName[] = [
   'Multiscale', // special case based off the HP, but specified here to allow toggling in the UI
-  'Protean', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
-  'Protosynthesis', // introduced gen 9
-  'Quark Drive', // introduced gen 9
   'Shadow Shield', // basically another multiscale lmao
+] as AbilityName[];
+
+/**
+ * Abilities that cause the Pokemon's type to change to the type of the move that it's about to use.
+ *
+ * * HUH
+ *
+ * @since 1.1.7
+ */
+export const PokemonTypeChangeAbilities: AbilityName[] = [
+  'Libero', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
+  'Protean', // if enabled, will apply STAB to all damaging moves (disabled = STAB for changed type only)
 ] as AbilityName[];
 
 /**
@@ -32,6 +44,35 @@ export const PokemonRuinAbilities: AbilityName[] = [
   'Sword of Ruin',
   'Tablets of Ruin',
   'Vessel of Ruin',
+] as AbilityName[];
+
+/**
+ * Abilities that boost your Elo.
+ *
+ * * Just kidding, they're abilities that can be activated by the *Booster Energy* item introduced in gen 9.
+ *   - Technically just 2: *Protosynthesis* & *Quark Drive* ... for now :o
+ *
+ * @since 1.1.7
+ */
+export const PokemonBoosterAbilities: AbilityName[] = [
+  'Protosynthesis',
+  'Quark Drive',
+] as AbilityName[];
+
+/**
+ * Abilities that can be forcibly toggled on/off by reporting its ability as *Pressure* when "off."
+ *
+ * * When toggled "off," the Pokémon's ability is reported as *Pressure* in `createSmogonPokemon()`,
+ *   which has no effect in damage calculations.
+ * * This is primarily to circumvent some of the "features" of `@smogon/calc` when these abilities are set,
+ *   which may cause duplicate stat boosts when Showdown also reports the same.
+ *
+ * @since 1.1.7
+ */
+export const PokemonPseudoToggleAbilities: AbilityName[] = [
+  ...PokemonSturdyAbilities,
+  ...PokemonTypeChangeAbilities,
+  ...PokemonBoosterAbilities,
 ] as AbilityName[];
 
 /**
