@@ -3,7 +3,7 @@ import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
 
 /**
- * Internal helper function to `filter()` & `map()` the `moveTrack` to the dex entries via `dex.moves.get()`.
+ * Internal helper function to `filter()` & `map()` the `moveTrack[]` to the dex entries via `dex.moves.get()`.
  *
  * * If `transformed` is `true`, only moves prepended with an asterisk (i.e., `*`) will be processed.
  *   - Otherwise, only moves that don't start with an asterisk will be processed (default).
@@ -31,14 +31,14 @@ const getDexMoveTrack = (
   ] as [move: Showdown.Move, ppUsed: number])
   .filter(([move]) => move?.exists && !!move.name);
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
- * Sanitizes the `moveTrack` from the passed-in `pokemon` and constructs the `revealedMoves`
- * from the resulting sanitized `moveTrack`, if any.
+ * Sanitizes the `moveTrack[]` from the passed-in `pokemon` and constructs the `revealedMoves[]` & `transformedMoves[]`, if any.
  *
- * * Partialed `CalcdexPokemon` is returned with only the `moveTrack` and `revealedMoves` defined.
+ * * Partialed `CalcdexPokemon` is returned with only the `moveTrack[]`, `revealedMoves[]` & `transformedMoves[]` defined.
  *   - Meant to be spread into an existing `CalcdexPokemon` object.
- * * Even if `pokemon` is not provided or has no `moveTrack`, the sanitized `moveTrack` and
- *   `revealedMoves` are guaranteed to be arrays (albeit empty).
+ * * Even if the `pokemon` has no `moveTrack[]`, each property is guaranteed to be an array (albeit empty).
  *
  * @default
  * ```ts
@@ -50,24 +50,26 @@ const getDexMoveTrack = (
  * ```
  * @since 1.0.3
  */
-export const sanitizeMoveTrack = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-  format?: GenerationNum | string,
-): DeepPartial<CalcdexPokemon> => {
+export const sanitizeMoveTrack = <
+  TPokemon extends Partial<Showdown.PokemonDetails>,
+>(
+  pokemon: TPokemon,
+  format?: string | GenerationNum,
+): Partial<CalcdexPokemon> => {
   const dex = getDexForFormat(format);
 
   // this is the output object we'll return later
-  const output: DeepPartial<CalcdexPokemon> = {
+  const output: Partial<CalcdexPokemon> = {
     moveTrack: [],
     revealedMoves: [],
     transformedMoves: [],
   };
 
-  if (!dex || !pokemon?.moveTrack?.length) {
+  if (!dex || !(pokemon as Partial<CalcdexPokemon>)?.moveTrack?.length) {
     return output;
   }
 
-  const moveTrack = pokemon.moveTrack as CalcdexPokemon['moveTrack'];
+  const { serverSourced, moveTrack } = pokemon as Partial<CalcdexPokemon>;
   const dexMoveTrack = getDexMoveTrack(dex, moveTrack);
   const dexTransformedMoveTrack = getDexMoveTrack(dex, moveTrack, true);
 
@@ -80,8 +82,10 @@ export const sanitizeMoveTrack = (
     ppUsed,
   ] as [moveName: MoveName, ppUsed: number]);
 
-  output.transformedMoves = dexTransformedMoveTrack
-    .map(([move]) => move.name as MoveName);
+  if (!serverSourced) {
+    output.transformedMoves = dexTransformedMoveTrack
+      .map(([move]) => move.name as MoveName);
+  }
 
   // filter out any Z/Max moves from the moveTrack
   output.revealedMoves = dexMoveTrack
@@ -90,3 +94,5 @@ export const sanitizeMoveTrack = (
 
   return output;
 };
+
+/* eslint-enable @typescript-eslint/indent */

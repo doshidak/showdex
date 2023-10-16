@@ -67,6 +67,8 @@ export const calcPresetCalcdexId = (
   // teraTypes: preset?.teraTypes?.join(','),
 });
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Generates a unique ID used by the Calcdex to track Pokemon.
  *
@@ -78,8 +80,10 @@ export const calcPresetCalcdexId = (
  *
  * @since 0.1.0
  */
-export const calcPokemonCalcdexId = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon & { slot: number; }> | DeepPartial<CalcdexPokemon> = {},
+export const calcPokemonCalcdexId = <
+  TPokemon extends Partial<Showdown.PokemonDetails>,
+>(
+  pokemon: TPokemon,
   playerKey?: CalcdexPlayerKey,
 ): string => calcCalcdexId<Partial<Record<keyof CalcdexPokemon, string>>>({
   // ident: pokemon?.ident,
@@ -105,6 +109,8 @@ export const calcPokemonCalcdexId = (
   gender: pokemon?.gender || 'N', // seems like 'N'-gendered Pokemon occasionally report back with an empty string
   // shiny: String(pokemon?.shiny), // bad idea, subject to change mid-battle
 });
+
+/* eslint-enable @typescript-eslint/indent */
 
 export const calcSideCalcdexId = (
   side: Partial<Showdown.Side>,

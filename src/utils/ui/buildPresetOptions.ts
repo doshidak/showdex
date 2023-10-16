@@ -1,9 +1,10 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
 import { FormatLabels } from '@showdex/consts/dex';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { getGenlessFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
+import { getPresetFormes } from '@showdex/utils/presets';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -12,8 +13,8 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
 /**
  * Builds the value for the `options` prop of the presets `Dropdown` component in `PokeInfo`.
  *
- * * As of v1.1.7, you can provide the optional `speciesForme` argument to append the preset's `speciesForme`
- *   to the option's `subLabel` if it doesn't match.
+ * * As of v1.1.7, you can provide the optional `pokemon` argument to append the preset's `speciesForme`
+ *   to the option's `subLabel` if it doesn't match the `speciesForme` of the provided `pokemon`.
  *   - This is useful for distinguishing presets of differing `speciesForme`'s, or even `transformedForme`'s.
  *
  * @since 1.0.3
@@ -21,13 +22,15 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
 export const buildPresetOptions = (
   presets: CalcdexPokemonPreset[],
   usages?: CalcdexPokemonPreset[],
-  speciesForme?: string,
+  pokemon?: CalcdexPokemon,
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
 
   if (!presets?.length) {
     return options;
   }
+
+  const currentForme = pokemon?.transformedForme || pokemon?.speciesForme;
 
   presets.forEach((preset) => {
     if (!preset?.calcdexId || !preset.name || !preset.format) {
@@ -62,7 +65,7 @@ export const buildPresetOptions = (
       }
     }
 
-    if (speciesForme && preset.speciesForme !== speciesForme) {
+    if (currentForme && preset.speciesForme !== currentForme) {
       if (option.subLabel) {
         (option.subLabel as string) += ` ${bull} `;
       } else {
@@ -70,6 +73,10 @@ export const buildPresetOptions = (
       }
 
       (option.subLabel as string) += preset.speciesForme;
+
+      if (pokemon.transformedForme) {
+        option.disabled = !getPresetFormes(currentForme, preset.gen).includes(preset.speciesForme);
+      }
     }
 
     // attempt to find this preset's usage percentage (typically only in Gen 9 Randoms)

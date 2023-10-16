@@ -1,3 +1,4 @@
+import { PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 
@@ -21,7 +22,7 @@ export const countSideRuinAbilities = (
 
   // count how many Pokemon have an activated Ruin ability (gen 9)
   const activeRuin = pokemon
-    ?.filter((p) => formatId(p?.dirtyAbility || p?.ability)?.endsWith('ofruin') && p.abilityToggled)
+    ?.filter((p) => PokemonRuinAbilities.includes(p?.dirtyAbility || p?.ability) && p.abilityToggled)
     .map((p) => formatId(p.dirtyAbility || p.ability))
     || [];
 

@@ -14,8 +14,8 @@ export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<Mov
   className?: string;
   style?: React.CSSProperties;
   format?: string;
-  pokemon?: DeepPartial<CalcdexPokemon>;
-  opponentPokemon?: DeepPartial<CalcdexPokemon>;
+  pokemon?: Partial<CalcdexPokemon>;
+  opponentPokemon?: Partial<CalcdexPokemon>;
 }
 
 export const PokeMoveOptionTooltip = ({

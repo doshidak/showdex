@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { type GenerationNum, type MoveName } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
+// import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
 import {
   type CalcdexBattleState,
   type CalcdexPlayerKey,
@@ -17,6 +17,7 @@ import {
   detectPlayerKeyFromBattle,
   detectPlayerKeyFromPokemon,
   detectPokemonDetails,
+  detectToggledAbility,
   mergeRevealedMoves,
   parsePokemonDetails,
   sanitizePlayerSide,
@@ -35,13 +36,13 @@ import {
 } from '@showdex/utils/core';
 import {
   detectLegacyGen,
-  getDefaultSpreadValue,
-  getDexForFormat,
+  // getDefaultSpreadValue,
+  // getDexForFormat,
   legalLockedFormat,
 } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
-  appliedPreset,
+  // appliedPreset,
   getPresetFormes,
   getTeamSheetPresets,
 } from '@showdex/utils/presets';
@@ -178,6 +179,30 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // update the sidesSwitched from the battle
     battleState.switchPlayers = battle.sidesSwitched;
 
+    // sync the field first cause we'll need the updated values for some calculations later
+    const syncedField = syncField(
+      battleState,
+      battle,
+    );
+
+    if (!syncedField) {
+      if (__DEV__) {
+        l.warn(
+          'Failed to sync the field state from the battle.',
+          '\n', 'syncedField', syncedField,
+          '\n', 'battleState.field', battleState.field,
+          // '\n', 'attackerIndex', battleState.p1.activeIndex, 'defenderIndex', battleState.p2.activeIndex,
+          '\n', 'battle', battle,
+          '\n', 'battleState', battleState,
+          '\n', '(You will only see this warning on development.)',
+        );
+      }
+
+      // return;
+    } else {
+      battleState.field = syncedField;
+    }
+
     // determine if we should include Teambuilder presets
     // (should be already pre-converted in the teamdexSlice)
     const teambuilderPresets = (
@@ -217,7 +242,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     // keep track of CalcdexPokemon mutations from one player to another
     // (e.g., revealed properties of the transform target Pokemon from the current player's transformed Pokemon)
-    const futureMutations = AllPlayerKeys.reduce<Record<CalcdexPlayerKey, DeepPartial<CalcdexPokemon>[]>>((prev, key) => {
+    const futureMutations = AllPlayerKeys.reduce<Record<CalcdexPlayerKey, Partial<CalcdexPokemon>[]>>((prev, key) => {
       prev[key] = [];
 
       return prev;
@@ -468,7 +493,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           level: serverPokemon.level,
           hp: serverPokemon.hp,
           maxhp: serverPokemon.maxhp,
-        } as DeepPartial<Showdown.Pokemon>;
+        } as Partial<Showdown.Pokemon>;
       });
 
       // check if we got Zoroark'd right off the bat
@@ -588,8 +613,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         const basePokemon = matchedPokemon || sanitizePokemon(
           clientPokemon,
           battleState.format,
-          // settings?.showAllFormes, // update (2023/01/05): no longer a setting
-          true,
         );
 
         // in case the volatiles aren't sanitized yet lol
@@ -599,28 +622,43 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // and then from here on out, we just directly modify syncedPokemon
         // (serverPokemon and dex are optional, which will add additional known properties)
-        const syncedPokemon = syncPokemon(
-          basePokemon,
+        // update (2023/10/13): syncPokemon() still handles server field populations like serverMoves[],
+        // but the teambuilderPresets & serverStats guessing routines have been moved to useAutoPresets()
+        const syncedPokemon = syncPokemon(basePokemon, {
+          format: battleState.format,
+          gameType: battleState.gameType,
           clientPokemon,
           serverPokemon,
-          battleState,
-          (!isMyPokemonSide || !hasMyPokemon)
+          weather: battleState.field.weather,
+          terrain: battleState.field.terrain,
+          // state: battleState,
+          // teambuilderPresets,
+
+          autoMoves: (!isMyPokemonSide || !hasMyPokemon)
             // update (2023/02/03): defaultAutoMoves.auth is always false since we'd normally have myPokemon,
             // but in cases of old replays, myPokemon won't be available, so we'd want to respect the user's setting
             // using the playerKey instead of 'auth'
             && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey && hasMyPokemon ? 'auth' : playerKey],
-          teambuilderPresets,
-        );
+
+          // for Randoms, if downloads are enabled, we'll want to wait for the React.useEffect() hook that auto-applies
+          // the preset to look for the matching role preset from the serverMoves[] & serverStats
+          // disableGuessing: battleState.format.includes('random') && settings?.downloadRandomsPresets,
+        });
 
         // update the syncedPokemon's playerKey, if falsy or mismatched
         if (!syncedPokemon.playerKey || syncedPokemon.playerKey !== playerKey) {
           syncedPokemon.playerKey = playerKey;
         }
 
-        const formes = getPresetFormes(
-          syncedPokemon.transformedForme || syncedPokemon.speciesForme,
-          battleState.format,
-        );
+        // const formes = getPresetFormes(
+        //   syncedPokemon.transformedForme || syncedPokemon.speciesForme,
+        //   battleState.format,
+        // );
+
+        const formes = [
+          ...getPresetFormes(syncedPokemon.speciesForme, battleState.format),
+          ...getPresetFormes(syncedPokemon.transformedForme, battleState.format),
+        ];
 
         // attach Teambuilder presets for the specific Pokemon, if available
         // (this should only happen once per battle)
@@ -643,8 +681,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
 
         // attach presets derived from team sheets matching the specific player AND Pokemon, if available
-        const dex = getDexForFormat(battleState.format);
+        // const dex = getDexForFormat(battleState.format);
 
+        // update (2023/10/13): now handled in CalcdexProvider
+        /*
         if (battleState.sheets.length) {
           // filter for matching sheet presets, then sort them with the highest allocated EVs first
           // (handles case where open team sheets are available, which has no EVs, then !showteam is invoked, which has EVs)
@@ -774,6 +814,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             } // end shouldApplyPreset
           } // end shouldAddPresets
         } // end battleState.sheets.length
+        */
 
         // if the Pokemon is transformed, see which one it's transformed as
         if (syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
@@ -837,7 +878,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           }
 
           // if the target Pokemon has any presets[], copy them over to the transformed Pokemon
-          // (this would typically only apply to 'Shown Team' presets)
+          // (this would typically only apply to 'sheet'/'import'-sourced presets)
           // (also note: this doesn't affect futureMutations at all, pretty much hijacking this if-statement,
           // which makes you a bad programmer for increasing the code's spaghetti... or a badass one for optimizing hehehe)
           const syncedPokemonPresetIds = syncedPokemon.presets.map((p) => p.calcdexId);
@@ -1009,60 +1050,60 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // see: https://github.com/smogon/pokemon-showdown-client/blob/4e5002411cc80ff8044fd586bd0db2f80979b8f6/src/battle.ts#L747-L808
           if (playerState.pokemon.length >= playerState.maxPokemon || speciesClause) {
             const existingTable: Record<string, number> = {};
-            let removalDetails: string = null;
+            let removalId: string = null;
 
             // update (2023/10/08): if not level 100, the searchid will include the level (e.g., 'p1: Zikachu|Zoroark, L84, M'),
             // which is commonly a thing in Randoms, where Zoroark also runs rampant lmao
-            // const {
-            //   // calcdexId: syncedCalcdexId,
-            //   searchid: syncedSearchId,
-            // } = syncedPokemon;
+            const {
+              calcdexId: syncedId,
+              // searchid: syncedSearchId,
+            } = syncedPokemon;
 
             // note: purposefully ignoring level here
-            const syncedDetails = detectPokemonDetails({
-              ...syncedPokemon,
-              level: null,
-            }, battleState.format);
+            // const syncedDetails = detectPokemonDetails({
+            //   ...syncedPokemon,
+            //   level: null,
+            // }, battleState.format);
 
             for (let j = 0; j < player.pokemon.length; j++) {
               const pokemonA = player.pokemon[j];
 
-              // const {
-              //   // calcdexId: pokemon1CalcdexId,
-              //   searchid: pokemon1SearchId,
-              // } = pokemonA || {};
+              const {
+                calcdexId: idA,
+                // searchid: pokemon1SearchId,
+              } = pokemonA || {};
 
-              const detailsA = detectPokemonDetails({
-                ...pokemonA,
-                level: null,
-              }, battleState.format);
+              // const detailsA = detectPokemonDetails({
+              //   ...pokemonA,
+              //   level: null,
+              // }, battleState.format);
 
-              if (!detailsA) {
+              if (!idA) {
                 continue;
               }
 
-              if (!detailsA || !(detailsA in existingTable)) {
-                if (detailsA) {
-                  existingTable[detailsA] = j;
+              if (!idA || !(idA in existingTable)) {
+                if (idA) {
+                  existingTable[idA] = j;
                 }
 
                 continue;
               }
 
-              const indexB = existingTable[detailsA];
+              const indexB = existingTable[idA];
               const pokemonB = player.pokemon[indexB];
 
-              // const {
-              //   // calcdexId: pokemon2CalcdexId,
-              //   searchid: pokemon2SearchId,
-              // } = pokemonB || {};
+              const {
+                calcdexId: idB,
+                // searchid: pokemon2SearchId,
+              } = pokemonB || {};
 
-              const detailsB = detectPokemonDetails({
-                ...pokemonB,
-                level: null,
-              }, battleState.format);
+              // const detailsB = detectPokemonDetails({
+              //   ...pokemonB,
+              //   level: null,
+              // }, battleState.format);
 
-              if (!detailsB) {
+              if (!idB) {
                 continue;
               }
 
@@ -1081,11 +1122,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               // }
 
               // check if we should remove pokemonB
-              const targetB = syncedDetails === detailsA
+              const targetB = syncedId === idA
                 || player.active.includes(pokemonA)
                 || (!pokemonA.hp && (pokemonB.hp || 0) > 0);
 
-              removalDetails = targetB ? detailsB : detailsA;
+              removalId = targetB ? idB : idA;
 
               break;
             }
@@ -1093,7 +1134,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             // note: unlike in addPokemon() of Showdown.Side, we don't care about updating the Illusion Pokemon,
             // only removing it so that the real Pokemon can be tracked in the Calcdex
             const removalIndex = playerState.pokemon
-              .findIndex((p) => detectPokemonDetails(p, battleState.format) === removalDetails);
+              .findIndex((p) => p.calcdexId === removalId);
 
             const removalPokemon = removalIndex > -1
               ? playerState.pokemon[removalIndex]
@@ -1105,7 +1146,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               l.debug(
                 'Removed Illusion Pokemon', removalPokemon.speciesForme, 'for player', playerKey,
                 '\n', 'battleId', battleId,
-                '\n', 'removalIndex', removalIndex, 'removalDetails', removalDetails,
+                '\n', 'removalIndex', removalIndex, 'removalId', removalId,
                 '\n', 'length', '(prev)', playerState.pokemon.length + 1,
                 '(now)', playerState.pokemon.length,
                 '(max)', playerState.maxPokemon,
@@ -1411,14 +1452,28 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         }
       }
 
-      // update Ruin abilities (gen 9), if any, before syncing the field
-      if (battleState.gen > 8) {
-        toggleRuinAbilities(
-          playerState,
-          null,
-          battleState.gameType,
-          true, // update the selected Pokemon's abilityToggled value too
-        );
+      // update abilityToggled for all of the player's pokemon now that they're all synced up
+      if (!battleState.legacy) {
+        playerState.pokemon.forEach((p, i) => {
+          p.abilityToggled = detectToggledAbility(p, {
+            gameType: battleState.gameType,
+            pokemonIndex: i,
+            selectionIndex: playerState.selectionIndex,
+            activeIndices: playerState.activeIndices,
+            weather: battleState.field.weather,
+            terrain: battleState.field.terrain,
+          });
+        });
+
+        // update (2023/10/14): this is kinda dumb but don't want to go too balls deep on this refactor
+        // (for 'Singles', detectToggledAbility() already does the toggling based on the provided selectionIndex)
+        if (battleState.gameType === 'Doubles') {
+          toggleRuinAbilities(
+            playerState,
+            battleState.gameType,
+            true, // update the selected Pokemon's abilityToggled value too
+          );
+        }
       }
 
       // sync player side
@@ -1443,29 +1498,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // now that all players were processed, recount the number of players
     // (typically required for FFA, when players 3 & 4 need to be invited, so the playerCount never updates)
     battleState.playerCount = countActivePlayers(battleState);
-
-    const syncedField = syncField(
-      battleState,
-      battle,
-    );
-
-    if (!syncedField) {
-      if (__DEV__) {
-        l.warn(
-          'Failed to sync the field state from the battle.',
-          '\n', 'syncedField', syncedField,
-          '\n', 'battleState.field', battleState.field,
-          // '\n', 'attackerIndex', battleState.p1.activeIndex, 'defenderIndex', battleState.p2.activeIndex,
-          '\n', 'battle', battle,
-          '\n', 'battleState', battleState,
-          '\n', '(You will only see this warning on development.)',
-        );
-      }
-
-      // return;
-    } else {
-      battleState.field = syncedField;
-    }
 
     // this is important, otherwise we can't ignore re-renders of the same battle state
     // (which may result in reaching React's maximum update depth)

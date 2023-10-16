@@ -28,7 +28,7 @@ import {
 } from '@showdex/utils/core';
 import { legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
-import { formatDamageAmounts } from '@showdex/utils/ui';
+import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';
@@ -52,7 +52,8 @@ export const PokeMoves = ({
     player,
     playerPokemon: pokemon,
     opponentPokemon,
-    moveOptions,
+    // moveOptions,
+    usage,
     matchups,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -70,6 +71,18 @@ export const PokeMoves = ({
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
+
+  const moveOptions = React.useMemo(() => buildMoveOptions(
+    format,
+    pokemon,
+    usage,
+    settings?.showAllOptions,
+  ), [
+    format,
+    pokemon,
+    settings?.showAllOptions,
+    usage,
+  ]);
 
   const nationalDexFormat = !!format && [
     'nationaldex',

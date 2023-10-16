@@ -4,6 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { NIL as NIL_UUID } from 'uuid';
 import { type GenerationNum } from '@smogon/calc';
 import { ErrorBoundary } from '@showdex/components/debug';
+import { SandwichProvider } from '@showdex/components/layout';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { type ShowdexBootstrapper } from '@showdex/main';
 import { syncBattle } from '@showdex/redux/actions';
@@ -78,13 +79,15 @@ export const renderCalcdex = (
       component={CalcdexError}
       battleId={battleId}
     >
-      <CalcdexProvider battleId={battleId}>
-        <Calcdex
-          // note: if we dispatch overlayClosed to false, the battleRoom and the injected Calcdex button
-          // won't properly update to reflect the closed state, so we must provide this prop
-          onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
-        />
-      </CalcdexProvider>
+      <SandwichProvider>
+        <CalcdexProvider battleId={battleId}>
+          <Calcdex
+            // note: if we dispatch overlayClosed to false, the battleRoom and the injected Calcdex button
+            // won't properly update to reflect the closed state, so we must provide this prop
+            onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
+          />
+        </CalcdexProvider>
+      </SandwichProvider>
     </ErrorBoundary>
   </ReduxProvider>
 ));

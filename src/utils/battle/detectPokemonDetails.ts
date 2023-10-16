@@ -1,5 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+// import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
 
 /* eslint-disable @typescript-eslint/indent */
@@ -42,9 +42,9 @@ import { getDexForFormat } from '@showdex/utils/dex';
  * @since 1.1.7
  */
 export const detectPokemonDetails = <
-  TMon extends Partial<Showdown.PokemonDetails> = CalcdexPokemon,
+  TPokemon extends Partial<Showdown.PokemonDetails>,
 >(
-  pokemon: TMon,
+  pokemon: TPokemon,
   format?: string | GenerationNum,
   delimiter = ', ',
 ): string => {

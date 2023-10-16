@@ -19,7 +19,7 @@ export const syncField = (
       );
     }
 
-    return null;
+    return state?.field;
   }
 
   // create a sanitized `Field` from the passed-in `battle`, then compare each result for changes
@@ -29,11 +29,11 @@ export const syncField = (
   const newField = cloneField(state.field);
   const updatedField = sanitizeField(battle);
 
-  const fieldSideKeys = ['attackerSide', 'defenderSide'] as (keyof CalcdexBattleField)[];
-  const fieldRemainingKeys = (Object.keys(updatedField || {}) as (keyof CalcdexBattleField)[])
-    .filter((key) => !fieldSideKeys.includes(key));
+  Object.keys(updatedField).forEach((key: keyof CalcdexBattleField) => {
+    if (['attackerSide', 'defenderSide'].includes(key)) {
+      return;
+    }
 
-  fieldRemainingKeys.forEach((key) => {
     const value = updatedField?.[key];
     const originalValue = state.field?.[key];
 

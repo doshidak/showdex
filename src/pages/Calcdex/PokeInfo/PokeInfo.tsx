@@ -21,7 +21,7 @@ import { eacute } from '@showdex/consts/core';
 import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
-import { detectToggledAbility } from '@showdex/utils/battle';
+// import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
@@ -33,6 +33,7 @@ import {
   flattenAlts,
   importPokePaste,
 } from '@showdex/utils/presets';
+import { buildAbilityOptions, buildItemOptions, buildPresetOptions } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
@@ -57,11 +58,13 @@ export const PokeInfo = ({
     // playerKey,
     player,
     playerPokemon: pokemon,
-    // field, // don't use the one from state btw
     presetsLoading,
-    abilityOptions,
-    itemOptions,
-    presetOptions,
+    presets,
+    usages,
+    usage,
+    // abilityOptions,
+    // itemOptions,
+    // presetOptions,
     applyPreset,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -78,13 +81,28 @@ export const PokeInfo = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const nickname = hasNickname(pokemon) && settings?.showNicknames
-    ? pokemon.name
-    : null;
+  const nickname = (
+    hasNickname(pokemon)
+      && settings?.showNicknames
+      && pokemon.name
+  ) || null;
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
+
+  const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
+    format,
+    pokemon,
+    usage,
+    settings?.showAllOptions,
+  )), [
+    legacy,
+    format,
+    pokemon,
+    settings?.showAllOptions,
+    usage,
+  ]);
 
   // for Ruin abilities (gen 9), only show the ability toggle in Doubles
   // update (2023/10/09): abilityToggleable will be false for Ruin abilities if not Doubles
@@ -113,21 +131,19 @@ export const PokeInfo = ({
     && !!pokemon.ability
     && pokemon.ability !== pokemon.dirtyAbility;
 
-  const handleAbilityChange = (name: AbilityName) => updatePokemon({
-    dirtyAbility: name,
-    abilityToggled: detectToggledAbility({
-      ...pokemon,
-      ability: name,
-    }),
-  }, `${baseScope}:handleAbilityChange()`);
-
-  const handleAbilityReset = () => updatePokemon({
-    dirtyAbility: null,
-    abilityToggled: detectToggledAbility({
-      ...pokemon,
-      dirtyAbility: null,
-    }),
-  }, `${baseScope}:handleAbilityReset()`);
+  const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
+    format,
+    pokemon,
+    usage,
+    // settings?.showAllOptions,
+    true, // fuck it w/e lol (instead of using settings.showAllOptions)
+  )), [
+    format,
+    gen,
+    pokemon,
+    // settings?.showAllOptions,
+    usage,
+  ]);
 
   const showResetItem = !!pokemon?.dirtyItem
     && (!!pokemon?.item || !!pokemon?.prevItem)
@@ -184,6 +200,16 @@ export const PokeInfo = ({
 
   const editableTypes = settings?.editPokemonTypes === 'always'
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
+
+  const presetOptions = React.useMemo(() => buildPresetOptions(
+    presets,
+    usages,
+    pokemon,
+  ), [
+    pokemon,
+    presets,
+    usages,
+  ]);
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
@@ -532,9 +558,13 @@ export const PokeInfo = ({
             aria-label={`Available Sets for Pok${eacute}mon ${friendlyPokemonName}`}
             hint="None"
             input={{
-              name: `PokeInfo:Preset:${pokemonKey}:Dropdown`,
+              name: `PokeInfo:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
-              onChange: (id: string) => applyPreset(id, null, `${baseScope}:Dropdown~Preset:input.onChange()`),
+              onChange: (id: string) => applyPreset(
+                id,
+                null,
+                `${baseScope}:Dropdown~Preset:input.onChange()`,
+              ),
             }}
             options={presetOptions}
             noOptionsMessage="No Sets"
@@ -596,7 +626,9 @@ export const PokeInfo = ({
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
                   active
-                  onPress={handleAbilityReset}
+                  onPress={() => updatePokemon({
+                    dirtyAbility: null,
+                  }, `${baseScope}:ToggleButton~DirtyAbility:onPress()`)}
                 />
               }
             </div>
@@ -610,9 +642,11 @@ export const PokeInfo = ({
                 hidden: !settings?.showAbilityTooltip,
               }}
               input={{
-                name: `PokeInfo:Ability:${pokemonKey}:Dropdown`,
+                name: `PokeInfo:${pokemonKey}:Ability`,
                 value: abilityName,
-                onChange: handleAbilityChange,
+                onChange: (value: AbilityName) => updatePokemon({
+                  dirtyAbility: value,
+                }, `${baseScope}:Dropdown~DirtyAbility:input.onChange()`),
               }}
               options={abilityOptions}
               noOptionsMessage="No Abilities"
@@ -630,7 +664,7 @@ export const PokeInfo = ({
               aria-label={`Available Natures for Pok${eacute}mon ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : '???'}
               input={{
-                name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
+                name: `PokeInfo:${pokemonKey}:Nature`,
                 value: pokemon?.nature,
                 onChange: (name: Showdown.PokemonNature) => updatePokemon({
                   nature: name,
@@ -723,11 +757,11 @@ export const PokeInfo = ({
                 hidden: !settings?.showItemTooltip,
               }}
               input={{
-                name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
+                name: `PokeInfo:${pokemonKey}:Item`,
                 value: itemName,
                 onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),
-                }, `${baseScope}:Dropdown~Item:input.onChange()`),
+                }, `${baseScope}:Dropdown~DirtyItem:input.onChange()`),
               }}
               options={itemOptions}
               noOptionsMessage="No Items"

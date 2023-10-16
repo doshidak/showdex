@@ -40,7 +40,6 @@ export const PokeStats = ({
     playerPokemon: pokemon,
     opponent,
     opponentPokemon,
-    field, // don't use the one from state btw
     updatePokemon,
   } = useCalcdexPokeContext();
 
@@ -49,6 +48,7 @@ export const PokeStats = ({
     format,
     legacy,
     authPlayerKey,
+    field,
   } = state;
 
   const colorScheme = useColorScheme();

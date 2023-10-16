@@ -305,16 +305,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Some abilities are conditionally toggled, such as *Flash Fire*.
    *
-   * * While we don't have to worry about those conditions,
+   * * ~~While we don't have to worry about those conditions~~ (a year later: ... LOL),
    *   we need to keep track of whether the ability is active.
    * * Allows toggling by the user, but will sync with the battle state as the turn ends.
-   * * Internally, this value depends on `abilityToggleable`.
-   *   - See `detectToggledAbility()` for implementation details.
-   * * If the ability is not in `PokemonToggleAbilities` in `consts`,
-   *   this value will always be `true`, despite the default value being `false`.
+   * * ~~Internally, this value depends on `abilityToggleable`.~~
+   *   - ~~See `detectToggledAbility()` for implementation details.~~
+   * * ~~If the ability is not in `PokemonToggleAbilities` in `consts`,
+   *   this value will always be `true`, despite the default value being `false`.~~
    *
    * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
    * @default false
+   * @todo rename this to `abilityActive`
    * @since 0.1.2
    */
   abilityToggled?: boolean;
@@ -433,7 +434,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @default
    * ```ts
    * // gens 1-2 (legacy)
-   * {}
+   * { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 }
    *
    * // gens 3+
    * { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
@@ -635,7 +636,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @see `Showdown.Pokemon['boosts']` in `types/pokemon.d.ts`
    * @since 1.0.2
    */
-  boosts?: Omit<Showdown.StatsTable, 'hp'>;
+  boosts?: Showdown.StatsTableNoHp;
 
   /**
    * Keeps track of user-modified boosts as to not modify the actual boosts from the `battle` state.
@@ -649,7 +650,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * ```
    * @since 0.1.0
    */
-  dirtyBoosts?: Omit<Showdown.StatsTable, 'hp'>;
+  dirtyBoosts?: Showdown.StatsTableNoHp;
 
   /**
    * Base stats of the Pokemon based on its species.
@@ -686,7 +687,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @since 0.1.3
    */
-  transformedBaseStats?: Omit<Showdown.StatsTable, 'hp'>;
+  transformedBaseStats?: Showdown.StatsTableNoHp;
 
   /**
    * Server-reported stats of the Pokemon.
@@ -2000,7 +2001,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           p4: null,
         }),
 
-        field: field || sanitizeField(),
+        field: field as CalcdexBattleField || sanitizeField(),
 
         sheetsNonce: null,
         sheets: [],
@@ -2269,7 +2270,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       playerState.pokemon[pokemonStateIndex] = {
         ...pokemonState,
         ...pokemon,
-      };
+      } as CalcdexPokemon;
 
       endTimer();
 
@@ -2332,6 +2333,8 @@ export const useCalcdexState = () => useSelector(
   (state) => state?.calcdex,
 );
 
-export const useCalcdexBattleState = (battleId: string) => useSelector(
-  (state) => state?.calcdex?.[battleId],
+export const useCalcdexBattleState = (
+  battleId: string,
+) => useSelector(
+  (state) => (state?.calcdex?.[battleId] ?? {}) as CalcdexBattleState,
 );

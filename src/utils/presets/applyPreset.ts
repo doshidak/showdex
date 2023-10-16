@@ -3,16 +3,18 @@ import {
   type CalcdexPokemonPreset,
   type CalcdexPokemonUsageAlt,
 } from '@showdex/redux/store';
-// import { mergeRevealedMoves } from '@showdex/utils/battle';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { sanitizePokemon } from '@showdex/utils/battle';
+import { calcPokemonSpreadStats } from '@showdex/utils/calc';
+// import { nonEmptyObject } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   detectLegacyGen,
   getDefaultSpreadValue,
-  hasMegaForme,
+  // hasMegaForme,
 } from '@showdex/utils/dex';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
+import { getPresetFormes } from './getPresetFormes';
 import { sortUsageAlts } from './sortUsageAlts';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { usageAltPercentSorter } from './usageAltPercentSorter';
@@ -48,7 +50,10 @@ export const applyPreset = (
   // this will be our final return value
   const output: Partial<CalcdexPokemon> = {
     calcdexId: pokemon.calcdexId,
-    presetId: preset.calcdexId,
+
+    // update (2023/10/15): now conditionally setting this at the end, depending if the provided `preset` is a full set
+    // (handles incomplete presets converted from OTS in battle)
+    // presetId: preset.calcdexId,
 
     // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
     // the new preset (don't want alts from a previous set to persist if none are defined)
@@ -81,11 +86,50 @@ export const applyPreset = (
     },
   };
 
+  const revealedPreset = ['server', 'sheet'].includes(preset.source);
+  const transformed = !!pokemon.transformedForme;
+
+  // update to the speciesForme (& update relevant info) if different
+  const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
+    || (!transformed && pokemon.speciesForme !== preset.speciesForme);
+
+  if (shouldUpdateSpecies) {
+    const speciesFormes = getPresetFormes(pokemon.speciesForme, format);
+    const speciesKey = transformed && !speciesFormes.includes(preset.speciesForme)
+      ? 'transformedForme'
+      : 'speciesForme';
+
+    output[speciesKey] = preset.speciesForme;
+
+    const {
+      types,
+      abilities,
+      altFormes,
+      baseStats,
+      transformedAbilities,
+      transformedBaseStats,
+    } = sanitizePokemon({
+      ...pokemon,
+      ...output,
+    }, format);
+
+    output.types = types;
+    output.altFormes = altFormes;
+
+    if (transformed) {
+      output.transformedAbilities = transformedAbilities;
+      output.transformedBaseStats = transformedBaseStats;
+    } else {
+      output.abilities = abilities;
+      output.baseStats = baseStats;
+    }
+  }
+
   // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
   // if the preset was for its non-Mega forme (since they could have different abilities)
-  if (hasMegaForme(pokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
-    delete output.dirtyAbility;
-  }
+  // if (hasMegaForme(pokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
+  //   delete output.dirtyAbility;
+  // }
 
   const didRevealTeraType = !!pokemon.revealedTeraType && pokemon.revealedTeraType !== '???';
   const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
@@ -109,15 +153,6 @@ export const applyPreset = (
     output.altTeraTypes = altTeraTypes;
   }
 
-  // don't apply the dirtyAbility/dirtyItem if we're applying the Pokemon's first preset and
-  // their abilility/item was already revealed or it matches the Pokemon's revealed ability/item
-  // const clearDirtyAbility = (!pokemon.presetId && pokemon.ability)
-  //   || pokemon.ability === preset.ability;
-
-  // update (2022/10/07): don't apply the dirtyAbility/dirtyItem at all if their non-dirty
-  // counterparts are revealed already
-  // const clearDirtyAbility = !!pokemon.ability && !pokemon.transformedForme;
-
   // update (2023/02/07): always clear the dirtyAbility from the preset if its actual ability
   // has been already revealed (even when transformed)
   const clearDirtyAbility = !!pokemon.ability;
@@ -126,9 +161,6 @@ export const applyPreset = (
     output.dirtyAbility = null;
   }
 
-  // const clearDirtyItem = (!pokemon.presetId && pokemon.item && pokemon.item !== '(exists)')
-  //   || pokemon.item === preset.item
-  //   || (!pokemon.item && pokemon.prevItem && pokemon.prevItemEffect);
   const clearDirtyItem = (pokemon.item && pokemon.item !== '(exists)')
     || (pokemon.prevItem && pokemon.prevItemEffect);
 
@@ -203,7 +235,9 @@ export const applyPreset = (
         /**
          * @todo Needs to be updated once we support more than 4 moves.
          */
-        output.moves = sortedMoves.slice(0, 4);
+        if (!revealedPreset) {
+          output.moves = sortedMoves.slice(0, 4);
+        }
       }
     }
   }
@@ -219,31 +253,10 @@ export const applyPreset = (
   });
   */
 
-  // only apply the ability/item (& remove their dirty counterparts) if there's only
-  // 1 possible ability/item in the pool (& their actual ability/item hasn't been revealed)
-  // update (2022/10/06): nvm on the setting the actual ability/item cause it's screwy when switching formes,
-  // so opting to use their dirty counterparts instead lol
-  // if (preset.format?.includes('random')) {
-  //   // apply the Gmax forme if that's all we have random sets for (cause they're most likely Gmax)
-  //   if (preset.speciesForme.endsWith('-Gmax')) {
-  //     output.speciesForme = preset.speciesForme;
-  //   }
-  //
-  //   if (!clearDirtyAbility && output.altAbilities?.length === 1) {
-  //     [output.dirtyAbility] = flattenAlts(output.altAbilities);
-  //     // output.dirtyAbility = null;
-  //   }
-  //
-  //   if (!pokemon.item && !pokemon.prevItem && output.altItems?.length === 1) {
-  //     [output.dirtyItem] = flattenAlts(output.altItems);
-  //     // output.dirtyItem = null;
-  //   }
-  // }
-
   // carefully apply the spread if Pokemon is transformed and a spread was already present prior
-  const shouldTransformSpread = !!pokemon.transformedForme
+  const shouldTransformSpread = transformed
     && !!pokemon.nature
-    && nonEmptyObject(Object.values({ ...pokemon.ivs, ...pokemon.evs }).filter(Boolean));
+    && !!Object.values({ ...pokemon.ivs, ...pokemon.evs }).filter(Boolean).length;
 
   if (shouldTransformSpread) {
     // since transforms inherit the exact stats of the target Pokemon (except for HP),
@@ -256,7 +269,7 @@ export const applyPreset = (
     output.evs.hp = pokemon.evs.hp;
 
     // if the Pokemon has an item set by a previous preset, ignore this preset's item
-    if (pokemon.dirtyItem || pokemon.item) {
+    if (pokemon.item || pokemon.dirtyItem) {
       delete output.dirtyItem;
     }
   }
@@ -271,20 +284,39 @@ export const applyPreset = (
     delete output.dirtyItem;
   }
 
-  // apply the defaultShowGenetics setting if the `pokemon` is serverSourced
-  // update (2022/11/15): defaultShowGenetics is deprecated in favor of lockGeneticsVisibility;
-  // showGenetics's initial value is set in syncBattle() when the `pokemon` is first init'd into Redux
-  // if (pokemon.serverSourced) {
-  //   output.showGenetics = settings?.defaultShowGenetics?.auth;
-  // }
+  // determine if we should be updating the actual info instead of the dirty ones
+  if (revealedPreset) {
+    if (output.teraType && !pokemon.revealedTeraType) {
+      output.revealedTeraType = output.teraType;
+    }
+
+    if (output.dirtyAbility && !pokemon.ability) {
+      output.ability = output.dirtyAbility;
+      output.dirtyAbility = null;
+    }
+
+    if (output.dirtyItem && (!pokemon.item || !pokemon.prevItem)) {
+      output.item = output.dirtyItem;
+      output.dirtyItem = null;
+    }
+
+    // if (output.moves.length) {
+    //   output[transformed ? 'transformedMoves' : 'revealedMoves'] = [...output.moves];
+    // }
+  }
+
+  const completePreset = !!Object.values(output.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
+    && (legacy || !!Object.values(output.evs || {}).reduce((sum, val) => sum + (val || 0), 0));
+
+  // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,
+  // which won't have any EVs/IVs, so we'll still have to rely on spreads from other presets)
+  if (completePreset) {
+    output.spreadStats = calcPokemonSpreadStats(format, { ...pokemon, ...output });
+    output.presetId = preset.calcdexId;
+  }
 
   // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
-  const forceShowGenetics = !pokemon.showGenetics && (
-    !Object.values(output.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-      || (!legacy && !Object.values(output.evs || {}).reduce((sum, val) => sum + (val || 0), 0))
-  );
-
-  if (forceShowGenetics) {
+  if (!pokemon.showGenetics && !completePreset) {
     output.showGenetics = true;
   }
 
