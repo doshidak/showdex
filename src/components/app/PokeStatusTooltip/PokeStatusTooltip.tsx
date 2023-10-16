@@ -23,7 +23,7 @@ export interface PokeStatusTooltipProps {
   visible?: boolean;
   disabled?: boolean;
   children?: TooltipProps['children'];
-  onPokemonChange?: (pokemon: DeepPartial<CalcdexPokemon>) => void;
+  onPokemonChange?: (pokemon: Partial<CalcdexPokemon>) => void;
   onRequestClose?: () => void;
 }
 
