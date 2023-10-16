@@ -32,7 +32,7 @@ declare type Modify<T, R> = Omit<T, keyof R> & R;
  * @since 0.1.0
  */
 declare type DeepPartial<T> = T extends object ? {
-  [P in keyof T]?: T[P] extends string | number | boolean | symbol | Array ? T[P] : DeepPartial<T[P]>;
+  [P in keyof T]?: T[P] extends string | number | boolean | symbol | unknown[] ? T[P] : DeepPartial<T[P]>;
 } : T;
 
 /**
