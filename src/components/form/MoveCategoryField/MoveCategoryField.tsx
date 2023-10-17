@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
+import { type GenerationNum } from '@smogon/calc';
 import { useSandwich } from '@showdex/components/layout';
 import {
   type ButtonElement,
@@ -12,6 +13,7 @@ import {
 import { PokemonBoostNames } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 import { useUserAgent } from '@showdex/utils/hooks';
 import {
   type MoveCategoryFieldLabel,
@@ -27,6 +29,7 @@ export interface MoveCategoryFieldProps extends FieldRenderProps<CalcdexMoveOver
   ariaLabel?: string;
   labels?: MoveCategoryFieldLabel[];
   tooltipPlacement?: TooltipProps['placement'];
+  format?: string | GenerationNum;
   readOnly?: boolean;
   disabled?: boolean;
 }
@@ -40,6 +43,7 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
   tooltipPlacement = 'top-start',
   input,
   readOnly,
+  format,
   disabled,
 }: MoveCategoryFieldProps, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
@@ -74,6 +78,7 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
   ]);
 
   const key = `MoveCategoryField:${input?.name || optionsId || '???'}`;
+  const gen = detectGenFromFormat(format);
 
   return (
     <Tooltip
@@ -122,20 +127,30 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
             </div>
 
             <div className={styles.statSectionOptions}>
-              {PokemonBoostNames.map((stat) => (
-                <ToggleButton
-                  key={`${key}:ToggleButton:Offense:${stat}`}
-                  className={styles.statSectionOption}
-                  label={stat.toUpperCase()}
-                  primary
-                  active={input?.value?.offensiveStat === stat}
-                  activeScale={input?.value?.offensiveStat === stat ? 0.98 : undefined}
-                  forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
-                  onPress={() => input?.onChange?.({
-                    offensiveStat: stat,
-                  })}
-                />
-              ))}
+              {PokemonBoostNames.map((name) => {
+                if (gen === 1 && name === 'spd') {
+                  return null;
+                }
+
+                const stat = gen === 1 && name === 'spa'
+                  ? 'spc'
+                  : name;
+
+                return (
+                  <ToggleButton
+                    key={`${key}:ToggleButton:Offense:${name}`}
+                    className={styles.statSectionOption}
+                    label={stat.toUpperCase()}
+                    primary
+                    active={input?.value?.offensiveStat === name}
+                    activeScale={input?.value?.offensiveStat === name ? 0.98 : undefined}
+                    forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
+                    onPress={() => input?.onChange?.({
+                      offensiveStat: name,
+                    })}
+                  />
+                );
+              })}
             </div>
 
             <div className={cx(styles.vsLabel, styles.vertical)}>
@@ -143,20 +158,30 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
             </div>
 
             <div className={styles.statSectionOptions}>
-              {PokemonBoostNames.map((stat) => (
-                <ToggleButton
-                  key={`${key}:ToggleButton:Defense:${stat}`}
-                  className={styles.statSectionOption}
-                  label={stat.toUpperCase()}
-                  primary
-                  active={input?.value?.defensiveStat === stat}
-                  activeScale={input?.value?.defensiveStat === stat ? 0.98 : undefined}
-                  forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
-                  onPress={() => input?.onChange?.({
-                    defensiveStat: stat,
-                  })}
-                />
-              ))}
+              {PokemonBoostNames.map((name) => {
+                if (gen === 1 && name === 'spa') {
+                  return null;
+                }
+
+                const stat = gen === 1 && name === 'spd'
+                  ? 'spc'
+                  : name;
+
+                return (
+                  <ToggleButton
+                    key={`${key}:ToggleButton:Defense:${name}`}
+                    className={styles.statSectionOption}
+                    label={stat.toUpperCase()}
+                    primary
+                    active={input?.value?.defensiveStat === name}
+                    activeScale={input?.value?.defensiveStat === name ? 0.98 : undefined}
+                    forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
+                    onPress={() => input?.onChange?.({
+                      defensiveStat: name,
+                    })}
+                  />
+                );
+              })}
             </div>
 
             <div className={cx(styles.statSectionTitle, styles.bottom)}>
@@ -193,11 +218,23 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
       >
         {label?.[2] || (
           <>
-            <div>{input?.value?.offensiveStat || <>&mdash;</>}</div>
+            <div>
+              {(
+                gen === 1 && input?.value?.offensiveStat === 'spa'
+                  ? 'spc'
+                  : input?.value?.offensiveStat
+              ) || <>&mdash;</>}
+            </div>
             <div className={cx(styles.vsLabel, styles.horizontal)}>
               vs
             </div>
-            <div>{input?.value?.defensiveStat || <>&mdash;</>}</div>
+            <div>
+              {(
+                gen === 1 && input?.value?.defensiveStat === 'spd'
+                  ? 'spc'
+                  : input?.value?.defensiveStat
+              ) || <>&mdash;</>}
+            </div>
           </>
         )}
       </ToggleButton>
