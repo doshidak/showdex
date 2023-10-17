@@ -69,7 +69,7 @@ export const sanitizeMoveTrack = <
     return output;
   }
 
-  const { serverSourced, moveTrack } = pokemon as Partial<CalcdexPokemon>;
+  const { moveTrack } = pokemon as Partial<CalcdexPokemon>;
   const dexMoveTrack = getDexMoveTrack(dex, moveTrack);
   const dexTransformedMoveTrack = getDexMoveTrack(dex, moveTrack, true);
 
@@ -82,10 +82,8 @@ export const sanitizeMoveTrack = <
     ppUsed,
   ] as [moveName: MoveName, ppUsed: number]);
 
-  if (!serverSourced) {
-    output.transformedMoves = dexTransformedMoveTrack
-      .map(([move]) => move.name as MoveName);
-  }
+  output.transformedMoves = dexTransformedMoveTrack
+    .map(([move]) => move.name as MoveName);
 
   // filter out any Z/Max moves from the moveTrack
   output.revealedMoves = dexMoveTrack
