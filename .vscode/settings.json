@@ -4,12 +4,14 @@
   "emmet.showExpandedAbbreviation": "never",
 
   "eslint.debug": false,
-  "eslint.packageManager": "yarn",
+  // "eslint.packageManager": "yarn",
 
   "explorer.incrementalNaming": "smart",
 
   "git.allowForcePush": true,
   "git.autoStash": true,
+
+  "github.copilot.inlineSuggest.enable": false,
 
   "files.associations": { ".env": "dotenv" },
   "files.insertFinalNewline": true,
