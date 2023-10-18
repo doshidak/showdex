@@ -20,5 +20,6 @@ export * from './hasMegaForme';
 export * from './hasNickname';
 export * from './legalLockedFormat';
 export * from './notFullyEvolved';
+export * from './parseBattleFormat';
 export * from './shouldIgnoreItem';
 export * from './toggleableAbility';
