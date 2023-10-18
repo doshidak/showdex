@@ -38,6 +38,11 @@
 
 .header {
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  @include transition.apply(color);
+
+  &.warning {
+    color: colors.$orange;
+  }
 }
 
 .statHeader {
@@ -77,15 +82,22 @@
 }
 
 .valueFieldInput {
-  .baseStatField.pristine &, .disabled & {
+  @include transition.apply(color, opacity);
+
+  .pristine &, .disabled & {
     color: inherit;
   }
 
-  &.missingSpread {
+  &.warning {
     color: colors.$orange;
+  }
+
+  &.dim:not(:active) {
+    opacity: 0.64;
   }
 }
 
+/*
 .ivsHeader {
   @include transition.apply(color);
 
@@ -93,11 +105,13 @@
     color: colors.$orange;
   }
 }
+*/
 
 .ivField {
   max-width: 30px;
 }
 
+/*
 .evsHeader {
   @include transition.apply(color);
 
@@ -115,6 +129,7 @@
     color: colors.$red;
   }
 }
+*/
 
 .evField {
   max-width: 30px;
@@ -187,7 +202,7 @@
   }
 
   &.disabled {
-    opacity: 0.65; // default 0.3 opacity is too faded
+    opacity: 0.64; // default 0.3 opacity is too faded
   }
 }
 
