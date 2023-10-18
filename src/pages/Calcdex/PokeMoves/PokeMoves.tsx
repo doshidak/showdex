@@ -89,7 +89,9 @@ export const PokeMoves = ({
     'natdex',
   ].some((f) => format.includes(f));
 
-  const showTeraToggle = !!pokemon?.speciesForme && gen > 8;
+  const showTeraToggle = !!pokemon?.speciesForme
+    && !rules?.tera
+    && gen > 8;
 
   const disableTeraToggle = !pokemon?.speciesForme
     || !pokemon.teraType
@@ -240,6 +242,10 @@ export const PokeMoves = ({
           showTeraToggle &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
+            labelClassName={cx(
+              styles.teraButtonLabel,
+              (battleActive && !player?.usedTera && !pokemon?.terastallized) && styles.available,
+            )}
             label="Tera"
             tooltip={(
               <div className={styles.descTooltip}>
@@ -266,7 +272,7 @@ export const PokeMoves = ({
               </div>
             )}
             tooltipDisabled={!settings?.showUiTooltips && !battleActive}
-            primary
+            primary={!battleActive || !player?.usedTera || pokemon?.terastallized}
             active={pokemon?.terastallized}
             disabled={disableTeraToggle}
             onPress={() => updatePokemon({
@@ -283,7 +289,7 @@ export const PokeMoves = ({
             className={cx(
               styles.toggleButton,
               styles.ultButton,
-              gen > 8 && styles.lessSpacing,
+              showTeraToggle && styles.lessSpacing,
             )}
             label="Z"
             tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
@@ -305,7 +311,7 @@ export const PokeMoves = ({
             className={cx(
               styles.toggleButton,
               styles.ultButton,
-              showZToggle && styles.lessSpacing,
+              (showTeraToggle || showZToggle) && styles.lessSpacing,
             )}
             label="Max"
             tooltip={(
@@ -332,7 +338,7 @@ export const PokeMoves = ({
               </div>
             )}
             tooltipDisabled={!settings?.showUiTooltips && !battleActive}
-            primary
+            primary={!battleActive || !player?.usedMax || pokemon?.useMax}
             active={pokemon?.useMax}
             disabled={disableMaxToggle}
             onPress={() => updatePokemon({
@@ -684,6 +690,7 @@ export const PokeMoves = ({
                   <MoveCategoryField
                     className={styles.categoryField}
                     ariaLabel={`Stat Overrides for ${moveName} of Pokemon ${friendlyPokemonName}`}
+                    format={format}
                     input={{
                       name: `PokeMoves:${pokemonKey}:Moves:MoveCategoryField:${moveName}`,
                       value: moveOverrides,

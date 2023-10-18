@@ -160,6 +160,97 @@ button.editButton {
   // }
 }
 
+.teraButtonLabel {
+  $gradient: linear-gradient(
+    // to right,
+    60deg,
+
+    color.alpha(colors.$black, 0.75) 26%,
+
+    // #55C0EC,
+    color.shade(#63B44A, 15%) 26%,
+    // #E96B7D,
+    color.shade(#43B9DC, 15%) 48%,
+
+    // #7ECADA,
+    // #DBE6A7,
+    #ACD7BF 48%,
+    color.shade(#6DC5E5, 10%) 70%,
+
+    color.alpha(colors.$white, 0.75) 70%,
+  );
+
+  // position: relative;
+  // color: colors.$transparent;
+  // background-image: $gradient;
+  // background-size: 400% 100%;
+  // background-position: 0% 0%;
+  // background-clip: text;
+  // mix-blend-mode: multiply;
+  @include transition.apply((color, 150ms), background-position);
+
+  &.available {
+    color: colors.$transparent;
+    background-image: $gradient;
+    background-size: 400% 100%;
+    background-position: 0% 0%;
+    background-clip: text;
+  }
+
+  .light & {
+    background-position: 0% 0%;
+
+    &.available {
+      background-position: 165% 0%;
+    }
+  }
+
+  .dark & {
+    background-position: 365% 0%;
+
+    &.available {
+      background-position: 330% 0%;
+    }
+  }
+
+  /*
+  &::before {
+    content: '';
+    @include position.absolute-fill;
+    background-image: $gradient;
+    mix-blend-mode: screen;
+    opacity: 0;
+    @include transition.apply(opacity);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light & {
+    color: colors.$black;
+    background-color: colors.$white;
+    mix-blend-mode: multiply;
+
+    &::before {
+      mix-blend-mode: screen;
+    }
+  }
+
+  .dark & {
+    color: colors.$white;
+    background-color: colors.$black;
+    mix-blend-mode: lighten;
+
+    &::before {
+      mix-blend-mode: multiply;
+    }
+  }
+
+  &.available::before {
+    opacity: 1;
+  }
+  */
+}
+
 button.ultButton {
   min-width: 25px;
 }
