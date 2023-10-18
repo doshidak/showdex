@@ -1,8 +1,8 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
-import { FormatLabels } from '@showdex/consts/dex';
+// import { FormatLabels } from '@showdex/consts/dex';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
-import { getGenlessFormat } from '@showdex/utils/dex';
+import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import { getPresetFormes } from '@showdex/utils/presets';
 
@@ -33,7 +33,13 @@ export const buildPresetOptions = (
   const currentForme = pokemon?.transformedForme || pokemon?.speciesForme;
 
   presets.forEach((preset) => {
-    if (!preset?.calcdexId || !preset.name || !preset.format) {
+    const validPreset = !!preset?.calcdexId
+      && !!preset.name
+      && !!preset.format
+      && !!preset.speciesForme
+      && (detectLegacyGen(preset.gen) || Object.values(preset.evs || {}).some((ev) => ev > 0));
+
+    if (!validPreset) {
       return;
     }
 
@@ -75,7 +81,9 @@ export const buildPresetOptions = (
       (option.subLabel as string) += preset.speciesForme;
 
       if (pokemon.transformedForme) {
-        option.disabled = !getPresetFormes(currentForme, preset.gen).includes(preset.speciesForme);
+        option.disabled = !getPresetFormes(currentForme, {
+          format: preset.gen,
+        }).includes(preset.speciesForme);
       }
     }
 
@@ -88,13 +96,12 @@ export const buildPresetOptions = (
       option.rightLabel = percentage(usage, 2);
     }
 
-    const genlessFormat = getGenlessFormat(preset.format);
-    const groupLabel = (!!genlessFormat && FormatLabels?.[genlessFormat]) || genlessFormat;
-    const group = options.find((o) => o.label === groupLabel);
+    const { label } = parseBattleFormat(`gen${preset.gen}${preset.format}`);
+    const group = options.find((o) => o.label === label);
 
     if (!group) {
       options.push({
-        label: groupLabel,
+        label,
         options: [option],
       });
 

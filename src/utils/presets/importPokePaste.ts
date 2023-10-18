@@ -13,6 +13,7 @@ import {
   detectLegacyGen,
   getDefaultSpreadValue,
   getDexForFormat,
+  parseBattleFormat,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 
@@ -69,7 +70,7 @@ const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
  *   - Flamethrower
  * `, 'gen8ou');
  *
- * CalcdexPokemonPreset {
+ * {
  *   // note: this is some random uuid for the example's sake
  *   calcdexId: 'fb1961f0-75f7-11ed-b30e-2d3f6d915c0a',
  *   id: 'fb1961f0-75f7-11ed-b30e-2d3f6d915c0a', // same as calcdexId
@@ -106,7 +107,7 @@ const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
  *     'Flamethrower',
  *   ],
  *   altMoves: [],
- * }
+ * } as CalcdexPokemonPreset
  * ```
  * @since 1.0.7
  */
@@ -530,6 +531,12 @@ export const importPokePaste = (
     if (speciesTypes?.length) {
       preset.teraTypes = [...speciesTypes];
     }
+  }
+
+  const { base: baseFormat } = parseBattleFormat(preset.format);
+
+  if (baseFormat) {
+    preset.format = baseFormat;
   }
 
   preset.calcdexId = calcPresetCalcdexId(preset);

@@ -2,11 +2,12 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
-import { FormatLabels } from '@showdex/consts/dex';
+import { bullop } from '@showdex/consts/core';
+// import { FormatLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
-import { detectGenFromFormat } from '@showdex/utils/dex';
+import { parseBattleFormat } from '@showdex/utils/dex';
 import styles from './InstanceButton.module.scss';
 
 export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
@@ -33,8 +34,14 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const gen = detectGenFromFormat(format);
-  const genlessFormat = gen > 0 ? format.replace(`gen${gen}`, '') : null;
+  // const gen = detectGenFromFormat(format);
+  // const genlessFormat = gen > 0 ? format.replace(`gen${gen}`, '') : null;
+
+  const {
+    gen,
+    label,
+    suffixes,
+  } = parseBattleFormat(format);
 
   const authPlayer = !!authName
     && [playerName, opponentNameFromProps].includes(authName);
@@ -72,10 +79,12 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 
       <div className={styles.info}>
         {
-          !!genlessFormat &&
+          !!label &&
           <div className={styles.format}>
             Gen {gen} &bull;{' '}
-            <strong>{FormatLabels[genlessFormat] || genlessFormat}</strong>
+            <strong>{label}</strong>
+            {!!suffixes && ' '}
+            {suffixes.map((s) => s[1]).join(` ${bullop} `)}
           </div>
         }
 
