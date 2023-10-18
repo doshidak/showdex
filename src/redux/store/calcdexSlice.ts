@@ -19,7 +19,7 @@ import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { detectLegacyGen } from '@showdex/utils/dex';
+import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
 import { useSelector } from './hooks';
 
 /* eslint-disable @typescript-eslint/indent */
@@ -1451,18 +1451,18 @@ export interface CalcdexBattleRules {
   /**
    * Whether only one *Baton Pass*-er is allowed.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|One Boost Passer Clause: Limit one Baton Passer that has a way to boost its stats'`
+   * * Rule: `'One Boost Passer Clause'`
+   *   - "Limit one Baton Passer that has a way to boost its stats"
    *
    * @since 1.0.1
    */
   boostPasser?: boolean;
 
   /**
-   * Whether dynamaxing is banned.
+   * Whether Dynamaxing is banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Dynamax Clause: You cannot dynamax'`
+   * * Rule: `'Dynamax Clause'`
+   *   - "You cannot dynamax"
    * * Obviously only applies if the current gen is 8.
    *
    * @since 0.1.3
@@ -1470,10 +1470,41 @@ export interface CalcdexBattleRules {
   dynamax?: boolean;
 
   /**
+   * Whether Terastallization is banned.
+   *
+   * * Rule: `'Terastal Clause'`
+   *   - "You cannot Terastallize"
+   * * Obviously only applies if the current gen is 9.
+   *
+   * @since 1.1.7
+   */
+  tera?: boolean;
+
+  /**
+   * Whether evasion abilities, items & moves are banned.
+   *
+   * * Rule: `'Evasion Clause`'
+   *   - "Evasion abilities, items, and moves are banned"
+   *
+   * @since 1.1.7
+   */
+  evasion?: boolean;
+
+  /**
+   * Whether evasion abilities are banned.
+   *
+   * * Rule: `'Evasion Abilities Clause'`
+   *   - "Evasion abilities are banned"
+   *
+   * @since 1.1.7
+   */
+  evasionAbilities?: boolean;
+
+  /**
    * Whether evasion items are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Evasion Items Clause: Evasion items are banned'`
+   * * Rule: `'Evasion Items Clause'`
+   *   - "Evasion items are banned"
    *
    * @since 0.1.3
    */
@@ -1482,8 +1513,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether evasion moves are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Evasion Moves Clause: Evasion moves are banned'`
+   * * Rule: `'Evasion Moves Clause'`
+   *   - "Evasion moves are banned"
    *
    * @since 0.1.3
    */
@@ -1492,8 +1523,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether forcing endless battles are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Endless Battle Clause: Forcing endless battles is banned'`
+   * * Rule: `'Endless Battle Clause'`
+   *   - "Forcing endless battles is banned"
    *
    * @since 0.1.3
    */
@@ -1502,8 +1533,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether only one foe can be frozen.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Freeze Clause Mod: Limit one foe frozen'`
+   * * Rule: `'Freeze Clause Mod'`
+   *   - "Limit one foe frozen"
    *
    * @since 1.0.1
    */
@@ -1512,10 +1543,10 @@ export interface CalcdexBattleRules {
   /**
    * Whether HP is shown in percentages.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|HP Percentage Mod: HP is shown in percentages'`
-   * * Only applies to the opponent's Pokemon as we can read the actual HP values
-   *   from the player's Pokemon via the corresponding `Showdown.ServerPokemon` objects.
+   * * Rule: `'HP Percentage Mod'`
+   *   - "HP is shown in percentages"
+   * * Only applies to the opponent's Pokemon as we can read the actual HP values from the player's Pokemon via the
+   *   corresponding `Showdown.ServerPokemon` objects.
    *
    * @since 0.1.3
    */
@@ -1524,8 +1555,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether Rayquaza cannot be mega-evolved.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Mega Rayquaza Clause: You cannot mega evolve Rayquaza'`
+   * * Rule: `'Mega Rayquaza Clause'`
+   *   - "You cannot mega evolve Rayquaza"
    * * Obviously only applies if the current gen is 6 or 7, or we're in some weird format like Gen 8 National Dex.
    *
    * @since 0.1.3
@@ -1535,8 +1566,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether OHKO (one-hit-KO) moves are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|OHKO Clause: OHKO moves are banned'`
+   * * Rule: `'OHKO Clause'`
+   *   - "OHKO moves are banned"
    *
    * @since 0.1.3
    */
@@ -1545,8 +1576,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether Pokemon must share the same type.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Same Type Clause: Pokémon in a team must share a type'`
+   * * Rule: `'Same Type Clause'`
+   *   - "Pokémon in a team must share a type"
    * * Typically only present in *monotype* formats.
    *
    * @since 1.0.1
@@ -1556,8 +1587,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether only one foe can be put to sleep.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Sleep Clause Mod: Limit one foe put to sleep'`
+   * * Rule: `'Sleep Clause Mod'`
+   *   - "Limit one foe put to sleep"
    *
    * @since 0.1.3
    */
@@ -1566,8 +1597,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether players are limited to one of each Pokemon.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Species Clause: Limit one of each Pokémon'`
+   * * Rule: `'Species Clause'`
+   *   - "Limit one of each Pokémon"
    *
    * @since 0.1.3
    */
@@ -1636,16 +1667,30 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * * Derived from splitting the `id` of the Showdown `battle` state.
    * * Note that this includes the `'gen#'` portion of the format.
    *
-   * @example 'gen8ubers'
+   * @example 'gen9vgc2023'
    * @since 0.1.0
    */
   format: string;
 
   /**
+   * Battle sub-formats.
+   *
+   * @example
+   * ```ts
+   * [
+   *   'regulatione',
+   *   'bo3',
+   * ]
+   * ```
+   * @since 1.1.7
+   */
+  subFormats?: string[];
+
+  /**
    * Game type, whether `'Singles'` or `'Doubles'`.
    *
    * @default 'Singles'
-   * @since 0.1.0
+   * @since 1.1.7
    */
   gameType: GameType;
 
@@ -1910,8 +1955,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       const {
         scope, // used for debugging; not used here, but destructuring it from `...payload`
         battleId,
-        gen = env.int<GenerationNum>('calcdex-default-gen'),
-        format = null,
+        gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
+        format: formatFromPayload = null,
         gameType = 'Singles',
         rules = {},
         turn = 0,
@@ -1944,6 +1989,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
+      const {
+        gen: genFromFormat,
+        base,
+        suffixes,
+      } = parseBattleFormat(formatFromPayload);
+
+      const gen = genFromFormat || genFromPayload;
+
       state[battleId] = {
         ...payload,
 
@@ -1951,9 +2004,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         // battleNonce: null, // make sure we don't set this for the syncBattle() action
 
         gen,
-        format,
+        format: `gen${gen}${base}`,
+        subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
         gameType,
-        legacy: detectLegacyGen(format || gen),
+        legacy: detectLegacyGen(gen),
         rules,
         turn,
         active,
