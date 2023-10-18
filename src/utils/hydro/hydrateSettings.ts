@@ -10,6 +10,7 @@ import {
   DehydratedCalcdexSettingsMap,
   DehydratedHellodexSettingsMap,
   DehydratedShowdexSettingsMap,
+  DehydratedShowdownSettingsMap,
 } from './dehydrateSettings';
 import { hydrateHeader } from './hydrateHeader';
 import { hydrateArray, hydrateBoolean, hydrateValue } from './hydratePrimitives';
@@ -34,6 +35,13 @@ export const HydratedHellodexSettingsMap = reverseObjectKv(DehydratedHellodexSet
  * @since 1.0.3
  */
 export const HydratedCalcdexSettingsMap = reverseObjectKv(DehydratedCalcdexSettingsMap);
+
+/**
+ * Reverse opcode-to-key mappings for the hydrated `ShowdexShowdownSettings`.
+ *
+ * @since 1.1.7
+ */
+export const HydratedShowdownSettingsMap = reverseObjectKv(DehydratedShowdownSettingsMap);
 
 /**
  * Internally-used list of keys to ignore when hydrating the root `ShowdexSettings`.
@@ -186,6 +194,10 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
         '4HKO',
       ],
     },
+
+    showdown: {
+      autoAcceptSheets: false,
+    },
   };
 
   if (!value || typeof value !== 'string') {
@@ -307,6 +319,41 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
               //     ? hydrateNumber(dehydratedCalcdexValue)
               //     : hydrateString(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
               : hydrateValue(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
+        });
+
+        break;
+      }
+
+      case DehydratedShowdexSettingsMap.showdown: {
+        const dehydratedShowdownSettings = dehydratedValue?.split('|') || [];
+
+        if (!dehydratedShowdownSettings.length) {
+          break;
+        }
+
+        dehydratedShowdownSettings.forEach((dehydratedShowdownSetting) => {
+          const [
+            rawDehydratedShowdownKey,
+            ...dehydratedShowdownValues
+          ] = dehydratedShowdownSetting?.split('~') || [];
+
+          const dehydratedShowdownKey = rawDehydratedShowdownKey?.toLowerCase();
+
+          if (!dehydratedShowdownKey) {
+            return;
+          }
+
+          const dehydratedShowdownValue = dehydratedShowdownValues.join('~');
+          const hydratedShowdownKey = HydratedShowdownSettingsMap[dehydratedShowdownKey];
+
+          if (!hydratedShowdownKey || !(hydratedShowdownKey in settings.showdown)) {
+            return;
+          }
+
+          // currently, only boolean values exist in ShowdexShowdownSettings
+          settings.showdown[hydratedShowdownKey] = ['y', 'n'].includes(dehydratedShowdownValue)
+            ? hydrateBoolean(dehydratedShowdownValue)
+            : null;
         });
 
         break;
