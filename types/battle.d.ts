@@ -268,6 +268,27 @@ declare namespace Showdown {
     roomid: string;
 
     /**
+     * @example
+     * ```ts
+     * // example from gen9nationaldexmonotype:
+     * {
+     *   'HP Percentage Mod': 1,
+     *   'Endless Battle Clause': 1,
+     *   'Same Type Clause': 1,
+     *   'Terastal Clause': 1,
+     *   'Species Clause': 1,
+     *   'OHKO Clause': 1,
+     *   'Evasion Clause': 1,
+     *   'Evasion Abilities Clause': 1,
+     *   'Evasion Items Clause': 1,
+     *   'Evasion Moves Clause': 1,
+     *   'Sleep Clause Mod': 1
+     * }
+     * ```
+     */
+    rules: Record<string, number>;
+
+    /**
      * @default false
      */
     hardcoreMode: boolean;
