@@ -112,10 +112,7 @@ export const PokeInfo = ({
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = React.useMemo(() => (
     showAbilityToggle
-      // && formatId(abilityName)?.endsWith('ofruin')
       && PokemonRuinAbilities.includes(abilityName)
-      // update (2023/10/09): no need to check this cause abilityToggleable will be false if not Doubles
-      // && field?.gameType === 'Doubles'
       && !pokemon.abilityToggled
       && ([
         'ruinBeadsCount',
@@ -662,7 +659,7 @@ export const PokeInfo = ({
               options={abilityOptions}
               noOptionsMessage="No Abilities"
               clearable={false}
-              highlight={pokemon.abilityToggled}
+              highlight={pokemon?.abilityToggled}
               disabled={legacy || !pokemon?.speciesForme}
             />
           </div>
