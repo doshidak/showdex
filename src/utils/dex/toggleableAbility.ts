@@ -1,4 +1,4 @@
-import { type AbilityName, type GameType } from '@smogon/calc';
+import { type GameType } from '@smogon/calc';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 
@@ -7,19 +7,20 @@ import { type CalcdexPokemon } from '@showdex/redux/store';
  *
  * * 10/10 name, I know.
  *
- * @see `CalcdexPokemon['abilityToggleable']` in `src/redux/store/calcdexSlice.ts`
+ * @see CalcdexPokemon['abilityToggleable']
  * @since 0.1.3
  */
 export const toggleableAbility = (
-  pokemon: Partial<Showdown.Pokemon> | Partial<CalcdexPokemon>,
+  pokemon: Partial<CalcdexPokemon>,
   gameType: GameType = 'Singles',
 ): boolean => {
-  const ability = (
-    'dirtyAbility' in (pokemon || {})
-      && (pokemon as Partial<CalcdexPokemon>).dirtyAbility
-  ) || pokemon?.ability as AbilityName;
+  if (!pokemon?.speciesForme || !PokemonToggleAbilities[gameType]?.length) {
+    return false;
+  }
 
-  if (!ability || !PokemonToggleAbilities[gameType]?.length) {
+  const ability = pokemon.dirtyAbility || pokemon.ability;
+
+  if (!ability) {
     return false;
   }
 
