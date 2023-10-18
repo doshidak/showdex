@@ -113,16 +113,17 @@ export const createSmogonPokemon = (
       // note that spreadStats may not be available yet, hence the fallback object
       const { hp: maxHp } = pokemon.spreadStats
         || { hp: pokemon.maxhp || 100 };
+      const hp = (pokemon.dirtyHp ?? (pokemon.hp || 0))
 
       if (pokemon.serverSourced) {
-        return shouldMultiscale && !pokemon.hp ? maxHp : pokemon.hp;
+        return shouldMultiscale && !hp ? maxHp : hp;
       }
 
       const hpPercentage = calcPokemonHpPercentage(pokemon);
 
       // if the Pokemon is dead, assume it has full HP as to not break the damage calc
       // return Math.floor((shouldMultiscale ? 0.99 : hpPercentage || 1) * hpStat);
-      return Math.floor((shouldMultiscale && !pokemon.hp ? 1 : hpPercentage || 1) * maxHp);
+      return Math.floor((shouldMultiscale && !hp ? 1 : hpPercentage || 1) * maxHp);
     })(),
 
     level: pokemon.level,
