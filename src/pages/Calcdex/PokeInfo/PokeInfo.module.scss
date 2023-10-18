@@ -39,13 +39,22 @@
   font-weight: 500;
   text-transform: uppercase;
   user-select: none;
+  @include transition.apply(color);
 
   .light & {
     color: color.alpha(colors.$black, 0.75);
+
+    &.legacy {
+      color: color.alpha(colors.$black, 0.3);
+    }
   }
 
   .dark & {
     color: color.alpha(colors.$white, 0.75);
+
+    &.legacy {
+      color: color.alpha(colors.$white, 0.3);
+    }
   }
 }
 

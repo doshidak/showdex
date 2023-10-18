@@ -583,7 +583,13 @@ export const PokeInfo = ({
           style={{ alignItems: 'flex-start' }}
         >
           <div className={styles.rowItem}>
-            <div className={cx(styles.label, styles.dropdownLabel)}>
+            <div
+              className={cx(
+                styles.label,
+                legacy && styles.legacy,
+                styles.dropdownLabel,
+              )}
+            >
               Ability
 
               {
@@ -643,7 +649,7 @@ export const PokeInfo = ({
               }}
               input={{
                 name: `PokeInfo:${pokemonKey}:Ability`,
-                value: abilityName,
+                value: legacy ? null : abilityName,
                 onChange: (value: AbilityName) => updatePokemon({
                   dirtyAbility: value,
                 }, `${baseScope}:Dropdown~DirtyAbility:input.onChange()`),
@@ -656,7 +662,13 @@ export const PokeInfo = ({
           </div>
 
           <div className={styles.rowItem}>
-            <div className={cx(styles.label, styles.dropdownLabel)}>
+            <div
+              className={cx(
+                styles.label,
+                legacy && styles.legacy,
+                styles.dropdownLabel,
+              )}
+            >
               Nature
             </div>
 
@@ -665,7 +677,7 @@ export const PokeInfo = ({
               hint={legacy ? 'N/A' : '???'}
               input={{
                 name: `PokeInfo:${pokemonKey}:Nature`,
-                value: pokemon?.nature,
+                value: legacy ? null : pokemon?.nature,
                 onChange: (name: Showdown.PokemonNature) => updatePokemon({
                   nature: name,
                 }, `${baseScope}:Dropdown~Nature:input.onChange()`),
@@ -686,7 +698,13 @@ export const PokeInfo = ({
           </div>
 
           <div className={styles.rowItem}>
-            <div className={cx(styles.label, styles.dropdownLabel)}>
+            <div
+              className={cx(
+                styles.label,
+                gen === 1 && styles.legacy,
+                styles.dropdownLabel,
+              )}
+            >
               Item
 
               {
@@ -758,7 +776,7 @@ export const PokeInfo = ({
               }}
               input={{
                 name: `PokeInfo:${pokemonKey}:Item`,
-                value: itemName,
+                value: gen === 1 ? null : itemName,
                 onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),
                 }, `${baseScope}:Dropdown~DirtyItem:input.onChange()`),
