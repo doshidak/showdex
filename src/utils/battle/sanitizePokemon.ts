@@ -7,7 +7,12 @@ import {
 import { PokemonBoostNames, PokemonNatures, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { clamp, env, similarArrays } from '@showdex/utils/core';
+import {
+  clamp,
+  env,
+  nonEmptyObject,
+  similarArrays,
+} from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   detectLegacyGen,
@@ -15,7 +20,7 @@ import {
   getDexForFormat,
   toggleableAbility,
 } from '@showdex/utils/dex';
-import { flattenAlts } from '@showdex/utils/presets/flattenAlts'; /** @todo reorganize me */
+import { flattenAlts } from '@showdex/utils/presets';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
 import { detectSpeciesForme } from './detectSpeciesForme';
@@ -319,10 +324,8 @@ export const sanitizePokemon = <
     ? dex.species.get(sanitizedPokemon.transformedForme)
     : null;
 
-  const transformedBaseSpeciesForme = transformedSpecies?.baseSpecies;
-  const transformedBaseSpecies = transformedBaseSpeciesForme
-    ? dex.species.get(transformedBaseSpeciesForme)
-    : null;
+  const transformedBaseForme = transformedSpecies?.baseSpecies;
+  const transformedBaseSpecies = transformedBaseForme ? dex.species.get(transformedBaseForme) : null;
 
   // check if this Pokemon can Dynamax
   sanitizedPokemon.dmaxable = !species.cannotDynamax;
@@ -331,10 +334,10 @@ export const sanitizePokemon = <
   // (or determined base forme from the current other forme)
   sanitizedPokemon.altFormes = transformedBaseSpecies?.otherFormes?.length && (
     transformedBaseSpecies.otherFormes.includes(sanitizedPokemon.transformedForme)
-      || transformedBaseSpeciesForme === sanitizedPokemon.transformedForme
+      || transformedBaseForme === sanitizedPokemon.transformedForme
   )
     ? [
-      transformedBaseSpeciesForme,
+      transformedBaseForme,
       ...(transformedBaseSpecies.otherFormes as string[]),
     ]
     : baseSpecies?.otherFormes?.length && (
@@ -373,7 +376,7 @@ export const sanitizePokemon = <
       ];
   }
 
-  if (transformedSpecies?.baseStats) {
+  if (nonEmptyObject(transformedSpecies?.baseStats)) {
     sanitizedPokemon.transformedBaseStats = { ...transformedSpecies.baseStats };
 
     // Transform ability doesn't copy the base HP stat
@@ -403,13 +406,9 @@ export const sanitizePokemon = <
   }
 
   // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
-  // (using Set makes sure there aren't any duplicate abilities in the array)
-  // update (2023/02/02): don't want to persist the legal abilities from the prior forme, which can be
-  // problematic for Mega Pokemon who have one legal ability compared to their non-Mega'd counterparts
-  sanitizedPokemon.abilities = Array.from(new Set([
-    // ...(sanitizedPokemon.abilities || []),
+  sanitizedPokemon.abilities = [
     ...(Object.values(species?.abilities || {}) as AbilityName[]),
-  ].filter(Boolean)));
+  ].filter(Boolean);
 
   // if transformed, update the legal abilities of the transformed Pokemon
   sanitizedPokemon.transformedAbilities = [
@@ -421,7 +420,10 @@ export const sanitizePokemon = <
     ? sanitizedPokemon.transformedAbilities
     : [...flattenAlts(sanitizedPokemon.altAbilities), ...sanitizedPokemon.abilities];
 
-  const updateDirtyAbility = !sanitizedPokemon.ability || (
+  const updateDirtyAbility = (
+    !sanitizedPokemon.ability
+      && !sanitizedPokemon.transformedForme
+  ) || (
     sanitizedPokemon.dirtyAbility
       && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility)
   );
