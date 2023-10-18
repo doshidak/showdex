@@ -113,7 +113,8 @@ export const createSmogonPokemon = (
       // note that spreadStats may not be available yet, hence the fallback object
       const { hp: maxHp } = pokemon.spreadStats
         || { hp: pokemon.maxhp || 100 };
-      const hp = (pokemon.dirtyHp ?? (pokemon.hp || 0))
+
+      const hp = (pokemon.dirtyHp ?? (pokemon.hp || 0));
 
       if (pokemon.serverSourced) {
         return shouldMultiscale && !hp ? maxHp : hp;
