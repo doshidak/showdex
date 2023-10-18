@@ -45,25 +45,47 @@ export const detectPokemonDetails = <
   TPokemon extends Partial<Showdown.PokemonDetails>,
 >(
   pokemon: TPokemon,
-  format?: string | GenerationNum,
-  delimiter = ', ',
+  config?: {
+    format?: string | GenerationNum;
+    normalizeForme?: boolean;
+    wildcardForme?: boolean;
+    ignoreLevel?: boolean;
+    ignoreGender?: boolean;
+    ignoreShiny?: boolean;
+    delimiter?: string;
+  },
 ): string => {
   if (!pokemon?.speciesForme) {
     return null;
   }
 
+  const {
+    format,
+    normalizeForme,
+    wildcardForme,
+    ignoreLevel,
+    ignoreGender,
+    ignoreShiny = true,
+    delimiter = ', ',
+  } = config || {};
+
   const output: string[] = [
     pokemon.speciesForme,
-    (!!pokemon.level && pokemon.level < 100) && `L${pokemon.level}`,
-    pokemon.gender !== 'N' && pokemon.gender,
+    (!ignoreLevel && !!pokemon.level && pokemon.level < 100) && `L${pokemon.level}`,
+    (!ignoreGender && pokemon.gender !== 'N') && pokemon.gender,
+    (!ignoreShiny && pokemon.shiny) && 'shiny',
   ].filter(Boolean);
 
-  if (output[0].includes('-') && format) {
+  if (normalizeForme && format) {
     const dex = getDexForFormat(format);
-    const baseForme = dex.species.get(output[0])?.baseSpecies;
+
+    const dexSpecies = dex.species.get(output[0]);
+    const baseForme = dexSpecies?.baseSpecies;
 
     if (baseForme && output[0] !== baseForme) {
-      output[0] = baseForme;
+      output[0] = wildcardForme && dexSpecies?.forme
+        ? output[0].replace(dexSpecies?.forme, '*')
+        : baseForme;
     }
   }
 

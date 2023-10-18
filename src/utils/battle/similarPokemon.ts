@@ -24,7 +24,8 @@ export const similarPokemon = <
   pokemonB: TPokemonB,
   config?: {
     format?: string | GenerationNum;
-    normalizeFormes?: boolean;
+    normalizeFormes?: 'wildcard' | boolean;
+    ignoreMega?: boolean;
     ignoreLevel?: boolean;
     ignoreGender?: boolean;
     ignoreShiny?: boolean;
@@ -35,14 +36,23 @@ export const similarPokemon = <
     return false;
   }
 
+  const { details: detailsA } = pokemonA;
+  const { details: detailsB } = pokemonB;
+
   const {
     format,
     normalizeFormes,
+    ignoreMega,
     ignoreLevel,
     ignoreGender,
     ignoreShiny = true,
     delimiter,
   } = config || {};
+
+  const shouldNormalizeFormes = normalizeFormes === true || (
+    normalizeFormes === 'wildcard'
+      && [detailsA, detailsB].some((d) => d.includes('-*'))
+  );
 
   const dex = getDexForFormat(format);
 
@@ -52,12 +62,19 @@ export const similarPokemon = <
     gender: genderA,
     shiny: shinyA,
   } = parsePokemonDetails(
-    pokemonA.details,
+    detailsA,
     delimiter,
   );
 
   const dexA = dex.species.get(speciesA);
-  const formeA = (dexA?.exists && (normalizeFormes ? dexA.baseSpecies : dexA.name)) || null;
+
+  const formeA = (
+    dexA?.exists && (
+      shouldNormalizeFormes || (ignoreMega && dexA.isMega)
+        ? dexA.baseSpecies
+        : dexA.name
+    )
+  ) || null;
 
   if (!formeA) {
     return false;
@@ -74,7 +91,14 @@ export const similarPokemon = <
   );
 
   const dexB = dex.species.get(speciesB);
-  const formeB = (dexB?.exists && (normalizeFormes ? dexB.baseSpecies : dexB.name)) || null;
+
+  const formeB = (
+    dexB?.exists && (
+      shouldNormalizeFormes || (ignoreMega && dexB.isMega)
+        ? dexB.baseSpecies
+        : dexB.name
+    )
+  ) || null;
 
   if (!formeB) {
     return false;
