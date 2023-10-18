@@ -148,8 +148,8 @@ export const PokeInfo = ({
   ]);
 
   const showResetItem = !!pokemon?.dirtyItem
-    && (!!pokemon?.item || !!pokemon?.prevItem)
-    && (pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem;
+    && (!!pokemon.item || !!pokemon.prevItem)
+    && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem);
 
   const {
     active: formesVisible,
