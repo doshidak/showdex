@@ -72,3 +72,7 @@ button.primary {
     }
   }
 }
+
+.label {
+  @include transition.apply((color, 150ms));
+}

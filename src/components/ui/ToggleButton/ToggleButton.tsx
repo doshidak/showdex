@@ -14,7 +14,7 @@ export interface ToggleButtonProps extends Omit<ButtonProps, 'display'> {
 export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>(({
   className,
   activeClassName,
-  // labelClassName,
+  labelClassName,
   forceColorScheme,
   absoluteHover,
   primary,
@@ -38,10 +38,10 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
         className,
         active && activeClassName,
       )}
-      // labelClassName={cx(
-      //   styles.label,
-      //   labelClassName,
-      // )}
+      labelClassName={cx(
+        styles.label,
+        labelClassName,
+      )}
       forceColorScheme={forceColorScheme}
       display="inline"
       absoluteHover={!primary && absoluteHover}
