@@ -2063,10 +2063,31 @@ export const SettingsPane = ({
                       </div>
                     }
                   </div>
-
-                  {/* temporary spacer cause too lazy to do it in CSS lol */}
-                  <div style={{ height: 5 }} />
                 </div>
+              </div>
+
+              <div className={styles.settingsGroup}>
+                <div className={styles.settingsGroupTitle}>
+                  Showdown
+                </div>
+
+                <div className={styles.settingsGroupFields}>
+                  <Field<ShowdexSettings['showdown']['autoAcceptSheets']>
+                    name="showdown.autoAcceptSheets"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Auto-Accept Team Sheets"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Enabling this will automatically accept Open Team Sheet requests,
+                        which are typical of VGC formats.
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* temporary spacer cause too lazy to do it in CSS lol */}
+                <div style={{ height: 5 }} />
               </div>
 
               <div className={styles.notice}>
