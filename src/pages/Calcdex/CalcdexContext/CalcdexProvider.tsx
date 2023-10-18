@@ -3,7 +3,7 @@ import {
   useCalcdexBattleState,
   useCalcdexSettings,
 } from '@showdex/redux/store';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 import { useCalcdexPresets } from './useCalcdexPresets';
 
@@ -33,7 +33,7 @@ export interface CalcdexProviderProps {
   children: React.ReactNode;
 }
 
-const l = logger('@showdex/pages/Calcdex/CalcdexContext/CalcdexProvider');
+// const l = logger('@showdex/pages/Calcdex/CalcdexContext/CalcdexProvider');
 
 export const CalcdexProvider = ({
   battleId,
@@ -46,12 +46,12 @@ export const CalcdexProvider = ({
   // which means the actual presets are in presets.presets[] LOL
   const presets = useCalcdexPresets(state, settings);
 
-  l.debug(
-    'Providing CalcdexContext for', battleId || '???',
-    '\n', 'state', state,
-    '\n', 'settings', settings,
-    '\n', 'presets', presets,
-  );
+  // l.debug(
+  //   'Providing CalcdexContext for', battleId || '???',
+  //   '\n', 'state', state,
+  //   '\n', 'settings', settings,
+  //   '\n', 'presets', presets,
+  // );
 
   const value = React.useMemo<CalcdexContextValue>(() => ({
     state,

@@ -8,10 +8,10 @@ import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { nonEmptyObject } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
-  detectLegacyGen,
   getDefaultSpreadValue,
   // hasMegaForme,
 } from '@showdex/utils/dex';
+import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { getPresetFormes } from './getPresetFormes';
@@ -43,7 +43,6 @@ export const applyPreset = (
     return null;
   }
 
-  const legacy = detectLegacyGen(gen);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
 
@@ -94,7 +93,7 @@ export const applyPreset = (
     || (!transformed && pokemon.speciesForme !== preset.speciesForme);
 
   if (shouldUpdateSpecies) {
-    const speciesFormes = getPresetFormes(pokemon.speciesForme, format);
+    const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
     const speciesKey = transformed && !speciesFormes.includes(preset.speciesForme)
       ? 'transformedForme'
       : 'speciesForme';
@@ -300,24 +299,44 @@ export const applyPreset = (
       output.dirtyItem = null;
     }
 
-    // if (output.moves.length) {
-    //   output[transformed ? 'transformedMoves' : 'revealedMoves'] = [...output.moves];
-    // }
+    if (output.moves.length) {
+      output[transformed ? 'transformedMoves' : 'revealedMoves'] = [...output.moves];
+    }
   }
-
-  const completePreset = !!Object.values(output.ivs || {}).reduce((sum, val) => sum + (val || 0), 0)
-    && (legacy || !!Object.values(output.evs || {}).reduce((sum, val) => sum + (val || 0), 0));
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,
   // which won't have any EVs/IVs, so we'll still have to rely on spreads from other presets)
-  if (completePreset) {
-    output.spreadStats = calcPokemonSpreadStats(format, { ...pokemon, ...output });
+  if (detectCompletePreset(preset)) {
     output.presetId = preset.calcdexId;
+    output.spreadStats = calcPokemonSpreadStats(format, { ...pokemon, ...output });
+
+    if (revealedPreset) {
+      output.autoPreset = false;
+    }
+
+    return output;
+  }
+
+  // by this point, we don't have a complete preset, so most likely from an OTS
+  if (preset.source === 'sheet') {
+    delete output.ivs;
+    delete output.evs;
+
+    // if the nature's Hardy here, it's probably just the default value (aka garbaj throw it out)
+    if (output.nature === 'Hardy') {
+      delete output.nature;
+    }
   }
 
   // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
-  if (!pokemon.showGenetics && !completePreset) {
+  if (!pokemon.serverSourced && !pokemon.showGenetics) {
     output.showGenetics = true;
+  }
+
+  // if the Pokemon currently has a preset applied, visibly clear it
+  // (this should spin-up the auto-preset effect in useCalcdexPresets() or something lol)
+  if (pokemon.presetId) {
+    output.presetId = null;
   }
 
   return output;

@@ -83,7 +83,6 @@ export const createSmogonPokemon = (
 
   const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
   const abilityId = formatId(ability);
-  const abilityOn = pokemon.abilityToggleable && pokemon.abilityToggled;
 
   // note: these are in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // but we're allowing the effects of these abilities to be toggled on/off
@@ -98,7 +97,7 @@ export const createSmogonPokemon = (
         ...(gameType === 'Doubles' ? PokemonRuinAbilities : []),
       ].includes(ability);
 
-  const pseudoToggled = pseudoToggleAbility && abilityOn;
+  const pseudoToggled = pseudoToggleAbility && pokemon.abilityToggled;
 
   const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
@@ -147,7 +146,7 @@ export const createSmogonPokemon = (
 
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
     ability: pseudoToggleAbility && !pseudoToggled ? 'Pressure' : ability,
-    abilityOn,
+    abilityOn: pokemon.abilityToggled,
     item,
     nature: legacy ? null : pokemon.nature,
     moves: pokemon.moves,

@@ -135,8 +135,8 @@ export const usePokemonPresets = (
   // const formes = getPresetFormes(speciesForme, format, true);
 
   const formes = [
-    ...getPresetFormes(pokemon?.speciesForme, format, true),
-    ...(pokemon?.transformedForme ? getPresetFormes(pokemon.transformedForme, format, true) : []),
+    ...getPresetFormes(pokemon?.speciesForme, { format, formatAsId: true }),
+    ...(pokemon?.transformedForme ? getPresetFormes(pokemon.transformedForme, { format, formatAsId: true }) : []),
   ];
 
   const shouldSkip = disabled

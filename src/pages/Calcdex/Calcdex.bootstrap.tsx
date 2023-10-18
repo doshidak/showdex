@@ -29,6 +29,7 @@ import {
   clonePlayerSideConditions,
   detectAuthPlayerKeyFromBattle,
   sanitizePlayerSide,
+  similarPokemon,
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
@@ -167,7 +168,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     $controls,
     $userList,
     battle,
-    // tooltips,
   } = battleRoom;
 
   if (!battle?.id) {
@@ -208,10 +208,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         'Leaving calcdexRoom with destroyed battle due to user settings...',
         '\n', 'calcdexRoomId', calcdexRoomId,
       );
-
-      // if (settings.destroyOnClose) {
-      //   store.dispatch(calcdexSlice.actions.destroy(roomid));
-      // }
 
       // this will destroy the Calcdex state if configured to, via calcdexRoom's requestLeave() handler
       app.leaveRoom(calcdexRoomId);
@@ -301,16 +297,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       || (calcdexSettings.openOnStart === 'spectating' && authPlayer);
 
     if (preventInit) {
-      // const authName = getAuthUsername();
-
-      // l.debug('Preventing Calcdex init due to openOnStart', calcdexSettings.openOnStart, 'with authName', authName);
-
-      // prevent bootstrapping on subsequent bootstrapper calls
-      // if (calcdexSettings.openOnStart !== 'playing' || authName) {
-      //   battle.subscriptionDirty = true;
-      //   battle.calcdexDestroyed = true; // just in case lol
-      // }
-
       return endTimer('(calcdex denied)');
     }
   }
@@ -380,36 +366,18 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       // actually leave the room
       return true;
     };
-
-    // update (2023/04/22): we're now creating the ReactDOM.Root automatically in createCalcdexRoom(),
-    // which will also automatically call unmount() when the room's requestLeave() is invoked
-    // battle.calcdexReactRoot = ReactDOM.createRoot(battle.calcdexRoom.el);
   } else { // must be opening as an overlay here
-    // set the initial visibility of the overlay
-    // update (2023/02/01): after refactoring the Calcdex to not touch the battle object within React,
-    // this property is now stored in the CalcdexBattleState under overlayVisible (false, by default)
-    // battle.calcdexOverlayVisible = false;
-
     // local helper function that will be called once the native BattleRoom controls
     // are rendered in the `overrides` below
     // (warning: most of this logic is from trial and error tbh -- may make very little sense LOL)
     const injectToggleButton = () => {
-      // grab the updated controls HTML
-      // const controlsHtml = $controls?.html?.();
-
       if (typeof $controls?.find !== 'function') {
         return;
       }
 
       // grab the latest overlayVisible value
-      // const {
-      //   calcdexOverlayVisible: visible,
-      // } = battleRoom?.battle || {};
       const state = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id || roomid];
       const { overlayVisible: visible } = state || {};
-
-      // remove the outlying <p> tags so we can inject our custom button in
-      // const strippedControlsHtml = controlsHtml.replace(/^<p>(.+)<\/p>$/, '$1');
 
       const toggleButtonIcon = visible ? 'close' : 'calculator';
       const toggleButtonLabel = `${visible ? 'Close' : 'Open'} Calcdex`;
@@ -479,7 +447,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       if (hasTimerButton) {
         $toggleButton.insertAfter($timerButton);
       } else {
-        // $controlsTarget.html(`<p>${toggleButtonHtml}${strippedControlsHtml}</p>`);
         $controlsTarget[hasTimerButton ? 'append' : 'prepend']($toggleButton);
       }
     };
@@ -587,11 +554,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
         // (warning: not enough to just remove the meta tag as the browser will continue to enforce the no pinch zoom!)
         $('meta[data-calcdex*="no-mobile-zoom"]').attr('content', 'width=device-width, user-scalable=yes');
       }
-
-      // re-render the Calcdex React root only when opening
-      // if (visible) {
-      //   battle.subscription('callback');
-      // }
 
       // most BattleRoom button callbacks seem to do this at the end lol
       battleRoom.updateControls();
@@ -710,6 +672,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
               // note: not doing startsWith() since 'p1: Mewtwo|Mewtwo' will pass when given ident 'p1: Mew'
               || (!!p?.searchid?.includes('|') && p.searchid.split('|')[0] === ident)
           ))
+            /*
             // e.g., details = 'Ditto'
             // update (2023/07/30): for replays, the only guaranteed fields are `name` (typically the speciesForme), `speciesForme` & `details`
             && (!!details && (
@@ -728,6 +691,12 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
                   p.gender !== 'N' && p.gender,
                 ].filter(Boolean).join(', '))
             ))
+            */
+            && similarPokemon({ details }, p, {
+              format: battleState.format,
+              normalizeFormes: 'wildcard',
+              ignoreMega: true,
+            })
         ));
 
       // l.debug(
@@ -799,10 +768,17 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
           // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
           // || p.details.includes(pokemon.speciesForme)
           // update (2023/07/30): `details` can include the gender, if applicable (e.g., 'Reuniclus, M')
+          /*
           || p.details === [
             pokemon.speciesForme.replace('-*', ''),
             pokemon.gender !== 'N' && pokemon.gender,
           ].filter(Boolean).join(', ')
+          */
+          || similarPokemon(pokemon, p, {
+            format: battleRoom.battle.id.split('-')[1],
+            normalizeFormes: 'wildcard',
+            ignoreMega: true,
+          })
       ));
 
       if (!prevMyPokemon?.calcdexId) {

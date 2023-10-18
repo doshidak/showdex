@@ -63,7 +63,7 @@ export const PlayerCalc = ({
     rating: ratingFromBattle,
     pokemon: playerParty,
     maxPokemon,
-    activeIndices,
+    // activeIndices,
     selectionIndex: playerIndex,
     autoSelect,
   } = player;
@@ -344,7 +344,8 @@ export const PlayerCalc = ({
               && pokemon.abilityToggled;
 
             const pokemonActive = !!pokemon?.calcdexId
-              && activeIndices.includes(i);
+              // && activeIndices.includes(i);
+              && pokemon.active;
 
             const pokemonSelected = !!pokemon?.calcdexId
               && !!playerPokemon?.calcdexId

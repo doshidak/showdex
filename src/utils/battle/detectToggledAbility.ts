@@ -41,12 +41,18 @@ import { formatId } from '@showdex/utils/core';
  *   of the aforementioned gen 9 abilities can be individually supplied in the optional `config` argument.
  *   - For *Protosynthesis*, `weather` is required.
  *   - For *Quark Drive*, `terrain` is required.
- *   - For the 4 *Ruin* abilities, `pokemonIndex` is required, as well as `selectionIndex` if the `gameType` is `'Singles'`
- *     & `activeIndices[]` if `'Doubles'`.
+ *   - For the 4 *Ruin* abilities, ~~`pokemonIndex` is required, as well as~~ `selectionIndex` if the `gameType` is `'Singles'`
+ *     ~~& `activeIndices[]` if `'Doubles'`~~.
  * * Additionally as of v1.1.7, this no longer checks if the ability is toggleable via `toggleableAbility()`.
  *   - Since `abilityToggled` is used for counting *Ruin* abilities & isn't included in `PokemonToggleAbilities.Singles[]`
  *     (in order to prevent the "ACTIVE" toggle from appearing in `PokeInfo`), these two properties should be functionally distinct.
  *   - (Will probably rename `abilityToggled` to `abilityActive` or something later lol.)
+ *   - Update (2023/10/18): Just made `abilityToggleable` deprecated for now & removed all usage of it from the codebase.
+ * * Added optional `opponentPokemon` config cause *Stakeout* needs to know the `active` state of the opposing Pokemon.
+ *   - Basically looking if the `opponentPokemon.active` is `false`, which assumes the user is trying to calculate
+ *     *Stakeout* damage against a potential switch-in.
+ *   - As a safety measure, `opponentPokemon` needs to be explicitly provided for this check to run, otherwise, `false`
+ *     will be returned (i.e., how it was before *Stakeout* was implemented).
  *
  * @returns `true` if the Pokemon's ability is ~~*toggleable* and~~ *active*, `false` otherwise.
  * @todo rename to `detectToggledAbility()` to `activatedAbility()` whenever you rename `abilityToggled` to `abilityActive`.
@@ -57,6 +63,7 @@ export const detectToggledAbility = (
   config?: {
     gameType?: GameType,
     pokemonIndex?: number;
+    opponentPokemon?: Partial<CalcdexPokemon>;
     selectionIndex?: number;
     activeIndices?: number[];
     weather?: Weather;
@@ -65,7 +72,8 @@ export const detectToggledAbility = (
 ): boolean => {
   const {
     gameType = 'Singles',
-    pokemonIndex = -1,
+    pokemonIndex = pokemon?.slot ?? -1,
+    opponentPokemon,
     selectionIndex = -1,
     activeIndices = [],
     weather,
@@ -97,7 +105,16 @@ export const detectToggledAbility = (
 
   // handle Unburden
   if (ability === 'Unburden' as AbilityName) {
-    return !item || volatiles.includes('itemremoved');
+    // only enable from volatile if the user explicitly didn't set an item
+    return !pokemon.dirtyItem && volatiles.includes('itemremoved');
+  }
+
+  // handle Stakeout
+  // (this assumes that the user is trying to calculate Stakeout against a potential switch-in, i.e., not `active`)
+  if (ability === 'Stakeout' as AbilityName) {
+    // double-checking speciesForme here to make sure `opponentPokemon` was **explicitly** provided
+    // (otherwise, this would pretty much return `true` most of the time! would we want that? idk but I'm gunna assume naw)
+    return !!opponentPokemon?.speciesForme && !opponentPokemon.active;
   }
 
   // handle type-change abilities (i.e., Protean & Libero)
@@ -120,7 +137,7 @@ export const detectToggledAbility = (
 
     // only initially activate if the Pokemon is selected or active on the field
     return gameType === 'Doubles'
-      ? activeIndices?.includes(pokemonIndex)
+      ? (pokemon.active || activeIndices?.includes(pokemonIndex))
       : pokemonIndex === selectionIndex;
   }
 

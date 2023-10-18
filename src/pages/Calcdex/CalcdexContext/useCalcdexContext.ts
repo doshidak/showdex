@@ -31,7 +31,7 @@ import {
 } from '@showdex/utils/calc';
 import { nonEmptyObject, similarArrays, tolerance } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { toggleableAbility } from '@showdex/utils/dex';
+// import { toggleableAbility } from '@showdex/utils/dex';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -189,16 +189,61 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         }
       }
 
+      // if the particular Pokemon is the Crowned forme of either Zacian or Zamazenta, make sure Iron Head &
+      // Behemoth Blade/Bash are being properly replaced
+      const shouldBehemoth = [
+        'Zacian',
+        'Zamazenta',
+      ].some((f) => mutated.speciesForme.startsWith(f)) && (
+        mutated.moves.includes('Iron Head' as MoveName)
+          || mutated.moves.some((move) => move.startsWith('Behemoth'))
+      );
+
+      if (shouldBehemoth) {
+        const bash = mutated.speciesForme.startsWith('Zamazenta');
+        const crowned = mutated.speciesForme.endsWith('-Crowned');
+
+        // tried setting Iron Head while Behemoth Bash was there, so changing the forme back to Zamazenta, then back to
+        // the Crowned forme again will result in 2 Bash's !! LOL
+        // mutated.moves = mutated.moves.map((move) => (
+        //   move === 'Iron Head' as MoveName && crowned
+        //     ? (bash ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName
+        //     : move
+        // ));
+
+        const bashMove = (bash ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName;
+        const sourceMove = crowned ? 'Iron Head' as MoveName : bashMove;
+        const sourceIndex = mutated.moves.indexOf(sourceMove);
+
+        if (sourceIndex > -1) {
+          mutated.moves[sourceIndex] = crowned ? bashMove : 'Iron Head' as MoveName;
+        }
+      }
+
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
       // (which should only be in the Pokemon's unique `presets[]`, not in RTK Query or something lol)
-      if (mutated.presetId && mutated.presets?.length) {
-        const preset = mutated.presets.find((p) => p?.calcdexId === mutated.presetId);
+      if (!mutated.serverSourced && mutated.presetId) {
+        const preset = mutated.presets?.find((p) => p?.calcdexId === mutated.presetId);
 
-        if (!['server', 'sheet'].includes(preset?.source)) {
+        if (!preset?.source || !['server', 'sheet'].includes(preset.source)) {
           mutated.presetId = null;
           mutated.autoPreset = true;
         }
       }
+    }
+
+    if (mutating('ivs')) {
+      mutated.ivs = {
+        ...prevPokemon.ivs,
+        ...pokemon.ivs,
+      };
+    }
+
+    if (mutating('evs')) {
+      mutated.evs = {
+        ...prevPokemon.evs,
+        ...pokemon.evs,
+      };
     }
 
     // processing if ye olde Pokemone, like handling DVs & removing abilities, natures, etc.
@@ -252,21 +297,21 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // update (2023/06/04): now checking for dirtyTypes in the `pokemon` payload for Libero/Protean toggles
     // (designed to toggle off in detectToggledAbility() when dirtyTypes[] is present, i.e., the user manually
     // modifies the Pokemon's types; btw, dirtyTypes[] should've been processed by now if it was present)
-    if (mutating('ability', 'dirtyAbility', 'dirtyTypes')) {
-      mutated.abilityToggleable = toggleableAbility(mutated, state.gameType);
+    if (mutating('ability', 'dirtyAbility', 'dirtyTypes', 'dirtyItem')) {
+      // mutated.abilityToggleable = toggleableAbility(mutated, state.gameType);
 
-      const {
-        pokemon: playerParty,
-        selectionIndex,
-        activeIndices,
-      } = state[playerKey];
+      // const {
+      //   pokemon: playerParty,
+      //   selectionIndex,
+      //   activeIndices,
+      // } = state[playerKey];
 
       // note: these are now independent of each other & will probably rename abilityToggled to abilityActive soon
       mutated.abilityToggled = detectToggledAbility(mutated, {
         gameType: state.gameType,
-        pokemonIndex: playerParty.findIndex((p) => p.calcdexId === mutated.calcdexId),
-        selectionIndex,
-        activeIndices,
+        // pokemonIndex: playerParty.findIndex((p) => p.calcdexId === mutated.calcdexId),
+        selectionIndex: state[playerKey].selectionIndex,
+        // activeIndices,
         weather: state.field?.weather,
         terrain: state.field?.terrain,
       });
@@ -646,10 +691,58 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       delete playerPayload.side.isAuroraVeil;
     }
 
+    // ;-;
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
+      [playerKey]: playerPayload,
+    };
+
+    // now we do a thing for auto-toggling Stakeout lmao
+    // hmm... I feel kinda disgusted after writing this bit lol
+    [
+      state.playerKey,
+      state.opponentKey,
+    ].forEach((pKey) => {
+      const playerSource = pKey === playerKey ? playerPayload : state[pKey];
+
+      if (!playerSource?.active || !playerSource.pokemon?.length) {
+        return;
+      }
+
+      const opponentKey = pKey === state.playerKey ? state.opponentKey : state.playerKey;
+      const opponent = opponentKey === playerKey ? playerPayload : state[opponentKey];
+      const opponentSelectionIndex = opponentKey === playerKey ? pokemonIndex : opponent?.selectionIndex;
+      const opponentPokemon = opponent?.pokemon?.[opponentSelectionIndex];
+
+      playerSource.pokemon.forEach((pokemon, i) => {
+        const toggled = detectToggledAbility(pokemon, {
+          gameType: state.gameType,
+          opponentPokemon,
+          selectionIndex: pKey === playerKey ? pokemonIndex : opponentSelectionIndex,
+          weather: state.field?.weather,
+          terrain: state.field?.terrain,
+        });
+
+        if (pokemon.abilityToggled === toggled) {
+          return;
+        }
+
+        if (!playersPayload[pKey]?.pokemon?.length) {
+          playersPayload[pKey] = {
+            ...playersPayload[pKey],
+            pokemon: cloneAllPokemon(playerSource.pokemon),
+          };
+        }
+
+        const index = pokemon.slot ?? i;
+
+        playersPayload[pKey].pokemon[index].abilityToggled = toggled;
+      });
+    });
+
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
-      [playerKey]: playerPayload,
+      ...playersPayload,
     }));
 
     endTimer('(dispatched)');

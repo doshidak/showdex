@@ -17,8 +17,9 @@ import { getGenlessFormat } from '@showdex/utils/dex';
 import {
   type CalcdexBattlePresetsHookValue,
   applyPreset,
+  detectCompletePreset,
   flattenAlts,
-  getPresetFormes,
+  // getPresetFormes,
   guessTeambuilderPreset,
   selectPokemonPresets,
   sortPresetsByFormat,
@@ -57,7 +58,7 @@ export const useCalcdexPresets = (
   // auto-apply the first preset for every presetless Pokemon, if possible
   React.useEffect(() => {
     // used for debugging purposes only
-    const scope = s('[presetless]');
+    const scope = s('(AutoPreset)');
     const endTimer = runtimer(scope, l);
 
     const shouldAutoPreset = !!state?.battleId
@@ -82,8 +83,7 @@ export const useCalcdexPresets = (
         return;
       }
 
-      const party = cloneAllPokemon(player.pokemon);
-      const presetlessIndices = party
+      const presetlessIndices = player.pokemon
         .map((p, i) => (p.presetId ? null : i))
         .filter((v) => typeof v === 'number');
 
@@ -91,32 +91,45 @@ export const useCalcdexPresets = (
         return;
       }
 
+      const party = cloneAllPokemon(player.pokemon);
+
+      // l.debug(
+      //   '(Auto-Preset)', 'player', playerKey,
+      //   '\n', 'processing indices', presetlessIndices,
+      //   '\n', 'filtered', presetlessIndices.map((i) => party[i]),
+      // );
+
       // that one trick pro programmers don't want you to know about
-      let didUpdate = false;
-      let didApplySheet = false;
+      // update (2023/10/18): naw it's still a dank trick, just now a payload will always be dispatched lol
+      // let didUpdate = false;
+      // let didApplySheet = false;
 
       presetlessIndices.forEach((pokemonIndex) => {
         const pokemon = party[pokemonIndex];
 
         // note: getPresetFormes() will return an empty array if transformedForme is falsy
-        const speciesFormes = getPresetFormes(pokemon.speciesForme, state.format);
-        const transformedFormes = getPresetFormes(pokemon.transformedForme, state.format);
-        const formes = [...transformedFormes, ...speciesFormes];
+        // const speciesFormes = getPresetFormes(pokemon.speciesForme, { format: state.format });
+        // const transformedFormes = getPresetFormes(pokemon.transformedForme, { format: state.format });
+        // const formes = [...transformedFormes, ...speciesFormes];
 
         const pokemonPresets = selectPokemonPresets(
           presets.presets,
           pokemon,
-          'smogon',
-          state.format,
-          formes,
-        ).sort(sortPresetsByFormat(state.format));
+          {
+            format: state.format,
+            source: 'smogon',
+            select: 'any',
+          },
+        );
 
         const pokemonUsages = selectPokemonPresets(
           presets.usages,
           pokemon,
-          'usage',
-          state.format,
-          formes,
+          {
+            format: state.format,
+            source: 'usage',
+            select: 'any',
+          },
         );
 
         let preset: CalcdexPokemonPreset;
@@ -126,21 +139,49 @@ export const useCalcdexPresets = (
           // was gunna use this elsewhere, so I separated it from the map() below, but never ended up needing it lol
           const mergeMatches = (
             p: CalcdexPokemonPreset,
-          ) => ({
-            ...p,
-            ability: p.altAbilities?.includes(pokemon.ability) ? pokemon.ability : p.ability,
-            item: p.altItems?.includes(pokemon.item) ? pokemon.item : p.item,
-            moves: p.altMoves?.length && pokemon.serverMoves.every((m) => flattenAlts(p.altMoves).includes(m))
-              ? [...pokemon.serverMoves]
-              : p.moves,
-          });
+          ) => {
+            const abilityPool = [
+              ...(p.altAbilities?.length ? flattenAlts(p.altAbilities) : []),
+              p.ability,
+            ];
+
+            const itemPool = [
+              ...(p.altItems?.length ? flattenAlts(p.altItems) : []),
+              p.item,
+            ];
+
+            const movePool = [
+              ...(p.altMoves?.length ? flattenAlts(p.altMoves) : []),
+              ...p.moves,
+            ];
+
+            return {
+              ...p,
+              ability: abilityPool.includes(pokemon.ability) ? pokemon.ability : p.ability,
+              item: itemPool.includes(pokemon.item) ? pokemon.item : p.item,
+              moves: pokemon.serverMoves.every((m) => movePool.includes(m))
+                ? [...pokemon.serverMoves]
+                : p.moves,
+            };
+          };
 
           // Teambuilder presets should've been synced by syncBattle() & available in pokemon.presets[] by now
           // hmm, is this ambitious? idk
-          preset = guessTeambuilderPreset([
-            ...(pokemon.presets?.length ? pokemon.presets : []),
-            ...pokemonPresets.filter((p) => speciesFormes.includes(p.speciesForme)),
-          ].map(mergeMatches), pokemon, state.format);
+          preset = guessTeambuilderPreset(
+            [
+              ...(pokemon.presets?.length ? pokemon.presets : []),
+              ...selectPokemonPresets(
+                pokemonPresets,
+                pokemon,
+                {
+                  format: state.format,
+                  select: 'species',
+                },
+              ),
+            ].map(mergeMatches),
+            pokemon,
+            state.format,
+          );
 
           // if we found one, make a copy & mark it as 'server'-sourced w/ the Pokemon's actual properties
           if (preset?.calcdexId) {
@@ -196,7 +237,15 @@ export const useCalcdexPresets = (
 
           // if at this stage the Pokemon is transformed, ignore whatever preset we found beforehand
           if (pokemon.transformedForme && (!preset?.speciesForme || preset.speciesForme !== pokemon.transformedForme)) {
-            const transformedPresets = pokemonPresets.filter((p) => transformedFormes.includes(p.speciesForme));
+            // note: pokemonPresets[] (from selectPokemonPresets()) will also include presets of the transformedForme
+            const transformedPresets = selectPokemonPresets(
+              pokemonPresets,
+              pokemon,
+              {
+                format: state.format,
+                select: 'transformed',
+              },
+            ).sort(sortPresetsByFormat(state.format));
 
             preset = (
               !!pokemon.transformedMoves?.length
@@ -219,34 +268,62 @@ export const useCalcdexPresets = (
           [preset] = selectPokemonPresets(
             state.sheets,
             pokemon,
-            'sheet',
-            state.format,
-            formes,
-            (p) => !pokemon.transformedForme || formatId(p.playerName) === formatId(player.name),
+            {
+              format: state.format,
+              source: 'sheet',
+              select: 'any',
+              filter: (p) => !pokemon.transformedForme || formatId(p.playerName) === formatId(player.name),
+            },
           );
 
-          if (preset?.calcdexId) {
-            didApplySheet = true;
+          // but if it's an OTS (i.e., missing exact nature, EVs & IVs), don't bother applying it
+          if (!detectCompletePreset(preset)) {
+            preset = null;
+          }
+        }
+
+        // attempt to find a preset within the current format
+        if (!preset && pokemonPresets.length) {
+          [preset] = selectPokemonPresets(
+            pokemonPresets,
+            pokemon,
+            {
+              format: state.format,
+              formatOnly: true,
+              select: 'one',
+            },
+          );
+
+          // if we still haven't found one, then try finding one from any format (unless we have a usage preset)
+          if (!preset && !usage?.calcdexId) {
+            [preset] = selectPokemonPresets(
+              pokemonPresets,
+              pokemon,
+              {
+                format: state.format,
+                select: 'one',
+              },
+            );
           }
         }
 
         // "Showdown Usage" preset is only made available in non-Randoms formats
-        if (!preset && !randoms && usage?.calcdexId && settings?.prioritizeUsageStats) {
+        if ((!preset || settings?.prioritizeUsageStats) && !randoms && usage?.calcdexId) {
           preset = usage;
         }
 
-        if (!preset && pokemonPresets.length) {
-          [preset] = pokemonPresets;
-        }
-
+        // if no preset is applied, forcibly open the Pokemon's stats to alert the user
         if (!preset?.calcdexId) {
+          pokemon.showGenetics = true;
+
           return;
         }
 
         // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
         // (normally only an issue in Gen 9 Randoms with their role system, which has multiple usage presets)
         if (randoms && pokemonUsages.length > 1) {
-          const roleUsage = pokemonUsages.find((p) => formatId(preset.name).includes(formatId(p.name)));
+          const nameId = formatId(preset.name);
+          const roleUsage = pokemonUsages.find((p) => nameId.includes(formatId(p.name)));
 
           if (roleUsage?.calcdexId) {
             usage = roleUsage;
@@ -258,16 +335,12 @@ export const useCalcdexPresets = (
           ...applyPreset(state.format, pokemon, preset, usage),
         };
 
-        didUpdate = true;
+        // didUpdate = true;
       });
 
-      if (!didUpdate) {
-        return;
-      }
-
-      if (didApplySheet) {
-        appliedSheets.current = true;
-      }
+      // if (!didUpdate) {
+      //   return;
+      // }
 
       playersPayload[playerKey] = {
         pokemon: party,
@@ -289,17 +362,19 @@ export const useCalcdexPresets = (
     presets.ready,
     state?.battleId,
     state?.format,
-    ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId).length),
+    ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId)?.length || 0),
+    // ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId || p?.autoPreset)?.length || 0),
   ]);
 
   React.useEffect(() => {
     // used for debugging purposes only
-    const scope = s('[sheets]');
+    const scope = s('(Sheets)');
     const endTimer = runtimer(scope, l);
 
     const shouldApplySheets = !appliedSheets.current
       && !!state?.battleId
       && !!state.format
+      && !!state.sheetsNonce
       && !!state.sheets?.length
       && AllPlayerKeys.some((key) => !!state[key]?.pokemon?.length);
 
@@ -330,18 +405,15 @@ export const useCalcdexPresets = (
       nonServerIndices.forEach((pokemonIndex) => {
         const pokemon = party[pokemonIndex];
 
-        const formes = [
-          ...getPresetFormes(pokemon.transformedForme, state.format),
-          ...getPresetFormes(pokemon.speciesForme, state.format),
-        ];
-
         const [sheet] = selectPokemonPresets(
           state.sheets,
           pokemon,
-          'sheet',
-          state.format,
-          formes,
-          (p) => !pokemon.transformedForme || formatId(p.playerName) === formatId(player.name),
+          {
+            format: state.format,
+            source: 'sheet',
+            select: 'one',
+            filter: (p) => !pokemon.transformedForme || formatId(p.playerName) === formatId(player.name),
+          },
         );
 
         if (!sheet?.calcdexId) {
@@ -351,9 +423,11 @@ export const useCalcdexPresets = (
         const pokemonUsages = selectPokemonPresets(
           presets.usages,
           pokemon,
-          'usage',
-          state.format,
-          formes,
+          {
+            format: state.format,
+            source: 'usage',
+            select: 'one',
+          },
         );
 
         const usage = (
@@ -399,6 +473,7 @@ export const useCalcdexPresets = (
     state?.battleId,
     state?.format,
     state?.sheets?.length,
+    state?.sheetsNonce,
     ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.length),
   ]);
 

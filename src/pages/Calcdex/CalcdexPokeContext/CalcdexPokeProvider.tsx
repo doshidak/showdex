@@ -102,8 +102,11 @@ export const CalcdexPokeProvider = ({
   const pokemonSheets = React.useMemo(() => selectPokemonPresets(
     sheets,
     playerPokemon,
-    'sheet',
-    format,
+    {
+      format,
+      source: 'sheet',
+      select: 'any',
+    },
   ), [
     format,
     playerPokemon,
@@ -113,8 +116,11 @@ export const CalcdexPokeProvider = ({
   const pokemonPresets = React.useMemo(() => selectPokemonPresets(
     allPresets,
     playerPokemon,
-    'smogon',
-    format,
+    {
+      format,
+      source: 'smogon',
+      select: 'any',
+    },
   ), [
     allPresets,
     format,
@@ -124,8 +130,11 @@ export const CalcdexPokeProvider = ({
   const usages = React.useMemo(() => selectPokemonPresets(
     allUsages,
     playerPokemon,
-    'usage',
-    format,
+    {
+      format,
+      source: 'usage',
+      select: 'any',
+    },
   ), [
     allUsages,
     format,
@@ -135,8 +144,8 @@ export const CalcdexPokeProvider = ({
   const presets = React.useMemo(() => [
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
-    ...pokemonPresets,
     ...(format?.includes('random') ? [] : usages),
+    ...pokemonPresets,
   ], [
     format,
     playerPokemon?.presets,
