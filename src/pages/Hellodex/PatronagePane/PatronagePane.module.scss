@@ -209,7 +209,8 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
   }
 
   .description {
-    text-align: justify;
+    letter-spacing: 0.1px;
+    // text-align: justify;
     opacity: 0.65;
   }
 
