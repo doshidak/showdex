@@ -18,6 +18,7 @@ export * from './sanitizeMoveTrack';
 export * from './sanitizePlayerSide';
 export * from './sanitizePokemon';
 export * from './sanitizeVolatiles';
+export * from './similarPokemon';
 export * from './toggleRuinAbilities';
 export * from './usedDynamax';
 export * from './usedTerastallization';
