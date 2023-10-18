@@ -18,7 +18,7 @@ import {
   detectLegacyGen,
   getDefaultSpreadValue,
   getDexForFormat,
-  toggleableAbility,
+  // toggleableAbility,
 } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
@@ -122,7 +122,7 @@ export const sanitizePokemon = <
     baseAbility: (pokemon as Partial<Showdown.Pokemon>)?.baseAbility?.replace(/no\s?ability/i, '') as AbilityName,
     ability: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.ability) || null,
     dirtyAbility: (pokemon as Partial<CalcdexPokemon>)?.dirtyAbility || null,
-    abilityToggleable: (pokemon as Partial<CalcdexPokemon>)?.abilityToggleable || false,
+    // abilityToggleable: (pokemon as Partial<CalcdexPokemon>)?.abilityToggleable || false,
     abilityToggled: (pokemon as Partial<CalcdexPokemon>)?.abilityToggled || false,
     abilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.abilities) || [],
     altAbilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.altAbilities) || [],
@@ -435,7 +435,8 @@ export const sanitizePokemon = <
   // abilityToggleable is mainly used for UI, hence why there are two of
   // what seems to be essentially the same thing
   // (but note that abilityToggled stores the current toggle state)
-  sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
+  // update (2023/10/18): abilityToggleable is no longer being stored in the CalcdexPokemon so yeetus
+  // sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
   sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   if (!sanitizedPokemon?.calcdexId) {

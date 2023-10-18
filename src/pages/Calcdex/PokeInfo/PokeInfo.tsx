@@ -24,7 +24,7 @@ import { openSmogonUniversity } from '@showdex/utils/app';
 // import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
-import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
+import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
 import {
@@ -55,16 +55,12 @@ export const PokeInfo = ({
   const {
     state,
     settings,
-    // playerKey,
     player,
     playerPokemon: pokemon,
     presetsLoading,
     presets,
     usages,
     usage,
-    // abilityOptions,
-    // itemOptions,
-    // presetOptions,
     applyPreset,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -73,6 +69,7 @@ export const PokeInfo = ({
     gen,
     format,
     legacy,
+    gameType,
   } = state;
 
   const colorScheme = useColorScheme();
@@ -104,27 +101,35 @@ export const PokeInfo = ({
     usage,
   ]);
 
-  // for Ruin abilities (gen 9), only show the ability toggle in Doubles
-  // update (2023/10/09): abilityToggleable will be false for Ruin abilities if not Doubles
-  // const showAbilityToggle = pokemon?.abilityToggleable && (
-  //   !formatId(abilityName)?.endsWith('ofruin')
-  //     || field?.gameType === 'Doubles'
-  // );
+  const showAbilityToggle = React.useMemo(() => toggleableAbility(
+    pokemon,
+    gameType,
+  ), [
+    gameType,
+    pokemon,
+  ]);
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
-  const disableAbilityToggle = pokemon?.abilityToggleable
-    // && formatId(abilityName)?.endsWith('ofruin')
-    && PokemonRuinAbilities.includes(abilityName)
-    // update (2023/10/09): no need to check this cause abilityToggleable will be false if not Doubles
-    // && field?.gameType === 'Doubles'
-    && !pokemon.abilityToggled
-    && ([
-      'ruinBeadsCount',
-      'ruinSwordCount',
-      'ruinTabletsCount',
-      'ruinVesselCount',
-    ] as (keyof CalcdexPlayerSide)[])
-      .reduce((sum, key) => sum + ((player?.side?.[key] as number) || 0), 0) >= 2;
+  const disableAbilityToggle = React.useMemo(() => (
+    showAbilityToggle
+      // && formatId(abilityName)?.endsWith('ofruin')
+      && PokemonRuinAbilities.includes(abilityName)
+      // update (2023/10/09): no need to check this cause abilityToggleable will be false if not Doubles
+      // && field?.gameType === 'Doubles'
+      && !pokemon.abilityToggled
+      && ([
+        'ruinBeadsCount',
+        'ruinSwordCount',
+        'ruinTabletsCount',
+        'ruinVesselCount',
+      ] as (keyof CalcdexPlayerSide)[])
+        .reduce((sum, key) => sum + ((player?.side?.[key] as number) || 0), 0) >= 2
+  ), [
+    abilityName,
+    player?.side,
+    pokemon?.abilityToggled,
+    showAbilityToggle,
+  ]);
 
   const showResetAbility = !!pokemon?.dirtyAbility
     && !pokemon.transformedForme
@@ -593,7 +598,7 @@ export const PokeInfo = ({
               Ability
 
               {
-                pokemon?.abilityToggleable &&
+                showAbilityToggle &&
                 <ToggleButton
                   className={styles.toggleButton}
                   label="Active"
@@ -657,6 +662,7 @@ export const PokeInfo = ({
               options={abilityOptions}
               noOptionsMessage="No Abilities"
               clearable={false}
+              highlight={pokemon.abilityToggled}
               disabled={legacy || !pokemon?.speciesForme}
             />
           </div>

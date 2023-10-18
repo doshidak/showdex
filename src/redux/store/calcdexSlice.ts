@@ -298,6 +298,9 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
    * @default false
+   * @deprecated As of v1.1.7, this is no longer being used since it was exclusively being used for short-circuit rendering
+   *   in `PokeInfo`. As part of the great v1.1.7 refactor, `abilityToggleable` & `abilityToggled` are now mutually independent
+   *   (i.e., `abilityToggled` no longer depends on `abilityToggleable` to be `true`).
    * @since 0.1.3
    */
   abilityToggleable?: boolean;
