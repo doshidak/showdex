@@ -71,6 +71,7 @@ export const sanitizePokemon = <
     name: pokemon?.name,
     details: pokemon?.details || null,
     searchid: pokemon?.searchid || null,
+    active: (pokemon as Partial<CalcdexPokemon>)?.active || false,
 
     speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
     altFormes: (pokemon as Partial<CalcdexPokemon>)?.altFormes || [],

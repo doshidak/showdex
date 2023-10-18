@@ -96,6 +96,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   playerKey?: CalcdexPlayerKey;
 
   /**
+   * Whether the Pokemon is actively out on the field.
+   *
+   * * Populated by `syncBattle()`.
+   * * Particularly required for auto-toggling *Stakeout*.
+   *
+   * @default false
+   * @since 1.1.7
+   */
+  active?: boolean;
+
+  /**
    * Whether the Pokemon can Dynamax.
    *
    * * In addition to the Dynamax clause (and whether the gen supports D-maxing),
