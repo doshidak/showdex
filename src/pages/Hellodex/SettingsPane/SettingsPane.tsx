@@ -1033,6 +1033,8 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           This is the default behavior prior to v1.1.6.
+                          <br />
+                          (By the way, you're on v{env('package-version', 'icoden')}!)
                         </div>
                       ),
                       value: 0,
@@ -1741,14 +1743,7 @@ export const SettingsPane = ({
                           <br />
                           You can edit the move's type, category (if damaging) &amp;
                           BP (including separate BPs for Z &amp; Max moves when activated).
-                          Edits are unique to each move of the Pok&eacute;mon.
-                          <br />
-                          <br />
-                          Additionally, if space permits, you can override the attacking stat (ATK/SPA)
-                          &amp; the defending stat (DEF/SPD).
-                          <br />
-                          <br />
-                          (Note: There's currently no setting to show stat overrides on smaller screens.)
+                          Edits are unique to each move of each Pok&eacute;mon.
                         </div>
                       ),
                       value: 'always',
