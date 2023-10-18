@@ -318,6 +318,7 @@ declare namespace Showdown {
     calcdexReactRoot?: import('react-dom/client').Root;
     calcdexInit?: boolean;
     calcdexStateInit?: boolean;
+    calcdexSheetsAccepted?: boolean;
     calcdexDestroyed?: boolean;
     nonce?: string;
 
