@@ -8,6 +8,7 @@ import {
   type CalcdexPokemon,
   type RootState,
 } from '@showdex/redux/store';
+import { getAuthUsername } from '@showdex/utils/app';
 import {
   cloneBattleState,
   clonePlayerSideConditions,
@@ -78,6 +79,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     const rootState = api.getState() as RootState;
     const settings = rootState?.showdex?.settings?.calcdex;
+    const showdownSettings = rootState?.showdex?.settings?.showdown;
     const state = rootState?.calcdex;
 
     // moved from calcdexSlice since the syncBattle.pending case does not provide the payload
@@ -96,7 +98,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       ended,
       myPokemon,
       speciesClause,
-      // stepQueue,
+      stepQueue,
     } = battle || {};
 
     if (!battleId) {
@@ -158,6 +160,36 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     // update the authPlayerKey (if any)
     battleState.authPlayerKey = detectAuthPlayerKeyFromBattle(battle);
+
+    // determine if we should auto-accept any active OTS request
+    const authUsername = getAuthUsername();
+
+    const sheetsRequested = !!battleState.authPlayerKey
+      && stepQueue?.some((q) => q?.includes('|uhtml|otsrequest'))
+      && stepQueue.some((q) => q?.includes('acceptopenteamsheets'));
+
+    const sheetsAccepted = sheetsRequested
+      && !!authUsername
+      && (
+        battle.calcdexSheetsAccepted
+          || stepQueue.some((q) => q?.includes(`${authUsername} has agreed`))
+      );
+
+    const shouldAcceptSheets = sheetsRequested
+      && !sheetsAccepted
+      && showdownSettings?.autoAcceptSheets;
+
+    if (shouldAcceptSheets) {
+      l.debug(
+        'Auto-accepting detected OTS request for', authUsername,
+        '\n', 'battle', battleId, battle,
+        '\n', 'state', state,
+      );
+
+      // this is essentially the command that gets run when you click on the SSR'd button
+      app.send('/acceptopenteamsheets', battleId);
+      battle.calcdexSheetsAccepted = true;
+    }
 
     // find out which side myPokemon belongs to
     const detectedPlayerKey = battleState.authPlayerKey || detectPlayerKeyFromBattle(battle);
