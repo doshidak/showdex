@@ -11,8 +11,6 @@
   "git.allowForcePush": true,
   "git.autoStash": true,
 
-  "github.copilot.inlineSuggest.enable": false,
-
   "files.associations": { ".env": "dotenv" },
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
