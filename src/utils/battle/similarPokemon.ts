@@ -1,5 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { getDexForFormat } from '@showdex/utils/dex';
+import { getPresetFormes } from '@showdex/utils/presets';
 import { parsePokemonDetails } from './parsePokemonDetails';
 
 /* eslint-disable @typescript-eslint/indent */
@@ -24,7 +25,7 @@ export const similarPokemon = <
   pokemonB: TPokemonB,
   config?: {
     format?: string | GenerationNum;
-    normalizeFormes?: 'wildcard' | boolean;
+    normalizeFormes?: 'fucked' | 'wildcard' | boolean;
     ignoreMega?: boolean;
     ignoreLevel?: boolean;
     ignoreGender?: boolean;
@@ -80,6 +81,10 @@ export const similarPokemon = <
     return false;
   }
 
+  const fuckedA = normalizeFormes === 'fucked' ? getPresetFormes(formeA, {
+    format,
+  }) : [];
+
   const {
     speciesForme: speciesB,
     level: levelB,
@@ -104,7 +109,14 @@ export const similarPokemon = <
     return false;
   }
 
-  return formeA === formeB
+  const fuckedB = normalizeFormes === 'fucked' ? getPresetFormes(formeB, {
+    format,
+  }) : [];
+
+  return (
+      (normalizeFormes === 'fucked' && fuckedA.some((f) => fuckedB.includes(f)))
+        || formeA === formeB
+    )
     && (
       ignoreLevel
         || !levelA

@@ -433,8 +433,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
                   // && p.details === details
                   && similarPokemon(pokemon, p, {
                     format: battleState.format,
-                    normalizeFormes: 'wildcard',
-                    ignoreMega: true,
+                    normalizeFormes: 'fucked',
+                    // ignoreMega: true,
                   })
               ))?.calcdexId
           ) || calcPokemonCalcdexId(pokemon, playerKey);
@@ -473,8 +473,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
               */
               similarPokemon(pokemon, p, {
                 format: battleState.format,
-                normalizeFormes: 'wildcard',
-                ignoreMega: true,
+                normalizeFormes: 'fucked',
+                // ignoreMega: true,
               })
             ));
 
