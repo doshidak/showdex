@@ -60,6 +60,7 @@ export const FormatLabels: Record<string, string> = {
   draft: 'Draft',
   flipped: 'Flipped',
   forceofthefallen: 'Force of the Fallen',
+  franticfusions: 'Frantic Fusions',
   freeforall: 'FFA',
   freeforallrandombattle: 'FFA Randoms',
   fullpotential: 'Full Potential',
@@ -72,7 +73,7 @@ export const FormatLabels: Record<string, string> = {
   joltemonsrandombattle: 'JolteMons Randoms',
   kitakamiprologue: 'Kitakami Prologue',
   lc: 'LC', // LittleCup
-  lcuu: 'UU LC',
+  lcuu: 'LC UU',
   letsgoou: 'LGPE OU', // LetsGoPikachuEevee
   letsgorandombattle: 'LGPE Randoms',
   linked: 'Linked',
@@ -123,6 +124,7 @@ export const FormatLabels: Record<string, string> = {
   ru: 'RU', // RarelyUsed
   sharedpower: 'Shared Power',
   sharedpowerrandombattle: 'Shared Power Randoms',
+  sharingiscaring: 'Sharing is Caring',
   spikemuthcup: 'Spikemuth Cup',
   stabmons: 'STABmons', // SameTypeAttackBonus
   stabmonsmixandmega: 'STABmons Mix & Mega',
@@ -167,6 +169,7 @@ export const FormatLabels: Record<string, string> = {
  * @since 1.1.7
  */
 export const FormatSuffixes: [test: RegExp, replacement: string][] = [
+  [/blitz/, 'Blitz'],
   [/unrated/, 'Unrated'],
   [/series(\d+)/, 'Series $1'],
   [/regulation([a-z])/, 'Reg $1'],
