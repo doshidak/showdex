@@ -27,7 +27,7 @@ export const sanitizeField = (
 ): CalcdexBattleField => {
   const {
     // gen: genFromBattle,
-    gameType,
+    // gameType,
     // p1: battleP1,
     // p2: battleP2,
     pseudoWeather,
@@ -53,7 +53,8 @@ export const sanitizeField = (
   const [pseudoWeatherName] = pseudoWeatherMoveNames;
 
   const sanitizedField: CalcdexBattleField = {
-    gameType: gameType === 'doubles' ? 'Doubles' : 'Singles',
+    // update (2023/10/10): now populated during the Calcdex bootstrap process, specifically in the init dispatch
+    // gameType: gameType === 'doubles' ? 'Doubles' : 'Singles',
 
     weather: WeatherMap[weather] || null,
     terrain: PseudoWeatherMap[pseudoWeatherName] || null,

@@ -18,13 +18,13 @@ import {
   ToggleButton,
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
-import { PokemonCommonNatures, PokemonNatureBoosts } from '@showdex/consts/dex';
+import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
-import { detectToggledAbility } from '@showdex/utils/battle';
+// import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
-import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
-import { hasNickname, legalLockedFormat } from '@showdex/utils/dex';
+import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
+import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
 import {
@@ -33,6 +33,7 @@ import {
   flattenAlts,
   importPokePaste,
 } from '@showdex/utils/presets';
+import { buildAbilityOptions, buildItemOptions, buildPresetOptions } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
@@ -54,14 +55,12 @@ export const PokeInfo = ({
   const {
     state,
     settings,
-    // playerKey,
     player,
     playerPokemon: pokemon,
-    field, // don't use the one from state btw
     presetsLoading,
-    abilityOptions,
-    itemOptions,
-    presetOptions,
+    presets,
+    usages,
+    usage,
     applyPreset,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -70,6 +69,7 @@ export const PokeInfo = ({
     gen,
     format,
     legacy,
+    gameType,
   } = state;
 
   const colorScheme = useColorScheme();
@@ -78,57 +78,78 @@ export const PokeInfo = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
-  const nickname = hasNickname(pokemon) && settings?.showNicknames
-    ? pokemon.name
-    : null;
+  const nickname = (
+    hasNickname(pokemon)
+      && settings?.showNicknames
+      && pokemon.name
+  ) || null;
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
 
-  // for Ruin abilities (gen 9), only show the ability toggle in Doubles
-  const showAbilityToggle = pokemon?.abilityToggleable && (
-    !formatId(abilityName)?.endsWith('ofruin')
-      || field?.gameType === 'Doubles'
-  );
+  const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
+    format,
+    pokemon,
+    usage,
+    settings?.showAllOptions,
+  )), [
+    legacy,
+    format,
+    pokemon,
+    settings?.showAllOptions,
+    usage,
+  ]);
+
+  const showAbilityToggle = React.useMemo(() => toggleableAbility(
+    pokemon,
+    gameType,
+  ), [
+    gameType,
+    pokemon,
+  ]);
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
-  const disableAbilityToggle = pokemon?.abilityToggleable
-    && formatId(abilityName)?.endsWith('ofruin')
-    && field?.gameType === 'Doubles'
-    && !pokemon.abilityToggled
-    && ([
-      'ruinBeadsCount',
-      'ruinSwordCount',
-      'ruinTabletsCount',
-      'ruinVesselCount',
-    ] as (keyof CalcdexPlayerSide)[])
-      .reduce((sum, key) => sum + ((player?.side?.[key] as number) || 0), 0) >= 2;
+  const disableAbilityToggle = React.useMemo(() => (
+    showAbilityToggle
+      && PokemonRuinAbilities.includes(abilityName)
+      && !pokemon.abilityToggled
+      && ([
+        'ruinBeadsCount',
+        'ruinSwordCount',
+        'ruinTabletsCount',
+        'ruinVesselCount',
+      ] as (keyof CalcdexPlayerSide)[])
+        .reduce((sum, key) => sum + ((player?.side?.[key] as number) || 0), 0) >= 2
+  ), [
+    abilityName,
+    player?.side,
+    pokemon?.abilityToggled,
+    showAbilityToggle,
+  ]);
 
   const showResetAbility = !!pokemon?.dirtyAbility
     && !pokemon.transformedForme
     && !!pokemon.ability
     && pokemon.ability !== pokemon.dirtyAbility;
 
-  const handleAbilityChange = (name: AbilityName) => updatePokemon({
-    dirtyAbility: name,
-    abilityToggled: detectToggledAbility({
-      ...pokemon,
-      ability: name,
-    }),
-  }, `${baseScope}:handleAbilityChange()`);
-
-  const handleAbilityReset = () => updatePokemon({
-    dirtyAbility: null,
-    abilityToggled: detectToggledAbility({
-      ...pokemon,
-      dirtyAbility: null,
-    }),
-  }, `${baseScope}:handleAbilityReset()`);
+  const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
+    format,
+    pokemon,
+    usage,
+    // settings?.showAllOptions,
+    true, // fuck it w/e lol (instead of using settings.showAllOptions)
+  )), [
+    format,
+    gen,
+    pokemon,
+    // settings?.showAllOptions,
+    usage,
+  ]);
 
   const showResetItem = !!pokemon?.dirtyItem
-    && (!!pokemon?.item || !!pokemon?.prevItem)
-    && (pokemon?.item || pokemon?.prevItem) !== pokemon?.dirtyItem;
+    && (!!pokemon.item || !!pokemon.prevItem)
+    && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem);
 
   const {
     active: formesVisible,
@@ -181,6 +202,16 @@ export const PokeInfo = ({
 
   const editableTypes = settings?.editPokemonTypes === 'always'
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
+
+  const presetOptions = React.useMemo(() => buildPresetOptions(
+    presets,
+    usages,
+    pokemon,
+  ), [
+    pokemon,
+    presets,
+    usages,
+  ]);
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
@@ -350,7 +381,11 @@ export const PokeInfo = ({
                 }, `${baseScope}:PokeTypeField:input.onChange()`),
               }}
               tooltipPlacement="bottom-start"
-              containerSize={gen > 8 ? containerSize : null}
+              containerSize={gen > 8 && (
+                pokemon?.dirtyTypes?.length
+                  || pokemon?.types?.length
+                  || 0
+              ) !== 1 ? containerSize : null}
               highlight={gen < 9 || !pokemon?.terastallized}
               highlightTypes={pokemon?.types}
               revealedTypes={pokemon?.types}
@@ -375,7 +410,11 @@ export const PokeInfo = ({
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel="Tera"
                 teraTyping
-                containerSize={containerSize}
+                containerSize={(
+                  pokemon?.dirtyTypes?.length
+                    || pokemon?.types?.length
+                    || 0
+                ) !== 1 ? containerSize : null}
                 highlight={pokemon?.terastallized}
                 highlightTypes={Array.from(new Set([
                   ...flattenAlts(pokemon?.altTeraTypes),
@@ -521,9 +560,13 @@ export const PokeInfo = ({
             aria-label={`Available Sets for Pok${eacute}mon ${friendlyPokemonName}`}
             hint="None"
             input={{
-              name: `PokeInfo:Preset:${pokemonKey}:Dropdown`,
+              name: `PokeInfo:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
-              onChange: (id: string) => applyPreset(id, null, `${baseScope}:Dropdown~Preset:input.onChange()`),
+              onChange: (id: string) => applyPreset(
+                id,
+                null,
+                `${baseScope}:Dropdown~Preset:input.onChange()`,
+              ),
             }}
             options={presetOptions}
             noOptionsMessage="No Sets"
@@ -542,7 +585,13 @@ export const PokeInfo = ({
           style={{ alignItems: 'flex-start' }}
         >
           <div className={styles.rowItem}>
-            <div className={cx(styles.label, styles.dropdownLabel)}>
+            <div
+              className={cx(
+                styles.label,
+                legacy && styles.legacy,
+                styles.dropdownLabel,
+              )}
+            >
               Ability
 
               {
@@ -585,7 +634,9 @@ export const PokeInfo = ({
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
                   active
-                  onPress={handleAbilityReset}
+                  onPress={() => updatePokemon({
+                    dirtyAbility: null,
+                  }, `${baseScope}:ToggleButton~DirtyAbility:onPress()`)}
                 />
               }
             </div>
@@ -599,19 +650,28 @@ export const PokeInfo = ({
                 hidden: !settings?.showAbilityTooltip,
               }}
               input={{
-                name: `PokeInfo:Ability:${pokemonKey}:Dropdown`,
-                value: abilityName,
-                onChange: handleAbilityChange,
+                name: `PokeInfo:${pokemonKey}:Ability`,
+                value: legacy ? null : abilityName,
+                onChange: (value: AbilityName) => updatePokemon({
+                  dirtyAbility: value,
+                }, `${baseScope}:Dropdown~DirtyAbility:input.onChange()`),
               }}
               options={abilityOptions}
               noOptionsMessage="No Abilities"
               clearable={false}
+              highlight={pokemon?.abilityToggled}
               disabled={legacy || !pokemon?.speciesForme}
             />
           </div>
 
           <div className={styles.rowItem}>
-            <div className={cx(styles.label, styles.dropdownLabel)}>
+            <div
+              className={cx(
+                styles.label,
+                legacy && styles.legacy,
+                styles.dropdownLabel,
+              )}
+            >
               Nature
             </div>
 
@@ -619,8 +679,8 @@ export const PokeInfo = ({
               aria-label={`Available Natures for Pok${eacute}mon ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : '???'}
               input={{
-                name: `PokeInfo:Nature:${pokemonKey}:Dropdown`,
-                value: pokemon?.nature,
+                name: `PokeInfo:${pokemonKey}:Nature`,
+                value: legacy ? null : pokemon?.nature,
                 onChange: (name: Showdown.PokemonNature) => updatePokemon({
                   nature: name,
                 }, `${baseScope}:Dropdown~Nature:input.onChange()`),
@@ -641,7 +701,13 @@ export const PokeInfo = ({
           </div>
 
           <div className={styles.rowItem}>
-            <div className={cx(styles.label, styles.dropdownLabel)}>
+            <div
+              className={cx(
+                styles.label,
+                gen === 1 && styles.legacy,
+                styles.dropdownLabel,
+              )}
+            >
               Item
 
               {
@@ -712,11 +778,11 @@ export const PokeInfo = ({
                 hidden: !settings?.showItemTooltip,
               }}
               input={{
-                name: `PokeInfo:Item:${pokemonKey}:Dropdown`,
-                value: itemName,
+                name: `PokeInfo:${pokemonKey}:Item`,
+                value: gen === 1 ? null : itemName,
                 onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),
-                }, `${baseScope}:Dropdown~Item:input.onChange()`),
+                }, `${baseScope}:Dropdown~DirtyItem:input.onChange()`),
               }}
               options={itemOptions}
               noOptionsMessage="No Items"

@@ -1,16 +1,16 @@
 import { type GameType } from '@smogon/calc';
+import { PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayer } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/core';
+// import { formatId } from '@showdex/utils/core';
 
 /**
  * Auto-toggles each applicable Pokemon's `abilityToggled` if they have a *Ruin* ability.
  *
- * * Note that this will **directly** mutate the passed-in `player` object,
- *   hence the `void` for the return value.
- * * Providing the `index` argument will override the `selectionIndex` from the `player`
- *   when determining the user's currently selected Pokemon.
- * * `updateSelection` must be explicitly set to `true` for this utility to set the
- *   `abilityToggled` state for the Pokemon at `index`.
+ * * Note that this will **directly** mutate the passed-in `player` object, hence the `void` for the return value.
+ * * Providing the `selectionIndexOverride` argument will override the `selectionIndex` (wow!!) from the `player` when
+ *   determining the user's currently selected Pokemon.
+ * * `updateSelection` must be explicitly set to `true` for this utility to set the `abilityToggled` state for the
+ *   Pokemon at the determined selection index (whether `selectionIndexOverride` or `player.selectionIndex`).
  *   - This argument is only used when `gameType` is `'Doubles'`.
  *   - i.e., Has no effect when `gameType` is `'Singles'` (default).
  *
@@ -18,56 +18,50 @@ import { formatId } from '@showdex/utils/core';
  */
 export const toggleRuinAbilities = (
   player: CalcdexPlayer,
-  index?: number,
   gameType: GameType = 'Singles',
   updateSelection?: boolean,
+  selectionIndexOverride?: number,
 ): void => {
-  if (!player?.sideid) {
+  if (!player?.sideid || !player.pokemon?.length) {
     return;
   }
-
-  const selectionIndex = index ?? player.selectionIndex;
-  const selectedPokemon = player.pokemon?.[selectionIndex];
-  const ability = formatId(selectedPokemon?.dirtyAbility || selectedPokemon?.ability);
-
-  // if (!ability?.endsWith('ofruin')) {
-  //   return;
-  // }
 
   // find all `pokemon` with a Ruin ability, whether activated or not
   const ruinPokemon = player.pokemon
-    .filter((p) => formatId(p?.dirtyAbility || p?.ability)?.endsWith('ofruin'));
+    .filter((p) => PokemonRuinAbilities.includes(p?.dirtyAbility || p?.ability));
 
-  if (gameType === 'Singles') {
-    // toggle off each ruinPokemon's Ruin ability if activated, except for the selectedPokemon
-    // (UI shouldn't display the "ACTIVE" toggle in Singles for Ruin abilities)
-    ruinPokemon.forEach((mon) => {
-      mon.abilityToggled = mon.calcdexId === selectedPokemon.calcdexId;
-    });
-
+  if (!ruinPokemon.length) {
     return;
   }
 
-  if (!updateSelection) {
+  const selectionIndex = selectionIndexOverride ?? player.selectionIndex;
+  const selectedPokemon = player.pokemon?.[selectionIndex];
+
+  if (gameType === 'Singles' && !selectedPokemon?.calcdexId) {
     return;
   }
 
-  // gameType = 'Doubles'
-  // toggle off each inactive ruinPokemon's Ruin ability if activated
-  ruinPokemon.forEach((mon) => {
-    // if (!mon.abilityToggled) {
-    //   return;
-    // }
+  const activeIds = gameType === 'Doubles' && player.activeIndices?.length
+    ? player.activeIndices.map((i) => player.pokemon[i]?.calcdexId).filter(Boolean)
+    : [];
 
-    const currentIndex = player.pokemon.findIndex((p) => p?.calcdexId === mon.calcdexId);
-
-    // if (currentIndex > -1 && player.activeIndices.includes(currentIndex)) {
-    //   return;
-    // }
-
-    // mon.abilityToggled = false;
-    mon.abilityToggled = currentIndex > -1 && player.activeIndices.includes(currentIndex);
+  // for 'Singles', toggle off each ruinPokemon's Ruin ability if activated, except for the selectedPokemon
+  // (UI shouldn't display the "ACTIVE" toggle in Singles for Ruin abilities)
+  // for 'Doubles', toggle off each inactive ruinPokemon's Ruin ability if activated
+  ruinPokemon.forEach((pokemon) => {
+    pokemon.abilityToggled = gameType === 'Singles'
+      ? pokemon.calcdexId === selectedPokemon.calcdexId
+      : activeIds.includes(pokemon.calcdexId);
   });
+
+  const shouldUpdateSelection = gameType === 'Doubles'
+    && updateSelection
+    && !!selectedPokemon?.calcdexId
+    && PokemonRuinAbilities.includes(selectedPokemon.dirtyAbility || selectedPokemon.ability);
+
+  if (!shouldUpdateSelection) {
+    return;
+  }
 
   // count how many Pokemon have an activated Ruin ability, whether active on the field or not
   // (but at this point, only active ruinPokemon should have abilityToggled as true)
@@ -75,7 +69,7 @@ export const toggleRuinAbilities = (
 
   // in the case that both active Pokemon have activated Ruin abilities,
   // only allow the ability to be toggled on if one of the active Ruin abilities is deactivated
-  if (activeRuinCount < 2 && ability?.endsWith('ofruin')) { // 2 for doubles
+  if (activeRuinCount < 2) { // 2 for doubles
     selectedPokemon.abilityToggled = true;
   }
 };

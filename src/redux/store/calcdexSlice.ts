@@ -7,6 +7,7 @@ import {
 } from '@reduxjs/toolkit';
 import {
   type AbilityName,
+  type GameType,
   type GenerationNum,
   type ItemName,
   type MoveName,
@@ -18,7 +19,7 @@ import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { detectLegacyGen } from '@showdex/utils/dex';
+import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
 import { useSelector } from './hooks';
 
 /* eslint-disable @typescript-eslint/indent */
@@ -93,6 +94,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.0
    */
   playerKey?: CalcdexPlayerKey;
+
+  /**
+   * Whether the Pokemon is actively out on the field.
+   *
+   * * Populated by `syncBattle()`.
+   * * Particularly required for auto-toggling *Stakeout*.
+   *
+   * @default false
+   * @since 1.1.7
+   */
+  active?: boolean;
 
   /**
    * Whether the Pokemon can Dynamax.
@@ -231,6 +243,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   revealedTeraType?: Showdown.TypeName;
 
   /**
+   * Original level of the *Transform*-target Pokemon.
+   *
+   * * Apparently when the base stats are copied (i.e., `transformedBaseStats`), they're calculated at the level of
+   *   the target Pokemon, not the Pokemon doing the *Transform*.
+   *   - HP is still calculated at the level of the Pokemon doing the *Transform*, of course.
+   *   - Nice.
+   *
+   * @default null
+   * @since 1.1.7
+   */
+  transformedLevel?: number;
+
+  /**
    * User-modified *Hit Point* (HP) value.
    *
    * * Should be `clamp()`'d between `0` & this Pokemon's `maxhp`.
@@ -284,6 +309,9 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
    * @default false
+   * @deprecated As of v1.1.7, this is no longer being used since it was exclusively being used for short-circuit rendering
+   *   in `PokeInfo`. As part of the great v1.1.7 refactor, `abilityToggleable` & `abilityToggled` are now mutually independent
+   *   (i.e., `abilityToggled` no longer depends on `abilityToggleable` to be `true`).
    * @since 0.1.3
    */
   abilityToggleable?: boolean;
@@ -291,16 +319,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Some abilities are conditionally toggled, such as *Flash Fire*.
    *
-   * * While we don't have to worry about those conditions,
+   * * ~~While we don't have to worry about those conditions~~ (a year later: ... LOL),
    *   we need to keep track of whether the ability is active.
    * * Allows toggling by the user, but will sync with the battle state as the turn ends.
-   * * Internally, this value depends on `abilityToggleable`.
-   *   - See `detectToggledAbility()` for implementation details.
-   * * If the ability is not in `PokemonToggleAbilities` in `consts`,
-   *   this value will always be `true`, despite the default value being `false`.
+   * * ~~Internally, this value depends on `abilityToggleable`.~~
+   *   - ~~See `detectToggledAbility()` for implementation details.~~
+   * * ~~If the ability is not in `PokemonToggleAbilities` in `consts`,
+   *   this value will always be `true`, despite the default value being `false`.~~
    *
    * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
    * @default false
+   * @todo rename this to `abilityActive`
    * @since 0.1.2
    */
   abilityToggled?: boolean;
@@ -419,7 +448,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @default
    * ```ts
    * // gens 1-2 (legacy)
-   * {}
+   * { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 }
    *
    * // gens 3+
    * { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
@@ -621,7 +650,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @see `Showdown.Pokemon['boosts']` in `types/pokemon.d.ts`
    * @since 1.0.2
    */
-  boosts?: Omit<Showdown.StatsTable, 'hp'>;
+  boosts?: Showdown.StatsTableNoHp;
 
   /**
    * Keeps track of user-modified boosts as to not modify the actual boosts from the `battle` state.
@@ -635,7 +664,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * ```
    * @since 0.1.0
    */
-  dirtyBoosts?: Omit<Showdown.StatsTable, 'hp'>;
+  dirtyBoosts?: Showdown.StatsTableNoHp;
 
   /**
    * Base stats of the Pokemon based on its species.
@@ -672,7 +701,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @since 0.1.3
    */
-  transformedBaseStats?: Omit<Showdown.StatsTable, 'hp'>;
+  transformedBaseStats?: Showdown.StatsTableNoHp;
 
   /**
    * Server-reported stats of the Pokemon.
@@ -831,6 +860,9 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * * Update (2023/07/25): Apparently this value should only be updated when the Pokemon is **not** active!
    *   - This applies more in Doubles formats, where allies can faint while the Pokemon is active.
    *   - This value shouldn't be updated during that time, only when switched out.
+   * * Update (2023/10/07): Apparently the last apparent point wasn't *entirely* true.
+   *   - Restriction only applies to *Supreme Overlord* & not other things like *Last Respects*.
+   *   - In other words, we should be syncing this value always when not *Supreme Overlord*.
    *
    * @default 0
    * @since 1.1.0
@@ -918,7 +950,7 @@ export interface CalcdexMoveOverride {
   maxBasePower?: number;
   alwaysCriticalHits?: boolean;
   offensiveStat?: Showdown.StatNameNoHp;
-  defensiveStat?: Showdown.StatNameNoHp | 'ignore';
+  defensiveStat?: Showdown.StatNameNoHp;
 }
 
 /**
@@ -1283,6 +1315,13 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
 }
 
 /**
+ * Convenient type alias of the `sideConditions` property in `Showdown.Side`.
+ *
+ * @since 1.1.7
+ */
+export type CalcdexPlayerSideConditions = Showdown.Side['sideConditions'];
+
+/**
  * Field conditions on the player's side.
  *
  * * Additional properties that will be unused by the `Side` constructor are included
@@ -1300,7 +1339,7 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
    *
    * @since 1.1.3
    */
-  conditions?: Showdown.Side['sideConditions'];
+  conditions?: CalcdexPlayerSideConditions;
 
   isProtected?: boolean;
   isSeeded?: boolean;
@@ -1373,11 +1412,12 @@ export interface CalcdexPlayerSide extends SmogonState.Side {
  * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
  * * Checking the source code for the `Field` class (see link below),
  *   the constructor accepts these missing properties.
+ * * As of v1.1.7, the `gameType` property has been moved up to the `CalcdexBattleState`.
  *
  * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
  * @since 0.1.3
  */
-export interface CalcdexBattleField extends SmogonState.Field {
+export interface CalcdexBattleField extends Omit<SmogonState.Field, 'gameType'> {
   isMagicRoom?: boolean;
   isWonderRoom?: boolean;
   isAuraBreak?: boolean;
@@ -1425,18 +1465,18 @@ export interface CalcdexBattleRules {
   /**
    * Whether only one *Baton Pass*-er is allowed.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|One Boost Passer Clause: Limit one Baton Passer that has a way to boost its stats'`
+   * * Rule: `'One Boost Passer Clause'`
+   *   - "Limit one Baton Passer that has a way to boost its stats"
    *
    * @since 1.0.1
    */
   boostPasser?: boolean;
 
   /**
-   * Whether dynamaxing is banned.
+   * Whether Dynamaxing is banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Dynamax Clause: You cannot dynamax'`
+   * * Rule: `'Dynamax Clause'`
+   *   - "You cannot dynamax"
    * * Obviously only applies if the current gen is 8.
    *
    * @since 0.1.3
@@ -1444,10 +1484,41 @@ export interface CalcdexBattleRules {
   dynamax?: boolean;
 
   /**
+   * Whether Terastallization is banned.
+   *
+   * * Rule: `'Terastal Clause'`
+   *   - "You cannot Terastallize"
+   * * Obviously only applies if the current gen is 9.
+   *
+   * @since 1.1.7
+   */
+  tera?: boolean;
+
+  /**
+   * Whether evasion abilities, items & moves are banned.
+   *
+   * * Rule: `'Evasion Clause`'
+   *   - "Evasion abilities, items, and moves are banned"
+   *
+   * @since 1.1.7
+   */
+  evasion?: boolean;
+
+  /**
+   * Whether evasion abilities are banned.
+   *
+   * * Rule: `'Evasion Abilities Clause'`
+   *   - "Evasion abilities are banned"
+   *
+   * @since 1.1.7
+   */
+  evasionAbilities?: boolean;
+
+  /**
    * Whether evasion items are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Evasion Items Clause: Evasion items are banned'`
+   * * Rule: `'Evasion Items Clause'`
+   *   - "Evasion items are banned"
    *
    * @since 0.1.3
    */
@@ -1456,8 +1527,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether evasion moves are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Evasion Moves Clause: Evasion moves are banned'`
+   * * Rule: `'Evasion Moves Clause'`
+   *   - "Evasion moves are banned"
    *
    * @since 0.1.3
    */
@@ -1466,8 +1537,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether forcing endless battles are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Endless Battle Clause: Forcing endless battles is banned'`
+   * * Rule: `'Endless Battle Clause'`
+   *   - "Forcing endless battles is banned"
    *
    * @since 0.1.3
    */
@@ -1476,8 +1547,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether only one foe can be frozen.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Freeze Clause Mod: Limit one foe frozen'`
+   * * Rule: `'Freeze Clause Mod'`
+   *   - "Limit one foe frozen"
    *
    * @since 1.0.1
    */
@@ -1486,10 +1557,10 @@ export interface CalcdexBattleRules {
   /**
    * Whether HP is shown in percentages.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|HP Percentage Mod: HP is shown in percentages'`
-   * * Only applies to the opponent's Pokemon as we can read the actual HP values
-   *   from the player's Pokemon via the corresponding `Showdown.ServerPokemon` objects.
+   * * Rule: `'HP Percentage Mod'`
+   *   - "HP is shown in percentages"
+   * * Only applies to the opponent's Pokemon as we can read the actual HP values from the player's Pokemon via the
+   *   corresponding `Showdown.ServerPokemon` objects.
    *
    * @since 0.1.3
    */
@@ -1498,8 +1569,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether Rayquaza cannot be mega-evolved.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Mega Rayquaza Clause: You cannot mega evolve Rayquaza'`
+   * * Rule: `'Mega Rayquaza Clause'`
+   *   - "You cannot mega evolve Rayquaza"
    * * Obviously only applies if the current gen is 6 or 7, or we're in some weird format like Gen 8 National Dex.
    *
    * @since 0.1.3
@@ -1509,8 +1580,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether OHKO (one-hit-KO) moves are banned.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|OHKO Clause: OHKO moves are banned'`
+   * * Rule: `'OHKO Clause'`
+   *   - "OHKO moves are banned"
    *
    * @since 0.1.3
    */
@@ -1519,8 +1590,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether Pokemon must share the same type.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Same Type Clause: Pokémon in a team must share a type'`
+   * * Rule: `'Same Type Clause'`
+   *   - "Pokémon in a team must share a type"
    * * Typically only present in *monotype* formats.
    *
    * @since 1.0.1
@@ -1530,8 +1601,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether only one foe can be put to sleep.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Sleep Clause Mod: Limit one foe put to sleep'`
+   * * Rule: `'Sleep Clause Mod'`
+   *   - "Limit one foe put to sleep"
    *
    * @since 0.1.3
    */
@@ -1540,8 +1611,8 @@ export interface CalcdexBattleRules {
   /**
    * Whether players are limited to one of each Pokemon.
    *
-   * * Derived from the existence of the following rule in the `stepQueue`:
-   *   - `'|rule|Species Clause: Limit one of each Pokémon'`
+   * * Rule: `'Species Clause'`
+   *   - "Limit one of each Pokémon"
    *
    * @since 0.1.3
    */
@@ -1610,10 +1681,32 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * * Derived from splitting the `id` of the Showdown `battle` state.
    * * Note that this includes the `'gen#'` portion of the format.
    *
-   * @example 'gen8ubers'
+   * @example 'gen9vgc2023'
    * @since 0.1.0
    */
   format: string;
+
+  /**
+   * Battle sub-formats.
+   *
+   * @example
+   * ```ts
+   * [
+   *   'regulatione',
+   *   'bo3',
+   * ]
+   * ```
+   * @since 1.1.7
+   */
+  subFormats?: string[];
+
+  /**
+   * Game type, whether `'Singles'` or `'Doubles'`.
+   *
+   * @default 'Singles'
+   * @since 1.1.7
+   */
+  gameType: GameType;
 
   /**
    * Whether the gen uses legacy battle mechanics.
@@ -1876,8 +1969,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       const {
         scope, // used for debugging; not used here, but destructuring it from `...payload`
         battleId,
-        gen = env.int<GenerationNum>('calcdex-default-gen'),
-        format = null,
+        gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
+        format: formatFromPayload = null,
+        gameType = 'Singles',
         rules = {},
         turn = 0,
         active = false,
@@ -1909,6 +2003,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return;
       }
 
+      const {
+        gen: genFromFormat,
+        base,
+        suffixes,
+      } = parseBattleFormat(formatFromPayload);
+
+      const gen = genFromFormat || genFromPayload;
+
       state[battleId] = {
         ...payload,
 
@@ -1916,8 +2018,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         // battleNonce: null, // make sure we don't set this for the syncBattle() action
 
         gen,
-        format,
-        legacy: detectLegacyGen(format || gen),
+        format: `gen${gen}${base}`,
+        subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
+        gameType,
+        legacy: detectLegacyGen(gen),
         rules,
         turn,
         active,
@@ -1965,7 +2069,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           p4: null,
         }),
 
-        field: field || sanitizeField(),
+        field: field as CalcdexBattleField || sanitizeField(),
 
         sheetsNonce: null,
         sheets: [],
@@ -2234,7 +2338,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       playerState.pokemon[pokemonStateIndex] = {
         ...pokemonState,
         ...pokemon,
-      };
+      } as CalcdexPokemon;
 
       endTimer();
 
@@ -2297,6 +2401,8 @@ export const useCalcdexState = () => useSelector(
   (state) => state?.calcdex,
 );
 
-export const useCalcdexBattleState = (battleId: string) => useSelector(
-  (state) => state?.calcdex?.[battleId],
+export const useCalcdexBattleState = (
+  battleId: string,
+) => useSelector(
+  (state) => (state?.calcdex?.[battleId] ?? {}) as CalcdexBattleState,
 );

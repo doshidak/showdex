@@ -40,7 +40,6 @@ export const PokeStats = ({
     playerPokemon: pokemon,
     opponent,
     opponentPokemon,
-    field, // don't use the one from state btw
     updatePokemon,
   } = useCalcdexPokeContext();
 
@@ -49,6 +48,7 @@ export const PokeStats = ({
     format,
     legacy,
     authPlayerKey,
+    field,
   } = state;
 
   const colorScheme = useColorScheme();
@@ -82,10 +82,7 @@ export const PokeStats = ({
   const showIvsRow = pokemon?.showGenetics
     || (!defaultShowBehavior && lockedVisibilities.includes('iv'));
 
-  const showEvsRow = (
-    !legacy
-      || settings?.showLegacyEvs
-  ) && (
+  const showEvsRow = (!legacy || settings?.showLegacyEvs) && (
     pokemon?.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('ev'))
   );
@@ -97,7 +94,7 @@ export const PokeStats = ({
     || (settings?.allowIllegalSpreads === 'meta' && !legalLockedFormat(format));
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
-  const maxLegalEvs = env.int('calcdex-pokemon-max-legal-evs');
+  const maxLegalEvs = env.int(format?.includes('random') ? 'calcdex-pokemon-max-legal-randoms-evs' : 'calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
 
   // update (2023/07/26): since showLegacyEvs is now a setting, any amount of EVs in legacy gens
@@ -109,6 +106,11 @@ export const PokeStats = ({
   // should only apply the missingSpread styles if a Pokemon is loaded in
   const missingIvs = !!pokemon?.speciesForme && !Object.values(pokemon?.ivs || {}).reduce((sum, value) => sum + (value || 0), 0);
   const missingEvs = !!pokemon?.speciesForme && !legacy && !totalEvs;
+
+  const warningColor = settings?.nhkoColors?.[2];
+  const evsWarning = missingEvs
+    || (!format?.includes('random') && totalEvs < maxLegalEvs)
+    || !evsLegal;
 
   const statsRecord = React.useMemo(() => (pokemon?.speciesForme ? calcPokemonFinalStats(
     gen,
@@ -251,7 +253,10 @@ export const PokeStats = ({
                     pristine && styles.pristine,
                     disabled && styles.disabled,
                   )}
-                  inputClassName={styles.valueFieldInput}
+                  inputClassName={cx(
+                    styles.valueFieldInput,
+                    pristine && styles.dim,
+                  )}
                   label={`${statLabel} Base Stat for ${friendlyPokemonName}`}
                   hideLabel
                   hint={baseStat?.toString() || 1}
@@ -297,9 +302,11 @@ export const PokeStats = ({
             <TableGridItem
               className={cx(
                 styles.header,
-                styles.ivsHeader,
-                missingIvs && styles.missingSpread,
+                // styles.ivsHeader,
+                // missingIvs && styles.missingSpread,
+                missingIvs && styles.warning,
               )}
+              style={missingIvs && warningColor ? { color: warningColor } : undefined}
               align="right"
               header
             >
@@ -323,6 +330,7 @@ export const PokeStats = ({
 
             const iv = pokemon?.ivs?.[stat] || 0;
             const value = legacy ? convertIvToLegacyDv(iv) : iv;
+            const maxValue = legacy ? 15 : 31;
 
             const disabled = !pokemon?.speciesForme
               || (legacy && stat === 'hp')
@@ -337,17 +345,21 @@ export const PokeStats = ({
                   className={cx(
                     styles.valueField,
                     disabled && styles.disabled,
+                    (value === maxValue && !missingIvs) && styles.pristine,
                   )}
                   inputClassName={cx(
                     styles.valueFieldInput,
-                    missingIvs && styles.missingSpread,
+                    (value === maxValue && !missingIvs) && styles.dim,
+                    // missingIvs && styles.missingSpread,
+                    missingIvs && styles.warning,
                   )}
+                  inputStyle={missingIvs && warningColor ? { color: warningColor } : undefined}
                   label={`${statLabel} ${legacy ? 'DV' : 'IV'} for ${friendlyPokemonName}`}
                   hideLabel
-                  hint={value.toString() || (legacy ? '15' : '31')}
-                  fallbackValue={legacy ? 15 : 31}
+                  hint={value.toString() || maxValue.toString()}
+                  fallbackValue={maxValue}
                   min={0}
-                  max={legacy ? 15 : (allowIllegalSpreads ? 999 : 31)}
+                  max={legacy ? maxValue : (allowIllegalSpreads ? 999 : maxValue)}
                   step={1}
                   shiftStep={legacy ? 3 : 5}
                   loop
@@ -400,16 +412,18 @@ export const PokeStats = ({
             delay={[1000, 50]}
             trigger="mouseenter"
             touch={['hold', 500]}
-            disabled={!missingEvs && (format?.includes('random') || totalEvs === maxLegalEvs) && evsLegal}
+            disabled={!evsWarning}
           >
             <TableGridItem
               className={cx(
                 styles.header,
-                styles.evsHeader,
-                missingEvs && styles.missingSpread,
-                (!format?.includes('random') && totalEvs < maxLegalEvs) && styles.unallocated,
-                !evsLegal && styles.illegal,
+                // styles.evsHeader,
+                // missingEvs && styles.missingSpread,
+                // (!format?.includes('random') && totalEvs < maxLegalEvs) && styles.unallocated,
+                // !evsLegal && styles.illegal,
+                evsWarning && styles.warning,
               )}
+              style={evsWarning && warningColor ? { color: warningColor } : undefined}
               align="right"
               header
             >
@@ -430,11 +444,16 @@ export const PokeStats = ({
                 className={styles.valueFieldContainer}
               >
                 <ValueField
-                  className={styles.valueField}
+                  className={cx(
+                    styles.valueField,
+                    (!ev && !missingEvs) && styles.pristine,
+                  )}
                   inputClassName={cx(
                     styles.valueFieldInput,
-                    missingEvs && styles.missingSpread,
+                    (!ev && !missingEvs) && styles.dim,
+                    missingEvs && styles.warning,
                   )}
+                  inputStyle={missingEvs && warningColor ? { color: warningColor } : undefined}
                   label={`${statLabel} EV for ${friendlyPokemonName}`}
                   hideLabel
                   hint={ev.toString() || '252'}
@@ -467,8 +486,14 @@ export const PokeStats = ({
       {statNames.map((stat) => {
         const finalStat = finalStats?.[stat] || 0;
         const formattedStat = formatStatBoost(finalStat) || '???';
-        const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
         const mods = statMods?.[stat];
+
+        const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
+        const boostColor = (
+          !!boostDelta
+            && (settings?.nhkoColors?.length || 0) > 1
+            && settings.nhkoColors[boostDelta === 'positive' ? 0 : (settings.nhkoColors.length - 1)]
+        ) || null;
 
         return (
           <Tooltip
@@ -508,10 +533,9 @@ export const PokeStats = ({
               className={cx(
                 styles.statValue,
                 styles.finalStat,
-                !!boostDelta && styles[boostDelta],
-                // boostDelta === 'positive' && styles.positive,
-                // boostDelta === 'negative' && styles.negative,
+                !!boostDelta && !boostColor && styles[boostDelta], // default color
               )}
+              style={boostColor ? { color: boostColor } : undefined}
             >
               {formattedStat}
             </TableGridItem>

@@ -1,5 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { NIL as NIL_UUID, v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -48,6 +49,10 @@ const finalEnv = {
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_VERSION_SUFFIX: sanitizeEnv(process.env.PACKAGE_VERSION_SUFFIX),
 };
+
+if (!finalEnv.UUID_NAMESPACE || finalEnv.UUID_NAMESPACE === NIL_UUID) {
+  finalEnv.UUID_NAMESPACE = uuidv4();
+}
 
 finalEnv.BUILD_NAME = [
   finalEnv.PACKAGE_NAME,
@@ -298,6 +303,7 @@ const plugins = [
 
   ...[
     __DEV__
+      && process.env.DEV_SPRING_CLEANING === 'true'
       && new CircularDependencyPlugin({
         exclude: /node_modules/,
         include: /src/,

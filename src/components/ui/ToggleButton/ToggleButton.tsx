@@ -14,12 +14,13 @@ export interface ToggleButtonProps extends Omit<ButtonProps, 'display'> {
 export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>(({
   className,
   activeClassName,
-  // labelClassName,
+  labelClassName,
   forceColorScheme,
   absoluteHover,
   primary,
   active,
   hoverScale = 1,
+  children,
   ...props
 }: ToggleButtonProps, forwardedRef): JSX.Element => {
   const currentColorScheme = useColorScheme();
@@ -37,14 +38,16 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
         className,
         active && activeClassName,
       )}
-      // labelClassName={cx(
-      //   styles.label,
-      //   labelClassName,
-      // )}
+      labelClassName={cx(
+        styles.label,
+        labelClassName,
+      )}
       forceColorScheme={forceColorScheme}
       display="inline"
       absoluteHover={!primary && absoluteHover}
       hoverScale={hoverScale}
-    />
+    >
+      {children}
+    </Button>
   );
 });

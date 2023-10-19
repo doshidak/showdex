@@ -1,7 +1,7 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonNatureBoosts } from '@showdex/consts/dex';
 import { clamp } from '@showdex/utils/core';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, getDefaultSpreadValue } from '@showdex/utils/dex';
 
 /**
  * Truncates `num` to the number of `bits`.
@@ -35,10 +35,10 @@ const tr = (
  * @since 1.0.3
  */
 export const calcPokemonStat = (
-  format: GenerationNum | string,
+  format: string | GenerationNum,
   stat: Showdown.StatName,
   base: number,
-  iv = 31,
+  iv?: number,
   ev?: number,
   level = 100,
   nature?: Showdown.NatureName,
@@ -51,8 +51,9 @@ export const calcPokemonStat = (
   const supportsAvs = typeof format === 'string' && format.includes('letsgo');
   // const supportsEvs = !legacy && !supportsAvs;
 
-  const actualIv = clamp(0, legacy ? iv - (iv % 2 === 1 ? 1 : 0) : iv);
-  const actualEv = clamp(0, ev ?? (legacy ? 252 : 0));
+  const parsedIv = iv ?? getDefaultSpreadValue('iv', format);
+  const actualIv = clamp(0, parsedIv - (legacy && parsedIv % 2 === 1 ? 1 : 0));
+  const actualEv = clamp(0, ev ?? getDefaultSpreadValue('ev', format));
   const actualLevel = clamp(0, level, 100);
 
   if (stat === 'hp') {

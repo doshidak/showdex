@@ -3,7 +3,7 @@ import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
-  detectLegacyGen,
+  getDefaultSpreadValue,
   getDexForFormat,
   hasNickname,
 } from '@showdex/utils/dex';
@@ -107,7 +107,6 @@ export const exportPokePaste = (
 
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
-  const legacy = detectLegacyGen(format);
 
   const {
     name,
@@ -201,8 +200,8 @@ export const exportPokePaste = (
   // IVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 31 [or 30, if legacy])
   // EVs: <value> <stat> ...[/ <value> <stat>] (where <value> is not 0) -- only in non-legacy
   // (where <stat> is HP, Atk, Def, SpA, SpD, or Spe)
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   if (nonEmptyObject(ivs)) {
     // in legacy gens, max DV is 15, which equates to 30 IVs (NOT 31!)

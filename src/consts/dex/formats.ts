@@ -1,3 +1,5 @@
+import { times } from '@showdex/consts/core';
+
 /**
  * Labels for rendering group labels in the Pokemon presets dropdown.
  *
@@ -21,12 +23,7 @@ export const FormatLabels: Record<string, string> = {
   battlespotdoubles: 'B-Spot Doubles',
   battlespottriples: 'B-Spot Triples',
   battlestadiumsingles: 'BSS',
-  battlestadiumsinglesseries1: 'BSS Series 1',
-  battlestadiumsinglesseries2: 'BSS Series 2',
-  battlestadiumsinglesregulationc: 'BSS Reg C',
-  battlestadiumsinglesregulationd: 'BSS Reg D',
   battlestadiumdoubles: 'BSD',
-  battlestadiumdoublesseries13: 'BSD Series 13',
   bdsp3v3singles: 'BDSP 3v3 Singles',
   bdspbattlefestivaldoubles: 'BDSP B-Fest Doubles',
   bdspcap: 'BDSP CAP',
@@ -63,6 +60,7 @@ export const FormatLabels: Record<string, string> = {
   draft: 'Draft',
   flipped: 'Flipped',
   forceofthefallen: 'Force of the Fallen',
+  franticfusions: 'Frantic Fusions',
   freeforall: 'FFA',
   freeforallrandombattle: 'FFA Randoms',
   fullpotential: 'Full Potential',
@@ -73,13 +71,15 @@ export const FormatLabels: Record<string, string> = {
   inheritance: 'Inheritance',
   japaneseou: 'Japanese OU',
   joltemonsrandombattle: 'JolteMons Randoms',
+  kitakamiprologue: 'Kitakami Prologue',
   lc: 'LC', // LittleCup
-  lcuu: 'UU LC',
+  lcuu: 'LC UU',
   letsgoou: 'LGPE OU', // LetsGoPikachuEevee
   letsgorandombattle: 'LGPE Randoms',
   linked: 'Linked',
   metronomebattle: 'Metronome',
   mixandmega: 'Mix & Mega',
+  monothreatfairy: 'Monothreat Fairy',
   monotype: 'Monotype',
   monotypebattlefactory: 'B-Factory Monotype',
   monotyperandombattle: 'Monotype Randoms',
@@ -124,11 +124,12 @@ export const FormatLabels: Record<string, string> = {
   ru: 'RU', // RarelyUsed
   sharedpower: 'Shared Power',
   sharedpowerrandombattle: 'Shared Power Randoms',
+  sharingiscaring: 'Sharing is Caring',
   spikemuthcup: 'Spikemuth Cup',
   stabmons: 'STABmons', // SameTypeAttackBonus
   stabmonsmixandmega: 'STABmons Mix & Mega',
   stadiumou: 'Stadium OU',
-  superstaffbros4: 'Super Staff Bros 4',
+  superstaffbros4: 'SSB4',
   tagteamsingles: 'Tag Team Singles',
   teradonation: 'Tera Donation',
   terapreviewpaldeadexdraft: 'Tera Paldea Draft',
@@ -139,7 +140,7 @@ export const FormatLabels: Record<string, string> = {
   triplescustomgame: 'Triples Customs',
   ubers: 'Ubers',
   ultimatefinale: 'Ultimate Finale',
-  unratedrandombattle: 'Unrated Randoms',
+  // unratedrandombattle: 'Unrated Randoms',
   uu: 'UU', // UnderUsed
   vgc2009: 'VGC 2009', // VideoGameChampionships
   vgc2010: 'VGC 2010',
@@ -156,14 +157,25 @@ export const FormatLabels: Record<string, string> = {
   vgc2021: 'VGC 2021',
   vgc2022: 'VGC 2022',
   vgc2023: 'VGC 2023',
-  vgc2023series1: 'VGC 2023 Series 1',
-  vgc2023series2: 'VGC 2023 Series 2',
-  vgc2023regulationc: 'VGC 2023 Reg C',
-  vgc2023regulationd: 'VGC 2023 Reg D',
-  vgc2023regulatione: 'VGC 2023 Reg E',
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
+
+/**
+ * Format suffixes & how to parse them.
+ *
+ * * hehe
+ *
+ * @since 1.1.7
+ */
+export const FormatSuffixes: [test: RegExp, replacement: string][] = [
+  [/blitz/, 'Blitz'],
+  [/unrated/, 'Unrated'],
+  [/series(\d+)/, 'Series $1'],
+  [/regulation([a-z])/, 'Reg $1'],
+  [/muk$/, `${times} Muk`], // saw a "[Gen 2] UU (+ Muk)" lol
+  [/bo(\d+)$/, 'Bo$1'],
+];
 
 /**
  * Formats where abilities & moves should be locked to legal values.

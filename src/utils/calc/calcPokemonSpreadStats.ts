@@ -2,7 +2,7 @@ import { type GenerationNum } from '@smogon/calc';
 import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { nonEmptyObject } from '@showdex/utils/core';
-import { detectLegacyGen } from '@showdex/utils/dex';
+import { detectLegacyGen, getDefaultSpreadValue } from '@showdex/utils/dex';
 import { calcPokemonStat } from './calcPokemonStat';
 
 /**
@@ -21,7 +21,7 @@ import { calcPokemonStat } from './calcPokemonStat';
  * @since 0.1.0
  */
 export const calcPokemonSpreadStats = (
-  format: GenerationNum | string,
+  format: string | GenerationNum,
   pokemon: DeepPartial<CalcdexPokemon>,
 ): Partial<Showdown.StatsTable> => {
   if (!nonEmptyObject(pokemon?.baseStats)) {
@@ -29,8 +29,8 @@ export const calcPokemonSpreadStats = (
   }
 
   const legacy = detectLegacyGen(format);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   return PokemonStatNames.reduce((prev, stat) => {
     // update (2023/02/07): cleaned up the baseStat fuckery that existed before
@@ -46,7 +46,7 @@ export const calcPokemonSpreadStats = (
       baseStat,
       pokemon.ivs?.[stat] ?? defaultIv,
       pokemon.evs?.[stat] ?? defaultEv,
-      pokemon.level ?? 100,
+      (stat !== 'hp' && pokemon.transformedLevel) || (pokemon.level ?? 100),
       legacy ? undefined : pokemon.nature,
     );
 

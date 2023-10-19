@@ -2,10 +2,15 @@ import { type GenerationNum } from '@smogon/calc';
 import { type Duration, add, compareAsc } from 'date-fns';
 import LzString from 'lz-string';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
-import { getStoredItem, nonEmptyObject } from '@showdex/utils/core';
+import {
+  clearStoredItem,
+  env,
+  getStoredItem,
+  nonEmptyObject,
+} from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { fileSize } from '@showdex/utils/humanize';
-import { hydratePresets } from '@showdex/utils/hydro';
+import { hydrateHeader, hydratePresets } from '@showdex/utils/hydro';
 
 const l = logger('@showdex/utils/presets/getCachedPresets()');
 
@@ -59,9 +64,31 @@ export const getCachedPresets = (
     return [];
   }
 
-  const stale = nonEmptyObject(maxAge)
-    ? compareAsc(new Date(), add(hydration.date, maxAge)) > -1
-    : undefined;
+  const [header] = hydrateHeader(decompressed);
+
+  const buildChanged = !__DEV__ && !!header?.timestamp && (
+    env('build-date') !== header.timestamp
+      || env('package-version') !== header.version
+  );
+
+  /**
+   * @todo find a better cache purging method (might be race-condition-mania here lol)
+   */
+  if (buildChanged) {
+    l.info(
+      'Purging stale preset cache due to detected build change!',
+      '\n', 'version', '(prev)', header.version, '(now)', env('package-version'),
+      '\n', 'build', '(prev)', header.timestamp, '(now)', env('build-date'),
+    );
+
+    clearStoredItem('storage-preset-cache-key');
+  }
+
+  const stale = buildChanged
+    ? true
+    : nonEmptyObject(maxAge)
+      ? compareAsc(new Date(), add(hydration.date, maxAge)) > -1
+      : undefined;
 
   return [
     hydration.presets,

@@ -38,11 +38,11 @@ export const cachePresets = (
   format?: GenerationNum | string,
   source?: CalcdexPokemonPresetSource,
 ): void => {
-  l.debug(
-    '\n', 'presets', presets,
-    '\n', 'format', format,
-    '\n', 'source', source,
-  );
+  // l.debug(
+  //   '\n', 'presets', presets,
+  //   '\n', 'format', format,
+  //   '\n', 'source', source,
+  // );
 
   if (!presets?.length) {
     return;
@@ -71,7 +71,7 @@ export const cachePresets = (
       && !!preset.speciesForme
   ));
 
-  l.debug('validPresets', validPresets);
+  // l.debug('validPresets', validPresets);
 
   if (!validPresets.length) {
     return null;
@@ -81,7 +81,7 @@ export const cachePresets = (
   // (note: not passing `format` here since we want the entire cache in memory to manipulate it)
   let [cachedPresets = []] = getCachedPresets();
 
-  l.debug('cachedPresets', '(pre)', cachedPresets);
+  // l.debug('cachedPresets', '(pre)', cachedPresets);
 
   // there are 2 possible "modes" based on the input args:
   // 1. `format` isn't provided, so just append/replace the provided `presets`
@@ -115,7 +115,7 @@ export const cachePresets = (
     cachedPresets.push(...validPresets);
   }
 
-  l.debug('cachedPresets', '(post)', cachedPresets);
+  // l.debug('cachedPresets', '(post)', cachedPresets);
 
   // if there's nothing in the cache, delete the key
   if (!cachedPresets.length) {

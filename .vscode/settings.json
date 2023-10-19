@@ -4,7 +4,7 @@
   "emmet.showExpandedAbbreviation": "never",
 
   "eslint.debug": false,
-  "eslint.packageManager": "yarn",
+  // "eslint.packageManager": "yarn",
 
   "explorer.incrementalNaming": "smart",
 

@@ -32,7 +32,7 @@ const l = logger('@showdex/utils/calc/guessServerSpread()');
  * @since 0.1.1
  */
 export const guessServerSpread = (
-  format: GenerationNum | string,
+  format: string | GenerationNum,
   pokemon: CalcdexPokemon,
   knownNature?: Showdown.NatureName,
 ): Partial<CalcdexPokemonPreset> => {

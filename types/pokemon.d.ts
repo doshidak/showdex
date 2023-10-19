@@ -191,8 +191,9 @@ declare namespace Showdown {
     fainted?: boolean;
   }
 
-  type PokemonStats = { [K in StatNameNoHp]: number; };
+  type PokemonStats = { [K in StatName]: number; };
   type StatsTable = { [K in StatName]?: number; };
+  type StatsTableNoHp = { [K in StatNameNoHp]?: number; };
 
   /**
    * Note that unlike `Pokemon`, this is a POJO (Plain Ol' JavaScript Object), not a class.
@@ -424,17 +425,20 @@ declare namespace Showdown {
     /**
      * @default {}
      */
-    volatiles: { [effectid?: PokemonVolatile | string]: EffectState; };
+    // volatiles: { [effectid?: PokemonVolatile | string]: EffectState; };
+    volatiles: Record<string, EffectState>;
 
     /**
      * @default {}
      */
-    turnstatuses: { [effectid?: PokemonTurnStatus | string]: EffectState; };
+    // turnstatuses: { [effectid?: PokemonTurnStatus | string]: EffectState; };
+    turnstatuses: Record<string, EffectState>;
 
     /**
      * @default {}
      */
-    movestatuses: { [effectid?: PokemonMoveStatus | string]: EffectState; };
+    // movestatuses: { [effectid?: PokemonMoveStatus | string]: EffectState; };
+    movestatuses: Record<string, EffectState>;
 
     /**
      * @default ''
@@ -547,6 +551,6 @@ declare namespace Showdown {
     hpWidth(maxWidth: number): number;
 
     getHPText(precision?: number): string;
-    static getHPText(pokemon: PokemonHealth, precision?: number): string;
+    getHPText(pokemon: PokemonHealth, precision?: number): string;
   }
 }

@@ -42,12 +42,12 @@ app.receive = (data: string) => {
 
   if (receivedRoom) {
     const roomId = data.slice(1, data.indexOf('\n'));
-    const room = app.rooms[roomId];
+    // const room = app.rooms[roomId];
 
     l.debug(
       'receive() for', roomId,
-      '\n', 'room', room,
-      '\n', 'data', __DEV__ && data,
+      // '\n', 'room', room,
+      '\n', data,
     );
 
     // call each bootstrapper

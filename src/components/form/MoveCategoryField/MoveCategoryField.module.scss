@@ -1,0 +1,147 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+
+$tooltip-container: (
+  padding: 8px,
+);
+
+$stat-presets: (
+  spacing: 8px, // section spacing
+
+  option: (
+    size: 44px,
+    spacing: 4px,
+    font-size: 9px,
+  ),
+);
+
+$stat-sections: (
+  title: (
+    spacing: 4px,
+    font-weight: 600,
+    font-size: 8px,
+    color: (
+      light: color.alpha(colors.$white, 0.64),
+      dark: color.alpha(colors.$black, 0.64),
+    ),
+  ),
+
+  option: (
+    size: 28px,
+    spacing: 2px,
+    font-size: 8px,
+  ),
+);
+
+$container-button: (
+  padding-x: 8px,
+  padding-y: 1px,
+  font-vertical-offset: 1px,
+  font-weight: 500,
+  font-size: 8px,
+);
+
+$vs-label: (
+  spacing-x: 4px,
+  spacing-y: 3px,
+  font-weight: 600,
+  font-size: 6px,
+  letter-spacing: 0.25px,
+  opacity: 0.56,
+);
+
+button.container {
+  @include spacing.padding(
+    $top: map.get($container-button, padding-y) + map.get($container-button, font-vertical-offset),
+    $right: map.get($container-button, padding-x),
+    $bottom: map.get($container-button, padding-y),
+    $left: map.get($container-button, padding-x),
+  );
+  font-weight: map.get($container-button, font-weight);
+  font-size: map.get($container-button, font-size);
+
+  &.readOnly {
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+.tooltipContainer {
+  @include spacing.padding-all(map.get($tooltip-container, padding));
+  user-select: none;
+  z-index: 99;
+}
+
+.statPresets {
+  @include flex.row-center;
+  @include spacing.margin($bottom: map.get($stat-presets, spacing));
+}
+
+button.statPresetOption {
+  width: map.get($stat-presets, option, size);
+  font-size: map.get($stat-presets, option, font-size);
+
+  &:not(:last-child) {
+    @include spacing.margin($right: map.get($stat-presets, option, spacing));
+  }
+}
+
+.statSections {
+  @include flex.column-center;
+}
+
+.statSectionTitle {
+  @include font.apply(fonts.$primary, ( font-weight: map.get($stat-sections, title, font-weight) ));
+  font-size: map.get($stat-sections, title, font-size);
+  text-transform: uppercase;
+
+  &.top {
+    @include spacing.margin($bottom: map.get($stat-sections, title, spacing));
+  }
+
+  &.bottom {
+    @include spacing.margin($top: map.get($stat-sections, title, spacing));
+  }
+
+  .light & {
+    color: map.get($stat-sections, title, color, light);
+  }
+
+  .dark & {
+    color: map.get($stat-sections, title, color, dark);
+  }
+}
+
+.statSectionOptions {
+  @include flex.row-center;
+}
+
+button.statSectionOption {
+  width: map.get($stat-sections, option, size);
+  font-size: map.get($stat-sections, option, font-size);
+
+  &:not(:last-child) {
+    @include spacing.margin($right: map.get($stat-sections, option, spacing));
+  }
+}
+
+.vsLabel {
+  @include font.apply(fonts.$mono, ( font-weight: map.get($vs-label, font-weight) ));
+  font-size: map.get($vs-label, font-size);
+  letter-spacing: map.get($vs-label, letter-spacing);
+  text-transform: uppercase;
+  opacity: map.get($vs-label, opacity);
+
+  &.horizontal {
+    @include spacing.margin-xy($x: map.get($vs-label, spacing-x));
+  }
+
+  &.vertical {
+    @include spacing.margin-xy($y: map.get($vs-label, spacing-y));
+  }
+}

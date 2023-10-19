@@ -42,9 +42,9 @@ const l = logger('@showdex/utils/calc/calcPokemonFinalStats()');
  * @since 0.1.3
  */
 export const calcPokemonFinalStats = (
-  format: GenerationNum | string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  opponentPokemon: DeepPartial<CalcdexPokemon>,
+  format: string | GenerationNum,
+  pokemon: CalcdexPokemon,
+  opponentPokemon: CalcdexPokemon,
   player?: CalcdexPlayer,
   opponent?: CalcdexPlayer,
   field?: CalcdexBattleField,
@@ -310,6 +310,11 @@ export const calcPokemonFinalStats = (
   // 50% ATK boost if ability is "Hustle" or "Gorilla Tactics" (and not dynamaxed, for the latter only)
   if (ability === 'hustle' || (ability === 'gorillatactics' && !hasDynamax)) {
     record.apply('atk', 1.5, 'ability', dex.abilities.get(ability)?.name || ability);
+  }
+
+  // 100% DEF boost if ability is "Fur Coat"
+  if (ability === 'furcoat') {
+    record.apply('def', 2, 'ability', dex.abilities.get(ability)?.name || ability);
   }
 
   // apply "Ruin" ability effects that'll ruin me (gen 9)

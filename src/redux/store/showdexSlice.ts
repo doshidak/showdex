@@ -59,6 +59,13 @@ export interface ShowdexSettings {
    * @since 1.0.3
    */
   calcdex: ShowdexCalcdexSettings;
+
+  /**
+   * Showdown-specific settings.
+   *
+   * @since 1.1.7
+   */
+  showdown: ShowdexShowdownSettings;
 }
 
 /**
@@ -691,6 +698,21 @@ export interface ShowdexCalcdexSettings {
 }
 
 /**
+ * Showdown-specific settings.
+ *
+ * @since 1.1.7
+ */
+export interface ShowdexShowdownSettings {
+  /**
+   * Whether to auto-accept Open Team Sheets when prompted by the server.
+   *
+   * @default false
+   * @since 1.1.7
+   */
+  autoAcceptSheets: boolean;
+}
+
+/**
  * Primary state for the entire extension.
  *
  * @since 1.0.2
@@ -943,6 +965,15 @@ export const useHellodexSettings = () => useSelector(
  */
 export const useCalcdexSettings = () => useSelector(
   (state) => state?.showdex?.settings?.calcdex,
+);
+
+/**
+ * Convenient hook to access the `ShowdexShowdownSettings` from the `ShowdexSettings` state.
+ *
+ * @since 1.1.7
+ */
+export const useShowdexShowdownSettings = () => useSelector(
+  (state) => state?.showdex?.settings?.showdown,
 );
 
 /**

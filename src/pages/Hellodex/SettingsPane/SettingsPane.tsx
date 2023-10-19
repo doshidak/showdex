@@ -1033,6 +1033,8 @@ export const SettingsPane = ({
                           <br />
                           <br />
                           This is the default behavior prior to v1.1.6.
+                          <br />
+                          (By the way, you're on v{env('package-version', 'icoden')}!)
                         </div>
                       ),
                       value: 0,
@@ -1192,15 +1194,19 @@ export const SettingsPane = ({
                       styles.field,
                       // !inBattle && styles.singleColumn,
                     )}
-                    // label={`My Pok${eacute}mon's Location`}
+                    // label={`My Pok${eacute}mon's Location`}#252836
                     label="My Location"
                     labelPosition={inBattle ? 'top' : 'left'}
                     options={[{
                       label: 'Top',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Your Pok&eacute;mon will always be located in the top half &amp;
-                          your opponent's in the bottom half.
+                          When playing, your Pok&eacute;mon will be located in the <strong>top half</strong>,
+                          regardless of Showdown's assigned player order.
+                          <br />
+                          <br />
+                          Has no effect if spectating, in which case, Showdown's ordering will be used.
+                          Hover over the <strong>Auto</strong> option to learn more.
                         </div>
                       ),
                       value: 'top',
@@ -1208,8 +1214,12 @@ export const SettingsPane = ({
                       label: 'Bottom',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          Your Pok&eacute;mon will always be located in the bottom half &amp;
-                          your opponent's in the top half.
+                          When playing, your Pok&eacute;mon will be located in the <strong>bottom half</strong>,
+                          regardless of Showdown's assigned player order.
+                          <br />
+                          <br />
+                          Has no effect if spectating, in which case, Showdown's ordering will be used.
+                          Hover over the <strong>Auto</strong> option to learn more.
                         </div>
                       ),
                       value: 'bottom',
@@ -1217,12 +1227,16 @@ export const SettingsPane = ({
                       label: 'Auto',
                       tooltip: (
                         <div className={styles.tooltipContent}>
-                          If you're <em>Player 1</em>,
-                          your Pok&eacute;mon will be located in the top half,
-                          otherwise, in the bottom half.
+                          Your Pok&eacute;mon will be located based on Showdown's assigned player order,
+                          with <em>Player 1</em> at the top & <em>Player 2</em> at the bottom.
                           <br />
                           <br />
-                          This is the default behavior if spectating.
+                          This is the behavior when spectating any game, as the other options only apply when you're
+                          playing a game.
+                          <br />
+                          <br />
+                          (Pro-Tip: Selecting <em>Switch Sides</em> in the spectator battle controls will also swap
+                          the player locations in the Calcdex!)
                         </div>
                       ),
                       value: 'auto',
@@ -1291,22 +1305,6 @@ export const SettingsPane = ({
                     )}
                   />
 
-                  {/* <Field<ShowdexSettings['calcdex']['reverseIconName']>
-                    name="calcdex.reverseIconName"
-                    component={Switch}
-                    className={cx(styles.field, styles.switchField)}
-                    label="Swap Icon/Name Behavior"
-                    tooltip={(
-                      <div className={styles.tooltipContent}>
-                        Swaps the behavior of the Pok&eacute;mon icon &amp; name when clicked on.
-                        <br />
-                        <br />
-                        By default (off), clicking on the icon will open its Smogon page &amp;
-                        clicking on the name will switch its forme, if any.
-                      </div>
-                    )}
-                  /> */}
-
                   <Field<ShowdexSettings['calcdex']['openSmogonPage']>
                     name="calcdex.openSmogonPage"
                     component={Switch}
@@ -1330,13 +1328,13 @@ export const SettingsPane = ({
                         Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
                         <br />
                         <br />
-                        ("but why tho?" &ndash;<em>camdawgboi</em>, 2022)
+                        ("but why tho?" &ndash;<em>analogcam</em>, 2022)
                       </div>
                     )}
                   />
 
-                  <Field<ShowdexSettings['calcdex']['alwaysShowNonVolatile']>
-                    name="calcdex.alwaysShowNonVolatile"
+                  <Field<ShowdexSettings['calcdex']['forceNonVolatile']>
+                    name="calcdex.forceNonVolatile"
                     component={Switch}
                     className={cx(styles.field, styles.switchField)}
                     label={`Always Show Pok${eacute}mon Statuses`}
@@ -1745,14 +1743,7 @@ export const SettingsPane = ({
                           <br />
                           You can edit the move's type, category (if damaging) &amp;
                           BP (including separate BPs for Z &amp; Max moves when activated).
-                          Edits are unique to each move of the Pok&eacute;mon.
-                          <br />
-                          <br />
-                          Additionally, if space permits, you can override the attacking stat (ATK/SPA)
-                          &amp; the defending stat (DEF/SPD).
-                          <br />
-                          <br />
-                          (Note: There's currently no setting to show stat overrides on smaller screens.)
+                          Edits are unique to each move of each Pok&eacute;mon.
                         </div>
                       ),
                       value: 'always',
@@ -2072,10 +2063,31 @@ export const SettingsPane = ({
                       </div>
                     }
                   </div>
-
-                  {/* temporary spacer cause too lazy to do it in CSS lol */}
-                  <div style={{ height: 5 }} />
                 </div>
+              </div>
+
+              <div className={styles.settingsGroup}>
+                <div className={styles.settingsGroupTitle}>
+                  Showdown
+                </div>
+
+                <div className={styles.settingsGroupFields}>
+                  <Field<ShowdexSettings['showdown']['autoAcceptSheets']>
+                    name="showdown.autoAcceptSheets"
+                    component={Switch}
+                    className={cx(styles.field, styles.switchField)}
+                    label="Auto-Accept Team Sheets"
+                    tooltip={(
+                      <div className={styles.tooltipContent}>
+                        Enabling this will automatically accept Open Team Sheet requests,
+                        which are typical of VGC formats.
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* temporary spacer cause too lazy to do it in CSS lol */}
+                <div style={{ height: 5 }} />
               </div>
 
               <div className={styles.notice}>

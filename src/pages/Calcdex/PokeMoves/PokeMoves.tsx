@@ -1,7 +1,12 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { type MoveName } from '@smogon/calc';
-import { Dropdown, PokeTypeField, ValueField } from '@showdex/components/form';
+import {
+  Dropdown,
+  MoveCategoryField,
+  PokeTypeField,
+  ValueField,
+} from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import {
   type BadgeInstance,
@@ -23,7 +28,7 @@ import {
 } from '@showdex/utils/core';
 import { legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
-import { formatDamageAmounts } from '@showdex/utils/ui';
+import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';
@@ -47,7 +52,8 @@ export const PokeMoves = ({
     player,
     playerPokemon: pokemon,
     opponentPokemon,
-    moveOptions,
+    // moveOptions,
+    usage,
     matchups,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -66,12 +72,26 @@ export const PokeMoves = ({
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
 
+  const moveOptions = React.useMemo(() => buildMoveOptions(
+    format,
+    pokemon,
+    usage,
+    settings?.showAllOptions,
+  ), [
+    format,
+    pokemon,
+    settings?.showAllOptions,
+    usage,
+  ]);
+
   const nationalDexFormat = !!format && [
     'nationaldex',
     'natdex',
   ].some((f) => format.includes(f));
 
-  const showTeraToggle = !!pokemon?.speciesForme && gen > 8;
+  const showTeraToggle = !!pokemon?.speciesForme
+    && !rules?.tera
+    && gen > 8;
 
   const disableTeraToggle = !pokemon?.speciesForme
     || !pokemon.teraType
@@ -93,8 +113,11 @@ export const PokeMoves = ({
       || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
   );
 
-  const showFaintCounter = !!pokemon?.speciesForme
-    && formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord';
+  // nice one me 10/10
+  const showFaintCounter = !!pokemon?.speciesForme && (
+    formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord'
+      || pokemon.moves?.includes('Last Respects' as MoveName)
+  );
 
   const handleMoveToggle = (name: MoveName) => {
     if (!name || !PokemonToggleMoves.includes(name)) {
@@ -189,7 +212,7 @@ export const PokeMoves = ({
         copiedRefs.current?.[index]?.show();
       } catch (error) {
         // no-op when an error is thrown while writing to the user's clipboard
-        (() => {})();
+        (() => void 0)();
       }
     })();
   };
@@ -219,6 +242,10 @@ export const PokeMoves = ({
           showTeraToggle &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.ultButton)}
+            labelClassName={cx(
+              styles.teraButtonLabel,
+              (battleActive && !player?.usedTera && !pokemon?.terastallized) && styles.available,
+            )}
             label="Tera"
             tooltip={(
               <div className={styles.descTooltip}>
@@ -245,7 +272,7 @@ export const PokeMoves = ({
               </div>
             )}
             tooltipDisabled={!settings?.showUiTooltips && !battleActive}
-            primary
+            primary={!battleActive || !player?.usedTera || pokemon?.terastallized}
             active={pokemon?.terastallized}
             disabled={disableTeraToggle}
             onPress={() => updatePokemon({
@@ -262,7 +289,7 @@ export const PokeMoves = ({
             className={cx(
               styles.toggleButton,
               styles.ultButton,
-              gen > 8 && styles.lessSpacing,
+              showTeraToggle && styles.lessSpacing,
             )}
             label="Z"
             tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
@@ -284,7 +311,7 @@ export const PokeMoves = ({
             className={cx(
               styles.toggleButton,
               styles.ultButton,
-              showZToggle && styles.lessSpacing,
+              (showTeraToggle || showZToggle) && styles.lessSpacing,
             )}
             label="Max"
             tooltip={(
@@ -311,7 +338,7 @@ export const PokeMoves = ({
               </div>
             )}
             tooltipDisabled={!settings?.showUiTooltips && !battleActive}
-            primary
+            primary={!battleActive || !player?.usedMax || pokemon?.useMax}
             active={pokemon?.useMax}
             disabled={disableMaxToggle}
             onPress={() => updatePokemon({
@@ -371,7 +398,12 @@ export const PokeMoves = ({
                   hint={pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0)}
                   fallbackValue={pokemon.faintCounter || 0}
                   min={0}
-                  max={player.maxPokemon}
+                  max={(
+                    formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord'
+                      && !pokemon.moves.includes('Last Respects' as MoveName)
+                      ? Math.max(player.maxPokemon - 1, 0)
+                      : 100 // Last Respects is capped at 100 LOL
+                  )}
                   step={1}
                   shiftStep={2}
                   clearOnFocus
@@ -570,7 +602,11 @@ export const PokeMoves = ({
             key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}
           >
             <TableGridItem
-              className={cx(pokemon?.showMoveOverrides && ['xs', 'sm'].includes(containerSize) && styles.editorItemInput)}
+              // className={cx(
+              //   pokemon?.showMoveOverrides
+              //     && ['xs', 'sm'].includes(containerSize)
+              //     && styles.editorItemInput,
+              // )}
               align="left"
             >
               <Dropdown
@@ -596,26 +632,28 @@ export const PokeMoves = ({
 
             {pokemon?.showMoveOverrides ? (
               <TableGridItem
-                className={cx(
-                  styles.editorItem,
-                  ['xs', 'sm'].includes(containerSize) && styles.smol,
-                  damagingMove && styles.withStatTargets,
-                )}
-                style={{ paddingLeft: '0.5em' }}
+                // className={cx(
+                //   styles.editorItem,
+                //   ['xs', 'sm'].includes(containerSize) && styles.smol,
+                //   damagingMove && styles.withStatTargets,
+                // )}
+                className={styles.editorItem}
+                // style={{ paddingLeft: 6 }}
               >
                 <div className={styles.editorLeft}>
                   <PokeTypeField
                     input={{
+                      name: `PokeMoves:${pokemonKey}:Moves:PokeTypeField:${moveName}`,
                       value: moveOverrides.type,
                       onChange: (value: Showdown.TypeName) => updatePokemon({
                         moveOverrides: {
                           [moveName]: { type: value },
                         },
-                      }, `${baseScope}:PokeTypeField~Move:input.onChange()`),
+                      }, `${baseScope}:PokeTypeField:input.onChange()`),
                     }}
                   />
 
-                  <ToggleButton
+                  {/* <ToggleButton
                     className={cx(
                       styles.editorButton,
                       styles.categoryButton,
@@ -647,6 +685,20 @@ export const PokeMoves = ({
                         },
                       },
                     }, `${baseScope}:ToggleButton~Category:onPress()`) : undefined}
+                  /> */}
+
+                  <MoveCategoryField
+                    className={styles.categoryField}
+                    ariaLabel={`Stat Overrides for ${moveName} of Pokemon ${friendlyPokemonName}`}
+                    format={format}
+                    input={{
+                      name: `PokeMoves:${pokemonKey}:Moves:MoveCategoryField:${moveName}`,
+                      value: moveOverrides,
+                      onChange: (value: Partial<CalcdexMoveOverride>) => updatePokemon({
+                        moveOverrides: { [moveName]: value },
+                      }, `${baseScope}:MoveCategoryField:input.onChange()`),
+                    }}
+                    readOnly={moveOverrides.category === 'Status'}
                   />
 
                   {
@@ -668,153 +720,36 @@ export const PokeMoves = ({
 
                   {
                     damagingMove &&
-                    <>
-                      <div className={styles.moveProperty}>
-                        <ValueField
-                          className={styles.valueField}
-                          label={`Base Power Override for ${moveName} of Pokemon ${friendlyPokemonName}`}
-                          hideLabel
-                          hint={moveOverrides[basePowerKey]?.toString() || 0}
-                          fallbackValue={fallbackBasePower}
-                          min={0}
-                          max={999} // hmm...
-                          step={1}
-                          shiftStep={10}
-                          clearOnFocus
-                          absoluteHover
-                          input={{
-                            value: moveOverrides[basePowerKey],
-                            onChange: (value: number) => updatePokemon({
-                              moveOverrides: {
-                                [moveName]: { [basePowerKey]: clamp(0, value, 999) },
-                              },
-                            }, `${baseScope}:ValueField~BasePower:input.onChange()`),
-                          }}
-                        />
-
-                        <div className={styles.propertyName}>
-                          {pokemon?.useZ && !pokemon?.useMax && 'Z '}
-                          {pokemon?.useMax && 'Max '}
-                          BP
-                        </div>
-                      </div>
-
-                      <div
-                        className={styles.moveProperty}
-                        style={{
-                          // marginLeft: '1em',
-                          ...(['xs', 'sm'].includes(containerSize) ? {
-                            paddingTop: 3,
-                            // paddingBottom: 2,
-                          } : {
-                            marginLeft: '1em',
-                          }),
+                    <div className={styles.moveProperty}>
+                      <ValueField
+                        className={styles.valueField}
+                        label={`Base Power Override for ${moveName} of Pokemon ${friendlyPokemonName}`}
+                        hideLabel
+                        hint={moveOverrides[basePowerKey]?.toString() || 0}
+                        fallbackValue={fallbackBasePower}
+                        min={0}
+                        max={999} // hmm...
+                        step={1}
+                        shiftStep={10}
+                        clearOnFocus
+                        absoluteHover
+                        input={{
+                          name: `PokeMoves:${pokemonKey}:Moves:ValueField~BasePower:${moveName}`,
+                          value: moveOverrides[basePowerKey],
+                          onChange: (value: number) => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { [basePowerKey]: clamp(0, value, 999) },
+                            },
+                          }, `${baseScope}:ValueField~BasePower:input.onChange()`),
                         }}
-                      >
-                        <ToggleButton
-                          className={styles.editorButton}
-                          style={{ marginRight: 3 }}
-                          label="ATK"
-                          tooltip={(
-                            <div className={styles.descTooltip}>
-                              Use this Pok&eacute;mon's ATK stat.
-                            </div>
-                          )}
-                          tooltipDisabled={!settings?.showUiTooltips}
-                          primary
-                          active={moveOverrides.offensiveStat === 'atk'}
-                          activeScale={moveOverrides.offensiveStat === 'atk' ? 0.98 : undefined}
-                          onPress={() => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { offensiveStat: 'atk' },
-                            },
-                          }, `${baseScope}:ToggleButton~Offense-ATK:onPress()`)}
-                        />
-                        <ToggleButton
-                          className={styles.editorButton}
-                          style={{ marginRight: '0.8em' }}
-                          label="SPA"
-                          tooltip={(
-                            <div className={styles.descTooltip}>
-                              Use this Pok&eacute;mon's SPA stat.
-                            </div>
-                          )}
-                          tooltipDisabled={!settings?.showUiTooltips}
-                          primary
-                          active={moveOverrides.offensiveStat === 'spa'}
-                          activeScale={moveOverrides.offensiveStat === 'spa' ? 0.98 : undefined}
-                          onPress={() => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { offensiveStat: 'spa' },
-                            },
-                          }, `${baseScope}:ToggleButton~Offense-SPA:onPress()`)}
-                        />
+                      />
 
-                        <div
-                          className={styles.propertyName}
-                          style={{ opacity: 0.5 }}
-                        >
-                          vs
-                        </div>
-
-                        <ToggleButton
-                          className={styles.editorButton}
-                          style={{ marginRight: 3, marginLeft: '0.8em' }}
-                          label="DEF"
-                          tooltip={(
-                            <div className={styles.descTooltip}>
-                              Use the opposing Pok&eacute;mon's DEF stat.
-                            </div>
-                          )}
-                          tooltipDisabled={!settings?.showUiTooltips}
-                          primary
-                          active={moveOverrides.defensiveStat === 'def'}
-                          activeScale={moveOverrides.defensiveStat === 'def' ? 0.98 : undefined}
-                          onPress={() => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { defensiveStat: 'def' },
-                            },
-                          }, `${baseScope}:ToggleButton~Defense-DEF:onPress()`)}
-                        />
-                        <ToggleButton
-                          className={styles.editorButton}
-                          // style={{ marginRight: 3 }}
-                          label="SPD"
-                          tooltip={(
-                            <div className={styles.descTooltip}>
-                              Use the opposing Pok&eacute;mon's SPD stat.
-                            </div>
-                          )}
-                          tooltipDisabled={!settings?.showUiTooltips}
-                          primary
-                          active={moveOverrides.defensiveStat === 'spd'}
-                          activeScale={moveOverrides.defensiveStat === 'spd' ? 0.98 : undefined}
-                          onPress={() => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { defensiveStat: 'spd' },
-                            },
-                          }, `${baseScope}:ToggleButton~Defense-SPD:onPress()`)}
-                        />
-                        {/* update (2022/11/04): ignoreDefensive in createSmogonMove() doesn't seem to do anything */}
-                        {/* <ToggleButton
-                          className={styles.editorButton}
-                          label="IGN"
-                          tooltip={(
-                            <div className={styles.descTooltip}>
-                              Ignore/bypass the opposing Pok&eactue;mon's defensive stats.
-                            </div>
-                          )}
-                          tooltipDisabled={!settings?.showUiTooltips}
-                          primary
-                          active={moveOverrides.defensiveStat === 'ignore'}
-                          onPress={() => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { defensiveStat: 'ignore' },
-                            },
-                          })}
-                        /> */}
+                      <div className={styles.propertyName}>
+                        {pokemon?.useZ && !pokemon?.useMax && 'Z '}
+                        {pokemon?.useMax && 'Max '}
+                        BP
                       </div>
-                    </>
+                    </div>
                   }
                 </div>
 

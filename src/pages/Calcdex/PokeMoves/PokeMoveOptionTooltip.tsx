@@ -2,8 +2,9 @@ import * as React from 'react';
 import cx from 'classnames';
 import { type MoveName } from '@smogon/calc';
 import { PokeType } from '@showdex/components/app';
-import { type SelectOptionTooltipProps } from '@showdex/components/form';
+import { type SelectOptionTooltipProps, findCategoryLabel } from '@showdex/components/form';
 import { type CalcdexPokemon } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
 import { type PokemonStatBoostDelta } from '@showdex/utils/ui';
@@ -13,8 +14,8 @@ export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<Mov
   className?: string;
   style?: React.CSSProperties;
   format?: string;
-  pokemon?: DeepPartial<CalcdexPokemon>;
-  opponentPokemon?: DeepPartial<CalcdexPokemon>;
+  pokemon?: Partial<CalcdexPokemon>;
+  opponentPokemon?: Partial<CalcdexPokemon>;
 }
 
 export const PokeMoveOptionTooltip = ({
@@ -60,6 +61,11 @@ export const PokeMoveOptionTooltip = ({
   const userOverrides = pokemon?.moveOverrides?.[value];
   const moveOverrides = { ...moveDefaults, ...userOverrides };
 
+  const categoryLabel = findCategoryLabel(
+    moveOverrides.category === 'Status' ? 'status' : moveOverrides.offensiveStat,
+    moveOverrides.defensiveStat,
+  );
+
   // const basePower = (
   //   pokemon?.useZ
   //     ? moveOverrides?.zBasePower
@@ -90,6 +96,11 @@ export const PokeMoveOptionTooltip = ({
         || (basePower < baseBasePower && 'negative')
     )
   ) || null;
+
+  const showFaintCount = (pokemon?.faintCounter ?? 0) > 0 && (
+    formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord'
+      || formatId(value) === 'lastrespects'
+  );
 
   // Z/Max/G-Max moves bypass the original move's accuracy
   // (only time these moves can "miss" is if the opposing Pokemon is in a semi-vulnerable state,
@@ -144,7 +155,15 @@ export const PokeMoveOptionTooltip = ({
           !!moveOverrides.category &&
           <div className={styles.moveProperty}>
             <div className={styles.propertyName}>
-              {moveOverrides.category.slice(0, 4)}
+              {categoryLabel?.[2] || (
+                <>
+                  <div>{moveOverrides.offensiveStat}</div>
+                  <div className={styles.statVsLabel}>
+                    vs
+                  </div>
+                  <div>{moveOverrides.defensiveStat}</div>
+                </>
+              )}
             </div>
 
             {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
@@ -175,6 +194,19 @@ export const PokeMoveOptionTooltip = ({
                 </span>
               </div>
             }
+          </div>
+        }
+
+        {
+          showFaintCount &&
+          <div className={styles.moveProperty}>
+            <div className={styles.propertyName}>
+              FNT
+            </div>
+
+            <div className={styles.propertyValue}>
+              {pokemon.faintCounter}
+            </div>
           </div>
         }
 

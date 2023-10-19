@@ -20,12 +20,12 @@ I'm not a stickler for how these should be formatted; just make sure you provide
 
 If possible, including the following would be **immensely** helpful!
 
-* **Device** (e.g., Custom PC, MacBook Pro 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
-* **OS** & **Version** (e.g., Windows 11, macOS Ventura, Ubuntu 22, Android 14, etc.)
+* **Device** (e.g., Custom PC, MacBook Pro 14" 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
+* **OS** & **Version** (e.g., Windows 11, macOS Sonoma, Ubuntu 22.04.3 LTS, Android 12, etc.)
 * **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
-* **Showdex Version** (e.g., v1.1.6)
-* **Format**, if applicable (e.g., Gen 9 National Dex AG)
-* **Replay**, if applicable & possible
+* **Showdex Version** (e.g., v1.1.7)
+* **Format**, if applicable (e.g., Gen 9 VGC 2023 Regulation E Bo3)
+* **Replay**, if applicable
 
 If you would like to be [credited for your contribution](../README.md#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type MoveName } from '@smogon/calc';
+import { type GameType, type MoveName } from '@smogon/calc';
 import {
   type CalcdexBattleField,
   type CalcdexPlayer,
@@ -21,6 +21,7 @@ export type SmogonMatchupHookCalculator = (
  */
 export const useSmogonMatchup = (
   format: string,
+  gameType: GameType,
   playerPokemon: CalcdexPokemon,
   opponentPokemon: CalcdexPokemon,
   player?: CalcdexPlayer,
@@ -32,6 +33,7 @@ export const useSmogonMatchup = (
   playerMove,
 ) => calcSmogonMatchup(
   format,
+  gameType,
   playerPokemon,
   opponentPokemon,
   playerMove,
@@ -44,6 +46,7 @@ export const useSmogonMatchup = (
   allPlayers,
   field,
   format,
+  gameType,
   opponent,
   opponentPokemon,
   player,

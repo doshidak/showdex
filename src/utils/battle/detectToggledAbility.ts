@@ -1,7 +1,20 @@
-import { type CalcdexBattleState, type CalcdexPokemon } from '@showdex/redux/store';
+import {
+  type AbilityName,
+  type GameType,
+  type ItemName,
+  type Terrain,
+  type Weather,
+} from '@smogon/calc';
+import {
+  PokemonBoosterAbilities,
+  PokemonSturdyAbilities,
+  PokemonRuinAbilities,
+  PokemonTypeChangeAbilities,
+} from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
-import { toggleableAbility } from '@showdex/utils/dex';
+// import { toggleableAbility } from '@showdex/utils/dex';
 
 /**
  * Determines whether the Pokemon's toggleable ability is active (if applicable).
@@ -16,7 +29,7 @@ import { toggleableAbility } from '@showdex/utils/dex';
  *   - Additionally, if, say, Dragonite takes damage, this would return `false`, since its HP is no longer at 100%.
  *     In the case where Dragonite uses *Roost* and the opponent doesn't attack (e.g., switches out),
  *     resulting in Dragonite healing back to full health (i.e., 100%), this would return `true` again.
- * * As of v1.1.0 when Gen 9 support was added, an optional `state` argument was added, which if provided,
+ * * As of v1.1.0 when Gen 9 support was added, ~~an optional `state` argument was added~~, which if provided,
  *   will be used in determining the toggle state for the following abilities:
  *   - *Beads of Ruin*
  *   - *Protosynthesis*
@@ -24,92 +37,120 @@ import { toggleableAbility } from '@showdex/utils/dex';
  *   - *Sword of Ruin*
  *   - *Tablets of Ruin*
  *   - *Vessel of Ruin*
+ * * As of v1.1.7, as to not depend on the big ass `state` argument, required parameters to determine the toggle state
+ *   of the aforementioned gen 9 abilities can be individually supplied in the optional `config` argument.
+ *   - For *Protosynthesis*, `weather` is required.
+ *   - For *Quark Drive*, `terrain` is required.
+ *   - For the 4 *Ruin* abilities, ~~`pokemonIndex` is required, as well as~~ `selectionIndex` if the `gameType` is `'Singles'`
+ *     ~~& `activeIndices[]` if `'Doubles'`~~.
+ * * Additionally as of v1.1.7, this no longer checks if the ability is toggleable via `toggleableAbility()`.
+ *   - Since `abilityToggled` is used for counting *Ruin* abilities & isn't included in `PokemonToggleAbilities.Singles[]`
+ *     (in order to prevent the "ACTIVE" toggle from appearing in `PokeInfo`), these two properties should be functionally distinct.
+ *   - (Will probably rename `abilityToggled` to `abilityActive` or something later lol.)
+ *   - Update (2023/10/18): Just made `abilityToggleable` deprecated for now & removed all usage of it from the codebase.
+ * * Added optional `opponentPokemon` config cause *Stakeout* needs to know the `active` state of the opposing Pokemon.
+ *   - Basically looking if the `opponentPokemon.active` is `false`, which assumes the user is trying to calculate
+ *     *Stakeout* damage against a potential switch-in.
+ *   - As a safety measure, `opponentPokemon` needs to be explicitly provided for this check to run, otherwise, `false`
+ *     will be returned (i.e., how it was before *Stakeout* was implemented).
  *
- * @returns `true` if the Pokemon's ability is *toggleable* and *active*, `false` otherwise.
+ * @returns `true` if the Pokemon's ability is ~~*toggleable* and~~ *active*, `false` otherwise.
+ * @todo rename to `detectToggledAbility()` to `activatedAbility()` whenever you rename `abilityToggled` to `abilityActive`.
  * @since 0.1.2
  */
 export const detectToggledAbility = (
-  pokemon: DeepPartial<CalcdexPokemon> = {},
-  state?: DeepPartial<CalcdexBattleState>,
+  pokemon: Partial<CalcdexPokemon>,
+  config?: {
+    gameType?: GameType,
+    pokemonIndex?: number;
+    opponentPokemon?: Partial<CalcdexPokemon>;
+    selectionIndex?: number;
+    activeIndices?: number[];
+    weather?: Weather;
+    terrain?: Terrain;
+  },
 ): boolean => {
-  if (!toggleableAbility(pokemon)) {
-    return false;
-  }
+  const {
+    gameType = 'Singles',
+    pokemonIndex = pokemon?.slot ?? -1,
+    opponentPokemon,
+    selectionIndex = -1,
+    activeIndices = [],
+    weather,
+    terrain,
+  } = config || {};
 
-  const ability = formatId(pokemon.dirtyAbility || pokemon.ability);
+  // if (!toggleableAbility(pokemon, gameType)) {
+  //   return false;
+  // }
+
+  const ability = pokemon.dirtyAbility || pokemon.ability;
 
   // by this point, the Pokemon's HP is 0% or 100% so Multiscale should be "on"
   // (considering that we "reset" the HP to 100% if the Pokemon is dead, i.e., at 0% HP)
   // (also note that Multiscale doesn't exist in pokemon.volatiles, hence the check here)
-  if (['multiscale', 'shadowshield'].includes(ability)) {
+  if (PokemonSturdyAbilities.includes(ability)) {
     const hpPercentage = calcPokemonHpPercentage(pokemon);
 
     return !hpPercentage || hpPercentage === 1;
   }
 
-  const volatilesKeys = Object.keys(pokemon.volatiles || {});
+  const item = pokemon.dirtyItem ?? pokemon.item;
+  const volatiles = Object.keys(pokemon.volatiles || {});
 
   // handle Slow Start
-  if (ability === 'slowstart') {
-    return volatilesKeys.includes('slowstart');
+  if (ability === 'Slow Start' as AbilityName) {
+    return volatiles.includes('slowstart');
   }
 
-  const item = formatId(pokemon.dirtyItem ?? pokemon.item);
-
   // handle Unburden
-  if (ability === 'Unburden') {
-    return !item || volatilesKeys.includes('itemremoved');
+  if (ability === 'Unburden' as AbilityName) {
+    // only enable from volatile if the user explicitly didn't set an item
+    return !pokemon.dirtyItem && volatiles.includes('itemremoved');
+  }
+
+  // handle Stakeout
+  // (this assumes that the user is trying to calculate Stakeout against a potential switch-in, i.e., not `active`)
+  if (ability === 'Stakeout' as AbilityName) {
+    // double-checking speciesForme here to make sure `opponentPokemon` was **explicitly** provided
+    // (otherwise, this would pretty much return `true` most of the time! would we want that? idk but I'm gunna assume naw)
+    return !!opponentPokemon?.speciesForme && !opponentPokemon.active;
   }
 
   // handle type-change abilities (i.e., Protean & Libero)
-  if (['protean', 'libero'].includes(ability)) {
+  if (PokemonTypeChangeAbilities.includes(ability)) {
     // idea is that if these abilities are enabled, then STAB will apply to all damaging moves;
     // otherwise, due to the handling of the 'typechange' volatile in createSmogonPokemon()
     // where the changed type is passed to @smogon/calc, only damaging moves of the changed type
     // will have STAB; additionally, when the user modifies the Pokemon's types via dirtyTypes[],
     // this should be toggled off as well, regardless of the 'typechange' volatile
-    return !('typechange' in pokemon.volatiles)
-      && !pokemon.dirtyTypes?.length;
+    return !volatiles.includes('typechange') && !pokemon.dirtyTypes?.length;
   }
 
   // handle Ruin abilities
   // (note: smart Ruin ability toggling is done in setSelectionIndex() of useCalcdex())
-  if (ability.endsWith('ofruin') && pokemon.playerKey && state?.[pokemon.playerKey]?.sideid) {
-    const {
-      activeIndices,
-      selectionIndex,
-      pokemon: pokemonState,
-    } = state[pokemon.playerKey];
-
-    // fuck it, just turn it on if state is uninitialized lol
-    if (!pokemonState?.length) {
-      return true;
-    }
-
-    const pokemonIndex = pokemonState
-      ?.findIndex((p) => p?.calcdexId === pokemon.calcdexId)
-      ?? -1;
-
+  if (PokemonRuinAbilities.includes(ability)) {
+    // fuck it, just turn it on if config isn't provided lol
     if (pokemonIndex < 0) {
-      return false;
+      return gameType === 'Singles' && selectionIndex < 0;
     }
 
     // only initially activate if the Pokemon is selected or active on the field
-    if (state.field?.gameType === 'Singles') {
-      return selectionIndex > -1 && pokemonIndex === selectionIndex;
-    }
-
-    return !!activeIndices?.length && activeIndices.includes(pokemonIndex);
+    return gameType === 'Doubles'
+      ? (pokemon.active || activeIndices?.includes(pokemonIndex))
+      : pokemonIndex === selectionIndex;
   }
 
+  const abilityId = formatId(ability);
+
   // handle Protosynthesis/Quark Drive
-  if (['protosynthesis', 'quarkdrive'].includes(ability)) {
-    return item === 'boosterenergy'
-      || (['Sun', 'Harsh Sunshine'].includes(state?.field?.weather) && ability === 'protosynthesis')
-      || (state?.field?.terrain === 'Electric' && ability === 'quarkdrive')
-      || volatilesKeys.some((k) => k?.startsWith(ability)); // e.g., 'protosynthesisatk' is a volatiles key
+  if (PokemonBoosterAbilities.includes(ability)) {
+    return item === 'Booster Energy' as ItemName
+      || (ability === 'Protosynthesis' as AbilityName && (['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather))
+      || (ability === 'Quark Drive' as AbilityName && terrain === 'Electric' as Terrain)
+      || volatiles.some((k) => k?.startsWith(abilityId)); // e.g., 'protosynthesisatk' is a volatiles key
   }
 
   // last resort: look in the volatiles for the ability, maybe
-  return volatilesKeys.some((k) => k?.includes(ability));
+  return volatiles.some((k) => k?.includes(abilityId));
 };

@@ -109,10 +109,15 @@ export const createSmogonMove = (
 
   // update (2022/11/04): ignoreDefensive doesn't seem to do anything here;
   // will leave this in, but won't allow the user to select 'ignore' in PokeMoves for now
+  // update (2023/10/11): yeetus deletus
+  /*
   if (defensiveStatOverride === 'ignore') {
     overrides.ignoreDefensive = true;
     overrides.overrideDefensiveStat = null;
-  } else if (defensiveStatOverride) {
+  }
+  */
+
+  if (defensiveStatOverride) {
     overrides.overrideDefensiveStat = defensiveStatOverride;
   }
 

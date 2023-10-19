@@ -17,13 +17,14 @@ import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 // import { fileSize } from '@showdex/utils/humanize';
 // import { dehydratePresets, hydratePresets } from '@showdex/utils/hydro';
 import { getPresetFormes } from './getPresetFormes';
+import { sortPresetsByFormat as sortPresets } from './sortPresetsByFormat';
 
 /**
- * Options for the `usePresets()` hook.
+ * Options for the `usePokemonPresets()` hook.
  *
  * @since 0.1.3
  */
-export interface CalcdexPresetsHookOptions {
+export interface CalcdexPokemonPresetsHookOptions {
   /**
    * Format of the battle.
    *
@@ -56,66 +57,15 @@ export interface CalcdexPresetsHookOptions {
 }
 
 /**
- * Return object of the `usePresets()` hook.
+ * Return object of the `usePokemonPresets()` hook.
  *
  * @since 1.0.3
  */
-export interface CalcdexPresetsHookInterface {
+export interface CalcdexPokemonPresetsHookValue {
   loading: boolean;
   presets: CalcdexPokemonPreset[];
   usages: CalcdexPokemonPreset[];
 }
-
-const sortPresets = (
-  genlessFormat?: string,
-): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => (a, b) => {
-  if (!genlessFormat) {
-    return 0;
-  }
-
-  // remove 'series<#>' from the genlessFormat
-  const format = genlessFormat.replace(/series\d+/i, '');
-
-  // first, hard match the genless formats
-  const matchesA = a.format === format;
-  const matchesB = b.format === format;
-
-  if (matchesA) {
-    // no need to repeat this case below since this only occurs when `a` and `b` both match
-    if (matchesB) {
-      if (a.source === 'usage') {
-        return 1;
-      }
-
-      if (b.source === 'usage') {
-        return -1;
-      }
-
-      // update (2023/07/27): WAIT how did I miss this case LMAO no wonder why the presets are backwards HAHAHA
-      // holy shit I'm actually dumb af
-      return 0;
-    }
-
-    return -1;
-  }
-
-  if (matchesB) {
-    return 1;
-  }
-
-  // at this point, we should've gotten all the hard matches, so we can do partial matching
-  // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
-  // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
-  if (a.format.endsWith(format)) {
-    return -1;
-  }
-
-  if (b.format.endsWith(format)) {
-    return 1;
-  }
-
-  return 0;
-};
 
 const selectPresetsFromResult = (
   presets: CalcdexPokemonPreset[],
@@ -126,6 +76,8 @@ const selectPresetsFromResult = (
   }
 
   // attempt to find presets of speciesFormes that match exactly with the firstForme
+  // update (2023/10/11): fucc it, release the flood gates
+  /*
   const [firstForme] = formes;
   const firstFormePresets = presets
     .filter((p) => !!p?.speciesForme && formatId(p.speciesForme) === firstForme);
@@ -138,28 +90,37 @@ const selectPresetsFromResult = (
   if (formes.length === 1) {
     return [];
   }
+  */
 
   // return any preset assigned to the current speciesForme (which at this point won't exist, probably) and baseForme
   return presets.filter((p) => !!p?.speciesForme && formes.includes(formatId(p.speciesForme)));
 };
 
-// const l = logger('@showdex/utils/presets/usePresets()');
+// const l = logger('@showdex/utils/presets/usePokemonPresets()');
 
 /**
- * Provides convenient tools to access the presets stored in RTK Query.
+ * Conveniently initiates preset fetching via RTK Query & "neatly" parses them for the given `format` & `pokemon`.
  *
  * * Automatically fetches the presets given the `options.format` value is valid.
  *   - Obviously not the case if `options.disabled` is `true`.
+ * * As of v1.1.7, this has been renamed from `usePresets()` in prior versions to better distinguish its scope from the
+ *   brand spankin' new `useBattlePresets()` hook.
+ *   - This (`usePokemonPresets()`) could be potentially deprecated in a future version, but leaving it as-is for now
+ *     in case I find some use for some `pokemon`-specific presets.
+ *   - What's the difference between this & `useBattlePresets()`? ...Latter doesn't accept a `pokemon`, just a `format` LOL.
+ *   - (While this was used in `CalcdexPokeProvider` [not anymore :o !!], `useBattlePresets()` is used in `CalcdexProvider`.)
  *
  * @since 0.1.3
  */
-export const usePresets = ({
-  format,
-  pokemon,
-  disabled,
-}: CalcdexPresetsHookOptions = {
-  format: null,
-}): CalcdexPresetsHookInterface => {
+export const usePokemonPresets = (
+  options: CalcdexPokemonPresetsHookOptions,
+): CalcdexPokemonPresetsHookValue => {
+  const {
+    format,
+    pokemon,
+    disabled,
+  } = options || {};
+
   const settings = useCalcdexSettings();
 
   const maxAge: Duration = typeof settings?.maxPresetAge === 'number' && settings.maxPresetAge > 0
@@ -170,8 +131,13 @@ export const usePresets = ({
   const genlessFormat = getGenlessFormat(format); // e.g., 'gen8randombattle' -> 'randombattle'
   const randoms = genlessFormat?.includes('random');
 
-  const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
-  const formes = getPresetFormes(speciesForme, format, true);
+  // const speciesForme = pokemon?.transformedForme || pokemon?.speciesForme; // e.g., 'Necrozma-Ultra'
+  // const formes = getPresetFormes(speciesForme, format, true);
+
+  const formes = [
+    ...getPresetFormes(pokemon?.speciesForme, { format, formatAsId: true }),
+    ...(pokemon?.transformedForme ? getPresetFormes(pokemon.transformedForme, { format, formatAsId: true }) : []),
+  ];
 
   const shouldSkip = disabled
     || !format

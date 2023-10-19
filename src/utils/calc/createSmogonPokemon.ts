@@ -1,11 +1,17 @@
-import { type MoveName, type Specie, Pokemon as SmogonPokemon } from '@smogon/calc';
-import { PokemonToggleAbilities } from '@showdex/consts/dex';
-import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/redux/store';
+import {
+  type GameType,
+  type MoveName,
+  type Specie,
+  Pokemon as SmogonPokemon,
+} from '@smogon/calc';
+import { PokemonPseudoToggleAbilities, PokemonRuinAbilities } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,
   detectLegacyGen,
+  getDefaultSpreadValue,
   getGenDexForFormat,
   notFullyEvolved,
 } from '@showdex/utils/dex';
@@ -26,21 +32,21 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon()');
  */
 export const createSmogonPokemon = (
   format: string,
+  gameType: GameType,
   pokemon: CalcdexPokemon,
   moveName?: MoveName,
   opponentPokemon?: CalcdexPokemon,
-  field?: CalcdexBattleField,
 ): SmogonPokemon => {
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
 
-  if (!dex || gen < 1 || !pokemon?.calcdexId || !pokemon.speciesForme) {
+  if (!dex || gen < 1 || !gameType || !pokemon?.calcdexId || !pokemon.speciesForme) {
     return null;
   }
 
   const legacy = detectLegacyGen(gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 0;
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
@@ -78,20 +84,20 @@ export const createSmogonPokemon = (
   const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
   const abilityId = formatId(ability);
 
-  const doubles = field?.gameType === 'Doubles';
-
   // note: these are in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
   // but we're allowing the effects of these abilities to be toggled on/off
   // update (2023/01/31): Ruin abilities aren't designed to be toggleable in Singles, only Doubles.
-  const pseudoToggleAbility = !!abilityId
-    && PokemonToggleAbilities
-      .map((a) => (formatId(a).endsWith('ofruin') && !doubles ? null : formatId(a)))
-      .filter(Boolean)
-      .includes(abilityId);
+  const pseudoToggleAbility = !!ability
+  //   && PokemonToggleAbilities
+  //     .map((a) => (formatId(a).endsWith('ofruin') && !doubles ? null : formatId(a)))
+  //     .filter(Boolean)
+  //     .includes(abilityId);
+      && [
+        ...PokemonPseudoToggleAbilities,
+        ...(gameType === 'Doubles' ? PokemonRuinAbilities : []),
+      ].includes(ability);
 
-  const pseudoToggled = pseudoToggleAbility
-    && pokemon.abilityToggleable // update (2023/01/31): don't think we really need to populate this lol
-    && pokemon.abilityToggled;
+  const pseudoToggled = pseudoToggleAbility && pokemon.abilityToggled;
 
   const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
@@ -107,7 +113,8 @@ export const createSmogonPokemon = (
       // note that spreadStats may not be available yet, hence the fallback object
       const { hp: maxHp } = pokemon.spreadStats
         || { hp: pokemon.maxhp || 100 };
-      const hp = (pokemon.dirtyHp ?? (pokemon.hp || 0))
+
+      const hp = (pokemon.dirtyHp ?? (pokemon.hp || 0));
 
       if (pokemon.serverSourced) {
         return shouldMultiscale && !hp ? maxHp : hp;
@@ -141,10 +148,20 @@ export const createSmogonPokemon = (
 
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
     ability: pseudoToggleAbility && !pseudoToggled ? 'Pressure' : ability,
-    abilityOn: pseudoToggled,
+    abilityOn: pokemon.abilityToggled,
     item,
     nature: legacy ? null : pokemon.nature,
     moves: pokemon.moves,
+
+    // update (2023/10/10): this is a special property I added into the @smogon/calc patch that when specified,
+    // will bypass @smogon/calc's internal spread stats calculator (which is required by Showdex to properly handle Ditto)
+    // update: fuck nvm keeps getting recalculated based on its species baseStats >:(
+    // update (2023/10/11): trying the new rawStats param, which overrides rawStats instead of stats
+    // (internally in the mechanics files, computeFinalStats() seems to write to `stats` based on `rawStats`)
+    // update: actually, `stats` would've worked (since I internally passed it to this.rawStats of the Pokemon class anyway),
+    // but I just had forgot purge the webpack cache for Showdex ... sooo don't forget to run `yarn cache:purge` when you
+    // change anything in node_modules lol
+    rawStats: { ...pokemon.spreadStats } as SmogonPokemonOptions['rawStats'],
 
     ivs: {
       hp: pokemon.ivs?.hp ?? defaultIv,
@@ -223,51 +240,15 @@ export const createSmogonPokemon = (
     }
   }
 
-  // typically (in gen 9), the Booster Energy will be consumed in battle, so there'll be no item.
-  // unfortunately, we must forcibly set the item to Booster Energy to "activate" these abilities
-  // update (2023/01/02): added a @smogon/calc patch for these abilities to ignore item/field checks if abilityOn is true
-  // if (pseudoToggled && ['protosynthesis', 'quarkdrive'].includes(abilityId) && options.item !== 'Booster Energy') {
-  //   const {
-  //     weather,
-  //     terrain,
-  //   } = field || {};
-  //
-  //   // update (2022/12/11): no need to forcibly set the item if the field conditions activate the abilities
-  //   const fieldActivated = (abilityId === 'protosynthesis' && ['Sun', 'Harsh Sunshine'].includes(weather))
-  //     || (abilityId === 'quarkdrive' && terrain === 'Electric');
-  //
-  //   if (!fieldActivated) {
-  //     options.item = <ItemName> 'Booster Energy';
-  //   }
-  // }
-
-  // also in gen 9, Supreme Overlord! (tf who named these lol)
-  // (workaround cause @smogon/calc doesn't support this ability yet)
-  // update: whoops nvm, looks like Showdown applies it to the move's BP instead
-  // if (abilityId === 'supremeoverlord' && field?.attackerSide) {
-  //   const fieldKey: keyof CalcdexBattleField = pokemon.playerKey === 'p2' ? 'defenderSide' : 'attackerSide';
-  //   const { faintedCount = 0 } = field[fieldKey] || {};
-  //
-  //   // Supreme Overlord boosts the ATK & SPA by 10% for each fainted teammate
-  //   if (faintedCount > 0) {
-  //     const { atk, spa } = options.overrides.baseStats;
-  //     const modifier = 1 + (0.1 * faintedCount);
-  //
-  //     /** @todo my lazy ass should just fix the typing at this point lol */
-  //     (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats.atk = Math.floor(atk * modifier);
-  //     (<DeepWritable<SmogonPokemonOverrides>> options.overrides).baseStats.spa = Math.floor(spa * modifier);
-  //   }
-  // }
-
   // calc will apply STAB boosts for ALL moves regardless of the Pokemon's changed type and the move's type
   // if the Pokemon has Protean or Libero; we don't want this to happen since the client reports the changed typings
   // update (2023/05/17): it appears people want this back, so allowing it unless the 'typechange' volatile exists
   // (note: there's no volatile for when the Pokemon Terastallizes, so we're good on that front; @smogon/calc will
   // also ignore Protean STAB once Terastallized, so we're actually doubly good)
   // update (2023/06/02): imagine working on this for 2 weeks. naw I finally have some time at 4 AM to do this lol
-  if (['protean', 'libero'].includes(abilityId) && !pokemon.abilityToggled) {
-    options.ability = 'Pressure';
-  }
+  // if (['protean', 'libero'].includes(abilityId) && !pokemon.abilityToggled) {
+  //   options.ability = 'Pressure';
+  // }
 
   // calc will auto +1 ATK/SPA, which the client will have already reported the boosts,
   // so we won't report these abilities to the calc to avoid unintentional double boostage

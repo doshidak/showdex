@@ -4,6 +4,7 @@ import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,
+  type ShowdexShowdownSettings,
 } from '@showdex/redux/store';
 // import { env } from '@showdex/utils/core';
 import { dehydrateHeader } from './dehydrateHeader';
@@ -20,6 +21,7 @@ export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string>
   developerMode: 'dm',
   hellodex: 'hd',
   calcdex: 'cd',
+  showdown: 'sd',
 };
 
 /**
@@ -88,6 +90,15 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   showFieldTooltips: 'sft',
   nhkoColors: 'ncl',
   nhkoLabels: 'nlb',
+};
+
+/**
+ * Opcode mappings for the dehydrated `ShowdexShowdownSettings`.
+ *
+ * @since 1.1.7
+ */
+export const DehydratedShowdownSettingsMap: Record<keyof ShowdexShowdownSettings, string> = {
+  autoAcceptSheets: 'aas',
 };
 
 /**
@@ -193,6 +204,7 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
     developerMode,
     hellodex,
     calcdex,
+    showdown,
   } = settings;
 
   const output: string[] = [
@@ -203,12 +215,13 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
     `${DehydratedShowdexSettingsMap.developerMode}:${dehydrateBoolean(developerMode)}`,
   ];
 
-  const hellodexOutput: string[] = Object.entries(hellodex || {}).map((
-    [key, value]: [
-      keyof ShowdexHellodexSettings,
-      ShowdexHellodexSettings[keyof ShowdexHellodexSettings],
-    ],
-  ) => {
+  const hellodexOutput: string[] = Object.entries(hellodex || {}).map(([
+    key,
+    value,
+  ]: [
+    keyof ShowdexHellodexSettings,
+    ShowdexHellodexSettings[keyof ShowdexHellodexSettings],
+  ]) => {
     const dehydratedKey = DehydratedHellodexSettingsMap[key];
 
     if (!dehydratedKey) {
@@ -222,12 +235,13 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
 
   output.push(`${DehydratedShowdexSettingsMap.hellodex}:${hellodexOutput.join('|')}`);
 
-  const calcdexOutput: string[] = Object.entries(calcdex || {}).map((
-    [key, value]: [
-      keyof ShowdexCalcdexSettings,
-      ShowdexCalcdexSettings[keyof ShowdexCalcdexSettings],
-    ],
-  ) => {
+  const calcdexOutput: string[] = Object.entries(calcdex || {}).map(([
+    key,
+    value,
+  ]: [
+    keyof ShowdexCalcdexSettings,
+    ShowdexCalcdexSettings[keyof ShowdexCalcdexSettings],
+  ]) => {
     const dehydratedKey = DehydratedCalcdexSettingsMap[key];
 
     if (!dehydratedKey) {
@@ -244,6 +258,26 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
   }).filter(Boolean);
 
   output.push(`${DehydratedShowdexSettingsMap.calcdex}:${calcdexOutput.join('|')}`);
+
+  const showdownOutput: string[] = Object.entries(showdown || {}).map(([
+    key,
+    value,
+  ]: [
+    keyof ShowdexShowdownSettings,
+    ShowdexShowdownSettings[keyof ShowdexShowdownSettings],
+  ]) => {
+    const dehydratedKey = DehydratedShowdownSettingsMap[key];
+
+    if (!dehydratedKey) {
+      return null;
+    }
+
+    const dehydratedValue = dehydrateValue(value);
+
+    return `${dehydratedKey.toLowerCase()}~${dehydratedValue}`;
+  }).filter(Boolean);
+
+  output.push(`${DehydratedShowdexSettingsMap.showdown}:${showdownOutput.join('|')}`);
 
   return output.filter(Boolean).join(';');
 };

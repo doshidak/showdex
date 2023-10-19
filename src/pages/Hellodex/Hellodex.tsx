@@ -234,6 +234,7 @@ export const Hellodex = ({
                     {Object.values(calcdexState).reverse().filter((b) => !!b?.battleId).map(({
                       battleId,
                       format,
+                      subFormats,
                       active,
                       playerCount,
                       p1,
@@ -242,7 +243,7 @@ export const Hellodex = ({
                       <InstanceButton
                         key={`Hellodex:InstanceButton:${battleId}`}
                         className={styles.instanceButton}
-                        format={format}
+                        format={`${format}${subFormats?.join('') || ''}`}
                         authName={authName}
                         playerName={p1?.name}
                         opponentName={p2?.name}

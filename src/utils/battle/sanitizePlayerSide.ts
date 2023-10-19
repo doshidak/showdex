@@ -44,31 +44,18 @@ export const sanitizePlayerSide = (
     .filter(Boolean);
 
   // obtain the "active" Pokemon by using the selectionIndex to properly apply the screens in
-  // gen 1 (since they're directly applied to the Pokemon as a volatile) or using the activeIndicies
-  // in gens 2+ to make sure stage hazards only apply for non-active Pokemon (otherwise, they'd be
-  // always affecting the damage ranges!)
-  // (note that these indices serve different purposes in gen 1 and in gens 2+)
-  // const currentPokemon = playerPokemon?.length
-  //   ? gen === 1 && selectionIndex > -1
-  //     ? playerPokemon[selectionIndex]
-  //     : gen > 1 && activeIndex > -1
-  //       ? playerPokemon[activeIndex]
-  //       : null
-  //   : null;
+  // gen 1 (since they're directly applied to the Pokemon as a volatile), otherwise don't bother
   const currentPokemon = gen === 1 && playerPokemon?.length && selectionIndex > -1
     ? playerPokemon[selectionIndex]
     : null;
 
-  const sideConditions = battleSide?.sideConditions || side?.conditions || {};
+  const sideConditions = battleSide?.sideConditions
+    || side?.conditions
+    || {};
+
   const sideConditionNames = Object.keys(sideConditions)
     .map((c) => formatId(c))
     .filter(Boolean);
-
-  // const volatileNames = (
-  //   currentPokemon?.volatiles
-  //     ? Object.keys(currentPokemon.volatiles || {})
-  //     : activePokemon?.flatMap((p) => Object.keys(p?.volatiles || {}))
-  // )?.map((v) => formatId(v)).filter(Boolean) ?? [];
 
   const volatileNames = Object.keys(currentPokemon?.volatiles || {})
     .map((v) => formatId(v))
@@ -80,28 +67,7 @@ export const sanitizePlayerSide = (
       .filter(Boolean))
     ?? [];
 
-  // check whether we should apply any Spikes and Stealth Rocks
-  // update (2023/02/04): we're now doing this in createSmogonField() instead
-  // const applyFieldHazards = gen > 1
-  //   // && !!currentPokemon?.speciesForme // no reason to check this lol
-  //   && selectionIndex > -1
-  //   // && activeIndex !== selectionIndex;
-  //   && !activeIndices.includes(selectionIndex);
-
-  // l.debug(
-  //   'Sanitizing side for player', player?.sideid || 'p?', player?.name || '???',
-  //   '\n', 'gen', gen, 'activeIndices', activeIndices, 'selectionIndex', selectionIndex,
-  //   '\n', 'currentPokemon', currentPokemon,
-  //   // ...(gen > 1 ? ['\n', 'applyFieldHazards?', applyFieldHazards] : []),
-  // );
-
-  // count how many Pokemon have an activated Ruin ability (gen 9)
-  // const activeRuinAbilities = playerPokemon
-  //   ?.filter((p) => formatId(p?.dirtyAbility || p?.ability)?.endsWith('ofruin') && p.abilityToggled)
-  //   .map((p) => formatId(p.dirtyAbility || p.ability))
-  //   || [];
-
-  return {
+  const output: CalcdexPlayerSide = {
     // conditionally remove Spikes & Stealth Rocks from the calc if the Pokemon is
     // already on the field (don't want the hazard damage to re-apply)
     // update (2023/02/04): as part of the CalcdexPlayerSide refactoring, we're now conditionally removing
@@ -143,4 +109,18 @@ export const sanitizePlayerSide = (
 
     // isSwitching: player?.active?.[0]?.ident === player?.pokemon?.[activeIndex]?.ident ? 'out' : 'in',
   };
+
+  // l.debug(
+  //   'Sanitized CalcdexPlayerSide for', player?.sideid || 'p?', player?.name || '???',
+  //   '\n', 'gen', gen, 'activeIndices', activeIndices, 'selectionIndex', selectionIndex,
+  //   '\n', 'player', player,
+  //   '\n', 'sideConditionNames', sideConditionNames,
+  //   ...(gen === 1 ? [
+  //     '\n', 'currentPokemon', currentPokemon,
+  //     '\n', 'volatileNames', volatileNames,
+  //   ] : []),
+  //   '\n', 'output', output,
+  // );
+
+  return output;
 };

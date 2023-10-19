@@ -3,20 +3,9 @@ import { AllPlayerKeys } from '@showdex/consts/battle';
 import { type CalcdexPlayerKey } from '@showdex/redux/store';
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
-import {
-  appliedPreset,
-  applyPreset,
-  usePresets,
-  useUsageAltSorter,
-} from '@showdex/utils/presets';
-import {
-  buildAbilityOptions,
-  buildItemOptions,
-  buildMoveOptions,
-  buildPresetOptions,
-} from '@showdex/utils/ui';
-import { useCalcdexContext } from '../CalcdexContext';
-import { type CalcdexPokeContextConsumables, CalcdexPokeContext } from './CalcdexPokeContext';
+import { flattenAlts, selectPokemonPresets } from '@showdex/utils/presets';
+import { CalcdexContext } from '../CalcdexContext';
+import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
 /**
  * Props passable to the `CalcdexPokeProvider` for initializing the Context for a specific Pokemon.
@@ -45,40 +34,49 @@ export interface CalcdexPokeProviderProps {
    *
    * @since 1.1.1
    */
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
-const baseScope = '@showdex/pages/Calcdex/CalcdexPokeProvider';
+// const baseScope = '@showdex/pages/Calcdex/CalcdexPokeProvider';
 
 export const CalcdexPokeProvider = ({
   playerKey,
   movesCount = 4,
   children,
 }: CalcdexPokeProviderProps): JSX.Element => {
-  const ctx = useCalcdexContext();
+  // const ctx = useCalcdexContext();
+  const ctx = React.useContext(CalcdexContext);
 
   const {
     state,
     settings,
-    updatePokemon,
-    updateField,
-    setActiveIndex,
-    setActiveIndices,
-    setSelectionIndex,
-    setAutoSelect,
+    presets: battlePresets,
+    // updatePokemon,
+    // updateSide,
+    // updateField,
+    // activatePokemon,
+    // selectPokemon,
+    // autoSelectPokemon,
+    // assignPlayer,
+    // assignOpponent,
   } = ctx;
 
   const {
-    gen,
+    // gen,
     format,
-    legacy,
+    // legacy,
     playerKey: topKey,
     opponentKey: bottomKey,
     field,
+    sheets,
   } = state;
 
   // update (2023/07/28): oopsies ... forgot to update this for FFA :o
-  const opponentKey: CalcdexPlayerKey = playerKey === topKey ? bottomKey : topKey;
+  const opponentKey = React.useMemo(
+    () => (playerKey === topKey ? bottomKey : topKey),
+    [bottomKey, playerKey, topKey],
+  );
+
   const player = React.useMemo(() => state[playerKey] || {}, [playerKey, state]);
   const opponent = React.useMemo(() => state[opponentKey] || {}, [opponentKey, state]);
 
@@ -95,7 +93,93 @@ export const CalcdexPokeProvider = ({
   const playerPokemon = playerParty?.[playerIndex];
   const opponentPokemon = opponentParty?.[opponentIndex];
 
+  const {
+    loading: presetsLoading,
+    presets: allPresets,
+    usages: allUsages,
+  } = battlePresets;
+
+  const pokemonSheets = React.useMemo(() => selectPokemonPresets(
+    sheets,
+    playerPokemon,
+    {
+      format,
+      source: 'sheet',
+      select: 'any',
+    },
+  ), [
+    format,
+    playerPokemon,
+    sheets,
+  ]);
+
+  const pokemonPresets = React.useMemo(() => selectPokemonPresets(
+    allPresets,
+    playerPokemon,
+    {
+      format,
+      source: 'smogon',
+      select: 'any',
+    },
+  ), [
+    allPresets,
+    format,
+    playerPokemon,
+  ]);
+
+  const usages = React.useMemo(() => selectPokemonPresets(
+    allUsages,
+    playerPokemon,
+    {
+      format,
+      source: 'usage',
+      select: 'any',
+    },
+  ), [
+    allUsages,
+    format,
+    playerPokemon,
+  ]);
+
+  const presets = React.useMemo(() => [
+    ...(playerPokemon?.presets || []),
+    ...pokemonSheets,
+    ...(format?.includes('random') ? [] : usages),
+    ...pokemonPresets,
+  ], [
+    format,
+    playerPokemon?.presets,
+    pokemonPresets,
+    pokemonSheets,
+    usages,
+  ]);
+
+  const usage = React.useMemo(() => {
+    if (usages.length === 1) {
+      return usages[0];
+    }
+
+    const moves = playerPokemon?.altMoves?.length
+      ? flattenAlts(playerPokemon.altMoves)
+      : playerPokemon?.moves;
+
+    if (!moves?.length) {
+      return usages[0];
+    }
+
+    return usages.find((u) => {
+      const movePool = flattenAlts(u.altMoves);
+
+      return moves.every((move) => movePool.includes(move));
+    });
+  }, [
+    playerPokemon?.altMoves,
+    playerPokemon?.moves,
+    usages,
+  ]);
+
   // fetch presets and usage stats for the player's currently selected Pokemon
+  /*
   const {
     loading: presetsLoading,
     presets,
@@ -105,8 +189,6 @@ export const CalcdexPokeProvider = ({
     pokemon: playerPokemon,
   });
 
-  // note: `preset` is confusingly the `calcdexId` of the preset
-  // (there's a todo for `preset` to update its name lol)
   const currentPreset = (playerPokemon?.presetId ? [
     ...presets,
     ...((!!playerPokemon.presets?.length && playerPokemon.presets) || []),
@@ -115,8 +197,10 @@ export const CalcdexPokeProvider = ({
   const usage = (usages?.length === 1 && usages[0])
     || (!!currentPreset?.name && usages?.find((p) => p?.source === 'usage' && p.name?.includes(currentPreset.name)))
     || usages?.find((p) => p?.source === 'usage');
+  */
 
   // build dropdown options
+  /*
   const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
     format,
     playerPokemon,
@@ -160,17 +244,21 @@ export const CalcdexPokeProvider = ({
   const presetOptions = React.useMemo(() => buildPresetOptions(
     presets,
     usages,
+    playerPokemon?.speciesForme,
   ), [
+    playerPokemon,
     presets,
     usages,
   ]);
+  */
 
   // build usage sorters
-  const sortAbilitiesByUsage = useUsageAltSorter(usage?.altAbilities);
-  const sortItemsByUsage = useUsageAltSorter(usage?.altItems);
-  const sortMovesByUsage = useUsageAltSorter(usage?.altMoves);
+  // const sortAbilitiesByUsage = useUsageAltSorter(usage?.altAbilities);
+  // const sortItemsByUsage = useUsageAltSorter(usage?.altItems);
+  // const sortMovesByUsage = useUsageAltSorter(usage?.altMoves);
 
   // handle applying presets
+  /*
   const applyPresetCallback = React.useCallback<CalcdexPokeContextConsumables['applyPreset']>((
     presetOrId,
     additionalMutations,
@@ -216,13 +304,15 @@ export const CalcdexPokeProvider = ({
     updatePokemon,
     usages,
   ]);
+  */
 
   // this will allow the user to switch back to the "Yours" preset for a transformed Pokemon
   // (using a ref instead of state since we don't want to cause an unnecessary re-render)
-  const appliedTransformedPreset = React.useRef(false);
+  // const appliedTransformedPreset = React.useRef(false);
 
   // automatically apply the first preset if the Pokemon has no/invalid preset
   // (invalid presets could be due to the forme changing, so new presets are loaded in)
+  /*
   React.useEffect(() => {
     // if (!playerPokemon?.calcdexId || !playerPokemon.autoPreset || presetsLoading) {
     if (!playerPokemon?.calcdexId || presetsLoading) {
@@ -232,7 +322,10 @@ export const CalcdexPokeProvider = ({
     // used for debugging purposes only
     const scope = `${baseScope}:React.useEffect()`;
 
-    if (!playerPokemon.transformedForme && appliedTransformedPreset.current) {
+    // used for non-debugging purposes only
+    const transformed = !!playerPokemon.transformedForme;
+
+    if (!transformed && appliedTransformedPreset.current) {
       appliedTransformedPreset.current = false;
     }
 
@@ -247,12 +340,16 @@ export const CalcdexPokeProvider = ({
         // auto-preset if one hasn't been found or no longer exists in `presets`
         !existingPreset?.calcdexId
           // allow another round of auto-presetting if they are transformed
-          || (!!playerPokemon.transformedForme && !appliedTransformedPreset.current)
+          || (transformed && !appliedTransformedPreset.current)
       )
       && (
         !existingPreset?.source
           // don't auto-preset if we already know the exact preset or usage is currently applied
           || !['server', 'sheet', 'usage'].includes(existingPreset.source)
+          // update (2023/10/11): ... you know, after all these years, you'd think Ditto would've been defeated by now,
+          // but nope, its ghost still haunts me. think you wanna code Pokemon? think again buckaroo
+          || existingPreset.speciesForme !== playerPokemon.speciesForme
+          || (transformed && existingPreset.speciesForme !== playerPokemon.transformedForme)
       );
 
     if (!shouldAutoPreset) {
@@ -278,7 +375,7 @@ export const CalcdexPokeProvider = ({
     // if the Pokemon is transformed (very special case), we'll check if the "Yours" preset is applied,
     // which only occurs for serverSourced CalcdexPokemon, in which case we need to apply the second preset... lol
     // kinda looks like: [{ name: 'Yours', ... }, { name: 'Some Set of a Transformed Pokemon', ... }, ...]
-    if (playerPokemon.transformedForme) {
+    if (transformed) {
       // [, initialPreset] = presets; // readability 100; fancy JS way of writing initialPresets = presets[1]
       const nonServerPreset = presets.find((p) => p.source !== 'server');
 
@@ -290,6 +387,7 @@ export const CalcdexPokeProvider = ({
       appliedTransformedPreset.current = true;
     }
 
+    // update (2023/10/13): just checking if not Randoms for my sanity lol
     if (downloadUsageStats && prioritizeUsageStats) {
       // If we aren't in a random battle, check if we should prioritize
       // the showdown usage stats.
@@ -335,10 +433,12 @@ export const CalcdexPokeProvider = ({
     settings,
     updatePokemon,
   ]);
+  */
 
   // calculate the current matchup
   const calculateMatchup = useSmogonMatchup(
     format,
+    state?.gameType,
     playerPokemon,
     opponentPokemon,
     player,
@@ -359,7 +459,7 @@ export const CalcdexPokeProvider = ({
     playerPokemon,
   ]);
 
-  const consumables = React.useMemo<CalcdexPokeContextConsumables>(() => ({
+  const value = React.useMemo<CalcdexPokeContextValue>(() => ({
     state,
     settings,
 
@@ -368,71 +468,69 @@ export const CalcdexPokeProvider = ({
     playerPokemon,
     opponent,
     opponentPokemon,
-    field,
+    // field,
 
     presetsLoading,
     presets,
     usages,
     usage,
 
-    abilityOptions,
-    itemOptions,
-    moveOptions,
-    presetOptions,
+    // abilityOptions,
+    // itemOptions,
+    // moveOptions,
+    // presetOptions,
 
     matchups,
 
-    sortAbilitiesByUsage,
-    sortItemsByUsage,
-    sortMovesByUsage,
+    // sortAbilitiesByUsage,
+    // sortItemsByUsage,
+    // sortMovesByUsage,
 
-    applyPreset: applyPresetCallback,
+    // applyPreset: applyPresetCallback,
 
-    updatePokemon: (pokemon, scope) => updatePokemon(playerKey, {
-      ...pokemon,
-      calcdexId: playerPokemon?.calcdexId,
-    }, scope || `${baseScope}:updatePokemon()`),
+    // updatePokemon: (pokemon, scope) => updatePokemon(playerKey, {
+    //   ...pokemon,
+    //   calcdexId: playerPokemon?.calcdexId,
+    // }, scope || `${baseScope}:updatePokemon()`),
 
-    updateField,
-    setActiveIndex: (index, scope) => setActiveIndex(playerKey, index, scope || `${baseScope}:setActiveIndex()`),
-    setActiveIndices: (indices, scope) => setActiveIndices(playerKey, indices, scope || `${baseScope}:setActiveIndices()`),
-    setSelectionIndex: (index, scope) => setSelectionIndex(playerKey, index, scope || `${baseScope}:setSelectionIndex()`),
-    setAutoSelect: (autoSelect, scope) => setAutoSelect(playerKey, autoSelect, scope || `${baseScope}:setAutoSelect()`),
+    // updateField,
+    // setActiveIndex: (index, scope) => setActiveIndex(playerKey, index, scope || `${baseScope}:setActiveIndex()`),
+    // setActiveIndices: (indices, scope) => setActiveIndices(playerKey, indices, scope || `${baseScope}:setActiveIndices()`),
+    // setSelectionIndex: (index, scope) => setSelectionIndex(playerKey, index, scope || `${baseScope}:setSelectionIndex()`),
+    // setAutoSelect: (autoSelect, scope) => setAutoSelect(playerKey, autoSelect, scope || `${baseScope}:setAutoSelect()`),
   }), [
-    abilityOptions,
-    applyPresetCallback,
-    field,
-    itemOptions,
+    // abilityOptions,
+    // applyPresetCallback,
+    // field,
+    // itemOptions,
     matchups,
-    moveOptions,
+    // moveOptions,
     opponent,
     opponentPokemon,
     player,
     playerKey,
     playerPokemon,
-    presetOptions,
+    // presetOptions,
     presets,
     presetsLoading,
-    setActiveIndex,
-    setActiveIndices,
-    setAutoSelect,
-    setSelectionIndex,
+    // setActiveIndex,
+    // setActiveIndices,
+    // setAutoSelect,
+    // setSelectionIndex,
     settings,
-    sortAbilitiesByUsage,
-    sortItemsByUsage,
-    sortMovesByUsage,
+    // sortAbilitiesByUsage,
+    // sortItemsByUsage,
+    // sortMovesByUsage,
     state,
-    updateField,
-    updatePokemon,
+    // updateField,
+    // updatePokemon,
     usage,
     usages,
   ]);
 
   return (
-    <CalcdexPokeContext.Provider value={consumables}>
+    <CalcdexPokeContext.Provider value={value}>
       {children}
     </CalcdexPokeContext.Provider>
   );
 };
-
-export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => React.useContext(CalcdexPokeContext);

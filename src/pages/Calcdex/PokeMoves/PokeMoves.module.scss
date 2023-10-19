@@ -107,6 +107,7 @@
   }
 
   .propertyName {
+    @include flex.row-center;
     font-weight: 500;
     text-transform: uppercase;
     opacity: 0.75;
@@ -157,6 +158,97 @@ button.editButton {
   // &.hideButton {
   //   @include spacing.margin($left: 3px);
   // }
+}
+
+.teraButtonLabel {
+  $gradient: linear-gradient(
+    // to right,
+    60deg,
+
+    color.alpha(colors.$black, 0.75) 26%,
+
+    // #55C0EC,
+    color.shade(#63B44A, 15%) 26%,
+    // #E96B7D,
+    color.shade(#43B9DC, 15%) 48%,
+
+    // #7ECADA,
+    // #DBE6A7,
+    #ACD7BF 48%,
+    color.shade(#6DC5E5, 10%) 70%,
+
+    color.alpha(colors.$white, 0.75) 70%,
+  );
+
+  // position: relative;
+  // color: colors.$transparent;
+  // background-image: $gradient;
+  // background-size: 400% 100%;
+  // background-position: 0% 0%;
+  // background-clip: text;
+  // mix-blend-mode: multiply;
+  @include transition.apply((color, 150ms), background-position);
+
+  &.available {
+    color: colors.$transparent;
+    background-image: $gradient;
+    background-size: 400% 100%;
+    background-position: 0% 0%;
+    background-clip: text;
+  }
+
+  .light & {
+    background-position: 0% 0%;
+
+    &.available {
+      background-position: 165% 0%;
+    }
+  }
+
+  .dark & {
+    background-position: 365% 0%;
+
+    &.available {
+      background-position: 330% 0%;
+    }
+  }
+
+  /*
+  &::before {
+    content: '';
+    @include position.absolute-fill;
+    background-image: $gradient;
+    mix-blend-mode: screen;
+    opacity: 0;
+    @include transition.apply(opacity);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light & {
+    color: colors.$black;
+    background-color: colors.$white;
+    mix-blend-mode: multiply;
+
+    &::before {
+      mix-blend-mode: screen;
+    }
+  }
+
+  .dark & {
+    color: colors.$white;
+    background-color: colors.$black;
+    mix-blend-mode: lighten;
+
+    &::before {
+      mix-blend-mode: multiply;
+    }
+  }
+
+  &.available::before {
+    opacity: 1;
+  }
+  */
 }
 
 button.ultButton {
@@ -231,18 +323,19 @@ button.damageButton {
   align-self: center;
   @include spacing.margin($right: 5px);
 
-  &.smol {
-    align-items: flex-start;
-    align-self: flex-start;
-    @include spacing.padding($top: 2px);
-
-    &.withStatTargets {
-      @include spacing.padding($top: 3px);
-    }
-  }
+  // &.smol {
+  //   align-items: flex-start;
+  //   align-self: flex-start;
+  //   @include spacing.padding($top: 2px);
+  //
+  //   &.withStatTargets {
+  //     @include spacing.padding($top: 3px);
+  //   }
+  // }
 
   &.editorHeader {
     @include flex.row-between;
+    @include spacing.margin($bottom: 0);
   }
 
   .moveProperty {
@@ -264,9 +357,9 @@ button.damageButton {
   // }
 }
 
-.editorItemInput {
-  align-self: flex-start;
-}
+// .editorItemInput {
+//   align-self: flex-start;
+// }
 
 .editorLeft {
   @include flex.row($align: center);
@@ -287,8 +380,20 @@ button.editorButton {
   }
 }
 
-button.categoryButton {
-  width: 32px;
-  @include spacing.margin-xy($x: 0.8em);
-  font-weight: 500;
+// button.categoryButton {
+//   width: 32px;
+//   @include spacing.margin-xy($x: 0.8em);
+//   font-weight: 500;
+// }
+
+.categoryField {
+  @include spacing.margin-xy($x: 6px);
+}
+
+.statVsLabel {
+  @include spacing.margin-xy($x: 3px);
+  @include font.apply(fonts.$mono, ( font-weight: 600 ));
+  font-size: 6px;
+  letter-spacing: 0.25px;
+  opacity: 0.64;
 }

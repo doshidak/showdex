@@ -1,6 +1,8 @@
 import { type CalcdexPokemon } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Pokemon `volatiles` require special love & attention before they get Redux'd.
  *
@@ -11,27 +13,35 @@ import { formatId } from '@showdex/utils/core';
  *
  * @since 0.1.3
  */
-export const sanitizeVolatiles = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<CalcdexPokemon> = {},
-): CalcdexPokemon['volatiles'] => Object.entries(pokemon?.volatiles || {})
-  .reduce((sanitizedVolatiles, [id, volatile]) => {
-    const [
-      , // note: though unused, this is also equals the `id`
-      value,
-      ...rest
-    ] = volatile || [];
+export const sanitizeVolatiles = <
+  TPokemon extends Partial<Showdown.PokemonDetails>,
+>(
+  pokemon: TPokemon,
+): CalcdexPokemon['volatiles'] => Object.entries(
+  (pokemon as Partial<Showdown.Pokemon>)?.volatiles || {},
+).reduce((
+  volatiles,
+  [id, volatile],
+) => {
+  const [
+    , // note: though unused, this is also equals the `id`
+    value,
+    ...rest
+  ] = volatile || [];
 
-    // we're gunna replace the Pokemon object w/ its ident if it's a transform volatile
-    const transformed = formatId(id) === 'transform'
-      && typeof (value as unknown as Showdown.Pokemon)?.ident === 'string';
+  // we're gunna replace the Pokemon object w/ its speciesForme if it's a transform volatile
+  const transformed = formatId(id) === 'transform'
+    && typeof (value as unknown as Showdown.Pokemon)?.speciesForme === 'string';
 
-    if (transformed || !value || ['string', 'number'].includes(typeof value)) {
-      sanitizedVolatiles[id] = transformed ? [
-        id,
-        (value as unknown as Showdown.Pokemon).speciesForme,
-        ...rest,
-      ] : volatile;
-    }
+  if (transformed || !value || ['string', 'number'].includes(typeof value)) {
+    volatiles[id] = transformed ? [
+      id,
+      (value as unknown as Showdown.Pokemon).speciesForme,
+      ...rest,
+    ] : volatile;
+  }
 
-    return sanitizedVolatiles;
-  }, {});
+  return volatiles;
+}, {} as CalcdexPokemon['volatiles']);
+
+/* eslint-enable @typescript-eslint/indent */

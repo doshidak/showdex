@@ -3,7 +3,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
+import { getDefaultSpreadValue, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsStatsResponse()');
@@ -25,12 +25,13 @@ export const transformRandomsStatsResponse = (
     return [];
   }
 
+  const format = args.format || `gen${args.gen}randombattle`;
+
+  const defaultIv = getDefaultSpreadValue('iv', format);
+  const defaultEv = getDefaultSpreadValue('ev', format);
+
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
-
-  const legacy = detectLegacyGen(args.gen);
-  const defaultIv = legacy ? 30 : 31;
-  const defaultEv = legacy ? 252 : 84;
 
   Object.entries(response).forEach(([
     speciesForme,
@@ -56,7 +57,7 @@ export const transformRandomsStatsResponse = (
       source: 'usage',
       name: 'Showdown Usage',
       gen: args.gen,
-      format: getGenlessFormat(args?.format) || 'randombattle',
+      format: getGenlessFormat(format),
 
       speciesForme,
       level,
@@ -81,8 +82,8 @@ export const transformRandomsStatsResponse = (
       },
     };
 
-    const altAbilities = processUsageAlts(abilities);
-    const altItems = processUsageAlts(items);
+    const altAbilities = processUsageAlts(abilities, args.gen, 'abilities');
+    const altItems = processUsageAlts(items, args.gen, 'items');
 
     if (altAbilities.length) {
       preset.altAbilities = altAbilities;
@@ -126,7 +127,7 @@ export const transformRandomsStatsResponse = (
         }
 
         if (nonEmptyObject(roleAbilities)) {
-          const altRoleAbilities = processUsageAlts(roleAbilities);
+          const altRoleAbilities = processUsageAlts(roleAbilities, args.gen, 'abilities');
 
           if (altRoleAbilities.length) {
             rolePreset.altAbilities = altRoleAbilities;
@@ -135,7 +136,7 @@ export const transformRandomsStatsResponse = (
         }
 
         if (nonEmptyObject(roleItems)) {
-          const altRoleItems = processUsageAlts(roleItems);
+          const altRoleItems = processUsageAlts(roleItems, args.gen, 'items');
 
           if (altRoleItems.length) {
             rolePreset.altItems = altRoleItems;
@@ -149,7 +150,7 @@ export const transformRandomsStatsResponse = (
           rolePreset.teraTypes = altTeraTypes;
         }
 
-        rolePreset.altMoves = processUsageAlts(roleMoves);
+        rolePreset.altMoves = processUsageAlts(roleMoves, args.gen, 'moves');
 
         /**
          * @todo Needs to be updated once we support more than 4 moves.
@@ -168,7 +169,7 @@ export const transformRandomsStatsResponse = (
         }
       });
     } else if (nonEmptyObject(moves)) {
-      preset.altMoves = processUsageAlts(moves);
+      preset.altMoves = processUsageAlts(moves, args.gen, 'moves');
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.

@@ -2,7 +2,7 @@ import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/s
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
-import { getPresetFormes } from './getPresetFormes';
+import { selectPokemonPresets } from './selectPokemonPresets';
 
 /**
  * From the provided Teambuilder `presets`, finds and verifies a matching `CalcdexPokemonPreset`
@@ -31,7 +31,7 @@ export const guessTeambuilderPreset = (
   }
 
   const {
-    speciesForme,
+    // speciesForme,
     transformedForme,
     // teraType,
     serverStats,
@@ -49,8 +49,10 @@ export const guessTeambuilderPreset = (
     return null;
   }
 
-  const formes = getPresetFormes(transformedForme || speciesForme);
-  const pokemonPresets = presets.filter((p) => formes.includes(p?.speciesForme));
+  // const formes = getPresetFormes(transformedForme || speciesForme, { format });
+  // const pokemonPresets = presets.filter((p) => formes.includes(p?.speciesForme));
+
+  const pokemonPresets = selectPokemonPresets(presets, pokemon, { format });
 
   if (!pokemonPresets.length) {
     return null;

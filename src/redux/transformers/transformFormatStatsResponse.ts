@@ -53,13 +53,13 @@ export const transformFormatStatsResponse = (
       source: 'usage',
       name: 'Showdown Usage',
       gen: args.gen,
-      format: getGenlessFormat(args?.format),
+      format: getGenlessFormat(args.format),
       speciesForme,
     };
 
-    const altAbilities = processUsageAlts(abilities);
-    const altItems = processUsageAlts(items);
-    const altMoves = processUsageAlts(moves);
+    const altAbilities = processUsageAlts(abilities, args.format, 'abilities');
+    const altItems = processUsageAlts(items, args.format, 'items');
+    const altMoves = processUsageAlts(moves, args.format, 'moves');
 
     if (altAbilities.length) {
       preset.altAbilities = altAbilities;
@@ -86,6 +86,9 @@ export const transformFormatStatsResponse = (
       // For some reason ivydudgel doesn't get transformed into Ivy Cudgel.
       // Let's just manually do it here.
       // I hate Ogerpon just a little bit for this...
+      // update (2023/10/07): actually, not just Ivy Cudgel from the Usage Stats API that are unformatted LOL
+      // fixed this directly upstream in processUsageAlts() to format everything just in case
+      /*
       if (['ogerponwellspring', 'ogerponhearthflame', 'ogerpon', 'ogerponcornerstone', 'ogerponwellspringtera', 'ogerponhearthflametera', 'ogerpontera', 'ogerponcornerstonetera'].includes(formatId(speciesForme))) {
         const targetMove = 'Ivy Cudgel' as MoveName;
         const ivycudgelIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ivycudgel');
@@ -93,6 +96,7 @@ export const transformFormatStatsResponse = (
           altMoves[ivycudgelIndex][0] = targetMove;
         }
       }
+      */
 
       preset.altMoves = altMoves;
 

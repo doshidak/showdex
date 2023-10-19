@@ -17,6 +17,7 @@ export const dehydrateBoolean = (value: boolean): string => (value ? 'y' : 'n');
 export const dehydrateValue = (value: unknown): string => (
   typeof value === 'boolean'
     ? dehydrateBoolean(value)
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- yolo
     : value?.toString?.().replace(/(?:,|;|\|)/g, '') || '?'
 );
 

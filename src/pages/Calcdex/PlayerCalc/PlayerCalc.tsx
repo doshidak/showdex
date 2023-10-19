@@ -45,8 +45,8 @@ export const PlayerCalc = ({
   const {
     state,
     settings,
-    setSelectionIndex,
-    setAutoSelect,
+    selectPokemon,
+    autoSelectPokemon,
   } = ctx;
 
   const colorScheme = useColorScheme();
@@ -63,7 +63,7 @@ export const PlayerCalc = ({
     rating: ratingFromBattle,
     pokemon: playerParty,
     maxPokemon,
-    activeIndices,
+    // activeIndices,
     selectionIndex: playerIndex,
     autoSelect,
   } = player;
@@ -159,7 +159,7 @@ export const PlayerCalc = ({
               input={{
                 name: `PlayerCalc:PlayerKey:${position}:Dropdown`,
                 value: playerKey,
-                onChange: (key: CalcdexPlayerKey) => ctx[position === 'top' ? 'setPlayerKey' : 'setOpponentKey'](
+                onChange: (key: CalcdexPlayerKey) => ctx[position === 'top' ? 'assignPlayer' : 'assignOpponent'](
                   key,
                   `${baseScope}:Dropdown~PlayerKey-${position}:input.onChange()`,
                 ),
@@ -230,7 +230,7 @@ export const PlayerCalc = ({
               absoluteHover
               active={autoSelect}
               disabled={!playerParty?.length}
-              onPress={() => setAutoSelect(playerKey, !autoSelect)}
+              onPress={() => autoSelectPokemon(playerKey, !autoSelect)}
             />
 
             {
@@ -344,7 +344,8 @@ export const PlayerCalc = ({
               && pokemon.abilityToggled;
 
             const pokemonActive = !!pokemon?.calcdexId
-              && activeIndices.includes(i);
+              // && activeIndices.includes(i);
+              && pokemon.active;
 
             const pokemonSelected = !!pokemon?.calcdexId
               && !!playerPokemon?.calcdexId
@@ -406,7 +407,7 @@ export const PlayerCalc = ({
                   </div>
                 ) : undefined}
                 disabled={!pokemon?.speciesForme}
-                onPress={() => setSelectionIndex(playerKey, i)}
+                onPress={() => selectPokemon(playerKey, i)}
               >
                 <div className={styles.background} />
               </PiconButton>
