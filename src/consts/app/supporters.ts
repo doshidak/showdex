@@ -89,10 +89,12 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
   title: 'Paid Pals',
   term: 'once',
   names: [
+    ['CPL593H', true, '2023-09-14T03:46:43Z'],
     ['Angie L', false, '2022-12-31T23:26:59Z'],
     ['Fubwubs', true, '2022-12-31T06:38:03Z'],
     ['Timothy B', false, '2023-03-09T00:08:19Z'],
     ['PastGenOUFan', true, '2023-05-11T01:52:57Z'],
+    ['Luc H', false, '2023-09-25T08:47:33Z'],
     ['joshtheking7', true, '2023-05-17T22:21:31Z'],
     ['Michael L', false, '2022-11-09T05:17:33Z'],
     ['Bongphan', true, '2023-04-17T23:56:43Z'],
@@ -104,6 +106,9 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
     ['Sam P', false, '2023-05-08T10:35:08Z'],
     ['PokePastry', true, '2023-05-17T22:21:31Z'],
     ['DoubleCaret', true, '2023-07-25T17:41:33Z'],
+    ['JesskyKhemically', true, '2023-08-04T23:22:33Z'],
+    ['Plague von Karma', true, '2023-08-07T20:25:23Z'],
+    ['MrMimikry', true, '2023-08-09T06:00:54Z'],
     ['momalaharris', true, '2022-12-23T18:48:45Z'],
     ['FR1E5', true, '2022-10-22T16:18:20Z'],
     ['Tanuj C', false, '2023-02-07T06:39:25Z'],
@@ -122,7 +127,8 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
   term: 'monthly',
   names: [
     ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', null],
-    ['goddess mina', true, '2023-04-10T16:17:09Z', null],
+    ['goddess mina', true, '2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z'],
+    ['GabrielPBC', true, '2023-08-11T10:33:15Z', null],
     ['Zzodz', true, '2023-05-13T00:02:51Z', '2023-06-13T00:02:51Z'],
   ],
 }, {
@@ -140,6 +146,7 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
     ['BruhMomentMaker', true, '2023-04-10T13:35:32Z', null],
     ['Christopher Y', false, '2023-07-02T21:05:52Z', null],
     ['TheNexyr', true, '2023-07-21T01:24:21Z', null],
+    ['Michael K', false, '2023-09-05T09:02:03Z', null],
   ],
 }];
 

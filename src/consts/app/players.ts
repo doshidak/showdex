@@ -150,7 +150,8 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   userIds: [
     'agentlag', // Lazosful
     'dbkeith',
-    ['finchinator', 'Our Lord and Savior'],
+    ['finchinator', 'Our Lord & Savior'],
+    ['freezai', 'Randbats Reaper'],
     'heavancanwait', // DBKEITH
     'lesarlags', // Lazosful
     'l4z0s', // Lazosful
@@ -174,15 +175,19 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     'bongphan',
+    'cpl593h',
     'doublecaret',
     ['fr1e5', 'First Paid Pal'],
     'fubwubs',
     'genone',
     'goldengottago',
+    'jesskykhemically',
     'joshtheking7',
     'lunarvania',
     'momalaharris',
+    'mrmimikry',
     'pastgenoufan',
+    'plaguevonkarma',
     'pokepastry',
     'weavileisasin',
   ],
@@ -267,5 +272,21 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     ['goddessmina', 'warning: ratch af'],
+  ],
+}, {
+  title: 'Carried by Showdex',
+  supporterId: 'patreon-tier-03',
+  custom: true,
+  icon: 'team-lift',
+  iconDescription: 'Stick Figures Carrying Box Icon',
+
+  color: { // requested: '#00FF00'
+    light: '#00E676',
+    dark: '#69F0AE',
+  },
+
+  userIds: [
+    'gabrielpbc',
+    'pbc88',
   ],
 }];
