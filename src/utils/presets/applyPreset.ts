@@ -3,7 +3,7 @@ import {
   type CalcdexPokemonPreset,
   type CalcdexPokemonUsageAlt,
 } from '@showdex/redux/store';
-import { sanitizePokemon } from '@showdex/utils/battle';
+import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { nonEmptyObject } from '@showdex/utils/core';
 import {
@@ -245,6 +245,13 @@ export const applyPreset = (
   // update (2023/02/03): merging all of the output to provide altMoves[] (for Hidden Power moves)
   // update (2023/07/27): not handling transformedMoves here anymore since it's handled in mergeRevealedMoves()
   // update (2023/10/11): actually this fricks things up more being here, especially with all the Ditto shiz I'm doing rn
+  console.log(preset);
+  if (preset.source === 'usage') {
+    output.moves = mergeRevealedMoves({
+      ...pokemon,
+      ...output,
+    });
+  }
   /*
   output.moves = mergeRevealedMoves({
     ...pokemon,

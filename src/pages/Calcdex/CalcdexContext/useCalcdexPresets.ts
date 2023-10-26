@@ -310,7 +310,8 @@ export const useCalcdexPresets = (
         // "Showdown Usage" preset is only made available in non-Randoms formats
         if ((!preset || settings?.prioritizeUsageStats) && !randoms && usage?.calcdexId) {
           // Only do this if the preset is not server sourced.
-          if (preset.name !== 'Yours') {
+          // if (!preset || preset.name !== 'Yours') {
+          if (!preset) {
             preset = usage;
           }
         }
