@@ -139,6 +139,150 @@ const parseOpenTeamSheet = (
   return output;
 };
 
+/* Parse a team based on the specification provided @
+ https://github.com/smogon/pokemon-showdown/blob/master/sim/TEAMS.md
+*/
+function parsePackedTeam(team: string, players: object, format: string) {
+  // First, split the string into the two showteam parts
+  team = team.trim();
+  // Remove the showteam part
+  team = team.slice(team.indexOf('|showteam|') + 10);
+
+  // Get the player
+  const player = team.slice(0, team.indexOf('|'));
+  // Remove the player part
+  team = team.slice(team.indexOf('|') + 1);
+  const playerName = players[player] as string;
+
+  // Get the team and convert to export format.
+  const mons = team.split(']');
+  const pokePastes = [];
+  for (let i = 0; i < mons.length; i++) {
+    const mondata = mons[i];
+    if (!mondata) continue;
+    const mon = mondata.split('|');
+    // Create the pokepaste
+    // As of October 2023, the format is:
+    // 0: nickname
+    // 1: species -- empty if no nickname
+    // 2: item
+    // 3: ability
+    // 4: moves -- comma separated
+    // 5: nature
+    // 6: evs -- comma separated, order is HP, Atk, Def, SpA, SpD, Spe
+    // 7: gender
+    // 8: ivs -- comma separated, order is HP, Atk, Def, SpA, SpD, Spe
+    // 9: shiny
+    // 10: level
+    // 11: misc - comma separated, order is happiness, pokeball, hp type, gigantamax, dynamax level, tera type
+
+    let pokePaste = '';
+    // Check if species is empty
+    if (mon[1] === '') {
+      pokePaste += `${mon[0]}`;
+    } else {
+      pokePaste += `${mon[1]} (${mon[0]})`;
+    }
+    // Check if item is empty
+    if (mon[2] !== '') {
+      let item = mon[2];
+      // Add a space before each capital letter, excluding the first
+      item = item.replace(/([A-Z])/g, ' $1').trimStart();
+      pokePaste += ` @ ${item}`;
+    }
+    pokePaste += '\n';
+
+    // Check if ability is empty
+    if (mon[3] !== '') {
+      let ability = mons[3];
+      ability = ability.replace(/([A-Z])/g, ' $1').trimStart();
+      pokePaste += `Ability: ${ability}\n`;
+    }
+    // Check if tera type and hidden power type are empty
+    if (mon[11] !== '') {
+      const misc = mon[11].split(',');
+      if (misc[2] !== '') {
+        pokePaste += 'Hidden Power: ' + misc[2] + '\n';
+      }
+      if (misc[5] !== '') {
+        pokePaste += 'Tera Type: ' + misc[5] + '\n';
+      }
+    }
+
+    // Check if EVs are empty
+    if (mon[6] !== '') {
+      const evs = mon[6].split(',');
+      pokePaste += 'EVs:';
+      if (evs[0] !== '') {
+        pokePaste += ` ${evs[0]} HP /`;
+      }
+      if (evs[1] !== '') {
+        pokePaste += ` ${evs[1]} Atk /`;
+      }
+      if (evs[2] !== '') {
+        pokePaste += ` ${evs[2]} Def /`;
+      }
+      if (evs[3] !== '') {
+        pokePaste += ` ${evs[3]} SpA /`;
+      }
+      if (evs[4] !== '') {
+        pokePaste += ` ${evs[4]} SpD /`;
+      }
+      if (evs[5] !== '') {
+        pokePaste += ` ${evs[5]} Spe`;
+      }
+      // Remove the last slash
+      pokePaste = pokePaste.slice(0, -1);
+      pokePaste += '\n';
+    }
+    // Check if nature is empty
+    if (mon[5] !== '') {
+      pokePaste += `${mon[5]} Nature\n`;
+    }
+
+    // Check if IVs are empty
+    if (mon[8] !== '') {
+      const ivs = mon[8].split(',');
+      pokePaste += 'IVs:';
+      if (ivs[0] !== '') {
+        pokePaste += ` ${ivs[0]} HP /`;
+      }
+      if (ivs[1] !== '') {
+        pokePaste += ` ${ivs[1]} Atk /`;
+      }
+      if (ivs[2] !== '') {
+        pokePaste += ` ${ivs[2]} Def /`;
+      }
+      if (ivs[3] !== '') {
+        pokePaste += ` ${ivs[3]} SpA /`;
+      }
+      if (ivs[4] !== '') {
+        pokePaste += ` ${ivs[4]} SpD /`;
+      }
+      if (ivs[5] !== '') {
+        pokePaste += ` ${ivs[5]} Spe`;
+      }
+      // Remove the last slash
+      pokePaste = pokePaste.slice(0, -1);
+      pokePaste += '\n';
+    }
+
+    // Add the moves
+    const moves = mon[4].split(',');
+    for (let j = 0; j < moves.length; j++) {
+      const move = moves[j];
+      // Add a space before each capital letter, excluding the first
+      pokePaste += `- ${move.replace(/([A-Z])/g, ' $1').trimStart()}\n`;
+    }
+    pokePastes.push(pokePaste);
+  }
+
+  return pokePastes.map((pokePaste: string) => ({
+    ...importPokePaste(pokePaste, format, 'Shown Team', 'sheet'),
+    playerName,
+  }));
+}
+
 /**
  * Reads team sheets revealed in battle and returns `CalcdexPokemonPreset[]`s from the provided `stepQueue`.
  *
@@ -164,6 +308,7 @@ const parseOpenTeamSheet = (
 export const getTeamSheetPresets = (
   format: string,
   stepQueue: string,
+  players: object,
 ): CalcdexPokemonPreset[] => {
   if (!format || !stepQueue) {
     return [];
@@ -178,7 +323,11 @@ export const getTeamSheetPresets = (
     // Trim everything before the first `|uhtml|ots|` so we can parse it like an accepted teamsheet.
     stepQueue = stepQueue.slice(stepQueue.indexOf('|uhtml|ots|'));
   }
-
+  // Similar fix to handle FORCED ots
+  if (stepQueue.includes('|showteam|')) {
+    stepQueue = stepQueue.slice(stepQueue.indexOf('|showteam|'));
+    return parsePackedTeam(stepQueue, players, format);
+  }
   // if it ain't this either, then probably something we don't know how to parse
   // (in which case, this will just return an empty array anyways)
   return parseOpenTeamSheet(format, stepQueue);
