@@ -437,6 +437,7 @@ export const PokeStats = ({
           {statNames.map((stat) => {
             const statLabel = stat.toUpperCase();
             const ev = pokemon?.evs?.[stat] || 0;
+            const pristine = legacy ? ev === 252 : (!ev && !missingEvs);
 
             return (
               <TableGridItem
@@ -446,11 +447,11 @@ export const PokeStats = ({
                 <ValueField
                   className={cx(
                     styles.valueField,
-                    (!ev && !missingEvs) && styles.pristine,
+                    pristine && styles.pristine,
                   )}
                   inputClassName={cx(
                     styles.valueFieldInput,
-                    (!ev && !missingEvs) && styles.dim,
+                    pristine && styles.dim,
                     missingEvs && styles.warning,
                   )}
                   inputStyle={missingEvs && warningColor ? { color: warningColor } : undefined}
