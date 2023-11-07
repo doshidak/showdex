@@ -5,7 +5,7 @@ import { detectLegacyGen } from './detectLegacyGen';
 /**
  * Returns the default value for the given `spread` type & `format`.
  *
- * * If any of the inputs are invalid, `0` will be returned.
+ * * If any of the inputs are invalid, the `defaultValue` (which is `0` by default lol) will be returned.
  *
  * @example
  * ```ts
@@ -25,9 +25,10 @@ import { detectLegacyGen } from './detectLegacyGen';
 export const getDefaultSpreadValue = (
   spread: 'iv' | 'ev',
   format?: string | GenerationNum,
+  defaultValue = 0,
 ): number => {
   if (!['iv', 'ev'].includes(spread)) {
-    return 0;
+    return defaultValue;
   }
 
   const legacy = detectLegacyGen(format);
@@ -38,5 +39,5 @@ export const getDefaultSpreadValue = (
     + (randoms ? '-randoms' : '')
     + (legacy ? '-legacy' : '');
 
-  return env.int(`${baseEnvKey}-${spread}`, 0);
+  return env.int(`${baseEnvKey}-${spread}`, null) ?? defaultValue;
 };
