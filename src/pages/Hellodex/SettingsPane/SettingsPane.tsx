@@ -34,7 +34,7 @@ import {
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { fileSize } from '@showdex/utils/humanize';
-import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
+import { dehydrateSettings, hydrateSettings, possiblyDehydrated } from '@showdex/utils/hydro';
 import styles from './SettingsPane.module.scss';
 
 export interface SettingsPaneProps {
@@ -43,8 +43,6 @@ export interface SettingsPaneProps {
   inBattle?: boolean;
   onRequestClose?: BaseButtonProps['onPress'];
 }
-
-const DehydratedRegex = /^v:\d+\.\d+\.\d+;[a-z]{1,3}:/;
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
 
@@ -82,7 +80,7 @@ export const SettingsPane = ({
     );
 
     try {
-      if (DehydratedRegex.test(prevSettings)) {
+      if (possiblyDehydrated(prevSettings)) {
         const rehydratedPrev = hydrateSettings(prevSettings);
 
         if (importUndoTimeout.current) {
@@ -107,20 +105,18 @@ export const SettingsPane = ({
         '\n', 'importedSettings', importedSettings,
       );
 
-      if (!DehydratedRegex.test(importedSettings)) {
+      if (!possiblyDehydrated(importedSettings)) {
         l.debug(
           'Failed the dehydrated settings regex test!',
           '\n', 'importedSettings', importedSettings,
         );
 
-        importFailedBadgeRef.current?.show();
-
-        return;
+        return void importFailedBadgeRef.current?.show();
       }
 
       const dehydratedCurrent = dehydrateSettings(settings);
 
-      if (DehydratedRegex.test(dehydratedCurrent)) {
+      if (possiblyDehydrated(dehydratedCurrent)) {
         setPrevSettings(dehydratedCurrent);
 
         if (importUndoTimeout.current) {
@@ -141,9 +137,7 @@ export const SettingsPane = ({
           '\n', 'importedSettings', importedSettings,
         );
 
-        importFailedBadgeRef.current?.show();
-
-        return;
+        return void importFailedBadgeRef.current?.show();
       }
 
       updateSettings(hydratedSettings);
@@ -168,15 +162,13 @@ export const SettingsPane = ({
     try {
       const dehydratedSettings = dehydrateSettings(settings);
 
-      if (!DehydratedRegex.test(dehydratedSettings)) {
+      if (!possiblyDehydrated(dehydratedSettings)) {
         l.debug(
           'Failed the dehydrated settings regex test!',
           '\n', 'dehydratedSettings', dehydratedSettings,
         );
 
-        exportFailedBadgeRef.current?.show();
-
-        return;
+        return void exportFailedBadgeRef.current?.show();
       }
 
       // await navigator.clipboard.writeText(dehydratedSettings);
@@ -208,15 +200,13 @@ export const SettingsPane = ({
         const hydratedDefaults = hydrateSettings();
         const dehydratedDefaults = dehydrateSettings(hydratedDefaults);
 
-        if (!DehydratedRegex.test(dehydratedDefaults)) {
+        if (!possiblyDehydrated(dehydratedDefaults)) {
           l.debug(
             'Failed the dehydrated settings regex test!',
             '\n', 'dehydratedDefaults', dehydratedDefaults,
           );
 
-          defaultsFailedBadgeRef.current?.show();
-
-          return;
+          return void defaultsFailedBadgeRef.current?.show();
         }
 
         await navigator.clipboard.writeText(dehydratedDefaults);
