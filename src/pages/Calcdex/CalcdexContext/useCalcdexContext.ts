@@ -402,21 +402,28 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // recalculate the stats with the updated base stats/EVs/IVs
     mutated.spreadStats = calcPokemonSpreadStats(state.format, mutated);
 
-    // we can only reset dirtyBoosts if there are reported boosts from the current battle, obviously!
-    if (mutating('dirtyBoosts') && nonEmptyObject(mutated.boosts)) {
-      Object.entries(mutated.dirtyBoosts).forEach(([
-        stat,
-        dirtyBoost,
-      ]: [
-        stat: Showdown.StatNameNoHp,
-        dirtyBoost: number,
-      ]) => {
-        const boost = mutated.boosts?.[stat] || 0;
+    if (mutating('dirtyBoosts')) {
+      mutated.dirtyBoosts = {
+        ...prevPokemon.dirtyBoosts,
+        ...pokemon.dirtyBoosts,
+      };
 
-        if (dirtyBoost === boost) {
-          mutated.dirtyBoosts[stat] = null;
-        }
-      });
+      // we can only reset dirtyBoosts if there are reported boosts from the current battle, obviously!
+      if (nonEmptyObject(mutated.boosts)) {
+        Object.entries(mutated.dirtyBoosts).forEach(([
+          stat,
+          dirtyBoost,
+        ]: [
+          stat: Showdown.StatNameNoHp,
+          dirtyBoost: number,
+        ]) => {
+          const boost = mutated.boosts?.[stat] || 0;
+
+          if (dirtyBoost === boost) {
+            mutated.dirtyBoosts[stat] = null;
+          }
+        });
+      }
     }
 
     player.pokemon[pokemonIndex] = mutated;
