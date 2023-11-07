@@ -94,6 +94,7 @@ export const PatronageTierRenderer = (
           const userLabelColor = userTitle?.color?.[colorScheme];
           const userTooltipLabelColor = userTitle?.color?.[tooltipColorScheme];
           const userIconColor = userTitle?.iconColor?.[colorScheme];
+          const userTooltipIconColor = userTitle?.iconColor?.[tooltipColorScheme];
 
           const active = term === 'once' || (
             !!startDate // start date string (should exist)
@@ -131,7 +132,7 @@ export const PatronageTierRenderer = (
                     <>
                       <Svg
                         className={styles.customTitleIcon}
-                        style={{ color: userIconColor || userLabelColor }}
+                        style={{ color: userTooltipIconColor || userTooltipLabelColor }}
                         description={userTitle.iconDescription}
                         src={getResourceUrl(`${userTitle.icon}.svg`)}
                       />
