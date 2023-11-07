@@ -10,3 +10,4 @@ export * from './hydratePresets';
 export * from './hydratePrimitives';
 export * from './hydrateSettings';
 export * from './hydrateStatsTable';
+export * from './possiblyDehydrated';
