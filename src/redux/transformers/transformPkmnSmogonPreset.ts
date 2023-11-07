@@ -3,7 +3,10 @@ import { type PkmnSmogonPreset } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
+// import { logger } from '@showdex/utils/debug';
 import { getDefaultSpreadValue, getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
+
+// const l = logger('@showdex/redux/transformers/transformPkmnSmogonPreset()');
 
 /**
  * Internal transformer for converting a single `PkmnSmogonPreset` from the pkmn Sets API into a `CalcdexPokemonPreset`.
@@ -30,8 +33,11 @@ export const transformPkmnSmogonPreset = (
     return null;
   }
 
-  const defaultIv = getDefaultSpreadValue('iv', format);
-  const defaultEv = getDefaultSpreadValue('ev', format);
+  // update (2023/11/06): forgot that `format` in this particular transformer may not include the `gen<#>` prefix in
+  // the pkmn API, particularly when fetching presets of an entire gen (instead of a particular format) -- while this
+  // was actually fine in most cases, legacy gens defaulted to 0 stat EXP/EVs !! oopsies (they should all be 252 btw)
+  const defaultIv = getDefaultSpreadValue('iv', gen);
+  const defaultEv = getDefaultSpreadValue('ev', gen);
 
   const {
     teraTypes: presetTeraTypes,
