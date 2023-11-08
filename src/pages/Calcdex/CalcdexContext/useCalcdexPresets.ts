@@ -309,7 +309,10 @@ export const useCalcdexPresets = (
 
         // "Showdown Usage" preset is only made available in non-Randoms formats
         if ((!preset || settings?.prioritizeUsageStats) && !randoms && usage?.calcdexId) {
-          preset = usage;
+          // Only do this if the preset is not server sourced.
+          if (!preset || preset.name !== 'Yours') {
+            preset = usage;
+          }
         }
 
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
