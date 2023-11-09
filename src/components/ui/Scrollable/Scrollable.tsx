@@ -2,8 +2,8 @@ import * as React from 'react';
 import SimpleBar from 'simplebar';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/core';
-import { useUserAgent } from '@showdex/utils/hooks';
+// import { formatId } from '@showdex/utils/core';
+// import { useUserAgent } from '@showdex/utils/hooks';
 import styles from './Scrollable.module.scss';
 
 export interface ScrollableProps extends Omit<JSX.IntrinsicElements['div'], 'ref'> {
@@ -79,12 +79,16 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   React.useImperativeHandle(scrollRefFromProps, () => scrollRef.current);
   React.useImperativeHandle(contentRefFromProps, () => contentRef.current);
 
-  const userAgent = useUserAgent();
-  const shouldRenderNative = formatId(userAgent?.os?.name) === 'macos'
-    || userAgent?.device?.type === 'mobile';
+  // update (2023/11/09): the big Z added custom scrollbars to Showdown in battle-log.css of pokemon-showdown-client,
+  // which is being applied to the <body> element (plus there's apparently no ez way of "restoring" the original scrollbar
+  // via CSS & I don't wish to apply the .native-scrollbar style Showdown-wide, just to Showdex-related stuff), so guess
+  // we'll now always use our custom scrollbar now regardless of OS
+  // const userAgent = useUserAgent();
+  // const shouldRenderNative = formatId(userAgent?.os?.name) === 'macos'
+  //   || userAgent?.device?.type === 'mobile';
 
   React.useEffect(() => {
-    if (shouldRenderNative || !containerRef.current) {
+    if (!containerRef.current) {
       return;
     }
 
@@ -119,7 +123,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
 
     return () => simpleBarRef.current?.unMount();
   }, [
-    shouldRenderNative,
+    // shouldRenderNative,
   ]);
 
   const colorScheme = useColorScheme();
@@ -127,6 +131,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   // prevent the custom scrollbar from rendering (which sets the containerRef, letting SimpleBar instantiate)
   // if we haven't received anything back from the useUserAgent() hook
   // (something SHOULD be returned from the hook, even if the parsed properties are undefined)
+  /*
   if (shouldRenderNative || !Object.keys(userAgent || {}).length) {
     return (
       <div
@@ -142,6 +147,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
       </div>
     );
   }
+  */
 
   // SimpleBar lets you define your own divs, as long as the classNames match up.
   // we just have to pass the refs to the scrolableNode and contentNode options.
