@@ -258,14 +258,24 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     //   '\n', 'stepQueue', battle.stepQueue,
     // );
 
-    const p1 = battle.p1.name;
-    const p2 = battle.p2.name;
     if (sheetsNonce && battleState.sheetsNonce !== sheetsNonce) {
+      const playerNames = AllPlayerKeys.reduce((prev, key) => {
+        const { name: playerName } = battle[key] || {};
+
+        if (!playerName) {
+          return prev;
+        }
+
+        prev[key] = playerName;
+
+        return prev;
+      }, {} as Partial<Record<CalcdexPlayerKey, string>>);
+
       battleState.sheetsNonce = sheetsNonce;
       battleState.sheets = sheetStepQueues.flatMap((sheetStepQueue) => getTeamSheetPresets(
         battleState.format,
         sheetStepQueue,
-        { p1, p2 },
+        playerNames,
       ));
     }
 

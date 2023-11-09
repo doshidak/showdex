@@ -1,4 +1,4 @@
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPlayerKey, type CalcdexPokemonPreset } from '@showdex/redux/store';
 import { importPokePaste } from './importPokePaste';
 
 const SummaryTag = '</summary>';
@@ -139,24 +139,32 @@ const parseOpenTeamSheet = (
   return output;
 };
 
-/* Parse a team based on the specification provided @
- https://github.com/smogon/pokemon-showdown/blob/master/sim/TEAMS.md
-*/
-function parsePackedTeam(team: string, players: object, format: string) {
+/**
+ * Parse a team based on the specification provided @
+ * https://github.com/smogon/pokemon-showdown/blob/master/sim/TEAMS.md
+ *
+ * @author malaow3 <malaow3@yahoo.com>
+ * @since 1.1.8
+ */
+const parsePackedTeam = (
+  team: string,
+  playerNames: Partial<Record<CalcdexPlayerKey, string>>,
+  format: string,
+): CalcdexPokemonPreset[] => {
   // First, split the string into the two showteam parts
   team = team.trim();
   // Remove the showteam part
   team = team.slice(team.indexOf('|showteam|') + 10);
 
   // Get the player
-  const player = team.slice(0, team.indexOf('|'));
+  const playerKey = team.slice(0, team.indexOf('|')) as CalcdexPlayerKey;
   // Remove the player part
   team = team.slice(team.indexOf('|') + 1);
-  const playerName = players[player] as string;
+  const playerName = playerNames[playerKey];
 
   // Get the team and convert to export format.
   const mons = team.split(']');
-  const pokePastes = [];
+  const pokePastes: string[] = [];
   for (let i = 0; i < mons.length; i++) {
     const mondata = mons[i];
     if (!mondata) continue;
@@ -277,11 +285,11 @@ function parsePackedTeam(team: string, players: object, format: string) {
     pokePastes.push(pokePaste);
   }
 
-  return pokePastes.map((pokePaste: string) => ({
+  return pokePastes.map((pokePaste) => ({
     ...importPokePaste(pokePaste, format, 'Shown Team', 'sheet'),
     playerName,
   }));
-}
+};
 
 /**
  * Reads team sheets revealed in battle and returns `CalcdexPokemonPreset[]`s from the provided `stepQueue`.
@@ -308,7 +316,7 @@ function parsePackedTeam(team: string, players: object, format: string) {
 export const getTeamSheetPresets = (
   format: string,
   stepQueue: string,
-  players: object,
+  playerNames: Partial<Record<CalcdexPlayerKey, string>>,
 ): CalcdexPokemonPreset[] => {
   if (!format || !stepQueue) {
     return [];
@@ -326,7 +334,7 @@ export const getTeamSheetPresets = (
   // Similar fix to handle FORCED ots
   if (stepQueue.includes('|showteam|')) {
     stepQueue = stepQueue.slice(stepQueue.indexOf('|showteam|'));
-    return parsePackedTeam(stepQueue, players, format);
+    return parsePackedTeam(stepQueue, playerNames, format);
   }
   // if it ain't this either, then probably something we don't know how to parse
   // (in which case, this will just return an empty array anyways)
