@@ -1,8 +1,5 @@
-import {
-  type CalcdexPlayerKey,
-  type ShowdexSettings,
-  type ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { type ShowdexSettings, type ShowdexCalcdexSettings } from '@showdex/redux/store';
 import { getColorScheme } from '@showdex/utils/app';
 import { reverseObjectKv } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';

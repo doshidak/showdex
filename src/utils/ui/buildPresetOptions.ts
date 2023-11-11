@@ -1,7 +1,7 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
 // import { FormatLabels } from '@showdex/consts/dex';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import { getPresetFormes } from '@showdex/utils/presets';

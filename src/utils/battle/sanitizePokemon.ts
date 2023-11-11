@@ -5,7 +5,7 @@ import {
   // type MoveName,
 } from '@smogon/calc';
 import { PokemonBoostNames, PokemonNatures, PokemonStatNames } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import {
   clamp,

@@ -1,4 +1,4 @@
-import { type CalcdexBattleRules } from '@showdex/redux/store';
+import { type CalcdexBattleRules } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 
 /*

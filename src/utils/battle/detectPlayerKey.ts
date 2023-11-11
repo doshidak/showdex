@@ -1,4 +1,4 @@
-import { type CalcdexPlayerKey } from '@showdex/redux/store';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { getAuthUsername } from '@showdex/utils/app';
 import { detectPokemonIdent } from './detectPokemonIdent';
 

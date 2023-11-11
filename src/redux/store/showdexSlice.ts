@@ -5,12 +5,13 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { type CalcdexMatchupNhkoColors, type CalcdexMatchupNhkoLabels } from '@showdex/utils/calc';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { type CalcdexPlayerKey, type CalcdexRenderMode } from './calcdexSlice';
+import { type CalcdexRenderMode } from './calcdexSlice';
 import { useDispatch, useSelector } from './hooks';
 
 /**

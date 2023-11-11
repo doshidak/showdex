@@ -1,5 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { env, formatId, getStoredItem } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
 import { unpackStorageTeam } from './unpackStorageTeam';

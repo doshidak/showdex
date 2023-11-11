@@ -1,6 +1,6 @@
 import { HydroDescriptor } from '@showdex/consts/hydro';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import {
-  type CalcdexPlayerKey,
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,

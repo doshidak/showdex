@@ -4,7 +4,7 @@ import {
   HydroPresetsDehydrationAltMap,
   HydroPresetsDehydrationMap,
 } from '@showdex/consts/hydro';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectUsageAlts } from '@showdex/utils/presets';
 import { dehydrateHeader } from './dehydrateHeader';

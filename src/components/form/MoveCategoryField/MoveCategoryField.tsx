@@ -11,7 +11,8 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { PokemonBoostNames } from '@showdex/consts/dex';
-import { type CalcdexMoveOverride, useColorScheme } from '@showdex/redux/store';
+import { type CalcdexMoveOverride } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat } from '@showdex/utils/dex';
 import { useUserAgent } from '@showdex/utils/hooks';

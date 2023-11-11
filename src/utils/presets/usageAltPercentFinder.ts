@@ -1,4 +1,4 @@
-import { type CalcdexPokemonAlt } from '@showdex/redux/store';
+import { type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { percentage } from '@showdex/utils/humanize';
 import { detectUsageAlt } from './detectUsageAlt';

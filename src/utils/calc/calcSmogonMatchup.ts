@@ -5,12 +5,8 @@ import {
   type Pokemon as SmogonPokemon,
   calculate,
 } from '@smogon/calc';
-import {
-  type CalcdexBattleField,
-  type CalcdexPlayer,
-  type CalcdexPokemon,
-  type ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type ShowdexCalcdexSettings } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';

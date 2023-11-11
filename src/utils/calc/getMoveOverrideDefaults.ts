@@ -1,5 +1,5 @@
 import { type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/interfaces/calc';
 import {
   alwaysCriticalHits,
   determineMoveTargets,
@@ -65,7 +65,7 @@ export const getMoveOverrideDefaults = (
     || null;
 
   const {
-    ignoreDefensive,
+    // ignoreDefensive,
     overrideDefensiveStat,
     overrideOffensiveStat,
   } = determineMoveTargets(format, pokemon, moveName) || {};
@@ -77,7 +77,7 @@ export const getMoveOverrideDefaults = (
     zBasePower: zMove?.basePower,
     maxBasePower: gmaxBasePower || maxMove?.basePower,
     alwaysCriticalHits: criticalHit,
-    defensiveStat: (ignoreDefensive ? 'ignore' : overrideDefensiveStat) || defaultDefensiveStat,
+    defensiveStat: overrideDefensiveStat || defaultDefensiveStat,
     offensiveStat: overrideOffensiveStat || defaultOffensiveStat,
   };
 };

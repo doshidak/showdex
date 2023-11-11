@@ -1,7 +1,7 @@
 import { type GenerationNum } from '@smogon/calc';
 import { type Duration, add, compareAsc } from 'date-fns';
 import LzString from 'lz-string';
-import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
 import {
   clearStoredItem,
   env,

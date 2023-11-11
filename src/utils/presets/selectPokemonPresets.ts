@@ -3,7 +3,7 @@ import {
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
   type CalcdexPokemonPresetSource,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { getPresetFormes } from './getPresetFormes';

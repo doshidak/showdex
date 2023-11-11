@@ -1,5 +1,3 @@
-// import { type CalcdexPokemon } from '@showdex/redux/store';
-
 /* eslint-disable @typescript-eslint/indent */
 
 /**

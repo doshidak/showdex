@@ -1,5 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { detectGenFromFormat } from '@showdex/utils/dex';
 import { convertIvToLegacyDv } from './convertLegacyStats';
 

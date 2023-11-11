@@ -1,5 +1,5 @@
 import { PseudoWeatherMap, WeatherMap } from '@showdex/consts/dex';
-import { type CalcdexBattleField } from '@showdex/redux/store';
+import { type CalcdexBattleField } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 
 /**

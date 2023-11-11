@@ -12,7 +12,7 @@ import {
   PokemonBoostNames,
   PokemonTypes,
 } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import {
   clonePokemon,
   mergeRevealedMoves,

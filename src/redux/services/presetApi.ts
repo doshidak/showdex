@@ -6,8 +6,8 @@ import {
 } from '@smogon/calc';
 import { type Duration } from 'date-fns';
 // import { HttpMethod } from '@showdex/consts/core';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { buildPresetQuery, createTagProvider } from '@showdex/redux/factories';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 import {
   transformFormatPresetResponse,
   transformFormatStatsResponse,

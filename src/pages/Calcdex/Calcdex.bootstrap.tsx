@@ -6,12 +6,10 @@ import { type GenerationNum } from '@smogon/calc';
 import { ErrorBoundary } from '@showdex/components/debug';
 import { SandwichProvider } from '@showdex/components/layout';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type CalcdexPlayer, type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { type ShowdexBootstrapper } from '@showdex/main';
 import { syncBattle } from '@showdex/redux/actions';
 import {
-  type CalcdexPlayer,
-  type CalcdexPlayerKey,
-  type CalcdexPokemon,
   type CalcdexSliceState,
   type RootStore,
   type ShowdexSliceState,

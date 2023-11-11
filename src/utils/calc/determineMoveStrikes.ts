@@ -1,5 +1,5 @@
 import { type MoveName, type ShowdexCalcStrike } from '@smogon/calc';
-import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat } from '@showdex/utils/dex';
 import { calcPokemonFinalStats } from './calcPokemonFinalStats';

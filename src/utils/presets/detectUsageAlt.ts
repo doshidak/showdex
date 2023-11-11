@@ -1,4 +1,4 @@
-import { type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/redux/store';
+import { type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 
 /* eslint-disable @typescript-eslint/indent */
 

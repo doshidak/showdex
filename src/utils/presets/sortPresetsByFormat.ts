@@ -1,4 +1,4 @@
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { getGenlessFormat } from '@showdex/utils/dex';
 
 /**

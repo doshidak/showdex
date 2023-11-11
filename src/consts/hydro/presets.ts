@@ -1,4 +1,4 @@
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { reverseObjectKv } from '@showdex/utils/core';
 import { type HydroHeader } from './header';
 

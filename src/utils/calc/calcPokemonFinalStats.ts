@@ -5,11 +5,7 @@ import {
   PokemonSpeedReductionItems,
   PokemonStatNames,
 } from '@showdex/consts/dex';
-import {
-  type CalcdexBattleField,
-  type CalcdexPlayer,
-  type CalcdexPokemon,
-} from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import { env, formatId as id, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';

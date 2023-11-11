@@ -16,7 +16,8 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { PokemonToggleMoves } from '@showdex/consts/dex';
-import { type CalcdexMoveOverride, type CalcdexPokemon, useColorScheme } from '@showdex/redux/store';
+import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {

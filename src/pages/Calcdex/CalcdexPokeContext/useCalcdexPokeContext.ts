@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { appliedPreset, applyPreset as applyPokemonPreset, flattenAlts } from '@showdex/utils/presets';
 import { useCalcdexContext } from '../CalcdexContext';

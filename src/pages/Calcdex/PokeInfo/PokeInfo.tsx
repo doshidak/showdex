@@ -19,7 +19,8 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
-import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
+import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
 // import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';

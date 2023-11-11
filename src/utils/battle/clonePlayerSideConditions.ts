@@ -1,4 +1,4 @@
-import { type CalcdexPlayerSideConditions } from '@showdex/redux/store';
+import { type CalcdexPlayerSideConditions } from '@showdex/interfaces/calc';
 
 /**
  * Clones the `sideConditions` object from the `player`.

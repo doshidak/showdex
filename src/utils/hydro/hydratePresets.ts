@@ -9,7 +9,7 @@ import {
   type CalcdexPokemonAlt,
   type CalcdexPokemonPreset,
   type CalcdexPokemonPresetSource,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
 import { hydrateHeader } from './hydrateHeader';

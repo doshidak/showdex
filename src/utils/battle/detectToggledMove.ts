@@ -1,5 +1,5 @@
 import { type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { PokemonToggleMoves } from '@showdex/consts/dex';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 

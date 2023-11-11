@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type CalcdexPlayer, type CalcdexPlayerKey, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import {
   type CalcdexBattleState,
-  type CalcdexPlayer,
-  type CalcdexPlayerKey,
-  type CalcdexPokemonPreset,
   type ShowdexCalcdexSettings,
   calcdexSlice,
   useDispatch,
@@ -99,18 +97,8 @@ export const useCalcdexPresets = (
       //   '\n', 'filtered', presetlessIndices.map((i) => party[i]),
       // );
 
-      // that one trick pro programmers don't want you to know about
-      // update (2023/10/18): naw it's still a dank trick, just now a payload will always be dispatched lol
-      // let didUpdate = false;
-      // let didApplySheet = false;
-
       presetlessIndices.forEach((pokemonIndex) => {
         const pokemon = party[pokemonIndex];
-
-        // note: getPresetFormes() will return an empty array if transformedForme is falsy
-        // const speciesFormes = getPresetFormes(pokemon.speciesForme, { format: state.format });
-        // const transformedFormes = getPresetFormes(pokemon.transformedForme, { format: state.format });
-        // const formes = [...transformedFormes, ...speciesFormes];
 
         const pokemonPresets = selectPokemonPresets(
           presets.presets,
@@ -137,6 +125,7 @@ export const useCalcdexPresets = (
 
         if (pokemon.serverSourced && nonEmptyObject(pokemon.serverStats)) {
           // was gunna use this elsewhere, so I separated it from the map() below, but never ended up needing it lol
+          // (in other words, too lazy to move this back into the map() below)
           const mergeMatches = (
             p: CalcdexPokemonPreset,
           ) => {
@@ -199,7 +188,7 @@ export const useCalcdexPresets = (
           // "old reliable"
           // note: ServerPokemon info may be of the transformed Pokemon's moves, not the pre-transformed ones!!
           // (hence the `pokemon.transformedMoves` check)
-          if (!preset && !pokemon.transformedForme) {
+          if (!preset?.calcdexId && !pokemon.transformedForme) {
             const guessedSpread = state.legacy
               ? guessServerLegacySpread(state.format, pokemon)
               : guessServerSpread(state.format, pokemon);
@@ -264,7 +253,7 @@ export const useCalcdexPresets = (
 
         // apply any sheets, if available at this stage
         // (there's another effect hook below to handle sheets sent later)
-        if (!preset && state.sheets?.length) {
+        if (!preset?.calcdexId && state.sheets?.length) {
           [preset] = selectPokemonPresets(
             state.sheets,
             pokemon,
@@ -283,7 +272,7 @@ export const useCalcdexPresets = (
         }
 
         // attempt to find a preset within the current format
-        if (!preset && pokemonPresets.length) {
+        if (!preset?.calcdexId && pokemonPresets.length) {
           [preset] = selectPokemonPresets(
             pokemonPresets,
             pokemon,
@@ -294,8 +283,8 @@ export const useCalcdexPresets = (
             },
           );
 
-          // if we still haven't found one, then try finding one from any format (unless we have a usage preset)
-          if (!preset && !usage?.calcdexId) {
+          // if we still haven't found one, then try finding one from any format
+          if (!preset?.calcdexId) {
             [preset] = selectPokemonPresets(
               pokemonPresets,
               pokemon,
@@ -308,16 +297,28 @@ export const useCalcdexPresets = (
         }
 
         // "Showdown Usage" preset is only made available in non-Randoms formats
-        if ((!preset || settings?.prioritizeUsageStats) && !randoms && usage?.calcdexId) {
-          // Only do this if the preset is not server sourced.
-          if (!preset || preset.name !== 'Yours') {
-            preset = usage;
-          }
+        const shouldApplyUsage = !randoms
+          && !!usage?.calcdexId // making sure we have a "Showdown Usage" preset to begin with!
+          // only apply if we don't have a preset atm, or if we do, the prioritizeUsageStats setting is enabled &
+          // the current preset isn't server-sourced
+          && (!preset?.calcdexId || (settings?.prioritizeUsageStats && preset.source !== 'server'));
+
+        if (shouldApplyUsage) {
+          preset = usage;
         }
 
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
         if (!preset?.calcdexId) {
           pokemon.showGenetics = true;
+
+          l.debug(
+            'Failed to find a preset for', pokemon.speciesForme, 'of player', playerKey,
+            '\n', 'pokemon', pokemon,
+            '\n', 'preset', preset,
+            '\n', 'presets', presets,
+            '\n', 'usage', usage,
+            '\n', 'state', state,
+          );
 
           return;
         }
@@ -337,13 +338,7 @@ export const useCalcdexPresets = (
           ...pokemon,
           ...applyPreset(state.format, pokemon, preset, usage),
         };
-
-        // didUpdate = true;
       });
-
-      // if (!didUpdate) {
-      //   return;
-      // }
 
       playersPayload[playerKey] = {
         pokemon: party,
@@ -365,6 +360,12 @@ export const useCalcdexPresets = (
     presets.ready,
     state?.battleId,
     state?.format,
+
+    /**
+     * @todo this isn't foolproof since React will only see changes in the numbers, so if one Pokemon is resolved while
+     *   another comes in, React won't see any changes (since it'll still be `1`) & therefore not apply a preset for the
+     *   Pokemon that just came in.
+     */
     ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId)?.length || 0),
     // ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId || p?.autoPreset)?.length || 0),
   ]);

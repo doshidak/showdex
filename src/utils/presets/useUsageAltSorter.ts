@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type CalcdexPokemonAlt } from '@showdex/redux/store';
+import { type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { type CalcdexPokemonUsageAltSorter, usageAltPercentSorter } from './usageAltPercentSorter';
 

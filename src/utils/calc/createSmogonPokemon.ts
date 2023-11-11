@@ -5,7 +5,7 @@ import {
   Pokemon as SmogonPokemon,
 } from '@smogon/calc';
 import { PokemonPseudoToggleAbilities, PokemonRuinAbilities } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import {

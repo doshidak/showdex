@@ -1,7 +1,7 @@
 import { type ItemName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat, guessTableFormatKey, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';

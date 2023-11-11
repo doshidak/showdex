@@ -1,6 +1,6 @@
 import { type GameType } from '@smogon/calc';
 import { PokemonToggleAbilities } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 
 /**
  * Determines the value of the `abilityToggleable` property in a `CalcdexPokemon`.

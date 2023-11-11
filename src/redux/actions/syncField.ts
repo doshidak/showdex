@@ -1,4 +1,5 @@
-import { type CalcdexBattleField, type CalcdexBattleState } from '@showdex/redux/store';
+import { type CalcdexBattleField } from '@showdex/interfaces/calc';
+import { type CalcdexBattleState } from '@showdex/redux/store';
 import { cloneField, sanitizeField } from '@showdex/utils/battle';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';

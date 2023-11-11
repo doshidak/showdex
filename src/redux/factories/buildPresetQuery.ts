@@ -1,6 +1,6 @@
 import { HttpMethod } from '@showdex/consts/core';
 import { type PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */

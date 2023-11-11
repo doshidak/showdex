@@ -2,12 +2,8 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 // import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
-import {
-  type CalcdexBattleState,
-  type CalcdexPlayerKey,
-  type CalcdexPokemon,
-  type RootState,
-} from '@showdex/redux/store';
+import { type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleState, type RootState } from '@showdex/redux/store';
 import { getAuthUsername } from '@showdex/utils/app';
 import {
   cloneBattleState,

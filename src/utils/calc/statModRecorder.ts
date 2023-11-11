@@ -1,5 +1,5 @@
 import { PokemonInitialStats } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 
 export type CalcdexStatModSource =
   | 'ability'

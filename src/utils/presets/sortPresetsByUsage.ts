@@ -1,4 +1,4 @@
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 
 /**
  * Sorts `CalcdexPokemonPreset[]`'s by the provided usage percentages in `usages[]`.

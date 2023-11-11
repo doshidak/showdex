@@ -9,9 +9,8 @@ import {
   type CalcdexPlayerKey,
   type CalcdexPlayerSide,
   type CalcdexPokemon,
-  calcdexSlice,
-  useDispatch,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
+import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {
   cloneAllPokemon,
   clonePlayer,
