@@ -15,8 +15,8 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
+import { type ShowdexSettings } from '@showdex/interfaces/app';
 import {
-  type ShowdexSettings,
   useAuthUsername,
   useColorScheme,
   useShowdexSettings,

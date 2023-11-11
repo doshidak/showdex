@@ -1,11 +1,11 @@
 import { HydroDescriptor } from '@showdex/consts/hydro';
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,
   type ShowdexShowdownSettings,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/app';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 // import { env } from '@showdex/utils/core';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';

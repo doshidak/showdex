@@ -1,12 +1,8 @@
 import * as React from 'react';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexPlayer, type CalcdexPlayerKey, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import {
-  type CalcdexBattleState,
-  type ShowdexCalcdexSettings,
-  calcdexSlice,
-  useDispatch,
-} from '@showdex/redux/store';
+import { type CalcdexBattleState, calcdexSlice, useDispatch } from '@showdex/redux/store';
 import { cloneAllPokemon, clonePreset } from '@showdex/utils/battle';
 import { calcPresetCalcdexId, guessServerLegacySpread, guessServerSpread } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
