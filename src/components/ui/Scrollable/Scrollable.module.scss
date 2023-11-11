@@ -4,10 +4,10 @@
 @use 'mixins/spacing';
 @use 'mixins/transition';
 
-.nativeContainer {
-  position: relative;
-  overflow-y: auto;
-}
+// .nativeContainer {
+//   position: relative;
+//   overflow-y: auto;
+// }
 
 // derived from:
 // https://github.com/Grsmto/simplebar/blob/master/packages/simplebar/src/simplebar.css
@@ -17,6 +17,21 @@
   @include flex.column($justify: flex-start, $align: flex-start);
   flex-wrap: wrap;
   align-content: flex-start;
+
+  // update (2023/11/09): Showdown added custom scrollbars in battle-log.css, so while we're now reverting to using our
+  // custom Scrollable component, sometimes the custom scrollbar will flash real quick if the content changes, so we'll
+  // make sure anything inside here won't be shown
+  &::-webkit-scrollbar, *::-webkit-scrollbar {
+    display: none !important;
+
+    &:vertical {
+      width: 0 !important;
+    }
+
+    &:horizontal {
+      height: 0 !important;
+    }
+  }
 }
 
 .wrapper {
