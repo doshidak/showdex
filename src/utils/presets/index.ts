@@ -14,6 +14,7 @@ export * from './importPokePaste';
 export * from './processUsageAlts';
 export * from './selectPokemonPresets';
 export * from './sortPresetsByFormat';
+export * from './sortPresetsByForme';
 export * from './sortPresetsByUsage';
 export * from './sortUsageAlts';
 export * from './unpackStorageTeam';
