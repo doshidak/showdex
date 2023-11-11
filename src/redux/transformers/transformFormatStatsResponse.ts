@@ -1,7 +1,8 @@
 import { type MoveName } from '@smogon/calc';
 import { PokemonNatures } from '@showdex/consts/dex';
+import { type PkmnApiSmogonFormatStatsResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnSmogonFormatStatsResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
@@ -19,9 +20,9 @@ import { processUsageAlts } from '@showdex/utils/presets';
  * @since 1.0.3
  */
 export const transformFormatStatsResponse = (
-  response: PkmnSmogonFormatStatsResponse,
+  response: PkmnApiSmogonFormatStatsResponse,
   _meta: unknown,
-  args: PkmnSmogonPresetRequest,
+  args: PkmnApiSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   const { pokemon: pokemonStats } = response || {};
 

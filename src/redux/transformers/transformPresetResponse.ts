@@ -1,5 +1,6 @@
+import { type PkmnApiSmogonPresetResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnSmogonPresetRequest, type PkmnSmogonPresetResponse } from '@showdex/redux/services';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { transformPkmnSmogonPreset } from './transformPkmnSmogonPreset';
@@ -17,9 +18,9 @@ import { transformPkmnSmogonPreset } from './transformPkmnSmogonPreset';
  * @since 0.1.3
  */
 export const transformPresetResponse = (
-  response: PkmnSmogonPresetResponse,
+  response: PkmnApiSmogonPresetResponse,
   _meta: unknown,
-  args: PkmnSmogonPresetRequest,
+  args: PkmnApiSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   if (!args?.gen || !nonEmptyObject(response)) {
     return [];

@@ -1,6 +1,6 @@
 import { type AbilityName, type GenerationNum } from '@smogon/calc';
+import { type PkmnApiSmogonPreset } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnSmogonPreset } from '@showdex/redux/services';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
@@ -9,7 +9,7 @@ import { getDefaultSpreadValue, getDexForFormat, getGenlessFormat } from '@showd
 // const l = logger('@showdex/redux/transformers/transformPkmnSmogonPreset()');
 
 /**
- * Internal transformer for converting a single `PkmnSmogonPreset` from the pkmn Sets API into a `CalcdexPokemonPreset`.
+ * Internal transformer for converting a single `PkmnApiSmogonPreset` from the pkmn Sets API into a `CalcdexPokemonPreset`.
  *
  * * Primarily exported for use by `transformFormatPresetResponse()`.
  * * Returns `null` if transforming fails for whatever reason.
@@ -27,7 +27,7 @@ export const transformPkmnSmogonPreset = (
   format: string,
   speciesForme: string,
   presetName: string,
-  preset: PkmnSmogonPreset,
+  preset: PkmnApiSmogonPreset,
 ): CalcdexPokemonPreset => {
   if (!gen || !format || !speciesForme || !nonEmptyObject(preset)) {
     return null;

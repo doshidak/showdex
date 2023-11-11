@@ -1,6 +1,6 @@
 import { HttpMethod } from '@showdex/consts/core';
-import { type PkmnSmogonPresetRequest } from '@showdex/redux/services';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
@@ -102,14 +102,14 @@ export const buildPresetQuery = <TResponse>(
   source: CalcdexPokemonPresetSource,
   path: string,
   transformer: (
-    args: PkmnSmogonPresetRequest,
+    args: PkmnApiSmogonPresetRequest,
   ) => (
     data: TResponse,
     meta: unknown,
-    args: PkmnSmogonPresetRequest,
+    args: PkmnApiSmogonPresetRequest,
   ) => CalcdexPokemonPreset[],
 ): (
-  args: PkmnSmogonPresetRequest,
+  args: PkmnApiSmogonPresetRequest,
 ) => Promise<{
   data: CalcdexPokemonPreset[],
 }> => {
