@@ -5,7 +5,9 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
  *
  * * Note that usage percentages for presets are typically present in Randoms with multiple roles, in which the
  *   percentages indicate the probabilities of being a certain role.
- * * If no `usages[]` are available (as well as no `usage` percentages being available), this won't have any effect.
+ * * If there are less than 2 `usages[]` available, this won't have any effect.
+ *   - Single usage preset typically indicates it should apply format-wide, like in OU or Ubers.
+ *   - Multiple usage presets typically indicate usages based on the Pokemon's role, typically in Randoms, typically.
  * * Meant to be passed as the `compareFunction` of `CalcdexPokemonPreset[].sort()`.
  *
  * @since 1.1.8
@@ -13,7 +15,7 @@ import { type CalcdexPokemonPreset } from '@showdex/redux/store';
 export const sortPresetsByUsage = (
   usages: CalcdexPokemonPreset[],
 ): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => {
-  if (!usages?.length) {
+  if ((usages?.length || 0) < 2) {
     return () => 0;
   }
 
