@@ -3,7 +3,8 @@ import { AllPlayerKeys } from '@showdex/consts/battle';
 import { type CalcdexPlayerKey } from '@showdex/redux/store';
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
-import { flattenAlts, selectPokemonPresets } from '@showdex/utils/presets';
+// import { logger } from '@showdex/utils/debug';
+import { flattenAlts, selectPokemonPresets, sortPresetsByUsage } from '@showdex/utils/presets';
 import { CalcdexContext } from '../CalcdexContext';
 import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
@@ -37,7 +38,7 @@ export interface CalcdexPokeProviderProps {
   children: React.ReactNode;
 }
 
-// const baseScope = '@showdex/pages/Calcdex/CalcdexPokeProvider';
+// const l = logger('@showdex/pages/Calcdex/CalcdexPokeProvider');
 
 export const CalcdexPokeProvider = ({
   playerKey,
@@ -104,20 +105,6 @@ export const CalcdexPokeProvider = ({
     sheets,
   ]);
 
-  const pokemonPresets = React.useMemo(() => selectPokemonPresets(
-    allPresets,
-    playerPokemon,
-    {
-      format,
-      source: 'smogon',
-      select: 'any',
-    },
-  ), [
-    allPresets,
-    format,
-    playerPokemon,
-  ]);
-
   const usages = React.useMemo(() => selectPokemonPresets(
     allUsages,
     playerPokemon,
@@ -130,6 +117,21 @@ export const CalcdexPokeProvider = ({
     allUsages,
     format,
     playerPokemon,
+  ]);
+
+  const pokemonPresets = React.useMemo(() => selectPokemonPresets(
+    allPresets,
+    playerPokemon,
+    {
+      format,
+      source: 'smogon',
+      select: 'any',
+    },
+  ).sort(sortPresetsByUsage(usages)), [
+    allPresets,
+    format,
+    playerPokemon,
+    usages,
   ]);
 
   const presets = React.useMemo(() => [
