@@ -93,7 +93,7 @@ export const transformPkmnSmogonPreset = (
 
   // if the response omitted the `ability`, then grab it from the dex
   if (!output.ability) {
-    const dex = getDexForFormat(format);
+    const dex = getDexForFormat(gen);
     const species = dex?.species.get(speciesForme);
 
     if (species?.exists && species.abilities?.[0]) {
