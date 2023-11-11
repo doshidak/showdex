@@ -20,27 +20,17 @@ export const sortPresetsByFormat = (
     return () => 0;
   }
 
-  // remove 'series<#>' from the genlessFormat
-  const parsedFormat = genlessFormat.replace(/series\d+/i, '');
-
   return (a, b) => {
+    const formatA = getGenlessFormat(a.format);
+    const formatB = getGenlessFormat(b.format);
+
     // first, hard match the genless formats
-    const matchesA = a.format === parsedFormat;
-    const matchesB = b.format === parsedFormat;
+    const matchesA = formatA === genlessFormat;
+    const matchesB = formatB === genlessFormat;
 
     if (matchesA) {
       // no need to repeat this case below since this only occurs when `a` and `b` both match
       if (matchesB) {
-        if (a.source === 'usage') {
-          return 1;
-        }
-
-        if (b.source === 'usage') {
-          return -1;
-        }
-
-        // update (2023/07/27): WAIT how did I miss this case LMAO no wonder why the presets are backwards HAHAHA
-        // holy shit I'm actually dumb af
         return 0;
       }
 
@@ -54,11 +44,11 @@ export const sortPresetsByFormat = (
     // at this point, we should've gotten all the hard matches, so we can do partial matching
     // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
     // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
-    if (a.format.endsWith(parsedFormat)) {
+    if (formatA.endsWith(genlessFormat)) {
       return -1;
     }
 
-    if (b.format.endsWith(parsedFormat)) {
+    if (formatB.endsWith(genlessFormat)) {
       return 1;
     }
 
