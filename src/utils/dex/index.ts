@@ -8,6 +8,7 @@ export * from './getDefaultSpreadValue';
 export * from './getDexForFormat';
 export * from './getDynamicMoveType';
 export * from './getGenDexForFormat';
+export * from './getGenfulFormat';
 export * from './getGenlessFormat';
 export * from './getMaxMove';
 export * from './getNaturesDex';
