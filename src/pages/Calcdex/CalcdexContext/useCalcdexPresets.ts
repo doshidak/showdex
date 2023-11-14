@@ -420,7 +420,7 @@ export const useCalcdexPresets = (
             format: state.format,
             source: 'sheet',
             select: 'one',
-            filter: (p) => !pokemon.transformedForme || formatId(p.playerName) === formatId(player.name),
+            filter: (p) => !!pokemon.transformedForme || formatId(p.playerName) === formatId(player.name),
           },
         );
 
