@@ -1,9 +1,9 @@
 import { type ItemName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
-import { getDexForFormat, guessTableFormatKey, legalLockedFormat } from '@showdex/utils/dex';
+import { guessTableFormatKey, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -77,8 +77,6 @@ export const buildItemOptions = (
     return options;
   }
 
-  const dex = getDexForFormat(format);
-
   const {
     altItems,
   } = pokemon;
@@ -118,8 +116,22 @@ export const buildItemOptions = (
     filterItems.push(...flattenAlts(poolItems));
   }
 
-  if (!dex) {
-    return options;
+  if (detectUsageAlt(usageAltSource?.[0])) {
+    const usageItems = (usageAltSource as CalcdexPokemonUsageAlt<ItemName>[])
+      .filter((n) => !!n?.[0] && !filterItems.includes(n[0]));
+
+    if (usageItems.length) {
+      options.push({
+        label: 'Usage',
+        options: usageItems.map((alt) => ({
+          label: flattenAlt(alt),
+          rightLabel: percentage(alt[1], 2),
+          value: flattenAlt(alt),
+        })),
+      });
+
+      filterItems.push(...flattenAlts(usageItems));
+    }
   }
 
   if (typeof BattleTeambuilderTable === 'undefined' || !format || !BattleTeambuilderTable.items?.length) {
