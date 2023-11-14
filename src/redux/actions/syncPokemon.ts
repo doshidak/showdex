@@ -121,7 +121,9 @@ export const syncPokemon = (
             ];
           }
 
-          syncedPokemon.presetId = null;
+          if (!syncedPokemon.serverSourced && !serverPokemon?.speciesForme) {
+            syncedPokemon.presetId = null;
+          }
         }
 
         break;
