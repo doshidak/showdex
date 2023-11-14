@@ -11,6 +11,7 @@ export * from './getGenDexForFormat';
 export * from './getGenfulFormat';
 export * from './getGenlessFormat';
 export * from './getMaxMove';
+export * from './getNatureForStats';
 export * from './getNaturesDex';
 export * from './getPokemonLearnset';
 export * from './getTypesDex';
