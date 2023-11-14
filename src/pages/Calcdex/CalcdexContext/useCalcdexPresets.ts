@@ -23,6 +23,15 @@ import {
 const l = logger('@showdex/pages/Calcdex/CalcdexContext/useCalcdexPresets()');
 const s = (local: string, via?: string): string => `${l.scope}:${local}${via ? ` via ${via}` : ''}`;
 
+const playerAutoNonce = (
+  player: CalcdexPlayer,
+): string => (
+  player?.pokemon
+    ?.filter((p) => !p?.presetId)
+    .map((p) => p?.calcdexId)
+    .join(':')
+);
+
 /**
  * Basically does what `useBattlePresets()` does, but also auto-applies the first preset for any preset-less Pokemon
  * for every player in the provided `state`.
@@ -59,6 +68,7 @@ export const useCalcdexPresets = (
       && !!state.format
       && presets.ready
       && AllPlayerKeys.some((key) => !!state?.[key]?.pokemon?.length);
+      // && prevAutoNonce.current !== autoNonce;
       // && AllPlayerKeys.reduce((s, k) => s + (state?.[k]?.pokemon?.length ?? 0), 0) > 1;
 
     // note: presets.ready will be true if fetching is disabled by the user
@@ -351,19 +361,17 @@ export const useCalcdexPresets = (
       ...playersPayload,
     }));
 
+    // prevAutoNonce.current = autoNonce;
+
     endTimer('(dispatched)');
   }, [
+    playerAutoNonce(state?.p1),
+    playerAutoNonce(state?.p2),
+    playerAutoNonce(state?.p3),
+    playerAutoNonce(state?.p4),
     presets.ready,
     state?.battleId,
     state?.format,
-
-    /**
-     * @todo this isn't foolproof since React will only see changes in the numbers, so if one Pokemon is resolved while
-     *   another comes in, React won't see any changes (since it'll still be `1`) & therefore not apply a preset for the
-     *   Pokemon that just came in.
-     */
-    ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId)?.length || 0),
-    // ...AllPlayerKeys.map((key) => state?.[key]?.pokemon?.filter((p) => !p?.presetId || p?.autoPreset)?.length || 0),
   ]);
 
   React.useEffect(() => {

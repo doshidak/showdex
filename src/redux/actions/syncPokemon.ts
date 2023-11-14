@@ -127,6 +127,8 @@ export const syncPokemon = (
               ...(Object.values(updatedSpecies.abilities) as AbilityName[]),
             ];
           }
+
+          syncedPokemon.presetId = null;
         }
 
         break;
@@ -368,7 +370,6 @@ export const syncPokemon = (
 
         if (shouldResetPreset) {
           syncedPokemon.presetId = null;
-          syncedPokemon.autoPreset = true;
         }
 
         syncedPokemon.transformedForme = transformedForme || null;
