@@ -9,7 +9,8 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { PokemonStatuses, PokemonStatusTitles } from '@showdex/consts/dex';
-import { type CalcdexPokemon, useColorScheme } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonCurrentHp, calcPokemonHpPercentage, calcPokemonMaxHp } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
 import { useUserAgent } from '@showdex/utils/hooks';
