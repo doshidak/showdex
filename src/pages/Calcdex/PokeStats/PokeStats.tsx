@@ -12,7 +12,7 @@ import {
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
-import { legalLockedFormat } from '@showdex/utils/dex';
+import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
@@ -96,6 +96,19 @@ export const PokeStats = ({
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
   const maxLegalEvs = env.int(format?.includes('random') ? 'calcdex-pokemon-max-legal-randoms-evs' : 'calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
+
+  const defaultIv = React.useMemo(() => getDefaultSpreadValue('iv', format), [format]);
+  const defaultEv = React.useMemo(() => getDefaultSpreadValue('ev', format), [format]);
+
+  const pristineSpreadValue = React.useCallback((
+    spread: 'iv' | 'ev',
+    value: number,
+  ) => (
+    (value || 0) === (spread === 'ev' ? defaultEv : defaultIv)
+  ), [
+    defaultEv,
+    defaultIv,
+  ]);
 
   // update (2023/07/26): since showLegacyEvs is now a setting, any amount of EVs in legacy gens
   // will always be legal! (each stat defaults to 252 anyway, depending on the applied preset)
@@ -332,6 +345,7 @@ export const PokeStats = ({
             const value = legacy ? convertIvToLegacyDv(iv) : iv;
             const maxValue = legacy ? 15 : 31;
 
+            const pristine = !missingIvs && pristineSpreadValue('iv', value);
             const disabled = !pokemon?.speciesForme
               || (legacy && stat === 'hp')
               || (gen === 2 && stat === 'spd');
@@ -345,11 +359,11 @@ export const PokeStats = ({
                   className={cx(
                     styles.valueField,
                     disabled && styles.disabled,
-                    (value === maxValue && !missingIvs) && styles.pristine,
+                    pristine && styles.pristine,
                   )}
                   inputClassName={cx(
                     styles.valueFieldInput,
-                    (value === maxValue && !missingIvs) && styles.dim,
+                    pristine && styles.dim,
                     // missingIvs && styles.missingSpread,
                     missingIvs && styles.warning,
                   )}
@@ -437,7 +451,7 @@ export const PokeStats = ({
           {statNames.map((stat) => {
             const statLabel = stat.toUpperCase();
             const ev = pokemon?.evs?.[stat] || 0;
-            const pristine = legacy ? ev === 252 : (!ev && !missingEvs);
+            const pristine = !missingEvs && pristineSpreadValue('ev', ev);
 
             return (
               <TableGridItem
