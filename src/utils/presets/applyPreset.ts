@@ -10,7 +10,7 @@ import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import {
   detectGenFromFormat,
   getDefaultSpreadValue,
-  // hasMegaForme,
+  hasMegaForme,
 } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
@@ -95,10 +95,13 @@ export const applyPreset = (
   const completePreset = detectCompletePreset(preset);
 
   const transformed = !!pokemon.transformedForme;
+  const currentForme = pokemon.transformedForme || pokemon.speciesForme;
 
   // update to the speciesForme (& update relevant info) if different
-  const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
-    || (!transformed && pokemon.speciesForme !== preset.speciesForme);
+  // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
+  //   || (!transformed && pokemon.speciesForme !== preset.speciesForme);
+  const shouldUpdateSpecies = currentForme !== preset.speciesForme
+    && !hasMegaForme(currentForme);
 
   if (shouldUpdateSpecies) {
     const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
