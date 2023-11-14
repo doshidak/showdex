@@ -129,10 +129,16 @@ export const PokeInfo = ({
     showAbilityToggle,
   ]);
 
-  const showResetAbility = !!pokemon?.dirtyAbility
-    && !pokemon.transformedForme
-    && !!pokemon.ability
-    && pokemon.ability !== pokemon.dirtyAbility;
+  const showResetAbility = React.useMemo(() => (
+    !!pokemon?.dirtyAbility
+      && !pokemon.transformedForme
+      && !!pokemon.ability
+      && pokemon.ability !== pokemon.dirtyAbility
+  ), [
+    pokemon?.ability,
+    pokemon?.dirtyAbility,
+    pokemon?.transformedForme,
+  ]);
 
   const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
     format,
@@ -148,9 +154,15 @@ export const PokeInfo = ({
     usage,
   ]);
 
-  const showResetItem = !!pokemon?.dirtyItem
-    && (!!pokemon.item || !!pokemon.prevItem)
-    && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem);
+  const showResetItem = React.useMemo(() => (
+    !!pokemon?.dirtyItem
+      && (!!pokemon.item || !!pokemon.prevItem)
+      && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem)
+  ), [
+    pokemon?.dirtyItem,
+    pokemon?.item,
+    pokemon?.prevItem,
+  ]);
 
   const {
     active: formesVisible,
@@ -158,13 +170,21 @@ export const PokeInfo = ({
     notifyClose: closeFormesTooltip,
   } = useSandwich();
 
-  const toggleFormesTooltip = formesVisible ? closeFormesTooltip : openFormesTooltip;
+  const toggleFormesTooltip = React.useMemo(
+    () => (formesVisible ? closeFormesTooltip : openFormesTooltip),
+    [closeFormesTooltip, formesVisible, openFormesTooltip],
+  );
 
   const {
     active: statusVisible,
-    requestOpen: requestStatusOpen,
-    notifyClose: notifyStatusClose,
+    requestOpen: openStatusTooltip,
+    notifyClose: closeStatusTooltip,
   } = useSandwich();
+
+  const toggleStatusTooltip = React.useMemo(
+    () => (statusVisible ? closeStatusTooltip : openStatusTooltip),
+    [closeStatusTooltip, openStatusTooltip, statusVisible],
+  );
 
   const smogonPageTooltip = (
     <div className={styles.tooltipContent}>
@@ -190,12 +210,18 @@ export const PokeInfo = ({
   const formeDisabled = !pokemon?.altFormes?.length;
   const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
 
-  const showNonVolatileStatus = !!pokemon?.speciesForme && (
+  const showNonVolatileStatus = React.useMemo(() => !!pokemon?.speciesForme && (
     settings?.forceNonVolatile
       || !!pokemon.dirtyStatus
       || !!pokemon.status
       || !pokemon.hp // 'fnt' pseudo-status
-  );
+  ), [
+    pokemon?.dirtyStatus,
+    pokemon?.hp,
+    pokemon?.speciesForme,
+    pokemon?.status,
+    settings?.forceNonVolatile,
+  ]);
 
   const currentStatus = showNonVolatileStatus
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
@@ -441,14 +467,14 @@ export const PokeInfo = ({
               visible={statusVisible}
               disabled={!pokemon?.speciesForme}
               onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeStatusTooltip:onPokemonChange()`)}
-              onRequestClose={notifyStatusClose}
+              onRequestClose={closeStatusTooltip}
             >
               <BaseButton
                 className={styles.statusButton}
                 display="block"
                 aria-label={`Hit Points & Non-Volatile Status Condition for Pok${eacute}mon ${friendlyPokemonName}`}
                 hoverScale={1}
-                onPress={requestStatusOpen}
+                onPress={toggleStatusTooltip}
                 disabled={!pokemon?.speciesForme}
               >
                 {
