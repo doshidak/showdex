@@ -7,11 +7,7 @@ import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import {
-  detectGenFromFormat,
-  getDefaultSpreadValue,
-  hasMegaForme,
-} from '@showdex/utils/dex';
+import { detectGenFromFormat, getDefaultSpreadValue, hasMegaForme } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -95,7 +91,13 @@ export const applyPreset = (
   const completePreset = detectCompletePreset(preset);
 
   const transformed = !!pokemon.transformedForme;
-  const currentForme = pokemon.transformedForme || pokemon.speciesForme;
+
+  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
+  const formeKey = transformed && !speciesFormes.includes(preset.speciesForme)
+    ? 'transformedForme'
+    : 'speciesForme';
+
+  const currentForme = pokemon[formeKey];
 
   // update to the speciesForme (& update relevant info) if different
   // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
@@ -104,35 +106,7 @@ export const applyPreset = (
     && !hasMegaForme(currentForme);
 
   if (shouldUpdateSpecies) {
-    const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
-    const speciesKey = transformed && !speciesFormes.includes(preset.speciesForme)
-      ? 'transformedForme'
-      : 'speciesForme';
-
-    output[speciesKey] = preset.speciesForme;
-
-    const {
-      types,
-      abilities,
-      altFormes,
-      baseStats,
-      transformedAbilities,
-      transformedBaseStats,
-    } = sanitizePokemon({
-      ...pokemon,
-      ...output,
-    }, format);
-
-    output.types = types;
-    output.altFormes = altFormes;
-
-    if (transformed) {
-      output.transformedAbilities = transformedAbilities;
-      output.transformedBaseStats = transformedBaseStats;
-    } else {
-      output.abilities = abilities;
-      output.baseStats = baseStats;
-    }
+    output[formeKey] = preset.speciesForme;
   }
 
   // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
@@ -309,6 +283,31 @@ export const applyPreset = (
         ...pokemon,
         ...output,
       });
+    }
+  }
+
+  if (currentForme !== output[formeKey]) {
+    const {
+      types,
+      abilities,
+      altFormes,
+      baseStats,
+      transformedAbilities,
+      transformedBaseStats,
+    } = sanitizePokemon({
+      ...pokemon,
+      ...output,
+    }, format);
+
+    output.types = types;
+    output.altFormes = altFormes;
+
+    if (transformed) {
+      output.transformedAbilities = transformedAbilities;
+      output.transformedBaseStats = transformedBaseStats;
+    } else {
+      output.abilities = abilities;
+      output.baseStats = baseStats;
     }
   }
 
