@@ -16,7 +16,7 @@ import {
   clonePlayer,
   countSideRuinAbilities,
   detectToggledAbility,
-  // toggleRuinAbilities,
+  toggleRuinAbilities,
   sanitizePlayerSide,
   sanitizePokemon,
 } from '@showdex/utils/battle';
@@ -667,7 +667,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       selectionIndex: pokemonIndex,
     };
 
-    /*
     // technically don't need to specify this since toggleRuinAbilities() accepts a selectionIndex
     // override as its second argument, but just in case we forget to accept the same override for
     // future functions I may write & use here LOL
@@ -675,7 +674,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     // smart toggle Ruin abilities (gen 9)
     // (note: toggleRuinAbilities() will directly mutate each CalcdexPokemon in the player's pokemon[])
-    if (state.gen > 8) {
+    if (state.gameType === 'Singles' && state.gen > 8) {
       toggleRuinAbilities(
         player,
         state.gameType,
@@ -685,7 +684,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
       playerPayload.pokemon = player.pokemon;
     }
-    */
 
     // in gen 1, field conditions (i.e., only Reflect & Light Screen) are volatiles applied to the
     // Pokemon itself, not in the `sideConditions` of Showdown.Side, which is the case for gen 2+.
