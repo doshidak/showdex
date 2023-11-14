@@ -30,6 +30,20 @@ export type CalcdexPokemonPresetSource =
   | 'usage';
 
 /**
+ * Single Pokemon spread configuration.
+ *
+ * * For legacy gens where certain properties like `nature` won't exist, explicitly specify `null`.
+ *
+ * @since 1.1.8
+ */
+export interface CalcdexPokemonPresetSpread {
+  nature: Showdown.NatureName;
+  ivs: Showdown.StatsTable;
+  evs: Showdown.StatsTable;
+  usage?: number;
+}
+
+/**
  * Pokemon set, ~~basically~~ probably.
  *
  * * Types for some properties are more specifically typed,
@@ -161,5 +175,6 @@ export interface CalcdexPokemonPreset {
   nature?: Showdown.PokemonNature;
   ivs?: Showdown.StatsTable;
   evs?: Showdown.StatsTable;
+  spreads?: CalcdexPokemonPresetSpread[];
   pokeball?: string;
 }

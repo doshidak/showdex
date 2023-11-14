@@ -11,6 +11,7 @@ export * from './getTeambuilderPresets';
 export * from './getTeamSheetPresets';
 export * from './guessTeambuilderPreset';
 export * from './importPokePaste';
+export * from './parseUsageSpread';
 export * from './processUsageAlts';
 export * from './selectPokemonPresets';
 export * from './sortPresetsByFormat';

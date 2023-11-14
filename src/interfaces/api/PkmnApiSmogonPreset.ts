@@ -24,6 +24,6 @@ export interface PkmnApiSmogonPreset {
   nature: Showdown.PokemonNature | Showdown.PokemonNature[];
   item: ItemName | ItemName[];
   moves: (MoveName | MoveName[])[];
-  ivs?: Showdown.StatsTable;
-  evs?: Showdown.StatsTable;
+  ivs?: Showdown.StatsTable | Showdown.StatsTable[];
+  evs?: Showdown.StatsTable | Showdown.StatsTable[];
 }

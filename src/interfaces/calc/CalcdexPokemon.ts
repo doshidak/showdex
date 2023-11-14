@@ -415,6 +415,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   evs?: Showdown.StatsTable;
 
   /**
+   * Whether to show the spreads dropdown in `PokeInfo`.
+   *
+   * * If `false`, the natures dropdown will be shown.
+   * * This should only be set if there are any `CalcdexPokemonPresetSpread[]`'s available.
+   * * Fun fact: Property name is extra long to better distinguish this from `showGenetics`.
+   *
+   * @default false
+   * @since 1.1.8
+   */
+  showPresetSpreads?: boolean;
+
+  /**
    * Whether to show the EV/IV rows in the `PokeStats` table.
    *
    * * If `false`, an edit button should be shown to allow the user to set this value to `true`.

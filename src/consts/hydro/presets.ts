@@ -27,8 +27,11 @@ export type HydroPresetsDehydrationKeys = Exclude<keyof CalcdexPokemonPreset,
   | 'id'
   | 'gen'
   | 'ability'
+  | 'nature'
   | 'item'
   | 'moves'
+  | 'ivs'
+  | 'evs'
 >;
 
 /* eslint-enable @typescript-eslint/indent */
@@ -58,9 +61,10 @@ export const HydroPresetsDehydrationMap: Record<HydroPresetsDehydrationKeys, str
   altAbilities: 'abl',
   altItems: 'itm',
   altMoves: 'mov',
-  nature: 'ntr',
-  ivs: 'ivs',
-  evs: 'evs',
+  // nature: 'ntr',
+  // ivs: 'ivs',
+  // evs: 'evs',
+  spreads: 'spr',
   pokeball: 'pkb',
 };
 

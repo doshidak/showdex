@@ -4,12 +4,14 @@ import {
   HydroPresetsDehydrationAltMap,
   HydroPresetsDehydrationMap,
 } from '@showdex/consts/hydro';
-import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
+// import { logger } from '@showdex/utils/debug';
 import { detectUsageAlts } from '@showdex/utils/presets';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateDate, dehydrateValue } from './dehydratePrimitives';
-import { dehydrateStatsTable } from './dehydrateStatsTable';
+import { dehydrateSpread } from './dehydrateSpread';
+
+// const l = logger('@showdex/utils/hydro/dehydratePresets()');
 
 /**
  * Dehydrates (serializes) a single `preset` into a hydratable `string`.
@@ -48,9 +50,12 @@ import { dehydrateStatsTable } from './dehydrateStatsTable';
  * * `mov`, representing the `altMoves[]`.
  *   - Empty `preset.altMoves[]` will fallback to `preset.moves[]`.
  *   - During hydration, `moves[]` will be extracted from the *first* 4 elements of the hydrated array.
- * * `ntr`, representing the `nature` for gens 3+.
- * * `ivs`, representing the `ivs` (or DVs converted into IVs for legacy gens).
- * * `evs`, representing the `evs` (or technically "stat EXP" converted into EVs [hence why they're supposedly used] in legacy gens).
+ * * ~~`ntr`, representing the `nature` for gens 3+.~~
+ * * ~~`ivs`, representing the `ivs` (or DVs converted into IVs for legacy gens).~~
+ * * ~~`evs`, representing the `evs` (or technically "stat EXP" converted into EVs [hence why they're supposedly used] in legacy gens).~~
+ * * `spr`, representing the `spreads[]`.
+ *   - Empty `preset.spreads[]` will fallback to its current `nature`, `ivs` & `evs`.
+ *   - During hydration, the aforementioned properties will be extracted from the first element of the hydrated array.
  * * `pkb`, representing the `pokeball`, if any lol.
  *
  * For `CalcdexPokemonAlt<T>[]` properties, specifically `teraTypes` (`ter`), `altAbilities` (`abl`), `altItems` (`itm`), & `altMoves` (`mov`),
@@ -94,21 +99,47 @@ export const dehydratePreset = (
   ]) => {
     const value = preset[key];
 
+    // update (2023/11/13): special case for dehydrating spreads[]
+    // e.g., value = [
+    //   { nature: 'Adamant', ivs: { hp: 31, ..., spe: 31 }, evs: { hp: 0, atk: 252, def: 4, spa: 0, spd: 0, spe: 252 }, usage: 0.2408 },
+    //   { nature: 'Adamant', ivs: { hp: 31, ..., spe: 31 }, evs: { hp: 0, atk: 252, def: 0, spa: 0, spd: 4, spe: 252 }, usage: 0.1817 },
+    //   { nature: 'Jolly', ivs: { hp: 31, ..., spa: 0, spd: 30, spe: 31 }, evs: { hp: 0, atk: 252, def: 4, spa: 0, spd: 0, spe: 252 }, usage: 0.0634 },
+    // ]
+    if (key === 'spreads') {
+      // shitty backwards compatibility layer for presets not populating spreads
+      const spreads = (value as CalcdexPokemonPresetSpread[])?.length
+        ? value as CalcdexPokemonPresetSpread[]
+        : [{
+          nature: preset.nature,
+          ivs: preset.ivs,
+          evs: preset.evs,
+        }];
+
+      // e.g., -> dehydrated = ['0|252+|4|0-|0|252@0.2408', '0|252+|0|0-|4|252@0.1817', '0|252|4|(0)0-|(30)0|252+@0.0634']
+      const dehydrated = spreads.map((spread) => dehydrateSpread(spread, {
+        format: preset.gen,
+        delimiter: '|',
+      }));
+
+      // warning: don't use dehydrateArray() for spreads cause it internally calls dehydrateValue() for each element,
+      // which removes any symbols, including the delimiter symbol used above!!
+      return void push(opcode, dehydrated.join('/'));
+    }
+
     if (value === null || value === undefined) {
       return;
     }
 
     if (Array.isArray(value)) {
-      let source: typeof value = value.length
-        // e.g., key = 'altMoves'
-        // -> value = [['Bullet Seed', 1], ['Mach Punch', 1], ['Rock Tomb', 0.8303], ['Spore', 0.5994], ['Swords Dance', 0.5703]]
-        ? detectUsageAlts(value)
-          // e.g., ['Bullet Seed@1', 'Mach Punch@1', 'Rock Tomb@0.8303', 'Spore@0.5994', 'Swords Dance@0.5703']
-          ? value.map((alt) => dehydrateArray(alt, '@')) as typeof value
-          // e.g., ['Bullet Seed', 'Mach Punch', ...]
-          // (i.e., no usage, probably from a 'smogon'-sourced preset)
-          : value
-        : null;
+      // e.g., key = 'altMoves'; value = ['Bullet Seed', 'Mach Punch', ...]
+      // (i.e., no usage, probably from a 'smogon'-sourced preset)
+      let source: string[];
+
+      // e.g., value = [['Bullet Seed', 1], ['Mach Punch', 1], ['Rock Tomb', 0.8303], ['Spore', 0.5994], ['Swords Dance', 0.5703]]
+      if (detectUsageAlts(value)) {
+        // e.g., ['Bullet Seed@1', 'Mach Punch@1', 'Rock Tomb@0.8303', 'Spore@0.5994', 'Swords Dance@0.5703']
+        source = value.map((alt) => dehydrateArray(alt, '@'));
+      }
 
       // if `source` is empty, check if there's a mapped non-alt property to use instead
       if (!source) {
@@ -124,8 +155,8 @@ export const dehydratePreset = (
         const nonAlt = preset[hasNonAlt];
 
         source = Array.isArray(nonAlt)
-          ? nonAlt
-          : [nonAlt] as typeof value;
+          ? nonAlt as string[]
+          : [nonAlt as string];
       }
 
       if (!source?.length) {
@@ -133,18 +164,23 @@ export const dehydratePreset = (
       }
 
       // e.g., 'mov~Bullet Seed@1/Mach Punch@1/Rock Tomb@0.8303/Spore@0.5994/Swords Dance@0.5703'
-      push(opcode, dehydrateArray(source, '/'));
-
-      return;
+      return void push(opcode, dehydrateArray(source, '/'));
     }
 
+    /*
     const dehydratedValue = ['ivs', 'evs'].includes(key) && nonEmptyObject(value)
       ? dehydrateStatsTable(value as Showdown.StatsTable, '/')
       : key === 'format' && !String(value)?.startsWith(`gen${preset.gen}`)
         ? `gen${preset.gen}${dehydrateValue(value)}`
         : dehydrateValue(value);
+    */
 
-    push(opcode, dehydratedValue);
+    if (key === 'format' && !String(value)?.startsWith(`gen${preset.gen}`)) {
+      return void push(opcode, `gen${preset.gen}${dehydrateValue(value)}`);
+    }
+
+    // push(opcode, dehydratedValue);
+    push(opcode, dehydrateValue(value));
   });
 
   return output.join(delimiter);

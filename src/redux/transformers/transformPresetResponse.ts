@@ -78,7 +78,7 @@ export const transformPresetResponse = (
 
   // l.debug(
   //   'Completed gens preset response transformation from the pkmn API',
-  //   '\n', 'gen', gen,
+  //   // '\n', 'gen', gen,
   //   '\n', 'response', response,
   //   '\n', 'output', output,
   // );

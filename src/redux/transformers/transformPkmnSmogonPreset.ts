@@ -1,10 +1,10 @@
 import { type AbilityName, type GenerationNum } from '@smogon/calc';
 import { type PkmnApiSmogonPreset } from '@showdex/interfaces/api';
-import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { calcPresetCalcdexId } from '@showdex/utils/calc';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
+import { calcPresetCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { getDefaultSpreadValue, getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
+import { getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
 
 // const l = logger('@showdex/redux/transformers/transformPkmnSmogonPreset()');
 
@@ -36,8 +36,8 @@ export const transformPkmnSmogonPreset = (
   // update (2023/11/06): forgot that `format` in this particular transformer may not include the `gen<#>` prefix in
   // the pkmn API, particularly when fetching presets of an entire gen (instead of a particular format) -- while this
   // was actually fine in most cases, legacy gens defaulted to 0 stat EXP/EVs !! oopsies (they should all be 252 btw)
-  const defaultIv = getDefaultSpreadValue('iv', gen);
-  const defaultEv = getDefaultSpreadValue('ev', gen);
+  // const defaultIv = getDefaultSpreadValue('iv', gen);
+  // const defaultEv = getDefaultSpreadValue('ev', gen);
 
   const {
     teraTypes: presetTeraTypes,
@@ -64,7 +64,7 @@ export const transformPkmnSmogonPreset = (
     ability: Array.isArray(ability) ? ability[0] : ability,
     altAbilities: Array.isArray(ability) ? ability : [ability].filter(Boolean),
 
-    nature: Array.isArray(nature) ? nature[0] : nature,
+    // nature: Array.isArray(nature) ? nature[0] : nature,
 
     item: Array.isArray(item) ? item[0] : item,
     altItems: Array.isArray(item) ? item : [item].filter(Boolean),
@@ -72,24 +72,55 @@ export const transformPkmnSmogonPreset = (
     moves: moves?.map((move) => (Array.isArray(move) ? move[0] : move)) ?? [],
     altMoves: flatMoves.filter((m, i) => !flatMoves.includes(m, i + 1)), // remove dupe moves
 
-    ivs: {
-      hp: typeof ivs?.hp === 'number' ? ivs.hp : defaultIv,
-      atk: typeof ivs?.atk === 'number' ? ivs.atk : defaultIv,
-      def: typeof ivs?.def === 'number' ? ivs.def : defaultIv,
-      spa: typeof ivs?.spa === 'number' ? ivs.spa : defaultIv,
-      spd: typeof ivs?.spd === 'number' ? ivs.spd : defaultIv,
-      spe: typeof ivs?.spe === 'number' ? ivs.spe : defaultIv,
-    },
+    // ivs: {
+    //   hp: typeof ivs?.hp === 'number' ? ivs.hp : defaultIv,
+    //   atk: typeof ivs?.atk === 'number' ? ivs.atk : defaultIv,
+    //   def: typeof ivs?.def === 'number' ? ivs.def : defaultIv,
+    //   spa: typeof ivs?.spa === 'number' ? ivs.spa : defaultIv,
+    //   spd: typeof ivs?.spd === 'number' ? ivs.spd : defaultIv,
+    //   spe: typeof ivs?.spe === 'number' ? ivs.spe : defaultIv,
+    // },
 
-    evs: {
-      hp: typeof evs?.hp === 'number' ? evs.hp : defaultEv,
-      atk: typeof evs?.atk === 'number' ? evs.atk : defaultEv,
-      def: typeof evs?.def === 'number' ? evs.def : defaultEv,
-      spa: typeof evs?.spa === 'number' ? evs.spa : defaultEv,
-      spd: typeof evs?.spd === 'number' ? evs.spd : defaultEv,
-      spe: typeof evs?.spe === 'number' ? evs.spe : defaultEv,
-    },
+    // evs: {
+    //   hp: typeof evs?.hp === 'number' ? evs.hp : defaultEv,
+    //   atk: typeof evs?.atk === 'number' ? evs.atk : defaultEv,
+    //   def: typeof evs?.def === 'number' ? evs.def : defaultEv,
+    //   spa: typeof evs?.spa === 'number' ? evs.spa : defaultEv,
+    //   spd: typeof evs?.spd === 'number' ? evs.spd : defaultEv,
+    //   spe: typeof evs?.spe === 'number' ? evs.spe : defaultEv,
+    // },
   };
+
+  const length = Math.max(
+    1,
+    Array.isArray(nature) ? nature.length : 0,
+    Array.isArray(ivs) ? ivs.length : 0,
+    Array.isArray(evs) ? evs.length : 0,
+  );
+
+  output.spreads = Array(length).fill(null).map((_, i) => ({
+    nature: Array.isArray(nature) ? (nature[i] || nature[0]) : nature,
+
+    ivs: populateStatsTable(
+      Array.isArray(ivs) ? (ivs[i] || ivs[0]) : ivs,
+      {
+        spread: 'iv',
+        format: gen,
+      },
+    ),
+
+    evs: populateStatsTable(
+      Array.isArray(evs) ? (evs[i] || evs[0]) : evs,
+      {
+        spread: 'ev',
+        format: gen,
+      },
+    ),
+  } as CalcdexPokemonPresetSpread));
+
+  output.nature = output.spreads[0]?.nature;
+  output.ivs = { ...output.spreads[0]?.ivs };
+  output.evs = { ...output.spreads[0]?.evs };
 
   // if the response omitted the `ability`, then grab it from the dex
   if (!output.ability) {

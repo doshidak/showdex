@@ -6,20 +6,14 @@ import {
 } from '@smogon/calc';
 import { PokemonBoostNames, PokemonNatures, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { calcPokemonCalcdexId } from '@showdex/utils/calc';
+import { calcPokemonCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import {
   clamp,
   env,
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
-import {
-  detectGenFromFormat,
-  detectLegacyGen,
-  getDefaultSpreadValue,
-  getDexForFormat,
-  // toggleableAbility,
-} from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
@@ -53,9 +47,6 @@ export const sanitizePokemon = <
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(format);
-
-  const defaultIv = getDefaultSpreadValue('iv', format);
-  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // hmm... need to clean this file up lol
   const typeChanged = !!(pokemon as Partial<Showdown.Pokemon>)?.volatiles?.typechange?.[1];
@@ -144,45 +135,28 @@ export const sanitizePokemon = <
     prevItem: (pokemon as Partial<Showdown.Pokemon>)?.prevItem as ItemName || null,
     prevItemEffect: (pokemon as Partial<Showdown.Pokemon>)?.prevItemEffect || null,
 
-    nature: (!legacy && ((pokemon as Partial<CalcdexPokemon>)?.nature || PokemonNatures.slice(-1)[0])) || null,
+    nature: (!legacy && (
+      (pokemon as Partial<CalcdexPokemon>)?.nature
+        || PokemonNatures.slice(-1)[0])
+    ) || null,
 
-    // ivs: {
-    //   hp: 'ivs' in pokemon && typeof pokemon.ivs?.hp === 'number' ? pokemon.ivs.hp : defaultIv,
-    //   atk: 'ivs' in pokemon && typeof pokemon.ivs?.atk === 'number' ? pokemon.ivs.atk : defaultIv,
-    //   def: 'ivs' in pokemon && typeof pokemon.ivs?.def === 'number' ? pokemon.ivs.def : defaultIv,
-    //   spa: 'ivs' in pokemon && typeof pokemon.ivs?.spa === 'number' ? pokemon.ivs.spa : defaultIv,
-    //   spd: 'ivs' in pokemon && typeof pokemon.ivs?.spd === 'number' ? pokemon.ivs.spd : defaultIv,
-    //   spe: 'ivs' in pokemon && typeof pokemon.ivs?.spe === 'number' ? pokemon.ivs.spe : defaultIv,
-    // },
+    ivs: populateStatsTable(
+      (pokemon as Partial<CalcdexPokemon>)?.ivs,
+      {
+        spread: 'iv',
+        format,
+      },
+    ),
 
-    ivs: PokemonStatNames.reduce((table, stat) => {
-      table[stat] = clamp(
-        0,
-        (pokemon as Partial<CalcdexPokemon>)?.ivs?.[stat] ?? defaultIv,
-        31,
-      );
+    evs: populateStatsTable(
+      (pokemon as Partial<CalcdexPokemon>)?.evs,
+      {
+        spread: 'ev',
+        format,
+      },
+    ),
 
-      return table;
-    }, {} as Showdown.StatsTable),
-
-    // evs: {
-    //   hp: 'evs' in pokemon && typeof pokemon.evs?.hp === 'number' ? pokemon.evs.hp : defaultEv,
-    //   atk: 'evs' in pokemon && typeof pokemon.evs?.atk === 'number' ? pokemon.evs.atk : defaultEv,
-    //   def: 'evs' in pokemon && typeof pokemon.evs?.def === 'number' ? pokemon.evs.def : defaultEv,
-    //   spa: 'evs' in pokemon && typeof pokemon.evs?.spa === 'number' ? pokemon.evs.spa : defaultEv,
-    //   spd: 'evs' in pokemon && typeof pokemon.evs?.spd === 'number' ? pokemon.evs.spd : defaultEv,
-    //   spe: 'evs' in pokemon && typeof pokemon.evs?.spe === 'number' ? pokemon.evs.spe : defaultEv,
-    // },
-
-    evs: PokemonStatNames.reduce((table, stat) => {
-      table[stat] = clamp(
-        0,
-        (pokemon as Partial<CalcdexPokemon>)?.evs?.[stat] ?? defaultEv,
-        252,
-      );
-
-      return table;
-    }, {} as Showdown.StatsTable),
+    showPresetSpreads: (pokemon as Partial<CalcdexPokemon>)?.showPresetSpreads || false,
 
     // update (2022/11/14): defaultShowGenetics setting is now deprecated in favor of lockGeneticsVisibility,
     // so this should be its new default, false (was previously true)
@@ -191,16 +165,6 @@ export const sanitizePokemon = <
     // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
     // (populated in syncPokemon() & used in createSmogonPokemon())
     boostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
-
-    // boosts: {
-    //   atk: typeof pokemon?.boosts?.atk === 'number' ? pokemon.boosts.atk : 0,
-    //   def: typeof pokemon?.boosts?.def === 'number' ? pokemon.boosts.def : 0,
-    //   spa: 'spc' in (pokemon?.boosts || {}) && typeof (pokemon as Showdown.Pokemon).boosts.spc === 'number'
-    //     ? (pokemon as Showdown.Pokemon).boosts.spc
-    //     : typeof pokemon?.boosts?.spa === 'number' ? pokemon.boosts.spa : 0,
-    //   spd: typeof pokemon?.boosts?.spd === 'number' ? pokemon.boosts.spd : 0,
-    //   spe: typeof pokemon?.boosts?.spe === 'number' ? pokemon.boosts.spe : 0,
-    // },
 
     boosts: PokemonBoostNames.reduce((table, stat) => {
       const boosts = (pokemon as Partial<Showdown.Pokemon>)?.boosts;
@@ -215,19 +179,6 @@ export const sanitizePokemon = <
       return table;
     }, {} as Showdown.StatsTableNoHp),
 
-    // note to self: you can't clean this up in O(1) unless you wanna (a) use a loop, (b) use a ternary where you check
-    // 'dirtyBoosts' in pokemon first, but realize TypeScript is angy, so you end up doing (a) or (c) devise some advanced mainframe
-    // algorithms that does everything in O(1), including earning my Ph.D, when all you need to do was copy a tiny object & fill it
-    // with null's if its value is falsy :o -- wait you mean the `in` operator is O(n) ??? frick
-    // update to self (2023/10/13): still no Ph.D yet v_v
-    // dirtyBoosts: {
-    //   atk: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.atk) || null,
-    //   def: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.def) || null,
-    //   spa: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spa) || null,
-    //   spd: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spd) || null,
-    //   spe: ('dirtyBoosts' in pokemon && pokemon.dirtyBoosts?.spe) || null,
-    // },
-
     dirtyBoosts: PokemonBoostNames.reduce((table, stat) => {
       table[stat] = (pokemon as Partial<CalcdexPokemon>)?.dirtyBoosts?.[stat] ?? null;
 
@@ -237,15 +188,6 @@ export const sanitizePokemon = <
 
       return table;
     }, {} as Showdown.StatsTableNoHp),
-
-    // update (2023/10/13): wait I forgot `hp` here ??? LOL
-    // dirtyBaseStats: {
-    //   atk: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.atk) || null,
-    //   def: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.def) || null,
-    //   spa: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spa) || null,
-    //   spd: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spd) || null,
-    //   spe: ('dirtyBaseStats' in pokemon && pokemon.dirtyBaseStats?.spe) || null,
-    // },
 
     dirtyBaseStats: PokemonStatNames.reduce((table, stat) => {
       table[stat] = (pokemon as Partial<CalcdexPokemon>)?.dirtyBaseStats?.[stat] ?? null;
