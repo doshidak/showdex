@@ -331,6 +331,8 @@ export const applyPreset = (
     if (output.nature === 'Hardy') {
       delete output.nature;
     }
+
+    return output;
   }
 
   // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
