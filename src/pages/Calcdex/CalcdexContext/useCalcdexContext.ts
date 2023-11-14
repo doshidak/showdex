@@ -16,7 +16,7 @@ import {
   clonePlayer,
   countSideRuinAbilities,
   detectToggledAbility,
-  toggleRuinAbilities,
+  // toggleRuinAbilities,
   sanitizePlayerSide,
   sanitizePokemon,
 } from '@showdex/utils/battle';
@@ -30,7 +30,6 @@ import {
 } from '@showdex/utils/calc';
 import { nonEmptyObject, similarArrays, tolerance } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-// import { toggleableAbility } from '@showdex/utils/dex';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -428,13 +427,15 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     player.pokemon[pokemonIndex] = mutated;
 
     // smart toggle Ruin abilities (gen 9), but only when abilityToggled was not explicitly updated
-    if (state.gen > 8 && !mutating('abilityToggled')) {
+    if (state.gen > 8 && mutating('abilityToggled')) {
+      /*
       toggleRuinAbilities(
         player,
         state.gameType,
         false,
         pokemonIndex,
       );
+      */
 
       player.side = {
         ...player.side,
@@ -663,6 +664,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       selectionIndex: pokemonIndex,
     };
 
+    /*
     // technically don't need to specify this since toggleRuinAbilities() accepts a selectionIndex
     // override as its second argument, but just in case we forget to accept the same override for
     // future functions I may write & use here LOL
@@ -680,6 +682,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
       playerPayload.pokemon = player.pokemon;
     }
+    */
 
     // in gen 1, field conditions (i.e., only Reflect & Light Screen) are volatiles applied to the
     // Pokemon itself, not in the `sideConditions` of Showdown.Side, which is the case for gen 2+.
@@ -720,6 +723,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const opponentPokemon = opponent?.pokemon?.[opponentSelectionIndex];
 
       playerSource.pokemon.forEach((pokemon, i) => {
+        // update (2023/11/13): though detectToggledAbility() handles Ruin abilities, we don't want that here!
+        const ability = pokemon.dirtyAbility || pokemon.ability;
+
+        if (PokemonRuinAbilities.includes(ability)) {
+          return;
+        }
+
         const toggled = detectToggledAbility(pokemon, {
           gameType: state.gameType,
           opponentPokemon,

@@ -1,6 +1,6 @@
+import { type AbilityName } from '@smogon/calc';
 import { PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
-import { formatId } from '@showdex/utils/core';
 
 /**
  * Counts the number of each *Ruin* ability for the `CalcdexPlayerSide` of the provided `player`.
@@ -22,14 +22,14 @@ export const countSideRuinAbilities = (
 
   // count how many Pokemon have an activated Ruin ability (gen 9)
   const activeRuin = pokemon
-    ?.filter((p) => PokemonRuinAbilities.includes(p?.dirtyAbility || p?.ability) && p.abilityToggled)
-    .map((p) => formatId(p.dirtyAbility || p.ability))
+    ?.map((p) => p?.abilityToggled && (p?.dirtyAbility || p?.ability))
+    .filter((a) => PokemonRuinAbilities.includes(a))
     || [];
 
   return {
-    ruinBeadsCount: activeRuin.filter((a) => a === 'beadsofruin').length,
-    ruinSwordCount: activeRuin.filter((a) => a === 'swordofruin').length,
-    ruinTabletsCount: activeRuin.filter((a) => a === 'tabletsofruin').length,
-    ruinVesselCount: activeRuin.filter((a) => a === 'vesselofruin').length,
+    ruinBeadsCount: activeRuin.filter((a) => a === 'Beads of Ruin' as AbilityName).length,
+    ruinSwordCount: activeRuin.filter((a) => a === 'Sword of Ruin' as AbilityName).length,
+    ruinTabletsCount: activeRuin.filter((a) => a === 'Tablets of Ruin' as AbilityName).length,
+    ruinVesselCount: activeRuin.filter((a) => a === 'Vessel of Ruin' as AbilityName).length,
   };
 };
