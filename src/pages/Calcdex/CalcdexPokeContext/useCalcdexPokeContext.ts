@@ -114,13 +114,18 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
       })
       || usage;
 
+    const presetPayload = applyPokemonPreset(state.format, {
+      ...playerPokemon,
+      ...additionalMutations,
+    }, preset, presetUsage);
+
+    if (state.active && !playerPokemon.serverSourced && playerPokemon.revealedMoves.length) {
+      delete presetPayload.moves;
+    }
+
     updatePokemon({
       ...additionalMutations,
-
-      ...applyPokemonPreset(state.format, {
-        ...playerPokemon,
-        ...additionalMutations,
-      }, preset, presetUsage),
+      ...presetPayload,
     }, scope);
 
     endTimer('(update called)');

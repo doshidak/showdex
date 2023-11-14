@@ -340,9 +340,15 @@ export const useCalcdexPresets = (
           }
         }
 
+        const presetPayload = applyPreset(state.format, pokemon, preset, usage);
+
+        if (!pokemon.serverSourced && pokemon.revealedMoves.length) {
+          delete presetPayload.moves;
+        }
+
         party[pokemonIndex] = {
           ...pokemon,
-          ...applyPreset(state.format, pokemon, preset, usage),
+          ...presetPayload,
         };
       });
 
