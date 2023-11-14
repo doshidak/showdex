@@ -11,7 +11,7 @@ import {
   PokemonRuinAbilities,
   PokemonTypeChangeAbilities,
 } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
 // import { toggleableAbility } from '@showdex/utils/dex';
@@ -146,7 +146,8 @@ export const detectToggledAbility = (
   // handle Protosynthesis/Quark Drive
   if (PokemonBoosterAbilities.includes(ability)) {
     return item === 'Booster Energy' as ItemName
-      || (ability === 'Protosynthesis' as AbilityName && (['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather))
+      // || (ability === 'Protosynthesis' as AbilityName && (['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather))
+      || (ability === 'Protosynthesis' as AbilityName && weather === 'Sun' as Weather)
       || (ability === 'Quark Drive' as AbilityName && terrain === 'Electric' as Terrain)
       || volatiles.some((k) => k?.startsWith(abilityId)); // e.g., 'protosynthesisatk' is a volatiles key
   }

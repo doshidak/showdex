@@ -635,7 +635,8 @@ export const syncPokemon = (
       .some((k) => k.startsWith(formatId(syncedPokemon.dirtyAbility || syncedPokemon.ability)))
     && (
       (syncedPokemon.dirtyAbility || syncedPokemon.ability) !== 'Protosynthesis' as AbilityName
-        || !(['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather)
+        // || !(['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather)
+        || weather !== 'Sun' as Weather
     )
     && (
       (syncedPokemon.dirtyAbility || syncedPokemon.ability) !== 'Quark Drive' as AbilityName
