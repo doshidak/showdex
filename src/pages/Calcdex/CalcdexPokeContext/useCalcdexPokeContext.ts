@@ -119,7 +119,10 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
       ...additionalMutations,
     }, preset, presetUsage);
 
-    if (state.active && !playerPokemon.serverSourced && playerPokemon.revealedMoves.length) {
+    /**
+     * @todo update when more than 4 moves are supported
+     */
+    if (state.active && !playerPokemon.serverSourced && playerPokemon.revealedMoves.length === 4) {
       delete presetPayload.moves;
     }
 

@@ -342,7 +342,10 @@ export const useCalcdexPresets = (
 
         const presetPayload = applyPreset(state.format, pokemon, preset, usage);
 
-        if (!pokemon.serverSourced && pokemon.revealedMoves.length) {
+        /**
+         * @todo update when more than 4 moves are supported
+         */
+        if (!pokemon.serverSourced && pokemon.revealedMoves.length === 4) {
           delete presetPayload.moves;
         }
 
