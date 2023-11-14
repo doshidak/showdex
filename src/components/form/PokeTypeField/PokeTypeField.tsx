@@ -12,9 +12,10 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { PokemonTypes } from '@showdex/consts/dex';
-import { type CalcdexPokemonUsageAlt, useColorScheme } from '@showdex/redux/store';
-import { formatId, similarArrays } from '@showdex/utils/core';
-import { type ElementSizeLabel, useUserAgent } from '@showdex/utils/hooks';
+import { type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
+import { similarArrays } from '@showdex/utils/core';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { percentage } from '@showdex/utils/humanize';
 import { flattenAlts, sortUsageAlts } from '@showdex/utils/presets';
 import styles from './PokeTypeField.module.scss';
@@ -75,10 +76,6 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
     forwardedRef,
     () => containerRef.current,
   );
-
-  // detect non-macOS cause the Tippy's positioning is really fucked on Windows (and probably Linux)
-  const userAgent = useUserAgent();
-  const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   // keep track of whether the options tooltip is open
   // const [optionsVisible, setOptionsVisible] = React.useState(false);
@@ -310,7 +307,6 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       visible={optionsVisible}
       // interactive={optionsVisible}
       interactive
-      popperOptions={nonMacOS ? { strategy: 'fixed' } : undefined}
       placement={tooltipPlacement}
       // trigger="mouseenter"
       // delay={[1000, 50]}

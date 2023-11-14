@@ -15,7 +15,6 @@ import { type CalcdexMoveOverride } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat } from '@showdex/utils/dex';
-import { useUserAgent } from '@showdex/utils/hooks';
 import {
   type MoveCategoryFieldLabel,
   findCategoryLabel,
@@ -53,10 +52,6 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
     forwardedRef,
     () => containerRef.current,
   );
-
-  // ... ok I'll address this tooltip issue next time ... LOL
-  const userAgent = useUserAgent();
-  const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   const {
     id: optionsId,
@@ -193,7 +188,6 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
       )}
       visible={optionsVisible}
       interactive
-      popperOptions={nonMacOS ? { strategy: 'fixed' } : undefined}
       placement={tooltipPlacement}
       offset={[0, 10]}
       disabled={readOnly || disabled}

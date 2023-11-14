@@ -12,8 +12,6 @@ import { PokemonStatuses, PokemonStatusTitles } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonCurrentHp, calcPokemonHpPercentage, calcPokemonMaxHp } from '@showdex/utils/calc';
-import { formatId } from '@showdex/utils/core';
-import { useUserAgent } from '@showdex/utils/hooks';
 import { PokeStatus } from '../PokeStatus';
 import styles from './PokeStatusTooltip.module.scss';
 
@@ -39,11 +37,6 @@ export const PokeStatusTooltip = ({
   onRequestClose,
 }: PokeStatusTooltipProps): JSX.Element => {
   const colorScheme = useColorScheme();
-
-  // do the same non-macOS Tippy fucked position workaround in PokeFormeTooltip lmao
-  // (I should look into a better tooltip library or make my own at some point hmm)
-  const userAgent = useUserAgent();
-  const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   const {
     ident,
@@ -239,7 +232,6 @@ export const PokeStatusTooltip = ({
       )}
       visible={visible}
       interactive
-      popperOptions={nonMacOS ? { strategy: 'fixed' } : undefined}
       placement="top-start"
       offset={[0, 7]}
       disabled={!speciesForme || disabled}

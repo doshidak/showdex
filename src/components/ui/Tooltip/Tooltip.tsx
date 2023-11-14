@@ -112,6 +112,7 @@ export const Tooltip = ({
       {...props}
       animation
       popperOptions={{
+        strategy: 'fixed',
         ...popperOptions,
         modifiers: [...popperModifiers, {
           name: 'arrow',
