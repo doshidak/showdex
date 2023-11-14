@@ -67,5 +67,5 @@ export const detectCompletePreset = (
   } = preset;
 
   return detectLegacyGen(gen)
-    || Object.values(evs).some((ev) => (ev || 0) > 0);
+    || Object.values(evs || {}).some((ev) => (ev || 0) > 0);
 };
