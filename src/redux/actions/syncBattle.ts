@@ -1,7 +1,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+  type Terrain,
+  type Weather,
+} from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-// import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
+import { PokemonBoosterAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { type CalcdexBattleState, type RootState } from '@showdex/redux/store';
 import { getAuthUsername } from '@showdex/utils/app';
@@ -41,6 +48,7 @@ import {
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   // appliedPreset,
+  flattenAlts,
   getPresetFormes,
   getTeamSheetPresets,
   selectPokemonPresets,
@@ -1308,6 +1316,40 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           //   '\n', 'playerState.activeIndices', playerState.activeIndices,
           //   '\n', 'pendingPokemon', pendingPokemon,
           // );
+        }
+
+        // exhibit the big smart sync technology by utilizing the power of hardcoded game sense for Protosynthesis/Quark Drive,
+        // i.e., remove the Booster Energy **dirtyItem** & select the next item in altItems[] if the Pokemon doesn't have an
+        // active booster volatile (e.g., 'protosynthesisatk') & field conditions aren't met, which is to say they're probably
+        // not running Booster Energy on that Pokemon
+        // update (2023/11/14): moved this from syncPokemon() since this should only trigger for active Pokemon
+        if (gen > 8) {
+          const pendingPokemon = playerState.pokemon.filter((p) => (
+            p.active
+              && PokemonBoosterAbilities.includes(p.dirtyAbility || p.ability)
+              && p.dirtyItem === 'Booster Energy' as ItemName
+              && !Object.keys(p.volatiles).some((k) => k.startsWith(formatId(p.dirtyAbility || p.ability)))
+              && (
+                (p.dirtyAbility || p.ability) !== 'Protosynthesis' as AbilityName
+                  || syncedField.weather !== 'Sun' as Weather
+              )
+              && (
+                (p.dirtyAbility || p.ability) !== 'Quark Drive' as AbilityName
+                  || syncedField.terrain !== 'Electric' as Terrain
+              )
+          ));
+
+          pendingPokemon.forEach((pokemon) => {
+            // altItems could be potentially sorted by usage stats from the Calcdex
+            pokemon.dirtyItem = (
+              !!pokemon.altItems?.length
+                && flattenAlts(pokemon.altItems)
+                  .find((item) => item !== 'Booster Energy' as ItemName)
+            ) || null;
+
+            // could've been previously toggled, so make sure the ability is toggled off
+            pokemon.abilityToggled = false;
+          });
         }
 
         if (playerState.autoSelect) {

@@ -7,11 +7,7 @@ import {
   type Terrain,
   type Weather,
 } from '@smogon/calc';
-import {
-  PokemonBoosterAbilities,
-  PokemonBoostNames,
-  PokemonTypes,
-} from '@showdex/consts/dex';
+import { PokemonBoostNames, PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import {
   clonePokemon,
@@ -36,7 +32,6 @@ import {
   // toggleableAbility,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
-import { flattenAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/actions/syncPokemon()');
 
@@ -57,8 +52,6 @@ export const syncPokemon = (
     // gameType,
     clientPokemon,
     serverPokemon,
-    weather,
-    terrain,
     autoMoves,
   } = config || {};
 
@@ -623,37 +616,6 @@ export const syncPokemon = (
     syncedPokemon.moves = syncedPokemon.serverSourced
       ? [...syncedPokemon.transformedMoves]
       : mergeRevealedMoves(syncedPokemon);
-  }
-
-  // exhibit the big smart sync technology by utilizing the power of hardcoded game sense for Protosynthesis/Quark Drive,
-  // i.e., remove the Booster Energy **dirtyItem** & select the next item in altItems[] if the Pokemon doesn't have an
-  // active booster volatile (e.g., 'protosynthesisatk') & field conditions aren't met, which is to say they're probably
-  // not running Booster Energy on that Pokemon
-  const removeDirtyBooster = gen > 8
-    && PokemonBoosterAbilities.includes(syncedPokemon.dirtyAbility || syncedPokemon.ability)
-    && syncedPokemon.dirtyItem === 'Booster Energy' as ItemName
-    && !Object.keys(syncedPokemon.volatiles)
-      .some((k) => k.startsWith(formatId(syncedPokemon.dirtyAbility || syncedPokemon.ability)))
-    && (
-      (syncedPokemon.dirtyAbility || syncedPokemon.ability) !== 'Protosynthesis' as AbilityName
-        // || !(['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather)
-        || weather !== 'Sun' as Weather
-    )
-    && (
-      (syncedPokemon.dirtyAbility || syncedPokemon.ability) !== 'Quark Drive' as AbilityName
-        || terrain !== 'Electric' as Terrain
-    );
-
-  if (removeDirtyBooster) {
-    // altItems could be potentially sorted by usage stats from the Calcdex
-    syncedPokemon.dirtyItem = (
-      !!syncedPokemon.altItems?.length
-      && flattenAlts(syncedPokemon.altItems)
-        .find((item) => item !== 'Booster Energy' as ItemName)
-    ) || null;
-
-    // could've been previously toggled, so make sure the ability is toggled off
-    syncedPokemon.abilityToggled = false;
   }
 
   // recalculate the spread stats
