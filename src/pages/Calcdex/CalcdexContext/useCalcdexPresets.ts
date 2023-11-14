@@ -289,6 +289,17 @@ export const useCalcdexPresets = (
             },
           );
 
+          // "Showdown Usage" preset is only made available in non-Randoms formats
+          const shouldApplyUsage = !randoms
+            && !!usage?.calcdexId // making sure we have a "Showdown Usage" preset to begin with!
+            // only apply if we don't have a preset atm, or if we do, the prioritizeUsageStats setting is enabled &
+            // the current preset isn't server-sourced
+            && (!preset?.calcdexId || (settings?.prioritizeUsageStats && preset.source !== 'server'));
+
+          if (shouldApplyUsage) {
+            preset = usage;
+          }
+
           // if we still haven't found one, then try finding one from any format
           if (!preset?.calcdexId) {
             [preset] = selectPokemonPresets(
@@ -300,17 +311,6 @@ export const useCalcdexPresets = (
               },
             );
           }
-        }
-
-        // "Showdown Usage" preset is only made available in non-Randoms formats
-        const shouldApplyUsage = !randoms
-          && !!usage?.calcdexId // making sure we have a "Showdown Usage" preset to begin with!
-          // only apply if we don't have a preset atm, or if we do, the prioritizeUsageStats setting is enabled &
-          // the current preset isn't server-sourced
-          && (!preset?.calcdexId || (settings?.prioritizeUsageStats && preset.source !== 'server'));
-
-        if (shouldApplyUsage) {
-          preset = usage;
         }
 
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
