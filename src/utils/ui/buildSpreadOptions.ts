@@ -1,4 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
+import { bull } from '@showdex/consts/core';
 import { PokemonNatureBoosts } from '@showdex/consts/dex';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
@@ -51,7 +52,9 @@ const processOption = (
     : spread.nature;
 
   if (spread.usage) {
-    option.rightLabel = percentage(spread.usage, 2);
+    // update (2023/11/15): might not be enough room tbh LOL
+    // option.rightLabel = percentage(spread.usage, 2);
+    option.subLabel = `${option.subLabel as string} ${bull} ${percentage(spread.usage, 2)}`;
   }
 
   return option;
@@ -116,7 +119,8 @@ export const buildSpreadOptions = (
     const presetOption = presetOptions.find((o) => o.value === value);
 
     if (presetOption) {
-      presetOption.rightLabel = percentage(spread.usage, 2);
+      // presetOption.rightLabel = percentage(spread.usage, 2);
+      presetOption.subLabel = `${presetOption.subLabel as string} ${bull} ${percentage(spread.usage, 2)}`;
 
       return;
     }
