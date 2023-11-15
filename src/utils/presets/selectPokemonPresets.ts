@@ -5,7 +5,7 @@ import {
   type CalcdexPokemonPresetSource,
 } from '@showdex/interfaces/calc';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
+import { detectGenFromFormat, getGenfulFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { getPresetFormes } from './getPresetFormes';
 import { sortPresetsByForme } from './sortPresetsByForme';
 
@@ -94,7 +94,8 @@ export const selectPokemonPresets = (
 
   const filtered = presets.filter((preset) => (
     (!source || ignoreSource || preset.source === source)
-      && (!genlessFormat || (preset.gen === gen && getGenlessFormat(preset.format) === genlessFormat))
+      // && (!genlessFormat || (preset.gen === gen && getGenlessFormat(preset.format) === genlessFormat))
+      && (!genlessFormat || (getGenfulFormat(gen, genlessFormat) === getGenfulFormat(preset.gen, preset.format)))
       && presetFormes.includes(preset.speciesForme)
       && (
         typeof additionalPredicate !== 'function'

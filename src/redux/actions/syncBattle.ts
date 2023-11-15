@@ -728,28 +728,37 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           //   )
           // ));
 
+          // update: (2023/11/15): since the guessing is now done in useCalcdexPresets(), we can't include guessed
+          // matches from omitted Teambuilder presets (depending on the user's setting) as the guessing happens *after*
+          // the Teambuilder presets are added !! (in other words, oh well rip)
           const matchedPresets = [
-            ...(['always', 'teams'].includes(settings.includeTeambuilder) ? selectPokemonPresets(
+            ...(settings.includeTeambuilder !== 'boxes' ? selectPokemonPresets(
               teambuilderPresets,
               syncedPokemon,
               {
                 format: battleState.format,
                 source: 'storage',
-                ignoreSource: true,
+                // ignoreSource: true,
                 // include the matched Teambuilder team if includeTeambuilder is 'boxes'
-                filter: (p) => p.calcdexId === syncedPokemon.presetId,
+                // filter: (p) => (
+                //   settings.includeTeambuilder !== 'boxes'
+                //     || p.calcdexId === syncedPokemon.presetId
+                // ),
               },
             ) : []),
 
-            ...(['always', 'boxes'].includes(settings.includeTeambuilder) ? selectPokemonPresets(
+            ...(settings.includeTeambuilder !== 'teams' ? selectPokemonPresets(
               teambuilderPresets,
               syncedPokemon,
               {
                 format: battleState.format,
                 source: 'storage-box',
-                ignoreSource: true,
+                // ignoreSource: true,
                 // include the matched Teambuilder box if includeTeambuilder is 'teams'
-                filter: (p) => p.calcdexId === syncedPokemon.presetId,
+                // filter: (p) => (
+                //   settings.includeTeambuilder !== 'teams'
+                //     || p.calcdexId === syncedPokemon.presetId
+                // ),
               },
             ) : []),
           ];
