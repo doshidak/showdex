@@ -68,6 +68,10 @@ const FormatReplacements: [test: RegExp, replace: RegExp, replacement: string][]
   // does anybody play this ??? o_O
   // e.g., 'gen9multirandombattle' -> 'gen9randomdoublesbattle'
   [/multirandom/i, null, 'randomdoubles'],
+
+  // Randomized Format Spotlight as of 2023/11/14, requested by Pulse_kS
+  // e.g., 'gen9partnersincrimerandombattle' -> 'gen9randomdoublesbattle'
+  [/partnersincrimerandom/i, null, 'randomdoubles'],
 ];
 
 // 10/10 function name
