@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { type ItemName, type MoveName } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { PokemonBoosterAbilities, PokemonRuinAbilities } from '@showdex/consts/dex';
+import {
+  PokemonBoosterAbilities,
+  PokemonPresetFuckedBaseFormes,
+  PokemonPresetFuckedBattleFormes,
+  PokemonRuinAbilities,
+} from '@showdex/consts/dex';
 import {
   type CalcdexBattleField,
   type CalcdexMoveOverride,
@@ -30,6 +35,7 @@ import {
 } from '@showdex/utils/calc';
 import { nonEmptyObject, similarArrays, tolerance } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { getDexForFormat } from '@showdex/utils/dex';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -221,9 +227,15 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
       // (which should only be in the Pokemon's unique `presets[]`, not in RTK Query or something lol)
       if (!mutated.serverSourced && mutated.presetId) {
+        const dex = getDexForFormat(state.format);
+        const baseForme = dex.species.get(mutated.speciesForme)?.baseSpecies;
         const preset = mutated.presets?.find((p) => p?.calcdexId === mutated.presetId);
 
-        if (!preset?.source || !['server', 'sheet'].includes(preset.source)) {
+        const shouldClearPreset = (!preset?.source || !['server', 'sheet'].includes(preset.source))
+          && !PokemonPresetFuckedBaseFormes.includes(baseForme)
+          && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme);
+
+        if (shouldClearPreset) {
           mutated.presetId = null;
         }
       }
