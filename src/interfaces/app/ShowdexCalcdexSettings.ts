@@ -140,23 +140,6 @@ export interface ShowdexCalcdexSettings {
    */
   showNicknames: boolean;
 
-  /*
-   * Whether to reverse the functionality of the Pokemon's icon and name when clicked on.
-   *
-   * * If `false` (default), the functionality will be as follows:
-   *   - Clicking on the icon will open the Pokemon's *Smogon University* page.
-   *   - Clicking on the name will switch the Pokemon's current `speciesForme` if it has defined `altFormes`.
-   * * If `true`, the functionality will be switched as follows:
-   *   - Clicking on the icon will switch the Pokemon's current `speciesForme` if it has defined `altFormes`.
-   *   - Clicking on the name will open the Pokemon's *Smogon University* page.
-   *
-   * @deprecated As of v1.1.6, this setting has been removed cause I don't think most people even use this,
-   *   let alone even find the forme switcher, so this would make things even more confusing!
-   * @default false
-   * @since 1.0.3
-   */
-  // reverseIconName: boolean;
-
   /**
    * Whether to open the Pokemon's *Smogon Univeristy* page when the configured button is clicked on.
    *
@@ -174,6 +157,21 @@ export interface ShowdexCalcdexSettings {
    * @since 1.0.3
    */
   showAllOptions: boolean;
+
+  /**
+   * Whether to initially show the spreads (instead of natures) dropdown whenever spreads are available.
+   *
+   * * Spreads are typically derived from the applied preset & usage stats.
+   *   - See `buildSpreadOptions()` in `@showdex/utils/ui` for how they're actually derived.
+   * * If spreads are available, a toggle will be shown to allow the user to switch between spreads & natures.
+   *   - In this case, this option will show spreads first.
+   * * Has no effect if there aren't any spreads available for the given Pokemon.
+   *   - In this case, only the natures dropdown will be shown without the toggle visible.
+   *
+   * @default true
+   * @since 1.1.8
+   */
+  showSpreadsFirst: boolean;
 
   /**
    * Whether to show "N/A" damage ranges, which are typically from status moves.

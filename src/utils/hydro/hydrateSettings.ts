@@ -109,11 +109,8 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       openOnStart: 'always',
       openAs: 'showdown',
       openOnPanel: 'showdown',
-      // forcedOpenAs: 'showdown',
-      // closeOnEnd: false,
       closeOn: 'battle-tab',
       destroyOnClose: true,
-      // preserveRenderStates: true,
 
       defaultAutoSelect: {
         auth: true,
@@ -126,10 +123,9 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       showPlayerRatings: true,
       authPosition: 'top',
       showNicknames: false,
-      // reverseIconName: false,
       openSmogonPage: true,
-      // showAllFormes: true,
       showAllOptions: false,
+      showSpreadsFirst: true,
       showNonDamageRanges: true,
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,
