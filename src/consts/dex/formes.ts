@@ -54,6 +54,7 @@ export const PokemonPresetFuckedBaseFormes: string[] = [
   'Pikachu', // -> Pikachu-Alola -> Pikachu-Hoenn -> Pikachu-Kalos -> Pikachu-Original -> Pikachu-Partner -> Pikachu-Sinnoh -> Pikachu-Unova -> Pikachu-World -> Pikachu-Starter
   'Poltchageist', // -> Poltchageist-Artisan
   'Polteageist', // -> Polteageist-Antique
+  'Ribombee', // -> Ribombee-Totem
   'Sawsbuck', // -> Sawsbuck-Summer -> Sawsbuck-Autumn -> Sawsbuck-Winter
   'Shellos', // -> Shellos-East
   'Sinistcha', // -> Sinistcha-Masterpiece
