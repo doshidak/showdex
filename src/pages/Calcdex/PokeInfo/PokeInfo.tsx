@@ -200,6 +200,11 @@ export const PokeInfo = ({
     spreadOptions,
   ]);
 
+  const showPresetSpreads = React.useMemo(
+    () => showSpreadsToggle && pokemon.showPresetSpreads,
+    [pokemon?.showPresetSpreads, showSpreadsToggle],
+  );
+
   const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
     format,
     pokemon,
@@ -756,7 +761,7 @@ export const PokeInfo = ({
                 styles.dropdownLabel,
               )}
             >
-              {pokemon?.showPresetSpreads ? 'Spread' : 'Nature'}
+              {showPresetSpreads ? 'Spread' : 'Nature'}
 
               {
                 showSpreadsToggle &&
@@ -779,20 +784,20 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available ${pokemon?.showPresetSpreads ? 'Spreads' : 'Natures'} for Pok${eacute}mon ${friendlyPokemonName}`}
-              hint={legacy ? 'N/A' : (pokemon?.showPresetSpreads ? (currentSpread || 'Custom') : '???')}
+              aria-label={`Available ${showPresetSpreads ? 'Spreads' : 'Natures'} for Pok${eacute}mon ${friendlyPokemonName}`}
+              hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               input={{
-                name: `PokeInfo:${pokemonKey}:${pokemon?.showPresetSpreads ? 'Spreads' : 'Natures'}`,
-                value: pokemon?.showPresetSpreads ? currentSpread : pokemon?.nature,
+                name: `PokeInfo:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
+                value: showPresetSpreads ? currentSpread : pokemon?.nature,
                 onChange: (name: string) => updatePokemon(
-                  pokemon?.showPresetSpreads
+                  showPresetSpreads
                     ? hydrateSpread(name, { format })
                     : { nature: name as Showdown.NatureName },
-                  `${baseScope}:Dropdown~${pokemon?.showPresetSpreads ? 'Spread' : 'Nature'}:input.onChange()`,
+                  `${baseScope}:Dropdown~${showPresetSpreads ? 'Spread' : 'Nature'}:input.onChange()`,
                 ),
               }}
-              options={pokemon?.showPresetSpreads ? spreadOptions : natureOptions}
-              noOptionsMessage={`No ${pokemon?.showPresetSpreads ? 'Spreads' : 'Natures'}`}
+              options={showPresetSpreads ? spreadOptions : natureOptions}
+              noOptionsMessage={`No ${showPresetSpreads ? 'Spreads' : 'Natures'}`}
               clearable={false}
               disabled={legacy || !pokemon?.speciesForme}
             />

@@ -1121,12 +1121,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             continue;
           }
 
+          // note: this won't do anything if the Pokemon has no spreads available
+          syncedPokemon.showPresetSpreads = settings?.showSpreadsFirst || false;
+
           // set the initial showGenetics value from the settings if this is serverSourced
           const geneticsKey = playerKey === battleState.authPlayerKey ? 'auth' : playerKey;
-
-          // update (2022/11/14): defaultShowGenetics has been deprecated in favor of lockGeneticsVisibility
-          // syncedPokemon.showGenetics = settings?.defaultShowGenetics?.[geneticsKey] ?? true;
-
           const showBaseStats = settings?.showBaseStats === 'always'
             || (settings?.showBaseStats === 'meta' && !legalLockedFormat(battleState.format));
 
