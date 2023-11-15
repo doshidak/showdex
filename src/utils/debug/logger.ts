@@ -13,16 +13,13 @@ export type LoggerLevel =
   | 'error';
 
 export type LoggerLogFunction = (...data: unknown[]) => void;
-
-export type LoggerLogFactory = (
-  scope?: string,
-  level?: LoggerLevel,
-) => LoggerLogFunction;
+export type LoggerLogFactory = (scope?: string, level?: LoggerLevel) => LoggerLogFunction;
 
 export interface LoggerLevelConfig {
   label: string;
   color: AnsiColor;
   htmlColor?: string;
+  devOnly?: boolean;
   print: LoggerLogFunction;
 }
 
@@ -30,12 +27,8 @@ export interface LoggerLevelFunctions extends Record<LoggerLevel, LoggerLogFunct
   scope?: string;
 }
 
-export type LoggerLevelFactory = (
-  scope?: string,
-) => LoggerLevelFunctions;
-
+export type LoggerLevelFactory = (scope?: string) => LoggerLevelFunctions;
 export type LoggerInstance = Omit<LoggerLevelFunctions, 'scope'> & LoggerLevelFactory;
-
 export type LoggerHtmlStyles = Record<string, string | number>;
 
 const __DEV__ = process.env.NODE_ENV === 'development';
@@ -51,6 +44,7 @@ const levels: Record<LoggerLevel, LoggerLevelConfig> = {
     label: 'SILL',
     color: HighIntensityAnsiColor.Gray,
     htmlColor: '#616161', // MD Gray 700
+    devOnly: true,
     print: console.log, // alias for `console.log` in node
   },
 
@@ -58,6 +52,7 @@ const levels: Record<LoggerLevel, LoggerLevelConfig> = {
     label: 'DBUG',
     color: HighIntensityAnsiColor.Gray,
     htmlColor: '#616161', // MD Gray 700
+    devOnly: true,
     print: console.log,
   },
 
@@ -65,6 +60,7 @@ const levels: Record<LoggerLevel, LoggerLevelConfig> = {
     label: 'VERB',
     color: HighIntensityAnsiColor.BrightBlue,
     htmlColor: '#0288D1', // MD Light Blue 700
+    devOnly: true,
     print: console.info,
   },
 
@@ -76,7 +72,7 @@ const levels: Record<LoggerLevel, LoggerLevelConfig> = {
   },
 
   success: {
-    label: ' OK ',
+    label: 'GUCC',
     color: StandardAnsiColor.Green,
     htmlColor: '#388E3C', // MD Green 700
     print: console.log,
@@ -102,17 +98,19 @@ const levels: Record<LoggerLevel, LoggerLevelConfig> = {
 const createTtyLevel: LoggerLogFactory = (
   scope,
   level = 'silly',
-) => (...data) => {
-  // don't emit silly- and debug-level logs if we're not in development mode
-  if (!__DEV__ && (level === 'silly' || level === 'debug')) {
-    return;
-  }
-
+) => (
+  ...data
+) => {
   const {
     label,
     color,
+    devOnly,
     print,
   } = levels[level];
+
+  if (devOnly && !__DEV__) {
+    return;
+  }
 
   const args = [
     timestamp(),
@@ -154,17 +152,19 @@ const toInlineStyles = (
 const createHtmlLevel: LoggerLogFactory = (
   scope,
   level = 'silly',
-) => (...data) => {
-  // don't emit silly- and debug-level logs if we're not in development mode
-  if (!__DEV__ && (level === 'silly' || level === 'debug')) {
-    return;
-  }
-
+) => (
+  ...data
+) => {
   const {
     label,
     htmlColor,
+    devOnly,
     print,
   } = levels[level];
+
+  if (devOnly && !__DEV__) {
+    return;
+  }
 
   // makes the console logs in Chrome's DevTools look pretty (unsure about other browsers tho)
   const heading = [`%c${label}`];
@@ -221,9 +221,15 @@ const createHtmlLevel: LoggerLogFactory = (
 const createLevel: LoggerLogFactory = (
   scope,
   level = 'silly',
-) => (isBrowser ? createHtmlLevel : createTtyLevel)(scope, level);
+) => (
+  isBrowser
+    ? createHtmlLevel
+    : createTtyLevel
+)(scope, level);
 
-export const logger: LoggerInstance = (scope): LoggerLevelFunctions => ({
+export const logger: LoggerInstance = (
+  scope,
+): LoggerLevelFunctions => ({
   scope,
   silly: createLevel(scope, 'silly'),
   debug: createLevel(scope, 'debug'),
@@ -241,6 +247,3 @@ logger.success = createLevel(null, 'success');
 logger.info = createLevel(null, 'info');
 logger.warn = createLevel(null, 'warn');
 logger.error = createLevel(null, 'error');
-
-// logger.debug('chalk level:', chalk.level);
-// logger.debug('supports color?', chalk.supportsColor);
