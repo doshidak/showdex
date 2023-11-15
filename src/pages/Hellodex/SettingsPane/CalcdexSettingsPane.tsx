@@ -449,11 +449,6 @@ export const CalcdexSettingsPane = ({
               <br />
               Teams that start with "Untitled" or Pok&eacute;mon with an empty moveset or
               incomplete EV distribution (if applicable) will be ignored.
-              <br />
-              <br />
-              For your Pok&eacute;mon, your Teambuilder sets will be used to match the
-              server-reported stats before guessing, in which case you won't see the{' '}
-              <em>Yours</em> set if a match was found.
             </div>
           ),
           value: 'teams',
@@ -468,11 +463,6 @@ export const CalcdexSettingsPane = ({
               <br />
               Pok&eacute;mon in these boxes with an empty moveset or incomplete EV distribution
               (if applicable) will be ignored.
-              <br />
-              <br />
-              For your Pok&eacute;mon, sets derived from your Teambuilder teams will still
-              be used to match the server-reported stats before guessing, in which case you
-              won't see the <em>Yours</em> set if a match was found.
             </div>
           ),
           value: 'boxes',
@@ -487,11 +477,6 @@ export const CalcdexSettingsPane = ({
               <br />
               Teams that start with "Untitled" or Pok&eacute;mon with an empty moveset or
               incomplete EV distribution (if applicable) will be ignored.
-              <br />
-              <br />
-              For your Pok&eacute;mon, your Teambuilder sets will be used to match the
-              server-reported stats before guessing, in which case you won't see the{' '}
-              <em>Yours</em> set if a match was found.
             </div>
           ),
           value: 'always',
@@ -676,93 +661,6 @@ export const CalcdexSettingsPane = ({
         ].filter(Boolean) as ('auth' | 'player')[])}
       />
 
-      <Field<ShowdexCalcdexSettings['showPlayerRatings']>
-        name="calcdex.showPlayerRatings"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Show Players' Elo Ratings"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Shows each player's Elo rating, if available, by their username.
-          </div>
-        )}
-      />
-
-      <Field<ShowdexCalcdexSettings['openSmogonPage']>
-        name="calcdex.openSmogonPage"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Link to Smogon Dex Entries"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Opens the Pok&eacute;mon's Smogon Dex entry as a popup window when
-            the Pok&eacute;mon's icon is clicked on.
-          </div>
-        )}
-      />
-
-      <Field<ShowdexCalcdexSettings['showNicknames']>
-        name="calcdex.showNicknames"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label={`Show Pok${eacute}mon Nicknames`}
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
-            <br />
-            <br />
-            ("but why tho?" &ndash;<em>analogcam</em>, 2022)
-          </div>
-        )}
-      />
-
-      <Field<ShowdexCalcdexSettings['forceNonVolatile']>
-        name="calcdex.forceNonVolatile"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label={`Always Show Pok${eacute}mon Statuses`}
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Always shows the Pok&eacute;mon's non-volatile status (e.g., BRN, PAR, SLP, etc.),
-            regardless if it has one. In those cases, the status will display "OK".
-          </div>
-        )}
-      />
-
-      <Field<ShowdexCalcdexSettings['defaultAutoMoves'], HTMLInputElement, boolean>
-        name="calcdex.defaultAutoMoves"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Auto-Fill Revealed Moves"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Selects revealed moves of your opponent's (or spectating players') Pok&eacute;mon,
-            if not already selected from the applied set.
-          </div>
-        )}
-        parse={(v) => ({
-          auth: false,
-          p1: v,
-          p2: v,
-          p3: v,
-          p4: v,
-        })}
-        format={(va) => Object.values(va || {}).some((v) => !!v)}
-      />
-
-      <Field<ShowdexCalcdexSettings['showNonDamageRanges']>
-        name="calcdex.showNonDamageRanges"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label={'Show "N/A" Damage Ranges'}
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Shows damage ranges that are "N/A" or "IMMUNE", typical of status moves
-            or <em>Earthquake</em> against a Flying-type Pok&eacute;mon, for instance.
-          </div>
-        )}
-      />
-
       <Field<ShowdexCalcdexSettings['lockGeneticsVisibility']['auth']>
         name="calcdex.lockGeneticsVisibility.auth"
         component={Segmented}
@@ -873,6 +771,111 @@ export const CalcdexSettingsPane = ({
           p4: v,
         })}
         format={(v) => [...(v?.p1 || [])]}
+      />
+
+      <Field<ShowdexCalcdexSettings['showPlayerRatings']>
+        name="calcdex.showPlayerRatings"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label="Show Players' Elo Ratings"
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Shows each player's Elo rating, if available, by their username.
+          </div>
+        )}
+      />
+
+      <Field<ShowdexCalcdexSettings['openSmogonPage']>
+        name="calcdex.openSmogonPage"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label="Link to Smogon Dex Entries"
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Opens the Pok&eacute;mon's Smogon Dex entry as a popup window when
+            the Pok&eacute;mon's icon is clicked on.
+          </div>
+        )}
+      />
+
+      <Field<ShowdexCalcdexSettings['showNicknames']>
+        name="calcdex.showNicknames"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label={`Show Pok${eacute}mon Nicknames`}
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Shows the Pok&eacute;mon's nickname, if any, instead of its forme.
+            <br />
+            <br />
+            ("but why tho?" &ndash;<em>analogcam</em>, 2022)
+          </div>
+        )}
+      />
+
+      <Field<ShowdexCalcdexSettings['forceNonVolatile']>
+        name="calcdex.forceNonVolatile"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label={`Always Show Pok${eacute}mon Statuses`}
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Always shows the Pok&eacute;mon's non-volatile status (e.g., BRN, PAR, SLP, etc.),
+            regardless if it has one. In those cases, the status will display "OK".
+          </div>
+        )}
+      />
+
+      <Field<ShowdexCalcdexSettings['showSpreadsFirst']>
+        name="calcdex.showSpreadsFirst"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label="Show Available Spreads First"
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Shows the spread dropdown (in place of the nature dropdown) for the currently selected
+            Pok&eacute;mon if it has any spreads available from its currently applied set or
+            corresponding usage stats.
+            <br />
+            <br />
+            A toggle button will appear next to the dropdown letting you switch between the spread
+            &amp; nature dropdowns.
+          </div>
+        )}
+      />
+
+      <Field<ShowdexCalcdexSettings['defaultAutoMoves'], HTMLInputElement, boolean>
+        name="calcdex.defaultAutoMoves"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label="Auto-Fill Revealed Moves"
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Selects revealed moves of your opponent's (or spectating players') Pok&eacute;mon,
+            if not already selected from the applied set.
+          </div>
+        )}
+        parse={(v) => ({
+          auth: false,
+          p1: v,
+          p2: v,
+          p3: v,
+          p4: v,
+        })}
+        format={(va) => Object.values(va || {}).some((v) => !!v)}
+      />
+
+      <Field<ShowdexCalcdexSettings['showNonDamageRanges']>
+        name="calcdex.showNonDamageRanges"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label={'Show "N/A" Damage Ranges'}
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Shows damage ranges that are "N/A" or "IMMUNE", typical of status moves
+            or <em>Earthquake</em> against a Flying-type Pok&eacute;mon, for instance.
+          </div>
+        )}
       />
 
       <Field<ShowdexCalcdexSettings, HTMLDivElement, ('ui' | 'field' | 'ability' | 'item' | 'move' | 'matchup')[]>
