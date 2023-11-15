@@ -173,6 +173,8 @@ export const FormatLabels: Record<string, string> = {
  */
 export const FormatSuffixes: [test: RegExp, replacement: string][] = [
   [/blitz/, 'Blitz'],
+  [/legacy/, 'Legacy'],
+  [/prehome/, 'Pre-Home'],
   [/unrated/, 'Unrated'],
   [/series(\d+)/, 'Series $1'],
   [/regulation([a-z])/, 'Reg $1'],
