@@ -363,12 +363,19 @@ export const sanitizePokemon = <
     ? sanitizedPokemon.transformedAbilities
     : [...flattenAlts(sanitizedPokemon.altAbilities), ...sanitizedPokemon.abilities];
 
+  /*
   const updateDirtyAbility = (
     !sanitizedPokemon.ability
       && !sanitizedPokemon.transformedForme
   ) || (
     sanitizedPokemon.dirtyAbility
       && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility)
+  );
+  */
+
+  const updateDirtyAbility = (
+    (!sanitizedPokemon.ability || !!sanitizedPokemon.transformedForme)
+      && (!sanitizedPokemon.dirtyAbility || !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))
   );
 
   if (updateDirtyAbility) {
