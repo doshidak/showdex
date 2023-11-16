@@ -1,5 +1,5 @@
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { getGenlessFormat } from '@showdex/utils/dex';
+import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 
 /**
  * Sorts `CalcdexPokemonPreset[]`'s whose `format`'s match the provided `format` the closest in ascending order.
@@ -14,19 +14,22 @@ import { getGenlessFormat } from '@showdex/utils/dex';
 export const sortPresetsByFormat = (
   format?: string,
 ): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => {
-  const genlessFormat = getGenlessFormat(format);
+  const battleFormat = parseBattleFormat(format);
 
-  if (!genlessFormat) {
+  if (!battleFormat) {
     return () => 0;
   }
 
   return (a, b) => {
-    const formatA = getGenlessFormat(a.format);
-    const formatB = getGenlessFormat(b.format);
+    const formatA = getGenfulFormat(a.gen, a.format);
+    const formatB = getGenfulFormat(b.gen, b.format);
+
+    const battleFormatA = parseBattleFormat(formatA);
+    const battleFormatB = parseBattleFormat(formatB);
 
     // first, hard match the genless formats
-    const matchesA = formatA === genlessFormat;
-    const matchesB = formatB === genlessFormat;
+    const matchesA = battleFormatA === battleFormat;
+    const matchesB = battleFormatB === battleFormat;
 
     if (matchesA) {
       // no need to repeat this case below since this only occurs when `a` and `b` both match
@@ -42,13 +45,18 @@ export const sortPresetsByFormat = (
     }
 
     // at this point, we should've gotten all the hard matches, so we can do partial matching
-    // (e.g., 'ou' would be sorted at the lowest indices already, so we can pull something like 'bdspou' to the top,
-    // but not something like '2v2doubles', which technically includes 'ou', hence the endsWith())
-    if (formatA.endsWith(genlessFormat)) {
+    const partialMatchesA = formatA.startsWith(format);
+    const partialMatchesB = formatB.startsWith(format);
+
+    if (partialMatchesA) {
+      if (partialMatchesB) {
+        return 0;
+      }
+
       return -1;
     }
 
-    if (formatB.endsWith(genlessFormat)) {
+    if (partialMatchesB) {
       return 1;
     }
 
