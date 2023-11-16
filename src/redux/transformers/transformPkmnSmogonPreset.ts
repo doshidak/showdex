@@ -33,11 +33,7 @@ export const transformPkmnSmogonPreset = (
     return null;
   }
 
-  // update (2023/11/06): forgot that `format` in this particular transformer may not include the `gen<#>` prefix in
-  // the pkmn API, particularly when fetching presets of an entire gen (instead of a particular format) -- while this
-  // was actually fine in most cases, legacy gens defaulted to 0 stat EXP/EVs !! oopsies (they should all be 252 btw)
-  // const defaultIv = getDefaultSpreadValue('iv', gen);
-  // const defaultEv = getDefaultSpreadValue('ev', gen);
+  const dex = getDexForFormat(gen);
 
   const {
     teraTypes: presetTeraTypes,
@@ -59,36 +55,13 @@ export const transformPkmnSmogonPreset = (
     name: presetName || 'Smogon Set', // e.g., 'Defensive Pivot'
     gen,
     format: getGenlessFormat(format), // just in case; e.g., 'ou'
-
     speciesForme, // do not sanitize
     ability: Array.isArray(ability) ? ability[0] : ability,
     altAbilities: Array.isArray(ability) ? ability : [ability].filter(Boolean),
-
-    // nature: Array.isArray(nature) ? nature[0] : nature,
-
     item: Array.isArray(item) ? item[0] : item,
     altItems: Array.isArray(item) ? item : [item].filter(Boolean),
-
     moves: moves?.map((move) => (Array.isArray(move) ? move[0] : move)) ?? [],
     altMoves: flatMoves.filter((m, i) => !flatMoves.includes(m, i + 1)), // remove dupe moves
-
-    // ivs: {
-    //   hp: typeof ivs?.hp === 'number' ? ivs.hp : defaultIv,
-    //   atk: typeof ivs?.atk === 'number' ? ivs.atk : defaultIv,
-    //   def: typeof ivs?.def === 'number' ? ivs.def : defaultIv,
-    //   spa: typeof ivs?.spa === 'number' ? ivs.spa : defaultIv,
-    //   spd: typeof ivs?.spd === 'number' ? ivs.spd : defaultIv,
-    //   spe: typeof ivs?.spe === 'number' ? ivs.spe : defaultIv,
-    // },
-
-    // evs: {
-    //   hp: typeof evs?.hp === 'number' ? evs.hp : defaultEv,
-    //   atk: typeof evs?.atk === 'number' ? evs.atk : defaultEv,
-    //   def: typeof evs?.def === 'number' ? evs.def : defaultEv,
-    //   spa: typeof evs?.spa === 'number' ? evs.spa : defaultEv,
-    //   spd: typeof evs?.spd === 'number' ? evs.spd : defaultEv,
-    //   spe: typeof evs?.spe === 'number' ? evs.spe : defaultEv,
-    // },
   };
 
   const length = Math.max(
@@ -122,13 +95,22 @@ export const transformPkmnSmogonPreset = (
   output.ivs = { ...output.spreads[0]?.ivs };
   output.evs = { ...output.spreads[0]?.evs };
 
-  // if the response omitted the `ability`, then grab it from the dex
-  if (!output.ability) {
-    const dex = getDexForFormat(gen);
-    const species = dex?.species.get(speciesForme);
+  if (output.item) {
+    // e.g., output.item = 'Charizardite X' -> megaForme = 'Charizard-Mega-X'
+    const megaForme = dex.items.get(output.item)?.megaStone;
 
-    if (species?.exists && species.abilities?.[0]) {
-      output.ability = species.abilities[0] as AbilityName;
+    if (megaForme && output.speciesForme !== megaForme) {
+      output.speciesForme = megaForme;
+    }
+  }
+
+  // if the response omitted the `ability`, then grab it from the dex
+  if (!output.ability || output.speciesForme !== speciesForme) {
+    const abilities = dex.species.get(output.speciesForme)?.abilities;
+
+    // note: abilities is an object with keys such as '0', '1' & 'H' (hidden)
+    if (abilities?.[0] && !Object.values(abilities).includes(output.ability)) {
+      output.ability = abilities[0] as AbilityName;
       output.altAbilities.push(output.ability); // would be empty before this push()
     }
   }

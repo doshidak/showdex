@@ -35,7 +35,7 @@ import {
 } from '@showdex/utils/calc';
 import { nonEmptyObject, similarArrays, tolerance } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { getDexForFormat } from '@showdex/utils/dex';
+import { getDexForFormat, hasMegaForme } from '@showdex/utils/dex';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -168,8 +168,18 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         mutated.abilities = [...abilities];
 
         // checking payload.ability so as to not overwrite what's actually revealed in battle
-        if (!mutated.ability && !abilities.includes(mutated.dirtyAbility)) {
+        // note: checking `ability` first instead of the usual `dirtyAbility` here;
+        // specifically for Mega formes & serverSourced Pokemon, we'll need to update its ability when it Mega evo's
+        if (!abilities.includes(mutated.ability || mutated.dirtyAbility)) {
           [mutated.dirtyAbility] = abilities;
+        }
+
+        const clearInvalidDirtyAbility = !!mutated.dirtyAbility
+          && abilities.includes(mutated.ability)
+          && !abilities.includes(mutated.dirtyAbility);
+
+        if (clearInvalidDirtyAbility) {
+          mutated.dirtyAbility = null;
         }
       }
 
@@ -233,7 +243,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
         const shouldClearPreset = (!preset?.source || !['server', 'sheet'].includes(preset.source))
           && !PokemonPresetFuckedBaseFormes.includes(baseForme)
-          && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme);
+          && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme)
+          && !hasMegaForme(prevPokemon.speciesForme)
+          && !hasMegaForme(pokemon.speciesForme);
 
         if (shouldClearPreset) {
           mutated.presetId = null;
