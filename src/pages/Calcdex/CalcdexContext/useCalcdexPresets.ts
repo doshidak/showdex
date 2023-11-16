@@ -313,6 +313,12 @@ export const useCalcdexPresets = (
           }
         }
 
+        // no smogon presets are available at this point, so apply the usage if we have it
+        // (encountered many cases where Pokemon only have usage w/ no pokemonPresets[], particularly in Gen 9 National Dex)
+        if (!preset?.calcdexId && usage?.calcdexId) {
+          preset = usage;
+        }
+
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
         if (!preset?.calcdexId) {
           pokemon.showGenetics = true;
