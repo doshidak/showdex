@@ -291,7 +291,9 @@ export const PokeInfo = ({
     presets,
     usages,
     pokemon,
+    format,
   ), [
+    format,
     pokemon,
     presets,
     usages,
