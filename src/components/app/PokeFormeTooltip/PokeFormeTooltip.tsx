@@ -1,10 +1,9 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { type TooltipProps, BaseButton, Tooltip } from '@showdex/components/ui';
-import { type CalcdexPokemon, useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/core';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
-import { useUserAgent } from '@showdex/utils/hooks';
 import { Picon } from '../Picon';
 import styles from './PokeFormeTooltip.module.scss';
 
@@ -38,10 +37,6 @@ export const PokeFormeTooltip = ({
 }: PokeFormeTooltipProps): JSX.Element => {
   const dex = getDexForFormat(format);
   const colorScheme = useColorScheme();
-
-  // detect non-macOS cause the Tippy's positioning is really fucked on Windows (and probably Linux)
-  const userAgent = useUserAgent();
-  const nonMacOS = !['macos', 'ios'].includes(formatId(userAgent?.os?.name));
 
   const {
     speciesForme,
@@ -112,7 +107,6 @@ export const PokeFormeTooltip = ({
       )}
       visible={visible}
       interactive
-      popperOptions={nonMacOS ? { strategy: 'fixed' } : undefined}
       placement="top-start"
       offset={[0, 7]}
       disabled={!speciesForme || !altFormesCount || disabled}

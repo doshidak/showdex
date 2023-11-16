@@ -2,15 +2,12 @@ import {
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
   type CalcdexPokemonUsageAlt,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
 import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 // import { nonEmptyObject } from '@showdex/utils/core';
-import {
-  detectGenFromFormat,
-  getDefaultSpreadValue,
-  // hasMegaForme,
-} from '@showdex/utils/dex';
+// import { logger } from '@showdex/utils/debug';
+import { detectGenFromFormat, getDefaultSpreadValue, hasMegaForme } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -18,6 +15,8 @@ import { getPresetFormes } from './getPresetFormes';
 import { sortUsageAlts } from './sortUsageAlts';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { usageAltPercentSorter } from './usageAltPercentSorter';
+
+// const l = logger('@showdex/utils/presets/applyPreset()');
 
 /**
  * Applies the provided `CalcdexPokemonPreset` to the provided `pokemon`.
@@ -85,43 +84,29 @@ export const applyPreset = (
     },
   };
 
-  const revealedPreset = ['server', 'sheet'].includes(preset.source);
+  // determine if this preset reveals actual info
+  const revealingPreset = ['server', 'sheet'].includes(preset.source);
+
+  // determine if we have a completed preset (to distinguish partial presets w/o any spreads derived from OTS)
+  const completePreset = detectCompletePreset(preset);
+
   const transformed = !!pokemon.transformedForme;
 
+  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
+  const formeKey = transformed && !speciesFormes.includes(preset.speciesForme)
+    ? 'transformedForme'
+    : 'speciesForme';
+
+  const currentForme = pokemon[formeKey];
+
   // update to the speciesForme (& update relevant info) if different
-  const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
-    || (!transformed && pokemon.speciesForme !== preset.speciesForme);
+  // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
+  //   || (!transformed && pokemon.speciesForme !== preset.speciesForme);
+  const shouldUpdateSpecies = currentForme !== preset.speciesForme
+    && !hasMegaForme(currentForme);
 
   if (shouldUpdateSpecies) {
-    const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
-    const speciesKey = transformed && !speciesFormes.includes(preset.speciesForme)
-      ? 'transformedForme'
-      : 'speciesForme';
-
-    output[speciesKey] = preset.speciesForme;
-
-    const {
-      types,
-      abilities,
-      altFormes,
-      baseStats,
-      transformedAbilities,
-      transformedBaseStats,
-    } = sanitizePokemon({
-      ...pokemon,
-      ...output,
-    }, format);
-
-    output.types = types;
-    output.altFormes = altFormes;
-
-    if (transformed) {
-      output.transformedAbilities = transformedAbilities;
-      output.transformedBaseStats = transformedBaseStats;
-    } else {
-      output.abilities = abilities;
-      output.baseStats = baseStats;
-    }
+    output[formeKey] = preset.speciesForme;
   }
 
   // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
@@ -234,30 +219,12 @@ export const applyPreset = (
         /**
          * @todo Needs to be updated once we support more than 4 moves.
          */
-        if (!revealedPreset) {
+        if (!revealingPreset) {
           output.moves = sortedMoves.slice(0, 4);
         }
       }
     }
   }
-
-  // check if we already have revealed moves (typical of spectating or replaying a battle)
-  // update (2023/02/03): merging all of the output to provide altMoves[] (for Hidden Power moves)
-  // update (2023/07/27): not handling transformedMoves here anymore since it's handled in mergeRevealedMoves()
-  // update (2023/10/11): actually this fricks things up more being here, especially with all the Ditto shiz I'm doing rn
-  console.log(preset);
-  if (preset.source === 'usage') {
-    output.moves = mergeRevealedMoves({
-      ...pokemon,
-      ...output,
-    });
-  }
-  /*
-  output.moves = mergeRevealedMoves({
-    ...pokemon,
-    ...output,
-  });
-  */
 
   // carefully apply the spread if Pokemon is transformed and a spread was already present prior
   const shouldTransformSpread = transformed
@@ -291,7 +258,7 @@ export const applyPreset = (
   }
 
   // determine if we should be updating the actual info instead of the dirty ones
-  if (revealedPreset) {
+  if (revealingPreset) {
     if (output.teraType && !pokemon.revealedTeraType) {
       output.revealedTeraType = output.teraType;
     }
@@ -309,15 +276,48 @@ export const applyPreset = (
     if (output.moves.length) {
       output[transformed ? 'transformedMoves' : 'revealedMoves'] = [...output.moves];
     }
+
+    // we probably have an OTS if not complete
+    if (!completePreset) {
+      output.moves = mergeRevealedMoves({
+        ...pokemon,
+        ...output,
+      });
+    }
+  }
+
+  if (currentForme !== output[formeKey]) {
+    const {
+      types,
+      abilities,
+      altFormes,
+      baseStats,
+      transformedAbilities,
+      transformedBaseStats,
+    } = sanitizePokemon({
+      ...pokemon,
+      ...output,
+    }, format);
+
+    output.types = types;
+    output.altFormes = altFormes;
+
+    if (transformed) {
+      output.transformedAbilities = transformedAbilities;
+      output.transformedBaseStats = transformedBaseStats;
+    } else {
+      output.abilities = abilities;
+      output.baseStats = baseStats;
+    }
   }
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,
   // which won't have any EVs/IVs, so we'll still have to rely on spreads from other presets)
-  if (detectCompletePreset(preset)) {
+  if (completePreset) {
     output.presetId = preset.calcdexId;
     output.spreadStats = calcPokemonSpreadStats(format, { ...pokemon, ...output });
 
-    if (revealedPreset) {
+    if (revealingPreset) {
       output.autoPreset = false;
     }
 
@@ -333,6 +333,8 @@ export const applyPreset = (
     if (output.nature === 'Hardy') {
       delete output.nature;
     }
+
+    return output;
   }
 
   // if the applied preset doesn't have a completed EV/IV spread, forcibly show them

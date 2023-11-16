@@ -1,5 +1,6 @@
-import { type PkmnSmogonFormatPresetResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { transformPkmnSmogonPreset } from './transformPkmnSmogonPreset';
@@ -11,14 +12,14 @@ import { transformPkmnSmogonPreset } from './transformPkmnSmogonPreset';
  *
  * * Meant to be passed directly into the `transformResponse` option of an RTK Query API endpoint.
  *   - Nothing stopping you from using it directly, though.
- * * Only use this if `formatOnly` of `PkmnSmogonPresetRequest` is `true`.
+ * * Only use this if `formatOnly` of `PkmnApiSmogonPresetRequest` is `true`.
  *
  * @since 0.1.3
  */
 export const transformFormatPresetResponse = (
-  response: PkmnSmogonFormatPresetResponse,
+  response: PkmnApiSmogonFormatPresetResponse,
   _meta: unknown,
-  args: PkmnSmogonPresetRequest,
+  args: PkmnApiSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   if (!args?.gen || !args.format || !nonEmptyObject(response)) {
     return [];

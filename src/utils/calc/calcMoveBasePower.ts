@@ -1,5 +1,5 @@
 import { type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp, formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
@@ -75,6 +75,13 @@ export const calcMoveBasePower = (
     basePower = clamp(0, basePower * (1 + faintCounter), 5050);
   }
 
+  // note: had to manually disable the auto-boost in @smogon/calc (specifically in the gen56 & gen789 mechanics files),
+  // which is included in this project's @smogon/calc patch
+  // update (2023/11/06): this needs to be applied BEFORE the Tera STAB boost oops
+  if (moveId === 'acrobatics' && !itemId) {
+    basePower *= 2;
+  }
+
   // update (2023/04/17): though @smogon/calc natively implements this now,
   // leaving this logic here to show the boosted BP in the move's tooltip;
   // also, this mechanic comes AFTER any boosts from Rage Fist/Last Respects
@@ -86,12 +93,6 @@ export const calcMoveBasePower = (
   }
 
   const basePowerMods: number[] = [];
-
-  // note: had to manually disable the auto-boost in @smogon/calc (specifically in the gen56 & gen789 mechanics files),
-  // which is included in this project's @smogon/calc patch
-  if (moveId === 'acrobatics' && !itemId) {
-    basePowerMods.push(2);
-  }
 
   if (['electromorphosis', 'windpower'].includes(abilityId) && 'charge' in (pokemon?.volatiles || {})) {
     const moveType = overrides?.type || move.type;

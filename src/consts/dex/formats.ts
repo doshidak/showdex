@@ -68,6 +68,7 @@ export const FormatLabels: Record<string, string> = {
   gbusingles: 'GBU Singles',
   godlygift: 'Godly Gift',
   hackmonscup: 'Hackmons Cup',
+  hoenngaiden: 'Hoenn Gaiden',
   inheritance: 'Inheritance',
   japaneseou: 'Japanese OU',
   joltemonsrandombattle: 'JolteMons Randoms',
@@ -107,9 +108,11 @@ export const FormatLabels: Record<string, string> = {
   oublitz: 'OU Blitz',
   paldeadexdraft: 'Paldea Draft',
   partnersincrime: 'Partners-in-Crime',
+  partnersincrimerandombattle: 'Partners-in-Crime Randoms',
   pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
   pokebilities: 'Pokebilities',
   pokebilitiesaaa: 'Pokebilities AAA',
+  proteanpalace: 'Protean Palace',
   pu: 'PU', // PU (as in, "P-U, smells like ass"... I think)
   purehackmons: 'Pure Hackmons',
   randombattle: 'Randoms',
@@ -137,10 +140,10 @@ export const FormatLabels: Record<string, string> = {
   tiershift: 'Tier Shift',
   tradebacksou: 'Tradebacks OU',
   trademarked: 'Trademarked',
+  trickmagic: 'Trick Magic',
   triplescustomgame: 'Triples Customs',
   ubers: 'Ubers',
   ultimatefinale: 'Ultimate Finale',
-  // unratedrandombattle: 'Unrated Randoms',
   uu: 'UU', // UnderUsed
   vgc2009: 'VGC 2009', // VideoGameChampionships
   vgc2010: 'VGC 2010',
@@ -170,6 +173,8 @@ export const FormatLabels: Record<string, string> = {
  */
 export const FormatSuffixes: [test: RegExp, replacement: string][] = [
   [/blitz/, 'Blitz'],
+  [/legacy/, 'Legacy'],
+  [/prehome/, 'Pre-Home'],
   [/unrated/, 'Unrated'],
   [/series(\d+)/, 'Series $1'],
   [/regulation([a-z])/, 'Reg $1'],

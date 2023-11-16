@@ -1,5 +1,4 @@
 import { type GenerationNum } from '@smogon/calc';
-// import { type CalcdexPokemon } from '@showdex/redux/store';
 import { getDexForFormat } from '@showdex/utils/dex';
 
 /* eslint-disable @typescript-eslint/indent */

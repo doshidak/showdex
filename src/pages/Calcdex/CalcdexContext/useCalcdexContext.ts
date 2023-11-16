@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { type ItemName, type MoveName } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { PokemonBoosterAbilities, PokemonRuinAbilities } from '@showdex/consts/dex';
+import {
+  PokemonBoosterAbilities,
+  PokemonPresetFuckedBaseFormes,
+  PokemonPresetFuckedBattleFormes,
+  PokemonRuinAbilities,
+} from '@showdex/consts/dex';
 import {
   type CalcdexBattleField,
   type CalcdexMoveOverride,
@@ -9,9 +14,8 @@ import {
   type CalcdexPlayerKey,
   type CalcdexPlayerSide,
   type CalcdexPokemon,
-  calcdexSlice,
-  useDispatch,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
+import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {
   cloneAllPokemon,
   clonePlayer,
@@ -31,7 +35,7 @@ import {
 } from '@showdex/utils/calc';
 import { nonEmptyObject, similarArrays, tolerance } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-// import { toggleableAbility } from '@showdex/utils/dex';
+import { getDexForFormat, hasMegaForme } from '@showdex/utils/dex';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -164,8 +168,18 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         mutated.abilities = [...abilities];
 
         // checking payload.ability so as to not overwrite what's actually revealed in battle
-        if (!mutated.ability && !abilities.includes(mutated.dirtyAbility)) {
+        // note: checking `ability` first instead of the usual `dirtyAbility` here;
+        // specifically for Mega formes & serverSourced Pokemon, we'll need to update its ability when it Mega evo's
+        if (!abilities.includes(mutated.ability || mutated.dirtyAbility)) {
           [mutated.dirtyAbility] = abilities;
+        }
+
+        const clearInvalidDirtyAbility = !!mutated.dirtyAbility
+          && abilities.includes(mutated.ability)
+          && !abilities.includes(mutated.dirtyAbility);
+
+        if (clearInvalidDirtyAbility) {
+          mutated.dirtyAbility = null;
         }
       }
 
@@ -223,11 +237,18 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
       // (which should only be in the Pokemon's unique `presets[]`, not in RTK Query or something lol)
       if (!mutated.serverSourced && mutated.presetId) {
+        const dex = getDexForFormat(state.format);
+        const baseForme = dex.species.get(mutated.speciesForme)?.baseSpecies;
         const preset = mutated.presets?.find((p) => p?.calcdexId === mutated.presetId);
 
-        if (!preset?.source || !['server', 'sheet'].includes(preset.source)) {
+        const shouldClearPreset = (!preset?.source || !['server', 'sheet'].includes(preset.source))
+          && !PokemonPresetFuckedBaseFormes.includes(baseForme)
+          && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme)
+          && !hasMegaForme(prevPokemon.speciesForme)
+          && !hasMegaForme(pokemon.speciesForme);
+
+        if (shouldClearPreset) {
           mutated.presetId = null;
-          mutated.autoPreset = true;
         }
       }
     }
@@ -274,9 +295,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     // note: teraType is technically "dirtyTeraType" & revealedTeraType "teraType" (once I refactor this lmao)
+    // update (2023/11/14): but cause I'm a genius, none of the logic falls back to revealedTeraType, so setting it to
+    // null actually produces some funky behavior LOL (but whenever you refactor this, definitely use this bit)
+    /*
     if (mutating('teraType') && mutated.revealedTeraType === mutated.teraType) {
       mutated.teraType = null;
     }
+    */
 
     if (mutating('dirtyAbility') && mutated.ability === mutated.dirtyAbility) {
       mutated.dirtyAbility = null;
@@ -402,33 +427,42 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // recalculate the stats with the updated base stats/EVs/IVs
     mutated.spreadStats = calcPokemonSpreadStats(state.format, mutated);
 
-    // we can only reset dirtyBoosts if there are reported boosts from the current battle, obviously!
-    if (mutating('dirtyBoosts') && nonEmptyObject(mutated.boosts)) {
-      Object.entries(mutated.dirtyBoosts).forEach(([
-        stat,
-        dirtyBoost,
-      ]: [
-        stat: Showdown.StatNameNoHp,
-        dirtyBoost: number,
-      ]) => {
-        const boost = mutated.boosts?.[stat] || 0;
+    if (mutating('dirtyBoosts')) {
+      mutated.dirtyBoosts = {
+        ...prevPokemon.dirtyBoosts,
+        ...pokemon.dirtyBoosts,
+      };
 
-        if (dirtyBoost === boost) {
-          mutated.dirtyBoosts[stat] = null;
-        }
-      });
+      // we can only reset dirtyBoosts if there are reported boosts from the current battle, obviously!
+      if (nonEmptyObject(mutated.boosts)) {
+        Object.entries(mutated.dirtyBoosts).forEach(([
+          stat,
+          dirtyBoost,
+        ]: [
+          stat: Showdown.StatNameNoHp,
+          dirtyBoost: number,
+        ]) => {
+          const boost = mutated.boosts?.[stat] || 0;
+
+          if (dirtyBoost === boost) {
+            mutated.dirtyBoosts[stat] = null;
+          }
+        });
+      }
     }
 
     player.pokemon[pokemonIndex] = mutated;
 
     // smart toggle Ruin abilities (gen 9), but only when abilityToggled was not explicitly updated
-    if (state.gen > 8 && !mutating('abilityToggled')) {
+    if (state.gen > 8 && mutating('abilityToggled')) {
+      /*
       toggleRuinAbilities(
         player,
         state.gameType,
         false,
         pokemonIndex,
       );
+      */
 
       player.side = {
         ...player.side,
@@ -664,7 +698,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     // smart toggle Ruin abilities (gen 9)
     // (note: toggleRuinAbilities() will directly mutate each CalcdexPokemon in the player's pokemon[])
-    if (state.gen > 8) {
+    if (state.gameType === 'Singles' && state.gen > 8) {
       toggleRuinAbilities(
         player,
         state.gameType,
@@ -714,6 +748,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const opponentPokemon = opponent?.pokemon?.[opponentSelectionIndex];
 
       playerSource.pokemon.forEach((pokemon, i) => {
+        // update (2023/11/13): though detectToggledAbility() handles Ruin abilities, we don't want that here!
+        const ability = pokemon.dirtyAbility || pokemon.ability;
+
+        if (PokemonRuinAbilities.includes(ability)) {
+          return;
+        }
+
         const toggled = detectToggledAbility(pokemon, {
           gameType: state.gameType,
           opponentPokemon,

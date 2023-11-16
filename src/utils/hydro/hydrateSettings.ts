@@ -1,8 +1,5 @@
-import {
-  type CalcdexPlayerKey,
-  type ShowdexSettings,
-  type ShowdexCalcdexSettings,
-} from '@showdex/redux/store';
+import { type ShowdexSettings, type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { getColorScheme } from '@showdex/utils/app';
 import { reverseObjectKv } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -112,11 +109,8 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       openOnStart: 'always',
       openAs: 'showdown',
       openOnPanel: 'showdown',
-      // forcedOpenAs: 'showdown',
-      // closeOnEnd: false,
       closeOn: 'battle-tab',
       destroyOnClose: true,
-      // preserveRenderStates: true,
 
       defaultAutoSelect: {
         auth: true,
@@ -129,10 +123,9 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       showPlayerRatings: true,
       authPosition: 'top',
       showNicknames: false,
-      // reverseIconName: false,
       openSmogonPage: true,
-      // showAllFormes: true,
       showAllOptions: false,
+      showSpreadsFirst: false,
       showNonDamageRanges: true,
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,

@@ -1,6 +1,6 @@
 import { HttpMethod } from '@showdex/consts/core';
-import { type PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
@@ -68,6 +68,10 @@ const FormatReplacements: [test: RegExp, replace: RegExp, replacement: string][]
   // does anybody play this ??? o_O
   // e.g., 'gen9multirandombattle' -> 'gen9randomdoublesbattle'
   [/multirandom/i, null, 'randomdoubles'],
+
+  // Randomized Format Spotlight as of 2023/11/14, requested by Pulse_kS
+  // e.g., 'gen9partnersincrimerandombattle' -> 'gen9randomdoublesbattle'
+  [/partnersincrimerandom/i, null, 'randomdoubles'],
 ];
 
 // 10/10 function name
@@ -102,14 +106,14 @@ export const buildPresetQuery = <TResponse>(
   source: CalcdexPokemonPresetSource,
   path: string,
   transformer: (
-    args: PkmnSmogonPresetRequest,
+    args: PkmnApiSmogonPresetRequest,
   ) => (
     data: TResponse,
     meta: unknown,
-    args: PkmnSmogonPresetRequest,
+    args: PkmnApiSmogonPresetRequest,
   ) => CalcdexPokemonPreset[],
 ): (
-  args: PkmnSmogonPresetRequest,
+  args: PkmnApiSmogonPresetRequest,
 ) => Promise<{
   data: CalcdexPokemonPreset[],
 }> => {

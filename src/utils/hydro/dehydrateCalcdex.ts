@@ -1,8 +1,9 @@
 import base64 from 'base-64';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { HydroDescriptor } from '@showdex/consts/hydro';
+import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 // import { env } from '@showdex/utils/core';
-import { type CalcdexBattleState, type CalcdexPlayerSide } from '@showdex/redux/store';
+import { type CalcdexBattleState } from '@showdex/redux/store';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
 import { dehydrateStatsTable } from './dehydrateStatsTable';

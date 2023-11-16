@@ -1,4 +1,4 @@
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';

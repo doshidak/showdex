@@ -4,7 +4,7 @@ import {
   type CalcdexPlayerKey,
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
 import { type CalcdexMatchupResult } from '@showdex/utils/calc';
 import { type CalcdexContextValue } from '../CalcdexContext';
 

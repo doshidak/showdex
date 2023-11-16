@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { appliedPreset, applyPreset as applyPokemonPreset, flattenAlts } from '@showdex/utils/presets';
 import { useCalcdexContext } from '../CalcdexContext';
@@ -114,13 +114,21 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
       })
       || usage;
 
+    const presetPayload = applyPokemonPreset(state.format, {
+      ...playerPokemon,
+      ...additionalMutations,
+    }, preset, presetUsage);
+
+    /**
+     * @todo update when more than 4 moves are supported
+     */
+    if (state.active && !playerPokemon.serverSourced && playerPokemon.revealedMoves.length === 4) {
+      delete presetPayload.moves;
+    }
+
     updatePokemon({
       ...additionalMutations,
-
-      ...applyPokemonPreset(state.format, {
-        ...playerPokemon,
-        ...additionalMutations,
-      }, preset, presetUsage),
+      ...presetPayload,
     }, scope);
 
     endTimer('(update called)');

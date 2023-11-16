@@ -1,13 +1,16 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
-import { AllPlayerKeys } from '@showdex/consts/battle';
-// import { PokemonNatures, PokemonTypes } from '@showdex/consts/dex';
 import {
-  type CalcdexBattleState,
-  type CalcdexPlayerKey,
-  type CalcdexPokemon,
-  type RootState,
-} from '@showdex/redux/store';
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+  type Terrain,
+  type Weather,
+} from '@smogon/calc';
+import { AllPlayerKeys } from '@showdex/consts/battle';
+import { PokemonBoosterAbilities } from '@showdex/consts/dex';
+import { type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleState, type RootState } from '@showdex/redux/store';
 import { getAuthUsername } from '@showdex/utils/app';
 import {
   cloneBattleState,
@@ -45,6 +48,7 @@ import {
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   // appliedPreset,
+  flattenAlts,
   getPresetFormes,
   getTeamSheetPresets,
   selectPokemonPresets,
@@ -258,14 +262,24 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     //   '\n', 'stepQueue', battle.stepQueue,
     // );
 
-    const p1 = battle.p1.name;
-    const p2 = battle.p2.name;
     if (sheetsNonce && battleState.sheetsNonce !== sheetsNonce) {
+      const playerNames = AllPlayerKeys.reduce((prev, key) => {
+        const { name: playerName } = battle[key] || {};
+
+        if (!playerName) {
+          return prev;
+        }
+
+        prev[key] = playerName;
+
+        return prev;
+      }, {} as Partial<Record<CalcdexPlayerKey, string>>);
+
       battleState.sheetsNonce = sheetsNonce;
       battleState.sheets = sheetStepQueues.flatMap((sheetStepQueue) => getTeamSheetPresets(
         battleState.format,
         sheetStepQueue,
-        { p1, p2 },
+        playerNames,
       ));
     }
 
@@ -714,28 +728,37 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           //   )
           // ));
 
+          // update: (2023/11/15): since the guessing is now done in useCalcdexPresets(), we can't include guessed
+          // matches from omitted Teambuilder presets (depending on the user's setting) as the guessing happens *after*
+          // the Teambuilder presets are added !! (in other words, oh well rip)
           const matchedPresets = [
-            ...(['always', 'teams'].includes(settings.includeTeambuilder) ? selectPokemonPresets(
+            ...(settings.includeTeambuilder !== 'boxes' ? selectPokemonPresets(
               teambuilderPresets,
               syncedPokemon,
               {
                 format: battleState.format,
                 source: 'storage',
-                ignoreSource: true,
+                // ignoreSource: true,
                 // include the matched Teambuilder team if includeTeambuilder is 'boxes'
-                filter: (p) => p.calcdexId === syncedPokemon.presetId,
+                // filter: (p) => (
+                //   settings.includeTeambuilder !== 'boxes'
+                //     || p.calcdexId === syncedPokemon.presetId
+                // ),
               },
             ) : []),
 
-            ...(['always', 'boxes'].includes(settings.includeTeambuilder) ? selectPokemonPresets(
+            ...(settings.includeTeambuilder !== 'teams' ? selectPokemonPresets(
               teambuilderPresets,
               syncedPokemon,
               {
                 format: battleState.format,
                 source: 'storage-box',
-                ignoreSource: true,
+                // ignoreSource: true,
                 // include the matched Teambuilder box if includeTeambuilder is 'teams'
-                filter: (p) => p.calcdexId === syncedPokemon.presetId,
+                // filter: (p) => (
+                //   settings.includeTeambuilder !== 'teams'
+                //     || p.calcdexId === syncedPokemon.presetId
+                // ),
               },
             ) : []),
           ];
@@ -1098,12 +1121,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             continue;
           }
 
+          // note: this won't do anything if the Pokemon has no spreads available
+          syncedPokemon.showPresetSpreads = settings?.showSpreadsFirst || false;
+
           // set the initial showGenetics value from the settings if this is serverSourced
           const geneticsKey = playerKey === battleState.authPlayerKey ? 'auth' : playerKey;
-
-          // update (2022/11/14): defaultShowGenetics has been deprecated in favor of lockGeneticsVisibility
-          // syncedPokemon.showGenetics = settings?.defaultShowGenetics?.[geneticsKey] ?? true;
-
           const showBaseStats = settings?.showBaseStats === 'always'
             || (settings?.showBaseStats === 'meta' && !legalLockedFormat(battleState.format));
 
@@ -1302,6 +1324,40 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           //   '\n', 'playerState.activeIndices', playerState.activeIndices,
           //   '\n', 'pendingPokemon', pendingPokemon,
           // );
+        }
+
+        // exhibit the big smart sync technology by utilizing the power of hardcoded game sense for Protosynthesis/Quark Drive,
+        // i.e., remove the Booster Energy **dirtyItem** & select the next item in altItems[] if the Pokemon doesn't have an
+        // active booster volatile (e.g., 'protosynthesisatk') & field conditions aren't met, which is to say they're probably
+        // not running Booster Energy on that Pokemon
+        // update (2023/11/14): moved this from syncPokemon() since this should only trigger for active Pokemon
+        if (gen > 8) {
+          const pendingPokemon = playerState.pokemon.filter((p) => (
+            p.active
+              && PokemonBoosterAbilities.includes(p.dirtyAbility || p.ability)
+              && p.dirtyItem === 'Booster Energy' as ItemName
+              && !Object.keys(p.volatiles).some((k) => k.startsWith(formatId(p.dirtyAbility || p.ability)))
+              && (
+                (p.dirtyAbility || p.ability) !== 'Protosynthesis' as AbilityName
+                  || syncedField.weather !== 'Sun' as Weather
+              )
+              && (
+                (p.dirtyAbility || p.ability) !== 'Quark Drive' as AbilityName
+                  || syncedField.terrain !== 'Electric' as Terrain
+              )
+          ));
+
+          pendingPokemon.forEach((pokemon) => {
+            // altItems could be potentially sorted by usage stats from the Calcdex
+            pokemon.dirtyItem = (
+              !!pokemon.altItems?.length
+                && flattenAlts(pokemon.altItems)
+                  .find((item) => item !== 'Booster Energy' as ItemName)
+            ) || null;
+
+            // could've been previously toggled, so make sure the ability is toggled off
+            pokemon.abilityToggled = false;
+          });
         }
 
         if (playerState.autoSelect) {

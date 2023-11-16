@@ -1,6 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonPresetFuckedBaseFormes, PokemonPresetFuckedBattleFormes } from '@showdex/consts/dex';
-import { type CalcdexPokemonPresetSource } from '@showdex/redux/store';
+import { type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat, hasMegaForme } from '@showdex/utils/dex';
 

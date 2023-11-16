@@ -1,16 +1,13 @@
 import * as React from 'react';
 // import LzString from 'lz-string';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import {
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
   usePokemonRandomsStatsQuery,
 } from '@showdex/redux/services';
-import {
-  type CalcdexPokemon,
-  type CalcdexPokemonPreset,
-  useCalcdexSettings,
-} from '@showdex/redux/store';
+import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';

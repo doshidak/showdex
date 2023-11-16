@@ -1,10 +1,10 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
 // import { FormatLabels } from '@showdex/consts/dex';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
-import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { detectLegacyGen, getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import { getPresetFormes } from '@showdex/utils/presets';
+import { getPresetFormes, sortPresetsByFormat } from '@showdex/utils/presets';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -23,6 +23,7 @@ export const buildPresetOptions = (
   presets: CalcdexPokemonPreset[],
   usages?: CalcdexPokemonPreset[],
   pokemon?: CalcdexPokemon,
+  format?: string,
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
 
@@ -31,8 +32,13 @@ export const buildPresetOptions = (
   }
 
   const currentForme = pokemon?.transformedForme || pokemon?.speciesForme;
+  const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
 
-  presets.forEach((preset) => {
+  const presetsSource = format
+    ? [...presets].sort(sortPresetsByFormat(format))
+    : presets;
+
+  presetsSource.forEach((preset) => {
     const validPreset = !!preset?.calcdexId
       && !!preset.name
       && !!preset.format
@@ -71,7 +77,7 @@ export const buildPresetOptions = (
       }
     }
 
-    if (currentForme && preset.speciesForme !== currentForme) {
+    if (currentForme && hasDifferentFormes) {
       if (option.subLabel) {
         (option.subLabel as string) += ` ${bull} `;
       } else {
@@ -96,7 +102,7 @@ export const buildPresetOptions = (
       option.rightLabel = percentage(usage, 2);
     }
 
-    const { label } = parseBattleFormat(`gen${preset.gen}${preset.format}`);
+    const { label } = parseBattleFormat(getGenfulFormat(preset.gen, preset.format));
     const group = options.find((o) => o.label === label);
 
     if (!group) {

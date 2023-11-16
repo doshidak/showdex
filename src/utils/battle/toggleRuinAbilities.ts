@@ -1,6 +1,6 @@
 import { type GameType } from '@smogon/calc';
 import { PokemonRuinAbilities } from '@showdex/consts/dex';
-import { type CalcdexPlayer } from '@showdex/redux/store';
+import { type CalcdexPlayer } from '@showdex/interfaces/calc';
 // import { formatId } from '@showdex/utils/core';
 
 /**

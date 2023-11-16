@@ -1,4 +1,4 @@
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { detectLegacyGen } from '@showdex/utils/dex';
 
 /**
@@ -67,5 +67,5 @@ export const detectCompletePreset = (
   } = preset;
 
   return detectLegacyGen(gen)
-    || Object.values(evs).some((ev) => (ev || 0) > 0);
+    || Object.values(evs || {}).some((ev) => (ev || 0) > 0);
 };

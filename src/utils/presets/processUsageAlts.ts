@@ -1,5 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-import { type CalcdexPokemonUsageAlt } from '@showdex/redux/store';
+import { type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { sortUsageAlts } from './sortUsageAlts';

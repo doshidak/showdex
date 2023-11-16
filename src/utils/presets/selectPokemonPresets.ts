@@ -3,9 +3,13 @@ import {
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
   type CalcdexPokemonPresetSource,
-} from '@showdex/redux/store';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
+} from '@showdex/interfaces/calc';
+// import { logger } from '@showdex/utils/debug';
+import { detectGenFromFormat, getGenfulFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { getPresetFormes } from './getPresetFormes';
+import { sortPresetsByForme } from './sortPresetsByForme';
+
+// const l = logger('@showdex/utils/presets/selectPokemonPresets()');
 
 /**
  * Filters the provided `presets[]` for the given `pokemon`.
@@ -81,7 +85,7 @@ export const selectPokemonPresets = (
   }
 
   const gen = formatOnly
-    ? (typeof format === 'number' ? format : detectGenFromFormat(format))
+    ? detectGenFromFormat(format)
     : null;
 
   const genlessFormat = formatOnly && typeof format === 'string'
@@ -90,7 +94,8 @@ export const selectPokemonPresets = (
 
   const filtered = presets.filter((preset) => (
     (!source || ignoreSource || preset.source === source)
-      && (!genlessFormat || (preset.gen === gen && preset.format === genlessFormat))
+      // && (!genlessFormat || (preset.gen === gen && getGenlessFormat(preset.format) === genlessFormat))
+      && (!genlessFormat || (getGenfulFormat(gen, genlessFormat) === getGenfulFormat(preset.gen, preset.format)))
       && presetFormes.includes(preset.speciesForme)
       && (
         typeof additionalPredicate !== 'function'
@@ -98,19 +103,5 @@ export const selectPokemonPresets = (
       )
   ));
 
-  // if (!pokemon.transformedForme) {
-  //   return filtered;
-  // }
-
-  return filtered.sort((a, b) => {
-    if (a.speciesForme === currentForme) {
-      return -1;
-    }
-
-    if (b.speciesForme === currentForme) {
-      return 1;
-    }
-
-    return 0;
-  });
+  return filtered.sort(sortPresetsByForme(currentForme));
 };

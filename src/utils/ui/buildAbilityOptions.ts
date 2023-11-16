@@ -1,6 +1,6 @@
 import { type AbilityName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
@@ -121,6 +121,24 @@ export const buildAbilityOptions = (
     });
 
     filterAbilities.push(...flattenAlts(poolAbilities));
+  }
+
+  if (detectUsageAlt(usageAltSource?.[0])) {
+    const usageAbilities = (usageAltSource as CalcdexPokemonUsageAlt<AbilityName>[])
+      .filter((n) => !!n?.[0] && !filterAbilities.includes(n[0]));
+
+    if (usageAbilities.length) {
+      options.push({
+        label: 'Usage',
+        options: usageAbilities.map((alt) => ({
+          label: flattenAlt(alt),
+          rightLabel: percentage(alt[1], 2),
+          value: flattenAlt(alt),
+        })),
+      });
+
+      filterAbilities.push(...flattenAlts(usageAbilities));
+    }
   }
 
   if (abilities?.length) {

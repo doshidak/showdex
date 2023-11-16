@@ -5,7 +5,7 @@ import {
   type MoveName,
 } from '@smogon/calc';
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
-import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/redux/store';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
 import {

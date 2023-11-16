@@ -19,21 +19,27 @@ import {
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
 import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
-import { type CalcdexPlayerSide, useColorScheme } from '@showdex/redux/store';
+import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { openSmogonUniversity } from '@showdex/utils/app';
-// import { detectToggledAbility } from '@showdex/utils/battle';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
 import { capitalize } from '@showdex/utils/humanize';
+import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {
   detectUsageAlt,
   exportPokePaste,
   flattenAlts,
   importPokePaste,
 } from '@showdex/utils/presets';
-import { buildAbilityOptions, buildItemOptions, buildPresetOptions } from '@showdex/utils/ui';
+import {
+  buildAbilityOptions,
+  buildItemOptions,
+  buildPresetOptions,
+  buildSpreadOptions,
+} from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
 import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
@@ -128,10 +134,76 @@ export const PokeInfo = ({
     showAbilityToggle,
   ]);
 
-  const showResetAbility = !!pokemon?.dirtyAbility
-    && !pokemon.transformedForme
-    && !!pokemon.ability
-    && pokemon.ability !== pokemon.dirtyAbility;
+  const showResetAbility = React.useMemo(() => !!pokemon?.speciesForme && (
+    pokemon.dirtyAbility
+      && !pokemon.transformedForme
+      && !!pokemon.ability
+      && pokemon.ability !== pokemon.dirtyAbility
+  ), [
+    pokemon?.ability,
+    pokemon?.dirtyAbility,
+    pokemon?.speciesForme,
+    pokemon?.transformedForme,
+  ]);
+
+  const appliedPreset = React.useMemo(() => (
+    !!pokemon?.speciesForme
+      && presets.find((p) => p?.calcdexId === pokemon.presetId)
+  ) || null, [
+    pokemon?.presetId,
+    pokemon?.speciesForme,
+    presets,
+  ]);
+
+  const currentSpread = React.useMemo(() => (pokemon?.speciesForme ? dehydrateSpread({
+    nature: pokemon.nature,
+    ivs: { ...pokemon.ivs },
+    evs: { ...pokemon.evs },
+  }, {
+    format,
+  }) : null), [
+    format,
+    pokemon?.evs,
+    pokemon?.ivs,
+    pokemon?.nature,
+    pokemon?.speciesForme,
+  ]);
+
+  const natureOptions = React.useMemo(() => PokemonCommonNatures.map((name) => ({
+    label: name,
+    rightLabel: PokemonNatureBoosts[name]?.length ? [
+      !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
+      !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
+    ].filter(Boolean).join(' ') : 'Neutral',
+    value: name,
+  })), []);
+
+  const spreadOptions = React.useMemo(() => (pokemon?.speciesForme ? buildSpreadOptions(
+    appliedPreset,
+    {
+      format,
+      usage: format?.includes('random') ? null : usage,
+    },
+  ) : []), [
+    appliedPreset,
+    format,
+    pokemon?.speciesForme,
+    usage,
+  ]);
+
+  const showSpreadsToggle = React.useMemo(() => !!pokemon?.speciesForme && (
+    !!spreadOptions.length
+      && (spreadOptions.length > 1 || !currentSpread || spreadOptions[0].value !== currentSpread)
+  ), [
+    currentSpread,
+    pokemon?.speciesForme,
+    spreadOptions,
+  ]);
+
+  const showPresetSpreads = React.useMemo(
+    () => showSpreadsToggle && pokemon.showPresetSpreads,
+    [pokemon?.showPresetSpreads, showSpreadsToggle],
+  );
 
   const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
     format,
@@ -147,9 +219,15 @@ export const PokeInfo = ({
     usage,
   ]);
 
-  const showResetItem = !!pokemon?.dirtyItem
-    && (!!pokemon.item || !!pokemon.prevItem)
-    && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem);
+  const showResetItem = React.useMemo(() => (
+    !!pokemon?.dirtyItem
+      && (!!pokemon.item || !!pokemon.prevItem)
+      && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem)
+  ), [
+    pokemon?.dirtyItem,
+    pokemon?.item,
+    pokemon?.prevItem,
+  ]);
 
   const {
     active: formesVisible,
@@ -157,13 +235,21 @@ export const PokeInfo = ({
     notifyClose: closeFormesTooltip,
   } = useSandwich();
 
-  const toggleFormesTooltip = formesVisible ? closeFormesTooltip : openFormesTooltip;
+  const toggleFormesTooltip = React.useMemo(
+    () => (formesVisible ? closeFormesTooltip : openFormesTooltip),
+    [closeFormesTooltip, formesVisible, openFormesTooltip],
+  );
 
   const {
     active: statusVisible,
-    requestOpen: requestStatusOpen,
-    notifyClose: notifyStatusClose,
+    requestOpen: openStatusTooltip,
+    notifyClose: closeStatusTooltip,
   } = useSandwich();
+
+  const toggleStatusTooltip = React.useMemo(
+    () => (statusVisible ? closeStatusTooltip : openStatusTooltip),
+    [closeStatusTooltip, openStatusTooltip, statusVisible],
+  );
 
   const smogonPageTooltip = (
     <div className={styles.tooltipContent}>
@@ -179,22 +265,20 @@ export const PokeInfo = ({
     </div>
   );
 
-  const openSmogonPage = () => openSmogonUniversity(
-    gen,
-    'pokemon',
-    pokemon?.speciesForme,
-    format,
-  );
-
   const formeDisabled = !pokemon?.altFormes?.length;
-  const smogonDisabled = !settings?.openSmogonPage || !pokemon?.speciesForme;
 
-  const showNonVolatileStatus = !!pokemon?.speciesForme && (
+  const showNonVolatileStatus = React.useMemo(() => !!pokemon?.speciesForme && (
     settings?.forceNonVolatile
       || !!pokemon.dirtyStatus
       || !!pokemon.status
       || !pokemon.hp // 'fnt' pseudo-status
-  );
+  ), [
+    pokemon?.dirtyStatus,
+    pokemon?.hp,
+    pokemon?.speciesForme,
+    pokemon?.status,
+    settings?.forceNonVolatile,
+  ]);
 
   const currentStatus = showNonVolatileStatus
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
@@ -207,7 +291,9 @@ export const PokeInfo = ({
     presets,
     usages,
     pokemon,
+    format,
   ), [
+    format,
     pokemon,
     presets,
     usages,
@@ -324,8 +410,13 @@ export const PokeInfo = ({
             tooltipDelay={[1000, 50]}
             tooltipDisabled={!settings?.showUiTooltips}
             shadow
-            disabled={smogonDisabled}
-            onPress={openSmogonPage}
+            disabled={!pokemon?.speciesForme || !settings?.openSmogonPage}
+            onPress={() => openSmogonUniversity(
+              gen,
+              'pokemon',
+              pokemon?.speciesForme,
+              format,
+            )}
           />
         </div>
 
@@ -440,14 +531,14 @@ export const PokeInfo = ({
               visible={statusVisible}
               disabled={!pokemon?.speciesForme}
               onPokemonChange={(p) => updatePokemon(p, `${baseScope}:PokeStatusTooltip:onPokemonChange()`)}
-              onRequestClose={notifyStatusClose}
+              onRequestClose={closeStatusTooltip}
             >
               <BaseButton
                 className={styles.statusButton}
                 display="block"
                 aria-label={`Hit Points & Non-Volatile Status Condition for Pok${eacute}mon ${friendlyPokemonName}`}
                 hoverScale={1}
-                onPress={requestStatusOpen}
+                onPress={toggleStatusTooltip}
                 disabled={!pokemon?.speciesForme}
               >
                 {
@@ -672,30 +763,44 @@ export const PokeInfo = ({
                 styles.dropdownLabel,
               )}
             >
-              Nature
+              {showPresetSpreads ? 'Spread' : 'Nature'}
+
+              {
+                showSpreadsToggle &&
+                <ToggleButton
+                  className={styles.toggleButton}
+                  label={pokemon.showPresetSpreads ? 'Nature' : 'Spread'}
+                  tooltip={(
+                    <div className={styles.tooltipContent}>
+                      Switch to{' '}
+                      <strong>{pokemon.showPresetSpreads ? 'Natures' : 'Spreads'}</strong>
+                    </div>
+                  )}
+                  tooltipDisabled={!settings?.showUiTooltips}
+                  absoluteHover
+                  onPress={() => updatePokemon({
+                    showPresetSpreads: !pokemon.showPresetSpreads,
+                  }, `${baseScope}:ToggleButton~Spread:onPress()`)}
+                />
+              }
             </div>
 
             <Dropdown
-              aria-label={`Available Natures for Pok${eacute}mon ${friendlyPokemonName}`}
-              hint={legacy ? 'N/A' : '???'}
+              aria-label={`Available ${showPresetSpreads ? 'Spreads' : 'Natures'} for Pok${eacute}mon ${friendlyPokemonName}`}
+              hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               input={{
-                name: `PokeInfo:${pokemonKey}:Nature`,
-                value: legacy ? null : pokemon?.nature,
-                onChange: (name: Showdown.PokemonNature) => updatePokemon({
-                  nature: name,
-                }, `${baseScope}:Dropdown~Nature:input.onChange()`),
+                name: `PokeInfo:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
+                value: showPresetSpreads ? currentSpread : pokemon?.nature,
+                onChange: (name: string) => updatePokemon(
+                  showPresetSpreads
+                    ? hydrateSpread(name, { format })
+                    : { nature: name as Showdown.NatureName },
+                  `${baseScope}:Dropdown~${showPresetSpreads ? 'Spread' : 'Nature'}:input.onChange()`,
+                ),
               }}
-              options={PokemonCommonNatures.map((name) => ({
-                label: name,
-                rightLabel: PokemonNatureBoosts[name]?.length ? [
-                  !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
-                  !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
-                ].filter(Boolean).join(' ') : 'Neutral',
-                value: name,
-              }))}
-              noOptionsMessage="No Natures"
+              options={showPresetSpreads ? spreadOptions : natureOptions}
+              noOptionsMessage={`No ${showPresetSpreads ? 'Spreads' : 'Natures'}`}
               clearable={false}
-              // hideSelections
               disabled={legacy || !pokemon?.speciesForme}
             />
           </div>

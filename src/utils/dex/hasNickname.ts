@@ -1,4 +1,4 @@
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { getDexForFormat } from './getDexForFormat';
 
 /**

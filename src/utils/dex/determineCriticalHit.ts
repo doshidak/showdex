@@ -1,5 +1,5 @@
 import { type GenerationNum, type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { alwaysCriticalHits } from './alwaysCriticalHits';
 import { getMaxMove } from './getMaxMove';
 import { getZMove } from './getZMove';

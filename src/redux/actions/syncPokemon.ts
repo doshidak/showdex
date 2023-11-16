@@ -7,12 +7,8 @@ import {
   type Terrain,
   type Weather,
 } from '@smogon/calc';
-import {
-  PokemonBoosterAbilities,
-  PokemonBoostNames,
-  PokemonTypes,
-} from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { PokemonBoostNames, PokemonTypes } from '@showdex/consts/dex';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import {
   clonePokemon,
   mergeRevealedMoves,
@@ -33,10 +29,10 @@ import {
   detectGenFromFormat,
   detectLegacyGen,
   getDexForFormat,
+  hasMegaForme,
   // toggleableAbility,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
-import { flattenAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/actions/syncPokemon()');
 
@@ -57,8 +53,6 @@ export const syncPokemon = (
     // gameType,
     clientPokemon,
     serverPokemon,
-    weather,
-    terrain,
     autoMoves,
   } = config || {};
 
@@ -113,20 +107,42 @@ export const syncPokemon = (
           return;
         }
 
+        if (prevValue === value) {
+          return;
+        }
+
         // if the speciesForme changed, update the types and possible abilities
         // (could change due to mega-evolutions or gigantamaxing, for instance)
-        if (prevValue !== value && dex) {
-          const updatedSpecies = dex.species.get(value);
+        const updatedSpecies = dex.species.get(value);
 
-          syncedPokemon.types = [
-            ...(updatedSpecies?.types || syncedPokemon.types || []),
+        syncedPokemon.types = [
+          ...(updatedSpecies?.types || syncedPokemon.types || []),
+        ];
+
+        if (nonEmptyObject(updatedSpecies?.abilities)) {
+          syncedPokemon.abilities = [
+            ...(Object.values(updatedSpecies.abilities) as AbilityName[]),
           ];
 
-          if (nonEmptyObject(updatedSpecies?.abilities)) {
-            syncedPokemon.abilities = [
-              ...(Object.values(updatedSpecies.abilities) as AbilityName[]),
-            ];
+          // note: checking `ability` first instead of the usual `dirtyAbility` here
+          if (!syncedPokemon.abilities.includes(syncedPokemon.ability || syncedPokemon.dirtyAbility)) {
+            [syncedPokemon.dirtyAbility] = syncedPokemon.abilities;
           }
+
+          const clearInvalidDirtyAbility = !!syncedPokemon.dirtyAbility
+            && syncedPokemon.abilities.includes(syncedPokemon.ability)
+            && !syncedPokemon.abilities.includes(syncedPokemon.dirtyAbility);
+
+          if (clearInvalidDirtyAbility) {
+            syncedPokemon.dirtyAbility = null;
+          }
+        }
+
+        const shouldClearPreset = (!syncedPokemon.serverSourced && !serverPokemon?.speciesForme)
+          && (!hasMegaForme(syncedPokemon.speciesForme) || hasMegaForme(value));
+
+        if (shouldClearPreset) {
+          syncedPokemon.presetId = null;
         }
 
         break;
@@ -368,7 +384,6 @@ export const syncPokemon = (
 
         if (shouldResetPreset) {
           syncedPokemon.presetId = null;
-          syncedPokemon.autoPreset = true;
         }
 
         syncedPokemon.transformedForme = transformedForme || null;
@@ -622,36 +637,6 @@ export const syncPokemon = (
     syncedPokemon.moves = syncedPokemon.serverSourced
       ? [...syncedPokemon.transformedMoves]
       : mergeRevealedMoves(syncedPokemon);
-  }
-
-  // exhibit the big smart sync technology by utilizing the power of hardcoded game sense for Protosynthesis/Quark Drive,
-  // i.e., remove the Booster Energy **dirtyItem** & select the next item in altItems[] if the Pokemon doesn't have an
-  // active booster volatile (e.g., 'protosynthesisatk') & field conditions aren't met, which is to say they're probably
-  // not running Booster Energy on that Pokemon
-  const removeDirtyBooster = gen > 8
-    && PokemonBoosterAbilities.includes(syncedPokemon.dirtyAbility || syncedPokemon.ability)
-    && syncedPokemon.dirtyItem === 'Booster Energy' as ItemName
-    && !Object.keys(syncedPokemon.volatiles)
-      .some((k) => k.startsWith(formatId(syncedPokemon.dirtyAbility || syncedPokemon.ability)))
-    && (
-      (syncedPokemon.dirtyAbility || syncedPokemon.ability) !== 'Protosynthesis' as AbilityName
-        || !(['Sun', 'Harsh Sunshine'] as Weather[]).includes(weather)
-    )
-    && (
-      (syncedPokemon.dirtyAbility || syncedPokemon.ability) !== 'Quark Drive' as AbilityName
-        || terrain !== 'Electric' as Terrain
-    );
-
-  if (removeDirtyBooster) {
-    // altItems could be potentially sorted by usage stats from the Calcdex
-    syncedPokemon.dirtyItem = (
-      !!syncedPokemon.altItems?.length
-      && flattenAlts(syncedPokemon.altItems)
-        .find((item) => item !== 'Booster Energy' as ItemName)
-    ) || null;
-
-    // could've been previously toggled, so make sure the ability is toggled off
-    syncedPokemon.abilityToggled = false;
   }
 
   // recalculate the spread stats

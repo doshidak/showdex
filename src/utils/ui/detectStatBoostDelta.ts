@@ -1,4 +1,4 @@
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 
 export type PokemonStatBoostDelta =

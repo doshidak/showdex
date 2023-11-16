@@ -98,6 +98,8 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
     ['joshtheking7', true, '2023-05-17T22:21:31Z'],
     ['Michael L', false, '2022-11-09T05:17:33Z'],
     ['Bongphan', true, '2023-04-17T23:56:43Z'],
+    ['Pulse_kS', true, '2023-10-23T18:54:34Z'],
+    ['Thilo P', false, '2023-10-30T11:01:05Z'],
     ['GenOne', true, '2023-03-18T20:56:43Z'],
     ['Lunarvania', true, '2022-12-30T19:24:14Z'],
     ['Leman T', false, '2022-12-01T20:08:37Z'],
@@ -126,10 +128,10 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
   title: 'Supreme Overlords',
   term: 'monthly',
   names: [
-    ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', null],
+    ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', '2023-11-12T23:25:18Z'],
     ['goddess mina', true, '2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z'],
-    ['GabrielPBC', true, '2023-08-11T10:33:15Z', null],
     ['Zzodz', true, '2023-05-13T00:02:51Z', '2023-06-13T00:02:51Z'],
+    ['Ah Ok Got It', true, '2023-10-28T16:57:56Z', null],
   ],
 }, {
   id: 'patreon-tier-02',
@@ -143,10 +145,13 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
   title: 'Blazikens',
   term: 'monthly',
   names: [
+    ['GabrielPBC', true, '2023-08-11T10:33:15Z', null],
     ['BruhMomentMaker', true, '2023-04-10T13:35:32Z', null],
     ['Christopher Y', false, '2023-07-02T21:05:52Z', null],
+    ['PokePastry', true, '2023-08-04T03:41:08Z', null],
     ['TheNexyr', true, '2023-07-21T01:24:21Z', null],
     ['Michael K', false, '2023-09-05T09:02:03Z', null],
+    ['Kristen G', false, '2023-10-29T10:46:04Z', null],
   ],
 }];
 

@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { type CalcdexBattleState, type ShowdexCalcdexSettings } from '@showdex/redux/store';
+import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
+import { type CalcdexBattleState } from '@showdex/redux/store';
 import { type CalcdexBattlePresetsHookValue } from '@showdex/utils/presets';
 
 /**

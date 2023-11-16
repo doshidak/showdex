@@ -1,6 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonCommonNatures, PokemonStatNames } from '@showdex/consts/dex';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/redux/store';
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';

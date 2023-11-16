@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { type Duration } from 'date-fns';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import {
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
   usePokemonRandomsStatsQuery,
 } from '@showdex/redux/services';
-import { type CalcdexPokemonPreset, useCalcdexSettings } from '@showdex/redux/store';
+import { useCalcdexSettings } from '@showdex/redux/store';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { sortPresetsByFormat } from './sortPresetsByFormat';
 

@@ -1,12 +1,13 @@
 import { type MoveName } from '@smogon/calc';
-import { PokemonNatures } from '@showdex/consts/dex';
-import { type PkmnSmogonFormatStatsResponse, type PkmnSmogonPresetRequest } from '@showdex/redux/services';
-import { type CalcdexPokemonPreset } from '@showdex/redux/store';
+// import { PokemonNatures } from '@showdex/consts/dex';
+import { type PkmnApiSmogonFormatStatsResponse } from '@showdex/interfaces/api';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { getGenlessFormat } from '@showdex/utils/dex';
-import { processUsageAlts } from '@showdex/utils/presets';
+import { getGenfulFormat, getGenlessFormat } from '@showdex/utils/dex';
+import { parseUsageSpread, processUsageAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/transformers/transformFormatStatsResponse()');
 
@@ -19,9 +20,9 @@ import { processUsageAlts } from '@showdex/utils/presets';
  * @since 1.0.3
  */
 export const transformFormatStatsResponse = (
-  response: PkmnSmogonFormatStatsResponse,
+  response: PkmnApiSmogonFormatStatsResponse,
   _meta: unknown,
-  args: PkmnSmogonPresetRequest,
+  args: PkmnApiSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   const { pokemon: pokemonStats } = response || {};
 
@@ -83,21 +84,6 @@ export const transformFormatStatsResponse = (
         }
       }
 
-      // For some reason ivydudgel doesn't get transformed into Ivy Cudgel.
-      // Let's just manually do it here.
-      // I hate Ogerpon just a little bit for this...
-      // update (2023/10/07): actually, not just Ivy Cudgel from the Usage Stats API that are unformatted LOL
-      // fixed this directly upstream in processUsageAlts() to format everything just in case
-      /*
-      if (['ogerponwellspring', 'ogerponhearthflame', 'ogerpon', 'ogerponcornerstone', 'ogerponwellspringtera', 'ogerponhearthflametera', 'ogerpontera', 'ogerponcornerstonetera'].includes(formatId(speciesForme))) {
-        const targetMove = 'Ivy Cudgel' as MoveName;
-        const ivycudgelIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ivycudgel');
-        if (ivycudgelIndex > -1) {
-          altMoves[ivycudgelIndex][0] = targetMove;
-        }
-      }
-      */
-
       preset.altMoves = altMoves;
 
       /**
@@ -106,6 +92,7 @@ export const transformFormatStatsResponse = (
       preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
     }
 
+    /*
     const [topSpread] = processUsageAlts(spreads);
     const [nature, evSpread] = (topSpread?.[0]?.split(':') || []) as [Showdown.NatureName, string];
     const [hpEv, atkEv, defEv, spaEv, spdEv, speEv] = evSpread?.split('/') || [];
@@ -124,6 +111,21 @@ export const transformFormatStatsResponse = (
         spe: parseInt(speEv, 10) || 0,
       };
     }
+    */
+
+    const usageSpreads = processUsageAlts(spreads);
+
+    // note: only up to top 10 (could have more than 200!!)
+    preset.spreads = usageSpreads
+      .slice(0, 10)
+      .map((spread) => ({
+        ...parseUsageSpread(spread[0], getGenfulFormat(args.gen, args.format)),
+        usage: spread[1],
+      }));
+
+    // note: `ivs` don't exist here!
+    preset.nature = preset.spreads[0]?.nature;
+    preset.evs = { ...preset.spreads[1]?.evs };
 
     preset.calcdexId = calcPresetCalcdexId(preset);
     preset.id = preset.calcdexId;

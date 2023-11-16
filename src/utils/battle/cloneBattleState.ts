@@ -2,12 +2,12 @@ import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   type CalcdexBattleField,
   type CalcdexBattleRules,
-  type CalcdexBattleState,
   type CalcdexPlayer,
   type CalcdexPlayerSide,
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
+import { type CalcdexBattleState } from '@showdex/redux/store';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectUsageAlt } from '@showdex/utils/presets/detectUsageAlt'; /** @todo reorganize me */
 import { clonePlayerSideConditions } from './clonePlayerSideConditions';

@@ -12,7 +12,8 @@ import {
   TerrainNames,
   WeatherDescriptions,
 } from '@showdex/consts/dex';
-import { type CalcdexBattleField, type CalcdexPlayerKey, useColorScheme } from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';

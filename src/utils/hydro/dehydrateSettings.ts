@@ -1,11 +1,11 @@
 import { HydroDescriptor } from '@showdex/consts/hydro';
 import {
-  type CalcdexPlayerKey,
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,
   type ShowdexShowdownSettings,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/app';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 // import { env } from '@showdex/utils/core';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
@@ -45,19 +45,15 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   openOnStart: 'oos',
   openAs: 'oas',
   openOnPanel: 'oop',
-  // forcedOpenAs: 'foa',
-  // closeOnEnd: 'coe',
   closeOn: 'con',
   destroyOnClose: 'doc',
-  // preserveRenderStates: 'prs',
   defaultAutoSelect: 'das',
   showPlayerRatings: 'spr',
   authPosition: 'aps',
   showNicknames: 'snn',
-  // reverseIconName: 'rin',
   openSmogonPage: 'osp',
-  // showAllFormes: 'saf',
   showAllOptions: 'sao',
+  showSpreadsFirst: 'ssf',
   showNonDamageRanges: 'snd',
   downloadSmogonPresets: 'dsp',
   downloadRandomsPresets: 'drp',
@@ -68,7 +64,6 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   autoImportTeamSheets: 'ats',
   autoExportOpponent: 'aeo',
   defaultAutoMoves: 'dam',
-  // defaultShowGenetics: 'dsg',
   forceNonVolatile: 'fnv', // thought about alwaysShowStatus, but ya... LOL
   editPokemonTypes: 'ept',
   lockUsedTera: 'lut',

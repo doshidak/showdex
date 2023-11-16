@@ -1,6 +1,6 @@
 import { type MoveName } from '@smogon/calc';
 import { PokemonPivotMoves } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 

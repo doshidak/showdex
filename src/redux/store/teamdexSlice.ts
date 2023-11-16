@@ -5,8 +5,8 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
+import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { logger } from '@showdex/utils/debug';
-import { type CalcdexPokemonPreset } from './calcdexSlice';
 import { useSelector } from './hooks';
 
 /**

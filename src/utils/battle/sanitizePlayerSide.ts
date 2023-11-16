@@ -1,5 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/redux/store';
+import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { countSideRuinAbilities } from './countSideRuinAbilities';

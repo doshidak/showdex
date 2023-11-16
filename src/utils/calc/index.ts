@@ -20,6 +20,7 @@ export * from './getMoveOverrideDefaults';
 export * from './guessServerLegacySpread';
 export * from './guessServerSpread';
 export * from './hasMoveOverrides';
+export * from './populateStatsTable';
 export * from './parseMatchupDescription';
 export * from './shouldBoostTeraStab';
 export * from './statModRecorder';

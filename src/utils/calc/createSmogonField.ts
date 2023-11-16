@@ -1,5 +1,5 @@
 import { type GameType, Field as SmogonField, State as SmogonState } from '@smogon/calc';
-import { type CalcdexBattleField, type CalcdexPlayer } from '@showdex/redux/store';
+import { type CalcdexBattleField, type CalcdexPlayer } from '@showdex/interfaces/calc';
 import { clonePlayerSide, countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat } from '@showdex/utils/dex';

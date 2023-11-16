@@ -9,12 +9,15 @@ import {
   type CalcdexPokemonAlt,
   type CalcdexPokemonPreset,
   type CalcdexPokemonPresetSource,
-} from '@showdex/redux/store';
+} from '@showdex/interfaces/calc';
+// import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
 import { hydrateHeader } from './hydrateHeader';
 import { hydrateNumber, hydrateValue } from './hydratePrimitives';
-import { hydrateStatsTable } from './hydrateStatsTable';
+import { hydrateSpread } from './hydrateSpread';
+
+// const l = logger('@showdex/utils/hydro/hydratePresets()');
 
 /**
  * Hydrates a string `value` into a `CalcdexPokemonAlt<T>`.
@@ -177,6 +180,22 @@ export const hydratePreset = (
         break;
       }
 
+      case 'spreads': {
+        output[key] = partValue.split(arrayDelimiter)
+          .map((currentValue) => hydrateSpread(currentValue, {
+            format: output.gen,
+            delimiter: '|',
+            altDelimiter,
+          }));
+
+        output.nature = output[key][0]?.nature;
+        output.ivs = { ...output[key][0]?.ivs };
+        output.evs = { ...output[key][0]?.evs };
+
+        break;
+      }
+
+      /*
       case 'ivs':
       case 'evs': {
         // e.g., partValue = '84/0/84/84/84/84'
@@ -187,6 +206,7 @@ export const hydratePreset = (
 
         break;
       }
+      */
 
       default: {
         output[key] = hydrateValue(partValue);

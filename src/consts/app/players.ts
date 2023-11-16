@@ -188,7 +188,8 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     'mrmimikry',
     'pastgenoufan',
     'plaguevonkarma',
-    'pokepastry',
+    // 'pokepastry', // commented to apply T.1 Patron title
+    'pulseks',
     'weavileisasin',
   ],
 }, {
@@ -205,8 +206,9 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     ['bruhmomentmaker', 'First Blaziken Patron'],
-    'thenexyr',
     'nexyralt',
+    'pokepastry',
+    'thenexyr',
   ],
 }, {
   title: 'Pop Bomb Patron',
@@ -275,7 +277,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   ],
 }, {
   title: 'Carried by Showdex',
-  supporterId: 'patreon-tier-03',
+  supporterId: 'patreon-tier-01',
   custom: true,
   icon: 'team-lift',
   iconDescription: 'Stick Figures Carrying Box Icon',
@@ -288,5 +290,21 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   userIds: [
     'gabrielpbc',
     'pbc88',
+  ],
+}, {
+  title: 'Supreme Overlord Patron', /** @todo when `title` is received by patron */
+  supporterId: 'patreon-tier-03',
+  custom: true,
+  icon: '9k-plus',
+  iconDescription: '9K Plus Icon',
+
+  color: { // requested: '#00D8FF'
+    light: '#0090AA',
+    dark: '#00D8FF',
+  },
+
+  userIds: [
+    'ahokgotit',
+    'nashketchumai',
   ],
 }];

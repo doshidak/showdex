@@ -1,4 +1,4 @@
-import { type CalcdexPlayerSide } from '@showdex/redux/store';
+import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 
 /**
  * Toggle button mappings of player-sided screens.

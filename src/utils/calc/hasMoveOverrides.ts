@@ -1,5 +1,5 @@
 import { type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/redux/store';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
 
