@@ -168,7 +168,7 @@ export interface ShowdexCalcdexSettings {
    * * Has no effect if there aren't any spreads available for the given Pokemon.
    *   - In this case, only the natures dropdown will be shown without the toggle visible.
    *
-   * @default true
+   * @default false
    * @since 1.1.8
    */
   showSpreadsFirst: boolean;

@@ -125,7 +125,7 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
       showNicknames: false,
       openSmogonPage: true,
       showAllOptions: false,
-      showSpreadsFirst: true,
+      showSpreadsFirst: false,
       showNonDamageRanges: true,
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,
