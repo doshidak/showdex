@@ -128,7 +128,7 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
   title: 'Supreme Overlords',
   term: 'monthly',
   names: [
-    ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', null],
+    ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', '2023-11-12T23:25:18Z'],
     ['goddess mina', true, '2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z'],
     ['Zzodz', true, '2023-05-13T00:02:51Z', '2023-06-13T00:02:51Z'],
     ['Ah Ok Got It', true, '2023-10-28T16:57:56Z', null],
