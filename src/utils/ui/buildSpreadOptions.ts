@@ -1,6 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { bull } from '@showdex/consts/core';
-import { PokemonNatureBoosts } from '@showdex/consts/dex';
+import { PokemonNatureBoosts, PokemonNatures } from '@showdex/consts/dex';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
 import { percentage } from '@showdex/utils/humanize';
@@ -26,6 +26,8 @@ const spreadLabel = (
   omitIvs: true,
 });
 
+const subLabelDelimiter = ` ${bull} `;
+
 const processOption = (
   prev: DropdownOption<string>[],
   spread: CalcdexPokemonPresetSpread,
@@ -35,7 +37,14 @@ const processOption = (
   const existingOption = prev.find((o) => o.value === value);
 
   if (existingOption && spread.usage) {
-    existingOption.rightLabel = percentage(spread.usage, 2);
+    const subLabelParts = [...((existingOption.subLabel as string).split?.(subLabelDelimiter) || [])];
+    const usageLabel = percentage(spread.usage, 2);
+
+    if (!subLabelParts.includes(usageLabel)) {
+      subLabelParts.push(usageLabel);
+    }
+
+    existingOption.subLabel = subLabelParts.join(subLabelDelimiter);
 
     return;
   }
@@ -45,16 +54,25 @@ const processOption = (
     value,
   };
 
-  const boosts = PokemonNatureBoosts[spread.nature];
+  const subLabelParts: string[] = [];
 
-  option.subLabel = boosts.length === 2
-    ? `${spread.nature} +${boosts[0].toUpperCase()} -${boosts[1].toUpperCase()}`
-    : spread.nature;
+  if (PokemonNatures.includes(spread.nature)) {
+    const boosts = PokemonNatureBoosts[spread.nature];
+
+    subLabelParts.push((
+      boosts?.length === 2
+        ? `${spread.nature} +${boosts[0].toUpperCase()} -${boosts[1].toUpperCase()}`
+        : spread.nature
+    ));
+  }
 
   if (spread.usage) {
     // update (2023/11/15): might not be enough room tbh LOL
-    // option.rightLabel = percentage(spread.usage, 2);
-    option.subLabel = `${option.subLabel as string} ${bull} ${percentage(spread.usage, 2)}`;
+    subLabelParts.push(percentage(spread.usage, 2));
+  }
+
+  if (subLabelParts.length) {
+    option.subLabel = subLabelParts.join(subLabelDelimiter);
   }
 
   return option;
@@ -117,15 +135,15 @@ export const buildSpreadOptions = (
   usageSpreads.forEach((spread) => {
     const value = spreadValue(spread, format);
     const presetOption = presetOptions.find((o) => o.value === value);
+    const processedOption = processOption(usageOptions, spread, format);
 
-    if (presetOption) {
-      // presetOption.rightLabel = percentage(spread.usage, 2);
-      presetOption.subLabel = `${presetOption.subLabel as string} ${bull} ${percentage(spread.usage, 2)}`;
+    if (presetOption && processedOption.subLabel) {
+      presetOption.subLabel = processedOption.subLabel;
 
       return;
     }
 
-    usageOptions.push(processOption(usageOptions, spread, format));
+    usageOptions.push(processedOption);
   });
 
   options.push(...(
