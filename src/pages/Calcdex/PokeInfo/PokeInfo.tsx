@@ -790,7 +790,7 @@ export const PokeInfo = ({
               hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               input={{
                 name: `PokeInfo:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
-                value: showPresetSpreads ? currentSpread : pokemon?.nature,
+                value: legacy ? null : (showPresetSpreads ? currentSpread : pokemon?.nature),
                 onChange: (name: string) => updatePokemon(
                   showPresetSpreads
                     ? hydrateSpread(name, { format })
