@@ -276,14 +276,6 @@ export const applyPreset = (
     if (output.moves.length) {
       output[transformed ? 'transformedMoves' : 'revealedMoves'] = [...output.moves];
     }
-
-    // we probably have an OTS if not complete
-    if (!completePreset) {
-      output.moves = mergeRevealedMoves({
-        ...pokemon,
-        ...output,
-      });
-    }
   }
 
   if (currentForme !== output[formeKey]) {
@@ -309,6 +301,19 @@ export const applyPreset = (
       output.abilities = abilities;
       output.baseStats = baseStats;
     }
+  }
+
+  // we probably have an OTS (Open Team Sheet) if revealing & not complete
+  const shouldMergeMoves = (revealingPreset && !completePreset)
+    || (transformed && !!pokemon.transformedMoves?.length);
+
+  if (shouldMergeMoves) {
+    /**
+     * @todo update this when we support more than 4 moves
+     */
+    output.moves = transformed && pokemon.transformedMoves.length === 4
+      ? [...pokemon.transformedMoves] // preserves the order
+      : mergeRevealedMoves({ ...pokemon, ...output });
   }
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,
