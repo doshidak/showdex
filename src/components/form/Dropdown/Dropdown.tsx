@@ -111,7 +111,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   scrollMenuIntoView = true,
   captureMenuScroll = false, // do not remove false; Select's default is true
   minMenuHeight = 80,
-  maxMenuHeight = 240,
+  maxMenuHeight = 208,
   tabSelectsValue = true,
   hideSelections,
   autoFocus,
