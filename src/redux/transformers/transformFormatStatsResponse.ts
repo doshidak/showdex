@@ -125,7 +125,7 @@ export const transformFormatStatsResponse = (
 
     // note: `ivs` don't exist here!
     preset.nature = preset.spreads[0]?.nature;
-    preset.evs = { ...preset.spreads[1]?.evs };
+    preset.evs = { ...preset.spreads[0]?.evs };
 
     preset.calcdexId = calcPresetCalcdexId(preset);
     preset.id = preset.calcdexId;
