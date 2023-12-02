@@ -28,6 +28,9 @@ const spreadLabel = (
 
 const subLabelDelimiter = ` ${bull} `;
 
+// note: this is a poorly refactored function that will return a new option if the `spread` is unique, otherwise, it will
+// directly mutate `prev` & return nothing; this is so that I don't have to repeat the `existingOption` logic twice for
+// both the preset's `spreads` & usage stat's `spreads`
 const processOption = (
   prev: DropdownOption<string>[],
   spread: CalcdexPokemonPresetSpread,
@@ -46,7 +49,7 @@ const processOption = (
 
     existingOption.subLabel = subLabelParts.join(subLabelDelimiter);
 
-    return;
+    return null;
   }
 
   const option: DropdownOption<string> = {
@@ -129,13 +132,23 @@ export const buildSpreadOptions = (
   // note: not map()'ing these due to a circular reference in the first arg
   // (i.e., whatever that thingy was called when a system depends on its previous state lol)
   presetSpreads.forEach((spread) => {
-    presetOptions.push(processOption(presetOptions, spread, format));
+    const processedOption = processOption(presetOptions, spread, format);
+
+    if (!processedOption?.value) {
+      return;
+    }
+
+    presetOptions.push(processedOption);
   });
 
   usageSpreads.forEach((spread) => {
     const value = spreadValue(spread, format);
     const presetOption = presetOptions.find((o) => o.value === value);
     const processedOption = processOption(usageOptions, spread, format);
+
+    if (!processedOption?.value) {
+      return;
+    }
 
     if (presetOption && processedOption.subLabel) {
       presetOption.subLabel = processedOption.subLabel;
