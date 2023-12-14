@@ -20,8 +20,9 @@ export const shouldBoostTeraStab = (
 ): boolean => {
   const dex = getDexForFormat(format);
   const move = dex.moves.get(moveName);
+  const teraType = pokemon?.dirtyTeraType || pokemon?.teraType;
 
-  if (!move?.exists || !pokemon?.teraType) {
+  if (!move?.exists || !teraType) {
     return false;
   }
 
@@ -37,7 +38,7 @@ export const shouldBoostTeraStab = (
   const hasTechnician = abilityId === 'technician';
 
   return pokemon.terastallized
-    && move.type === pokemon.teraType
+    && move.type === teraType
     && basePower < 60
     && (!hasTechnician || Math.floor(basePower * 1.5) < 60)
     && !move.multihit

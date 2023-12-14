@@ -185,10 +185,13 @@ export const useCalcdexPresets = (
             preset.playerName = player.name;
             preset.name = 'Yours';
             preset.source = 'server';
-            preset.teraTypes = [pokemon.revealedTeraType].filter(Boolean);
             preset.ability = pokemon.ability;
             preset.item = pokemon.item;
             preset.moves = [...pokemon.serverMoves].filter(Boolean);
+
+            if (pokemon.teraType) {
+              preset.teraTypes = [pokemon.teraType];
+            }
           }
 
           // "old reliable"
@@ -211,7 +214,7 @@ export const useCalcdexPresets = (
                 speciesForme: pokemon.speciesForme,
                 level: pokemon.level,
                 gender: pokemon.gender,
-                teraTypes: [pokemon.revealedTeraType].filter(Boolean),
+                teraTypes: [pokemon.teraType].filter(Boolean),
                 ability: pokemon.ability,
                 item: pokemon.item,
                 moves: [...pokemon.serverMoves].filter(Boolean),

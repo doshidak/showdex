@@ -294,14 +294,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       mutated.dirtyTypes = [];
     }
 
-    // note: teraType is technically "dirtyTeraType" & revealedTeraType "teraType" (once I refactor this lmao)
-    // update (2023/11/14): but cause I'm a genius, none of the logic falls back to revealedTeraType, so setting it to
-    // null actually produces some funky behavior LOL (but whenever you refactor this, definitely use this bit)
-    /*
-    if (mutating('teraType') && mutated.revealedTeraType === mutated.teraType) {
-      mutated.teraType = null;
+    if (mutating('dirtyTeraType') && mutated.teraType === mutated.dirtyTeraType) {
+      mutated.dirtyTeraType = null;
     }
-    */
 
     if (mutating('dirtyAbility') && mutated.ability === mutated.dirtyAbility) {
       mutated.dirtyAbility = null;

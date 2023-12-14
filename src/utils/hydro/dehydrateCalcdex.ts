@@ -86,7 +86,7 @@ export const dehydratePlayerSide = (
  * {gender},
  * {level},
  * {shiny},
- * {types[0]}[/{types[1]}...]~{dirtyTypes[0]}[/{dirtyTypes[1]}...]>{revealedTeraType}~{teraType},
+ * {types[0]}[/{types[1]}...]~{dirtyTypes[0]}[/{dirtyTypes[1]}...]>{teraType}~{dirtyTeraType},
  * {hp}~{dirtyHp}/{maxhp}/{fainted},
  * {status}~{dirtyStatus}/{sleepCounter}/{toxicCounter}/{hitCounter}/{faintCounter}~{dirtyFaintCounter},
  * {presetId ? 'y' : 'n'},
@@ -220,7 +220,7 @@ export const dehydrateCalcdex = (
         shiny,
         types = [],
         teraType,
-        revealedTeraType,
+        dirtyTeraType,
         hp,
         dirtyHp,
         maxhp,
@@ -276,7 +276,7 @@ export const dehydrateCalcdex = (
         dehydrateBoolean(shiny),
         dehydrateArray([
           dehydrateArray(types),
-          dehydrateArray([revealedTeraType, teraType], '~'),
+          dehydrateArray([teraType, dirtyTeraType], '~'),
         ], '>'),
         dehydrateArray([
           dehydrateArray([hp, dirtyHp], '~'),

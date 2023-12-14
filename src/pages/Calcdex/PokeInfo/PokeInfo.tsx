@@ -492,9 +492,9 @@ export const PokeInfo = ({
                 title="Tera Type"
                 input={{
                   name: `PokeInfo:TeraType:${pokemonKey}`,
-                  value: pokemon?.teraType || '???',
+                  value: pokemon?.dirtyTeraType || pokemon?.teraType || '???',
                   onChange: (type: Showdown.TypeName) => updatePokemon({
-                    teraType: type,
+                    dirtyTeraType: type,
                     terastallized: !!type && type !== '???' && pokemon?.terastallized,
                   }, `${baseScope}:PokeTypeField~Tera:input.onChange()`),
                 }}
@@ -509,11 +509,9 @@ export const PokeInfo = ({
                 highlight={pokemon?.terastallized}
                 highlightTypes={Array.from(new Set([
                   ...flattenAlts(pokemon?.altTeraTypes),
-                  pokemon?.revealedTeraType,
+                  pokemon?.teraType,
                 ])).filter(Boolean)}
-                revealedTypes={pokemon?.revealedTeraType ? [
-                  pokemon.revealedTeraType,
-                ] : undefined}
+                revealedTypes={[pokemon?.teraType].filter(Boolean)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}
               />

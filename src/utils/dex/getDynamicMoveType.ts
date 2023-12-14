@@ -20,16 +20,24 @@ export const getDynamicMoveType = (
     return null;
   }
 
+  const {
+    speciesForme,
+    types,
+    teraType: revealedTeraType,
+    dirtyTeraType,
+    terastallized,
+    item: revealedItem,
+    dirtyItem,
+  } = pokemon;
+
+  const formeId = formatId(speciesForme);
+  const teraType = dirtyTeraType || revealedTeraType;
+  const item = dirtyItem ?? revealedItem; // note: dirtyItem can be `''`, so using the nullish coalescing operator (`??`)
   const moveId = formatId(moveName);
 
   switch (moveId) {
     // Aura Wheel, primarily used by Morpeko
     case 'aurawheel': {
-      const { speciesForme } = pokemon;
-
-      // attempt to determine the type from the forme
-      const formeId = formatId(speciesForme);
-
       // by default, Aura Wheel is Electric, so only change its type to Dark if it's Hangry
       if (formeId === 'morpekohangry') {
         return 'Dark';
@@ -45,17 +53,9 @@ export const getDynamicMoveType = (
     case 'judgment':
     case 'multiattack':
     case 'technoblast': {
-      const {
-        dirtyItem,
-        item,
-      } = pokemon;
-
-      // attempt to determine the type from the held plate
-      // note: using nullish-coalescing (`??`) here since dirtyItem can be made empty by the user (i.e., `''`)
-      const currentItem = dirtyItem ?? item;
-
-      if (currentItem && currentItem in PokemonTypeAssociativeItems) {
-        return PokemonTypeAssociativeItems[currentItem];
+      // attempt to determine the type from the held item
+      if (item && item in PokemonTypeAssociativeItems) {
+        return PokemonTypeAssociativeItems[item];
       }
 
       break;
@@ -63,11 +63,7 @@ export const getDynamicMoveType = (
 
     // Raging Bull, primarily used by Tauros-Paldea
     case 'ragingbull': {
-      const { speciesForme } = pokemon;
-
       // attempt to determine the type from the forme
-      const formeId = formatId(speciesForme);
-
       switch (formeId) {
         case 'taurospaldea': // Tauros-Paldea (just in case, this was the forme before they renamed them all)
         case 'taurospaldeacombat': { // Tauros-Paldea-Combat
@@ -94,11 +90,7 @@ export const getDynamicMoveType = (
 
     // Ivy Cudgel, Ogerpon signature move
     case 'ivycudgel': {
-      const { speciesForme } = pokemon;
-
       // attempt to determine the type from the forme
-      const formeId = formatId(speciesForme);
-
       switch (formeId) {
         case 'ogerpon': // Regular Ogerpon
         case 'ogerpontealtera': { // Regular Ogerpon tera
@@ -127,13 +119,6 @@ export const getDynamicMoveType = (
 
     // Revelation Dance, primarily used by Oricorio
     case 'revelationdance': {
-      const {
-        speciesForme,
-        types,
-        teraType,
-        terastallized,
-      } = pokemon;
-
       // if the Pokemon is Terastallized, the move's type is the Pokemon's Tera type
       if (teraType && terastallized) {
         return teraType;
@@ -158,8 +143,6 @@ export const getDynamicMoveType = (
 
       // attempt to determine the type from the forme
       // (note: since Hackmons are a thing, we shouldn't assume the user of this move is an Oricorio!)
-      const formeId = formatId(speciesForme);
-
       switch (formeId) {
         case 'oricorio': {
           return 'Fire';
@@ -187,11 +170,6 @@ export const getDynamicMoveType = (
 
     // Tera Blast, primarily used by every Pokemon, probably lol
     case 'terablast': {
-      const {
-        teraType,
-        terastallized,
-      } = pokemon;
-
       // Tera Blast's type only becomes the `teraType` when `terastallized`
       if (teraType && terastallized) {
         return teraType;

@@ -167,10 +167,8 @@ export const syncPokemon = (
         // (also no point storing a '???' type; null is perfectly acceptable since the UI should show '???' for falsy values)
         // update (2022/12/12): don't sync falsy values; clears your Pokemon's Tera types! LOL
         if (!value || value === '???') {
-          // value = null;
           syncedPokemon.terastallized = false;
 
-          // break;
           return;
         }
 
@@ -183,10 +181,9 @@ export const syncPokemon = (
           return;
         }
 
-        syncedPokemon.revealedTeraType = value as Showdown.TypeName;
-        syncedPokemon.teraType = syncedPokemon.revealedTeraType;
+        syncedPokemon.teraType = value as Showdown.TypeName;
+        syncedPokemon.dirtyTeraType = null;
 
-        // break;
         return;
       }
 
@@ -494,7 +491,7 @@ export const syncPokemon = (
     // check if the Tera type has been revealed
     if (serverPokemon.teraType && serverPokemon.teraType !== '???') {
       syncedPokemon.teraType = serverPokemon.teraType;
-      syncedPokemon.revealedTeraType = serverPokemon.teraType;
+      syncedPokemon.dirtyTeraType = null;
     }
 
     // sometimes, the server may only provide the baseAbility (w/ an undefined ability)

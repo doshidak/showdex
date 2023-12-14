@@ -97,13 +97,7 @@ export const sanitizePokemon = <
       || (pokemon as Partial<CalcdexPokemon>)?.teraType
       || null,
 
-    revealedTeraType: (
-      typeof (pokemon as Partial<Showdown.Pokemon>)?.terastallized === 'string'
-        && (pokemon as Partial<Showdown.Pokemon>).terastallized
-    )
-      || (pokemon as Partial<CalcdexPokemon>)?.revealedTeraType
-      || null,
-
+    dirtyTeraType: (pokemon as Partial<CalcdexPokemon>)?.dirtyTeraType || null,
     altTeraTypes: (pokemon as Partial<CalcdexPokemon>)?.altTeraTypes || [],
 
     hp: (pokemon as Partial<Showdown.Pokemon>)?.hp || 0,
@@ -344,8 +338,8 @@ export const sanitizePokemon = <
   }
 
   // if no teraType in gen 9, default to the Pokemon's first type
-  if (gen > 8 && !sanitizedPokemon.teraType && sanitizedPokemon.types[0]) {
-    sanitizedPokemon.teraType = sanitizedPokemon.revealedTeraType || sanitizedPokemon.types[0];
+  if (gen > 8 && !sanitizedPokemon.teraType && !sanitizedPokemon.dirtyTeraType && sanitizedPokemon.types[0]) {
+    [sanitizedPokemon.dirtyTeraType] = sanitizedPokemon.types;
   }
 
   // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)

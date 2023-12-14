@@ -19,14 +19,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   calcdexId?: string;
 
   /**
-   * Internal checksum of the Pokemon's mutable properties used by the extension.
-   *
-   * @deprecated As of v0.1.3, although assigned, don't think this is used anymore.
-   * @since 0.1.0
-   */
-  calcdexNonce?: string;
-
-  /**
    * Whether the Pokemon object originates from the client or server.
    *
    * * Used to determine whether the Pokemon's `hp` is a percentage or not.
@@ -168,10 +160,21 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Terastallizing type that the terastallizable Pokemon can terastallizingly terastallize into during terastallization.
    *
+   * * As of v1.2.0, this is now functionally being used as `revealedTeraType`, which is now deprecated.
+   * * Similar to all other dirty fields, this should only be populated if reported by the battle.
+   *
    * @default null
    * @since 1.1.0
    */
   teraType?: Showdown.TypeName;
+
+  /**
+   * User-modified Tera type.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  dirtyTeraType?: Showdown.TypeName;
 
   /**
    * Alternative Tera types from the currently applied `preset`.
@@ -183,21 +186,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.0
    */
   altTeraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
-
-  /**
-   * Revealed Tera type from the battle.
-   *
-   * * Can be populated from the `terastallized` property of `Showdown.Pokemon` or from a team sheet.
-   * * Why isn't this just `teraType` and the existing `teraType` not `dirtyTeraType`?
-   *   - No idea.
-   *   - Sounds like a good idea though.
-   *   - I'll leave it like this for now as to not break anything.
-   *
-   * @todo Update (2023/06/04 @ v1.1.6): fuck lmao gotta refactor the names for sure
-   * @default null
-   * @since 1.1.3
-   */
-  revealedTeraType?: Showdown.TypeName;
 
   /**
    * Original level of the *Transform*-target Pokemon.

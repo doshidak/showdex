@@ -1,10 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-// import { times } from '@showdex/consts/core';
-import {
-  // PokemonInitialStats,
-  PokemonSpeedReductionItems,
-  PokemonStatNames,
-} from '@showdex/consts/dex';
+import { PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import { env, formatId as id, nonEmptyObject } from '@showdex/utils/core';
@@ -89,8 +84,8 @@ export const calcPokemonFinalStats = (
   const species = dex.species.get(speciesForme);
   const baseForme = id(species?.baseSpecies);
 
-  const types = pokemon.terastallized && pokemon.teraType
-    ? [pokemon.teraType]
+  const types = pokemon.terastallized && (pokemon.dirtyTeraType || pokemon.teraType)
+    ? [pokemon.dirtyTeraType || pokemon.teraType]
     : pokemon.types;
 
   // note: using optional chaining here (over logical OR) in case the user clears the item on purpose

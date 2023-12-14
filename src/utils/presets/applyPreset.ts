@@ -115,7 +115,7 @@ export const applyPreset = (
   //   delete output.dirtyAbility;
   // }
 
-  const didRevealTeraType = !!pokemon.revealedTeraType && pokemon.revealedTeraType !== '???';
+  const didRevealTeraType = !!pokemon.teraType && pokemon.teraType !== '???';
   const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
 
   // check if we have Tera typing usage data
@@ -126,12 +126,12 @@ export const applyPreset = (
     output.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
 
     if (!didRevealTeraType) {
-      [output.teraType] = output.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
+      [output.dirtyTeraType] = output.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
     }
   } else if (altTeraTypes?.[0]) {
     // apply the first teraType from the preset's teraTypes
     if (!didRevealTeraType) {
-      [output.teraType] = flattenAlts(altTeraTypes);
+      [output.dirtyTeraType] = flattenAlts(altTeraTypes);
     }
 
     output.altTeraTypes = altTeraTypes;
@@ -259,8 +259,9 @@ export const applyPreset = (
 
   // determine if we should be updating the actual info instead of the dirty ones
   if (revealingPreset) {
-    if (output.teraType && !pokemon.revealedTeraType) {
-      output.revealedTeraType = output.teraType;
+    if (!pokemon.teraType && preset.teraTypes?.length) {
+      [output.teraType] = flattenAlts(preset.teraTypes);
+      output.dirtyTeraType = null;
     }
 
     if (output.dirtyAbility && !pokemon.ability) {
