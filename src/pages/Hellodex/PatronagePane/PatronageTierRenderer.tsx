@@ -1,12 +1,20 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { format, formatDistance, isValid } from 'date-fns';
+import {
+  type Duration,
+  format,
+  // formatDistance,
+  formatDuration,
+  intervalToDuration,
+  isValid,
+} from 'date-fns';
 import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTier } from '@showdex/consts/app';
 import { bullop } from '@showdex/consts/core';
 import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
 import { env, formatId, getResourceUrl } from '@showdex/utils/core';
+import { pluralize } from '@showdex/utils/humanize';
 import styles from './PatronagePane.module.scss';
 
 /**
@@ -36,11 +44,12 @@ export const PatronageTierRenderer = (
   const {
     title,
     term,
-    names,
+    // names,
+    members,
   } = tier || {};
 
-  // note: we're not checking if `names[]` is empty since we render an mdash if it is
-  if (!title || !Array.isArray(names)) {
+  // note: we're not checking if `members[]` is empty since we render an mdash if it is
+  if (!title || !Array.isArray(members)) {
     return null;
   }
 
@@ -50,7 +59,7 @@ export const PatronageTierRenderer = (
 
   const containerKey = `PatronagePane:${key}:${formatId(title)}`;
   const notFirstTier = index > 0;
-  const namesCount = names.length;
+  const membersCount = members.length;
 
   const buildDateMs = parseInt(env('build-date'), 16) || null;
   const buildDate = isValid(buildDateMs) ? new Date(buildDateMs) : null;
@@ -67,19 +76,27 @@ export const PatronageTierRenderer = (
       <div
         className={cx(
           styles.value,
-          !names.length && styles.empty,
+          !membersCount && styles.empty,
         )}
       >
-        {names.length ? names.map((n, i) => {
-          const name = Array.isArray(n) ? n[0] : n;
+        {membersCount ? members.map((member, i) => {
+          const {
+            name,
+            showdownUser,
+            periods,
+          } = member || {};
 
           if (!name) {
             return null;
           }
 
-          const showdownUser = Array.isArray(n) && n[1];
-          const notLastChild = i < namesCount - 1;
+          const childKey = `${key}:${formatId(name)}`;
+          const notLastChild = i < membersCount - 1;
 
+          const periodsCount = periods?.length || 0;
+          const validPeriods = periods?.filter?.((p) => !!p?.[0] && isValid(new Date(p[0])));
+
+          /*
           const startIsoDate = Array.isArray(n) ? n[2] : null;
           const startDate = startIsoDate?.includes('-') && isValid(new Date(startIsoDate))
             ? new Date(startIsoDate)
@@ -89,6 +106,7 @@ export const PatronageTierRenderer = (
           const endDate = endIsoDate?.includes('-') && isValid(new Date(endIsoDate))
             ? new Date(endIsoDate)
             : null;
+          */
 
           const userTitle = findPlayerTitle(name, showdownUser);
           const userLabelColor = userTitle?.color?.[colorScheme];
@@ -96,10 +114,7 @@ export const PatronageTierRenderer = (
           const userIconColor = userTitle?.iconColor?.[colorScheme];
           const userTooltipIconColor = userTitle?.iconColor?.[tooltipColorScheme];
 
-          const active = term === 'once' || (
-            !!startDate // start date string (should exist)
-              && !endDate // end date string (should not exist)
-          );
+          const active = term === 'once' || validPeriods?.some((p) => !p[1]);
 
           const nameStyle: React.CSSProperties = {
             ...(showTitles && userLabelColor ? { color: userLabelColor } : undefined),
@@ -122,7 +137,7 @@ export const PatronageTierRenderer = (
             </>
           );
 
-          const renderedTooltip = userTitle?.title || startDate ? (
+          const renderedTooltip = userTitle?.title || validPeriods?.length ? (
             <div className={styles.tooltipContent}>
               {
                 showTitles &&
@@ -155,39 +170,123 @@ export const PatronageTierRenderer = (
                 </>
               }
 
-              {startDate && term === 'once' ? (
+              {
+                !!validPeriods?.length &&
                 <>
-                  Donated on{' '}
-                  {/* <br /> */}
-                  {/* {format(startDate, 'PP \'at\' pp')} */}
-                  {format(startDate, 'PP')}
+                  {
+                    term === 'once' &&
+                    <>
+                      Donated{' '}
+                      {
+                        periodsCount > 1 &&
+                        <strong>{pluralize(periodsCount, 'time:s')}{' '}</strong>
+                      }
+                      on
+                      {validPeriods.map((period) => (
+                        <React.Fragment key={`${childKey}:${period[0]}`}>
+                          <br />
+                          {format(new Date(period[0]), 'PP')}
+                        </React.Fragment>
+                      ))}
+                    </>
+                  }
+
+                  {
+                    term === 'monthly' &&
+                    <>
+                      {(() => {
+                        const duration = validPeriods.reduce((prev, period) => {
+                          const [startDate, endDate] = period;
+
+                          const periodDuration = intervalToDuration({
+                            start: new Date(startDate),
+                            end: new Date(endDate || buildDate),
+                          });
+
+                          Object.keys(prev).forEach((unit) => {
+                            if (!periodDuration?.[unit]) {
+                              return;
+                            }
+
+                            prev[unit] += periodDuration[unit];
+                          });
+
+                          return prev;
+                        }, {
+                          years: 0,
+                          months: 0,
+                          // weeks: 0, // apparently not a thing in date-fns@2.30.0 o_O
+                          days: 0,
+                          hours: 0,
+                          minutes: 0,
+                          seconds: 0,
+                        } as Duration);
+
+                        // do some rounding up
+                        if (duration.seconds > 30) {
+                          duration.minutes++;
+                          duration.seconds = 0;
+                        }
+
+                        if (duration.minutes > 30) {
+                          duration.hours++;
+                          duration.minutes = 0;
+                        }
+
+                        if (duration.hours > 12) {
+                          duration.days++;
+                          duration.hours = 0;
+                        }
+
+                        /*
+                        if (duration.days > 3) {
+                          duration.weeks++;
+                          duration.days = 0;
+                        }
+
+                        if (duration.weeks > 2) {
+                          duration.months++;
+                          duration.weeks = 0;
+                        }
+                        */
+
+                        if (duration.days > 15) {
+                          duration.months++;
+                          duration.days = 0;
+                        }
+
+                        // this one doesn't round up, but handles overflows from prior roundings
+                        if (duration.months > 11) {
+                          duration.years++;
+                          duration.months = Math.max(duration.months - 12, 0);
+                        }
+
+                        /*
+                        const formatted = formatDistance(startDate, endDate || buildDate)
+                          .replace(/1(?=\x20)/, 'a')
+                          .replace('about', '');
+
+                        if (formatted.includes('day')) {
+                          return null;
+                        }
+                        */
+
+                        const formatted = formatDuration(duration, {
+                          format: ['years', 'months'],
+                          zero: false,
+                          delimiter: ' & ',
+                        }).replace(/1(?=\x20)/, 'a');
+
+                        if (!formatted) {
+                          return null;
+                        }
+
+                        return `${active ? '' : 'Supported '}for ${formatted}`;
+                      })()}
+                    </>
+                  }
                 </>
-              ) : startDate && (endDate || buildDate) && term === 'monthly' ? (
-                <>
-                  {/* {endDate ? 'Supported' : 'Supporter'}{' '} */}
-                  {/* {endDate && 'Supported '} */}
-                  {/* for{' '} */}
-                  {/* {formatDistance(
-                    startDate,
-                    endDate || buildDate,
-                  ).replace(/1(?=\x20)/, 'a')} */}
-                  {(() => {
-                    const formatted = formatDistance(startDate, endDate || buildDate)
-                      .replace(/1(?=\x20)/, 'a')
-                      .replace('about', '');
-
-                    if (formatted.includes('day')) {
-                      return null;
-                    }
-
-                    if (endDate) {
-                      return `Supported for ${formatted}`;
-                    }
-
-                    return `for ${formatted}`;
-                  })()}
-                </>
-              ) : null}
+              }
             </div>
           ) : showdownUser ? (
             <div className={styles.tooltipContent}>
@@ -196,7 +295,7 @@ export const PatronageTierRenderer = (
           ) : null;
 
           return (
-            <React.Fragment key={`${key}:${formatId(name)}`}>
+            <React.Fragment key={childKey}>
               {showdownUser ? (
                 <Button
                   display="inline"

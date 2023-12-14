@@ -35,9 +35,9 @@ export const findPlayerTitle = (
       : t.supporterId
         ? ShowdexSupporterTiers
           .find((s) => !!s?.id && s.id === t.supporterId)
-          ?.names
-          ?.filter((n) => Array.isArray(n) && typeof n[1] === 'boolean' && !n[1])
-          .map((n) => n[0])
+          ?.members
+          ?.filter((m) => !!m?.name && !m.showdownUser)
+          .map((m) => m.name)
           .filter(Boolean)
           || []
         : []
