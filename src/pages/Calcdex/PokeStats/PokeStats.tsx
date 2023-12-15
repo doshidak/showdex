@@ -13,7 +13,7 @@ import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
-import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
+import { useRandomUuid } from '@showdex/utils/hooks';
 import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
@@ -22,7 +22,6 @@ import styles from './PokeStats.module.scss';
 export interface PokeStatsProps {
   className?: string;
   style?: React.CSSProperties;
-  containerSize?: ElementSizeLabel;
 }
 
 const baseScope = '@showdex/pages/Calcdex/PokeStats';
@@ -30,7 +29,6 @@ const baseScope = '@showdex/pages/Calcdex/PokeStats';
 export const PokeStats = ({
   className,
   style,
-  containerSize,
 }: PokeStatsProps): JSX.Element => {
   const {
     state,
@@ -44,6 +42,7 @@ export const PokeStats = ({
   } = useCalcdexPokeContext();
 
   const {
+    containerSize,
     gen,
     format,
     legacy,

@@ -28,7 +28,7 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { legalLockedFormat } from '@showdex/utils/dex';
-import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
+import { useRandomUuid } from '@showdex/utils/hooks';
 import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
@@ -37,7 +37,6 @@ import styles from './PokeMoves.module.scss';
 export interface PokeMovesProps {
   className?: string;
   style?: React.CSSProperties;
-  containerSize?: ElementSizeLabel;
 }
 
 const baseScope = '@showdex/pages/Calcdex/PokeMoves';
@@ -45,7 +44,6 @@ const baseScope = '@showdex/pages/Calcdex/PokeMoves';
 export const PokeMoves = ({
   className,
   style,
-  containerSize,
 }: PokeMovesProps): JSX.Element => {
   const {
     state,
@@ -53,13 +51,13 @@ export const PokeMoves = ({
     player,
     playerPokemon: pokemon,
     opponentPokemon,
-    // moveOptions,
     usage,
     matchups,
     updatePokemon,
   } = useCalcdexPokeContext();
 
   const {
+    containerSize,
     active: battleActive,
     gen,
     format,

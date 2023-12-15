@@ -14,7 +14,6 @@ import { env, formatId, getResourceUrl } from '@showdex/utils/core';
 import { hasNickname } from '@showdex/utils/dex';
 import { openUserPopup } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
-import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { CalcdexPokeProvider } from '../CalcdexPokeContext';
 import { useCalcdexContext } from '../CalcdexContext';
 import { PokeCalc } from '../PokeCalc';
@@ -26,7 +25,6 @@ interface PlayerCalcProps {
   position?: 'top' | 'bottom';
   playerKey?: CalcdexPlayerKey;
   defaultName?: string;
-  containerSize?: ElementSizeLabel;
   playerOptions?: DropdownOption<CalcdexPlayerKey>[];
 }
 
@@ -39,7 +37,6 @@ export const PlayerCalc = ({
   position = 'top',
   playerKey = 'p1',
   defaultName = '--',
-  containerSize,
   playerOptions,
 }: PlayerCalcProps): JSX.Element => {
   const ctx = useCalcdexContext();
@@ -54,6 +51,7 @@ export const PlayerCalc = ({
   const colorScheme = useColorScheme();
 
   const {
+    containerSize,
     format,
     legacy,
   } = state;
@@ -421,7 +419,6 @@ export const PlayerCalc = ({
       <CalcdexPokeProvider playerKey={playerKey}>
         <PokeCalc
           className={styles.pokeCalc}
-          containerSize={containerSize}
         />
       </CalcdexPokeProvider>
     </div>

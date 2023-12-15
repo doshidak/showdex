@@ -9,8 +9,8 @@ import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
-import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
-import { useCalcdexContext } from './CalcdexContext';
+import { useMobileViewport } from '@showdex/utils/hooks';
+import { useCalcdexContext, useCalcdexSize } from './CalcdexContext';
 import { CloseButton } from './CloseButton';
 import { FieldCalc } from './FieldCalc';
 import { PlayerCalc } from './PlayerCalc';
@@ -25,10 +25,7 @@ export const Calcdex = ({
 }: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const { size } = useElementSize(containerRef, {
-    initialWidth: 400,
-    initialHeight: 700,
-  });
+  useCalcdexSize(containerRef);
 
   const {
     state,
@@ -134,7 +131,6 @@ export const Calcdex = ({
           position="top"
           playerKey={topKey}
           defaultName="Player 1"
-          containerSize={size}
           playerOptions={playerOptions}
         />
 
@@ -142,7 +138,6 @@ export const Calcdex = ({
           className={cx(styles.section, styles.fieldCalc)}
           playerKey={topKey}
           opponentKey={bottomKey}
-          containerSize={size}
         />
 
         <PlayerCalc
@@ -150,7 +145,6 @@ export const Calcdex = ({
           position="bottom"
           playerKey={bottomKey}
           defaultName="Player 2"
-          containerSize={size}
           playerOptions={playerOptions}
         />
 

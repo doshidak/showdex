@@ -24,7 +24,7 @@ import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
-import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
+import { useRandomUuid } from '@showdex/utils/hooks';
 import { openSmogonDex } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
 import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
@@ -48,7 +48,6 @@ import styles from './PokeInfo.module.scss';
 export interface PokeInfoProps {
   className?: string;
   style?: React.CSSProperties;
-  containerSize?: ElementSizeLabel;
 }
 
 const baseScope = '@showdex/pages/Calcdex/PokeInfo';
@@ -56,7 +55,6 @@ const baseScope = '@showdex/pages/Calcdex/PokeInfo';
 export const PokeInfo = ({
   className,
   style,
-  containerSize,
 }: PokeInfoProps): JSX.Element => {
   const {
     state,
@@ -72,6 +70,7 @@ export const PokeInfo = ({
   } = useCalcdexPokeContext();
 
   const {
+    containerSize,
     gen,
     format,
     subFormats,

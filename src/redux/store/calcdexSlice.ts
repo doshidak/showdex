@@ -21,6 +21,7 @@ import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { useSelector } from './hooks';
 
 export type CalcdexPlayerState = Partial<Record<CalcdexPlayerKey, CalcdexPlayer>>;
@@ -147,6 +148,16 @@ export interface CalcdexBattleState extends CalcdexPlayerState {
    * @since 1.1.3
    */
   overlayVisible?: boolean;
+
+  /**
+   * Last recorded container size label.
+   *
+   * * Re-opened Calcdexes will initially render with this value instead of starting from `'xs'` again.
+   *
+   * @default 'xs'
+   * @since 1.2.0
+   */
+  containerSize?: ElementSizeLabel;
 
   /**
    * Number of active players in the battle.
@@ -369,6 +380,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         active = false,
         renderMode,
         overlayVisible = false,
+        containerSize = 'xs',
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
@@ -420,6 +432,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         renderMode,
         overlayVisible: renderMode === 'overlay' && overlayVisible,
+        containerSize,
 
         playerCount: 0,
         playerKey,
@@ -497,18 +510,27 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         format,
         active,
         overlayVisible,
+        containerSize,
         playerKey,
         opponentKey,
       } = action.payload;
 
       if (!battleId) {
-        l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
+        l.error(
+          'Attempted to update a CalcdexBattleState with a falsy battleId.',
+          '\n', 'action.type', action.type,
+          '\n', 'action.payload', action.payload,
+        );
 
         return;
       }
 
       if (!(battleId in state)) {
-        l.error('Could not find a CalcdexBattleState with battleId', battleId);
+        l.error(
+          'Could not find a CalcdexBattleState with battleId', battleId,
+          '\n', 'action.type', action.type,
+          '\n', 'action.payload', action.payload,
+        );
 
         return;
       }
@@ -528,6 +550,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         format: format || currentState.format,
         // active: typeof active === 'boolean' ? active : currentState.active,
         overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
+        containerSize: containerSize || currentState.containerSize,
         playerKey: playerKey || currentState.playerKey,
         opponentKey: opponentKey || currentState.opponentKey,
       };

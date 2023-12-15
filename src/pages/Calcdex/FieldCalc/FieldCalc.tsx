@@ -16,7 +16,6 @@ import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfa
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
-import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { useCalcdexContext } from '../CalcdexContext';
 import styles from './FieldCalc.module.scss';
 
@@ -25,7 +24,6 @@ interface FieldCalcProps {
   style?: React.CSSProperties;
   playerKey?: CalcdexPlayerKey;
   opponentKey?: CalcdexPlayerKey;
-  containerSize?: ElementSizeLabel;
 }
 
 export const FieldCalc = ({
@@ -33,7 +31,6 @@ export const FieldCalc = ({
   style,
   playerKey = 'p1',
   opponentKey = 'p2',
-  containerSize,
 }: FieldCalcProps): JSX.Element => {
   const {
     state,
@@ -44,20 +41,16 @@ export const FieldCalc = ({
 
   const {
     battleId,
+    containerSize,
     gen,
     format,
     authPlayerKey,
-    // p1,
-    // p2,
     field,
   } = state;
 
   const {
-    // gameType,
     weather,
     terrain,
-    // attackerSide: p1Side,
-    // defenderSide: p2Side,
   } = field || {};
 
   const colorScheme = useColorScheme();
@@ -118,13 +111,6 @@ export const FieldCalc = ({
     delete sideFieldMap.Battery;
     delete sideFieldMap.Power;
   }
-
-  // const p1Attacker = playerKey === 'p1';
-  // const attackerSide = p1Attacker ? p1Side : p2Side;
-  // const attackerSideKey: keyof CalcdexBattleField = p1Attacker ? 'attackerSide' : 'defenderSide';
-
-  // const defenderSide = p1Attacker ? p2Side : p1Side;
-  // const defenderSideKey: keyof CalcdexBattleField = p1Attacker ? 'defenderSide' : 'attackerSide';
 
   // update (2023/01/23): CalcdexPlayerSide's (formerly attached to attackerSide and defenderSide of CalcdexBattleField)
   // are now attached to each individual CalcdexPlayer under the `side` property; attackerSide and defenderSide are
