@@ -1,6 +1,7 @@
 export * from './abilities';
 export * from './formats';
 export * from './formes';
+export * from './gens';
 export * from './items';
 export * from './moves';
 export * from './natures';
