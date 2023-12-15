@@ -3,11 +3,16 @@ import { PokemonToggleAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 
 /**
- * Determines the value of the `abilityToggleable` property in a `CalcdexPokemon`.
+ * Determines whether the `pokemon`'s `dirtyAbility` or `ability` is toggleable.
  *
- * * 10/10 name, I know.
+ * * List of toggleable abilities are defined in `PokemonToggleAbilities` from `@showdex/consts/dex`.
+ * * This does **not** determine whether the toggleable ability should be toggled.
+ *   - For that, use `detectToggledAbility()` utility.
+ * * Prior to v1.1.7, this was primarily used to populate the now ~~deprecated~~ removed `abilityToggleable` property of
+ *   each `CalcdexPokemon`.
+ *   - Now, this is primarily being used by `PokeInfo` directly to determine its local `showAbilityToggle` value.
+ *   - As of v1.2.0, this property has been removed.
  *
- * @see CalcdexPokemon['abilityToggleable']
  * @since 0.1.3
  */
 export const toggleableAbility = (

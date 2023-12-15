@@ -244,35 +244,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   baseAbility?: AbilityName;
 
   /**
-   * Whether the current `ability`/`dirtyAbility` is toggleable.
+   * Whether some conditional abilities are active, such as *Flash Fire*.
    *
-   * * & the dev award for the best variable names goes to...
-   * * Used for showing the ability toggle button in `PokeInfo`.
-   * * Should be determined by whether the ability is in the list of `PokemonToggleAbilities`.
-   *   - Special handling is required for the *Multiscale* ability,
-   *     in which this value should be `false` if the Pokemon's HP is not 100%.
+   * * For toggleable abilities natively supported by `@smogon/calc`, such as the aforementioned *Flash Fire*, this will
+   *    directly set the `abilityOn` option when constructing a new `SmogonPokemon` in `createSmogonPokemon()`.
+   * * There are some "special" abilities like *Protean* & *Beads of Ruin* that require special handling.
+   *   - These are known as "pseudo-toggleable" abilities.
+   *   - In these instances, Showdex will report the Pokemon's ability as *Pressure*, which is essentially a no-op in
+   *     regards to damages, when this value is `true`.
+   * * This is initially populated by `detectToggledAbility()`, then synced by the battle via `syncPokemon()` &
+   *   `syncBattle()`, or manually toggled by the user if visible in `PokeInfo` by `toggleableAbility()`.
    *
-   * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
-   * @default false
-   * @deprecated As of v1.1.7, this is no longer being used since it was exclusively being used for short-circuit rendering
-   *   in `PokeInfo`. As part of the great v1.1.7 refactor, `abilityToggleable` & `abilityToggled` are now mutually independent
-   *   (i.e., `abilityToggled` no longer depends on `abilityToggleable` to be `true`).
-   * @since 0.1.3
-   */
-  abilityToggleable?: boolean;
-
-  /**
-   * Some abilities are conditionally toggled, such as *Flash Fire*.
-   *
-   * * ~~While we don't have to worry about those conditions~~ (a year later: ... LOL),
-   *   we need to keep track of whether the ability is active.
-   * * Allows toggling by the user, but will sync with the battle state as the turn ends.
-   * * ~~Internally, this value depends on `abilityToggleable`.~~
-   *   - ~~See `detectToggledAbility()` for implementation details.~~
-   * * ~~If the ability is not in `PokemonToggleAbilities` in `consts`,
-   *   this value will always be `true`, despite the default value being `false`.~~
-   *
-   * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
    * @default false
    * @todo rename this to `abilityActive`
    * @since 0.1.2

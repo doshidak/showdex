@@ -238,7 +238,6 @@ export const dehydrateCalcdex = (
         baseAbility,
         ability,
         dirtyAbility,
-        // abilityToggleable,
         abilityToggled,
         item,
         dirtyItem,
@@ -294,7 +293,6 @@ export const dehydrateCalcdex = (
         dehydrateArray([
           baseAbility,
           dehydrateArray([ability, dirtyAbility], '~'),
-          // abilityToggleable,
           abilityToggled,
         ]),
         dehydrateArray([

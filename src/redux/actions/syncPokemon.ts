@@ -1,6 +1,5 @@
 import {
   type AbilityName,
-  // type GameType,
   type GenerationNum,
   type ItemName,
   type MoveName,
@@ -18,7 +17,6 @@ import {
 } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import {
-  // diffArrays,
   env,
   formatId,
   nonEmptyObject,
@@ -30,7 +28,6 @@ import {
   detectLegacyGen,
   getDexForFormat,
   hasMegaForme,
-  // toggleableAbility,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 
@@ -40,7 +37,6 @@ export const syncPokemon = (
   pokemon: CalcdexPokemon,
   config?: {
     format: string;
-    // gameType?: GameType;
     clientPokemon: Partial<Showdown.Pokemon>;
     serverPokemon?: Showdown.ServerPokemon;
     weather?: Weather;
@@ -50,7 +46,6 @@ export const syncPokemon = (
 ): CalcdexPokemon => {
   const {
     format,
-    // gameType,
     clientPokemon,
     serverPokemon,
     autoMoves,
@@ -61,8 +56,6 @@ export const syncPokemon = (
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // final synced Pokemon that will be returned at the end
-  // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
-  // const syncedPokemon = structuredClone(pokemon) || {};
   const syncedPokemon = clonePokemon(pokemon);
 
   // you should not be looping through any special CalcdexPokemon-specific properties here!
@@ -542,10 +535,6 @@ export const syncPokemon = (
       && !syncedPokemon.transformedForme;
 
     if (shouldUpdateServerMoves) {
-      // const transformed = !!syncedPokemon.transformedForme || 'transform' in (clientPokemon?.volatiles || {});
-      // const moveKey = transformed ? 'transformedMoves' : 'serverMoves';
-
-      // syncedPokemon[moveKey] = [...serverMoves];
       syncedPokemon.serverMoves = [...serverMoves];
     }
 
@@ -563,7 +552,6 @@ export const syncPokemon = (
     dirtyAbility,
     abilities,
     transformedAbilities,
-    // abilityToggleable, // update (2023/10/09): there's now a `gameType` arg to toggleableAbility() lol
     // abilityToggled, // update (2022/12/09): recalculating this w/ the `field` arg below for gen 9 support
     baseStats,
     transformedBaseStats,
@@ -594,11 +582,7 @@ export const syncPokemon = (
   }
 
   // check for toggleable abilities
-  // update (2023/10/18): abilityToggleable is now deprecated & directly determined by PokeInfo during renders
-  // syncedPokemon.abilityToggleable = toggleableAbility(syncedPokemon, gameType);
-
   if (syncedPokemon.dirtyAbility !== dirtyAbility) {
-    // [syncedPokemon.dirtyAbility] = transformedAbilities;
     syncedPokemon.dirtyAbility = dirtyAbility;
   }
 

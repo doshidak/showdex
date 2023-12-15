@@ -1,9 +1,4 @@
-import {
-  type AbilityName,
-  type GenerationNum,
-  type ItemName,
-  // type MoveName,
-} from '@smogon/calc';
+import { type AbilityName, type GenerationNum, type ItemName } from '@smogon/calc';
 import { PokemonBoostNames, PokemonNatures, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { calcPokemonCalcdexId, populateStatsTable } from '@showdex/utils/calc';
@@ -108,7 +103,6 @@ export const sanitizePokemon = <
     baseAbility: (pokemon as Partial<Showdown.Pokemon>)?.baseAbility?.replace(/no\s?ability/i, '') as AbilityName,
     ability: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.ability) || null,
     dirtyAbility: (pokemon as Partial<CalcdexPokemon>)?.dirtyAbility || null,
-    // abilityToggleable: (pokemon as Partial<CalcdexPokemon>)?.abilityToggleable || false,
     abilityToggled: (pokemon as Partial<CalcdexPokemon>)?.abilityToggled || false,
     abilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.abilities) || [],
     altAbilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.altAbilities) || [],
@@ -357,16 +351,6 @@ export const sanitizePokemon = <
     ? sanitizedPokemon.transformedAbilities
     : [...flattenAlts(sanitizedPokemon.altAbilities), ...sanitizedPokemon.abilities];
 
-  /*
-  const updateDirtyAbility = (
-    !sanitizedPokemon.ability
-      && !sanitizedPokemon.transformedForme
-  ) || (
-    sanitizedPokemon.dirtyAbility
-      && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility)
-  );
-  */
-
   const updateDirtyAbility = (
     (!sanitizedPokemon.ability || !!sanitizedPokemon.transformedForme)
       && (!sanitizedPokemon.dirtyAbility || !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))
@@ -376,11 +360,7 @@ export const sanitizePokemon = <
     [sanitizedPokemon.dirtyAbility] = abilitiesSource;
   }
 
-  // abilityToggleable is mainly used for UI, hence why there are two of
-  // what seems to be essentially the same thing
-  // (but note that abilityToggled stores the current toggle state)
-  // update (2023/10/18): abilityToggleable is no longer being stored in the CalcdexPokemon so yeetus
-  // sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
+  // determine the toggle state of the toggleable ability, if applicable
   sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   if (!sanitizedPokemon?.calcdexId) {

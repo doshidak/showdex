@@ -318,14 +318,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // (designed to toggle off in detectToggledAbility() when dirtyTypes[] is present, i.e., the user manually
     // modifies the Pokemon's types; btw, dirtyTypes[] should've been processed by now if it was present)
     if (mutating('ability', 'dirtyAbility', 'dirtyTypes', 'dirtyItem')) {
-      // mutated.abilityToggleable = toggleableAbility(mutated, state.gameType);
-
-      // const {
-      //   pokemon: playerParty,
-      //   selectionIndex,
-      //   activeIndices,
-      // } = state[playerKey];
-
       // note: these are now independent of each other & will probably rename abilityToggled to abilityActive soon
       mutated.abilityToggled = detectToggledAbility(mutated, {
         gameType: state.gameType,
