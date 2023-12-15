@@ -66,10 +66,18 @@ export const getCachedPresets = (
 
   const [header] = hydrateHeader(decompressed);
 
-  const buildChanged = !__DEV__ && !!header?.timestamp && (
-    env('build-date') !== header.timestamp
+  const buildChanged = !__DEV__ && !!header?.buildTimestamp && (
+    env('build-date') !== header.buildTimestamp
       || env('package-version') !== header.version
   );
+
+  /*
+  l.debug(
+    'Hydrated cache header',
+    '\n', 'version', '(hydro)', header.version, '(now)', env('package-version'),
+    '\n', 'build', '(hydro)', header.buildTimestamp, '(now)', env('build-date'),
+  );
+  */
 
   /**
    * @todo find a better cache purging method (might be race-condition-mania here lol)
@@ -78,7 +86,7 @@ export const getCachedPresets = (
     l.info(
       'Purging stale preset cache due to detected build change!',
       '\n', 'version', '(prev)', header.version, '(now)', env('package-version'),
-      '\n', 'build', '(prev)', header.timestamp, '(now)', env('build-date'),
+      '\n', 'build', '(prev)', header.buildTimestamp, '(now)', env('build-date'),
     );
 
     clearStoredItem('storage-preset-cache-key');
