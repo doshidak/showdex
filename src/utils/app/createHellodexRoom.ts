@@ -1,6 +1,6 @@
 import * as ReactDOM from 'react-dom/client';
 import { type RootStore, type ShowdexSliceState } from '@showdex/redux/store';
-import { createHtmlRoom } from './createHtmlRoom';
+import { createHtmlRoom } from '@showdex/utils/host';
 
 /**
  * Creates an `HtmlRoom` via `createHtmlRoom()` specially made to house a `Hellodex`.

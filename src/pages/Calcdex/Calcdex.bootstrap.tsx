@@ -16,13 +16,7 @@ import {
   calcdexSlice,
   hellodexSlice,
 } from '@showdex/redux/store';
-import {
-  createCalcdexRoom,
-  getAuthUsername,
-  getBattleRoom,
-  getCalcdexRoomId,
-  hasSinglePanel,
-} from '@showdex/utils/app';
+import { createCalcdexRoom, getCalcdexRoomId } from '@showdex/utils/app';
 import {
   clonePlayerSideConditions,
   detectAuthPlayerKeyFromBattle,
@@ -33,6 +27,7 @@ import {
 } from '@showdex/utils/battle';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { getAuthUsername, getBattleRoom, hasSinglePanel } from '@showdex/utils/host';
 import { Calcdex } from './Calcdex';
 import { CalcdexProvider } from './CalcdexContext';
 import { CalcdexError } from './CalcdexError';

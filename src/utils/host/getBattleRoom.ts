@@ -1,6 +1,6 @@
 // import { logger } from '@showdex/utils/debug';
 
-// const l = logger('@showdex/utils/app/getBattleRoom()');
+// const l = logger('@showdex/utils/host/getBattleRoom()');
 
 export const getBattleRoom = (
   roomid: string,

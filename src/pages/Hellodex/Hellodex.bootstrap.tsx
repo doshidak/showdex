@@ -3,14 +3,10 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { type ShowdexBootstrapper } from '@showdex/main';
 import { renderCalcdex } from '@showdex/pages/Calcdex';
 import { type CalcdexSliceState, calcdexSlice, showdexSlice } from '@showdex/redux/store';
-import {
-  createCalcdexRoom,
-  createHellodexRoom,
-  getBattleRoom,
-  getCalcdexRoomId,
-} from '@showdex/utils/app';
+import { createCalcdexRoom, createHellodexRoom, getCalcdexRoomId } from '@showdex/utils/app';
 import { env, formatId } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { getBattleRoom } from '@showdex/utils/host';
 import { Hellodex } from './Hellodex';
 
 const l = logger('@showdex/pages/Hellodex/Hellodex.bootstrap');

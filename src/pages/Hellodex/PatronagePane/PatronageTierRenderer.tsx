@@ -4,7 +4,6 @@ import cx from 'classnames';
 import {
   type Duration,
   format,
-  // formatDistance,
   formatDuration,
   intervalToDuration,
   isValid,
@@ -12,8 +11,9 @@ import {
 import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTier } from '@showdex/consts/app';
 import { bullop } from '@showdex/consts/core';
-import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle } from '@showdex/utils/app';
 import { env, formatId, getResourceUrl } from '@showdex/utils/core';
+import { openUserPopup } from '@showdex/utils/host';
 import { pluralize } from '@showdex/utils/humanize';
 import styles from './PatronagePane.module.scss';
 

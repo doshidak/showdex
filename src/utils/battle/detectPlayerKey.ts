@@ -1,5 +1,5 @@
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { getAuthUsername } from '@showdex/utils/app';
+import { getAuthUsername } from '@showdex/utils/host';
 import { detectPokemonIdent } from './detectPokemonIdent';
 
 /* eslint-disable @typescript-eslint/indent */

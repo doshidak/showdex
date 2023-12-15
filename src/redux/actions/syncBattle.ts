@@ -11,7 +11,6 @@ import { AllPlayerKeys } from '@showdex/consts/battle';
 import { PokemonBoosterAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { type CalcdexBattleState, type RootState } from '@showdex/redux/store';
-import { getAuthUsername } from '@showdex/utils/app';
 import {
   cloneBattleState,
   clonePlayerSideConditions,
@@ -39,15 +38,10 @@ import {
   env,
   formatId,
 } from '@showdex/utils/core';
-import {
-  detectLegacyGen,
-  // getDefaultSpreadValue,
-  // getDexForFormat,
-  legalLockedFormat,
-} from '@showdex/utils/dex';
+import { detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { getAuthUsername } from '@showdex/utils/host';
 import {
-  // appliedPreset,
   flattenAlts,
   getPresetFormes,
   getTeamSheetPresets,

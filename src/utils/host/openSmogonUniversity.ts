@@ -11,7 +11,7 @@ export type SmogonUniversityDexCategory =
   | 'types'
   | 'formats';
 
-const l = logger('@showdex/utils/app/openSmogonUniversity()');
+const l = logger('@showdex/utils/host/openSmogonUniversity()');
 
 const SmogonUniversityGenSlugs: string[] = [
   null, // gen 0? kekw

@@ -11,9 +11,10 @@ import {
   useColorScheme,
   useHellodexSettings,
 } from '@showdex/redux/store';
-import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
+import { openUserPopup } from '@showdex/utils/host';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
 import { GradientButton } from './GradientButton';

@@ -21,11 +21,11 @@ import { eacute } from '@showdex/consts/core';
 import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
-import { openSmogonUniversity } from '@showdex/utils/app';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
+import { openSmogonUniversity } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
 import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {

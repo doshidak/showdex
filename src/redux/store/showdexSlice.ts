@@ -11,9 +11,9 @@ import {
   type ShowdexSettings,
 } from '@showdex/interfaces/app';
 import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
-import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
 import { getStoredItem, setStoredItem } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/host';
 import { useDispatch, useSelector } from './hooks';
 
 /**
