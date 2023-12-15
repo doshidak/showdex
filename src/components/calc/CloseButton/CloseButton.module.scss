@@ -1,0 +1,18 @@
+@use 'config/fonts';
+@use 'mixins/font';
+@use 'mixins/spacing';
+
+.container {
+  width: 100%;
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+}
+
+.icon {
+  @include spacing.margin($right: 3px, $bottom: 1px);
+  font-size: 14px;
+}
+
+.label {
+  @include spacing.padding($left: 5px);
+  text-transform: uppercase;
+}

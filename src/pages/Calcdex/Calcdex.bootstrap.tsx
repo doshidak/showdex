@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { NIL as NIL_UUID } from 'uuid';
 import { type GenerationNum } from '@smogon/calc';
+import { CalcdexErrorBoundary, CalcdexProvider } from '@showdex/components/calc';
 import { ErrorBoundary } from '@showdex/components/debug';
 import { SandwichProvider } from '@showdex/components/layout';
 import { AllPlayerKeys } from '@showdex/consts/battle';
@@ -29,8 +30,6 @@ import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { getAuthUsername, getBattleRoom, hasSinglePanel } from '@showdex/utils/host';
 import { Calcdex } from './Calcdex';
-import { CalcdexProvider } from './CalcdexContext';
-import { CalcdexError } from './CalcdexError';
 import styles from './Calcdex.module.scss';
 
 /**
@@ -70,7 +69,7 @@ export const renderCalcdex = (
 ): void => dom.render((
   <ReduxProvider store={store}>
     <ErrorBoundary
-      component={CalcdexError}
+      component={CalcdexErrorBoundary}
       battleId={battleId}
     >
       <SandwichProvider>

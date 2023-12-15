@@ -2,6 +2,13 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { AllPlayerKeys } from '@showdex/consts/battle';
+import {
+  CloseButton,
+  FieldCalc,
+  PlayerCalc,
+  useCalcdexContext,
+  useCalcdexSize,
+} from '@showdex/components/calc';
 import { BuildInfo } from '@showdex/components/debug';
 import { type DropdownOption } from '@showdex/components/form';
 import { Scrollable } from '@showdex/components/ui';
@@ -10,10 +17,6 @@ import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { useMobileViewport } from '@showdex/utils/hooks';
-import { useCalcdexContext, useCalcdexSize } from './CalcdexContext';
-import { CloseButton } from './CloseButton';
-import { FieldCalc } from './FieldCalc';
-import { PlayerCalc } from './PlayerCalc';
 import styles from './Calcdex.module.scss';
 
 export interface CalcdexProps {
