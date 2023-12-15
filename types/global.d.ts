@@ -1,5 +1,5 @@
 /**
- * `global.d.ts`
+ * @file `global.d.ts`
  *
  * Primary file that declares globals.
  *
@@ -38,6 +38,7 @@ declare const app: Showdown.ClientApp;
 declare const Config: Showdown.PSConfig;
 declare const Dex: Showdown.Dex; /** @todo convert to declare class Dex in battle-dex.d.ts */
 declare const BattleAbilities: Showdown.BattleAbilities;
+declare const BattleFormats: Showdown.BattleFormats;
 declare const BattleItems: Showdown.BattleItems;
 declare const BattleMovedex: Showdown.BattleMovedex;
 declare const BattleTeambuilderTable: Showdown.BattleTeambuilderTable;
@@ -61,7 +62,7 @@ declare const UserPopup: Showdown.UserPopup;
  * //          `{ new (): Storage; prototype: Storage; }`.
  *
  * // hence the forceful type assertions here
- * (<Showdown.ClientStorage> <unknown> Storage).prefs('theme');
+ * (Storage as unknown as Showdown.ClientStorage).prefs('theme');
  * ```
  * @since 1.0.3
  */
