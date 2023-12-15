@@ -9,8 +9,8 @@ import {
 } from '@smogon/calc';
 import { AllPlayerKeys } from '@showdex/consts/battle';
 import { PokemonBoosterAbilities } from '@showdex/consts/dex';
-import { type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { type CalcdexBattleState, type RootState } from '@showdex/redux/store';
+import { type CalcdexBattleState, type CalcdexPlayerKey, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type RootState } from '@showdex/redux/store';
 import {
   cloneBattleState,
   clonePlayerSideConditions,

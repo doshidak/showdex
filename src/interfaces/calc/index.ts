@@ -1,5 +1,6 @@
 export * from './CalcdexBattleField';
 export * from './CalcdexBattleRules';
+export * from './CalcdexBattleState';
 export * from './CalcdexLeanPokemon';
 export * from './CalcdexLeanSide';
 export * from './CalcdexMoveOverride';
