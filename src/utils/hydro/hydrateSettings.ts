@@ -1,44 +1,17 @@
-import { type ShowdexSettings, type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { reverseObjectKv } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
-import { getColorScheme } from '@showdex/utils/host';
 import {
   DehydratedCalcdexSettingsMap,
-  DehydratedHellodexSettingsMap,
   DehydratedShowdexSettingsMap,
-  DehydratedShowdownSettingsMap,
-} from './dehydrateSettings';
+  HydratedCalcdexSettingsMap,
+  HydratedHellodexSettingsMap,
+  HydratedShowdexSettingsMap,
+  HydratedShowdownSettingsMap,
+} from '@showdex/consts/hydro';
+import { type ShowdexSettings, type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
+import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { logger } from '@showdex/utils/debug';
+import { getColorScheme } from '@showdex/utils/host';
 import { hydrateHeader } from './hydrateHeader';
 import { hydrateArray, hydrateBoolean, hydrateValue } from './hydratePrimitives';
-
-/**
- * Reverse opcode-to-key mappings for the hydrated root `ShowdexSettings`.
- *
- * @since 1.0.3
- */
-export const HydratedShowdexSettingsMap = reverseObjectKv(DehydratedShowdexSettingsMap);
-
-/**
- * Reverse opcode-to-key mappings for the hydrated `ShowdexHellodexSettings`.
- *
- * @since 1.0.3
- */
-export const HydratedHellodexSettingsMap = reverseObjectKv(DehydratedHellodexSettingsMap);
-
-/**
- * Reverse opcode-to-key mappings for the hydrated `ShowdexCalcdexSettings`.
- *
- * @since 1.0.3
- */
-export const HydratedCalcdexSettingsMap = reverseObjectKv(DehydratedCalcdexSettingsMap);
-
-/**
- * Reverse opcode-to-key mappings for the hydrated `ShowdexShowdownSettings`.
- *
- * @since 1.1.7
- */
-export const HydratedShowdownSettingsMap = reverseObjectKv(DehydratedShowdownSettingsMap);
 
 /**
  * Internally-used list of keys to ignore when hydrating the root `ShowdexSettings`.
@@ -90,7 +63,9 @@ const l = logger('@showdex/utils/hydro/hydrateSettings()');
  *
  * @since 1.0.3
  */
-export const hydrateSettings = (value?: string): ShowdexSettings => {
+export const hydrateSettings = (
+  value: string,
+): ShowdexSettings => {
   // these settings have their default values, which will be individually overwritten with the hydrated values
   // from the dehydrated settings in the passed-in `value` (otherwise, the default settings will be returned)
   const settings: ShowdexSettings = {

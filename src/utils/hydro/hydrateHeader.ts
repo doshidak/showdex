@@ -1,4 +1,4 @@
-import { type HydroHeader, HydroDescriptor } from '@showdex/consts/hydro';
+import { type HydroHeader, HydroDescriptor } from '@showdex/interfaces/hydro';
 import { hydrateDate } from './hydratePrimitives';
 
 /**
@@ -53,6 +53,10 @@ export const hydrateHeader = (
   const header: HydroHeader = {
     version: null,
     build: null,
+    buildTimestamp: null,
+    buildDate: null,
+    buildEnvironment: 'production',
+    buildTarget: null,
     timestamp: null,
     date: null,
     descriptor: null,
@@ -86,6 +90,34 @@ export const hydrateHeader = (
 
       case '@': {
         header.build = partValue;
+
+        // e.g., header.build = 'showdex-v1.2.0-b18C6BC343EC-dev.chrome'
+        if (header.build?.includes('-')) {
+          const [
+            , // e.g., 'showdex'
+            versionPart, // e.g., 'v1.2.0'
+            buildPart, // e.g., 'b18C6BC343EC'
+            targetPart, // e.g., 'dev.chrome'
+          ] = header.build.split('-');
+
+          if (versionPart?.startsWith('v') && !header.version) {
+            header.version = versionPart.slice(1);
+          }
+
+          if (buildPart?.startsWith('b')) {
+            header.buildTimestamp = buildPart.slice(1);
+            header.buildDate = hydrateDate(header.buildTimestamp);
+          }
+
+          if (targetPart) {
+            header.buildTarget = targetPart;
+
+            if (header.buildTarget.startsWith('dev.')) {
+              header.buildEnvironment = 'development';
+              header.buildTarget = header.buildTarget.replace('dev.', '');
+            }
+          }
+        }
 
         break;
       }

@@ -5,7 +5,9 @@ import { parseISO, toDate } from 'date-fns';
  *
  * @since 1.0.3
  */
-export const dehydrateBoolean = (value: boolean): string => (value ? 'y' : 'n');
+export const dehydrateBoolean = (
+  value: boolean,
+): string => (value ? 'y' : 'n');
 
 /**
  * Dehydrates a serializable `value`, defaulting to `'?'` if not serializable via `toString()`.
@@ -14,7 +16,9 @@ export const dehydrateBoolean = (value: boolean): string => (value ? 'y' : 'n');
  *
  * @since 1.0.3
  */
-export const dehydrateValue = (value: unknown): string => (
+export const dehydrateValue = (
+  value: unknown,
+): string => (
   typeof value === 'boolean'
     ? dehydrateBoolean(value)
     // eslint-disable-next-line @typescript-eslint/no-base-to-string -- yolo

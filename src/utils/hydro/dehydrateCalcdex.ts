@@ -1,8 +1,7 @@
 import base64 from 'base-64';
 import { AllPlayerKeys } from '@showdex/consts/battle';
-import { HydroDescriptor } from '@showdex/consts/hydro';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
-// import { env } from '@showdex/utils/core';
+import { HydroDescriptor } from '@showdex/interfaces/hydro';
 import { type CalcdexBattleState } from '@showdex/redux/store';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
@@ -190,7 +189,6 @@ export const dehydrateCalcdex = (
       sideid,
       name: playerName,
       rating,
-      // activeIndex = -1,
       activeIndices,
       selectionIndex = -1,
       autoSelect,
@@ -201,7 +199,6 @@ export const dehydrateCalcdex = (
     const playerOutput: string[] = [
       dehydrateValue(playerName),
       dehydrateValue(rating),
-      // typeof activeIndex === 'number' ? String(activeIndex) : '-1',
       dehydrateArray(activeIndices),
       typeof selectionIndex === 'number' ? String(selectionIndex) : '-1',
       dehydrateBoolean(autoSelect),
@@ -227,13 +224,11 @@ export const dehydrateCalcdex = (
         fainted,
         status,
         dirtyStatus,
-        // statusData,
         sleepCounter,
         toxicCounter,
         hitCounter,
         faintCounter,
         dirtyFaintCounter,
-        // preset,
         presetId,
         baseAbility,
         ability,
@@ -260,7 +255,6 @@ export const dehydrateCalcdex = (
         terastallized,
         criticalHit,
         moves,
-        // moveTrack,
         revealedMoves,
         transformedMoves,
         volatiles,
@@ -351,23 +345,14 @@ export const dehydrateCalcdex = (
     output.push(`${sideid}:${playerOutput.join('|')}`);
   }
 
-  // update (2023/02/06): attackerSide & defenderSide (of type CalcdexPlayerSide) are now attached to
-  // the individual players (of type CalcdexPlayer), i.e., they're no longer in the CalcdexBattleField
-  // update (2023/10/10): gameType is now up a level in CalcdexBattleState
   const {
-    // gameType,
     weather,
     terrain,
-    // attackerSide,
-    // defenderSide,
   } = field || {};
 
   const fieldOutput: string[] = [
-    // gameType === 'Doubles' ? 'd' : 's',
     dehydrateValue(weather),
     dehydrateValue(terrain),
-    // dehydrateFieldSide(attackerSide),
-    // dehydrateFieldSide(defenderSide),
   ];
 
   output.push(`f:${fieldOutput.join('|')}`);

@@ -1,20 +1,5 @@
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { reverseObjectKv } from '@showdex/utils/core';
-import { type HydroHeader } from './header';
-
-/**
- * Hydrated object from dehydrated presets.
- *
- * @since 1.1.6
- */
-export interface HydroPresetsHydration extends HydroHeader {
-  /**
-   * Hydrated presets.
-   *
-   * @since 1.1.6
-   */
-  presets?: CalcdexPokemonPreset[];
-}
 
 /* eslint-disable @typescript-eslint/indent */
 

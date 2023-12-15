@@ -1,4 +1,9 @@
-import { HydroDescriptor } from '@showdex/consts/hydro';
+import {
+  DehydratedCalcdexSettingsMap,
+  DehydratedHellodexSettingsMap,
+  DehydratedShowdexSettingsMap,
+  DehydratedShowdownSettingsMap,
+} from '@showdex/consts/hydro';
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
@@ -6,95 +11,9 @@ import {
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-// import { env } from '@showdex/utils/core';
+import { HydroDescriptor } from '@showdex/interfaces/hydro';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
-
-/**
- * Opcode mappings for the dehydrated root `ShowdexSettings`.
- *
- * @since 1.0.3
- */
-export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string> = {
-  colorScheme: 'cs',
-  forcedColorScheme: 'fc',
-  developerMode: 'dm',
-  hellodex: 'hd',
-  calcdex: 'cd',
-  showdown: 'sd',
-};
-
-/**
- * Opcode mappings for the dehydrated `ShowdexHellodexSettings`.
- *
- * @since 1.0.3
- */
-export const DehydratedHellodexSettingsMap: Record<keyof ShowdexHellodexSettings, string> = {
-  openOnStart: 'oos',
-  focusRoomsRoom: 'frr',
-  showBattleRecord: 'sbr',
-  showDonateButton: 'sdb',
-};
-
-/**
- * Opcode mappings for the dehydrated `ShowdexCalcdexSettings`.
- *
- * @since 1.0.3
- */
-export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, string> = {
-  openOnStart: 'oos',
-  openAs: 'oas',
-  openOnPanel: 'oop',
-  closeOn: 'con',
-  destroyOnClose: 'doc',
-  defaultAutoSelect: 'das',
-  showPlayerRatings: 'spr',
-  authPosition: 'aps',
-  showNicknames: 'snn',
-  openSmogonPage: 'osp',
-  showAllOptions: 'sao',
-  showSpreadsFirst: 'ssf',
-  showNonDamageRanges: 'snd',
-  downloadSmogonPresets: 'dsp',
-  downloadRandomsPresets: 'drp',
-  downloadUsageStats: 'dus',
-  maxPresetAge: 'mpa',
-  prioritizeUsageStats: 'pus',
-  includeTeambuilder: 'itb',
-  autoImportTeamSheets: 'ats',
-  autoExportOpponent: 'aeo',
-  defaultAutoMoves: 'dam',
-  forceNonVolatile: 'fnv', // thought about alwaysShowStatus, but ya... LOL
-  editPokemonTypes: 'ept',
-  lockUsedTera: 'lut',
-  resetDirtyBoosts: 'rdb',
-  showMoveEditor: 'sme',
-  showBaseStats: 'sbs',
-  showLegacyEvs: 'sle',
-  lockGeneticsVisibility: 'lgv',
-  allowIllegalSpreads: 'ais',
-  showUiTooltips: 'sut',
-  showAbilityTooltip: 'sat',
-  showItemTooltip: 'sit',
-  showMoveTooltip: 'smv',
-  showMatchupTooltip: 'smu',
-  prettifyMatchupDescription: 'pmd',
-  showMatchupDamageAmounts: 'sda',
-  formatMatchupDamageAmounts: 'fda',
-  copyMatchupDescription: 'cmd',
-  showFieldTooltips: 'sft',
-  nhkoColors: 'ncl',
-  nhkoLabels: 'nlb',
-};
-
-/**
- * Opcode mappings for the dehydrated `ShowdexShowdownSettings`.
- *
- * @since 1.1.7
- */
-export const DehydratedShowdownSettingsMap: Record<keyof ShowdexShowdownSettings, string> = {
-  autoAcceptSheets: 'aas',
-};
 
 /**
  * Dehydrates a per-side settings `value`.
@@ -204,8 +123,6 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
 
   const output: string[] = [
     dehydrateHeader(HydroDescriptor.Settings),
-    // `${DehydratedShowdexSettingsMap.packageVersion}:${env('package-version', '?')}`,
-    // `${DehydratedShowdexSettingsMap.buildDate}:${env('build-date', '?')}`,
     `${DehydratedShowdexSettingsMap.forcedColorScheme}:${dehydrateValue(forcedColorScheme)}`,
     `${DehydratedShowdexSettingsMap.developerMode}:${dehydrateBoolean(developerMode)}`,
   ];
