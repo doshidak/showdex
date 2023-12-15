@@ -1,4 +1,4 @@
-import { times } from '@showdex/consts/core';
+import { eacute, times } from '@showdex/consts/core';
 
 /**
  * Labels for rendering group labels in the Pokemon presets dropdown.
@@ -58,6 +58,8 @@ export const FormatLabels: Record<string, string> = {
   doublesubers: 'Doubles Ubers',
   doublesuu: 'Doubles UU',
   draft: 'Draft',
+  dragonkingcup: 'Dragon King Cup',
+  dreamworldou: 'Dream World OU',
   flipped: 'Flipped',
   forceofthefallen: 'Force of the Fallen',
   franticfusions: 'Frantic Fusions',
@@ -80,14 +82,18 @@ export const FormatLabels: Record<string, string> = {
   linked: 'Linked',
   metronomebattle: 'Metronome',
   mixandmega: 'Mix & Mega',
+  moderngen1: 'Modern RB',
   monothreatfairy: 'Monothreat Fairy',
+  monothreatfire: 'Monothreat Fire',
   monotype: 'Monotype',
   monotypebattlefactory: 'B-Factory Monotype',
+  monotypecap: 'CAP Monotype',
+  monotypelc: 'LC Monotype',
   monotyperandombattle: 'Monotype Randoms',
   multibility: 'Multibility',
   multirandombattle: 'Multi Randoms',
-  natdex4v4doublesdraft: 'NatDex 4v4 Dbls Draft',
-  natdex6v6doublesdraft: 'NatDex 6v6 Dbls Draft',
+  natdex4v4doublesdraft: 'NatDex 4v4 Dbl Draft',
+  natdex6v6doublesdraft: 'NatDex 6v6 Dbl Draft',
   natdexdraft: 'NatDex Draft', // update (2023/01/06): think it's 'natdex' and not 'nationaldex' here
   natdexlcdraft: 'NatDex LC Draft',
   nationaldex: 'NatDex',
@@ -102,16 +108,21 @@ export const FormatLabels: Record<string, string> = {
   nextou: 'Next OU',
   nfe: 'NFE', // NotFullyEvolved
   nintendocup1997: 'Nintendo Cup 1997',
+  nintendocup1998: 'Nintendo Cup 1998',
+  nintendocup1999: 'Nintendo Cup 1999',
   nintendocup2000: 'Nintendo Cup 2000',
   nu: 'NU', // NeverUsed
   ou: 'OU', // OverUsed
   oublitz: 'OU Blitz',
   paldeadexdraft: 'Paldea Draft',
-  partnersincrime: 'Partners-in-Crime',
-  partnersincrimerandombattle: 'Partners-in-Crime Randoms',
+  partnersincrime: 'PiC',
+  partnersincrimerandombattle: 'PiC Randoms',
+  petitcup: 'Petit Cup',
   pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
+  pikacup: 'Pika Cup',
   pokebilities: 'Pokebilities',
   pokebilitiesaaa: 'Pokebilities AAA',
+  pokecup: `Pok${eacute} Cup`,
   proteanpalace: 'Protean Palace',
   pu: 'PU', // PU (as in, "P-U, smells like ass"... I think)
   purehackmons: 'Pure Hackmons',
@@ -128,6 +139,7 @@ export const FormatLabels: Record<string, string> = {
   sharedpower: 'Shared Power',
   sharedpowerrandombattle: 'Shared Power Randoms',
   sharingiscaring: 'Sharing is Caring',
+  sketchmons: 'Sketchmons',
   spikemuthcup: 'Spikemuth Cup',
   stabmons: 'STABmons', // SameTypeAttackBonus
   stabmonsmixandmega: 'STABmons Mix & Mega',
@@ -143,8 +155,10 @@ export const FormatLabels: Record<string, string> = {
   trickmagic: 'Trick Magic',
   triplescustomgame: 'Triples Customs',
   ubers: 'Ubers',
+  ubersuu: 'Ubers UU',
   ultimatefinale: 'Ultimate Finale',
   uu: 'UU', // UnderUsed
+  vaporemons: 'VaporeMons',
   vgc2009: 'VGC 2009', // VideoGameChampionships
   vgc2010: 'VGC 2010',
   vgc2011: 'VGC 2011',
@@ -160,6 +174,7 @@ export const FormatLabels: Record<string, string> = {
   vgc2021: 'VGC 2021',
   vgc2022: 'VGC 2022',
   vgc2023: 'VGC 2023',
+  vgc2024: 'VGC 2024',
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
@@ -181,6 +196,83 @@ export const FormatSuffixes: [test: RegExp, replacement: string][] = [
   [/muk$/, `${times} Muk`], // saw a "[Gen 2] UU (+ Muk)" lol
   [/bo(\d+)$/, 'Bo$1'],
 ];
+
+/**
+ * Format-to-slug dictionary for accessing the Pokemon's Smogon StrategyDex page specific to the format.
+ *
+ * @since 0.1.2
+ */
+export const SmogonDexFormatSlugs: Record<string, string> = {
+  '1v1': '1v1',
+  '2v2doubles': '2v2-doubles',
+  almostanyability: 'almost-any-ability',
+  anythinggoes: 'ag',
+  balancedhackmons: 'bh',
+  battlespotsingles: 'battle-spot-singles',
+  battlespotdoubles: 'battle-spot-doubles',
+  battlespottriples: 'battle-spot-triples',
+  battlestadiumsingles: 'battle-stadium-singles',
+  battlestadiumsinglesseries1: 'bss-series-1',
+  battlestadiumsinglesseries2: 'bss-series-2',
+  battlestadiumsinglesseries12: 'bss-series-12',
+  battlestadiumsinglesseries13: 'bss-series-13',
+  bdspou: 'bdsp-ou',
+  camomons: 'camomons',
+  cap: 'cap',
+  doubles: 'doubles', // fallback case for formats matching 'doubles'
+  doublesou: 'doubles',
+  dreamworldou: 'dw-ou',
+  godlygift: 'godly-gift',
+  letsgoou: 'lgpe-ou',
+  mixandmega: 'mix-and-mega',
+  monotype: 'monotype', // fallback case for formats matching 'monotype'
+  nationaldex: 'national-dex',
+  nationaldexag: 'national-dex-ag',
+  nationaldexmonotype: 'national-dex-monotype',
+  nationaldexru: 'national-dex-ru',
+  nationaldexuu: 'national-dex-uu',
+  nfe: 'nfe',
+  nintendocup1997: 'nintendo-cup-1997',
+  nintendocup1998: 'nintendo-cup-1998',
+  nintendocup1999: 'nintendo-cup-1999',
+  nintendocup2000: 'nintendo-cup-2000',
+  nu: 'nu',
+  ou: 'ou',
+  partnersincrime: 'pic',
+  petitcup: 'petit-cup',
+  pikacup: 'pika-cup',
+  pokecup: 'poke-cup-rentals',
+  pu: 'pu',
+  purehackmons: 'pure-hackmons',
+  ru: 'ru',
+  stabmons: 'stabmons',
+  stadiumou: 'stadium-ou',
+  tradebacksou: 'tradebacks-ou',
+  ubers: 'uber',
+  uu: 'uu',
+  vgc2010: 'vgc10',
+  vgc2011: 'vgc11',
+  vgc2012: 'vgc12',
+  vgc2013: 'vgc13',
+  vgc2014: 'vgc14',
+  vgc2015: 'vgc15',
+  vgc2016: 'vgc16',
+  vgc2017: 'vgc17',
+  vgc2018: 'vgc18',
+  vgc2019: 'vgc19',
+  vgc2020: 'vgc20',
+  vgc2021: 'vgc21',
+  vgc2022: 'vgc22',
+  vgc2023: 'vgc23',
+  vgc2023series1: 'vgc23-series-1',
+  vgc2023series2: 'vgc23-series-2',
+  vgc2023series3: 'vgc23-series-3',
+  vgc2023series4: 'vgc23-series-4',
+  vgc2023regulatione: 'vgc24-regulation-e',
+  vgc2024: 'vgc24',
+  vgc2024regulatione: 'vgc24-regulation-e',
+  zu: 'zu',
+};
 
 /**
  * Formats where abilities & moves should be locked to legal values.

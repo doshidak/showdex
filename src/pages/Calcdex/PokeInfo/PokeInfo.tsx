@@ -25,7 +25,7 @@ import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { type ElementSizeLabel, useRandomUuid } from '@showdex/utils/hooks';
-import { openSmogonUniversity } from '@showdex/utils/host';
+import { openSmogonDex } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
 import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {
@@ -74,6 +74,7 @@ export const PokeInfo = ({
   const {
     gen,
     format,
+    subFormats,
     legacy,
     gameType,
   } = state;
@@ -411,11 +412,11 @@ export const PokeInfo = ({
             tooltipDisabled={!settings?.showUiTooltips}
             shadow
             disabled={!pokemon?.speciesForme || !settings?.openSmogonPage}
-            onPress={() => openSmogonUniversity(
+            onPress={() => openSmogonDex(
               gen,
               'pokemon',
               pokemon?.speciesForme,
-              format,
+              [format, ...(subFormats || [])].filter(Boolean).join(''),
             )}
           />
         </div>

@@ -6,5 +6,5 @@ export * from './getColorScheme';
 export * from './getSideRooms';
 export * from './hasSinglePanel';
 export * from './openShowdownUser';
-export * from './openSmogonUniversity';
+export * from './openSmogonDex';
 export * from './openUserPopup';
