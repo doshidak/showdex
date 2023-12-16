@@ -6,7 +6,7 @@ import { getTeambuilderPresets } from '@showdex/utils/presets';
 
 const l = logger('@showdex/pages/Teamdex/Teamdex.bootstrap');
 
-export const teamdexBootstrapper: ShowdexBootstrapper = (store) => {
+export const TeamdexBootstrapper: ShowdexBootstrapper = (store) => {
   l.debug(
     'Teamdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',

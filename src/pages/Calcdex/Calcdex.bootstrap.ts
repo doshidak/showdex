@@ -1,11 +1,6 @@
-import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { Provider as ReduxProvider } from 'react-redux';
 import { NIL as NIL_UUID } from 'uuid';
 import { type GenerationNum } from '@smogon/calc';
-import { CalcdexErrorBoundary, CalcdexProvider } from '@showdex/components/calc';
-import { ErrorBoundary } from '@showdex/components/debug';
-import { SandwichProvider } from '@showdex/components/layout';
 import {
   type CalcdexPlayer,
   type CalcdexPlayerKey,
@@ -33,7 +28,7 @@ import {
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { getAuthUsername, getBattleRoom, hasSinglePanel } from '@showdex/utils/host';
-import { Calcdex } from './Calcdex';
+import { CalcdexRenderer } from './Calcdex.renderer';
 import styles from './Calcdex.module.scss';
 
 /**
@@ -49,45 +44,6 @@ export interface BattleRoomOverride<
   name: FunctionPropertyNames<Showdown.BattleRoom>;
   native: TFunc;
 }
-
-/**
- * Renders the React-based Calcdex interface.
- *
- * * Only required fields are a `dom` created by `ReactDOM.createRoot()`, a `store` containing the
- *   `CalcdexSliceState` & a `battleId` inside the `CalcdexSliceState`.
- *   - You'd typically only provide `battleRoom` for active battles, which primarily contain G-Max
- *     forme data about an auth player's `Showdown.ServerPokemon`.
- * * As of v1.1.5, if you used `createCalcdexRoom()` & provided the optional `rootElement` argument,
- *   you can use the embedded `reactRoot` property for `dom` in the returned `Showdown.HtmlRoom`.
- *   - e.g., If `calcdexRoom` stores the return value of `createCalcdexRoom()`, you can pass in
- *     `calcdexRoom.reactRoot` for the `dom` argument of this function.
- * * Note that this is `export`'d & used by other outside components, like the Hellodex.
- *
- * @since 1.0.3
- */
-export const renderCalcdex = (
-  dom: ReactDOM.Root,
-  store: RootStore,
-  battleId: string,
-  battleRoom?: Showdown.BattleRoom,
-): void => dom.render((
-  <ReduxProvider store={store}>
-    <ErrorBoundary
-      component={CalcdexErrorBoundary}
-      battleId={battleId}
-    >
-      <SandwichProvider>
-        <CalcdexProvider battleId={battleId}>
-          <Calcdex
-            // note: if we dispatch overlayClosed to false, the battleRoom and the injected Calcdex button
-            // won't properly update to reflect the closed state, so we must provide this prop
-            onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
-          />
-        </CalcdexProvider>
-      </SandwichProvider>
-    </ErrorBoundary>
-  </ReduxProvider>
-));
 
 /**
  * Determines if the auth user has won/loss, then increments the win/loss counter.
@@ -131,15 +87,14 @@ const updateBattleRecord = (
   store.dispatch(hellodexSlice.actions[reducerName]());
 };
 
-const baseScope = '@showdex/pages/Calcdex/Calcdex.bootstrap';
-const l = logger(baseScope);
+const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
 
-export const calcdexBootstrapper: ShowdexBootstrapper = (
+export const CalcdexBootstrapper: ShowdexBootstrapper = (
   store,
   data,
   roomid,
 ) => {
-  const endTimer = runtimer(baseScope, l);
+  const endTimer = runtimer(l.scope, l);
 
   l.debug(
     'Calcdex bootstrapper was invoked;',
@@ -668,26 +623,6 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
               // note: not doing startsWith() since 'p1: Mewtwo|Mewtwo' will pass when given ident 'p1: Mew'
               || (!!p?.searchid?.includes('|') && p.searchid.split('|')[0] === ident)
           ))
-            /*
-            // e.g., details = 'Ditto'
-            // update (2023/07/30): for replays, the only guaranteed fields are `name` (typically the speciesForme), `speciesForme` & `details`
-            && (!!details && (
-              (!!p?.details && p.details === details)
-                // e.g., 'p1: CalcdexDemolisher|Ditto'.endsWith('Ditto')
-                // update (2023/07/27): apparently includes() was a bad idea for this very unique edge case in gen1ubers where
-                // the client first adds 'Mewtwo' (under `details`), then at some point later 'Mew', which then passes this check,
-                // incorrectly assigning Mewtwo's calcdexId to Mew! (& this breaks sync, as you'd expect) hence endsWith() LOL
-                // || (!!p?.searchid && p.searchid.includes(details))
-                || (!!p?.searchid && p.searchid.endsWith(details))
-                // update (2023/07/27): whoops, missed a spot!
-                // || (!!p?.speciesForme && !p.speciesForme.endsWith('-*') && details.includes(p.speciesForme))
-                // update (2023/07/30): oh ye, forgot that `details` includes the gender, if applicable (e.g., 'Reuniclus, M')
-                || (!!p?.speciesForme && details.replace('-*', '') === [
-                  p.speciesForme.replace('-*', ''),
-                  p.gender !== 'N' && p.gender,
-                ].filter(Boolean).join(', '))
-            ))
-            */
             && similarPokemon({ details }, p, {
               format: battleState.format,
               normalizeFormes: 'wildcard',
@@ -899,7 +834,9 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       store.dispatch(calcdexSlice.actions.init({
-        scope: `${baseScope}:battle.subscribe()`,
+        scope: `${l.scope}:battle.subscribe()`,
+
+        operatingMode: 'battle',
         battleId: battle.id || roomid,
         battleNonce: initNonce,
         gen: battle.gen as GenerationNum,
@@ -986,7 +923,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
       );
 
       store.dispatch(calcdexSlice.actions.update({
-        scope: `${baseScope}:battle.subscribe()`,
+        scope: `${l.scope}:battle.subscribe()`,
         battleId: battle.id || roomid,
         battleNonce: battle.nonce,
         active: false,
@@ -1073,7 +1010,7 @@ export const calcdexBootstrapper: ShowdexBootstrapper = (
     //   '\n', 'battleRoom', battleRoom,
     // );
 
-    renderCalcdex(
+    CalcdexRenderer(
       calcdexReactRoot,
       store,
       battle.id || roomid,

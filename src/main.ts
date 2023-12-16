@@ -1,4 +1,4 @@
-import { calcdexBootstrapper, hellodexBootstrapper, teamdexBootstrapper } from '@showdex/pages';
+import { CalcdexBootstrapper, HellodexBootstrapper, TeamdexBootstrapper } from '@showdex/pages';
 import { type RootStore, createStore, showdexSlice } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import '@showdex/styles/global.scss';
@@ -24,7 +24,7 @@ const store = createStore();
 
 // list of bootstrappers dependent on a room
 const bootstrappers: ShowdexBootstrapper[] = [
-  calcdexBootstrapper,
+  CalcdexBootstrapper,
 ];
 
 l.debug('Hooking into the client\'s app.receive()...');
@@ -86,13 +86,13 @@ colorSchemeObserver.observe(document.documentElement, {
 
 // open the Hellodex when the Showdown client starts
 // (hence why it's not part of the bootstrappers array)
-hellodexBootstrapper(store);
+HellodexBootstrapper(store);
 
 /**
  * @todo May require some special logic to detect when the Teambuilder room opens.
  *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
  *   i.e., doesn't render anything, this implementation is fine.
  */
-teamdexBootstrapper(store);
+TeamdexBootstrapper(store);
 
-l.info('Completed main execution!');
+l.success('Completed main execution!');
