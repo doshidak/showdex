@@ -80,9 +80,6 @@ export const HellodexSettingsPane = ({
               <br />
               <br />
               Only records games that you've played (i.e., ignores spectating games).
-              Won't appear if there are no recorded wins or losses.
-              <br />
-              <br />
               Recorded amounts don't persist between sessions; i.e., will reset back to 0W-0L
               as soon as you refresh the page.
             </div>

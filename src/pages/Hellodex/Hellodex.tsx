@@ -10,10 +10,11 @@ import {
   useCalcdexState,
   useColorScheme,
   useHellodexSettings,
+  useHellodexState,
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
-import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
+import { useRoomNavigation } from '@showdex/utils/hooks';
 import { openUserPopup } from '@showdex/utils/host';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
@@ -21,6 +22,7 @@ import { GradientButton } from './GradientButton';
 import { InstanceButton } from './InstanceButton';
 import { PatronagePane } from './PatronagePane';
 import { SettingsPane } from './SettingsPane';
+import { useHellodexSize } from './useHellodexSize';
 import styles from './Hellodex.module.scss';
 
 export interface HellodexProps {
@@ -44,10 +46,7 @@ export const Hellodex = ({
   const colorScheme = useColorScheme();
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  const { size } = useElementSize(contentRef, {
-    initialWidth: 400,
-    initialHeight: 700,
-  });
+  useHellodexSize(contentRef);
 
   const authName = useAuthUsername();
   const authTitle = findPlayerTitle(authName, true);
@@ -56,6 +55,7 @@ export const Hellodex = ({
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
   useRoomNavigation();
 
+  const state = useHellodexState();
   const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
   const neverOpens = calcdexSettings?.openOnStart === 'never';
@@ -86,13 +86,12 @@ export const Hellodex = ({
         ref={contentRef}
         className={cx(
           styles.content,
-          ['xs', 'sm'].includes(size) && styles.verySmol,
+          ['xs', 'sm'].includes(state.containerSize) && styles.verySmol,
         )}
       >
         {
           patronageVisible &&
           <PatronagePane
-            containerSize={size}
             onRequestClose={() => setPatronageVisible(false)}
           />
         }
@@ -100,7 +99,6 @@ export const Hellodex = ({
         {
           settingsVisible &&
           <SettingsPane
-            inBattle={['xs', 'sm'].includes(size)}
             onRequestClose={() => setSettingsVisible(false)}
           />
         }

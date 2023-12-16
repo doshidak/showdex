@@ -1,5 +1,4 @@
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { type CalcdexRenderMode } from '@showdex/redux/store';
+import { type CalcdexPlayerKey, type CalcdexRenderMode } from '@showdex/interfaces/calc';
 import { type CalcdexMatchupNhkoColors, type CalcdexMatchupNhkoLabels } from '@showdex/utils/calc';
 
 /**

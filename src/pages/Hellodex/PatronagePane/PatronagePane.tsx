@@ -9,10 +9,9 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { ShowdexDonorTiers, ShowdexPatronTiers } from '@showdex/consts/app';
-import { useAuthUsername, useColorScheme } from '@showdex/redux/store';
+import { useAuthUsername, useColorScheme, useHellodexState } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
-import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { GradientButton } from '../GradientButton';
 import { PatronageTierRenderer } from './PatronageTierRenderer';
 import styles from './PatronagePane.module.scss';
@@ -20,7 +19,6 @@ import styles from './PatronagePane.module.scss';
 export interface PatronagePaneProps {
   className?: string;
   style?: React.CSSProperties;
-  containerSize?: ElementSizeLabel,
   onRequestClose?: BaseButtonProps['onPress'];
 }
 
@@ -30,19 +28,20 @@ const patronageUrl = env('hellodex-patronage-url');
 export const PatronagePane = ({
   className,
   style,
-  containerSize = 'md',
   onRequestClose,
 }: PatronagePaneProps): JSX.Element => {
+  const state = useHellodexState();
+  const colorScheme = useColorScheme();
+
   const authUser = useAuthUsername();
   const authTitle = findPlayerTitle(authUser, true);
-  const colorScheme = useColorScheme();
 
   return (
     <div
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
-        ['xs', 'sm'].includes(containerSize) && styles.verySmol,
+        ['xs', 'sm'].includes(state.containerSize) && styles.verySmol,
         className,
       )}
       style={style}

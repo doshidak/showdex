@@ -16,6 +16,7 @@ import {
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import {
   useColorScheme,
+  useHellodexState,
   useShowdexSettings,
   useUpdateSettings,
 } from '@showdex/redux/store';
@@ -39,7 +40,6 @@ import styles from './SettingsPane.module.scss';
 export interface SettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
-  inBattle?: boolean;
   onRequestClose?: BaseButtonProps['onPress'];
 }
 
@@ -57,10 +57,12 @@ const getPresetCacheSize = () => (getStoredItem('storage-preset-cache-key')?.len
 export const SettingsPane = ({
   className,
   style,
-  inBattle,
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
   const colorScheme = useColorScheme();
+  const state = useHellodexState();
+  const inBattle = ['xs', 'sm'].includes(state.containerSize);
+
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
 

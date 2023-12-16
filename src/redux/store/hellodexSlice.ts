@@ -5,7 +5,9 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { useDispatch, useSelector } from './hooks';
 
 /**
@@ -41,6 +43,19 @@ export interface HellodexBattleRecord {
  * @since 1.0.6
  */
 export interface HellodexSliceState {
+  /**
+   * Last recorded container size label.
+   *
+   * @default 'xs'
+   * @since 1.2.0
+   */
+  containerSize: ElementSizeLabel;
+
+  /**
+   * Win/loss record state.
+   *
+   * @since 1.0.6
+   */
   battleRecord: HellodexBattleRecord;
 }
 
@@ -51,13 +66,26 @@ export interface HellodexSliceState {
  */
 export interface HellodexSliceReducers extends SliceCaseReducers<HellodexSliceState> {
   /**
+   * Updates any part of the `HellodexSliceState`.
+   *
+   * @since 1.2.0
+   */
+  update: (
+    state: Draft<HellodexSliceState>,
+    action: PayloadAction<DeepPartial<HellodexSliceState>>,
+  ) => void;
+
+  /**
    * Increases the win count by the specified amount in `action.payload` (`1` by default).
    *
    * * Amount in `action.payload` must be positive, otherwise, will default to `0`.
    *
    * @since 1.0.6
    */
-  recordWin: (state: Draft<HellodexSliceState>, action: PayloadAction<number>) => void;
+  recordWin: (
+    state: Draft<HellodexSliceState>,
+    action: PayloadAction<number>,
+  ) => void;
 
   /**
    * Increases the loss count by the specified amount in `action.payload` (`1` by default).
@@ -66,14 +94,20 @@ export interface HellodexSliceReducers extends SliceCaseReducers<HellodexSliceSt
    *
    * @since 1.0.6
    */
-  recordLoss: (state: Draft<HellodexSliceState>, action: PayloadAction<number>) => void;
+  recordLoss: (
+    state: Draft<HellodexSliceState>,
+    action: PayloadAction<number>,
+  ) => void;
 
   /**
-   * Resets the record to `0` wins and `0` losses.
+   * Resets the record to `0` wins & `0` losses.
    *
    * @since 1.0.6
    */
-  resetRecord: (state: Draft<HellodexSliceState>, action: PayloadAction<null>) => void;
+  resetRecord: (
+    state: Draft<HellodexSliceState>,
+    action: PayloadAction<null>,
+  ) => void;
 }
 
 const l = logger('@showdex/redux/store/hellodexSlice');
@@ -82,6 +116,7 @@ export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReduce
   name: 'hellodex',
 
   initialState: {
+    containerSize: 'xs',
     battleRecord: {
       wins: 0,
       losses: 0,
@@ -89,12 +124,37 @@ export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReduce
   },
 
   reducers: {
-    recordWin: (state, action) => {
+    update: (state, action) => {
+      const { payload } = action;
+
+      if (!nonEmptyObject(payload)) {
+        return;
+      }
+
+      if (payload?.containerSize) {
+        state.containerSize = payload.containerSize;
+      }
+
+      if (nonEmptyObject(payload?.battleRecord)) {
+        state.battleRecord = {
+          ...state.battleRecord,
+          ...payload.battleRecord,
+        };
+      }
+
       l.debug(
-        'RECV', action.type,
+        'DONE', action.type,
         '\n', 'action.payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
+    },
+
+    recordWin: (state, action) => {
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'action.payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const { wins: currentWins = 0 } = state.battleRecord || {};
       const deltaWins = Math.max(action.payload || 1, 0);
@@ -109,11 +169,11 @@ export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReduce
     },
 
     recordLoss: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'action.payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'action.payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       const { losses: currentLosses = 0 } = state.battleRecord || {};
       const deltaLosses = Math.max(action.payload || 1, 0);
@@ -128,10 +188,10 @@ export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReduce
     },
 
     resetRecord: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       state.battleRecord.wins = 0;
       state.battleRecord.losses = 0;
@@ -143,6 +203,15 @@ export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReduce
     },
   },
 });
+
+/**
+ * Convenient hook to access the `HellodexSliceState`.
+ *
+ * @since 1.2.0
+ */
+export const useHellodexState = () => useSelector(
+  (state) => state.hellodex,
+);
 
 /**
  * Convenient hook to access the current `HellodexBattleRecord`.
