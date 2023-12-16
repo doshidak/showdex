@@ -8,7 +8,7 @@ import { formatId } from '@showdex/utils/core';
 import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
 import { type PokemonStatBoostDelta } from '@showdex/utils/ui';
-import styles from './PokeMoves.module.scss';
+import styles from './PokeMoveOptionTooltip.module.scss';
 
 export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<MoveName> {
   className?: string;
@@ -51,11 +51,6 @@ export const PokeMoveOptionTooltip = ({
       || dexMove.desc,
   );
 
-  // const moveOverrides = {
-  //   ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon),
-  //   ...pokemon?.moveOverrides?.[value],
-  // };
-
   const hasOverrides = hasMoveOverrides(format, pokemon, value, opponentPokemon);
   const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon) };
   const userOverrides = pokemon?.moveOverrides?.[value];
@@ -65,14 +60,6 @@ export const PokeMoveOptionTooltip = ({
     moveOverrides.category === 'Status' ? 'status' : moveOverrides.offensiveStat,
     moveOverrides.defensiveStat,
   );
-
-  // const basePower = (
-  //   pokemon?.useZ
-  //     ? moveOverrides?.zBasePower
-  //     : pokemon?.useMax
-  //       ? moveOverrides?.maxBasePower
-  //       : null
-  // ) || moveOverrides?.basePower;
 
   const basePowerOverride = (pokemon?.useZ && userOverrides?.zBasePower)
     || (pokemon?.useMax && userOverrides?.maxBasePower)
@@ -117,15 +104,12 @@ export const PokeMoveOptionTooltip = ({
 
   return (
     <div
-      className={cx(
-        styles.moveTooltip,
-        className,
-      )}
+      className={cx(styles.container, className)}
       style={style}
     >
       {
         !!description &&
-        <div className={styles.moveDescription}>
+        <div className={styles.description}>
           {description}
         </div>
       }
@@ -133,10 +117,10 @@ export const PokeMoveOptionTooltip = ({
       {
         hasOverrides &&
         <div
-          className={styles.moveProperties}
+          className={styles.properties}
           style={{ marginBottom: 3 }}
         >
-          <div className={styles.moveProperty}>
+          <div className={styles.property}>
             <div className={styles.propertyName}>
               Edited
             </div>
@@ -144,16 +128,16 @@ export const PokeMoveOptionTooltip = ({
         </div>
       }
 
-      <div className={styles.moveProperties}>
+      <div className={styles.properties}>
         <PokeType
-          className={styles.moveType}
+          className={styles.type}
           type={moveOverrides.type}
           reverseColorScheme
         />
 
         {
           !!moveOverrides.category &&
-          <div className={styles.moveProperty}>
+          <div className={styles.property}>
             <div className={styles.propertyName}>
               {categoryLabel?.[2] || (
                 <>
@@ -199,7 +183,7 @@ export const PokeMoveOptionTooltip = ({
 
         {
           showFaintCount &&
-          <div className={styles.moveProperty}>
+          <div className={styles.property}>
             <div className={styles.propertyName}>
               FNT
             </div>
@@ -212,7 +196,7 @@ export const PokeMoveOptionTooltip = ({
 
         {
           showAccuracy &&
-          <div className={styles.moveProperty}>
+          <div className={styles.property}>
             <div className={styles.propertyName}>
               ACC
             </div>
@@ -225,7 +209,7 @@ export const PokeMoveOptionTooltip = ({
 
         {
           showPriority &&
-          <div className={styles.moveProperty}>
+          <div className={styles.property}>
             <div className={styles.propertyName}>
               PRI
             </div>

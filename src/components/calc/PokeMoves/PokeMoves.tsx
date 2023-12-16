@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { type MoveName } from '@smogon/calc';
+import { PokeMoveOptionTooltip } from '@showdex/components/app';
 import {
   Dropdown,
   MoveCategoryField,
@@ -32,7 +33,6 @@ import { legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
-import { PokeMoveOptionTooltip } from './PokeMoveOptionTooltip';
 import styles from './PokeMoves.module.scss';
 
 export interface PokeMovesProps {
@@ -480,8 +480,6 @@ export const PokeMoves = ({
       {Array(matchups.length).fill(null).map((_, i) => {
         // const moveName = pokemon?.moves?.[i];
         // const move = moveName ? dex?.moves.get(moveName) : null;
-        // const moveDescription = move?.shortDesc || move?.desc;
-
         // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
         // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
 
@@ -631,15 +629,7 @@ export const PokeMoves = ({
             </TableGridItem>
 
             {pokemon?.showMoveOverrides ? (
-              <TableGridItem
-                // className={cx(
-                //   styles.editorItem,
-                //   ['xs', 'sm'].includes(containerSize) && styles.smol,
-                //   damagingMove && styles.withStatTargets,
-                // )}
-                className={styles.editorItem}
-                // style={{ paddingLeft: 6 }}
-              >
+              <TableGridItem className={styles.editorItem}>
                 <div className={styles.editorLeft}>
                   <PokeTypeField
                     input={{
@@ -652,40 +642,6 @@ export const PokeMoves = ({
                       }, `${l.scope}:PokeTypeField:input.onChange()`),
                     }}
                   />
-
-                  {/* <ToggleButton
-                    className={cx(
-                      styles.editorButton,
-                      styles.categoryButton,
-                      moveOverrides.category === 'Status' && styles.readOnly,
-                    )}
-                    label={moveOverrides.category?.slice(0, 4)}
-                    tooltip={(
-                      <div className={styles.descTooltip}>
-                        {
-                          damagingMove &&
-                          <>
-                            Switch to{' '}
-                            <em>{moveOverrides.category === 'Physical' ? 'Special' : 'Physical'}</em>
-                            <br />
-                          </>
-                        }
-
-                        <strong>{moveOverrides.category}</strong>
-                      </div>
-                    )}
-                    tooltipDisabled={!settings?.showUiTooltips}
-                    primary={damagingMove}
-                    onPress={damagingMove ? () => updatePokemon({
-                      moveOverrides: {
-                        [moveName]: {
-                          category: moveOverrides.category === 'Physical'
-                            ? 'Special'
-                            : 'Physical',
-                        },
-                      },
-                    }, `${l.scope}:ToggleButton~Category:onPress()`) : undefined}
-                  /> */}
 
                   <MoveCategoryField
                     className={styles.categoryField}

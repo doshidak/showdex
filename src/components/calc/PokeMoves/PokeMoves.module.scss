@@ -73,27 +73,6 @@
   }
 }
 
-.moveTooltip {
-  @include flex.column-center;
-  max-width: 160px;
-  white-space: normal;
-  user-select: none;
-}
-
-.moveDescription {
-  @include spacing.margin($bottom: 0.4em);
-  text-align: center;
-}
-
-.moveProperties {
-  @include flex.row-center;
-  font-size: 8px;
-}
-
-.moveType {
-  @include spacing.margin($right: 0.8em);
-}
-
 .moveProperty {
   @include flex.row($align: center);
 
@@ -112,28 +91,6 @@
     @include spacing.margin($left: 0.5em);
     @include font.apply(fonts.$mono);
     font-size: 10px;
-  }
-}
-
-.deltaValue {
-  @include transition.apply(color);
-
-  &.positive {
-    color: colors.$green;
-  }
-
-  &.negative {
-    color: colors.$red;
-  }
-
-  &.dark {
-    &.positive {
-      color: color.shade(colors.$green, 10%);
-    }
-
-    &.negative {
-      color: color.shade(colors.$red, 10%);
-    }
   }
 }
 

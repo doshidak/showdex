@@ -3,8 +3,10 @@ import cx from 'classnames';
 import { type AbilityName, type ItemName } from '@smogon/calc';
 import {
   PiconButton,
+  PokeAbilityOptionTooltip,
   PokeFormeTooltip,
   PokeHpBar,
+  PokeItemOptionTooltip,
   PokeStatus,
   PokeStatusTooltip,
 } from '@showdex/components/app';
@@ -42,8 +44,6 @@ import {
   buildSpreadOptions,
 } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
-import { PokeAbilityOptionTooltip } from './PokeAbilityOptionTooltip';
-import { PokeItemOptionTooltip } from './PokeItemOptionTooltip';
 import styles from './PokeInfo.module.scss';
 
 export interface PokeInfoProps {

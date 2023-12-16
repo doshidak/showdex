@@ -1,38 +1,34 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { type ItemName } from '@smogon/calc';
+import { type AbilityName } from '@smogon/calc';
 import { type SelectOptionTooltipProps } from '@showdex/components/form';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
-import styles from './PokeInfo.module.scss';
+import styles from './PokeAbilityOptionTooltip.module.scss';
 
-export interface PokeItemOptionTooltipProps extends SelectOptionTooltipProps<ItemName> {
+export interface PokeAbilityOptionTooltipProps extends SelectOptionTooltipProps<AbilityName> {
   className?: string;
   style?: React.CSSProperties;
   format?: string;
 }
 
-export const PokeItemOptionTooltip = ({
+export const PokeAbilityOptionTooltip = ({
   className,
   style,
   format,
   value,
   hidden,
-}: PokeItemOptionTooltipProps): JSX.Element => {
+}: PokeAbilityOptionTooltipProps): JSX.Element => {
   if (!value || hidden) {
     return null;
   }
 
   const dex = getDexForFormat(format);
-  const dexItem = dex?.items.get(value);
-  const description = formatDexDescription(dexItem?.shortDesc || dexItem?.desc);
+  const dexAbility = dex?.abilities.get(value);
+  const description = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
 
   return (
     <div
-      className={cx(
-        styles.tooltipContent,
-        styles.descTooltip,
-        className,
-      )}
+      className={cx(styles.container, className)}
       style={style}
     >
       {description || 'No description available.'}
