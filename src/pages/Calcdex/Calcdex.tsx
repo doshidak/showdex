@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   CloseButton,
   FieldCalc,
@@ -12,7 +11,7 @@ import {
 import { BuildInfo } from '@showdex/components/debug';
 import { type DropdownOption } from '@showdex/components/form';
 import { Scrollable } from '@showdex/components/ui';
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';

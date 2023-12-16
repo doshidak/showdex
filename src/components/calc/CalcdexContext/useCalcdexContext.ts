@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { type ItemName, type MoveName } from '@smogon/calc';
-import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   PokemonBoosterAbilities,
   PokemonPresetFuckedBaseFormes,
@@ -14,6 +13,7 @@ import {
   type CalcdexPlayerKey,
   type CalcdexPlayerSide,
   type CalcdexPokemon,
+  CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {

@@ -6,13 +6,13 @@ import {
   current,
 } from '@reduxjs/toolkit';
 import { type GenerationNum } from '@smogon/calc';
-import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   type CalcdexBattleField,
   type CalcdexBattleState,
   type CalcdexPlayer,
   type CalcdexPlayerKey,
   type CalcdexPokemon,
+  CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';

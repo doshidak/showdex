@@ -1,8 +1,5 @@
-import {
-  type ShowdexPlayerTitle,
-  ShowdexPlayerTitles,
-  ShowdexSupporterTiers,
-} from '@showdex/consts/app';
+import { ShowdexPlayerTitles, ShowdexSupporterTiers } from '@showdex/consts/app';
+import { type ShowdexPlayerTitle } from '@showdex/interfaces/app';
 import { formatId } from '@showdex/utils/core';
 
 /**

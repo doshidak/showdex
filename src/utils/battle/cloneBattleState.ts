@@ -1,4 +1,3 @@
-import { AllPlayerKeys } from '@showdex/consts/battle';
 import {
   type CalcdexBattleField,
   type CalcdexBattleRules,
@@ -7,6 +6,7 @@ import {
   type CalcdexPlayerSide,
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
+  CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { detectUsageAlt } from '@showdex/utils/presets/detectUsageAlt'; /** @todo reorganize me */

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { AllPlayerKeys } from '@showdex/consts/battle';
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';

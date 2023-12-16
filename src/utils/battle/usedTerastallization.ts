@@ -1,5 +1,4 @@
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { AllPlayerKeys } from '@showdex/consts/battle';
+import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 
 /**
  * Determines if the player with the `playerKey` has used Terastallization in the battle.

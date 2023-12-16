@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { AllPlayerKeys } from '@showdex/consts/battle';
 import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import {
   type CalcdexBattleState,
   type CalcdexPlayer,
   type CalcdexPlayerKey,
   type CalcdexPokemonPreset,
+  CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import { cloneAllPokemon, clonePreset } from '@showdex/utils/battle';

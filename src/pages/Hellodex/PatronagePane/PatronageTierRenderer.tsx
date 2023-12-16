@@ -9,8 +9,8 @@ import {
   isValid,
 } from 'date-fns';
 import { Button, Tooltip } from '@showdex/components/ui';
-import { type ShowdexSupporterTier } from '@showdex/consts/app';
 import { bullop } from '@showdex/consts/core';
+import { type ShowdexSupporterTier } from '@showdex/interfaces/app';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, formatId, getResourceUrl } from '@showdex/utils/core';
 import { openUserPopup } from '@showdex/utils/host';
