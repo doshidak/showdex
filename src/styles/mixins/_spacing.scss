@@ -5,104 +5,138 @@
 
 @use 'functions/list';
 
-@mixin -spacing($property, $top: null, $right: null, $bottom: null, $left: null) {
+@mixin -spacing(
+  $prop,
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null,
+) {
+  @if not list.includes('margin' 'padding', $prop) {
+    @error 'Invalid $prop value passed to the -spacing() mixin: #{$prop}';
+  }
+
   @if $top and $right and $bottom and $left { // all directions specified
     @if $right == $left {
       @if $top == $bottom {
         @if $top == $right { // $top (== $bottom) == $right (== $left)
-          #{$property}: $top;
+          #{$prop}: $top;
         } @else { // $top (== $bottom) != $right (== $left)
-          #{$property}: $top $right;
+          #{$prop}: $top $right;
         }
       } @else { // $top != $bottom, but $right == $left
-        #{$property}: $top $right $bottom;
+        #{$prop}: $top $right $bottom;
       }
     } @else { // $right != $left
-      #{$property}: $top $right $bottom $left;
+      #{$prop}: $top $right $bottom $left;
     }
   } @else { // not all directions specified
     @if $top {
-      #{$property}-top: $top;
+      #{$prop}-top: $top;
     }
 
     @if $right {
-      #{$property}-right: $right;
+      #{$prop}-right: $right;
     }
 
     @if $bottom {
-      #{$property}-bottom: $bottom;
+      #{$prop}-bottom: $bottom;
     }
 
     @if $left {
-      #{$property}-left: $left;
+      #{$prop}-left: $left;
     }
   }
 }
 
 // margin
 
-@mixin margin($top: null, $right: null, $bottom: null, $left: null) {
-  @include -spacing(margin, $top, $right, $bottom, $left);
+@mixin margin(
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null,
+  $x: null,
+  $y: null,
+  $all: null,
+) {
+  @include -spacing(
+    $prop: margin,
+    $top: if($top, $top, if($y, $y, $all)),
+    $right: if($right, $right, if($x, $x, $all)),
+    $bottom: if($bottom, $bottom, if($y, $y, $all)),
+    $left: if($left, $left, if($x, $x, $all)),
+  );
 }
 
-@mixin margin-axis($vertical: null, $horizontal: null) {
-  @include margin($vertical, $horizontal, $vertical, $horizontal);
-}
-
-/// @alias margin-axis
 @mixin margin-xy($x: null, $y: null) {
-  @include margin-axis($vertical: $y, $horizontal: $x);
+  @include margin($x: $x, $y: $y);
 }
 
-@mixin margin-center($vertical: 0, $horizontal: auto) {
-  @include margin-axis($vertical, $horizontal);
+@mixin margin-axis($horizontal: null, $vertical: null) {
+  @include margin($x: $horizontal, $y: $vertical);
 }
 
-@mixin margin-middle($vertical: auto, $horizontal: 0) {
-  @include margin-axis($vertical, $horizontal);
+@mixin margin-center($vertical: null) {
+  @include margin($x: auto, $y: $vertical);
 }
 
-@mixin margin-square($margin: null) {
-  @include margin($margin, $margin, $margin, $margin);
+@mixin margin-middle($horizontal: null) {
+  @include margin($x: $horizontal, $y: auto);
 }
 
-/// @alias margin-square
-@mixin margin-all($margin: null) {
-  @include margin-square($margin);
+@mixin margin-all($margin) {
+  @include margin($all: $margin);
 }
 
-@mixin margin-auto($margin: auto) {
-  @include margin-square($margin);
+@mixin margin-square($margin) {
+  @include margin($all: $margin);
 }
 
-@mixin margin-none($margin: 0) {
-  @include margin-square($margin);
+@mixin margin-auto {
+  @include margin($all: auto);
+}
+
+@mixin margin-none {
+  @include margin($all: 0);
 }
 
 // padding
 
-@mixin padding($top: null, $right: null, $bottom: null, $left: null) {
-  @include -spacing(padding, $top, $right, $bottom, $left);
+@mixin padding(
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null,
+  $x: null,
+  $y: null,
+  $all: null,
+) {
+  @include -spacing(
+    $prop: padding,
+    $top: if($top, $top, if($y, $y, $all)),
+    $right: if($right, $right, if($x, $x, $all)),
+    $bottom: if($bottom, $bottom, if($y, $y, $all)),
+    $left: if($left, $left, if($x, $x, $all)),
+  );
 }
 
-@mixin padding-axis($vertical: null, $horizontal: null) {
-  @include padding($vertical, $horizontal, $vertical, $horizontal);
-}
-
-/// @alias padding-axis
 @mixin padding-xy($x: null, $y: null) {
-  @include padding-axis($vertical: $y, $horizontal: $x);
+  @include padding($x: $x, $y: $y);
 }
 
-@mixin padding-square($padding: null) {
-  @include padding($padding, $padding, $padding, $padding);
+@mixin padding-axis($horizontal: null, $vertical: null) {
+  @include padding($x: $horizontal, $y: $vertical);
 }
 
-/// @alias padding-square
-@mixin padding-all($padding: null) {
-  @include padding-square($padding);
+@mixin padding-all($padding) {
+  @include padding($all: $padding);
 }
 
-@mixin padding-none($padding: 0) {
-  @include padding-square($padding);
+@mixin padding-square($padding) {
+  @include padding($all: $padding);
+}
+
+@mixin padding-none {
+  @include padding($all: 0);
 }

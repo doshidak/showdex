@@ -4,11 +4,20 @@
 ////
 
 @use 'sass:meta';
+@use 'functions/list';
 
-@mixin -position($position: null, $top: null, $right: null, $bottom: null, $left: null) {
-  @if $position {
-    position: $position;
+@mixin -position(
+  $position: relative,
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null,
+) {
+  @if not list.includes('absolute' 'fixed' 'relative', $position) {
+    @error 'Invalid $position value passed to the -position() mixin: #{$position}';
   }
+
+  position: $position;
 
   @if $top {
     top: $top;
@@ -29,7 +38,10 @@
 
 // translate
 
-@mixin translate($x: null, $y: null) {
+@mixin translate(
+  $x: null,
+  $y: null,
+) {
   @if meta.type-of($x) == 'number' or meta.type-of($y) == 'number' {
     @if $x and $x != 0 and $y and $y != 0 {
       transform: translate($x, $y);
@@ -52,33 +64,50 @@
 
 // absolute
 
-@mixin absolute($top: null, $right: null, $bottom: null, $left: null) {
-  @include -position(absolute, $top, $right, $bottom, $left);
+@mixin absolute(
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null,
+  $x: null,
+  $y: null,
+  $all: null,
+) {
+  @include -position(
+    $position: absolute,
+    $top: if($top, $top, if($y, $y, $all)),
+    $right: if($right, $right, if($x, $x, $all)),
+    $bottom: if($bottom, $bottom, if($y, $y, $all)),
+    $left: if($left, $left, if($x, $x, $all)),
+  );
 }
 
-@mixin absolute-fill($top: 0, $right: 0, $bottom: 0, $left: 0) {
-  @include absolute($top, $right, $bottom, $left);
+@mixin absolute-xy($x: null, $y: null) {
+  @include absolute($x: $x, $y: $y);
 }
 
-@mixin absolute-axis($vertical, $horizontal) {
-  @include absolute($vertical, $horizontal, $vertical, $horizontal);
+@mixin absolute-axis($horizontal: null, $vertical: null) {
+  @include absolute($x: $horizontal, $y: $vertical);
 }
 
-/// @alias absolute-axis
-@mixin absolute-xy($x, $y) {
-  @include absolute-axis($vertical: $y, $horizontal: $x);
+@mixin absolute-all($margin) {
+  @include absolute($all: $margin);
 }
 
 @mixin absolute-square($margin) {
-  @include absolute($margin, $margin, $margin, $margin);
+  @include absolute($all: $margin);
 }
 
-/// @alias absolute-square
-@mixin absolute-all($margin) {
-  @include absolute-square($margin);
+@mixin absolute-fill {
+  @include absolute($all: 0);
 }
 
-@mixin absolute-anchor($x: null, $y: null, $x-prop: left, $y-prop: top) {
+@mixin absolute-anchor(
+  $x: null,
+  $y: null,
+  $x-prop: left,
+  $y-prop: top,
+) {
   $translate-x: if($x, -$x, null);
   $translate-y: if($y, -$y, null);
 
@@ -96,42 +125,60 @@
     $bottom: if($y-prop == bottom, $y, null),
     $left: if($x-prop == left, $x, null),
   );
-  @include translate($translate-x, $translate-y);
+
+  @include translate($x: $translate-x, $y: $translate-y);
 }
 
-@mixin absolute-center($top: 50%, $left: 50%) {
-  @include absolute-anchor($x: $left, $y: $top);
+@mixin absolute-center($x-prop: left, $y-prop: top) {
+  @include absolute-anchor($x: 50%, $y: 50%, $x-prop: $x-prop, $y-prop: $y-prop);
 }
 
 // fixed
 
-@mixin fixed($top: null, $right: null, $bottom: null, $left: null) {
-  @include -position(fixed, $top, $right, $bottom, $left);
+@mixin fixed(
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null,
+  $x: null,
+  $y: null,
+  $all: null,
+) {
+  @include -position(
+    $position: fixed,
+    $top: if($top, $top, if($y, $y, $all)),
+    $right: if($right, $right, if($x, $x, $all)),
+    $bottom: if($bottom, $bottom, if($y, $y, $all)),
+    $left: if($left, $left, if($x, $x, $all)),
+  );
 }
 
-@mixin fixed-fill($top: 0, $right: 0, $bottom: 0, $left: 0) {
-  @include fixed($top, $right, $bottom, $left);
+@mixin fixed-xy($x: null, $y: null) {
+  @include fixed($x: $x, $y: $y);
 }
 
-@mixin fixed-axis($vertical, $horizontal) {
-  @include fixed($vertical, $horizontal, $vertical, $horizontal);
+@mixin fixed-axis($horizontal: null, $vertical: null) {
+  @include fixed($x: $horizontal, $y: $vertical);
 }
 
-/// @alias fixed-axis
-@mixin fixed-xy($x, $y) {
-  @include fixed-axis($vertical: $y, $horizontal: $x);
+@mixin fixed-all($margin) {
+  @include fixed($all: $margin);
 }
 
 @mixin fixed-square($margin) {
-  @include fixed($margin, $margin, $margin, $margin);
+  @include fixed($all: $margin);
 }
 
-/// @alias fixed-square
-@mixin fixed-all($margin) {
-  @include fixed-square($margin);
+@mixin fixed-fill {
+  @include fixed($all: 0);
 }
 
-@mixin fixed-anchor($x: null, $y: null, $x-prop: left, $y-prop: top) {
+@mixin fixed-anchor(
+  $x: null,
+  $y: null,
+  $x-prop: left,
+  $y-prop: top,
+) {
   $translate-x: if($x, -$x, null);
   $translate-y: if($y, -$y, null);
 
@@ -149,9 +196,10 @@
     $bottom: if($y-prop == bottom, $y, null),
     $left: if($x-prop == left, $x, null),
   );
-  @include translate($translate-x, $translate-y);
+
+  @include translate($x: $translate-x, $y: $translate-y);
 }
 
-@mixin fixed-center($top: 50%, $left: 50%) {
-  @include fixed-anchor($x: $left, $y: $top);
+@mixin fixed-center($x-prop: left, $y-prop: top) {
+  @include fixed-anchor($x: 50%, $y: 50%, $x-prop: $x-prop, $y-prop: $y-prop);
 }
