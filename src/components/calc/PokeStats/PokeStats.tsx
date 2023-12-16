@@ -311,8 +311,6 @@ export const PokeStats = ({
             <TableGridItem
               className={cx(
                 styles.header,
-                // styles.ivsHeader,
-                // missingIvs && styles.missingSpread,
                 missingIvs && styles.warning,
               )}
               style={missingIvs && warningColor ? { color: warningColor } : undefined}
@@ -360,7 +358,6 @@ export const PokeStats = ({
                   inputClassName={cx(
                     styles.valueFieldInput,
                     pristine && styles.dim,
-                    // missingIvs && styles.missingSpread,
                     missingIvs && styles.warning,
                   )}
                   inputStyle={missingIvs && warningColor ? { color: warningColor } : undefined}
@@ -379,8 +376,7 @@ export const PokeStats = ({
                   input={{
                     value,
                     onChange: (val: number) => updatePokemon({
-                      // note: HP (for gen 1 and 2) and SPD (for gen 2 only) handled in
-                      // handlePokemonChange() of PokeCalc
+                      // note: HP (for legacy gens) & SPD (for gen 2 only) handled in updatePokemon() of useCalcdexContext()
                       ivs: { [stat]: legacy ? convertLegacyDvToIv(val) : val },
                     }, `${l.scope}:ValueField~Iv-${statLabel}:input.onChange()`),
                   }}
@@ -427,10 +423,6 @@ export const PokeStats = ({
             <TableGridItem
               className={cx(
                 styles.header,
-                // styles.evsHeader,
-                // missingEvs && styles.missingSpread,
-                // (!format?.includes('random') && totalEvs < maxLegalEvs) && styles.unallocated,
-                // !evsLegal && styles.illegal,
                 evsWarning && styles.warning,
               )}
               style={evsWarning && warningColor ? { color: warningColor } : undefined}
@@ -447,7 +439,9 @@ export const PokeStats = ({
           {statNames.map((stat) => {
             const statLabel = stat.toUpperCase();
             const ev = pokemon?.evs?.[stat] || 0;
+
             const pristine = !missingEvs && pristineSpreadValue('ev', ev);
+            const disabled = !pokemon?.speciesForme || (gen === 2 && stat === 'spd');
 
             return (
               <TableGridItem
@@ -458,6 +452,7 @@ export const PokeStats = ({
                   className={cx(
                     styles.valueField,
                     pristine && styles.pristine,
+                    disabled && styles.disabled,
                   )}
                   inputClassName={cx(
                     styles.valueFieldInput,
@@ -483,7 +478,7 @@ export const PokeStats = ({
                       evs: { [stat]: value },
                     }, `${l.scope}:ValueField~Ev-${statLabel}:input.onChange()`),
                   }}
-                  disabled={!pokemon?.speciesForme}
+                  disabled={disabled}
                 />
               </TableGridItem>
             );

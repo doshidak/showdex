@@ -266,6 +266,11 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         ...prevPokemon.evs,
         ...pokemon.evs,
       };
+
+      // needed to prevent @smogon/calc from throwing an legacy SPA/SPD mismatch error since we also allow this case
+      if (state.legacy) {
+        mutated.evs.spd = mutated.evs.spa;
+      }
     }
 
     // processing if ye olde Pokemone, like handling DVs & removing abilities, natures, etc.
