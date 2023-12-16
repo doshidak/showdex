@@ -3,7 +3,7 @@ import { type CalcdexLeanPokemon } from './CalcdexLeanPokemon';
 import { type CalcdexMoveOverride } from './CalcdexMoveOverride';
 import { type CalcdexPlayerKey } from './CalcdexPlayerKey';
 import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
-import { type CalcdexPokemonPreset } from './CalcdexPokemonPreset';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from './CalcdexPokemonPreset';
 
 export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
@@ -821,20 +821,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyFaintCounter?: number;
 
   /**
-   * Preset that's currently being applied to the Pokemon.
-   *
-   * * Could use the preset's `name`, but you may run into some issues with uniqueness.
-   *   - See the `name` property in `CalcdexPokemonPreset` for more information.
-   * * Recommended you use the preset's `calcdexId` as this property's value instead.
-   *
-   * @deprecated As of v1.1.3, this property is no longer being used in favor of `presetId`.
-   *   Most instances of `preset` have been replaced with `presetId`, but just in case, I'm leaving this
-   *   still defined for now.
-   * @since 0.1.0
-   */
-  preset?: string;
-
-  /**
    * ID of the preset that's currently applied to the Pokemon.
    *
    * * ID refers to the `calcdexId` of the preset.
@@ -845,6 +831,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.3
    */
   presetId?: string;
+
+  /**
+   * Source of the preset that's currently applied to the Pokemon.
+   *
+   * * Should be populated alongside any `presetId` popultations.
+   * * Primarily used to alter `CalcdexPokemon` mutation behavior, such as whether to clear the `presetId` depending on
+   *   the applied `presetSource`.
+   * * Needs to be accessed at this level since applied presets can be from outside sources & not necessarily in `presets[]`.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  presetSource?: CalcdexPokemonPresetSource;
 
   /**
    * Available presets (i.e., sets) for the Pokemon.

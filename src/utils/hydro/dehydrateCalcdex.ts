@@ -87,7 +87,7 @@ export const dehydratePlayerSide = (
  * {types[0]}[/{types[1]}...]~{dirtyTypes[0]}[/{dirtyTypes[1]}...]>{teraType}~{dirtyTeraType},
  * {hp}~{dirtyHp}/{maxhp}/{fainted},
  * {status}~{dirtyStatus}/{sleepCounter}/{toxicCounter}/{hitCounter}/{faintCounter}~{dirtyFaintCounter},
- * {presetId ? 'y' : 'n'},
+ * {presetId ? 'y' : 'n'}/{presetSource},
  * {baseAbility}/{ability}~{dirtyAbility}/{abilityToggled},
  * {item}~{dirtyItem}>{itemEffect}/{prevItem}>{prevItemEffect},
  * {nature},
@@ -229,6 +229,7 @@ export const dehydrateCalcdex = (
         faintCounter,
         dirtyFaintCounter,
         presetId,
+        presetSource,
         baseAbility,
         ability,
         dirtyAbility,
@@ -282,7 +283,10 @@ export const dehydrateCalcdex = (
           hitCounter,
           dehydrateArray([faintCounter, dirtyFaintCounter], '~'),
         ]),
-        dehydrateBoolean(!!presetId),
+        dehydrateArray([
+          dehydrateBoolean(!!presetId),
+          dehydrateValue(presetSource),
+        ]),
         dehydrateArray([
           baseAbility,
           dehydrateArray([ability, dirtyAbility], '~'),

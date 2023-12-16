@@ -229,6 +229,7 @@ export const sanitizePokemon = <
     ...sanitizeMoveTrack(pokemon, format),
 
     presetId: (pokemon as Partial<CalcdexPokemon>)?.presetId || null,
+    presetSource: (pokemon as Partial<CalcdexPokemon>)?.presetSource || null,
     presets: (pokemon as Partial<CalcdexPokemon>)?.presets || [],
     autoPreset: (pokemon as Partial<CalcdexPokemon>)?.autoPreset || true,
 

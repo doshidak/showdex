@@ -136,6 +136,7 @@ export const syncPokemon = (
 
         if (shouldClearPreset) {
           syncedPokemon.presetId = null;
+          syncedPokemon.presetSource = null;
         }
 
         break;
@@ -374,6 +375,7 @@ export const syncPokemon = (
 
         if (shouldResetPreset) {
           syncedPokemon.presetId = null;
+          syncedPokemon.presetSource = null;
         }
 
         syncedPokemon.transformedForme = transformedForme || null;

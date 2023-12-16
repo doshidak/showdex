@@ -96,6 +96,7 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
         updatePokemon({
           ...additionalMutations,
           presetId: preset.calcdexId,
+          presetSource: preset.source,
         }, scope);
       }
 

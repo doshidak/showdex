@@ -321,6 +321,7 @@ export const applyPreset = (
   // which won't have any EVs/IVs, so we'll still have to rely on spreads from other presets)
   if (completePreset) {
     output.presetId = preset.calcdexId;
+    output.presetSource = preset.source;
     output.spreadStats = calcPokemonSpreadStats(format, { ...pokemon, ...output });
 
     if (revealingPreset) {
@@ -352,6 +353,7 @@ export const applyPreset = (
   // (this should spin-up the auto-preset effect in useCalcdexPresets() or something lol)
   if (pokemon.presetId) {
     output.presetId = null;
+    output.presetSource = null;
   }
 
   return output;

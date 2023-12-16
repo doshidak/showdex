@@ -239,9 +239,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       if (!mutated.serverSourced && mutated.presetId) {
         const dex = getDexForFormat(state.format);
         const baseForme = dex.species.get(mutated.speciesForme)?.baseSpecies;
-        const preset = mutated.presets?.find((p) => p?.calcdexId === mutated.presetId);
+        // const preset = mutated.presets?.find((p) => p?.calcdexId === mutated.presetId);
 
-        const shouldClearPreset = (!preset?.source || !['server', 'sheet'].includes(preset.source))
+        const shouldClearPreset = (!mutated.presetSource || !['server', 'sheet'].includes(mutated.presetSource))
           && !PokemonPresetFuckedBaseFormes.includes(baseForme)
           && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme)
           && !hasMegaForme(prevPokemon.speciesForme)
@@ -249,6 +249,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
         if (shouldClearPreset) {
           mutated.presetId = null;
+          mutated.presetSource = null;
         }
       }
     }
