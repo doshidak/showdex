@@ -4,6 +4,7 @@ import { type MoveName } from '@smogon/calc';
 import { PokeType } from '@showdex/components/app';
 import { type SelectOptionTooltipProps, findCategoryLabel } from '@showdex/components/form';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
@@ -28,6 +29,8 @@ export const PokeMoveOptionTooltip = ({
   value,
   hidden,
 }: PokeMoveOptionTooltipProps): JSX.Element => {
+  const settings = useCalcdexSettings();
+
   // using label here instead of value since the move can turn into a Z or Max move
   if (!value || hidden) {
     return null;
@@ -82,6 +85,11 @@ export const PokeMoveOptionTooltip = ({
       (basePower > baseBasePower && 'positive')
         || (basePower < baseBasePower && 'negative')
     )
+  ) || null;
+
+  const basePowerDeltaColor = (
+    (basePowerDelta === 'positive' && settings?.nhkoColors?.[0])
+      || (basePowerDelta === 'negative' && settings?.nhkoColors?.slice(-1)[0])
   ) || null;
 
   const showFaintCount = (pokemon?.faintCounter ?? 0) > 0 && (
@@ -173,6 +181,7 @@ export const PokeMoveOptionTooltip = ({
                     basePowerDelta === 'positive' && styles.positive,
                     basePowerDelta === 'negative' && styles.negative,
                   )}
+                  style={basePowerDeltaColor ? { color: basePowerDeltaColor } : undefined}
                 >
                   {basePower}
                 </span>
