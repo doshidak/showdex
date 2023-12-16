@@ -33,8 +33,7 @@ import { useSelector } from './hooks';
 export type CalcdexSliceStateAction<
   TRequired extends keyof CalcdexBattleState = null,
 > = PayloadAction<Modify<{ scope?: string; } & DeepPartial<CalcdexBattleState>, {
-  // idk why CalcdexBattleField isn't partialed from DeepPartial<CalcdexBattleState>
-  [P in TRequired]: P extends 'field' ? DeepPartial<CalcdexBattleField> : DeepPartial<CalcdexBattleState>[P];
+  [P in TRequired]: DeepPartial<CalcdexBattleState>[P];
 }>>;
 
 /**
@@ -77,21 +76,30 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    *
    * @since 0.1.3
    */
-  init: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+  init: (
+    state: Draft<CalcdexSliceState>,
+    action: CalcdexSliceStateAction,
+  ) => void;
 
   /**
    * Updates an existing `CalcdexBattleState`.
    *
    * @since 0.1.3
    */
-  update: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+  update: (
+    state: Draft<CalcdexSliceState>,
+    action: CalcdexSliceStateAction,
+  ) => void;
 
   /**
    * Updates the `field` of a matching `CalcdexBattleState` from the provided `battleId`.
    *
    * @since 0.1.3
    */
-  updateField: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction<'field'>) => void;
+  updateField: (
+    state: Draft<CalcdexSliceState>,
+    action: CalcdexSliceStateAction<'field'>,
+  ) => void;
 
   /**
    * Updates a `CalcdexPlayer` of a matching `CalcdexBattleState` from the provided `battleId`.
@@ -100,7 +108,10 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    *
    * @since 0.1.3
    */
-  updatePlayer: (state: Draft<CalcdexSliceState>, action: CalcdexSliceStateAction) => void;
+  updatePlayer: (
+    state: Draft<CalcdexSliceState>,
+    action: CalcdexSliceStateAction,
+  ) => void;
 
   /**
    * Updates a `CalcdexPokemon` of an existing `CalcdexPlayer` of a matching `CalcdexBattleState`
@@ -108,14 +119,20 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    *
    * @since 0.1.3
    */
-  updatePokemon: (state: Draft<CalcdexSliceState>, action: PayloadAction<CalcdexSlicePokemonAction>) => void;
+  updatePokemon: (
+    state: Draft<CalcdexSliceState>,
+    action: PayloadAction<CalcdexSlicePokemonAction>,
+  ) => void;
 
   /**
    * Destroys the entire `CalcdexBattleState` by the passed-in `battleId` represented as `action.payload`.
    *
    * @since 1.0.3
    */
-  destroy: (state: Draft<CalcdexSliceState>, action: PayloadAction<string>) => void;
+  destroy: (
+    state: Draft<CalcdexSliceState>,
+    action: PayloadAction<string>,
+  ) => void;
 }
 
 const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
@@ -187,8 +204,6 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...payload,
 
         battleId,
-        // battleNonce: null, // make sure we don't set this for the syncBattle() action
-
         gen,
         format: `gen${gen}${base}`,
         subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
@@ -248,7 +263,6 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         sheets: [],
       };
 
-      // state[battleId].playerCount = AllPlayerKeys.filter((k) => state[battleId][k].active).length;
       state[battleId].playerCount = countActivePlayers(state[battleId]);
 
       endTimer();
@@ -284,7 +298,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       } = action.payload;
 
       if (!battleId) {
-        l.error(
+        l.warn(
           'Attempted to update a CalcdexBattleState with a falsy battleId.',
           '\n', 'action.type', action.type,
           '\n', 'action.payload', action.payload,
@@ -573,6 +587,8 @@ export const useCalcdexState = () => useSelector(
 
 export const useCalcdexBattleState = (
   battleId: string,
-) => useSelector(
-  (state) => (state?.calcdex?.[battleId] ?? {}) as CalcdexBattleState,
-);
+) => {
+  const battleState = useSelector((state) => state?.calcdex?.[battleId]);
+
+  return battleState || ({} as CalcdexBattleState);
+};
