@@ -1,3 +1,4 @@
+export * from './HomieButton';
 export * from './Picon';
 export * from './PiconButton';
 export * from './PokeAbilityOptionTooltip';
