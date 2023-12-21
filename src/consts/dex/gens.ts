@@ -92,7 +92,7 @@ export const GenLabels: GenerationLabel[] = [
     gen: 5,
     slug: 'bw',
     label: 'B/W',
-    description: 'Black/White + Black 2/White 2 (B2/W2)',
+    description: 'Black/White + Black 2/White 2 (B2W2)',
   },
   {
     gen: 6,
