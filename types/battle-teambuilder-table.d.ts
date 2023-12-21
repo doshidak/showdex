@@ -9,18 +9,54 @@
  */
 
 declare namespace Showdown {
+  type BattleTeambuilderTableFormatCode =
+    | 'AG'
+    | 'CAP LC'
+    | 'DNU' // doubles NU
+    | 'DOU' // doubles OU
+    | 'DUU'
+    | 'LC'
+    | 'NFE'
+    | 'NU'
+    | 'New'
+    | 'OU'
+    | 'PU'
+    | 'RU'
+    | 'UU'
+    | 'Uber'
+    | 'ZU';
+
+  type BattleTeambuilderTableTier =
+    | [type: 'header', name: string]
+    | [type: 'pokemon', speciesId: string]
+    | string;
+
   interface BattleTeambuilderGenTable {
     /**
-     * Not entirely sure what this is used for.
+     * Starting index of `tiers[]` for the list of Pokemon within a format.
+     *
+     * * Index includes the header, so make sure to add `1` to ignore it.
+     * * `tiers[]` are specifically ordered, so you can simply include the remaining elements (e.g., OU will include UUBL, UU, RUBL, etc.).
      *
      * @example
      * ```ts
-     * { AG: 72, 'CAP LC': 45, LC: 670, NFE: 577, NU: 313, New: 577, OU: 154, PU: 367, RU: 257, UU: 207, Uber: 109, ZU: 410 }
+     * {
+     *   AG: 72,
+     *   'CAP LC': 45,
+     *   LC: 670,
+     *   NFE: 577,
+     *   NU: 313,
+     *   New: 577,
+     *   OU: 154,
+     *   PU: 367,
+     *   RU: 257,
+     *   UU: 207,
+     *   Uber: 109,
+     *   ZU: 410.
+     * }
      * ```
      */
-    formatSlices: {
-      [format: string]: number;
-    };
+    formatSlices: Partial<Record<BattleTeambuilderTableFormatCode, number>>;
 
     /**
      * Item list.
@@ -143,7 +179,7 @@ declare namespace Showdown {
      * Ability overrides.
      */
     overrideAbilityData?: {
-      [abilityId: string]: DeepPartial<Writable<Showdown.Ability>>;
+      [abilityId: string]: DeepPartial<Writable<Ability>>;
     };
 
     /**
@@ -157,14 +193,14 @@ declare namespace Showdown {
      * Move overrides.
      */
     overrideMoveData?: {
-      [moveId: string]: DeepPartial<Writable<Showdown.Move>>;
+      [moveId: string]: DeepPartial<Writable<Move>>;
     };
 
     /**
      * Pokemon species forme overrides.
      */
     overrideSpeciesData?: {
-      [speciesFormeId: string]: DeepPartial<Writable<Showdown.Pokemon>>;
+      [speciesFormeId: string]: DeepPartial<Writable<Pokemon>>;
     };
 
     /**
@@ -197,10 +233,10 @@ declare namespace Showdown {
      * Type overrides.
      */
     overrideTypeChart?: {
-      [typeName?: Exclude<Showdown.TypeName, '???'>]: {
-        HPdvs?: Partial<Record<Showdown.StatNameNoHp, number>>;
-        HPivs?: Partial<Record<Showdown.StatNameNoHp, number>>;
-        damageTaken?: Partial<Record<Exclude<Showdown.TypeName, '???'>, number>>;
+      [typeName?: Exclude<TypeName, '???'>]: {
+        HPdvs?: Partial<Record<StatNameNoHp, number>>;
+        HPivs?: Partial<Record<StatNameNoHp, number>>;
+        damageTaken?: Partial<Record<Exclude<TypeName, '???'>, number>>;
       };
     };
 
@@ -233,13 +269,20 @@ declare namespace Showdown {
      * ]
      * ```
      */
-    tiers: ([type: 'header', name: string] | string)[];
+    tiers: BattleTeambuilderTableTier[];
+
+    /**
+     * Strangely, the Teambuilder will move `tiers[]` to this when showing the list of Pokemon.
+     *
+     * * It also sets `tiers[]` to `null`, so make sure you pull from both `tiers[]` & this, just in case.
+     */
+    tierSet: BattleTeambuilderTableTier[];
 
     /**
      * Types to remove.
      */
     removeType?: {
-      [typeName?: Exclude<Showdown.TypeName, '???'>]: true;
+      [typeName?: Exclude<TypeName, '???'>]: true;
     };
 
     /**
@@ -262,9 +305,19 @@ declare namespace Showdown {
     zuBans?: {
       [speciesFormeId: string]: 1;
     };
+
+    /**
+     * Ubers UU bans.
+     *
+     * * Same as `zuBans`.
+     */
+    uberUUBans?: {
+      [speciesFormeId: string]: 1;
+    };
   }
 
   type BattleTeambuilderTableFormat =
+    | 'bh'
     | 'gen1'
     | 'gen1lc'
     | 'gen1nfe'
@@ -309,16 +362,18 @@ declare namespace Showdown {
     | 'gen8nfe'
     | 'gen8vgc'
     | 'gen9' // but this? doesn't exist!
+    | 'gen9dlc1'
+    | 'gen9dlc1doubles'
     | 'gen9doubles'
     | 'gen9lc'
     | 'gen9metronome'
     | 'gen9natdex'
     | 'gen9nfe'
+    | 'gen9predlc'
+    | 'gen9predlcdoubles'
     | 'gen9vgc';
-    // | 'metronome' // update (2023/07/21): no longer exists; use 'gen8metronome' or 'gen9metronome' instead
-    // | 'natdex' // update (2023/07/21): no longer exists; use 'gen8natdex' or 'gen9natdex' instead
 
   type BattleTeambuilderTable =
-    & Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'overrideTier' | 'tiers' | 'zuBans'>
+    & Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'overrideTier' | 'tiers' | 'tierSet' | 'uberUUBans' | 'zuBans'>
     & Record<BattleTeambuilderTableFormat, BattleTeambuilderGenTable>;
 }
