@@ -44,10 +44,10 @@ export interface ElementSizeHookResult {
 
 export const ElementSizeDefaultBreakpoints: Record<ElementSizeLabel, number> = {
   xs: 380,
-  sm: 550,
+  sm: 570,
   md: 750,
-  lg: 1000,
-  xl: 1500,
+  lg: 900,
+  xl: 1100,
 };
 
 /**
