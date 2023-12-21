@@ -9,9 +9,6 @@
 
 .itemIcon {
   @include position.absolute-anchor($x: -7%, $y: -17%, $x-prop: right, $y-prop: bottom);
-  width: 24px;
-  height: 24px;
-  image-rendering: pixelated;
-  opacity: 0.75;
+  opacity: 0.8;
   transform: scale(0.75);
 }
