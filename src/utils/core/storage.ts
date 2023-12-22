@@ -41,7 +41,8 @@ export const setStoredItem = (envKey: string, value: string): void => {
     return;
   }
 
-  localStorage.setItem(key, value);
+  // setTimeout() to make it non-blocking
+  setTimeout(() => localStorage.setItem(key, value), 0);
 };
 
 /**
