@@ -12,6 +12,7 @@ export interface PiconButtonProps extends BaseButtonProps {
   pokemon?: PiconProps['pokemon'];
   facingLeft?: PiconProps['facingLeft'];
   tooltip?: React.ReactNode;
+  tooltipPlacement?: TooltipProps['placement'];
   tooltipOffset?: TooltipProps['offset'];
   tooltipDelay?: TooltipProps['delay'];
   tooltipTrigger?: TooltipProps['trigger'];
@@ -29,6 +30,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
   pokemon,
   facingLeft,
   tooltip,
+  tooltipPlacement = 'auto',
   tooltipOffset = [0, 5],
   tooltipDelay = [150, 50],
   tooltipTrigger = 'mouseenter',
@@ -81,6 +83,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
       <Tooltip
         reference={ref.current}
         content={tooltip}
+        placement={tooltipPlacement}
         offset={tooltipOffset}
         delay={tooltipDelay}
         trigger={tooltipTrigger}

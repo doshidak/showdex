@@ -5,9 +5,8 @@ import {
 } from '@showdex/interfaces/calc';
 import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
-// import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, getDefaultSpreadValue, hasMegaForme } from '@showdex/utils/dex';
+import { detectGenFromFormat, getDefaultSpreadValue } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -103,7 +102,8 @@ export const applyPreset = (
   // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
   //   || (!transformed && pokemon.speciesForme !== preset.speciesForme);
   const shouldUpdateSpecies = currentForme !== preset.speciesForme
-    && !hasMegaForme(currentForme);
+    // && !hasMegaForme(currentForme);
+    && !speciesFormes.includes(currentForme);
 
   if (shouldUpdateSpecies) {
     output[formeKey] = preset.speciesForme;
@@ -283,18 +283,20 @@ export const applyPreset = (
     }
   }
 
+  const sanitized = sanitizePokemon({
+    ...pokemon,
+    ...output,
+  }, format);
+
   if (currentForme !== output[formeKey]) {
     const {
+      altFormes,
       types,
       abilities,
-      altFormes,
       baseStats,
       transformedAbilities,
       transformedBaseStats,
-    } = sanitizePokemon({
-      ...pokemon,
-      ...output,
-    }, format);
+    } = sanitized;
 
     output.types = types;
     output.altFormes = altFormes;
@@ -306,6 +308,10 @@ export const applyPreset = (
       output.abilities = abilities;
       output.baseStats = baseStats;
     }
+  }
+
+  if (!pokemon.ability && sanitized.abilityToggled) {
+    output.abilityToggled = sanitized.abilityToggled;
   }
 
   // we probably have an OTS (Open Team Sheet) if revealing & not complete

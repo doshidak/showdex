@@ -36,12 +36,7 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
-import {
-  env,
-  nonEmptyObject,
-  similarArrays,
-  tolerance,
-} from '@showdex/utils/core';
+import { env, nonEmptyObject, similarArrays } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   detectDoublesFormat,
@@ -213,8 +208,16 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     const newPokemon = sanitizePokemon({
       ...pokemon,
       level: pokemon?.level || state.defaultLevel,
-      hp: 1, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
+      hp: 100, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
+      maxhp: 100,
     }, state.format);
+
+    // no need to provide activeIndices[] & selectionIndex to detectToggledAbility() since it will just read `active`
+    newPokemon.abilityToggled = detectToggledAbility(newPokemon, {
+      gameType: state.gameType,
+      weather: state.field.weather,
+      terrain: state.field.terrain,
+    });
 
     newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
     newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
@@ -472,22 +475,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
     }
 
-    // recheck for toggleable abilities if changed
-    // update (2023/06/04): now checking for dirtyTypes in the `pokemon` payload for Libero/Protean toggles
-    // (designed to toggle off in detectToggledAbility() when dirtyTypes[] is present, i.e., the user manually
-    // modifies the Pokemon's types; btw, dirtyTypes[] should've been processed by now if it was present)
-    if (mutating('ability', 'dirtyAbility', 'dirtyTypes', 'dirtyItem')) {
-      // note: these are now independent of each other & will probably rename abilityToggled to abilityActive soon
-      mutated.abilityToggled = detectToggledAbility(mutated, {
-        gameType: state.gameType,
-        // pokemonIndex: playerParty.findIndex((p) => p.calcdexId === mutated.calcdexId),
-        selectionIndex: state[playerKey].selectionIndex,
-        // activeIndices,
-        weather: state.field?.weather,
-        terrain: state.field?.terrain,
-      });
-    }
-
     // update (2022/11/06): now allowing base stat editing as a setting lul
     if (mutating('dirtyBaseStats')) {
       // if we receive nothing valid in payload.dirtyBaseStats, means all dirty values should be cleared
@@ -524,13 +511,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const currentHp = calcPokemonCurrentHp(mutated, true);
       const dirtyHp = calcPokemonCurrentHp(mutated);
 
-      // update (2023/07/30): due to rounding errors, the percentage might be "close enough" to the currentHp,
-      // but won't clear since they don't *exactly* match, hence the use of the tolerance() util
-      const clearDirtyHp = !maxHp
-        || (mutated.serverSourced && currentHp === dirtyHp)
-        || tolerance(currentHp, Math.ceil(maxHp * 0.01))(dirtyHp);
-
-      if (clearDirtyHp) {
+      if (!maxHp || currentHp === dirtyHp) {
         mutated.dirtyHp = null;
       }
     }
@@ -541,6 +522,22 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     if (mutating('dirtyFaintCounter') && mutated.dirtyFaintCounter === mutated.faintCounter) {
       mutated.dirtyFaintCounter = null;
+    }
+
+    // recheck for toggleable abilities if changed
+    // update (2023/06/04): now checking for dirtyTypes in the `pokemon` payload for Libero/Protean toggles
+    // (designed to toggle off in detectToggledAbility() when dirtyTypes[] is present, i.e., the user manually
+    // modifies the Pokemon's types; btw, dirtyTypes[] should've been processed by now if it was present)
+    if (mutating('dirtyHp', 'ability', 'dirtyAbility', 'dirtyTypes', 'dirtyItem')) {
+      // note: these are now independent of each other & will probably rename abilityToggled to abilityActive soon
+      mutated.abilityToggled = detectToggledAbility(mutated, {
+        gameType: state.gameType,
+        // pokemonIndex: playerParty.findIndex((p) => p.calcdexId === mutated.calcdexId),
+        selectionIndex: state[playerKey].selectionIndex,
+        // activeIndices,
+        weather: state.field?.weather,
+        terrain: state.field?.terrain,
+      });
     }
 
     // individually spread each overridden move w/ the move's defaults, if any

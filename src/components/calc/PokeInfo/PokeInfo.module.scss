@@ -103,6 +103,10 @@ button.toggleButton {
   }
 }
 
+.formeDropdown {
+  max-width: 200px;
+}
+
 button.nameButton {
   flex: 0 1 auto;
   @include flex.row-center;
@@ -149,11 +153,11 @@ button.nameButton {
 
 .level {
   @include flex.row($align: center);
-  flex: 0 0 auto;
-  @include spacing.margin($left: 8px);
+  flex: 0 0;
+  @include spacing.margin($left: 4px);
   font-size: 8px;
-  line-height: 9px;
   text-transform: uppercase;
+  line-height: 9px;
   user-select: none;
 
   .dim {
@@ -167,7 +171,7 @@ button.nameButton {
 }
 
 .levelField {
-  max-width: 16px;
+  width: 16px;
 
   &.absoluteHover::before {
     @include position.absolute($x: -2px, $y: -1px);
@@ -189,8 +193,12 @@ button.nameButton {
 }
 
 .typesField {
-  flex: 0 0 auto;
+  flex: 0 0;
   @include spacing.margin($left: 4px);
+
+  &.teraTypeField {
+    @include spacing.margin($left: 6px);
+  }
 }
 
 .secondLine {
@@ -202,13 +210,15 @@ button.nameButton {
 
 .hpPercentage {
   @include spacing.margin($left: 6px);
+  font-size: 10px;
+  line-height: 11px;
 
   .light & {
-    color: color.alpha(colors.$black, 0.85);
+    color: color.alpha(colors.$black, 0.88);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.85);
+    color: color.alpha(colors.$white, 0.88);
   }
 }
 

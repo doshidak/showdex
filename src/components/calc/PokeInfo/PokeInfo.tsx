@@ -5,6 +5,7 @@ import {
   PiconButton,
   PokeAbilityOptionTooltip,
   PokeFormeTooltip,
+  PokeGlanceOptionTooltip,
   PokeHpBar,
   PokeItemOptionTooltip,
   PokeStatus,
@@ -468,9 +469,11 @@ export const PokeInfo = ({
           >
             {operatingMode === 'standalone' ? (
               <Dropdown
-                style={{ maxWidth: 150 }}
+                className={styles.formeDropdown}
                 aria-label={`Pok${eacute}mon Selector`}
                 hint="MissingNo."
+                optionTooltip={PokeGlanceOptionTooltip}
+                optionTooltipProps={{ format }}
                 input={{
                   name: `PokeInfo:SpeciesForme:${pokemonKey}`,
                   value: pokemon?.speciesForme,

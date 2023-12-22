@@ -5,6 +5,7 @@ export * from './Picon';
 export * from './PiconButton';
 export * from './PokeAbilityOptionTooltip';
 export * from './PokeFormeTooltip';
+export * from './PokeGlance';
 export * from './PokeHpBar';
 export * from './PokeItemOptionTooltip';
 export * from './PokeMoveOptionTooltip';

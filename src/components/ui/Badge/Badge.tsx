@@ -39,6 +39,10 @@ export const Badge = React.forwardRef<BadgeInstance, BadgeProps>(({
 
       setVisible(true);
 
+      if (!duration) {
+        return;
+      }
+
       visibleTimeout.current = setTimeout(() => {
         setVisible(false);
         visibleTimeout.current = null;

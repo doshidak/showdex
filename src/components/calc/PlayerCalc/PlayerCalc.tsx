@@ -1,13 +1,12 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { PiconButton } from '@showdex/components/app';
+import { PiconButton, PokeGlance } from '@showdex/components/app';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonCurrentHp } from '@showdex/utils/calc';
-import { env, formatId } from '@showdex/utils/core';
+import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { hasNickname } from '@showdex/utils/dex';
 import { CalcdexPokeProvider } from '../CalcdexPokeContext';
 import { useCalcdexContext } from '../CalcdexContext';
 import { PlayerInfo } from '../PlayerInfo';
@@ -44,7 +43,7 @@ export const PlayerCalc = ({
   const {
     operatingMode,
     containerSize,
-    legacy,
+    format,
   } = state;
 
   const minPokemonKey = (operatingMode === 'battle' && 'calcdex-player-min-pokemon')
@@ -101,22 +100,9 @@ export const PlayerCalc = ({
               || pokemon?.name
               || pokemonKey;
 
-            const nickname = hasNickname(pokemon) && settings?.showNicknames
-              ? pokemon.name
-              : null;
-
             const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
             const hp = calcPokemonCurrentHp(pokemon);
-            const ability = pokemon?.dirtyAbility || pokemon?.ability;
             const item = pokemon?.dirtyItem ?? pokemon?.item;
-
-            // only tracking Ruin abilities (gen 9) atm
-            const abilityActive = !legacy
-              && formatId(ability)?.endsWith('ofruin')
-              && pokemon.abilityToggled;
-
-            const pokemonActive = !!pokemon?.calcdexId
-              && pokemon.active;
 
             const pokemonSelected = (
               operatingMode === 'standalone'
@@ -128,17 +114,14 @@ export const PlayerCalc = ({
                 && playerPokemon.calcdexId === pokemon.calcdexId
             );
 
-            const disabled = (
-              operatingMode === 'battle'
-                && !pokemon?.speciesForme
-            );
+            const disabled = operatingMode === 'battle' && !pokemon?.speciesForme;
 
             return (
               <PiconButton
                 key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}`}
                 className={cx(
                   styles.piconButton,
-                  pokemonActive && styles.active,
+                  pokemon?.active && styles.active,
                   pokemonSelected && styles.selected,
                   !hp && styles.fainted,
                 )}
@@ -153,44 +136,20 @@ export const PlayerCalc = ({
                   speciesForme: speciesForme?.replace(pokemon?.useMax ? '' : '-Gmax', ''),
                   item,
                 } : 'pokeball-none'}
-                tooltip={pokemon ? (
-                  <div className={styles.piconTooltip}>
-                    {nickname ? (
-                      <>
-                        {nickname}{' '}
-                        (<strong>{friendlyPokemonName}</strong>)
-                      </>
-                    ) : <strong>{friendlyPokemonName}</strong>}
-
-                    {
-                      abilityActive &&
-                      <>
-                        <br />
-                        <span className={styles.activeAbility}>
-                          {ability}
-                        </span>
-                      </>
-                    }
-
-                    {
-                      !!item &&
-                      <>
-                        <br />
-                        {item}
-                      </>
-                    }
-
-                    {
-                      (!pokemon?.dirtyItem && !!pokemon?.prevItem) &&
-                      <>
-                        <br />
-                        <span className={styles.prevItem}>
-                          {pokemon.prevItem}
-                        </span>
-                      </>
-                    }
-                  </div>
+                tooltip={pokemon?.speciesForme ? (
+                  <PokeGlance
+                    className={styles.glanceTooltip}
+                    pokemon={pokemon}
+                    format={format}
+                    showNickname={settings?.showNicknames}
+                    showAbility={operatingMode === 'standalone' || pokemon?.abilityToggled}
+                    showItem
+                    showStatus
+                    reverseColorScheme
+                  />
                 ) : undefined}
+                tooltipPlacement="top-start"
+                tooltipOffset={[0, -4]}
                 disabled={disabled}
                 onPress={() => selectPokemon(
                   playerKey,

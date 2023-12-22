@@ -86,21 +86,8 @@
   }
 }
 
-.piconTooltip {
-  max-width: 175px;
-  text-align: center;
-  white-space: normal;
-  user-select: none;
-}
-
-.activeAbility {
-  font-weight: 500;
-  color: colors.$blue;
-}
-
-.prevItem {
-  text-decoration: line-through;
-  opacity: 0.65;
+.glanceTooltip {
+  max-width: 256px;
 }
 
 .piconBackground {
