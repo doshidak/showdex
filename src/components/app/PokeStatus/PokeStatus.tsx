@@ -3,6 +3,7 @@ import cx from 'classnames';
 import { PokemonStatuses, PokemonStatusLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
+import { determineColorScheme } from '@showdex/utils/ui';
 import styles from './PokeStatus.module.scss';
 
 export interface PokeStatusProps {
@@ -33,13 +34,7 @@ export const PokeStatus = ({
   highlight = true,
 }: PokeStatusProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
-
-  const colorScheme = (!reverseColorScheme && currentColorScheme)
-    || (reverseColorScheme && (
-      (currentColorScheme === 'light' && 'dark')
-        || (currentColorScheme === 'dark' && 'light')
-    ))
-    || null;
+  const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
   if (!PokemonStatuses.includes(status as Showdown.PokemonStatus) && !fainted && !override) {
     return null;

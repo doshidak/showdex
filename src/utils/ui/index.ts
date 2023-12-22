@@ -7,5 +7,6 @@ export * from './buildMoveOptions';
 export * from './buildPresetOptions';
 export * from './buildSpreadOptions';
 export * from './detectStatBoostDelta';
+export * from './determineColorScheme';
 export * from './formatDamageAmounts';
 export * from './formatStatBoost';

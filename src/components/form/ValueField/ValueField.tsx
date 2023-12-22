@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
+import { determineColorScheme } from '@showdex/utils/ui';
 import { type BaseTextFieldProps, BaseTextField } from '../TextField';
 import styles from './ValueField.module.scss';
 
@@ -119,13 +120,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
 
   // grab the color scheme for applying the theme
   const currentColorScheme = useColorScheme();
-
-  const colorScheme = (!reverseColorScheme && currentColorScheme)
-    || (reverseColorScheme && (
-      (currentColorScheme === 'light' && 'dark')
-        || (currentColorScheme === 'dark' && 'light')
-    ))
-    || null;
+  const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
   // although react-final-form has meta.active,
   // we're keeping track of the focus state ourselves in case we don't wrap this in a Field

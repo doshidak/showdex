@@ -3,6 +3,7 @@ import cx from 'classnames';
 import { PokemonTypeLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
+import { determineColorScheme } from '@showdex/utils/ui';
 import styles from './PokeType.module.scss';
 
 export interface PokeTypeProps {
@@ -31,11 +32,7 @@ export const PokeType = ({
   teraTyping,
 }: PokeTypeProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
-
-  const colorScheme = (!reverseColorScheme && currentColorScheme)
-    || (reverseColorScheme && currentColorScheme === 'light' && 'dark')
-    || (reverseColorScheme && currentColorScheme === 'dark' && 'light')
-    || null;
+  const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
   const shouldAbbreviate = ['xs', 'sm'].includes(containerSize);
 
