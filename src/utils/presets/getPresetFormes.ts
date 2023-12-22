@@ -100,9 +100,10 @@ export const getPresetFormes = (
   const {
     name,
     baseForme,
-    baseSpecies: baseSpeciesForme,
+    baseSpecies,
     battleOnly,
     changesFrom,
+    cosmeticFormes,
     otherFormes,
     isMega,
     canGigantamax,
@@ -118,6 +119,16 @@ export const getPresetFormes = (
   if (baseForme) {
     // e.g., name = 'Urshifu', baseForme = 'Single-Strike' -> 'Urshifu-Single-Strike'
     output.push(`${name}-${baseForme}`);
+  }
+
+  // update (2023/12/22): include any cosmeticFormes[]
+  // e.g., name = 'Minior-Orange' -> cosmeticFormes = ['Minior-Orange', 'Minior-Yellow', 'Minior-Green', ...]
+  if (cosmeticFormes?.length) {
+    if (name !== baseSpecies && cosmeticFormes.includes(name)) {
+      output.push(baseSpecies);
+    }
+
+    output.push(...cosmeticFormes);
   }
 
   // check for Mega formes
@@ -149,9 +160,9 @@ export const getPresetFormes = (
     }
   }
 
-  // e.g., name = 'Poltchageist-Artisan', baseSpeciesForme = 'Poltchageist' -> includes('Poltchageist') = true
-  if (name !== baseSpeciesForme && (isMega || PokemonPresetFuckedBaseFormes.includes(baseSpeciesForme))) {
-    output.push(baseSpeciesForme);
+  // e.g., name = 'Poltchageist-Artisan', baseSpecies = 'Poltchageist' -> includes('Poltchageist') = true
+  if (name !== baseSpecies && (isMega || PokemonPresetFuckedBaseFormes.includes(baseSpecies))) {
+    output.push(baseSpecies);
   }
 
   // see if we should add the Gmax forme as well, if any
@@ -170,14 +181,14 @@ export const getPresetFormes = (
   // (namely to address a mismatch between an initialized 'Urshifu' & an OTS preset for 'Urshifu-Rapid-Strike')
   if (['server', 'sheet'].includes(source)) {
     const allFormes = (
-      name === baseSpeciesForme
+      name === baseSpecies
         ? otherFormes // e.g., name = 'Urshifu' -> ['Urshifu-Rapid-Strike']
-        // e.g., name = 'Ogerpon-Wellspring', baseSpeciesForme = 'Ogerpon' -> ['Ogerpon-Wellspring', ...]
-        : dex.species.get(baseSpeciesForme)?.otherFormes
+        // e.g., name = 'Ogerpon-Wellspring', baseSpecies = 'Ogerpon' -> ['Ogerpon-Wellspring', ...]
+        : dex.species.get(baseSpecies)?.otherFormes
     ) || [];
 
-    if (name !== baseSpeciesForme) {
-      output.unshift(baseSpeciesForme);
+    if (name !== baseSpecies) {
+      output.unshift(baseSpecies);
     }
 
     if (allFormes.length) {
