@@ -11,8 +11,18 @@ import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeC
  * @since 1.1.7
  */
 export interface CalcdexPokeContextConsumables extends CalcdexPokeContextValue {
+  addPokemon: (
+    pokemon: PickRequired<CalcdexPokemon, 'speciesForme'>,
+    scope?: string,
+  ) => void;
+
   updatePokemon: (
     pokemon: Partial<CalcdexPokemon>,
+    scope?: string,
+  ) => void;
+
+  removePokemon: (
+    pokemonOrId: PickRequired<CalcdexPokemon, 'calcdexId'> | string,
     scope?: string,
   ) => void;
 
@@ -55,24 +65,43 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
   } = ctx;
 
   const {
-    updatePokemon: updateCalcdexPokemon,
+    addPokemon: addPlayerPokemon,
+    updatePokemon: updatePlayerPokemon,
+    removePokemon: removePlayerPokemon,
     activatePokemon,
     selectPokemon,
     autoSelectPokemon,
   } = useCalcdexContext();
 
+  const addPokemon: CalcdexPokeContextConsumables['addPokemon'] = (
+    pokemon,
+    scopeFromArgs,
+  ) => addPlayerPokemon(
+    playerKey,
+    pokemon,
+    s('addPokemon()', scopeFromArgs),
+  );
+
   const updatePokemon: CalcdexPokeContextConsumables['updatePokemon'] = (
     pokemon,
     scopeFromArgs,
-  ) => {
-    // used for debugging purposes only
-    const scope = s('updatePokemon()', scopeFromArgs);
-
-    updateCalcdexPokemon(playerKey, {
+  ) => updatePlayerPokemon(
+    playerKey,
+    {
       ...pokemon,
       calcdexId: playerPokemon?.calcdexId,
-    }, scope);
-  };
+    },
+    s('updatePokemon()', scopeFromArgs),
+  );
+
+  const removePokemon: CalcdexPokeContextConsumables['removePokemon'] = (
+    pokemonOrId,
+    scopeFromArgs,
+  ) => removePlayerPokemon(
+    playerKey,
+    pokemonOrId,
+    s('removePokemon()', scopeFromArgs),
+  );
 
   const applyPreset: CalcdexPokeContextConsumables['applyPreset'] = (
     presetOrId,
@@ -135,7 +164,9 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
   return {
     ...ctx,
 
+    addPokemon,
     updatePokemon,
+    removePokemon,
     applyPreset,
     activatePokemon: (indices, scope) => activatePokemon(playerKey, indices, s('activatePokemon()', scope)),
     selectPokemon: (index, scope) => selectPokemon(playerKey, index, s('selectPokemon()', scope)),

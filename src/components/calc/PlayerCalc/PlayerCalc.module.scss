@@ -1,21 +1,32 @@
 @use 'config/colors';
-@use 'config/fonts';
 @use 'functions/color';
 @use 'mixins/flex';
-@use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
 @use 'mixins/transition';
 
 .container {
   width: 100%;
+
+  &.thicc.standalone {
+    display: grid;
+    grid-template-columns: min-content minmax(0, 1fr);
+    grid-template-rows: max-content;
+    column-gap: 16px;
+    align-content: center;
+  }
 }
 
 .playerBar {
   @include flex.row($justify: space-between);
   width: 100%;
 
-  &.verySmol {
+  .standalone:not(.thicc) & {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .verySmol & {
     flex-direction: column;
     justify-content: center;
   }
@@ -32,110 +43,30 @@
   }
 }
 
-button.usernameButton {
-  justify-content: initial;
-  max-width: 90%;
-  @include font.apply(fonts.$primary, ( font-weight: 500 ));
-
-  .light & {
-    color: color.alpha(colors.$black, 0.75);
-  }
-
-  .dark & {
-    color: color.alpha(colors.$white, 0.75);
-  }
-}
-
-.usernameButtonLabel {
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.usernameButtonIcon {
-  width: 12px;
-  min-width: 12px;
-  height: 12px;
-  min-height: 12px;
-  @include spacing.margin($left: 2px);
-  color: inherit;
-  transform: scale(1.1);
-}
-
-.playerActions {
-  @include flex.row($align: center);
-  @include spacing.margin($top: 2px);
-  font-size: 8px;
-
-  .verySmol & {
-    @include spacing.margin($top: 0, $left: 10px);
-  }
-
-  button.toggleButton {
-    font-size: inherit;
-  }
-}
-
-.rating {
-  opacity: 0;
-  @include transition.apply(opacity);
-
-  &.visible {
-    opacity: 0.65;
-  }
-
-  .ratingSeparator {
-    display: inline-block;
-    @include spacing.margin-xy($x: 0.5em);
-    user-select: none;
-  }
-}
-
-.tooltipContent {
-  max-width: 175px;
-  text-align: center;
-  white-space: normal;
-  user-select: none;
-}
-
-.ladderFormat {
-  @include spacing.margin($bottom: 2px);
-  font-size: 8px;
-  text-transform: uppercase;
-  opacity: 0.55;
-}
-
-.ladderStats {
-  display: grid;
-  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
-  align-items: center;
-  column-gap: 0.5em;
-}
-
-.ladderStatLabel {
-  grid-area: span 1 / span 1;
-  font-weight: 500;
-  font-size: 8px;
-  text-align: right;
-  text-transform: uppercase;
-  opacity: 0.65;
-}
-
-.ladderStatValue {
-  grid-area: span 1 / span 1;
-  @include font.apply(fonts.$mono);
-  font-size: 10px;
-  text-align: left;
-}
-
 .teamList {
   display: grid;
+  grid-template-columns: repeat(6, min-content);
+  grid-auto-rows: min-content;
+
+  .thicc & {
+    grid-template-columns: repeat(12, min-content);
+  }
+
+  .thicc.standalone & {
+    grid-template-columns: repeat(3, min-content);
+    align-self: center;
+  }
 
   .verySmol & {
     justify-content: center;
     @include spacing.margin($top: 3px);
   }
+}
+
+.pokePlusButton {
+  align-self: center;
+  width: 40px;
+  height: 40px;
 }
 
 .piconButton {
@@ -144,6 +75,10 @@ button.usernameButton {
 
 .picon {
   @include transition.apply(opacity, filter);
+
+  &.none {
+    transform: translateY(-4px);
+  }
 
   .fainted & {
     opacity: 0.3;
@@ -168,40 +103,70 @@ button.usernameButton {
   opacity: 0.65;
 }
 
-.background {
+.piconBackground {
   @include position.absolute-center;
   width: 38px;
   height: 38px;
   border: 2px solid colors.$transparent;
-  border-radius: 45px;
+  border-radius: 100px;
   @include transition.apply(background-color, border-color);
   pointer-events: none;
 
   .piconButton:not(.selected):hover & {
     .light & {
-      border-color: color.alpha(colors.$black, 0.15);
+      border-color: color.alpha(colors.$black, 0.16);
     }
 
     .dark & {
-      border-color: color.alpha(colors.$white, 0.15);
+      border-color: color.alpha(colors.$white, 0.16);
     }
   }
 
   .active & {
     .light & {
-      background-color: color.alpha(color.shade(colors.$blue, 15%), 0.25);
+      background-color: color.alpha(color.shade(colors.$blue, 16%), 0.24);
     }
 
     .dark & {
-      background-color: color.alpha(colors.$blue, 0.25);
+      background-color: color.alpha(colors.$blue, 0.24);
     }
   }
 
   .selected & {
-    border-color: color.alpha(colors.$blue, 0.75);
+    border-color: color.alpha(colors.$blue, 0.8);
+  }
+}
+
+.piconAdd {
+  @include position.absolute-center;
+  @include flex.row-center;
+  width: 36px;
+  height: 36px;
+  border-radius: 100px;
+  opacity: 0;
+  @include transition.apply(color, background-color, opacity);
+  pointer-events: none;
+
+  .piconButton:hover & {
+    opacity: 1;
+  }
+
+  .light & {
+    color: color.alpha(colors.$black, 0.16);
+    background-color: color.alpha(color.shade(colors.$blue, 16%), 0.08);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.16);
+    background-color: color.alpha(colors.$blue, 0.08);
+  }
+
+  i {
+    font-size: 16px;
+    line-height: 17px;
   }
 }
 
 .pokeCalc {
-  @include spacing.padding($top: 3px);
+  @include spacing.padding($top: 4px);
 }

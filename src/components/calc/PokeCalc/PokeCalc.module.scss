@@ -1,9 +1,28 @@
+@use 'mixins/flex';
 @use 'mixins/spacing';
 
-.moves {
-  @include spacing.margin($top: 10px);
+// .container {}
+
+.tablesContainer {
+  @include flex.column($justify: stretch, $align: stretch);
+  @include spacing.margin($top: 16px);
+
+  .ultraThicc & {
+    flex-direction: row;
+    align-items: center;
+
+    .moves {
+      flex: 2;
+    }
+
+    .stats {
+      flex: 1;
+      @include spacing.margin($top: 0);
+      @include spacing.padding($all: 12px, $right: 0);
+    }
+  }
 }
 
 .stats {
-  @include spacing.margin($top: 10px);
+  @include spacing.margin($top: 12px);
 }

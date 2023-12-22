@@ -1,4 +1,6 @@
 import * as React from 'react';
+import cx from 'classnames';
+import { useCalcdexContext } from '../CalcdexContext';
 import { PokeInfo } from '../PokeInfo';
 import { PokeMoves } from '../PokeMoves';
 import { PokeStats } from '../PokeStats';
@@ -12,22 +14,36 @@ export interface PokeCalcProps {
 export const PokeCalc = ({
   className,
   style,
-}: PokeCalcProps): JSX.Element => (
-  <div
-    className={className}
-    style={style}
-  >
-    {/* name, types, level, HP, status, set, ability, nature, item */}
-    <PokeInfo />
+}: PokeCalcProps): JSX.Element => {
+  const { state } = useCalcdexContext();
+  const { containerSize } = state;
 
-    {/* moves (duh) */}
-    <PokeMoves
-      className={styles.moves}
-    />
+  return (
+    <div
+      className={cx(
+        styles.container,
+        // ['lg', 'xl'].includes(containerSize) && styles.thicc,
+        containerSize === 'xl' && styles.ultraThicc,
+        className,
+      )}
+      style={style}
+    >
+      {/* name, types, level, HP, status, set, ability, nature, item */}
+      <PokeInfo
+        className={styles.info}
+      />
 
-    {/* IVs, EVs, calculated stats, boosts */}
-    <PokeStats
-      className={styles.stats}
-    />
-  </div>
-);
+      <div className={styles.tablesContainer}>
+        {/* moves (duh) */}
+        <PokeMoves
+          className={styles.moves}
+        />
+
+        {/* IVs, EVs, calculated stats, boosts */}
+        <PokeStats
+          className={styles.stats}
+        />
+      </div>
+    </div>
+  );
+};

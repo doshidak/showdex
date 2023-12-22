@@ -1,5 +1,5 @@
 import { type GenerationNum, type MoveName } from '@smogon/calc';
-import { env, formatId } from '@showdex/utils/core';
+import { env, formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
@@ -27,57 +27,19 @@ export const getPokemonLearnset = (
   speciesForme: string,
   ignoreGen?: boolean,
 ): MoveName[] => {
+  if (!nonEmptyObject(BattleTeambuilderTable?.learnsets) || !format || !speciesForme) {
+    return [];
+  }
+
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const dex = getDexForFormat(format);
-
-  if (typeof BattleTeambuilderTable === 'undefined') {
-    if (__DEV__) {
-      l.warn(
-        'Global BattleTeambuilderTable is unavailable.',
-        '\n', 'format', format, 'gen', gen,
-        '\n', 'speciesForme', speciesForme,
-        '\n', '(You will only see this warning on development.)',
-      );
-    }
-
-    return [];
-  }
-
-  const { learnsets: allLearnsets } = BattleTeambuilderTable;
-
-  if (!Object.keys(allLearnsets || {}).length) {
-    if (__DEV__) {
-      l.warn(
-        'No learnsets are available in the global BattleTeambuilderTable!',
-        '\n', 'format', format, 'gen', gen,
-        '\n', 'speciesForme', speciesForme,
-        '\n', '(You will only see this warning on development.)',
-      );
-    }
-
-    return [];
-  }
-
-  if (!speciesForme) {
-    // l.debug(
-    //   'Falsy speciesForme was provided; returning empty learnsets.',
-    //   '\n', 'format', format, 'gen', gen,
-    //   '\n', 'speciesForme', speciesForme,
-    // );
-
-    return [];
-  }
-
-  // e.g., 'Urshifu-*' -> 'urshifu', 'Urshifu-Rapid-Strike' -> 'urshifurapidstrike',
-  // 'Urshifu-Rapid-Strike-Gmax' -> 'urshifurapidstrike', 'Charizard-Mega-X' -> 'charizard'
-  // const speciesId = formatId(speciesForme.replace(/(?:-\*|-Mega(?:-[A-Z]+)?|-Gmax)$/i, ''));
 
   // note: not all formats (like metronome) include learnsets, hence the conditional spreading below
   const formatKey = guessTableFormatKey(format);
 
   const learnsets = {
-    ...allLearnsets,
-    ...(!!formatKey && formatKey in BattleTeambuilderTable && BattleTeambuilderTable[formatKey]?.learnsets),
+    ...BattleTeambuilderTable.learnsets,
+    ...(!!formatKey && BattleTeambuilderTable[formatKey]?.learnsets),
   };
 
   // find all the species (including previous evolutions) to lookup learnsets for

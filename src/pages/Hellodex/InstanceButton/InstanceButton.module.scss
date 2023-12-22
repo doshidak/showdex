@@ -11,7 +11,7 @@ div.container {
   position: relative;
   @include flex.row-between;
   // max-height: 53px;
-  @include spacing.padding-xy($x: 15px);
+  @include spacing.padding($x: 16px);
   @include font.apply(fonts.$primary);
   color: inherit;
   border-radius: 12px;
@@ -105,6 +105,17 @@ div.container {
   }
 }
 
+.standaloneIcon {
+  @include flex.row-center;
+  width: 26px;
+  height: 26px;
+  opacity: 0.5;
+
+  i {
+    font-size: 22px;
+  }
+}
+
 .info {
   flex: 1;
   max-width: calc(100% - 26px - 10px);
@@ -125,6 +136,11 @@ div.container {
   white-space: nowrap;
   opacity: 0.6;
   overflow: hidden;
+}
+
+.honkName {
+  @include font.apply(fonts.$mono);
+  opacity: 0.4;
 }
 
 .players {

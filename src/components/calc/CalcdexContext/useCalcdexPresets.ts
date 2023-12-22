@@ -2,6 +2,7 @@ import * as React from 'react';
 import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import {
   type CalcdexBattleState,
+  type CalcdexOperatingMode,
   type CalcdexPlayer,
   type CalcdexPlayerKey,
   type CalcdexPokemonPreset,
@@ -9,7 +10,12 @@ import {
 } from '@showdex/interfaces/calc';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import { cloneAllPokemon, clonePreset } from '@showdex/utils/battle';
-import { calcPresetCalcdexId, guessServerLegacySpread, guessServerSpread } from '@showdex/utils/calc';
+import {
+  calcPresetCalcdexId,
+  guessServerLegacySpread,
+  guessServerSpread,
+  populateStatsTable,
+} from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { getGenlessFormat } from '@showdex/utils/dex';
@@ -29,10 +35,14 @@ const s = (local: string, via?: string): string => `${l.scope}:${local}${via ? `
 
 const playerAutoNonce = (
   player: CalcdexPlayer,
+  operatingMode?: CalcdexOperatingMode,
 ): string => (
   player?.pokemon
     ?.filter((p) => !p?.presetId)
-    .map((p) => p?.calcdexId)
+    .map((p) => [
+      p?.calcdexId,
+      operatingMode === 'standalone' && p?.speciesForme,
+    ].filter(Boolean).join('~'))
     .join(':')
 );
 
@@ -168,7 +178,7 @@ export const useCalcdexPresets = (
           // hmm, is this ambitious? idk
           preset = guessTeambuilderPreset(
             [
-              ...(pokemon.presets?.length ? pokemon.presets : []),
+              // ...(pokemon.presets?.length ? pokemon.presets : []),
               ...selectPokemonPresets(
                 pokemonPresets,
                 pokemon,
@@ -327,7 +337,23 @@ export const useCalcdexPresets = (
         }
 
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
+        // (also more the case in 'standalone' mode, reset some fields in case they were from a prior Pokemon w/ a preset)
         if (!preset?.calcdexId) {
+          pokemon.level = state.defaultLevel;
+          pokemon.nature = state.legacy ? 'Hardy' : 'Adamant';
+          pokemon.ivs = populateStatsTable({}, { spread: 'iv', format: state.format });
+          pokemon.evs = populateStatsTable({}, { spread: 'ev', format: state.format });
+          pokemon.altTeraTypes = [];
+          pokemon.altAbilities = [];
+          pokemon.altItems = [];
+          pokemon.dirtyItem = null;
+          pokemon.altMoves = [];
+          pokemon.moves = [];
+
+          if (pokemon.dirtyTeraType && pokemon.types?.length) {
+            [pokemon.dirtyTeraType] = pokemon.types;
+          }
+
           pokemon.showGenetics = true;
 
           l.debug(
@@ -387,10 +413,10 @@ export const useCalcdexPresets = (
 
     endTimer('(dispatched)');
   }, [
-    playerAutoNonce(state?.p1),
-    playerAutoNonce(state?.p2),
-    playerAutoNonce(state?.p3),
-    playerAutoNonce(state?.p4),
+    playerAutoNonce(state?.p1, state?.operatingMode),
+    playerAutoNonce(state?.p2, state?.operatingMode),
+    playerAutoNonce(state?.p3, state?.operatingMode),
+    playerAutoNonce(state?.p4, state?.operatingMode),
     presets.ready,
     state?.battleId,
     state?.format,

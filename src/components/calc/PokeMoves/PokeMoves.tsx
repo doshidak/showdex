@@ -119,7 +119,9 @@ export const PokeMoves = ({
       || pokemon.moves?.includes('Last Respects' as MoveName)
   );
 
-  const handleMoveToggle = (name: MoveName) => {
+  const handleMoveToggle = (
+    name: MoveName,
+  ) => {
     if (!name || !PokemonToggleMoves.includes(name)) {
       return;
     }
@@ -156,7 +158,10 @@ export const PokeMoves = ({
     updatePokemon(payload, `${l.scope}:handleMoveToggle()`);
   };
 
-  const handleMoveChange = (name: MoveName, index: number) => {
+  const handleMoveChange = (
+    name: MoveName,
+    index: number,
+  ) => {
     const moves = upsizeArray(
       [...(pokemon?.moves || [])],
       matchups?.length,
@@ -167,17 +172,14 @@ export const PokeMoves = ({
       return;
     }
 
-    // when move is cleared, `name` will be null/undefined, so coalesce into an empty string
-    const moveName = (name?.replace('*', '') ?? '') as MoveName;
-
-    // update (2023/07/27): if moveName already exists at a different index in moves[], just swap them
+    // update (2023/07/27): if `name` already exists at a different index in moves[], just swap them
     // so that you don't have 2 Hydro Pumps at different indices, for example lol
     // e.g., moves = ['Hydro Pump', 'Ice Beam', 'U-Turn', 'Grass Knot'], name = 'Hydro Pump', index = 1
     // before this change: ['Hydro Pump', 'Hydro Pump', 'U-Turn', 'Grass Knot']
     // after: ['Ice Beam', 'Hydro Pump', 'U-Turn', 'Grass Knot']
     // also, the `!!m` check is to allow users to yeet all the moves if they wish
     // (otherwise, they'd only be able to yeet one move!)
-    const existingMoveIndex = moves.findIndex((m) => !!m && m === moveName);
+    const existingMoveIndex = moves.findIndex((m) => !!m && m === name);
 
     if (existingMoveIndex > -1) {
       // this is the move that's currently parked at the user-requested `index`
@@ -188,9 +190,9 @@ export const PokeMoves = ({
       moves[existingMoveIndex] = moveAtIndex;
     }
 
-    // set the move at the index as normal
+    // set the move at the `index` as normal
     // e.g., moves = ['Ice Beam', 'Hydro Pump', 'U-Turn', 'Grass Knot']
-    moves[index] = moveName;
+    moves[index] = name || null;
 
     updatePokemon({
       moves,
@@ -198,7 +200,10 @@ export const PokeMoves = ({
   };
 
   // copies the matchup result description to the user's clipboard when the damage range is clicked
-  const handleDamagePress = (index: number, description: string) => {
+  const handleDamagePress = (
+    index: number,
+    description: string,
+  ) => {
     if (typeof navigator === 'undefined' || typeof index !== 'number' || index < 0 || !description) {
       return;
     }
@@ -253,7 +258,13 @@ export const PokeMoves = ({
                   settings?.showUiTooltips &&
                   <div style={battleActive ? { marginBottom: 2 } : undefined}>
                     {pokemon?.terastallized ? 'Revert' : 'Terastallize'} to{' '}
-                    {(pokemon?.terastallized ? pokemon?.types?.join('/') : pokemon?.teraType) || '???'}
+                    <strong>
+                      {(
+                        pokemon?.terastallized
+                          ? pokemon?.types?.join('/')
+                          : (pokemon?.dirtyTeraType || pokemon?.teraType)
+                      ) || '???'}
+                    </strong>
                   </div>
                 }
 

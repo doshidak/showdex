@@ -13,10 +13,11 @@ import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
  * * `'server'` refers to any preset provided by the Showdown server, typically for the logged-in user's Pokemon.
  * * `'sheet'` refers to any preset derived from an open team sheet or the `!showteam` chat command.
  * * `'smogon'` refers to any preset downloaded from a repository of Smogon sets.
- * * `'storage'` refers to any preset derived from locally-stored Teambuilder teams and boxes.
+ * * `'storage'` refers to any preset derived from locally-stored Teambuilder teams & boxes.
  *   - `'storage'` refers to any preset derived from a Teambuilder team.
  *   - `'storage-box'` refers to any preset derived from a Teambuilder box.
  * * `'usage'` refers to any preset derived from Showdown usage stats.
+ * * `'user'` refers to the user's manual modifications represented as a preset.
  *
  * @since 1.0.7
  */
@@ -27,7 +28,8 @@ export type CalcdexPokemonPresetSource =
   | 'smogon'
   | 'storage'
   | 'storage-box'
-  | 'usage';
+  | 'usage'
+  | 'user';
 
 /**
  * Single Pokemon spread configuration.

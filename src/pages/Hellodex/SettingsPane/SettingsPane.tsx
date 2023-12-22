@@ -6,7 +6,6 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import {
   type BadgeInstance,
-  type BaseButtonProps,
   Badge,
   BaseButton,
   Button,
@@ -40,7 +39,7 @@ import styles from './SettingsPane.module.scss';
 export interface SettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
-  onRequestClose?: BaseButtonProps['onPress'];
+  onRequestClose?: () => void;
 }
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
@@ -50,8 +49,6 @@ const getPresetCacheSize = () => (getStoredItem('storage-preset-cache-key')?.len
 /**
  * Showdex settings UI.
  *
- * @todo This file is gross. It's over 1500 lines.
- * @warning Also a warning lol.
  * @since 1.0.3
  */
 export const SettingsPane = ({
@@ -94,10 +91,6 @@ export const SettingsPane = ({
         return;
       }
 
-      // const importedSettings = env('build-target') === 'firefox'
-      //   // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
-      //   ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
-      //   : await navigator.clipboard.readText();
       const importedSettings = await readClipboardText();
 
       l.debug(
@@ -171,7 +164,6 @@ export const SettingsPane = ({
         return void exportFailedBadgeRef.current?.show();
       }
 
-      // await navigator.clipboard.writeText(dehydratedSettings);
       await writeClipboardText(dehydratedSettings);
       exportBadgeRef.current?.show();
     } catch (error) {
@@ -209,7 +201,7 @@ export const SettingsPane = ({
           return void defaultsFailedBadgeRef.current?.show();
         }
 
-        await navigator.clipboard.writeText(dehydratedDefaults);
+        await writeClipboardText(dehydratedDefaults);
         defaultsBadgeRef.current?.show();
       } catch (error) {
         if (__DEV__) {
@@ -274,7 +266,7 @@ export const SettingsPane = ({
         presetCacheTimeout.current = null;
       }
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- empty deps are intentional to only run on first mount
+  });
 
   const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
     if (!nonEmptyObject(values)) {
@@ -285,18 +277,6 @@ export const SettingsPane = ({
       // colorScheme: newColorScheme,
       calcdex,
     } = values;
-
-    /*
-    if (newColorScheme && colorScheme !== newColorScheme) {
-      // note: Storage is a native Web API (part of the Web Storage API), but Showdown redefines it with its own Storage() function
-      // also, Dex.prefs() is an alias of Storage.prefs(), but w/o the `value` and `save` args
-      (Storage as unknown as Showdown.ClientStorage)?.prefs?.('theme', newColorScheme, true);
-
-      // this is how Showdown natively applies the theme lmao
-      // see: https://github.com/smogon/pokemon-showdown-client/blob/1ea5210a360b64ede48813d9572b59b7f3d7365f/js/client.js#L473
-      $?.('html').toggleClass('dark', newColorScheme === 'dark');
-    }
-    */
 
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values

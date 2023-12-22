@@ -1,4 +1,5 @@
 export * from './alwaysCriticalHits';
+export * from './detectDoublesFormat';
 export * from './detectGenFromFormat';
 export * from './detectLegacyGen';
 export * from './determineCriticalHit';
@@ -18,6 +19,7 @@ export * from './getTypesDex';
 export * from './getWeatherConditions';
 export * from './getZMove';
 export * from './guessTableFormatKey';
+export * from './guessTableFormatSlice';
 export * from './hasMegaForme';
 export * from './hasNickname';
 export * from './legalLockedFormat';

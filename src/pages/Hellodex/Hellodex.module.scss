@@ -75,7 +75,7 @@
 }
 
 .ampersand {
-  @include spacing.margin-xy($x: 10px);
+  @include spacing.margin($x: 10px);
 }
 
 .authorButton {
@@ -146,7 +146,7 @@
   position: relative;
   width: 100%;
   height: 30vh;
-  @include spacing.margin-xy($y: 25px);
+  @include spacing.margin($y: 25px);
   border-radius: 15px;
   overflow: hidden;
   @include transition.apply(height, background-color, box-shadow);
@@ -208,6 +208,14 @@
   grid-area: span 1 / span 1;
 }
 
+div.newHonkButton {
+  border-radius: 12px;
+
+  &::before {
+    border-radius: 12px;
+  }
+}
+
 .battleRecordSpacer {
   grid-area: span 1 / span 3;
   height: 20px;
@@ -220,23 +228,57 @@
 .empty {
   @include position.absolute-fill;
   @include flex.column-center;
-  opacity: 0.65;
   user-select: none;
 
   .emptyIcon {
     width: 30px;
     min-width: 30px;
     @include spacing.margin($bottom: 10px);
+    opacity: 0.32;
   }
 
   .emptyLabel {
     max-width: 215px;
     font-size: 12px;
+    letter-spacing: 0.1px;
     text-align: center;
+    line-height: 15px;
+    opacity: 0.64;
 
     strong {
       font-weight: 600;
     }
+  }
+
+  .divider {
+    @include flex.row-center;
+    @include spacing.margin($y: 16px);
+
+    .dividerLine {
+      width: 56px;
+      height: 1px;
+      opacity: 0.08;
+      @include transition.apply(background-color);
+
+      .light & {
+        background-color: colors.$black;
+      }
+
+      .dark & {
+        background-color: colors.$white;
+      }
+    }
+
+    .dividerLabel {
+      @include spacing.padding($x: 12px);
+      // font-style: italic;
+      letter-spacing: 0.1px;
+      opacity: 0.32;
+    }
+  }
+
+  .honkButton {
+    @include spacing.margin($top: 4px, $x: auto);
   }
 }
 
@@ -256,7 +298,7 @@ button.spectateButton {
 }
 
 .donations {
-  @include spacing.margin-xy($x: auto);
+  @include spacing.margin($x: auto);
   font-size: 10px;
   text-align: center;
   line-height: 14px;
@@ -273,11 +315,17 @@ button.spectateButton {
 
 .donateFootnote {
   max-width: 250px + 10px;
-  @include spacing.padding-all(5px);
-  @include spacing.margin($top: 15px, $right: auto, $left: auto);
+  @include spacing.padding($all: 6px);
+  @include spacing.margin($top: 15px, $x: auto);
+  letter-spacing: 0.05px;
   backdrop-filter: blur(3px);
   border-radius: 5px;
-  opacity: 0.65;
+  opacity: 0.64;
+  @include transition.apply(opacity);
+
+  &.withTitle {
+    opacity: 0.4;
+  }
 }
 
 .footer {
@@ -286,7 +334,7 @@ button.spectateButton {
   flex: 0 0 73px;
   width: 100%;
   height: 73px;
-  @include spacing.padding-xy($x: 25px);
+  @include spacing.padding($x: 25px);
   backdrop-filter: blur(3px);
   border-top: 2px solid;
   @include transition.apply(background-color, border-top-color);

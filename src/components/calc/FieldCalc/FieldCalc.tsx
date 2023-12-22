@@ -40,6 +40,7 @@ export const FieldCalc = ({
   } = useCalcdexContext();
 
   const {
+    operatingMode,
     battleId,
     containerSize,
     gen,
@@ -97,7 +98,7 @@ export const FieldCalc = ({
     settings,
   ]);
 
-  const doubles = state?.gameType === 'Doubles';
+  const doubles = operatingMode === 'standalone' || state?.gameType === 'Doubles';
 
   const sideFieldMap = {
     ...PlayerSideScreensToggleMap,
@@ -106,7 +107,7 @@ export const FieldCalc = ({
 
   // update (2023/01/06): as per an executive order from camdawgboi, these toggles will be removed in
   // Gen 9 for non-National Dex formats (though, are there any doubles National Dex formats?)
-  if (gen === 9 && doubles && !['nationaldex', 'natdex'].some((f) => format.includes(f))) {
+  if (gen === 9 && doubles && !['nationaldex', 'natdex'].some((f) => format?.includes(f))) {
     delete sideFieldMap.Gift;
     delete sideFieldMap.Battery;
     delete sideFieldMap.Power;

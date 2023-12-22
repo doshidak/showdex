@@ -1,0 +1,106 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+// .container {}
+
+button.usernameButton {
+  justify-content: initial;
+  max-width: 90%;
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+
+  .light & {
+    color: color.alpha(colors.$black, 0.75);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.75);
+  }
+}
+
+.usernameButtonLabel {
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.usernameButtonIcon {
+  width: 12px;
+  min-width: 12px;
+  height: 12px;
+  min-height: 12px;
+  @include spacing.margin($left: 2px);
+  color: inherit;
+  transform: scale(1.1);
+}
+
+.playerActions {
+  @include flex.row($align: center);
+  @include spacing.margin($top: 2px);
+  font-size: 8px;
+
+  .verySmol & {
+    @include spacing.margin($top: 0, $left: 10px);
+  }
+
+  button.toggleButton {
+    font-size: inherit;
+  }
+}
+
+.rating {
+  opacity: 0;
+  @include transition.apply(opacity);
+
+  &.visible {
+    opacity: 0.65;
+  }
+
+  .ratingSeparator {
+    display: inline-block;
+    @include spacing.margin($x: 0.5em);
+    user-select: none;
+  }
+}
+
+.tooltipContent {
+  max-width: 175px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
+.ladderFormat {
+  @include spacing.margin($bottom: 2px);
+  font-size: 8px;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.ladderStats {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.5em;
+}
+
+.ladderStatLabel {
+  grid-area: span 1 / span 1;
+  font-weight: 500;
+  font-size: 8px;
+  text-align: right;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.ladderStatValue {
+  grid-area: span 1 / span 1;
+  @include font.apply(fonts.$mono);
+  font-size: 10px;
+  text-align: left;
+}

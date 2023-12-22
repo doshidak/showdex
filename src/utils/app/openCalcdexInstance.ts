@@ -8,19 +8,19 @@ import { getCalcdexRoomId } from './getCalcdexRoomId';
 /**
  * Opens an existing Calcdex tab (or battle if overlayed) or creates a new one.
  *
- * * For that last reason, the third `renderer()` argument is required.
+ * * For that last reason, the second `renderer()` argument is required.
  * * Extracted from the Hellodex bootstrapper in v1.2.0.
  *
  * @since 1.0.3
  */
 export const openCalcdexInstance = (
   store: RootStore,
-  battleId: string,
   renderer: (
     dom: ReactDOM.Root,
     store: RootStore,
     battleId: string,
   ) => void,
+  battleId: string,
 ): void => {
   const shouldOpen = nonEmptyObject(app?.rooms)
     && typeof store?.getState === 'function'
@@ -49,7 +49,7 @@ export const openCalcdexInstance = (
   // check if the Calcdex is rendered as an overlay for this battle
   if (battleState.renderMode === 'overlay') {
     // if we're not even in the battleRoom anymore, destroy the state
-    if (!(battleRoomId in (app.rooms || {}))) {
+    if (!(battleRoomId in app.rooms)) {
       store.dispatch(calcdexSlice.actions.destroy(battleRoomId));
 
       return;

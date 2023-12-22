@@ -11,9 +11,8 @@
   grid-template-columns: minmax(150px, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
   column-gap: 10px;
   row-gap: 3px;
-  @include spacing.margin($top: 15px);
-  @include spacing.padding($top: 8px, $right: 10px, $bottom: 10px, $left: 10px);
-  border-radius: 10px;
+  @include spacing.padding($all: 12px, $top: 8px);
+  border-radius: 12px;
   @include transition.apply(background-color, box-shadow);
 
   &.verySmol {
@@ -21,18 +20,18 @@
   }
 
   &.light {
-    background-color: color.alpha(colors.$white, 0.6);
+    background-color: color.alpha(colors.$white, 0.64);
     box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 15px color.alpha(colors.$gray-dark, 0.15),
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 16px color.alpha(colors.$gray-dark, 0.16),
     );
   }
 
   &.dark {
-    background-color: color.alpha(#121212, 0.85);
+    background-color: color.alpha(#121212, 0.8);
     box-shadow: (
-      0 0 1px color.alpha(colors.$white, 0.3),
-      0 0 15px color.alpha(colors.$black, 0.5),
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 16px color.alpha(colors.$black, 0.48),
     );
   }
 }

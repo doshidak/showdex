@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { NIL as NIL_UUID } from 'uuid';
 import { type ItemName, type MoveName } from '@smogon/calc';
 import {
   PokemonBoosterAbilities,
@@ -8,11 +9,13 @@ import {
 } from '@showdex/consts/dex';
 import {
   type CalcdexBattleField,
+  type CalcdexBattleState,
   type CalcdexMoveOverride,
   type CalcdexPlayer,
   type CalcdexPlayerKey,
   type CalcdexPlayerSide,
   type CalcdexPokemon,
+  type CalcdexPokemonPreset,
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
@@ -33,9 +36,22 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
-import { nonEmptyObject, similarArrays, tolerance } from '@showdex/utils/core';
+import {
+  env,
+  nonEmptyObject,
+  similarArrays,
+  tolerance,
+} from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { getDexForFormat, hasMegaForme } from '@showdex/utils/dex';
+import {
+  detectDoublesFormat,
+  getDexForFormat,
+  getGenfulFormat,
+  getGenlessFormat,
+  hasMegaForme,
+  parseBattleFormat,
+} from '@showdex/utils/dex';
+import { detectCompletePreset } from '@showdex/utils/presets';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -51,9 +67,26 @@ import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
  * @since 1.1.7
  */
 export interface CalcdexContextConsumables extends CalcdexContextValue {
+  updateBattle: (
+    battle: DeepPartial<CalcdexBattleState>,
+    scope?: string,
+  ) => void;
+
+  addPokemon: (
+    playerKey: CalcdexPlayerKey,
+    pokemon: PickRequired<CalcdexPokemon, 'speciesForme'>,
+    scope?: string,
+  ) => void;
+
   updatePokemon: (
     playerKey: CalcdexPlayerKey,
     pokemon: Partial<CalcdexPokemon>,
+    scope?: string,
+  ) => void;
+
+  removePokemon: (
+    playerKey: CalcdexPlayerKey,
+    pokemonOrId: PickRequired<CalcdexPokemon, 'calcdexId'> | string,
     scope?: string,
   ) => void;
 
@@ -104,9 +137,118 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   const ctx = React.useContext(CalcdexContext);
   const dispatch = useDispatch();
 
-  const {
-    state,
-  } = ctx;
+  const { state } = ctx;
+
+  const updateBattle: CalcdexContextConsumables['updateBattle'] = (
+    battle,
+    scopeFromArgs,
+  ) => {
+    // used for debugging purposes only
+    const scope = s('updateBattle()', scopeFromArgs);
+    const endTimer = runtimer(scope, l);
+
+    if (!state?.battleId) {
+      return void endTimer('(bad state)');
+    }
+
+    if (!nonEmptyObject(battle) || (battle?.battleId && battle.battleId !== state.battleId)) {
+      return void endTimer('(invalid args)');
+    }
+
+    const payload = {
+      ...battle,
+      battleId: state.battleId,
+    };
+
+    if (payload.gen && payload.gen !== state.gen) {
+      payload.format = getGenfulFormat(payload.gen, env('honkdex-default-format', payload.format));
+    }
+
+    if (payload.format && payload.format !== state.format) {
+      payload.gameType = detectDoublesFormat(payload.format) ? 'Doubles' : 'Singles';
+
+      const battleFormat = Object.values(BattleFormats).find((f) => {
+        const { base } = parseBattleFormat(f?.id);
+        const value = getGenfulFormat(state.gen, base);
+
+        return value === payload.format;
+      });
+
+      payload.defaultLevel = battleFormat?.teambuilderLevel || 100;
+    }
+
+    dispatch(calcdexSlice.actions.update({
+      scope,
+      ...payload,
+    }));
+
+    endTimer('(dispatched)');
+  };
+
+  const addPokemon: CalcdexContextConsumables['addPokemon'] = (
+    playerKey,
+    pokemon,
+    scopeFromArgs,
+  ) => {
+    // used for debugging purposes only
+    const scope = s('addPokemon()', scopeFromArgs);
+    const endTimer = runtimer(scope, l);
+
+    if (!state?.battleId || !state.format) {
+      return void endTimer('(bad state)');
+    }
+
+    if (!playerKey || !pokemon?.speciesForme) {
+      return void endTimer('(invalid args)');
+    }
+
+    if (!state[playerKey]?.active) {
+      return void endTimer('(bad player state)');
+    }
+
+    const payload: Partial<CalcdexPlayer> = {
+      pokemon: cloneAllPokemon(state[playerKey].pokemon),
+    };
+
+    const newPokemon = sanitizePokemon({
+      ...pokemon,
+      level: pokemon?.level || state.defaultLevel,
+      hp: 1, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
+    }, state.format);
+
+    newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
+    newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
+
+    payload.selectionIndex = payload.pokemon.push(newPokemon) - 1;
+
+    if (state.operatingMode === 'standalone') {
+      payload.activeIndices = [...(state[playerKey].activeIndices || [])];
+
+      const shouldActivate = (state.gameType === 'Singles' && !payload.activeIndices.length)
+        || (state.gameType === 'Doubles' && payload.activeIndices.length < 2);
+
+      if (shouldActivate) {
+        payload.activeIndices.push(payload.selectionIndex);
+        payload.pokemon = payload.pokemon.map((p, i) => ({
+          ...p,
+          active: payload.activeIndices.includes(i),
+        }));
+      }
+
+      // add a couple empty slots to display if we've reached the max
+      if (payload.pokemon.length >= state[playerKey].maxPokemon) {
+        payload.maxPokemon = state[playerKey].maxPokemon + Math.abs(env.int('honkdex-player-extend-pokemon', 0));
+      }
+    }
+
+    dispatch(calcdexSlice.actions.updatePlayer({
+      scope,
+      battleId: state.battleId,
+      [playerKey]: payload,
+    }));
+
+    endTimer('(dispatched)');
+  };
 
   // note: don't bother memozing these; may do more harm than good! :o
   const updatePokemon: CalcdexContextConsumables['updatePokemon'] = (
@@ -156,6 +298,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // note: using `prevPokemon` & `pokemon` over `mutated` is important here !!
     if (mutating('speciesForme') && prevPokemon.speciesForme !== pokemon.speciesForme) {
       const {
+        altFormes,
         types,
         abilities,
         baseStats,
@@ -163,6 +306,11 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         mutated,
         state.format,
       );
+
+      // note: altFormes[] can be empty! (i.e., a Pokemon has no other formes)
+      if (!similarArrays(mutated.altFormes, altFormes)) {
+        mutated.altFormes = [...altFormes];
+      }
 
       if (abilities?.length) {
         mutated.abilities = [...abilities];
@@ -235,17 +383,22 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
 
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
-      // (which should only be in the Pokemon's unique `presets[]`, not in RTK Query or something lol)
       if (!mutated.serverSourced && mutated.presetId) {
         const dex = getDexForFormat(state.format);
         const baseForme = dex.species.get(mutated.speciesForme)?.baseSpecies;
-        // const preset = mutated.presets?.find((p) => p?.calcdexId === mutated.presetId);
 
-        const shouldClearPreset = (!mutated.presetSource || !['server', 'sheet'].includes(mutated.presetSource))
-          && !PokemonPresetFuckedBaseFormes.includes(baseForme)
-          && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme)
-          && !hasMegaForme(prevPokemon.speciesForme)
-          && !hasMegaForme(pokemon.speciesForme);
+        const shouldClearPreset = (
+          // presetId would be NIL_UUID when the user manually fills in everything, but we'd want to clear it for the
+          // auto-preset to kick in when the base formes no longer match (e.g., mutating from 'Dragapult' -> 'Garchomp')
+          (mutated.presetId === NIL_UUID || mutated.presetSource === 'user')
+            && !prevPokemon.speciesForme.includes(baseForme)
+        ) || (
+          (!mutated.presetSource || !['server', 'sheet'].includes(mutated.presetSource))
+            && !PokemonPresetFuckedBaseFormes.includes(baseForme)
+            && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme)
+            && !hasMegaForme(prevPokemon.speciesForme)
+            && !hasMegaForme(pokemon.speciesForme)
+        );
 
         if (shouldClearPreset) {
           mutated.presetId = null;
@@ -266,11 +419,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         ...prevPokemon.evs,
         ...pokemon.evs,
       };
-
-      // needed to prevent @smogon/calc from throwing an legacy SPA/SPD mismatch error since we also allow this case
-      if (state.legacy) {
-        mutated.evs.spd = mutated.evs.spa;
-      }
     }
 
     // processing if ye olde Pokemone, like handling DVs & removing abilities, natures, etc.
@@ -284,13 +432,18 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         mutated.ivs.hp = calcLegacyHpIv(mutated.ivs);
       }
 
+      // needed to prevent @smogon/calc from throwing an legacy SPA/SPD mismatch error since we also allow this case
+      if (mutating('evs')) {
+        mutated.evs.spd = mutated.evs.spa;
+      }
+
       // no-op if these keys don't exist (i.e., no need to check if `mutating('abililty')` beforehand)
       delete mutated.ability;
       delete mutated.dirtyAbility;
       delete mutated.nature;
 
       // note: items were introduced in gen 2
-      if ((state.gen || 0) === 1) {
+      if (state.gen === 1) {
         delete mutated.item;
         delete mutated.dirtyItem;
       }
@@ -444,6 +597,37 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
     }
 
+    // when the user manually fills in a preset-less Pokemon, set its presetId to some value so that the auto-preset
+    // doesn't clear the changes when another Pokemon is added (auto-preset runs on each pokemon[] mutation)
+    // (note: also checking if the manualPreset was previously applied in case it's no longer "complete")
+    if (mutating('speciesForme') ? mutated.presetId === NIL_UUID : !mutated.presetId) {
+      // create a pseudo-preset based on the user's current inputs to feed into detectCompletePreset()
+      const manualPreset: CalcdexPokemonPreset = {
+        calcdexId: NIL_UUID,
+        id: NIL_UUID,
+        name: 'User',
+        source: 'user',
+        gen: state.gen,
+        format: getGenlessFormat(state.format),
+        speciesForme: mutated.speciesForme,
+        level: mutated.level,
+        teraTypes: [mutated.dirtyTeraType].filter(Boolean),
+        ability: mutated.dirtyAbility,
+        item: mutated.dirtyItem,
+        nature: mutated.nature,
+        ivs: { ...mutated.ivs },
+        evs: { ...mutated.evs },
+
+        // note: purposefully defaulting to [null] to satisfy the moves[].length check in detectCompletePreset()
+        moves: mutated.moves.length ? [...mutated.moves] : [null],
+      };
+
+      const manuallyComplete = detectCompletePreset(manualPreset);
+
+      mutated.presetId = manuallyComplete ? manualPreset.calcdexId : null;
+      mutated.presetSource = manuallyComplete ? manualPreset.source : null;
+    }
+
     player.pokemon[pokemonIndex] = mutated;
 
     // smart toggle Ruin abilities (gen 9), but only when abilityToggled was not explicitly updated
@@ -491,6 +675,69 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       scope,
       battleId: state.battleId,
       ...playersPayload,
+    }));
+
+    endTimer('(dispatched)');
+  };
+
+  const removePokemon: CalcdexContextConsumables['removePokemon'] = (
+    playerKey,
+    pokemonOrId,
+    scopeFromArgs,
+  ) => {
+    // used for debugging purposes only
+    const scope = s('removePokemon()', scopeFromArgs);
+    const endTimer = runtimer(scope, l);
+
+    if (!state?.battleId) {
+      return void endTimer('(bad state)');
+    }
+
+    const pokemonId = typeof pokemonOrId === 'string'
+      ? pokemonOrId
+      : pokemonOrId?.calcdexId;
+
+    if (!playerKey || !pokemonId || !state[playerKey]?.active) {
+      return void endTimer('(invalid args)');
+    }
+
+    const pokemonIndex = state[playerKey].pokemon.findIndex((p) => p?.calcdexId === pokemonId);
+
+    if (pokemonIndex < 0) {
+      return void endTimer('(404 pokemonId)');
+    }
+
+    const payload: Partial<CalcdexPlayer> = {
+      pokemon: cloneAllPokemon(state[playerKey].pokemon),
+    };
+
+    payload.pokemon.splice(pokemonIndex, 1);
+
+    const activeIndicesIndex = state[playerKey].activeIndices.indexOf(pokemonIndex);
+
+    if (activeIndicesIndex > -1) {
+      payload.activeIndices = [...state[playerKey].activeIndices];
+      payload.activeIndices.splice(activeIndicesIndex, 1);
+    }
+
+    if (state[playerKey].selectionIndex === pokemonIndex) {
+      payload.selectionIndex = Math.max(payload.pokemon.length - 1, 0);
+    }
+
+    const extendAmount = Math.abs(env.int('honkdex-player-extend-pokemon', 0));
+    const maxPokemonPrime = state[playerKey].maxPokemon - extendAmount;
+
+    if (maxPokemonPrime > payload.pokemon.length) {
+      payload.maxPokemon = Math.max(
+        maxPokemonPrime,
+        Math.abs(env.int('honkdex-player-min-pokemon', 0)),
+      );
+    }
+
+    dispatch(calcdexSlice.actions.updatePlayer({
+      scope,
+      battleId: state.battleId,
+      [playerKey]: payload,
     }));
 
     endTimer('(dispatched)');
@@ -642,10 +889,19 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return void endTimer('(no change)');
     }
 
+    const pokemon = cloneAllPokemon(state[playerKey].pokemon).map((p, i) => ({
+      ...p,
+      active: activeIndices.includes(i),
+    }));
+
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
-      [playerKey]: { activeIndices },
+
+      [playerKey]: {
+        activeIndices,
+        pokemon,
+      },
     }));
 
     endTimer('(dispatched)');
@@ -672,22 +928,60 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return void endTimer('(bad player state)');
     }
 
-    if (state[playerKey].selectionIndex === pokemonIndex) {
-      return void endTimer('(no change)');
-    }
-
     // note: this is being cloned (instead of just directly populating `payload` below) to freely allow functions
     // like toggleRuinAbilities() to freely mutate the pokemon[] without affecting the original state
     const player = clonePlayer(state[playerKey]);
 
     const playerPayload: Partial<CalcdexPlayer> = {
-      selectionIndex: pokemonIndex,
+      selectionIndex: Math.min(pokemonIndex, player.pokemon.length), // allowing + 1 to add
     };
+
+    if (player.selectionIndex === playerPayload.selectionIndex) {
+      switch (state.operatingMode) {
+        case 'battle': {
+          return void endTimer('(no change)');
+        }
+
+        case 'standalone': {
+          if (!Array.isArray(player.activeIndices)) {
+            player.activeIndices = [];
+          }
+
+          // when the same Pokemon is selected, toggle its activation state (i.e., whether it's `active` on the field)
+          const activeIndicesIndex = player.activeIndices.indexOf(player.selectionIndex);
+
+          // note: splice(-1, 1, 'foo') is functionally similar to push('foo').
+          // indexOf() will return -1 if the selectionIndex wasn't found.
+          // also, providing the `items[]` arg to splice() will insert them as-is, including null's & undefined's,
+          // e.g., ['foo', 'bar'].splice(-1, 1, undefined) -> ['foo', undefined], which we **don't** want!
+          // hence the spread array args in order to get ['foo'], while achieving that "1-liner" for max street cred LOL
+          player.activeIndices.splice(...([
+            activeIndicesIndex,
+            state.gameType === 'Doubles' && player.pokemon.length < 2 ? 0 : 1,
+            activeIndicesIndex < 0 && player.selectionIndex,
+          ].filter((v) => typeof v === 'number') as Parameters<typeof player.activeIndices.splice>));
+
+          player.pokemon = player.pokemon.map((p, i) => ({
+            ...p,
+            active: player.activeIndices.includes(i),
+          }));
+
+          playerPayload.activeIndices = [...player.activeIndices];
+          playerPayload.pokemon = [...player.pokemon];
+
+          break;
+        }
+
+        default: {
+          break;
+        }
+      }
+    }
 
     // technically don't need to specify this since toggleRuinAbilities() accepts a selectionIndex
     // override as its second argument, but just in case we forget to accept the same override for
     // future functions I may write & use here LOL
-    player.selectionIndex = pokemonIndex;
+    player.selectionIndex = playerPayload.selectionIndex;
 
     // smart toggle Ruin abilities (gen 9)
     // (note: toggleRuinAbilities() will directly mutate each CalcdexPokemon in the player's pokemon[])
@@ -696,7 +990,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         player,
         state.gameType,
         false,
-        pokemonIndex,
+        playerPayload.selectionIndex,
       );
 
       playerPayload.pokemon = player.pokemon;
@@ -737,7 +1031,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
       const opponentKey = pKey === state.playerKey ? state.opponentKey : state.playerKey;
       const opponent = opponentKey === playerKey ? playerPayload : state[opponentKey];
-      const opponentSelectionIndex = opponentKey === playerKey ? pokemonIndex : opponent?.selectionIndex;
+      const opponentSelectionIndex = opponentKey === playerKey ? playerPayload.selectionIndex : opponent?.selectionIndex;
       const opponentPokemon = opponent?.pokemon?.[opponentSelectionIndex];
 
       playerSource.pokemon.forEach((pokemon, i) => {
@@ -751,7 +1045,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         const toggled = detectToggledAbility(pokemon, {
           gameType: state.gameType,
           opponentPokemon,
-          selectionIndex: pKey === playerKey ? pokemonIndex : opponentSelectionIndex,
+          selectionIndex: pKey === playerKey ? playerPayload.selectionIndex : opponentSelectionIndex,
           weather: state.field?.weather,
           terrain: state.field?.terrain,
         });
@@ -875,7 +1169,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   return {
     ...ctx,
 
+    updateBattle,
+    addPokemon,
     updatePokemon,
+    removePokemon,
     updateSide,
     updateField,
     activatePokemon,

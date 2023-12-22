@@ -1,20 +1,27 @@
+import { nonEmptyObject } from '@showdex/utils/core';
+import { detectGenFromFormat } from './detectGenFromFormat';
+
 /**
  * Known mappings of formats to the `BattleTeambuilderTableFormat`.
  *
- * * Formats, i.e., the keys of this object, should be used as a search string.
+ * * Provided `format` will be `test()`'d against the `RegExp`, then the matching string will be `replace()`'d with the
+ *   `replacement` string, which is the resulting key that should be accessed in `BattleTeambuilderTable`.
  *
  * @since 1.0.3
  */
-const KnownTableMappings: Record<string, Showdown.BattleTeambuilderTableFormat> = {
-  bdsp: 'gen8bdsp', // for now, 'gen8bdspdoubles*' formats can go to gen8bdsp
-  gen8metronome: 'gen8metronome',
-  gen8natdex: 'gen8natdex', // unsure what formats would match this, but it's here just in case
-  gen8nationaldex: 'gen8natdex', // e.g., 'gen8nationaldex', 'gen8nationaldexubers', 'gen8nationaldexag', etc.
-  gen9metronome: 'gen9metronome',
-  gen9natdex: 'gen9natdex', // e.g., 'gen9natdexdraft', 'gen9natdex6v6doublesdraft', 'gen9natdexlcdraft', etc.
-  gen9nationaldex: 'gen9natdex', // e.g., 'gen9nationaldex', 'gen9nationaldexubers', 'gen9nationaldexag', etc.
-  letsgo: 'gen7letsgo',
-};
+const KnownFormats: [test: RegExp, replacement: string][] = [
+  [/balancedhackmons/, 'bh'],
+  [/bdsp.*(doubles)?/, 'gen8bdsp$1'],
+  [/letsgo/, 'gen7letsgo'],
+  [/^gen(\d).+lc/, 'gen$1lc'],
+  [/^gen(\d).+doubles/, 'gen$1doubles'],
+  [/^gen(\d)metronome/, 'gen$1metronome'],
+  [/^gen(\d)nat(?:ional)?dex/, 'gen$1natdex'],
+  [/^gen(\d)nfe/, 'gen$1nfe'],
+  [/^gen(\d)vgc/, 'gen$1vgc'],
+  [/^gen(\d)predlc.+(doubles)?/, 'gen$1predlc$2'],
+  [/^gen(\d)dlc(\d).+(doubles)?/, 'gen$1dlc$2$3'],
+];
 
 /**
  * Attempts to guess the key in `BattleTeambuilderTable` from the provided `format`.
@@ -34,24 +41,45 @@ const KnownTableMappings: Record<string, Showdown.BattleTeambuilderTableFormat> 
 export const guessTableFormatKey = (
   format: string,
 ): Showdown.BattleTeambuilderTableFormat => {
-  if (!format) {
+  if (!format || !nonEmptyObject(BattleTeambuilderTable)) {
     return null;
   }
 
-  const knownFormat = Object.entries(KnownTableMappings)
-    .find(([searchFormat]) => format.includes(searchFormat))?.[1];
+  // first sniff out any special formats, like gen8bdsp & gen9dlc1
+  const knownFormat = KnownFormats.find(([regex]) => regex.test(format));
 
-  if (knownFormat) {
-    return knownFormat;
+  if (knownFormat?.length) {
+    const [regex, replacement] = knownFormat;
+    const [match] = regex.exec(format);
+    const key = match?.replace(regex, replacement) as Showdown.BattleTeambuilderTableFormat;
+
+    if (key in BattleTeambuilderTable) {
+      return key;
+    }
   }
 
-  // reversing the order so that sub-formats like gen7letsgo comes before gen7
-  // (note: there's no gen8, only gen8dlc1. however, there is a gen8doubles and a gen8dlc1doubles,
-  // so we can't simply remove 'dlc1'; hence why we're filtering out gen8doubles since it comes before gen8dlc1doubles)
-  const genFormatKeys = (Object.keys(BattleTeambuilderTable) as Showdown.BattleTeambuilderTableFormat[])
-    .filter((key) => key?.startsWith?.('gen') && key !== 'gen8doubles')
-    .sort()
-    .reverse();
+  // current gen (e.g., 'gen9' -- at the time of writing) seems to be in the root BattleTeambuilderTable,
+  // while other gens (e.g., 'gen8') will be properties alongside the current gen;
+  // i.e., you won't find a 'gen9' BattleTeambuilderTable property, but what you'd normally find inside of it is
+  // available in the root of the BattleTeambuilderTable object itself
+  const gen = detectGenFromFormat(format);
 
-  return genFormatKeys.find((key) => format.includes(key.replace(/dlc\d?/i, '')));
+  // doubles (even of the current gen, e.g., 'gen9doubles') will always be a BattleTeambuilderTable property
+  if (format.includes('doubles')) {
+    const key = `gen${gen}doubles` as Showdown.BattleTeambuilderTableFormat;
+
+    if (key in BattleTeambuilderTable) {
+      return key;
+    }
+  }
+
+  const key = `gen${gen}` as Showdown.BattleTeambuilderTableFormat;
+
+  if (key in BattleTeambuilderTable) {
+    return key;
+  }
+
+  // at this point, the `format` might be something like `gen9ou`, so since it's the current gen, we'll return `null` as
+  // to fallback to using the root BattleTeambuilderTable properties
+  return null;
 };

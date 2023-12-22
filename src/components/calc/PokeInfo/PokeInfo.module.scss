@@ -19,7 +19,7 @@
 
   .rowItem {
     flex: 1;
-    @include spacing.margin-xy($x: 3px);
+    @include spacing.margin($x: 3px);
 
     &:first-child {
       @include spacing.margin($left: 0);
@@ -28,6 +28,11 @@
     &:last-child {
       @include spacing.margin($right: 0);
     }
+  }
+
+  &:nth-child(2) {
+    align-items: flex-start;
+    @include spacing.margin($x: 12px);
   }
 }
 
@@ -42,18 +47,18 @@
   @include transition.apply(color);
 
   .light & {
-    color: color.alpha(colors.$black, 0.75);
+    color: color.alpha(colors.$black, 0.8);
 
     &.legacy {
-      color: color.alpha(colors.$black, 0.3);
+      color: color.alpha(colors.$black, 0.32);
     }
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.75);
+    color: color.alpha(colors.$white, 0.8);
 
     &.legacy {
-      color: color.alpha(colors.$white, 0.3);
+      color: color.alpha(colors.$white, 0.32);
     }
   }
 }
@@ -64,11 +69,11 @@ button.toggleButton {
 
 .dropdownLabel {
   @include flex.row($align: center);
-  @include spacing.margin($bottom: 3px, $left: 5px);
+  @include spacing.margin($bottom: 4px, $left: 5px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
 
   button.toggleButton {
-    @include spacing.margin($left: 0.75em);
+    @include spacing.margin($left: 8px);
   }
 }
 
@@ -76,6 +81,10 @@ button.toggleButton {
   @include flex.row($align: center);
   max-width: 100%;
   @include spacing.margin($bottom: 1px);
+
+  &.standalone {
+    @include spacing.margin($bottom: 2px);
+  }
 }
 
 .piconContainer {
@@ -88,7 +97,8 @@ button.toggleButton {
   flex: 1.25;
   max-width: calc((100% - 40px - 6em) * math.div(5, 8));
 
-  .veryThicc & {
+  .thicc & {
+    flex: 2;
     max-width: none;
   }
 }
@@ -96,7 +106,7 @@ button.toggleButton {
 button.nameButton {
   flex: 0 1 auto;
   @include flex.row-center;
-  @include spacing.margin-xy($x: -5px, $y: -1px);
+  @include spacing.margin($x: -5px, $y: -1px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
   color: inherit;
   overflow-x: hidden;
@@ -124,6 +134,7 @@ button.nameButton {
 .formeChevron {
   @include spacing.margin($right: 5px);
   font-size: 10px;
+  line-height: 11px;
   opacity: 0.3;
   @include transition.apply(opacity, transform);
 
@@ -137,17 +148,49 @@ button.nameButton {
 }
 
 .level {
+  @include flex.row($align: center);
   flex: 0 0 auto;
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin($left: 8px);
   font-size: 8px;
+  line-height: 9px;
   text-transform: uppercase;
-  opacity: 0.65;
   user-select: none;
+
+  .dim {
+    opacity: 0.64;
+    @include transition.apply(opacity);
+
+    &.disabled {
+      opacity: 0.32;
+    }
+  }
+}
+
+.levelField {
+  max-width: 16px;
+
+  &.absoluteHover::before {
+    @include position.absolute($x: -2px, $y: -1px);
+  }
+
+  &.disabled input.levelInputField {
+    color: inherit;
+  }
+
+  input.levelInputField {
+    font-size: 8px;
+    line-height: 9px;
+
+    &::placeholder {
+      font-size: 8px;
+      line-height: 9px;
+    }
+  }
 }
 
 .typesField {
   flex: 0 0 auto;
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin($left: 4px);
 }
 
 .secondLine {
@@ -173,9 +216,17 @@ button.nameButton {
   @include flex.row($align: center);
   @include spacing.margin-xy($x: 4px);
 
-  .status:not(:last-child) {
-    display: inline-block;
-    @include spacing.margin($right: 4px);
+  // .status:not(:last-child) {
+  //   display: inline-block;
+  //   @include spacing.margin($right: 4px);
+  // }
+
+  .status {
+    @include transition.apply(opacity);
+
+    &.disabled {
+      opacity: 0.32;
+    }
   }
 }
 
@@ -210,7 +261,7 @@ button.nameButton {
     min-width: auto;
   }
 
-  .veryThicc & {
+  .thicc & {
     max-width: 225px;
   }
 }

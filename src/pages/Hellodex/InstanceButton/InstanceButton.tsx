@@ -3,7 +3,7 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
 import { bullop } from '@showdex/consts/core';
-// import { FormatLabels } from '@showdex/consts/dex';
+import { type CalcdexBattleState } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
@@ -11,37 +11,44 @@ import { parseBattleFormat } from '@showdex/utils/dex';
 import styles from './InstanceButton.module.scss';
 
 export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
-  format?: string;
+  instance: CalcdexBattleState;
   authName?: string;
-  playerName?: string;
-  opponentName?: string;
-  active?: boolean;
-  hasMorePlayers?: boolean;
 }
 
 export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
   className,
-  format,
+  instance,
   authName,
-  playerName,
-  opponentName: opponentNameFromProps,
   hoverScale = 1,
   activeScale = 0.98,
-  active,
-  hasMorePlayers,
   disabled,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  // const gen = detectGenFromFormat(format);
-  // const genlessFormat = gen > 0 ? format.replace(`gen${gen}`, '') : null;
+  const {
+    operatingMode,
+    battleId,
+    gen,
+    format,
+    subFormats,
+    active,
+    playerCount,
+    p1: player,
+    p2: opponent,
+  } = instance || {};
 
   const {
-    gen,
     label,
     suffixes,
-  } = parseBattleFormat(format);
+  } = parseBattleFormat(
+    [format, ...(subFormats || [])].filter(Boolean).join(''),
+  );
+
+  const hasMorePlayers = (playerCount || 0) > 2;
+
+  const playerName = player?.name;
+  const opponentNameFromProps = opponent?.name;
 
   const authPlayer = !!authName
     && [playerName, opponentNameFromProps].includes(authName);
@@ -71,82 +78,97 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       hoverScale={hoverScale}
       activeScale={activeScale}
     >
-      <Svg
-        className={styles.battleIcon}
-        description="Sword Icon"
-        src={getResourceUrl('sword.svg')}
-      />
+      {operatingMode === 'standalone' ? (
+        <div className={styles.standaloneIcon}>
+          <i className="fa fa-car" />
+        </div>
+      ) : (
+        <Svg
+          className={styles.battleIcon}
+          description="Sword Icon"
+          src={getResourceUrl('sword.svg')}
+        />
+      )}
 
       <div className={styles.info}>
-        {
-          !!label &&
-          <div className={styles.format}>
-            Gen {gen} &bull;{' '}
-            <strong>{label}</strong>
-            {!!suffixes && ' '}
-            {suffixes.map((s) => s[1]).join(` ${bullop} `)}
-          </div>
-        }
-
-        <div className={styles.players}>
+        <div className={styles.format}>
+          Gen {gen}
           {
-            (!!playerName && !!opponentName) &&
+            !!label &&
             <>
-              {
-                !authPlayer &&
+              {' '}&bull;{' '}
+              <strong>{label}</strong>
+            </>
+          }
+          {!!suffixes && ' '}
+          {suffixes.map((s) => s[1]).join(` ${bullop} `)}
+        </div>
+
+        {operatingMode === 'standalone' ? (
+          <div className={styles.honkName}>
+            {(!!battleId && `honk:${battleId.slice(-7)}`) || 'untitled honk'}
+          </div>
+        ) : (
+          <div className={styles.players}>
+            {
+              (!!playerName && !!opponentName) &&
+              <>
+                {
+                  !authPlayer &&
+                  <div
+                    className={styles.username}
+                    style={playerLabelColor ? { color: playerLabelColor } : undefined}
+                  >
+                    {playerName}
+
+                    {
+                      !!playerTitle?.icon &&
+                      <Svg
+                        className={styles.usernameIcon}
+                        style={playerIconColor ? { color: playerIconColor } : undefined}
+                        description={playerTitle.iconDescription}
+                        src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                      />
+                    }
+                  </div>
+                }
+
+                <div
+                  className={cx(
+                    styles.versus,
+                    authPlayer && styles.noPlayerName,
+                  )}
+                >
+                  vs
+                </div>
+
                 <div
                   className={styles.username}
-                  style={playerLabelColor ? { color: playerLabelColor } : undefined}
+                  style={opponentLabelColor ? { color: opponentLabelColor } : undefined}
                 >
-                  {playerName}
+                  {opponentName}
 
                   {
-                    !!playerTitle?.icon &&
+                    !!opponentTitle?.icon &&
                     <Svg
                       className={styles.usernameIcon}
-                      style={playerIconColor ? { color: playerIconColor } : undefined}
-                      description={playerTitle.iconDescription}
-                      src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                      style={opponentIconColor ? { color: opponentIconColor } : undefined}
+                      description={opponentTitle.iconDescription}
+                      src={getResourceUrl(`${opponentTitle.icon}.svg`)}
                     />
                   }
                 </div>
-              }
-
-              <div
-                className={cx(
-                  styles.versus,
-                  authPlayer && styles.noPlayerName,
-                )}
-              >
-                vs
-              </div>
-
-              <div
-                className={styles.username}
-                style={opponentLabelColor ? { color: opponentLabelColor } : undefined}
-              >
-                {opponentName}
 
                 {
-                  !!opponentTitle?.icon &&
-                  <Svg
-                    className={styles.usernameIcon}
-                    style={opponentIconColor ? { color: opponentIconColor } : undefined}
-                    description={opponentTitle.iconDescription}
-                    src={getResourceUrl(`${opponentTitle.icon}.svg`)}
-                  />
+                  hasMorePlayers &&
+                  <span className={styles.morePlayers}>
+                    &amp; friends
+                  </span>
                 }
-              </div>
-
-              {
-                hasMorePlayers &&
-                <span className={styles.morePlayers}>
-                  &amp; friends
-                </span>
-              }
-            </>
-          }
-        </div>
+              </>
+            }
+          </div>
+        )}
       </div>
     </BaseButton>
   );

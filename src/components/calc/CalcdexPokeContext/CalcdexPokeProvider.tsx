@@ -116,6 +116,35 @@ export const CalcdexPokeProvider = ({
     playerPokemon,
   ]);
 
+  // note: in Randoms, teambuilder presets won't exist in allPresets[]
+  const teamPresets = React.useMemo(() => selectPokemonPresets(
+    allPresets,
+    playerPokemon,
+    {
+      format,
+      source: 'storage',
+      select: 'any',
+    },
+  ), [
+    allPresets,
+    format,
+    playerPokemon,
+  ]);
+
+  const boxPresets = React.useMemo(() => selectPokemonPresets(
+    allPresets,
+    playerPokemon,
+    {
+      format,
+      source: 'storage-box',
+      select: 'any',
+    },
+  ), [
+    allPresets,
+    format,
+    playerPokemon,
+  ]);
+
   const pokemonPresets = React.useMemo(() => selectPokemonPresets(
     allPresets,
     playerPokemon,
@@ -135,12 +164,16 @@ export const CalcdexPokeProvider = ({
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
     ...(format?.includes('random') ? [] : usages),
+    ...teamPresets,
+    ...boxPresets,
     ...pokemonPresets,
   ], [
+    boxPresets,
     format,
     playerPokemon?.presets,
     pokemonPresets,
     pokemonSheets,
+    teamPresets,
     usages,
   ]);
 

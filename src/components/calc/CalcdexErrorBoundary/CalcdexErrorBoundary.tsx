@@ -34,6 +34,7 @@ export const CalcdexErrorBoundary = ({
   // const colorScheme = useColorScheme();
 
   const state = useCalcdexBattleState(battleId);
+  const calcdexName = state?.operatingMode === 'standalone' ? 'Honkdex' : 'Calcdex';
 
   const dehydratedState = React.useMemo(
     () => (nonEmptyObject(state) && dehydrateCalcdex(state, error)) || null,
@@ -77,7 +78,7 @@ export const CalcdexErrorBoundary = ({
             />
 
             <div className={styles.title}>
-              Calcdex
+              {calcdexName}
             </div>
 
             {
@@ -86,21 +87,27 @@ export const CalcdexErrorBoundary = ({
                 <span className={styles.format}>
                   {state.format}
                 </span>
-                <br />
-                <span className={styles.playerName}>
-                  {state.p1?.name || 'Player 1'}
-                </span>
-                <span className={styles.versus}>
-                  vs
-                </span>
-                <span className={styles.playerName}>
-                  {state.p2?.name || 'Player 2'}
-                </span>
+
+                {
+                  state.operatingMode === 'battle' &&
+                  <>
+                    <br />
+                    <span className={styles.playerName}>
+                      {state.p1?.name || 'Player 1'}
+                    </span>
+                    <span className={styles.versus}>
+                      vs
+                    </span>
+                    <span className={styles.playerName}>
+                      {state.p2?.name || 'Player 2'}
+                    </span>
+                  </>
+                }
               </div>
             }
 
             <div className={styles.subtitle}>
-              Calcdex has failed <em>successfully</em> and needs to close.
+              {calcdexName} has failed <em>successfully</em> and needs to close.
               <br />
               We are sorry for the inconvenience.
             </div>

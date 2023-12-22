@@ -3,8 +3,9 @@ import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { SandwichProvider } from '@showdex/components/layout';
 import { type RootStore } from '@showdex/redux/store';
-import { openCalcdexInstance } from '@showdex/utils/app';
+import { openCalcdexInstance, openHonkdexInstance } from '@showdex/utils/app';
 import { CalcdexRenderer } from '../Calcdex';
+import { HonkdexRenderer } from '../Honkdex';
 import { Hellodex } from './Hellodex';
 
 /**
@@ -23,8 +24,13 @@ export const HellodexRenderer = (
       <Hellodex
         openCalcdexInstance={(battleId) => openCalcdexInstance(
           store,
-          battleId,
           CalcdexRenderer,
+          battleId,
+        )}
+        openHonkdexInstance={(instanceId) => openHonkdexInstance(
+          store,
+          HonkdexRenderer,
+          instanceId,
         )}
       />
     </SandwichProvider>

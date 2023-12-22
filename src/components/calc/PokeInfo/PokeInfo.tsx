@@ -10,7 +10,7 @@ import {
   PokeStatus,
   PokeStatusTooltip,
 } from '@showdex/components/app';
-import { Dropdown, PokeTypeField } from '@showdex/components/form';
+import { Dropdown, PokeTypeField, ValueField } from '@showdex/components/form';
 import { useSandwich } from '@showdex/components/layout';
 import {
   type BadgeInstance,
@@ -23,7 +23,7 @@ import { eacute } from '@showdex/consts/core';
 import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
-import { calcPokemonHpPercentage } from '@showdex/utils/calc';
+import { calcPokemonHpPercentage, populateStatsTable } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
@@ -34,11 +34,13 @@ import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {
   detectUsageAlt,
   exportPokePaste,
+  flattenAlt,
   flattenAlts,
   importPokePaste,
 } from '@showdex/utils/presets';
 import {
   buildAbilityOptions,
+  buildFormeOptions,
   buildItemOptions,
   buildPresetOptions,
   buildSpreadOptions,
@@ -66,17 +68,21 @@ export const PokeInfo = ({
     presets,
     usages,
     usage,
-    applyPreset,
+    addPokemon,
     updatePokemon,
+    removePokemon,
+    applyPreset,
   } = useCalcdexPokeContext();
 
   const {
+    operatingMode,
     containerSize,
     gen,
     format,
     subFormats,
     legacy,
     gameType,
+    defaultLevel,
   } = state;
 
   const colorScheme = useColorScheme();
@@ -236,10 +242,7 @@ export const PokeInfo = ({
     notifyClose: closeFormesTooltip,
   } = useSandwich();
 
-  const toggleFormesTooltip = React.useMemo(
-    () => (formesVisible ? closeFormesTooltip : openFormesTooltip),
-    [closeFormesTooltip, formesVisible, openFormesTooltip],
-  );
+  const toggleFormesTooltip = formesVisible ? closeFormesTooltip : openFormesTooltip;
 
   const {
     active: statusVisible,
@@ -247,10 +250,7 @@ export const PokeInfo = ({
     notifyClose: closeStatusTooltip,
   } = useSandwich();
 
-  const toggleStatusTooltip = React.useMemo(
-    () => (statusVisible ? closeStatusTooltip : openStatusTooltip),
-    [closeStatusTooltip, openStatusTooltip, statusVisible],
-  );
+  const toggleStatusTooltip = statusVisible ? closeStatusTooltip : openStatusTooltip;
 
   const smogonPageTooltip = (
     <div className={styles.tooltipContent}>
@@ -266,14 +266,29 @@ export const PokeInfo = ({
     </div>
   );
 
+  const showFormeDropdown = operatingMode === 'standalone';
+
+  const formeOptions = React.useMemo(() => buildFormeOptions(
+    showFormeDropdown ? format : null,
+    pokemon,
+  ), [
+    format,
+    pokemon,
+    showFormeDropdown,
+  ]);
+
   const formeDisabled = !pokemon?.altFormes?.length;
 
-  const showNonVolatileStatus = React.useMemo(() => !!pokemon?.speciesForme && (
+  const showNonVolatileStatus = React.useMemo(() => (
+    operatingMode === 'standalone'
+      || !!pokemon?.speciesForme
+  ) && (
     settings?.forceNonVolatile
-      || !!pokemon.dirtyStatus
+      || !!pokemon?.dirtyStatus
       || !!pokemon.status
       || !pokemon.hp // 'fnt' pseudo-status
   ), [
+    operatingMode,
     pokemon?.dirtyStatus,
     pokemon?.hp,
     pokemon?.speciesForme,
@@ -281,7 +296,7 @@ export const PokeInfo = ({
     settings?.forceNonVolatile,
   ]);
 
-  const currentStatus = showNonVolatileStatus
+  const currentStatus = pokemon?.speciesForme && showNonVolatileStatus
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
     : null;
 
@@ -313,16 +328,36 @@ export const PokeInfo = ({
       const data = await readClipboardText();
       const preset = importPokePaste(data, format);
 
-      const importFailed = !preset?.calcdexId || ![
+      const speciesMismatch = ![
         pokemon?.speciesForme,
         ...(pokemon?.altFormes || []),
-      ].filter(Boolean).includes(preset.speciesForme);
+      ].filter(Boolean).includes(preset?.speciesForme);
+
+      const importFailed = !preset?.calcdexId || (operatingMode === 'battle' && speciesMismatch);
 
       if (importFailed) {
         setImportFailedReason(!preset?.calcdexId ? 'Bad Syntax' : 'Mismatch');
         importFailedBadgeRef.current?.show();
 
         return;
+      }
+
+      if (operatingMode === 'standalone' && speciesMismatch) {
+        addPokemon({
+          speciesForme: preset.speciesForme,
+          level: preset.level,
+          dirtyTeraType: flattenAlt(preset.teraTypes?.[0]),
+          dirtyAbility: preset.ability,
+          dirtyItem: preset.item,
+          nature: preset.nature,
+          ivs: populateStatsTable(preset.ivs, { spread: 'iv', format }),
+          evs: populateStatsTable(preset.evs, { spread: 'ev', format }),
+          moves: preset.moves,
+          presetId: preset.calcdexId,
+          presets: [preset],
+        }, `${l.scope}:handlePokePasteImport()`);
+
+        return void importBadgeRef.current?.show();
       }
 
       const currentPresets = [...pokemon.presets];
@@ -389,7 +424,7 @@ export const PokeInfo = ({
         styles.container,
         containerSize === 'xs' && styles.verySmol,
         // ['xs', 'sm'].includes(containerSize) && styles.smol,
-        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.thicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -398,7 +433,10 @@ export const PokeInfo = ({
       <div className={styles.row}>
         <div className={styles.piconContainer}>
           <PiconButton
-            piconStyle={pokemon?.name ? { transform: 'scaleX(-1)' } : undefined}
+            piconStyle={{
+              ...(!!pokemon?.name && { transform: 'scaleX(-1)' }),
+              ...(!pokemon?.speciesForme && { opacity: 0.32 }),
+            }}
             pokemon={{
               ...pokemon,
               speciesForme: (
@@ -422,48 +460,124 @@ export const PokeInfo = ({
         </div>
 
         <div className={styles.infoContainer}>
-          <div className={styles.firstLine}>
-            <PokeFormeTooltip
-              pokemon={pokemon}
-              visible={formesVisible}
-              onPokemonChange={(p) => updatePokemon(p, `${l.scope}:PokeFormeTooltip:onPokemonChange()`)}
-              onRequestClose={closeFormesTooltip}
-            >
-              <Button
-                className={cx(
-                  styles.nameButton,
-                  !pokemon?.speciesForme && styles.missingForme,
-                  !formeDisabled && styles.withFormes,
-                  formeDisabled && styles.disabled,
-                )}
-                labelClassName={styles.nameLabel}
-                label={nickname || pokemon?.speciesForme || 'MissingNo.'}
-                suffix={!formeDisabled && (
-                  <i
-                    className={cx(
-                      'fa',
-                      'fa-chevron-down',
-                      styles.formeChevron,
-                      formesVisible && styles.open,
-                    )}
-                  />
-                )}
-                hoverScale={1}
-                disabled={formeDisabled}
-                onPress={toggleFormesTooltip}
+          <div
+            className={cx(
+              styles.firstLine,
+              operatingMode === 'standalone' && styles.standalone,
+            )}
+          >
+            {operatingMode === 'standalone' ? (
+              <Dropdown
+                style={{ maxWidth: 150 }}
+                aria-label={`Pok${eacute}mon Selector`}
+                hint="MissingNo."
+                input={{
+                  name: `PokeInfo:SpeciesForme:${pokemonKey}`,
+                  value: pokemon?.speciesForme,
+                  onChange: (value: string) => {
+                    const s = `${l.scope}:Dropdown~SpeciesForme:input.onChange()`;
+
+                    if (!pokemon?.speciesForme) {
+                      return void addPokemon({ speciesForme: value }, s);
+                    }
+
+                    if (!value) {
+                      return void removePokemon(pokemon.calcdexId, s);
+                    }
+
+                    updatePokemon({ speciesForme: value }, s);
+                  },
+                }}
+                options={formeOptions}
+                noOptionsMessage={`No Pok${eacute}mon`}
+                clearable
+                highlight={!pokemon?.speciesForme}
               />
-            </PokeFormeTooltip>
+            ) : (
+              <PokeFormeTooltip
+                pokemon={pokemon}
+                visible={formesVisible}
+                onPokemonChange={(p) => updatePokemon(p, `${l.scope}:PokeFormeTooltip:onPokemonChange()`)}
+                onRequestClose={closeFormesTooltip}
+              >
+                <Button
+                  className={cx(
+                    styles.nameButton,
+                    !pokemon?.speciesForme && styles.missingForme,
+                    !formeDisabled && styles.withFormes,
+                    formeDisabled && styles.disabled,
+                  )}
+                  labelClassName={styles.nameLabel}
+                  label={nickname || pokemon?.speciesForme || 'MissingNo.'}
+                  suffix={!formeDisabled && (
+                    <i
+                      className={cx(
+                        'fa',
+                        'fa-chevron-down',
+                        styles.formeChevron,
+                        formesVisible && styles.open,
+                      )}
+                    />
+                  )}
+                  hoverScale={1}
+                  disabled={formeDisabled}
+                  onPress={toggleFormesTooltip}
+                />
+              </PokeFormeTooltip>
+            )}
 
             {
-              (typeof pokemon?.level === 'number' && pokemon.level !== 100) &&
+              (operatingMode === 'battle' && !!pokemon?.level && pokemon.level !== 100) &&
               <div className={styles.level}>
-                L{pokemon.level}
+                <div className={styles.dim}>
+                  L{pokemon.level}
+                </div>
+              </div>
+            }
+
+            {
+              operatingMode === 'standalone' &&
+              <div className={styles.level}>
+                <div
+                  className={cx(
+                    styles.dim,
+                    !pokemon?.speciesForme && styles.disabled,
+                  )}
+                >
+                  L
+                </div>
+                <ValueField
+                  className={cx(
+                    styles.levelField,
+                    styles.absoluteHover,
+                    !pokemon?.speciesForme && styles.disabled,
+                  )}
+                  inputClassName={styles.levelInputField}
+                  label={`Level for ${friendlyPokemonName}`}
+                  hideLabel
+                  hint={pokemon?.level?.toString() || defaultLevel}
+                  fallbackValue={defaultLevel}
+                  min={1}
+                  max={100}
+                  step={1}
+                  shiftStep={10}
+                  clearOnFocus
+                  absoluteHover
+                  input={{
+                    name: `PokeInfo:Level:${pokemonKey}`,
+                    value: pokemon?.level || defaultLevel,
+                    onChange: (value: number) => updatePokemon({
+                      level: value,
+                    }, `${l.scope}:ValueField~Level:input.onChange()`),
+                  }}
+                  disabled={!pokemon?.speciesForme}
+                />
               </div>
             }
 
             <PokeTypeField
               className={styles.typesField}
-              label={`Types for Pokemon ${friendlyPokemonName}`}
+              label={`Types for ${friendlyPokemonName}`}
               multi
               input={{
                 name: `PokeInfo:Types:${pokemonKey}`,
@@ -489,7 +603,7 @@ export const PokeInfo = ({
               (!!pokemon?.speciesForme && gen > 8) &&
               <PokeTypeField
                 className={cx(styles.typesField, styles.teraTypeField)}
-                label={`Tera Type for Pok${eacute}mon ${friendlyPokemonName}`}
+                label={`Tera Type for ${friendlyPokemonName}`}
                 title="Tera Type"
                 input={{
                   name: `PokeInfo:TeraType:${pokemonKey}`,
@@ -535,7 +649,7 @@ export const PokeInfo = ({
               <BaseButton
                 className={styles.statusButton}
                 display="block"
-                aria-label={`Hit Points & Non-Volatile Status Condition for Pok${eacute}mon ${friendlyPokemonName}`}
+                aria-label={`Hit Points & Non-Volatile Status Condition for ${friendlyPokemonName}`}
                 hoverScale={1}
                 onPress={toggleStatusTooltip}
                 disabled={!pokemon?.speciesForme}
@@ -551,6 +665,10 @@ export const PokeInfo = ({
                   showNonVolatileStatus &&
                   <div className={styles.statuses}>
                     <PokeStatus
+                      className={cx(
+                        styles.status,
+                        !pokemon?.speciesForme && styles.disabled,
+                      )}
                       status={currentStatus === 'ok' ? undefined : currentStatus}
                       override={currentStatus === 'ok' ? currentStatus : undefined}
                       fainted={!hpPercentage}
@@ -570,16 +688,19 @@ export const PokeInfo = ({
               <div className={styles.presetHeaderPart}>
                 Set
 
-                <ToggleButton
-                  className={styles.toggleButton}
-                  label="Auto"
-                  absoluteHover
-                  // active={pokemon?.autoPreset}
-                  disabled /** @todo remove after implementing auto-presets */
-                  onPress={() => updatePokemon({
-                    autoPreset: !pokemon?.autoPreset,
-                  }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
-                />
+                {
+                  operatingMode === 'battle' &&
+                  <ToggleButton
+                    className={styles.toggleButton}
+                    label="Auto"
+                    absoluteHover
+                    // active={pokemon?.autoPreset}
+                    disabled /** @todo remove after implementing auto-presets */
+                    onPress={() => updatePokemon({
+                      autoPreset: !pokemon?.autoPreset,
+                    }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
+                  />
+                }
               </div>
 
               <div className={cx(styles.presetHeaderPart, styles.presetHeaderRight)}>
@@ -597,7 +718,10 @@ export const PokeInfo = ({
                   tooltipPlacement="bottom"
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
-                  disabled={!pokemon?.speciesForme || typeof updatePokemon !== 'function'}
+                  disabled={(
+                    (operatingMode === 'battle' && !pokemon?.speciesForme)
+                      || typeof updatePokemon !== 'function'
+                  )}
                   onPress={handlePokePasteImport}
                 >
                   <Badge
@@ -647,7 +771,7 @@ export const PokeInfo = ({
           </div>
 
           <Dropdown
-            aria-label={`Available Sets for Pok${eacute}mon ${friendlyPokemonName}`}
+            aria-label={`Available Sets for ${friendlyPokemonName}`}
             hint="None"
             input={{
               name: `PokeInfo:${pokemonKey}:Preset`,
@@ -670,10 +794,7 @@ export const PokeInfo = ({
 
       {
         gen > 1 &&
-        <div
-          className={styles.row}
-          style={{ alignItems: 'flex-start' }}
-        >
+        <div className={styles.row}>
           <div className={styles.rowItem}>
             <div
               className={cx(
@@ -732,7 +853,7 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available Abilities for Pok${eacute}mon ${friendlyPokemonName}`}
+              aria-label={`Available Abilities for ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : '???'}
               optionTooltip={PokeAbilityOptionTooltip}
               optionTooltipProps={{
@@ -785,7 +906,7 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available ${showPresetSpreads ? 'Spreads' : 'Natures'} for Pok${eacute}mon ${friendlyPokemonName}`}
+              aria-label={`Available ${showPresetSpreads ? 'Spreads' : 'Natures'} for ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               input={{
                 name: `PokeInfo:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
@@ -847,7 +968,7 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={`Available Items for Pok${eacute}mon ${friendlyPokemonName}`}
+              aria-label={`Available Items for ${friendlyPokemonName}`}
               hint={gen === 1 ? 'N/A' : 'None'}
               tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
                 <div
