@@ -6,4 +6,4 @@
  * @since 1.0.2
  */
 export const hasMegaForme = (speciesForme: string): boolean => !!speciesForme
-  && /-Mega(?:-[A-Z]+)?$/i.test(speciesForme);
+  && /-(?:Mega(?:-[A-Z]+)?|Ultra)$/i.test(speciesForme);
