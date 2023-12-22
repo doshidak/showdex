@@ -156,10 +156,12 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       const {
         scope, // used for debugging; not used here, but destructuring it from `...payload`
+        operatingMode,
         battleId,
         gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
         format: formatFromPayload = null,
         gameType = 'Singles',
+        defaultLevel = 100,
         rules = {},
         turn = 0,
         active = false,
@@ -203,12 +205,14 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       state[battleId] = {
         ...payload,
 
+        operatingMode,
         battleId,
         gen,
-        format: `gen${gen}${base}`,
+        format: gen && base ? `gen${gen}${base}` : null,
         subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
         gameType,
         legacy: detectLegacyGen(gen),
+        defaultLevel,
         rules,
         turn,
         active,
@@ -290,6 +294,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleNonce,
         gen,
         format,
+        gameType,
+        defaultLevel,
         active,
         overlayVisible,
         containerSize,
@@ -320,6 +326,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       // note: this is a pointer/reference to the object in `state`
       const currentState = state[battleId];
 
+      const updatedGen = typeof gen === 'number' && gen > 0 ? gen : currentState.gen;
+      const legacy = detectLegacyGen(updatedGen);
+
       // note: `state` is actually a Proxy object via the WritableDraft from Immutable,
       // a dependency of RTK. spreading will only show the values of the current object depth;
       // all inner depths will remain as Proxy objects! (you cannot read the value of a Proxy.)
@@ -328,8 +337,11 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         battleId: battleId || currentState.battleId,
         battleNonce: battleNonce || currentState.battleNonce,
-        gen: typeof gen === 'number' && gen > 0 ? gen : currentState.gen,
+        gen: updatedGen,
+        legacy,
         format: format || currentState.format,
+        gameType: gameType || currentState.gameType,
+        defaultLevel: defaultLevel || currentState.defaultLevel,
         // active: typeof active === 'boolean' ? active : currentState.active,
         overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
         containerSize: containerSize || currentState.containerSize,
