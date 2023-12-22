@@ -95,10 +95,10 @@ export const sanitizePokemon = <
     dirtyTeraType: (pokemon as Partial<CalcdexPokemon>)?.dirtyTeraType || null,
     altTeraTypes: (pokemon as Partial<CalcdexPokemon>)?.altTeraTypes || [],
 
-    hp: (pokemon as Partial<Showdown.Pokemon>)?.hp || 0,
+    hp: (pokemon as Partial<Showdown.Pokemon>)?.hp ?? 100,
     dirtyHp: (pokemon as Partial<CalcdexPokemon>)?.dirtyHp ?? null, // note: 0 = fainted, so null is when the user resets back to `hp`
-    maxhp: (pokemon as Partial<Showdown.Pokemon>)?.maxhp || 1,
-    fainted: ((pokemon as Partial<Showdown.Pokemon>)?.hp || 0) <= 0,
+    maxhp: (pokemon as Partial<Showdown.Pokemon>)?.maxhp || 100,
+    fainted: !(pokemon as Partial<Showdown.Pokemon>)?.hp,
 
     baseAbility: (pokemon as Partial<Showdown.Pokemon>)?.baseAbility?.replace(/no\s?ability/i, '') as AbilityName,
     ability: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.ability) || null,
@@ -270,7 +270,7 @@ export const sanitizePokemon = <
   )
     ? [
       transformedBaseForme,
-      ...(transformedBaseSpecies.otherFormes as string[]),
+      ...transformedBaseSpecies.otherFormes,
     ]
     : baseSpecies?.otherFormes?.length && (
       baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
@@ -278,7 +278,7 @@ export const sanitizePokemon = <
     )
       ? [
         baseSpeciesForme,
-        ...(baseSpecies.otherFormes as string[]),
+        ...baseSpecies.otherFormes,
       ]
       : [];
 
@@ -320,7 +320,7 @@ export const sanitizePokemon = <
 
   // only update the types if the dex returned types
   // (checking against typeChanged since if true, should've been already updated above)
-  const speciesTypes = (transformedSpecies || species)?.types as Showdown.TypeName[];
+  const speciesTypes = (transformedSpecies || species)?.types;
 
   if (!typeChanged && speciesTypes?.length) {
     sanitizedPokemon.types = [...speciesTypes];

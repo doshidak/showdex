@@ -7,11 +7,11 @@ import {
   ToggleButton,
   Tooltip,
 } from '@showdex/components/ui';
-import { eacute } from '@showdex/consts/core';
 import { PokemonStatuses, PokemonStatusTitles } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonCurrentHp, calcPokemonHpPercentage, calcPokemonMaxHp } from '@showdex/utils/calc';
+import { clamp } from '@showdex/utils/core';
 import { PokeStatus } from '../PokeStatus';
 import styles from './PokeStatusTooltip.module.scss';
 
@@ -51,8 +51,9 @@ export const PokeStatusTooltip = ({
   // const pokemonKey = calcdexId || friendlyPokemonKey;
 
   const maxHp = calcPokemonMaxHp(pokemon);
+  const actualHp = calcPokemonCurrentHp(pokemon, true);
   const hp = calcPokemonCurrentHp(pokemon);
-  const hpPercentage = Math.round(calcPokemonHpPercentage(pokemon) * 100);
+  const hpPercentage = clamp(0, Math.round(calcPokemonHpPercentage(pokemon) * 100), 100);
 
   const status = dirtyStatus ?? (currentStatus || 'ok');
 
@@ -63,7 +64,8 @@ export const PokeStatusTooltip = ({
       : (PokemonStatusTitles[status] || 'Status');
 
   const showHpResetButton = typeof dirtyHp === 'number'
-    && dirtyHp !== rawHp;
+    && typeof rawHp === 'number'
+    && dirtyHp !== actualHp;
 
   const showStatusResetButton = !!dirtyStatus
     && (!currentStatus || dirtyStatus !== currentStatus);
@@ -85,7 +87,7 @@ export const PokeStatusTooltip = ({
               <ValueField
                 className={styles.hpField}
                 // inputClassName={styles.hpFieldInput}
-                label={`Current HP value of the Pok${eacute}mon ${friendlyPokemonKey}`}
+                label={`Current HP value of ${friendlyPokemonKey}`}
                 hideLabel
                 hint={hp}
                 min={0}
@@ -123,15 +125,10 @@ export const PokeStatusTooltip = ({
                 HP
               </div>
 
-              {/* <div className={styles.hpSlash}>
-                /
-              </div> */}
-
               <ValueField
                 className={styles.hpField}
                 style={{ marginLeft: '0.64em' }}
-                // inputClassName={styles.hpFieldInput}
-                label={`Current HP % of the Pok${eacute}mon ${friendlyPokemonKey}`}
+                label={`Current HP % of ${friendlyPokemonKey}`}
                 hideLabel
                 hint={hpPercentage}
                 min={0}
@@ -145,7 +142,7 @@ export const PokeStatusTooltip = ({
                 input={{
                   value: hpPercentage,
                   onChange: (value: number) => onPokemonChange?.({
-                    dirtyHp: Math.round(maxHp * (value / 100)),
+                    dirtyHp: Math.ceil((value / 100) * maxHp),
                   }),
                 }}
               />

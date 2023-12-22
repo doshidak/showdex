@@ -57,25 +57,18 @@ export const calcPokemonCurrentHp = (
 
   const {
     serverSourced,
-    hp,
+    hp: currentHp,
     dirtyHp,
-    maxhp,
+    maxhp: rawMaxHp,
     spreadStats,
   } = pokemon;
 
-  if (!ignoreDirty && typeof dirtyHp === 'number' && !Number.isNaN(dirtyHp)) {
-    return dirtyHp;
-  }
-
+  const known = (rawMaxHp || 0) > 1 && (serverSourced || rawMaxHp !== 100 || spreadStats?.hp === 100);
+  const maxHp = known ? rawMaxHp : (spreadStats?.hp || 100);
+  const hp = (ignoreDirty ? null : dirtyHp) ?? (known ? currentHp : ((currentHp / (rawMaxHp || 1)) * maxHp));
   const dmaxMod = getDynamaxHpModifier(pokemon);
 
-  if (serverSourced) {
-    return Math.floor(hp * dmaxMod);
-  }
-
-  const estHp = Math.round((spreadStats?.hp || 0) * (hp / maxhp));
-
-  return Math.floor(estHp * dmaxMod);
+  return Math.floor(hp * dmaxMod);
 };
 
 /**
