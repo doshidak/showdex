@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-select/dist/Select-49a62830.esm.js b/node_modules/react-select/dist/Select-49a62830.esm.js
+index bed0849..2a931cc 100644
+--- a/node_modules/react-select/dist/Select-49a62830.esm.js
++++ b/node_modules/react-select/dist/Select-49a62830.esm.js
+@@ -1760,6 +1760,9 @@ var Select = /*#__PURE__*/function (_Component) {
+       // ensure focus is on the Input when the menu opens
+       isFocused && menuIsOpen && !prevProps.menuIsOpen) {
+         this.focusInput();
++        if (!this.menuListRef) {
++          this.openMenu('first'); // the fix for @showdex/components/ui/Scrollable
++        }
+       }
+       if (isFocused && isDisabled && !prevProps.isDisabled) {
+         // ensure select state gets blurred in case Select is programmatically disabled while focused
