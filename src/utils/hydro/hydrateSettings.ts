@@ -64,7 +64,7 @@ const l = logger('@showdex/utils/hydro/hydrateSettings()');
  * @since 1.0.3
  */
 export const hydrateSettings = (
-  value: string,
+  value?: string,
 ): ShowdexSettings => {
   // these settings have their default values, which will be individually overwritten with the hydrated values
   // from the dehydrated settings in the passed-in `value` (otherwise, the default settings will be returned)
@@ -124,6 +124,7 @@ export const hydrateSettings = (
       resetDirtyBoosts: true,
       editPokemonTypes: 'always',
       showMoveEditor: 'meta',
+      enableQuickEditor: true,
       showBaseStats: 'meta',
       showLegacyEvs: false,
 
@@ -268,7 +269,6 @@ export const hydrateSettings = (
           // (without this declaration, you'll get a type <type> is not assignable to type 'never' error lmfao)
           const calcdexSettings: Partial<Record<typeof hydratedCalcdexKey, ShowdexCalcdexSettings[typeof hydratedCalcdexKey]>> = settings.calcdex;
 
-          // currently, there are no number values in ShowdexCalcdexSettings
           calcdexSettings[hydratedCalcdexKey] = [
             DehydratedCalcdexSettingsMap.nhkoColors,
             DehydratedCalcdexSettingsMap.nhkoLabels,
@@ -281,11 +281,6 @@ export const hydrateSettings = (
               DehydratedCalcdexSettingsMap.lockGeneticsVisibility,
             ].includes(dehydratedCalcdexKey)
               ? hydratePerSide(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey]
-              // : ['y', 'n'].includes(dehydratedCalcdexValue)
-              //   ? hydrateBoolean(dehydratedCalcdexValue)
-              //   : /^\d+$/.test(dehydratedCalcdexValue)
-              //     ? hydrateNumber(dehydratedCalcdexValue)
-              //     : hydrateString(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
               : hydrateValue(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
         });
 

@@ -1,5 +1,6 @@
-import { type MoveName } from '@smogon/calc';
+import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/interfaces/calc';
+import { clamp } from '@showdex/utils/core';
 import {
   alwaysCriticalHits,
   determineMoveTargets,
@@ -39,27 +40,36 @@ export const getMoveOverrideDefaults = (
 
   const {
     speciesForme,
-    teraType,
+    teraType: revealedTeraType,
     dirtyTeraType,
     terastallized,
-    ability,
+    ability: revealedAbility,
     dirtyAbility,
+    item: revealedItem,
+    dirtyItem,
+    stellarMoveMap,
   } = pokemon;
+
+  const teraType = dirtyTeraType || revealedTeraType;
+  const ability = dirtyAbility || revealedAbility;
+  const item = dirtyItem ?? revealedItem;
 
   const {
     type: typeFromDex,
     category: categoryFromDex,
     zMove,
     maxMove,
+    multihit,
   } = dexMove;
 
   // update (2023/07/27): running the type through getDynamicMoveType() now to handle moves like Raging Bull & Revelation Dance
   const type = getDynamicMoveType(pokemon, moveName) || typeFromDex;
 
   // only doing this for 1 move atm, so not making it into a function... yet o_O
+  const stellarastallized = teraType === 'Stellar' && terastallized;
   let category = categoryFromDex;
 
-  if (moveName === 'Tera Blast' as MoveName && (dirtyTeraType || teraType) === 'Stellar' && terastallized) {
+  if (moveName === 'Tera Blast' as MoveName && stellarastallized) {
     const { atk, spa } = calcBoostedStats(format, pokemon);
 
     if (atk > spa) {
@@ -71,7 +81,7 @@ export const getMoveOverrideDefaults = (
   // turns out we need to separately lookup G-Max moves since maxMove.basePower refers to Max Flare.
   const gmaxMoveName = (
     speciesForme.endsWith('-Gmax')
-      && getMaxMove(moveName, dirtyAbility || ability, speciesForme)
+      && getMaxMove(moveName, ability, speciesForme)
   ) || null;
 
   const gmaxBasePower = (
@@ -81,6 +91,21 @@ export const getMoveOverrideDefaults = (
 
   const basePower = calcMoveBasePower(format, pokemon, moveName, opponentPokemon);
   const criticalHit = alwaysCriticalHits(moveName, format);
+
+  const minHits = (typeof multihit === 'number' && multihit) || (Array.isArray(multihit) && multihit[0]) || null;
+  const maxHits = (typeof multihit === 'number' && multihit) || (Array.isArray(multihit) && multihit[1]) || null;
+  const hits = (typeof multihit === 'number' && multihit)
+    || clamp(
+      0,
+      !!minHits
+        && !!maxHits
+        && (
+          (ability === 'Skill Link' as AbilityName && clamp(minHits, 5, maxHits))
+            || (item === 'Loaded Dice' as ItemName && clamp(minHits, 4, maxHits))
+            || Math.floor((minHits + maxHits) / 2)
+        ),
+    )
+    || null;
 
   const defaultDefensiveStat: Showdown.StatNameNoHp = (
     (category === 'Physical' && 'def')
@@ -104,7 +129,11 @@ export const getMoveOverrideDefaults = (
     basePower,
     zBasePower: zMove?.basePower,
     maxBasePower: gmaxBasePower || maxMove?.basePower,
+    hits,
+    minHits,
+    maxHits,
     alwaysCriticalHits: criticalHit,
+    stellar: (stellarastallized && !stellarMoveMap?.[type]) || null,
     defensiveStat: overrideDefensiveStat || defaultDefensiveStat,
     offensiveStat: overrideOffensiveStat || defaultOffensiveStat,
   };

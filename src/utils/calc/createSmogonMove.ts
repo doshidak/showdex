@@ -81,6 +81,7 @@ export const createSmogonMove = (
     zBasePower: zBasePowerOverride,
     maxBasePower: maxBasePowerOverride,
     alwaysCriticalHits: criticalHitOverride,
+    hits: hitsOverride,
     stellar: stellarOverride,
     defensiveStat: defensiveStatOverride,
     offensiveStat: offensiveStatOverride,
@@ -120,6 +121,10 @@ export const createSmogonMove = (
   // only supply this if it's true (otherwise, use the pre-determined value)
   if (criticalHitOverride) {
     options.isCrit = criticalHitOverride;
+  }
+
+  if (hitsOverride) {
+    options.hits = hitsOverride;
   }
 
   if (defensiveStatOverride) {

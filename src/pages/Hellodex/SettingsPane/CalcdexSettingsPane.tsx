@@ -865,6 +865,23 @@ export const CalcdexSettingsPane = ({
         format={(va) => Object.values(va || {}).some((v) => !!v)}
       />
 
+      <Field<ShowdexCalcdexSettings['enableQuickEditor']>
+        name="calcdex.enableQuickEditor"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label="Quick-Edit Multihit Moves"
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Allows you to quickly edit the number of hits for multihitting moves,
+            such as <em>Icicle Spear</em>.
+            <br />
+            <br />
+            If <em>Edit Moves</em> is enabled for the current battle,
+            you'll be able to edit this value in the moves editor as well.
+          </div>
+        )}
+      />
+
       <Field<ShowdexCalcdexSettings['showNonDamageRanges']>
         name="calcdex.showNonDamageRanges"
         component={Switch}

@@ -351,6 +351,20 @@ export interface ShowdexCalcdexSettings {
   showMoveEditor: 'always' | 'meta' | 'never';
 
   /**
+   * Whether to dynamically show quick editor fields in the moves table.
+   *
+   * * For now, this is only being used to allow quick setting of the `hits` property of a given `CalcdexMoveOverride`.
+   *   - For example, when enabled, the move *Icicle Spear*, a multi-hitting move, will show a number input representing
+   *     the number of hits, followed by the same 'ol damage range text.
+   *   - Additionally, the `hits` property can be edited within the moves editor, enabled via `showMoveEditor`.
+   *   - (If the move editor is disabled, then the quick editor fields are the only ways to change the values.)
+   *
+   * @default true
+   * @since 1.2.0
+   */
+  enableQuickEditor: boolean;
+
+  /**
    * Whether to allow the Pokemon's base stats to be edited in the stats table.
    *
    * * `'always'` will always show the base stats.

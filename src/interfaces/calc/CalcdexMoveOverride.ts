@@ -15,6 +15,9 @@ export interface CalcdexMoveOverride {
   basePower?: number;
   zBasePower?: number;
   maxBasePower?: number;
+  hits?: number;
+  minHits?: number;
+  maxHits?: number;
   alwaysCriticalHits?: boolean;
   stellar?: boolean;
   offensiveStat?: Showdown.StatNameNoHp;
