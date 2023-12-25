@@ -68,7 +68,7 @@
     "@react-spring/web": "^9.7.3",
     "@react-stately/toggle": "^3.6.0",
     "@reduxjs/toolkit": "^1.9.5",
-    "@smogon/calc": "^0.8.0",
+    "@smogon/calc": "^0.8.1",
     "@tippyjs/react": "^4.2.6",
     "@use-gesture/react": "^10.2.27",
     "base-64": "^1.0.0",

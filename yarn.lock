@@ -1767,10 +1767,10 @@
     redux-thunk "^2.4.2"
     reselect "^4.1.8"
 
-"@smogon/calc@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@smogon/calc/-/calc-0.8.0.tgz#913b76733929571a3b9d86ae24190e7b15d6badc"
-  integrity sha512-HQHzmTqGRhsYl0KBdNdSd8up9rIiqb4siN9qhm6MYn28Ppp5mCnmpGLrQPKlF2AmTgWcyK0wvKVglIxM/mXXxg==
+"@smogon/calc@^0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@smogon/calc/-/calc-0.8.1.tgz#bc3c99313d76bacaadfe4b60d9375330b13f33ba"
+  integrity sha512-O/h2lgqUNJWbT8uvFZfNdsZffFU1HQNog+lrEFH8Ed0yy6KBXqPoxU/kw7X9aqZCrVGkDIQzWw0kZljca9IAZA==
   dependencies:
     "@types/node" "^18.14.2"
 
