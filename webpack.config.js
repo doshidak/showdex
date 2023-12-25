@@ -32,14 +32,22 @@ const sanitizeEnv = (
   .replace(/[^a-z0-9\.\,\-]+/gi, '')
   .replace(/\s+/g, '-');
 
+const { parsed: envFile } = dotenv.config({
+  path: path.join(__dirname, '.env'),
+});
+
 const finalEnv = {
-  ...dotenv.config({
-    path: path.join(__dirname, '.env'),
-  }).parsed,
+  ...envFile,
 
   BUILD_DATE: Date.now().toString(16).toUpperCase(),
   BUILD_SUFFIX: sanitizeEnv(process.env.BUILD_SUFFIX),
   BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
+  DEV_HOSTNAME: process.env.DEV_HOSTNAME || envFile.DEV_HOSTNAME,
+  DEV_PORT: process.env.DEV_PORT || envFile.DEV_PORT,
+  DEV_BABEL_CACHE_ENABLED: process.env.DEV_BABEL_CACHE_ENABLED || envFile.DEV_BABEL_CACHE_ENABLED,
+  DEV_WEBPACK_CACHE_ENABLED: process.env.DEV_WEBPACK_CACHE_ENABLED || envFile.DEV_WEBPACK_CACHE_ENABLED,
+  DEV_SPRING_CLEANING: process.env.DEV_SPRING_CLEANING || envFile.DEV_SPRING_CLEANING,
+  PROD_ANALYZE_BUNDLES: process.env.PROD_ANALYZE_BUNDLES || envFile.PROD_ANALYZE_BUNDLES,
   NODE_ENV: mode,
   PACKAGE_AUTHOR_EMAIL: process.env.npm_package_author_email,
   PACKAGE_AUTHOR_NAME: process.env.npm_package_author_name,
@@ -64,19 +72,17 @@ finalEnv.BUILD_NAME = [
   `.${finalEnv.BUILD_TARGET}`,
 ].filter(Boolean).join('');
 
-export const env = Object.entries(finalEnv).sort(([a], [b]) => (
-  a === b
-    ? 0
-    : (a > b ? -1 : 1)
-)).reduce((prev, [key, value]) => {
-  if (key) {
-    prev[key] = value;
-  }
+export const env = Object.entries(finalEnv)
+  .sort(([a], [b]) => a - b)
+  .reduce((prev, [key, value]) => {
+    if (key) {
+      prev[key] = value;
+    }
 
-  return prev;
-}, {
-  __DEV__,
-});
+    return prev;
+  }, {
+    __DEV__,
+  });
 
 const webpackEnv = Object.entries(env).reduce((prev, [key, value]) => {
   if (key) {
@@ -93,12 +99,12 @@ const entry = {
 };
 
 // background is not used on Firefox
-if (env.BUILD_TARGET === 'firefox') {
+if (finalEnv.BUILD_TARGET === 'firefox') {
   delete entry.background;
 }
 
 const output = {
-  path: path.join(__dirname, __DEV__ ? 'build' : 'dist', env.BUILD_TARGET),
+  path: path.join(__dirname, __DEV__ ? 'build' : 'dist', finalEnv.BUILD_TARGET),
   filename: '[name].js',
   clean: false, // clean output.path dir before emitting files (update: cleaning it up ourselves via rimraf)
   publicPath: 'auto',
@@ -150,7 +156,9 @@ const moduleRules = [{
     {
       loader: 'babel-loader',
       options: {
-        cacheDirectory: path.join(__dirname, 'node_modules', '.cache', 'babel'), // default: false
+        cacheDirectory: __DEV__
+          && finalEnv.DEV_BABEL_CACHE_ENABLED === 'true'
+          && path.join(__dirname, 'node_modules', '.cache', 'babel'), // default: false
         // cacheCompression: false, // default: true
       },
     },
@@ -175,21 +183,25 @@ const resolve = {
 };
 
 const copyPatterns = [{
-  // fill in fields from package.json into manifest and transform it depending on env.BUILD_TARGET
+  // fill in fields from package.json into manifest and transform it depending on finalEnv.BUILD_TARGET
   from: 'src/manifest.json',
   to: 'manifest.json',
 
   transform: (content) => {
     const parsed = JSON.parse(content.toString());
 
-    // should be set according to env.BUILD_TARGET below (in the `switch` block)
+    // should be set according to finalEnv.BUILD_TARGET below (in the `switch` block)
     // (purposefully given an erroneous value to indicate some transformation was done)
     parsed.manifest_version = -1;
 
-    parsed.version = env.PACKAGE_VERSION;
-    parsed.description = env.PACKAGE_DESCRIPTION;
-    parsed.author = env.PACKAGE_AUTHOR;
-    parsed.homepage_url = env.PACKAGE_URL;
+    parsed.version = finalEnv.PACKAGE_VERSION;
+    parsed.description = finalEnv.PACKAGE_DESCRIPTION;
+    parsed.author = { email: finalEnv.PACKAGE_AUTHOR_EMAIL };
+    parsed.homepage_url = finalEnv.PACKAGE_URL;
+
+    if (finalEnv.PACKAGE_AUTHOR_NAME) {
+      parsed.author.name = finalEnv.PACKAGE_AUTHOR_NAME;
+    }
 
     const {
       applications,
@@ -197,7 +209,7 @@ const copyPatterns = [{
       web_accessible_resources,
     } = parsed;
 
-    switch (env.BUILD_TARGET) {
+    switch (finalEnv.BUILD_TARGET) {
       case 'chrome': {
         // set to Manifest V3 (MV3) for Chrome
         parsed.manifest_version = 3;
@@ -303,7 +315,7 @@ const plugins = [
 
   ...[
     __DEV__
-      && process.env.DEV_SPRING_CLEANING === 'true'
+      && finalEnv.DEV_SPRING_CLEANING === 'true'
       && new CircularDependencyPlugin({
         exclude: /node_modules/,
         include: /src/,
@@ -320,20 +332,21 @@ const plugins = [
         },
       }),
 
-    (!__DEV__ || env.BUILD_TARGET === 'firefox')
+    (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox')
       && new ZipPlugin({
         // spit out the file in either `build` or `dist`
         path: '..',
 
         // extension will be appended to the end of the filename
-        filename: env.BUILD_NAME,
-        extension: env.BUILD_TARGET === 'firefox' ? 'xpi' : 'zip',
+        filename: finalEnv.BUILD_NAME,
+        extension: finalEnv.BUILD_TARGET === 'firefox' ? 'xpi' : 'zip',
       }),
 
     !__DEV__
+      && finalEnv.PROD_ANALYZE_BUNDLES === 'true'
       && new VisualizerPlugin({
         // per the doc: this is relative to the webpack output dir
-        filename: path.join('..', `${env.BUILD_NAME}.html`),
+        filename: path.join('..', `${finalEnv.BUILD_NAME}.html`),
       }),
   ].filter(Boolean),
 ];
@@ -347,7 +360,7 @@ const envConfig = {
   devtool: __DEV__ ? 'cheap-module-source-map' : 'source-map',
 
   // development
-  ...(__DEV__ && {
+  ...(__DEV__ && finalEnv.DEV_WEBPACK_CACHE_ENABLED === 'true' && {
     cache: {
       type: 'filesystem',
       allowCollectingMemory: true,
