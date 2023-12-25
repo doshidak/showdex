@@ -31,6 +31,7 @@ import {
 import { logger } from '@showdex/utils/debug';
 import { legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
+import { pluralize } from '@showdex/utils/humanize';
 import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import styles from './PokeMoves.module.scss';
@@ -398,10 +399,7 @@ export const PokeMoves = ({
           {
             showFaintCounter &&
             <>
-              <div
-                className={styles.moveProperty}
-                // style={{ marginRight: '0.5em' }}
-              >
+              <div className={styles.moveProperty}>
                 <ValueField
                   className={styles.valueField}
                   label={`Fallen Allies Count for Pokemon ${friendlyPokemonName}`}
@@ -436,10 +434,7 @@ export const PokeMoves = ({
 
               <ToggleButton
                 className={styles.editorButton}
-                style={{
-                  // marginRight: '1em',
-                  ...(typeof pokemon.dirtyFaintCounter === 'number' ? undefined : { opacity: 0 }),
-                }}
+                style={typeof pokemon.dirtyFaintCounter === 'number' ? undefined : { opacity: 0 }}
                 label="Reset"
                 tooltip={`Reset to ${pokemon.faintCounter} Fallen`}
                 tooltipDisabled={!settings?.showUiTooltips}
@@ -513,10 +508,8 @@ export const PokeMoves = ({
         const moveOverrides = { ...moveDefaults, ...pokemon?.moveOverrides?.[moveName] };
         const damagingMove = ['Physical', 'Special'].includes(moveOverrides.category);
 
-        const hasOverrides = pokemon?.showMoveOverrides && (
-          hasMoveOverrides(format, pokemon, moveName, opponentPokemon)
-            || typeof moveOverrides.stellar === 'boolean'
-        );
+        const hasOverrides = pokemon?.showMoveOverrides
+          && hasMoveOverrides(format, pokemon, moveName, opponentPokemon);
 
         const showStellarToggle = (pokemon?.dirtyTeraType || pokemon?.teraType) === 'Stellar'
           && pokemon.terastallized;
@@ -525,6 +518,11 @@ export const PokeMoves = ({
           moveOverrides.stellar
             ?? (!!moveOverrides.type && !pokemon?.stellarMoveMap?.[moveOverrides.type])
         );
+
+        const showHitsField = !!moveDefaults.hits
+          && !!moveDefaults.minHits
+          && !!moveDefaults.maxHits
+          && (moveDefaults.hits !== moveDefaults.minHits || moveDefaults.hits !== moveDefaults.maxHits);
 
         const basePowerKey: keyof CalcdexMoveOverride = (pokemon?.useZ && 'zBasePower')
           || (pokemon?.useMax && 'maxBasePower')
@@ -612,7 +610,7 @@ export const PokeMoves = ({
           <React.Fragment key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}>
             <TableGridItem align="left">
               <Dropdown
-                aria-label={`Move Slot ${i + 1} for Pokemon ${friendlyPokemonName}`}
+                aria-label={`Move Slot ${i + 1} for ${friendlyPokemonName}`}
                 hint="--"
                 optionTooltip={PokeMoveOptionTooltip}
                 optionTooltipProps={{
@@ -648,8 +646,7 @@ export const PokeMoves = ({
                   />
 
                   <MoveCategoryField
-                    className={styles.categoryField}
-                    ariaLabel={`Stat Overrides for ${moveName} of Pokemon ${friendlyPokemonName}`}
+                    ariaLabel={`Stat Overrides for ${moveName} of ${friendlyPokemonName}`}
                     format={format}
                     input={{
                       name: `PokeMoves:${pokemonKey}:Moves:MoveCategoryField:${moveName}`,
@@ -695,8 +692,39 @@ export const PokeMoves = ({
                         moveOverrides: {
                           [moveName]: { stellar: !stellarToggled },
                         },
-                      }, `${l.scope}:ToggleButton~stellar:onPress()`)}
+                      }, `${l.scope}:ToggleButton~Stellar:onPress()`)}
                     />
+                  }
+
+                  {
+                    showHitsField &&
+                    <div className={styles.moveProperty}>
+                      <ValueField
+                        className={styles.valueField}
+                        label={`Number of Hits Override for ${moveName} of ${friendlyPokemonName}`}
+                        hideLabel
+                        hint={moveOverrides.hits}
+                        fallbackValue={moveDefaults.hits}
+                        min={moveDefaults.minHits}
+                        max={moveDefaults.maxHits}
+                        step={1}
+                        clearOnFocus
+                        absoluteHover
+                        input={{
+                          name: `PokeMoves:${pokemonKey}:Moves:ValueField~Hits:${moveName}`,
+                          value: moveOverrides.hits,
+                          onChange: (value: number) => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { hits: clamp(moveDefaults.minHits, value, moveDefaults.maxHits) },
+                            },
+                          }, `${l.scope}:ValueField~Hits:input.onChange()`),
+                        }}
+                      />
+
+                      <div className={styles.propertyName}>
+                        {pluralize(moveOverrides.hits, 'Hit:s', { printNum: false })}
+                      </div>
+                    </div>
                   }
 
                   {
@@ -704,7 +732,7 @@ export const PokeMoves = ({
                     <div className={styles.moveProperty}>
                       <ValueField
                         className={styles.valueField}
-                        label={`Base Power Override for ${moveName} of Pokemon ${friendlyPokemonName}`}
+                        label={`Base Power Override for ${moveName} of ${friendlyPokemonName}`}
                         hideLabel
                         hint={moveOverrides[basePowerKey]?.toString() || 0}
                         fallbackValue={fallbackBasePower}
@@ -753,7 +781,38 @@ export const PokeMoves = ({
               </TableGridItem>
             ) : (
               <>
-                <TableGridItem>
+                <TableGridItem className={styles.quickEditor}>
+                  {
+                    (settings?.enableQuickEditor && showHitsField) &&
+                    <div className={styles.moveProperty}>
+                      <ValueField
+                        className={styles.valueField}
+                        label={`Number of Hits Override for ${moveName} of ${friendlyPokemonName}`}
+                        hideLabel
+                        hint={moveOverrides.hits}
+                        fallbackValue={moveDefaults.hits}
+                        min={moveDefaults.minHits}
+                        max={moveDefaults.maxHits}
+                        step={1}
+                        clearOnFocus
+                        absoluteHover
+                        input={{
+                          name: `PokeMoves:${pokemonKey}:Moves:ValueField~Hits:${moveName}`,
+                          value: moveOverrides.hits,
+                          onChange: (value: number) => updatePokemon({
+                            moveOverrides: {
+                              [moveName]: { hits: clamp(moveDefaults.minHits, value, moveDefaults.maxHits) },
+                            },
+                          }, `${l.scope}:ValueField~Hits:input.onChange()`),
+                        }}
+                      />
+
+                      <div className={styles.propertyName}>
+                        <i className="fa fa-close" />
+                      </div>
+                    </div>
+                  }
+
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
                   {(settings?.showNonDamageRanges || hasDamageRange) ? (
