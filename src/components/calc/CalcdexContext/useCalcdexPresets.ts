@@ -125,8 +125,9 @@ export const useCalcdexPresets = (
           pokemon,
           {
             format: state.format,
-            source: 'smogon',
+            // source: 'smogon',
             select: 'any',
+            filter: (p) => p.source !== 'usage',
           },
         );
 
@@ -174,11 +175,10 @@ export const useCalcdexPresets = (
             };
           };
 
-          // Teambuilder presets should've been synced by syncBattle() & available in pokemon.presets[] by now
-          // hmm, is this ambitious? idk
+          // update (2023/12/22): Teambuilder presets have been refactored into useBattlePresets(),
+          // which taps directly into the teamdexSlice state
           preset = guessTeambuilderPreset(
             [
-              // ...(pokemon.presets?.length ? pokemon.presets : []),
               ...selectPokemonPresets(
                 pokemonPresets,
                 pokemon,
