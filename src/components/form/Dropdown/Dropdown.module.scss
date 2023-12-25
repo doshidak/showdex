@@ -639,7 +639,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .indicatorSeparator {
   align-self: stretch;
   width: $indicator-separator-width;
-  @include spacing.margin-xy($indicator-separator-margin-x);
+  @include spacing.margin($x: $indicator-separator-margin-x);
 
   .light & {
     background: $indicator-separator-light-color;
@@ -655,7 +655,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .menu {
   position: absolute;
   width: 100%;
-  @include spacing.margin-xy(0, $menu-gutter);
+  @include spacing.margin($x: 0, $y: $menu-gutter);
   border-radius: $border-radius;
   // border: $menu-border-width solid colors.$transparent;
   overflow: hidden;
@@ -687,7 +687,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .menuList {
   position: relative;
   // overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden scroll;
 }
 
 // SelectOption
@@ -695,7 +695,7 @@ $group-heading-dark-background-color: color.alpha(colors.$white, 0.125);
 .option {
   @include flex.column;
   width: 100%;
-  @include spacing.padding-xy($option-padding-x, $option-padding-y);
+  @include spacing.padding($x: $option-padding-x, $y: $option-padding-y);
   font-size: map.get($value, font-size);
   @include transition.apply(background-color);
   user-select: none;
