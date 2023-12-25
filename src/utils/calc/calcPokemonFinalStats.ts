@@ -1,5 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-import { PokemonSpeedReductionItems, PokemonStatNames } from '@showdex/consts/dex';
+import { PokemonSpeedReductionItems } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import { env, formatId as id, nonEmptyObject } from '@showdex/utils/core';
@@ -11,6 +11,7 @@ import {
   notFullyEvolved,
   shouldIgnoreItem,
 } from '@showdex/utils/dex';
+import { calcBoostedStats } from './calcBoostedStats';
 import { calcPokemonHpPercentage } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
 import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
@@ -99,34 +100,8 @@ export const calcPokemonFinalStats = (
   }
 
   // apply stat boosts
-  const boostTable = legacy
-    ? [1, 100 / 66, 2, 2.5, 100 / 33, 100 / 28, 4]
-    : [1, 1.5, 2, 2.5, 3, 3.5, 4];
-
-  const boosts: Showdown.StatsTable = {
-    atk: (pokemon?.dirtyBoosts?.atk ?? pokemon?.boosts?.atk) || 0,
-    def: (pokemon?.dirtyBoosts?.def ?? pokemon?.boosts?.def) || 0,
-    spa: (pokemon?.dirtyBoosts?.spa ?? pokemon?.boosts?.spa) || 0,
-    spd: (pokemon?.dirtyBoosts?.spd ?? pokemon?.boosts?.spd) || 0,
-    spe: (pokemon?.dirtyBoosts?.spe ?? pokemon?.boosts?.spe) || 0,
-  };
-
-  PokemonStatNames.forEach((stat) => {
-    // apply effects to non-HP stats
-    if (stat === 'hp') {
-      return;
-    }
-
-    // apply stat boosts if not 0 (cause it'd do nothing)
-    const stage = boosts[stat];
-
-    if (stage) {
-      const boostValue = boostTable[Math.abs(stage)];
-      const modifier = stage > 0 ? boostValue : (1 / boostValue);
-
-      record.apply(stat, modifier, 'boost', `${stage > 0 ? '+' : ''}${stage} Stage`);
-    }
-  });
+  // note: calcBoostedStats() writes directly to our existing record via record.apply()
+  void calcBoostedStats(format, pokemon, record);
 
   // find out what the highest *boosted* stat is (excluding HP) for use in some abilities,
   // particularly Protosynthesis & Quark Drive (gen 9),

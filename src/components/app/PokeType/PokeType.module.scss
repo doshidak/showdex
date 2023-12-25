@@ -1,5 +1,7 @@
+@use 'sass:list';
 @use 'sass:map';
 @use 'sass:math';
+@use 'sass:meta';
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
@@ -37,11 +39,51 @@ $types: (
     dragon: #4D09F4,
     dark: #41332A,
     fairy: #E76D88,
+
+    // note: this one's special uwu
+    // (colors extracted from in-game Stellar type icon; will be used to populate gradient stops)
+    // (also... should've just made PokeType into an SVG in hindsight lmao)
+    stellar: (
+      #E4B637,
+      #FD7A33,
+      (#FA3E3A, topRight),
+      #E53B7D,
+      (#B762B1, middleRight),
+      #713CBE,
+      (#5E3B9D, bottomRight),
+      #374477,
+      #567D97,
+      #3599D5,
+      #21A5E0,
+      (#246FD4, bottomLeft),
+      #294FBC,
+      (#2C97C2, middleLeft),
+      (#16B345, topLeft),
+      #C7D86E,
+      #99A977,
+      // #B9864E,
+      #E0C08C,
+    ),
   ),
 
   adjustment: (
-    light: 10%, // shade (both highlight/non-highlight)
-    dark: 50%, // tint (for non-highlight only)
+    light: 8%, // shade (both highlight/non-highlight)
+    dark: 32%, // tint (for non-highlight only)
+
+    stellar: (
+      linear-angle: -30deg, // slanted right
+
+      // +% for tint, -% for shade
+      // (+/-% feature for stellar only)
+      color: (
+        light: -4%,
+        dark: 16%,
+      ),
+      background-color: (
+        light: 4%,
+        dark: -8%,
+      ),
+    ),
   ),
 );
 
@@ -53,7 +95,6 @@ $container: (
   ),
 
   height: 13px,
-  // padding-y: 1px,
 );
 
 $label: (
@@ -80,23 +121,19 @@ $label: (
   // for the unknown/??? type
   // (these colors were obtained with the commented out default background-opacity's below)
   default-background-color: (
-    light: #DADDDE,
+    light: #DCDFE1,
     dark: #2D2B2A,
   ),
 
   background-opacity: (
     // for the unknown/??? type
     default: (
-      // light: 0.075,
-      light: 0.9,
-      // dark: 0.1,
-      dark: 0.9,
+      light: 0.88,
+      dark: 0.88,
     ),
 
     highlight: (
-      // light: 0.85,
       light: 1,
-      // dark: 0.75,
       dark: 1,
     ),
   ),
@@ -139,16 +176,6 @@ $tera-edge: (
   display: inline-block;
   width: map.get($container, width, default);
   height: map.get($container, height);
-  // @include spacing.padding-xy($y: map.get($container, padding-y));
-  // @include font.apply(fonts.$mono);
-  // font-size: map.get($container, font-size);
-  // text-align: center;
-  // text-transform: uppercase;
-  // text-shadow: map.get($container, text-shadow, default);
-  // border-radius: map.get($container, border-radius);
-  // user-select: none;
-  // pointer-events: none;
-  // @include transition.apply(width, color, text-shadow, background-color);
   @include transition.apply(width);
 
   &.sm {
@@ -158,10 +185,6 @@ $tera-edge: (
   &.xs {
     width: map.get($container, width, xs);
   }
-
-  // &.teraTyping {
-  //   position: relative;
-  // }
 }
 
 .label {
@@ -175,18 +198,15 @@ $tera-edge: (
   border-radius: map.get($label, border-radius);
   @include transition.apply(color, text-shadow, background-color);
   user-select: none;
-  // pointer-events: none;
   z-index: 1;
 
   .light & {
     color: color.alpha(map.get($types, default-color, light), map.get($label, label-opacity, default, light));
-    // background-color: color.alpha(map.get($types, default-color, light), map.get($label, background-opacity, default, light));
     background-color: color.alpha(map.get($label, default-background-color, light), map.get($label, background-opacity, default, light));
   }
 
   .dark & {
     color: color.alpha(map.get($types, default-color, dark), map.get($label, label-opacity, default, dark));
-    // background-color: color.alpha(map.get($types, default-color, dark), map.get($label, background-opacity, default, dark));
     background-color: color.alpha(map.get($label, default-background-color, dark), map.get($label, background-opacity, default, dark));
   }
 
@@ -211,36 +231,15 @@ $tera-edge: (
   display: inline-block;
   width: map.get($tera-edge, size, edge);
   height: map.get($tera-edge, size, edge);
-  // background-color: inherit;
-  // mix-blend-mode: screen;
   @include transition.apply(background-color);
   user-select: none;
   pointer-events: none;
 
-  // .light:not(.highlight) & {
-  //   mix-blend-mode: darken;
-  // }
-
-  // .light.highlight & {
-  //   mix-blend-mode: color-burn;
-  // }
-
-  // .dark:not(.highlight) & {
-  //   mix-blend-mode: exclusion;
-  // }
-
-  // .dark.highlight & {
-  //   // mix-blend-mode: difference;
-  //   mix-blend-mode: color-dodge;
-  // }
-
   .light & {
-    // background-color: color.alpha(map.get($types, default-color, light), map.get($label, background-opacity, default, light));
     background-color: color.alpha(map.get($label, default-background-color, light), map.get($tera-edge, background-opacity, default, light));
   }
 
   .dark & {
-    // background-color: color.alpha(map.get($types, default-color, dark), map.get($label, background-opacity, default, dark));
     background-color: color.alpha(map.get($label, default-background-color, dark), map.get($tera-edge, background-opacity, default, dark));
   }
 
@@ -291,47 +290,130 @@ $tera-edge: (
 
 @each $type, $color in map.get($types, colors) {
   @if $type != unknown {
-    $light-color: color.shade($color, map.get($types, adjustment, light));
-    $light-highlight-color: $light-color;
-    $dark-color: color.tint($color, map.get($types, adjustment, dark));
-    $dark-highlight-color: $color;
+    $light-shade: map.get($types, adjustment, light);
+    $dark-tint: map.get($types, adjustment, dark);
 
     .type-#{$type} {
-      &:not(.highlight) {
-        &.light .label {
-          color: color.alpha($light-color, map.get($label, label-opacity, default, light));
+      @if $type == stellar {
+        $light-color-adj: map.get($types, adjustment, stellar, color, light);
+        $light-background-color-adj: map.get($types, adjustment, stellar, background-color, light);
+        $dark-color-adj: map.get($types, adjustment, stellar, color, dark);
+        $dark-background-color-adj: map.get($types, adjustment, stellar, background-color, dark);
+
+        // note: unless manipulated by any sass:map functions, meta.type-of() will return 'list' for `()`
+        // (not that it really matters here, but knowledge is power)
+        $light-colors: (); // list
+        $light-background-colors: (); // list
+        $light-tera-edges: (); // map
+        $dark-colors: (); // list
+        $dark-background-colors: (); // list
+        $dark-tera-edges: (); // map
+
+        @each $stop-tuple in $color {
+          $stop-color: if(meta.type-of($stop-tuple) == list, list.nth($stop-tuple, 1), $stop-tuple);
+          $tera-edge-name: if(meta.type-of($stop-tuple) == list, list.nth($stop-tuple, 2), null);
+
+          $light-stop-color: if($light-color-adj > 0, color.tint($stop-color, $light-color-adj), color.shade($stop-color, math.abs($light-color-adj)));
+          $light-stop-background-color: if($light-color-adj > 0, color.tint($stop-color, $light-background-color-adj), color.shade($stop-color, math.abs($light-background-color-adj)));
+          $dark-stop-color: if($dark-color-adj > 0, color.tint($stop-color, $dark-color-adj), color.shade($stop-color, math.abs($dark-color-adj)));
+          $dark-stop-background-color: if($dark-color-adj > 0, color.tint($stop-color, $dark-background-color-adj), color.shade($stop-color, math.abs($dark-background-color-adj)));
+
+          $light-colors: list.append($light-colors, $light-stop-color, $separator: comma);
+          $light-background-colors: list.append($light-background-colors, $light-stop-background-color, $separator: comma);
+          $dark-colors: list.append($dark-colors, $dark-stop-color, $separator: comma);
+          $dark-background-colors: list.append($dark-background-colors, $dark-stop-background-color, $separator: comma);
+
+          @if $tera-edge-name {
+            $light-tera-edges: map.set($light-tera-edges, $tera-edge-name, $light-stop-background-color);
+            $dark-tera-edges: map.set($dark-tera-edges, $tera-edge-name, $dark-stop-background-color);
+          }
         }
 
-        &.dark .label {
-          color: color.alpha($dark-color, map.get($label, label-opacity, default, dark));
-        }
-      }
-
-      &.highlight {
-        &.light {
-          .label {
-            // color: color.alpha(colors.$white, map.get($label, label-opacity, highlight, light));
-            background-color: color.alpha($light-highlight-color, map.get($label, background-opacity, highlight, light));
+        &:not(.highlight) {
+          .label span {
+            color: colors.$transparent;
+            background-clip: text;
           }
 
-          .teraEdge {
-            // background-color: $light-highlight-color;
-            background-color: color.alpha($light-highlight-color, map.get($tera-edge, background-opacity, highlight, light));
-          }
-        }
+          $linear-angle: map.get($types, adjustment, stellar, linear-angle);
 
-        &.dark {
-          .label {
-            // color: color.alpha(colors.$white, map.get($label, label-opacity, highlight, dark));
-            background-color: color.alpha($dark-highlight-color, map.get($label, background-opacity, highlight, dark));
+          &.light .label span {
+            background-image: linear-gradient($linear-angle, $light-colors);
           }
 
-          .teraEdge {
-            // background-color: $dark-highlight-color;
-            background-color: color.alpha($dark-highlight-color, map.get($tera-edge, background-opacity, highlight, dark));
+          &.dark .label span {
+            background-image: linear-gradient($linear-angle, $dark-colors);
           }
         }
-      } // end .highlight
+
+        &.highlight {
+          .label > span {
+            background-image: none;
+          }
+
+          &.light {
+            .label {
+              background-image: conic-gradient($light-background-colors);
+            }
+
+            @each $edge, $edge-color in $light-tera-edges {
+              .teraEdge.#{$edge} {
+                background-color: $edge-color;
+              }
+            }
+          }
+
+          &.dark {
+            .label {
+              background-image: conic-gradient($dark-background-colors);
+            }
+
+            @each $edge, $edge-color in $dark-tera-edges {
+              .teraEdge.#{$edge} {
+                background-color: $edge-color;
+              }
+            }
+          }
+        }
+      } @else {
+        $light-default-color: color.shade($color, $light-shade);
+        $dark-default-color: color.tint($color, $dark-tint);
+
+        &:not(.highlight) {
+          &.light .label {
+            color: color.alpha($light-default-color, map.get($label, label-opacity, default, light));
+          }
+
+          &.dark .label {
+            color: color.alpha($dark-default-color, map.get($label, label-opacity, default, dark));
+          }
+        }
+
+        $light-highlight-color: $light-default-color;
+        $dark-highlight-color: $color;
+
+        &.highlight {
+          &.light {
+            .label {
+              background-color: color.alpha($light-highlight-color, map.get($label, background-opacity, highlight, light));
+            }
+
+            .teraEdge {
+              background-color: color.alpha($light-highlight-color, map.get($tera-edge, background-opacity, highlight, light));
+            }
+          }
+
+          &.dark {
+            .label {
+              background-color: color.alpha($dark-highlight-color, map.get($label, background-opacity, highlight, dark));
+            }
+
+            .teraEdge {
+              background-color: color.alpha($dark-highlight-color, map.get($tera-edge, background-opacity, highlight, dark));
+            }
+          }
+        } // end &:not(.highlight), &.highlight
+      } // end @else
     } // end .type-#{$type}
   } // end @if
 }

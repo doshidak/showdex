@@ -1,6 +1,6 @@
-import { type MoveName, Move as SmogonMove } from '@smogon/calc';
+import { type AbilityName, type MoveName, Move as SmogonMove } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { clamp, formatId } from '@showdex/utils/core';
+import { clamp } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   determineCriticalHit,
@@ -36,20 +36,34 @@ export const createSmogonMove = (
     return null;
   }
 
-  const moveId = formatId(moveName);
-  const ability = pokemon.dirtyAbility ?? pokemon.ability;
-  const abilityId = formatId(ability);
-  const item = pokemon.dirtyItem ?? pokemon.item;
+  const {
+    speciesForme,
+    teraType: revealedTeraType,
+    dirtyTeraType,
+    terastallized,
+    ability: revealedAbility,
+    dirtyAbility,
+    item: revealedItem,
+    dirtyItem,
+    stellarMoveMap,
+    moveOverrides,
+    useZ,
+    useMax,
+  } = pokemon;
+
+  const teraType = dirtyTeraType || revealedTeraType;
+  const ability = dirtyAbility || revealedAbility;
+  const item = dirtyItem ?? revealedItem;
 
   const options: ConstructorParameters<typeof SmogonMove>[2] = {
-    species: pokemon.speciesForme,
-
+    species: speciesForme,
     ability,
     item,
 
     // only apply one of them, not both!
-    useZ: pokemon.useZ && !pokemon.useMax,
-    useMax: pokemon.useMax,
+    useZ: useZ && !useMax,
+    useMax,
+    // isStellarFirstUse: false, // note: populated below
 
     // for moves that always crit, we need to make sure the crit doesn't apply when Z/Max'd
     isCrit: determineCriticalHit(pokemon, moveName, format),
@@ -67,12 +81,13 @@ export const createSmogonMove = (
     zBasePower: zBasePowerOverride,
     maxBasePower: maxBasePowerOverride,
     alwaysCriticalHits: criticalHitOverride,
+    stellar: stellarOverride,
     defensiveStat: defensiveStatOverride,
     offensiveStat: offensiveStatOverride,
-  } = pokemon.moveOverrides?.[moveName] || {};
+  } = moveOverrides?.[moveName] || {};
 
   // pretty much only used for Beat Up (which is typeless in gens 2-4)
-  const forceTypeless = moveId === 'beatup' && gen < 5;
+  const forceTypeless = moveName === 'Beat Up' as MoveName && gen < 5;
 
   if (forceTypeless || typeOverride) {
     overrides.type = forceTypeless ? '???' : typeOverride;
@@ -93,7 +108,7 @@ export const createSmogonMove = (
   // (also, didn't remove it from calcMoveBasePower() since we still want to show the actual BP in the UI)
   const removeBasePowerOverride = overrides.basePower < 1 || (
     !overrodeBasePower && (
-      abilityId === 'supremeoverlord'
+      ability === 'Supreme Overlord' as AbilityName
         || shouldBoostTeraStab(format, pokemon, moveName, overrides.basePower)
     )
   );
@@ -107,22 +122,24 @@ export const createSmogonMove = (
     options.isCrit = criticalHitOverride;
   }
 
-  // update (2022/11/04): ignoreDefensive doesn't seem to do anything here;
-  // will leave this in, but won't allow the user to select 'ignore' in PokeMoves for now
-  // update (2023/10/11): yeetus deletus
-  /*
-  if (defensiveStatOverride === 'ignore') {
-    overrides.ignoreDefensive = true;
-    overrides.overrideDefensiveStat = null;
-  }
-  */
-
   if (defensiveStatOverride) {
     overrides.overrideDefensiveStat = defensiveStatOverride;
   }
 
   if (offensiveStatOverride) {
     overrides.overrideOffensiveStat = offensiveStatOverride;
+  }
+
+  // always on for the Terapagos-Stellar, otherwise, one successful move per type only
+  if (teraType === 'Stellar' && terastallized) {
+    const dexMove = dex.moves.get(moveName as Parameters<typeof dex.moves.get>[0]);
+    const { type: typeFromDex } = dexMove || {};
+    const moveType = overrides.type || typeFromDex;
+
+    options.isStellarFirstUse = stellarOverride ?? (
+      speciesForme === 'Terapagos-Stellar'
+        || (!!moveType && !stellarMoveMap?.[moveType])
+    );
   }
 
   const smogonMove = new SmogonMove(dex, moveName, {

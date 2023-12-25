@@ -7,6 +7,7 @@ import {
   getDynamicMoveType,
   getMaxMove,
 } from '@showdex/utils/dex';
+import { calcBoostedStats } from './calcBoostedStats';
 import { calcMoveBasePower } from './calcMoveBasePower';
 
 /**
@@ -30,22 +31,47 @@ export const getMoveOverrideDefaults = (
   }
 
   const dex = getDexForFormat(format);
+  const dexMove = dex.moves.get(moveName);
+
+  if (!dexMove?.exists) {
+    return null;
+  }
+
+  const {
+    speciesForme,
+    teraType,
+    dirtyTeraType,
+    terastallized,
+    ability,
+    dirtyAbility,
+  } = pokemon;
 
   const {
     type: typeFromDex,
-    category,
+    category: categoryFromDex,
     zMove,
     maxMove,
-  } = dex?.moves.get(moveName) || {};
+  } = dexMove;
 
   // update (2023/07/27): running the type through getDynamicMoveType() now to handle moves like Raging Bull & Revelation Dance
   const type = getDynamicMoveType(pokemon, moveName) || typeFromDex;
 
+  // only doing this for 1 move atm, so not making it into a function... yet o_O
+  let category = categoryFromDex;
+
+  if (moveName === 'Tera Blast' as MoveName && (dirtyTeraType || teraType) === 'Stellar' && terastallized) {
+    const { atk, spa } = calcBoostedStats(format, pokemon);
+
+    if (atk > spa) {
+      category = 'Physical';
+    }
+  }
+
   // update (2023/02/02): came across G-Max Fireball on a Cinderace-Gmax, which showed 140 BP.
   // turns out we need to separately lookup G-Max moves since maxMove.basePower refers to Max Flare.
   const gmaxMoveName = (
-    pokemon.speciesForme.endsWith('-Gmax')
-      && getMaxMove(moveName, pokemon.dirtyAbility || pokemon.ability, pokemon.speciesForme)
+    speciesForme.endsWith('-Gmax')
+      && getMaxMove(moveName, dirtyAbility || ability, speciesForme)
   ) || null;
 
   const gmaxBasePower = (
@@ -56,13 +82,15 @@ export const getMoveOverrideDefaults = (
   const basePower = calcMoveBasePower(format, pokemon, moveName, opponentPokemon);
   const criticalHit = alwaysCriticalHits(moveName, format);
 
-  const defaultDefensiveStat: Showdown.StatNameNoHp = (category === 'Physical' && 'def')
-    || (category === 'Special' && 'spd')
-    || null;
+  const defaultDefensiveStat: Showdown.StatNameNoHp = (
+    (category === 'Physical' && 'def')
+      || (category === 'Special' && 'spd')
+  ) || null;
 
-  const defaultOffensiveStat: Showdown.StatNameNoHp = (category === 'Physical' && 'atk')
-    || (category === 'Special' && 'spa')
-    || null;
+  const defaultOffensiveStat: Showdown.StatNameNoHp = (
+    (category === 'Physical' && 'atk')
+      || (category === 'Special' && 'spa')
+  ) || null;
 
   const {
     // ignoreDefensive,

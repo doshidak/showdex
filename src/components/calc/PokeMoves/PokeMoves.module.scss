@@ -47,7 +47,7 @@
 
 .movesHeader {
   @include flex.row($align: center);
-  @include spacing.margin($left: 5px);
+  @include spacing.margin($left: 6px);
 }
 
 .dmgHeader {
@@ -64,11 +64,11 @@
   user-select: none;
 
   .light & {
-    color: color.alpha(colors.$black, 0.75);
+    color: color.alpha(colors.$black, 0.8);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.75);
+    color: color.alpha(colors.$white, 0.8);
   }
 }
 
@@ -76,29 +76,29 @@
   @include flex.row($align: center);
 
   &:not(:last-of-type) {
-    @include spacing.margin($right: 1em);
+    @include spacing.margin($right: 8px);
   }
 
   .propertyName {
     @include flex.row-center;
     font-weight: 500;
     text-transform: uppercase;
-    opacity: 0.75;
+    opacity: 0.8;
   }
 
   .propertyValue {
-    @include spacing.margin($left: 0.5em);
+    @include spacing.margin($left: 4px);
     @include font.apply(fonts.$mono);
     font-size: 10px;
   }
 }
 
 button.toggleButton {
-  @include spacing.margin($left: 0.5em);
+  @include spacing.margin($left: 4px);
   font-size: 8px;
 
   &.lessSpacing {
-    @include spacing.margin($left: 0.25em);
+    @include spacing.margin($left: 2px);
   }
 }
 
@@ -161,16 +161,16 @@ button.editButton {
 }
 
 button.ultButton {
-  min-width: 25px;
+  min-width: 26px;
 }
 
 button.damageButton {
   .light &:not(:hover):not(.active) .damageButtonLabel.noDamage {
-    color: color.alpha(colors.$black, 0.5);
+    color: color.alpha(colors.$black, 0.48);
   }
 
   .dark &:not(:hover):not(.active) .damageButtonLabel.noDamage {
-    color: color.alpha(colors.$white, 0.5);
+    color: color.alpha(colors.$white, 0.48);
   }
 
   // by default, a disabled button will have 0.3 opacity
@@ -190,11 +190,11 @@ button.damageButton {
 
   &.noCopy.noDamage {
     .light & {
-      color: color.alpha(colors.$black, 0.5);
+      color: color.alpha(colors.$black, 0.48);
     }
 
     .dark & {
-      color: color.alpha(colors.$white, 0.5);
+      color: color.alpha(colors.$white, 0.48);
     }
   }
 }
@@ -221,7 +221,7 @@ button.damageButton {
     }
 
     &.consumed {
-      opacity: 0.75;
+      opacity: 0.8;
     }
   }
 }
@@ -230,7 +230,7 @@ button.damageButton {
   grid-area: span 1 / span 2;
   @include flex.row-between;
   align-self: center;
-  @include spacing.margin($right: 5px);
+  @include spacing.margin($right: 6px);
 
   &.editorHeader {
     @include flex.row-between;
@@ -244,7 +244,7 @@ button.damageButton {
 
   .valueField {
     max-width: 22px;
-    @include spacing.margin($right: 0.8em);
+    @include spacing.margin($right: 6px);
 
     &::before {
       @include position.absolute-xy($x: -3px, $y: 0); // remove "padding" from absoluteHover
@@ -255,6 +255,10 @@ button.damageButton {
 .editorLeft {
   @include flex.row($align: center);
   flex-wrap: wrap;
+
+  & > *:not(:last-child) {
+    @include spacing.margin($right: 6px);
+  }
 }
 
 .editorRight {
@@ -263,6 +267,7 @@ button.damageButton {
 
 button.editorButton {
   font-size: 8px;
+  line-height: 9px;
   @include transition.apply(color, background-color, box-shadow, opacity);
 
   &.readOnly {
@@ -271,9 +276,9 @@ button.editorButton {
   }
 }
 
-.categoryField {
-  @include spacing.margin-xy($x: 6px);
-}
+// .categoryField {
+//   @include spacing.margin-xy($x: 6px);
+// }
 
 .statVsLabel {
   @include spacing.margin-xy($x: 3px);

@@ -1,3 +1,4 @@
+export * from './calcBoostedStats';
 export * from './calcCalcdexId';
 export * from './calcCalcdexNonce';
 export * from './calcHiddenPower';

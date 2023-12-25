@@ -60,6 +60,7 @@ export const PokemonPresetFuckedBaseFormes: string[] = [
   'Sinistea', // -> Sinistea-Antique
   'Squawkabilly', // -> Squawkabilly-Blue -> Squawkabilly-White -> Squawkabilly-Yellow
   'Tatsugiri', // -> Tatsugiri-Droopy -> Tatsugiri-Stretchy
+  'Terapagos', // -> Terapagos-Terastal -> Terapagos-Stellar
   'Toxtricity', // -> Toxtricity-Low-Key
   'Vivillon', // -> Vivillon-Fancy -> Vivillon-Pokeball
   'Wishiwashi', // -> Wishiwashi-School

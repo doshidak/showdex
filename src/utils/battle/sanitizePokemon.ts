@@ -123,26 +123,9 @@ export const sanitizePokemon = <
     prevItem: (pokemon as Partial<Showdown.Pokemon>)?.prevItem as ItemName || null,
     prevItemEffect: (pokemon as Partial<Showdown.Pokemon>)?.prevItemEffect || null,
 
-    nature: (!legacy && (
-      (pokemon as Partial<CalcdexPokemon>)?.nature
-        || PokemonNatures.slice(-1)[0])
-    ) || null,
-
-    ivs: populateStatsTable(
-      (pokemon as Partial<CalcdexPokemon>)?.ivs,
-      {
-        spread: 'iv',
-        format,
-      },
-    ),
-
-    evs: populateStatsTable(
-      (pokemon as Partial<CalcdexPokemon>)?.evs,
-      {
-        spread: 'ev',
-        format,
-      },
-    ),
+    nature: (!legacy && ((pokemon as Partial<CalcdexPokemon>)?.nature || PokemonNatures.slice(-1)[0])) || null,
+    ivs: populateStatsTable((pokemon as Partial<CalcdexPokemon>)?.ivs, { spread: 'iv', format }),
+    evs: populateStatsTable((pokemon as Partial<CalcdexPokemon>)?.evs, { spread: 'ev', format }),
 
     showPresetSpreads: (pokemon as Partial<CalcdexPokemon>)?.showPresetSpreads || false,
 
@@ -222,6 +205,7 @@ export const sanitizePokemon = <
     serverMoves: (pokemon as Partial<CalcdexPokemon>)?.serverMoves || [],
     transformedMoves: (pokemon as Partial<CalcdexPokemon>)?.transformedMoves || [],
     altMoves: (pokemon as Partial<CalcdexPokemon>)?.altMoves || [],
+    stellarMoveMap: { ...(pokemon as Partial<CalcdexPokemon>)?.stellarMoveMap },
     moveOverrides: { ...(pokemon as Partial<CalcdexPokemon>)?.moveOverrides },
     showMoveOverrides: (pokemon as Partial<CalcdexPokemon>)?.showMoveOverrides || false,
 

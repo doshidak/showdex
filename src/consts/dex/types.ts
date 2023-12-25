@@ -27,6 +27,7 @@ export const PokemonTypes: Showdown.TypeName[] = [
   'Dark',
   'Steel',
   'Fairy',
+  'Stellar',
   '???',
 ];
 
@@ -34,6 +35,8 @@ export const PokemonTypes: Showdown.TypeName[] = [
  * Pokemon type labels.
  *
  * * `full` (index `0`) should be used when the container size is larger than `'sm'`.
+ *   - These are primarily based on how types were labeled in older gens, like gen 4.
+ *   - They seem to never exceed 6 characters, hence types like Electric are abbreviated into "ELECTR".
  * * `sm` (index `1`) should be used when the container size is `'sm'`.
  *   - For this size, labels do not exceed 4 characters.
  * * `xs` (index `2`) should be used when the container size is `'xs'`.
@@ -61,4 +64,5 @@ export const PokemonTypeLabels: Record<Exclude<Showdown.TypeName, '???'>, [full:
   Dark: ['DARK', 'DARK', 'DRK'],
   Steel: ['STEEL', 'STL', 'STL'],
   Fairy: ['FAIRY', 'FARY', 'FRY'],
+  Stellar: ['STELLR', 'STLR', 'SLR'],
 };

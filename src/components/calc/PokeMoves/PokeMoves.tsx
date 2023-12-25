@@ -510,19 +510,21 @@ export const PokeMoves = ({
         // getMoveOverrideDefaults() could return null, so spreading here to avoid a "Cannot read properties of null" error
         // (could make it not return null, but too lazy atm lol)
         const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon) };
+        const moveOverrides = { ...moveDefaults, ...pokemon?.moveOverrides?.[moveName] };
+        const damagingMove = ['Physical', 'Special'].includes(moveOverrides.category);
 
-        const moveOverrides = {
-          ...moveDefaults,
-          ...pokemon?.moveOverrides?.[moveName],
-        };
+        const hasOverrides = pokemon?.showMoveOverrides && (
+          hasMoveOverrides(format, pokemon, moveName, opponentPokemon)
+            || typeof moveOverrides.stellar === 'boolean'
+        );
 
-        const damagingMove = [
-          'Physical',
-          'Special',
-        ].includes(moveOverrides.category);
+        const showStellarToggle = (pokemon?.dirtyTeraType || pokemon?.teraType) === 'Stellar'
+          && pokemon.terastallized;
 
-        const hasOverrides = pokemon?.showMoveOverrides
-          && hasMoveOverrides(format, pokemon, moveName, opponentPokemon);
+        const stellarToggled = showStellarToggle && (
+          moveOverrides.stellar
+            ?? (!!moveOverrides.type && !pokemon?.stellarMoveMap?.[moveOverrides.type])
+        );
 
         const basePowerKey: keyof CalcdexMoveOverride = (pokemon?.useZ && 'zBasePower')
           || (pokemon?.useMax && 'maxBasePower')
@@ -607,17 +609,8 @@ export const PokeMoves = ({
           && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange);
 
         return (
-          <React.Fragment
-            key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}
-          >
-            <TableGridItem
-              // className={cx(
-              //   pokemon?.showMoveOverrides
-              //     && ['xs', 'sm'].includes(containerSize)
-              //     && styles.editorItemInput,
-              // )}
-              align="left"
-            >
+          <React.Fragment key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}>
+            <TableGridItem align="left">
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for Pokemon ${friendlyPokemonName}`}
                 hint="--"
@@ -682,6 +675,27 @@ export const PokeMoves = ({
                       tooltipDisabled={!settings?.showUiTooltips}
                       active={moveToggled}
                       onPress={() => handleMoveToggle(moveName)}
+                    />
+                  }
+
+                  {
+                    showStellarToggle &&
+                    <ToggleButton
+                      className={styles.editorButton}
+                      label="Stellar"
+                      tooltip={(
+                        <div className={styles.descTooltip}>
+                          {stellarToggled ? 'Deactivate' : 'Activate'}{' '}
+                          <strong>Stellar STAB</strong>
+                        </div>
+                      )}
+                      tooltipDisabled={!settings?.showUiTooltips}
+                      active={stellarToggled}
+                      onPress={() => updatePokemon({
+                        moveOverrides: {
+                          [moveName]: { stellar: !stellarToggled },
+                        },
+                      }, `${l.scope}:ToggleButton~stellar:onPress()`)}
                     />
                   }
 

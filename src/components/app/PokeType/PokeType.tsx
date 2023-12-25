@@ -12,6 +12,7 @@ export interface PokeTypeProps {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
   type?: Showdown.TypeName;
+  override?: string;
   defaultLabel?: string;
   teraTyping?: boolean;
   reverseColorScheme?: boolean;
@@ -24,6 +25,7 @@ export const PokeType = ({
   style,
   labelClassName,
   labelStyle,
+  override,
   type,
   defaultLabel,
   highlight = true,
@@ -46,7 +48,7 @@ export const PokeType = ({
 
   // TypeScript also can't infer that we've previously checked `type !== '???'` in labelIndex
   // (otherwise it would be `null`), so we gotta check again to keep it happy
-  const label = (
+  const label = override || (
     typeof labelIndex === 'number'
       && type !== '???' // this is also necessary for TypeScript lol
       && PokemonTypeLabels[type]?.[labelIndex]
@@ -69,7 +71,7 @@ export const PokeType = ({
         className={cx(styles.label, labelClassName)}
         style={labelStyle}
       >
-        {label}
+        <span>{label}</span>
       </span>
 
       {

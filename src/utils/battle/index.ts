@@ -1,3 +1,4 @@
+export * from './chunkStepQueueTurns';
 export * from './cloneBattleState';
 export * from './clonePlayerSideConditions';
 export * from './countActivePlayers';
@@ -10,6 +11,7 @@ export * from './detectPokemonIdent';
 export * from './detectSpeciesForme';
 export * from './detectToggledAbility';
 export * from './detectToggledMove';
+export * from './mapStellarMoves';
 export * from './mergeRevealedMoves';
 export * from './parsePokemonDetails';
 export * from './ruinAbilitiesActive';

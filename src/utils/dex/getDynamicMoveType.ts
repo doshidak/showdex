@@ -178,6 +178,16 @@ export const getDynamicMoveType = (
       break;
     }
 
+    // Terapagos-Terastal's new move in Gen 9 DLC 2
+    // (simply becomes Stellar type when in the Terapagos-Stellar forme, which is achieved by Terastallizing)
+    case 'terastarstorm': {
+      if (formeId === 'terapagosstellar' && terastallized) {
+        return 'Stellar';
+      }
+
+      break;
+    }
+
     default: {
       break;
     }

@@ -92,6 +92,11 @@ export const calcMoveBasePower = (
     basePower = 60;
   }
 
+  // Tera Blast becomes 100 BP when Terastallized to the Stellar type
+  if (moveId === 'terablast' && (pokemon?.dirtyTeraType || pokemon?.teraType) === 'Stellar' && pokemon.terastallized) {
+    basePower = 100;
+  }
+
   const basePowerMods: number[] = [];
 
   if (['electromorphosis', 'windpower'].includes(abilityId) && 'charge' in (pokemon?.volatiles || {})) {

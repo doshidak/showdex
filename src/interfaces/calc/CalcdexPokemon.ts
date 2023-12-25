@@ -125,7 +125,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * * Derived from the transformed `Showdown.Pokemon` in the current Pokemon's `volatiles.transform[1]`.
    * * Separately tracked from `speciesForme` as this is primarily used to determine if the Pokemon has transformed.
-   * * This should be prioritized over `speciesForme` in `createSmogonPokemon()` so that the calculations are based off of the transformed Pokemon.
+   * * This should be prioritized over `speciesForme` in `createSmogonPokemon()` so that the calculations are based off
+   *   of the transformed Pokemon.
    *
    * @default null
    * @since 0.1.3
@@ -135,8 +136,12 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Current types of the Pokemon.
    *
-   * * Could change in certain instances, such as if the Pokemon has the *Protean* ability or
-   *   the Pokemon transformed into another Pokemon.
+   * * Could change in certain instances, such as if the Pokemon has the *Protean* ability or the Pokemon transformed
+   *   into another Pokemon.
+   * * As of v1.2.0 when the Gen 9 DLC 2 mechanics were introduced, the Stellar type, though defined in `TypeName`,
+   *   should not be present here or `dirtyTypes[]`.
+   *   - Stellar type can only be achieved through Terastallization, hence this type should only be present in
+   *     `teraType` & `dirtyTeraType`.
    *
    * @default
    * ```ts
@@ -158,9 +163,12 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyTypes?: Showdown.TypeName[];
 
   /**
-   * Terastallizing type that the terastallizable Pokemon can terastallizingly terastallize into during terastallization.
+   * Terastallizing type that the Terastallizable Pokemon can Terastallizingly Terastallize into during Terastallization.
    *
    * * As of v1.2.0, this is now functionally being used as `revealedTeraType`, which is now deprecated.
+   *   - Additionally, since the Gen 9 DLC 2 mechanics were implemented in the aforementioned version, any Pokemon can
+   *     have the new Stellar type as their `teraType` & `dirtyTeraType`.
+   *   - As mentioned in `types[]`, the Stellar type should not be present in `types[]` & `dirtyTypes[]`.
    * * Similar to all other dirty fields, this should only be populated if reported by the battle.
    *
    * @default null
@@ -534,6 +542,43 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.0.3
    */
   revealedMoves?: MoveName[];
+
+  /**
+   * Mapping of successfully hit moves while Terastallized to the Stellar type.
+   *
+   * * Introduced in the Gen 9 DLC 2 update, Stellar type Terastallizations use a unique STAB mechanic that only applies
+   *   to the first move used of that type.
+   *   - Stellar STAB will apply a 2x base power boost for moves matching the Pokemon's *original* types & 1.2x otherwise.
+   *   - For instance, the Stellar STAB is applied to *Aqua Jet*, a Water type move, on its first use.
+   *   - When *Hydro Pump*, another Water type move, is used, since *Aqua Jet* was the previously used Water type move,
+   *     it does **not** get the Stellar STAB (or any Water type move for the remainder of the battle).
+   * * Only exception is *Terapagos*, which will *always* get the Stellar STAB for every damaging move, regardless of
+   *   what moves were used prior.
+   *   - Technically speaking, this is for *Terapagos-Stellar*, which is the forme *Terapagos-Terastal* changes into
+   *     when Terastallizing to Stellar.
+   *   - (Also for completeness, *Terapagos* will immediately change into *Terapagos-Terastal* once it's active on the
+   *     field due to its *Tera Shift* ability.)
+   * * This is primarily used to populate the `isStellarFirstUse` property in `createSmogonMove()`.
+   *   - Could technically store boolean values instead, but just in case, we'll store the `MoveName`.
+   *   - In any case, you only need to check the truthiness of the type's value for the aforementioned property.
+   * * Should be populated during battle syncs by reading the `stepQueue[]`.
+   *   - Moves that successfully hit will begin with `|move|`, followed by, but not necessarily right after, `|-damage|`.
+   *   - Otherwise, moves that failed to hit may have `|-fail|`, `|-miss|`, `|-immune|`, etc., but no `|-damage|` step.
+   *
+   * @example
+   * ```ts
+   * {
+   *   Ground: 'Earthquake',
+   *   Stellar: 'Tera Blast',
+   * }
+   * ```
+   * @default
+   * ```ts
+   * {}
+   * ```
+   * @since 1.2.0
+   */
+  stellarMoveMap?: Partial<Record<Showdown.TypeName, MoveName>>;
 
   /**
    * Whether to show editing controls for overriding moves.

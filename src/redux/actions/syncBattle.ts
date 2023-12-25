@@ -25,6 +25,7 @@ import {
   detectPlayerKeyFromPokemon,
   detectPokemonDetails,
   detectToggledAbility,
+  mapStellarMoves,
   mergeRevealedMoves,
   parsePokemonDetails,
   sanitizePlayerSide,
@@ -49,7 +50,7 @@ import {
   flattenAlts,
   getPresetFormes,
   getTeamSheetPresets,
-  selectPokemonPresets,
+  // selectPokemonPresets,
 } from '@showdex/utils/presets';
 import { syncField } from './syncField';
 import { syncPokemon } from './syncPokemon';
@@ -232,12 +233,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     // determine if we should include Teambuilder presets
     // (should be already pre-converted in the teamdexSlice)
-    const teambuilderPresets = (
-      !!settings?.includeTeambuilder
-        && settings.includeTeambuilder !== 'never'
-        && !battleState.format.includes('random')
-        && rootState?.teamdex?.presets?.filter((p) => p?.gen === battleState.gen)
-    ) || [];
+    // const teambuilderPresets = (
+    //   !!settings?.includeTeambuilder
+    //     && settings.includeTeambuilder !== 'never'
+    //     && !battleState.format.includes('random')
+    //     && rootState?.teamdex?.presets?.filter((p) => p?.gen === battleState.gen)
+    // ) || [];
 
     // determine if we should look for team sheets
     const sheetStepQueues = (
@@ -411,13 +412,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       ) => {
         const clientSourced = 'getIdent' in pokemon;
 
-        // note: purposefully not passing in the `format` arg here to avoid base forme replacement
-        // (i.e., we want any formes to remain as-is for what we're doing here atm)
-        // const details = detectPokemonDetails(pokemon);
-
         // l.debug(
         //   'Ordering', pokemon.speciesForme, 'for player', playerKey,
-        //   '\n', 'details', '(detected)', details,
         //   '\n', 'isMyPokemonSide?', isMyPokemonSide, 'hasMyPokemon?', hasMyPokemon,
         //   '\n', clientSourced ? 'client' : 'server', pokemon.calcdexId, pokemon,
         //   '\n', 'battle', battleId, battle,
@@ -429,24 +425,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // the ServerPokemon for the myPokemon side rip lol
           pokemon.calcdexId = (
             isMyPokemonSide
-              // && !!pokemon.ident
               && !!pokemon.details // update (2023/07/27): might be guaranteed to exist actually :o
               && player.pokemon.find((p) => (
                 !!p?.calcdexId
-                  // && !!p.ident
                   && !!p.details
-                  // && p.ident === pokemon.ident
-                  // update (2023/07/30): `details` can include the gender, if applicable (e.g., 'Reuniclus, M')
-                  // && p.details === (pokemon.details || pokemon.speciesForme)
-                  // update (2023/10/08): `details` can also include the level, if not 100 (e.g., 'Zoroark, L84, M')
-                  // && (
-                  //   p.details === pokemon.details
-                  //     || p.details === [
-                  //       pokemon.speciesForme,
-                  //       pokemon.gender !== 'N' && pokemon.gender,
-                  //     ].filter(Boolean).join(', ')
-                  // )
-                  // && p.details === details
                   && similarPokemon(pokemon, p, {
                     format: battleState.format,
                     normalizeFormes: 'fucked',
@@ -467,26 +449,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         if (isMyPokemonSide && hasMyPokemon && !clientSourced) {
           const clientPokemon = player.pokemon
-            .find((p) => !p.calcdexId && (
-              /*
-              !!p.ident
-                && !!p.speciesForme
-                && !!p.details
-                && !!p.searchid
-                && p.ident === pokemon.ident
-              */
-              !!p.details
-            ) && (
-              /*
-              p.details === details
-                || p.searchid === pokemon.searchid
-                || p.speciesForme === pokemon.speciesForme
-                // || pokemon.searchid.includes(p.ident)
-                // update (2023/07/27): this speciesForme check breaks in the case where you have a 'Mewtwo',
-                // but we come across a 'Mew' to initialize, so it'll pass this check! (it shouldn't)
-                // || pokemon.speciesForme.includes(p.speciesForme.replace('-*', ''))
-                || pokemon.speciesForme.replace('-*', '') === p.speciesForme.replace('-*', '')
-              */
+            .find((p) => !p.calcdexId && !!p.details && (
               similarPokemon(pokemon, p, {
                 format: battleState.format,
                 normalizeFormes: 'fucked',
@@ -713,6 +676,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // attach Teambuilder presets for the specific Pokemon, if available
         // (this should only happen once per battle)
+        /*
         const shouldAddTeambuilder = !!teambuilderPresets.length
           && !syncedPokemon.presets.some((p) => ['storage', 'storage-box'].includes(p.source));
 
@@ -765,6 +729,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             syncedPokemon.presets.push(...matchedPresets);
           }
         }
+        */
 
         // if the Pokemon is transformed, see which one it's transformed as
         if (syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
@@ -964,6 +929,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         if (typeof syncedPokemon.dirtyStatus === 'string') {
           syncedPokemon.dirtyStatus = null;
+        }
+
+        // if revealed to have a Stellar teraType, update the stellarMoveMap for the Stellar STAB mechanic
+        if (syncedPokemon.teraType === 'Stellar') {
+          syncedPokemon.stellarMoveMap = mapStellarMoves(syncedPokemon, battle.stepQueue, battleState.format);
         }
 
         // l.debug(
