@@ -198,7 +198,9 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen: genFromFormat,
         base,
         suffixes,
-      } = parseBattleFormat(formatFromPayload);
+      } = parseBattleFormat(formatFromPayload, {
+        populateSuffixes: true,
+      });
 
       const gen = genFromFormat || genFromPayload;
 

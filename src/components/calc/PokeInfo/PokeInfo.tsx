@@ -102,26 +102,19 @@ export const PokeInfo = ({
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
   const itemName = pokemon?.dirtyItem ?? pokemon?.item;
 
-  const abilityOptions = React.useMemo(() => (legacy ? [] : buildAbilityOptions(
+  const abilityOptions = React.useMemo(() => buildAbilityOptions(
     format,
     pokemon,
     usage,
     settings?.showAllOptions,
-  )), [
-    legacy,
+  ), [
     format,
     pokemon,
     settings?.showAllOptions,
     usage,
   ]);
 
-  const showAbilityToggle = React.useMemo(() => toggleableAbility(
-    pokemon,
-    gameType,
-  ), [
-    gameType,
-    pokemon,
-  ]);
+  const showAbilityToggle = toggleableAbility(pokemon, gameType);
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = React.useMemo(() => (
@@ -142,17 +135,12 @@ export const PokeInfo = ({
     showAbilityToggle,
   ]);
 
-  const showResetAbility = React.useMemo(() => !!pokemon?.speciesForme && (
+  const showResetAbility = !!pokemon?.speciesForme && (
     pokemon.dirtyAbility
       && !pokemon.transformedForme
       && !!pokemon.ability
       && pokemon.ability !== pokemon.dirtyAbility
-  ), [
-    pokemon?.ability,
-    pokemon?.dirtyAbility,
-    pokemon?.speciesForme,
-    pokemon?.transformedForme,
-  ]);
+  );
 
   const appliedPreset = React.useMemo(() => (
     !!pokemon?.speciesForme
@@ -199,43 +187,33 @@ export const PokeInfo = ({
     usage,
   ]);
 
-  const showSpreadsToggle = React.useMemo(() => !!pokemon?.speciesForme && (
-    !!spreadOptions.length
-      && (spreadOptions.length > 1 || !currentSpread || spreadOptions[0].value !== currentSpread)
-  ), [
-    currentSpread,
-    pokemon?.speciesForme,
-    spreadOptions,
-  ]);
-
-  const showPresetSpreads = React.useMemo(
-    () => showSpreadsToggle && pokemon.showPresetSpreads,
-    [pokemon?.showPresetSpreads, showSpreadsToggle],
+  const showSpreadsToggle = (
+    !!pokemon?.speciesForme
+      && !!spreadOptions.length
+      && (
+        spreadOptions.length > 1
+          || !currentSpread
+          || spreadOptions[0].value !== currentSpread
+      )
   );
 
-  const itemOptions = React.useMemo(() => (gen === 1 ? [] : buildItemOptions(
+  const showPresetSpreads = showSpreadsToggle && pokemon.showPresetSpreads;
+
+  const itemOptions = React.useMemo(() => buildItemOptions(
     format,
     pokemon,
     usage,
-    // settings?.showAllOptions,
-    true, // fuck it w/e lol (instead of using settings.showAllOptions)
-  )), [
+  ), [
     format,
-    gen,
     pokemon,
-    // settings?.showAllOptions,
     usage,
   ]);
 
-  const showResetItem = React.useMemo(() => (
+  const showResetItem = (
     !!pokemon?.dirtyItem
       && (!!pokemon.item || !!pokemon.prevItem)
       && ((pokemon.item !== pokemon.dirtyItem) || !!pokemon.prevItem)
-  ), [
-    pokemon?.dirtyItem,
-    pokemon?.item,
-    pokemon?.prevItem,
-  ]);
+  );
 
   const {
     active: formesVisible,
@@ -280,7 +258,7 @@ export const PokeInfo = ({
 
   const formeDisabled = !pokemon?.altFormes?.length;
 
-  const showNonVolatileStatus = React.useMemo(() => (
+  const showNonVolatileStatus = (
     operatingMode === 'standalone'
       || !!pokemon?.speciesForme
   ) && (
@@ -288,14 +266,7 @@ export const PokeInfo = ({
       || !!pokemon?.dirtyStatus
       || !!pokemon.status
       || !pokemon.hp // 'fnt' pseudo-status
-  ), [
-    operatingMode,
-    pokemon?.dirtyStatus,
-    pokemon?.hp,
-    pokemon?.speciesForme,
-    pokemon?.status,
-    settings?.forceNonVolatile,
-  ]);
+  );
 
   const currentStatus = pokemon?.speciesForme && showNonVolatileStatus
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
@@ -305,10 +276,10 @@ export const PokeInfo = ({
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
 
   const presetOptions = React.useMemo(() => buildPresetOptions(
+    format,
+    pokemon,
     presets,
     usages,
-    pokemon,
-    format,
   ), [
     format,
     pokemon,
