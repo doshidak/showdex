@@ -2,9 +2,9 @@ import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
 // import { FormatLabels } from '@showdex/consts/dex';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { detectLegacyGen, getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
+import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import { getPresetFormes, sortPresetsByFormat } from '@showdex/utils/presets';
+import { detectCompletePreset, getPresetFormes, sortPresetsByFormat } from '@showdex/utils/presets';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -20,32 +20,24 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
  * @since 1.0.3
  */
 export const buildPresetOptions = (
+  format: string,
+  pokemon: CalcdexPokemon,
   presets: CalcdexPokemonPreset[],
   usages?: CalcdexPokemonPreset[],
-  pokemon?: CalcdexPokemon,
-  format?: string,
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
 
-  if (!presets?.length) {
+  if (!format || !pokemon?.speciesForme || !presets?.length) {
     return options;
   }
 
-  const currentForme = pokemon?.transformedForme || pokemon?.speciesForme;
+  const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
 
-  const presetsSource = format
-    ? [...presets].sort(sortPresetsByFormat(format))
-    : presets;
+  const presetsSource = [...presets].sort(sortPresetsByFormat(format));
 
   presetsSource.forEach((preset) => {
-    const validPreset = !!preset?.calcdexId
-      && !!preset.name
-      && !!preset.format
-      && !!preset.speciesForme
-      && (detectLegacyGen(preset.gen) || Object.values(preset.evs || {}).some((ev) => ev > 0));
-
-    if (!validPreset) {
+    if (!detectCompletePreset(preset)) {
       return;
     }
 
@@ -58,21 +50,19 @@ export const buildPresetOptions = (
     // 'Defensive (Physical Attacker)' -> { label: 'Defensive', subLabel: 'PHYSICAL ATTACKER' },
     // 'Metal Sound + Steelium Z' -> { label: 'Metal Sound', subLabel: '+ STEELIUM Z' },
     // 'The Pex' -> (regex fails) -> { label: 'The Pex' } (untouched lol)
-    if (SubLabelRegex.test(String(option.label))) {
-      // update (2022/10/18): added default `[]` here cause the regex is letting some invalid
-      // option.label through and I'm too lazy to find out what that is rn lol
-      const [
-        ,
-        label,
-        plusLabel,
-        subLabel,
-      ] = SubLabelRegex.exec(String(option.label)) || [];
+    const [
+      subLabelMatch,
+      extractedLabel,
+      plusLabel,
+      subLabel,
+    ] = SubLabelRegex.exec(String(option.label)) || [];
 
+    if (subLabelMatch) {
       // it'll be one or the other since the capture groups are alternatives in a non-capturing group
       const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;
 
-      if (label && actualSubLabel) {
-        option.label = label;
+      if (extractedLabel && actualSubLabel) {
+        option.label = extractedLabel;
         option.subLabel = actualSubLabel;
       }
     }
@@ -106,12 +96,10 @@ export const buildPresetOptions = (
     const group = options.find((o) => o.label === label);
 
     if (!group) {
-      options.push({
+      return void options.push({
         label,
         options: [option],
       });
-
-      return;
     }
 
     group.options.push(option);

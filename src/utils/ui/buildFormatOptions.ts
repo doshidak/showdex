@@ -44,12 +44,7 @@ export const buildFormatOptions = (
 
   if (!sections.length) {
     return genFormats.reduce((prev, format) => {
-      const {
-        base,
-        label,
-        // suffixes,
-      } = parseBattleFormat(format.id);
-
+      const { base, label } = parseBattleFormat(format.id);
       const value = getGenfulFormat(gen, base);
 
       if (prev.some((o) => o.value === value)) {
@@ -76,11 +71,7 @@ export const buildFormatOptions = (
         && sections.find((g) => g.label === format.section)
     ) || otherFormats;
 
-    const {
-      base,
-      label,
-    } = parseBattleFormat(format.id);
-
+    const { base, label } = parseBattleFormat(format.id);
     const value = getGenfulFormat(gen, base);
 
     if (group.options.some((o) => o.label === label || o.value === value)) {

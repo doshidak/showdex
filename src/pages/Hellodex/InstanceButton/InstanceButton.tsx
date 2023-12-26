@@ -41,9 +41,13 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   const {
     label,
     suffixes,
-  } = parseBattleFormat(
+  } = React.useMemo(() => parseBattleFormat(
     [format, ...(subFormats || [])].filter(Boolean).join(''),
-  );
+    { populateSuffixes: true },
+  ), [
+    format,
+    subFormats,
+  ]);
 
   const hasMorePlayers = (playerCount || 0) > 2;
 

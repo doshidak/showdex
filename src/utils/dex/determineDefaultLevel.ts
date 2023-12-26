@@ -17,7 +17,10 @@ import { getGenfulFormat } from './getGenfulFormat';
 export const determineDefaultLevel = (
   format: string,
 ): number => {
-  const { gen, base: formatBase } = parseBattleFormat(format);
+  const {
+    gen,
+    base: formatBase,
+  } = parseBattleFormat(format);
 
   if (!gen || !formatBase || !nonEmptyObject(BattleFormats)) {
     return null;

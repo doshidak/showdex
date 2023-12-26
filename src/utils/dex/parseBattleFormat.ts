@@ -77,11 +77,15 @@ export interface ShowdownParsedFormat {
  *     slight deviance of the naming convention lol.
  *   - ... *ahh yeees, my favorite function, "`formatFormat`"*
  *   - (un-ironically makes sense in this context actually LOL)
- * * Guaranteed to return an object with `null` primitives or empty arrays.
+ * * Guaranteed to return an object with `null` primitives.
+ *   - As of v1.2.0, as part of a performance optimization, `suffixes[]` is guaranteed to be an empty array only when
+ *     `config.populateSuffixes` is `true`, `null` otherwise.
  *
  * @example
  * ```ts
- * parseBattleFormat('gen9vgc2023regulationebo3');
+ * parseBattleFormat('gen9vgc2023regulationebo3', {
+ *   populateSuffixes: true,
+ * });
  *
  * {
  *   raw: 'gen9vgc2023regulationebo3',
@@ -99,6 +103,9 @@ export interface ShowdownParsedFormat {
  */
 export const parseBattleFormat = (
   format: string,
+  config?: {
+    populateSuffixes?: boolean;
+  },
 ): ShowdownParsedFormat => {
   const output: ShowdownParsedFormat = {
     raw: format,
@@ -106,11 +113,19 @@ export const parseBattleFormat = (
     format: null,
     base: null,
     label: null,
-    suffixes: [],
+    suffixes: null,
   };
 
   if (!output.gen) {
     return output;
+  }
+
+  const {
+    populateSuffixes,
+  } = config || {};
+
+  if (populateSuffixes) {
+    output.suffixes = [];
   }
 
   // e.g., 'gen9vgc2023regulationebo3' -> 'vgc2023regulationebo3'
@@ -130,18 +145,20 @@ export const parseBattleFormat = (
     regex,
     replacement,
   ]) => {
-    if (!regex.test(output.base)) {
+    // e.g., rawSuffix = 'regulatione'
+    const [rawSuffix] = regex.exec(output.base) || [];
+
+    if (!rawSuffix) {
       return;
     }
 
-    // e.g., rawSuffix = 'regulatione'
-    const [rawSuffix] = regex.exec(output.base);
-
     // e.g., ['regulatione', 'Reg E']
-    output.suffixes.push([
-      rawSuffix,
-      rawSuffix.replace(regex, replacement),
-    ]);
+    if (populateSuffixes) {
+      output.suffixes.push([
+        rawSuffix,
+        rawSuffix.replace(regex, replacement),
+      ]);
+    }
 
     // e.g., 'vgc2023regulationebo3' -> 'vgc2023bo3'
     output.base = output.base.replace(rawSuffix, '');
