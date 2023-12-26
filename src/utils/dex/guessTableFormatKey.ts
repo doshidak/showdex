@@ -13,7 +13,7 @@ const KnownFormats: [test: RegExp, replacement: string][] = [
   [/balancedhackmons/, 'bh'],
   [/bdsp.*(doubles)?/, 'gen8bdsp$1'],
   [/letsgo/, 'gen7letsgo'],
-  [/^gen(\d).+lc/, 'gen$1lc'],
+  [/^gen(\d).*lc/, 'gen$1lc'],
   [/^gen(\d).+doubles/, 'gen$1doubles'],
   [/^gen(\d)metronome/, 'gen$1metronome'],
   [/^gen(\d)nat(?:ional)?dex/, 'gen$1natdex'],

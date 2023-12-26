@@ -19,7 +19,7 @@ import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { detectLegacyGen, parseBattleFormat } from '@showdex/utils/dex';
+import { detectLegacyGen, determineDefaultLevel, parseBattleFormat } from '@showdex/utils/dex';
 import { useSelector } from './hooks';
 
 /**
@@ -161,7 +161,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
         format: formatFromPayload = null,
         gameType = 'Singles',
-        defaultLevel = 100,
+        defaultLevel,
         rules = {},
         turn = 0,
         active = false,
@@ -266,6 +266,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         sheetsNonce: null,
         sheets: [],
       };
+
+      if (!state[battleId].defaultLevel) {
+        state[battleId].defaultLevel = determineDefaultLevel(state[battleId].format);
+      }
 
       state[battleId].playerCount = countActivePlayers(state[battleId]);
 

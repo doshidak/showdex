@@ -40,11 +40,11 @@ import { env, nonEmptyObject, similarArrays } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   detectDoublesFormat,
+  determineDefaultLevel,
   getDexForFormat,
   getGenfulFormat,
   getGenlessFormat,
   hasMegaForme,
-  parseBattleFormat,
 } from '@showdex/utils/dex';
 import { detectCompletePreset } from '@showdex/utils/presets';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
@@ -161,15 +161,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     if (payload.format && payload.format !== state.format) {
       payload.gameType = detectDoublesFormat(payload.format) ? 'Doubles' : 'Singles';
-
-      const battleFormat = Object.values(BattleFormats).find((f) => {
-        const { base } = parseBattleFormat(f?.id);
-        const value = getGenfulFormat(state.gen, base);
-
-        return value === payload.format;
-      });
-
-      payload.defaultLevel = battleFormat?.teambuilderLevel || 100;
+      payload.defaultLevel = determineDefaultLevel(payload.format) || 100;
     }
 
     dispatch(calcdexSlice.actions.update({

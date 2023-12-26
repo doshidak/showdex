@@ -1,4 +1,4 @@
-import { getGenlessFormat } from './getGenlessFormat';
+import { parseBattleFormat } from './parseBattleFormat';
 
 /**
  * Known mappings of **genless** formats to `BattleTeambuilderTableFormatCode`'s.
@@ -62,10 +62,10 @@ export const guessTableFormatSlice = (
     return null;
   }
 
-  const genless = getGenlessFormat(format);
+  const { base } = parseBattleFormat(format);
 
   return (
     Object.entries(KnownMappings)
-      .find(([f]) => f.endsWith(genless))?.[1]
+      .find(([f]) => f === base)?.[1]
   ) || null;
 };

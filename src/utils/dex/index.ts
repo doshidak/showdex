@@ -3,6 +3,7 @@ export * from './detectDoublesFormat';
 export * from './detectGenFromFormat';
 export * from './detectLegacyGen';
 export * from './determineCriticalHit';
+export * from './determineDefaultLevel';
 export * from './determineMoveTargets';
 export * from './formatDexDescription';
 export * from './getDefaultSpreadValue';
