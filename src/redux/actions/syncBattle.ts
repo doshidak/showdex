@@ -747,8 +747,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             ident: targetClientPokemon.ident, // using this as a fallback
           };
 
-          // if the Pokemon is also serverSourced, we can apply some known info as revealed info of the target Pokemon
-          if (syncedPokemon.serverSourced && AllPlayerKeys.includes(targetPlayerKey)) {
+          // if the Pokemon is also server-sourced, we can apply some known info as revealed info of the target Pokemon
+          if (syncedPokemon.source === 'server' && AllPlayerKeys.includes(targetPlayerKey)) {
             l.debug(
               'Adding revealed info to', targetClientPokemon.speciesForme, 'of player', targetPlayerKey,
               'from transformed', syncedPokemon.speciesForme, 'of player', playerKey,
@@ -1092,7 +1092,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // note: this won't do anything if the Pokemon has no spreads available
           syncedPokemon.showPresetSpreads = settings?.showSpreadsFirst || false;
 
-          // set the initial showGenetics value from the settings if this is serverSourced
+          // set the initial showGenetics value from the settings if this is server-sourced
           const geneticsKey = playerKey === battleState.authPlayerKey ? 'auth' : playerKey;
           const showBaseStats = settings?.showBaseStats === 'always'
             || (settings?.showBaseStats === 'meta' && !legalLockedFormat(battleState.format));

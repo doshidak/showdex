@@ -49,7 +49,7 @@ export const sanitizePokemon = <
 
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: (pokemon as Partial<CalcdexPokemon>)?.calcdexId || null,
-    serverSourced: (pokemon as Partial<CalcdexPokemon>)?.serverSourced || false,
+    source: (pokemon as Partial<CalcdexPokemon>)?.source || null,
     playerKey: detectPlayerKeyFromPokemon(pokemon),
 
     slot: (pokemon as Partial<Showdown.Pokemon>)?.slot ?? null, // could be 0, so don't use logical OR here

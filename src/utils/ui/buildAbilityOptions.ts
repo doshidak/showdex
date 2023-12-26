@@ -2,11 +2,7 @@ import { type AbilityName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
-import {
-  detectGenFromFormat,
-  detectLegacyGen,
-  legalLockedFormat,
-} from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -43,7 +39,7 @@ export const buildAbilityOptions = (
   // const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
   const {
-    serverSourced,
+    source,
     baseAbility,
     ability,
     abilities,
@@ -84,7 +80,7 @@ export const buildAbilityOptions = (
   if (transformedForme) {
     const transformed = Array.from(new Set([
       // filter out "revealed" abilities with parentheses, like "(suppressed)"
-      serverSourced && !/^\([\w\s]+\)$/.test(ability) && ability,
+      source === 'server' && !/^\([\w\s]+\)$/.test(ability) && ability,
       ...transformedAbilities,
     ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 

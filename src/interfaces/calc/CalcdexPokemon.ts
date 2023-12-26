@@ -5,6 +5,16 @@ import { type CalcdexPlayerKey } from './CalcdexPlayerKey';
 import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from './CalcdexPokemonPreset';
 
+/**
+ * Where the `CalcdexPokemon` originally came from.
+ *
+ * @since 1.2.0
+ */
+export type CalcdexPokemonSource =
+  | 'client'
+  | 'server'
+  | 'user';
+
 export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Internal unqiue ID used by the extension.
@@ -19,21 +29,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   calcdexId?: string;
 
   /**
-   * Whether the Pokemon object originates from the client or server.
+   * Where the Pokemon object originates from.
    *
-   * * Used to determine whether the Pokemon's `hp` is a percentage or not.
-   *   - If it's a percentage (`false`), then we'll need to calculate it from the `maxhp`,
-   *     which may also need to be calculated.
-   * * `ServerPokemon` provides the actual values for `hp` and `maxhp`,
-   *   while (client) `Pokemon` only provides a value range of `[0, 100]`, both inclusive.
-   *   - Using the `ServerPokemon` allows for more accurate calculations,
-   *     so if it's available, we'll use it.
-   * * This is primarily used in the `createSmogonPokemon()` utility.
+   * * Prior to v1.2.0, this was called `serverSourced`, where `true` maps to `'server'` & `false` to `'client'`.
+   *   - In these cases (typical of `'battle'` mode Calcdexes), this value determines how certain values should be
+   *     treated, such as whether the `hp` & `maxhp` are potentially percentages.
+   * * `'user'`-sourced objects are typical of `'standalone'` mode Calcdexes (aka. Honkdexes introduced in v1.2.0),
+   *   signifying that much of the data were supplied by the user.
    *
-   * @default false
+   * @default null
    * @since 0.1.0
    */
-  serverSourced?: boolean;
+  source?: CalcdexPokemonSource;
 
   /**
    * Player key (or "side ID", as it's referred to in the client) that the Pokemon belongs to.

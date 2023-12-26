@@ -68,7 +68,7 @@ export const guessServerLegacySpread = (
     return null;
   }
 
-  if (__DEV__ && !pokemon.serverSourced) {
+  if (__DEV__ && pokemon.source !== 'server') {
     l.warn(
       'Attempting to guess the spread of non-server Pokemon', pokemon.ident || pokemon.speciesForme,
       '\n', 'format', format, 'gen', gen,

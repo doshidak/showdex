@@ -81,7 +81,7 @@ export const dehydratePlayerSide = (
  * `{pokemon}`, whose properties are deliminated by a comma (`','`), is in the following format:
  *
  * ```
- * {slot}/{serverSourced ? 's' : 'c'},
+ * {slot}/{source},
  * {name},
  * {speciesForme}>{transformedForme},
  * {gender},
@@ -210,7 +210,7 @@ export const dehydrateCalcdex = (
     for (const pokemon of playerPokemon) {
       const {
         slot = -1,
-        serverSourced,
+        source,
         name: pokemonName,
         speciesForme,
         transformedForme,
@@ -264,7 +264,7 @@ export const dehydrateCalcdex = (
       } = pokemon || {};
 
       const pokemonOutput: string[] = [
-        dehydrateArray([slot, serverSourced ? 's' : 'c']),
+        dehydrateArray([slot, source]),
         dehydrateValue(pokemonName),
         dehydrateArray([speciesForme, transformedForme], '>'),
         dehydrateValue(gender),

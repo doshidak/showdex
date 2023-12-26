@@ -47,7 +47,7 @@ export const buildMoveOptions = (
   const item = pokemon.dirtyItem ?? pokemon.item;
 
   const {
-    serverSourced,
+    source,
     speciesForme,
     transformedForme,
     moves,
@@ -121,7 +121,7 @@ export const buildMoveOptions = (
     filterMoves.push(...sortedMoves);
   }
 
-  if (serverSourced && serverMoves?.length) {
+  if (source === 'server' && serverMoves?.length) {
     const filteredServerMoves = serverMoves
       .filter((n) => !!n && !filterMoves.includes(n))
       .sort(usageSorter);
@@ -171,9 +171,6 @@ export const buildMoveOptions = (
 
     filterMoves.push(...filteredRevealedMoves);
   }
-
-  // const hasUsageStats = !!altMoves?.length && altMoves
-  //   .some((a) => Array.isArray(a) && typeof a[1] === 'number');
 
   const hasUsageStats = !!usageAltSource?.length;
 

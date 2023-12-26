@@ -144,7 +144,7 @@ export const useCalcdexPresets = (
         let preset: CalcdexPokemonPreset;
         let [usage] = pokemonUsages;
 
-        if (pokemon.serverSourced && nonEmptyObject(pokemon.serverStats)) {
+        if (pokemon.source === 'server' && nonEmptyObject(pokemon.serverStats)) {
           // was gunna use this elsewhere, so I separated it from the map() below, but never ended up needing it lol
           // (in other words, too lazy to move this back into the map() below)
           const mergeMatches = (
@@ -384,7 +384,7 @@ export const useCalcdexPresets = (
         /**
          * @todo update when more than 4 moves are supported
          */
-        if (!pokemon.serverSourced && pokemon.revealedMoves.length === 4) {
+        if (pokemon.source !== 'server' && pokemon.revealedMoves.length === 4) {
           delete presetPayload.moves;
         }
 
@@ -449,7 +449,7 @@ export const useCalcdexPresets = (
 
       const party = cloneAllPokemon(player.pokemon);
       const nonServerIndices = party
-        .map((p, i) => (p.serverSourced ? null : i))
+        .map((p, i) => (p.source === 'server' ? null : i))
         .filter((v) => typeof v === 'number');
 
       if (!nonServerIndices.length) {

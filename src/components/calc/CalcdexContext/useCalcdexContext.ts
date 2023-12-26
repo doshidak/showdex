@@ -320,7 +320,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
         // checking payload.ability so as to not overwrite what's actually revealed in battle
         // note: checking `ability` first instead of the usual `dirtyAbility` here;
-        // specifically for Mega formes & serverSourced Pokemon, we'll need to update its ability when it Mega evo's
+        // specifically for Mega formes & server-sourced Pokemon, we'll need to update its ability when it Mega evo's
         if (!abilities.includes(mutated.ability || mutated.dirtyAbility)) {
           [mutated.dirtyAbility] = abilities;
         }
@@ -386,7 +386,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
 
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
-      if (!mutated.serverSourced && mutated.presetId) {
+      if (mutated.source !== 'server' && mutated.presetId) {
         const dex = getDexForFormat(state.format);
         const baseForme = dex.species.get(mutated.speciesForme)?.baseSpecies;
 

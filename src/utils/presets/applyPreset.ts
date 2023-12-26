@@ -355,7 +355,7 @@ export const applyPreset = (
   }
 
   // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
-  if (!pokemon.serverSourced && !pokemon.showGenetics) {
+  if (pokemon.source !== 'server' && !pokemon.showGenetics) {
     output.showGenetics = true;
   }
 

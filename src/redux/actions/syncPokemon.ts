@@ -58,6 +58,11 @@ export const syncPokemon = (
   // final synced Pokemon that will be returned at the end
   const syncedPokemon = clonePokemon(pokemon);
 
+  // if server-sourced, will be updated below
+  if (!syncedPokemon.source && clientPokemon?.speciesForme) {
+    syncedPokemon.source = 'client';
+  }
+
   // you should not be looping through any special CalcdexPokemon-specific properties here!
   ([
     'name',
@@ -131,7 +136,7 @@ export const syncPokemon = (
           }
         }
 
-        const shouldClearPreset = (!syncedPokemon.serverSourced && !serverPokemon?.speciesForme)
+        const shouldClearPreset = (syncedPokemon.source !== 'server' && !serverPokemon?.speciesForme)
           && (!hasMegaForme(syncedPokemon.speciesForme) || hasMegaForme(value));
 
         if (shouldClearPreset) {
@@ -304,7 +309,7 @@ export const syncPokemon = (
 
         value = moveTrack;
 
-        if (syncedPokemon.serverSourced) {
+        if (syncedPokemon.source === 'server') {
           break;
         }
 
@@ -342,7 +347,7 @@ export const syncPokemon = (
         const resetTypes = (
           'typechange' in syncedPokemon.volatiles
             && !changedTypes.length
-            && dex.species.get(syncedPokemon.speciesForme)?.types as Showdown.TypeName[]
+            && dex.species.get(syncedPokemon.speciesForme)?.types
         ) || [];
 
         if (resetTypes?.length) {
@@ -468,6 +473,8 @@ export const syncPokemon = (
 
   // fill in some additional fields if the serverPokemon was provided
   if (serverPokemon?.ident) {
+    syncedPokemon.source = 'server';
+
     // should always be the case, idk why it shouldn't be (but you know we gotta check)
     if (typeof serverPokemon.hp === 'number' && typeof serverPokemon.maxhp === 'number') {
       syncedPokemon.hp = serverPokemon.hp;
@@ -477,10 +484,6 @@ export const syncPokemon = (
       if (serverPokemon.hp || serverPokemon.maxhp !== 100) {
         syncedPokemon.maxhp = serverPokemon.maxhp;
       }
-
-      // serverSourced is used primarily as a flag to distinguish `hp` as the actual value or as a percentage
-      // (but since this conditional should always succeed in theory, should be ok to use to distinguish other properties)
-      syncedPokemon.serverSourced = true;
     }
 
     // check if the Tera type has been revealed
@@ -610,14 +613,14 @@ export const syncPokemon = (
   ) || null;
 
   // clear the list of transformed moves if the Pokemon is no longer transformed
-  // (this one applies to both client [i.e., non-serverSourced] & [redundantly] serverSourced syncedPokemon)
+  // (this one applies to both client [i.e., non-server-sourced] & [redundantly] server-sourced syncedPokemon)
   if (!transformedForme) {
     syncedPokemon.transformedMoves = [];
   }
 
   // if the Pokemon is transformed, auto-set the moves
   if (syncedPokemon.transformedMoves?.length) {
-    syncedPokemon.moves = syncedPokemon.serverSourced
+    syncedPokemon.moves = syncedPokemon.source === 'server'
       ? [...syncedPokemon.transformedMoves]
       : mergeRevealedMoves(syncedPokemon);
   }
