@@ -2,15 +2,11 @@ import { type GenerationNum } from '@smogon/calc';
 import { type Duration, add, compareAsc } from 'date-fns';
 import LzString from 'lz-string';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
-import {
-  clearStoredItem,
-  env,
-  getStoredItem,
-  nonEmptyObject,
-} from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { fileSize } from '@showdex/utils/humanize';
 import { hydrateHeader, hydratePresets } from '@showdex/utils/hydro';
+import { purgeLocalStorageItem, readLocalStorageItem } from '@showdex/utils/storage';
 
 const l = logger('@showdex/utils/presets/getCachedPresets()');
 
@@ -26,7 +22,8 @@ const l = logger('@showdex/utils/presets/getCachedPresets()');
  *   - See notes in `hydratePresets()` for additional information.
  * * Cached presets are compressed via `lz-string` due to `LocalStorage` limitations.
  *   - See notes in `cachePresets()` for additional information.
- * * `LocalStorage` key is configurable via the `STORAGE_PRESET_CACHE_KEY` env.
+ * * `LocalStorage` key is configurable via the `LOCAL_STORAGE_DEPRECATED_PRESET_CACHE_KEY` env.
+ *   - As of v1.2.0, as the name implies, `LocalStorage` is the deprecated storage solution.
  *
  * @since 1.1.6
  */
@@ -38,7 +35,7 @@ export const getCachedPresets = (
   presets?: CalcdexPokemonPreset[],
   stale?: boolean,
 ] => {
-  const cache = getStoredItem('storage-preset-cache-key');
+  const cache = readLocalStorageItem('local-storage-deprecated-preset-cache-key');
 
   if (!cache) {
     return [];
@@ -89,7 +86,7 @@ export const getCachedPresets = (
       '\n', 'build', '(prev)', header.buildTimestamp, '(now)', env('build-date'),
     );
 
-    clearStoredItem('storage-preset-cache-key');
+    purgeLocalStorageItem('storage-preset-cache-key');
   }
 
   const stale = buildChanged

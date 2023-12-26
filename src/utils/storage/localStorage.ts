@@ -1,4 +1,6 @@
-import { env } from './getEnv';
+import { env } from '@showdex/utils/core';
+
+/* eslint-disable @typescript-eslint/indent */
 
 /**
  * Retrieves the stored item with the specified `envKey` in `LocalStorage`.
@@ -9,7 +11,11 @@ import { env } from './getEnv';
  *
  * @since 1.0.3
  */
-export const getStoredItem = <T extends string>(envKey: string): T => {
+export const readLocalStorageItem = <
+  T extends string,
+>(
+  envKey: string,
+): T => {
   if (typeof localStorage === 'undefined') {
     return null;
   }
@@ -23,6 +29,8 @@ export const getStoredItem = <T extends string>(envKey: string): T => {
   return localStorage.getItem(key) as T || null;
 };
 
+/* eslint-enable @typescript-eslint/indent */
+
 /**
  * Sets the stored item with the specified `envKey` to `value` in `LocalStorage`.
  *
@@ -30,7 +38,10 @@ export const getStoredItem = <T extends string>(envKey: string): T => {
  *
  * @since 1.0.3
  */
-export const setStoredItem = (envKey: string, value: string): void => {
+export const writeLocalStorageItem = (
+  envKey: string,
+  value: string,
+): void => {
   if (typeof localStorage === 'undefined') {
     return;
   }
@@ -52,7 +63,9 @@ export const setStoredItem = (envKey: string, value: string): void => {
  *
  * @since 1.0.3
  */
-export const clearStoredItem = (envKey: string): void => {
+export const purgeLocalStorageItem = (
+  envKey: string,
+): void => {
   if (typeof localStorage === 'undefined') {
     return;
   }
@@ -63,5 +76,5 @@ export const clearStoredItem = (envKey: string): void => {
     return;
   }
 
-  localStorage.removeItem(key);
+  setTimeout(() => localStorage.removeItem(key), 0);
 };

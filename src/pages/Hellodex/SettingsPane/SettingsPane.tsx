@@ -20,16 +20,15 @@ import {
   useUpdateSettings,
 } from '@showdex/redux/store';
 import {
-  clearStoredItem,
   env,
   getResourceUrl,
-  getStoredItem,
   nonEmptyObject,
   readClipboardText,
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateSettings, hydrateSettings, possiblyDehydrated } from '@showdex/utils/hydro';
+import { purgeLocalStorageItem, readLocalStorageItem } from '@showdex/utils/storage';
 import { CalcdexSettingsPane } from './CalcdexSettingsPane';
 import { HellodexSettingsPane } from './HellodexSettingsPane';
 import { ShowdexSettingsPane } from './ShowdexSettingsPane';
@@ -44,7 +43,7 @@ export interface SettingsPaneProps {
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
 
-const getPresetCacheSize = () => (getStoredItem('storage-preset-cache-key')?.length ?? 0) * 2;
+const getPresetCacheSize = () => (readLocalStorageItem('local-storage-deprecated-preset-cache-key')?.length ?? 0) * 2;
 
 /**
  * Showdex settings UI.
@@ -281,7 +280,7 @@ export const SettingsPane = ({
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
     if (presetCacheSize && calcdex?.maxPresetAge === 0) {
-      clearStoredItem('storage-preset-cache-key');
+      purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
       updatePresetCacheSize();
     }
 
