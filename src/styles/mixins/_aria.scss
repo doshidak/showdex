@@ -1,0 +1,89 @@
+////
+/// @group aria
+/// @access public
+/// @author Keith Choison <keith@tize.io>
+////
+
+@use 'sass:math';
+@use 'config/colors';
+@use 'functions/color';
+@use 'position';
+@use 'transition';
+
+///
+/// Includes styling for a pseudo-element that displays an outline primarily for accessibility purposes.
+/// Requires at least one unusued pseudo-element (i.e, `::before` or `::after`) in the element this mixin is applied to.
+///
+/// @param {string} $position [relative] - Position of the outline. Specifying `null` will output no `position` property.
+/// @param {string} $pseudo [after] - Pseudo-element to use for displaying the outline. Can be `before` or `after`.
+/// @param {number} $offset [0] - Spacing between the container and the outline. Works just like the CSS `outline-offset` property.
+/// @param {number} $width [2px] - Width (thickness) of the outline. Works just like the CSS `outline-width` and `border-width` properties.
+/// @param {string} $style [solid] - Line style of the outline. Works just like the CSS `outline-style` and `border-style` properties.
+/// @param {string} $color [colors.$blue] - Color of the outline. Works just like the CSS `outline-color` and `border-color` properties.
+/// @param {number} $radius - Optional border radius of the outline. Works just like the CSS `border-radius` property.
+/// @param {number} $opacity [0] - Initial opacity of the outline. Set to `null` to not use opacity as the transition property (`border-color` will be used instead).
+/// @param {number} $z-index - Optional z-index value of the pseudo-element.
+///
+@mixin outline(
+  $position: relative,
+  $pseudo: after,
+  $offset: 4px,
+  $width: 2px,
+  $style: solid,
+  $color: colors.$blue,
+  $radius: null,
+  $opacity: 0,
+  $z-index: null,
+) {
+  @if $position {
+    position: $position;
+  }
+
+  outline: none;
+
+  &::#{$pseudo} {
+    content: '';
+    @include position.absolute($all: -$offset);
+    border: $width $style $color;
+    opacity: $opacity;
+    @include transition.apply(border-color, opacity);
+    pointer-events: none;
+
+    @if $radius {
+      @if math.abs($offset) > 0 {
+        $radius: $radius + math.abs($offset);
+      }
+
+      border-radius: $radius;
+    }
+
+    @if $z-index {
+      z-index: $z-index;
+    }
+
+    @content;
+  }
+}
+
+@mixin outline-hover(
+  $color: colors.$black,
+  $opacity: 0.08,
+) {
+  border-color: $color;
+  opacity: $opacity;
+
+  @content;
+}
+
+@mixin outline-show(
+  $color: colors.$blue,
+  $opacity: 0.88,
+  $duration: 256ms,
+  $timing: ease-out,
+) {
+  border-color: $color;
+  opacity: $opacity;
+  transform: scale(1);
+
+  @content;
+}

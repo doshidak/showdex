@@ -2,6 +2,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/aria';
 @use 'mixins/flex';
 @use 'mixins/font';
 @use 'mixins/media';
@@ -145,21 +146,33 @@
 .instancesContent {
   position: relative;
   width: 100%;
-  height: 30vh;
-  @include spacing.margin($y: 25px);
-  border-radius: 15px;
+  height: 32vh;
+  @include spacing.margin($y: 24px);
+  border-radius: 16px;
   overflow: hidden;
   @include transition.apply(height, background-color, box-shadow);
 
+  @include media.for-min-height(1000px) {
+    height: 48vh;
+  }
+
   &.hiddenDonation {
-    height: 50vh;
+    height: 52vh;
+
+    @include media.for-min-height(1000px) {
+      height: 58vh;
+    }
+
+    @include media.for-min-height(1200px) {
+      height: 62vh;
+    }
 
     @include media.for-max-height(850px) {
-      height: 43vh;
+      height: 42vh;
     }
 
     @include media.for-max-height(750px) {
-      height: 35vh;
+      height: 36vh;
     }
   }
 
@@ -210,6 +223,7 @@
 
 div.newHonkButton {
   border-radius: 12px;
+  @include aria.outline($radius: 12px);
 
   &::before {
     border-radius: 12px;
@@ -276,10 +290,10 @@ div.newHonkButton {
       opacity: 0.32;
     }
   }
+}
 
-  .honkButton {
-    @include spacing.margin($top: 4px, $x: auto);
-  }
+.honkButton {
+  @include spacing.margin($top: 4px, $x: auto);
 }
 
 button.spectateButton {
