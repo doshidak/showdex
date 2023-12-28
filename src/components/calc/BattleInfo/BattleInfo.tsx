@@ -156,7 +156,13 @@ export const BattleInfo = ({
               !saving?.[0] && styles.saved,
             )}
           >
-            {saving?.[0] ? 'saving...' : `saved ${formatDistanceToNow(cached, { addSuffix: true })}`}
+            {(
+              saving?.[0]
+                ? 'saving...'
+                : Date.now() - cached < (30 * 1000)
+                  ? 'saved just now'
+                  : `saved ${formatDistanceToNow(cached, { addSuffix: true })?.replace('about ', '')}`
+            ).trim()}
           </div>
         }
       </div>

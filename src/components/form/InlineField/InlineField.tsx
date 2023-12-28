@@ -83,11 +83,12 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
     'enter',
     'shift+enter',
   ].join(', '), (e, handler) => {
-    e?.preventDefault?.();
-
-    if (!containerRef.current || !'esc, enter'.includes(handler?.key)) {
+    if (!containerRef.current) {
       return;
     }
+
+    e?.preventDefault?.();
+    e?.stopImmediatePropagation?.();
 
     switch (handler.key) {
       // revert to the initial value
@@ -104,7 +105,9 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
         //   return; // also prevents the field from blurring
         // }
 
-        initialValue.current = input?.value ?? containerRef.current.innerText;
+        // initialValue.current = input?.value ?? containerRef.current.innerText;
+        initialValue.current = containerRef.current.innerText;
+        input?.onChange(initialValue.current);
 
         break;
       }
@@ -116,15 +119,14 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
 
     containerRef.current.blur();
   }, {
-    enabled: !disabled && meta?.active,
+    enabled: !disabled && active,
     enableOnContentEditable: true,
   }, [
-    containerRef,
+    active,
     disabled,
     // hasError,
     initialValue,
     input,
-    meta,
   ]);
 
   React.useEffect(() => {

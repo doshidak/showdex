@@ -6,3 +6,4 @@ export * from './getCalcdexRoomId';
 export * from './getHonkdexRoomId';
 export * from './openCalcdexInstance';
 export * from './openHonkdexInstance';
+export * from './removeHonkdexInstances';

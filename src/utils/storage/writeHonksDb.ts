@@ -26,8 +26,15 @@ export const writeHonksDb = (
   const endTimer = runtimer(l.scope, l);
   const db = config?.db || showdexedDb.value;
 
-  if (!nonEmptyObject(state) || state.operatingMode !== 'standalone' || typeof db?.transaction !== 'function') {
+  if (!nonEmptyObject(state) || !state.battleId || typeof db?.transaction !== 'function') {
     endTimer('(bad args)');
+    resolve(null);
+
+    return;
+  }
+
+  if (!state.name || state.operatingMode !== 'standalone') {
+    endTimer('(bad state)');
     resolve(null);
 
     return;
@@ -36,10 +43,16 @@ export const writeHonksDb = (
   const txn = db.transaction(honksName, 'readwrite');
   const store = txn.objectStore(honksName);
   const cached = Date.now();
-  const req = store.put({ ...state, cached });
 
-  req.onsuccess = () => {
-    endTimer('(done)');
+  store.put({ ...state, cached });
+
+  txn.oncomplete = () => {
+    endTimer(
+      '(done)',
+      '\n', 'battleId', state.battleId,
+      '\n', 'cached', cached,
+    );
+
     resolve(cached);
   };
 });

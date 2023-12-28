@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { SandwichProvider } from '@showdex/components/layout';
 import { type RootStore } from '@showdex/redux/store';
-import { openCalcdexInstance, openHonkdexInstance } from '@showdex/utils/app';
+import { openCalcdexInstance, openHonkdexInstance, removeHonkdexInstances } from '@showdex/utils/app';
 import { CalcdexRenderer } from '../Calcdex';
 import { HonkdexRenderer } from '../Honkdex';
 import { Hellodex } from './Hellodex';
@@ -31,6 +31,10 @@ export const HellodexRenderer = (
           store,
           HonkdexRenderer,
           instanceId,
+        )}
+        removeHonkdexInstances={(...instanceIds) => removeHonkdexInstances(
+          store,
+          instanceIds,
         )}
       />
     </SandwichProvider>

@@ -60,7 +60,7 @@ export interface SyncBattlePayload {
   request?: Showdown.BattleRequest;
 }
 
-export const SyncBattleActionType = 'calcdex:sync';
+export const SyncBattleActionType = 'calcdex:sync' as const;
 
 const l = logger('@showdex/redux/actions/syncBattle()');
 
@@ -71,7 +71,6 @@ const l = logger('@showdex/redux/actions/syncBattle()');
  */
 export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload>(
   SyncBattleActionType,
-
   (payload, api) => {
     const {
       battle,

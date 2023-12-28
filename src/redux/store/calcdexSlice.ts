@@ -14,7 +14,12 @@ import {
   type CalcdexPokemon,
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
-import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
+import {
+  saveHonkdex,
+  SaveHonkdexActionType,
+  syncBattle,
+  SyncBattleActionType,
+} from '@showdex/redux/actions';
 import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env, nonEmptyObject } from '@showdex/utils/core';
@@ -131,7 +136,7 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    */
   destroy: (
     state: Draft<CalcdexSliceState>,
-    action: PayloadAction<string>,
+    action: PayloadAction<string | string[]>,
   ) => void;
 
   /**
@@ -242,7 +247,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         opponentKey,
         switchPlayers,
 
-        ...AllPlayerKeys.reduce<Record<CalcdexPlayerKey, CalcdexPlayer>>((prev, currentPlayerKey) => {
+        ...AllPlayerKeys.reduce<Record<CalcdexPlayerKey, CalcdexPlayer>>((
+          prev,
+          currentPlayerKey,
+        ) => {
           prev[currentPlayerKey] = {
             // all of these can technically be overridden in payload[currentPlayerKey]
             sideid: currentPlayerKey,
@@ -578,6 +586,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       //   '\n', 'state', __DEV__ && current(state),
       // );
 
+      /*
       if (!action.payload || !(action.payload in state)) {
         if (__DEV__) {
           l.warn(
@@ -590,8 +599,21 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         return;
       }
+      */
 
-      delete state[action.payload];
+      const battleIds = [...(Array.isArray(action.payload) ? action.payload : [action.payload])].filter(Boolean);
+
+      if (!battleIds.length) {
+        return;
+      }
+
+      battleIds.forEach((id) => {
+        if (!(id in state)) {
+          return;
+        }
+
+        delete state[id];
+      });
 
       l.debug(
         'DONE', action.type,
@@ -626,17 +648,38 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
   extraReducers: (build) => void build
     .addCase(syncBattle.fulfilled, (state, action) => {
-      const { battleId } = action.payload;
+      const { battleId } = action.payload || {};
 
-      if (battleId) {
-        state[battleId] = action.payload;
+      if (!battleId) {
+        return;
       }
 
+      state[battleId] = action.payload;
+
       l.debug(
-        'DONE', SyncBattleActionType, 'from', '@showdex/redux/actions/syncBattle',
-        '\n', 'battleId', battleId || '???',
+        'DONE', SyncBattleActionType, 'from', '@showdex/redux/actions/syncBattle()',
+        '\n', 'battleId', battleId,
         '\n', 'payload', action.payload,
-        '\n', 'battleState', __DEV__ && current(state)[battleId],
+        '\n', 'state', __DEV__ && current(state)[battleId],
+      );
+    })
+    .addCase(saveHonkdex.fulfilled, (state, action) => {
+      const {
+        battleId,
+        cached,
+      } = action.payload || {};
+
+      if (!battleId || !cached) {
+        return;
+      }
+
+      state[battleId].cached = cached;
+
+      l.debug(
+        'DONE', SaveHonkdexActionType, 'from', '@showdex/redux/actions/saveHonkdex()',
+        '\n', 'battleId', battleId,
+        '\n', 'payload', action.payload,
+        '\n', 'state', __DEV__ && current(state)[battleId],
       );
     }),
 });

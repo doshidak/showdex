@@ -6,6 +6,7 @@ export * from './createSettingsDb';
 export * from './localStorage';
 export * from './migrateSettingsDb';
 export * from './openIndexedDb';
+export * from './purgeHonksDb';
 export * from './readHonksDb';
 export * from './readPresetsDb';
 export * from './readSettingsDb';

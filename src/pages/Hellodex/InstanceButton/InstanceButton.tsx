@@ -13,6 +13,7 @@ import styles from './InstanceButton.module.scss';
 export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
   instance: CalcdexBattleState;
   authName?: string;
+  onRequestRemove?: () => void;
 }
 
 export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
@@ -22,6 +23,8 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   hoverScale = 1,
   activeScale = 0.98,
   disabled,
+  onPress,
+  onRequestRemove,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
@@ -36,6 +39,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     playerCount,
     p1: player,
     p2: opponent,
+    cached,
   } = instance || {};
 
   const {
@@ -68,6 +72,27 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   const opponentLabelColor = opponentTitle?.color?.[colorScheme];
   const opponentIconColor = opponentTitle?.iconColor?.[colorScheme];
 
+  const [removalQueued, setRemovalQueued] = React.useState(false);
+  const removalRequestTimeout = React.useRef<NodeJS.Timeout>(null);
+
+  const queueRemovalRequest = () => {
+    if (typeof onRequestRemove !== 'function') {
+      return;
+    }
+
+    if (removalQueued) {
+      if (removalRequestTimeout.current) {
+        clearTimeout(removalRequestTimeout.current);
+        removalRequestTimeout.current = null;
+      }
+
+      return void setRemovalQueued(false);
+    }
+
+    removalRequestTimeout.current = setTimeout(onRequestRemove, 5000);
+    setRemovalQueued(true);
+  };
+
   return (
     <BaseButton
       ref={forwardedRef}
@@ -76,19 +101,22 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
         styles.container,
         !!colorScheme && styles[colorScheme],
         active && styles.active,
+        (!!name && !!cached) && styles.saved,
+        removalQueued && styles.removing,
         className,
       )}
       display="block"
       hoverScale={hoverScale}
       activeScale={activeScale}
+      onPress={removalQueued ? queueRemovalRequest : onPress}
     >
       {operatingMode === 'standalone' ? (
-        <div className={styles.standaloneIcon}>
+        <div className={cx(styles.icon, styles.standaloneIcon)}>
           <i className="fa fa-car" />
         </div>
       ) : (
         <Svg
-          className={styles.battleIcon}
+          className={cx(styles.icon, styles.battleIcon)}
           description="Sword Icon"
           src={getResourceUrl('sword.svg')}
         />
@@ -109,12 +137,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
         </div>
 
         {operatingMode === 'standalone' ? (
-          <div
-            className={cx(
-              styles.honkName,
-              !!name && styles.saved,
-            )}
-          >
+          <div className={styles.honkName}>
             {name || 'untitled honk'}
           </div>
         ) : (
@@ -179,6 +202,27 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
           </div>
         )}
       </div>
+
+      {
+        operatingMode === 'standalone' &&
+        <BaseButton
+          className={styles.removeButton}
+          aria-label="Permanently Delete Honkdex"
+          hoverScale={1}
+          activeScale={0.98}
+          disabled={typeof onRequestRemove !== 'function'}
+          onPress={queueRemovalRequest}
+        >
+          <i className="fa fa-times-circle" />
+        </BaseButton>
+      }
+
+      {
+        (operatingMode === 'standalone' && removalQueued) &&
+        <div className={styles.undoOverlay}>
+          Undo?
+        </div>
+      }
     </BaseButton>
   );
 });

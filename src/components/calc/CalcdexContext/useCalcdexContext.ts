@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useDebouncyFn } from 'use-debouncy';
 import { NIL as NIL_UUID } from 'uuid';
 import { type ItemName, type MoveName } from '@smogon/calc';
 import {
@@ -16,9 +15,9 @@ import {
   type CalcdexPlayerKey,
   type CalcdexPlayerSide,
   type CalcdexPokemon,
-  type CalcdexPokemonPreset,
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
+import { saveHonkdex } from '@showdex/redux/actions';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {
   cloneAllPokemon,
@@ -44,11 +43,8 @@ import {
   determineDefaultLevel,
   getDexForFormat,
   getGenfulFormat,
-  getGenlessFormat,
   hasMegaForme,
 } from '@showdex/utils/dex';
-import { detectCompletePreset } from '@showdex/utils/presets';
-import { writeHonksDb } from '@showdex/utils/storage';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -134,30 +130,30 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   const ctx = React.useContext(CalcdexContext);
   const dispatch = useDispatch();
 
-  const {
-    state,
-    saving,
-  } = ctx;
+  const { state, saving } = ctx;
+  const saveRequestTimeout = React.useRef<NodeJS.Timeout>(null);
 
-  const saveHonk = useDebouncyFn(() => void (async () => {
-    const cached = await writeHonksDb(state);
+  const saveHonk = () => void (async () => {
+    l.debug('saving honk', state.battleId);
 
-    dispatch(calcdexSlice.actions.update({
-      scope: `${l.scope}:saveHonk()`,
+    await dispatch(saveHonkdex({
       battleId: state.battleId,
-      cached,
     }));
 
     saving[1](false);
-  })(), 3000);
+    saveRequestTimeout.current = null;
+  })();
 
   const queueHonkSave = () => {
-    if (saving[0]) {
-      return;
+    if (saveRequestTimeout.current) {
+      clearTimeout(saveRequestTimeout.current);
     }
 
-    saving[1](true);
-    saveHonk();
+    if (!saving[0]) {
+      saving[1](true);
+    }
+
+    saveRequestTimeout.current = setTimeout(saveHonk, 3000);
   };
 
   const updateBattle: CalcdexContextConsumables['updateBattle'] = (
@@ -190,14 +186,18 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       payload.defaultLevel = determineDefaultLevel(payload.format) || 100;
     }
 
+    const shouldSaveHonk = state.operatingMode === 'standalone'
+      && !!(state.name || payload.name)
+      && AllPlayerKeys.some((k) => !!state[k]?.pokemon?.length);
+
+    if (shouldSaveHonk) {
+      queueHonkSave();
+    }
+
     dispatch(calcdexSlice.actions.update({
       scope,
       ...payload,
     }));
-
-    if (state.operatingMode === 'standalone' && state.name) {
-      queueHonkSave();
-    }
 
     endTimer('(dispatched)');
   };
@@ -229,6 +229,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     const newPokemon = sanitizePokemon({
       ...pokemon,
+
+      playerKey,
+      source: 'user',
       level: pokemon?.level || state.defaultLevel,
       hp: 100, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
       maxhp: 100,
@@ -242,7 +245,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     });
 
     newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
-    newPokemon.source = 'user';
     newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
 
     payload.selectionIndex = payload.pokemon.push(newPokemon) - 1;
@@ -625,6 +627,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // doesn't clear the changes when another Pokemon is added (auto-preset runs on each pokemon[] mutation)
     // (note: also checking if the manualPreset was previously applied in case it's no longer "complete")
     if (mutating('speciesForme') ? mutated.presetId === NIL_UUID : !mutated.presetId) {
+      /*
       // create a pseudo-preset based on the user's current inputs to feed into detectCompletePreset()
       const manualPreset: CalcdexPokemonPreset = {
         calcdexId: NIL_UUID,
@@ -650,6 +653,22 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
       mutated.presetId = manuallyComplete ? manualPreset.calcdexId : null;
       mutated.presetSource = manuallyComplete ? manualPreset.source : null;
+      */
+
+      const manuallyDirtied = !!mutated.dirtyTypes?.length
+        || !!mutated.dirtyTeraType
+        || !!mutated.dirtyHp
+        || !!mutated.dirtyStatus
+        || !!mutated.dirtyItem
+        || !!mutated.moves?.filter(Boolean).length
+        || Object.values(mutated.dirtyBaseStats || {}).some((v) => (v ?? -1) > 0)
+        || Object.values(mutated.evs || {}).some((v) => (v ?? -1) > 0)
+        || Object.values(mutated.dirtyBoosts || {}).some((v) => !!v);
+
+      if (manuallyDirtied) {
+        mutated.presetId = NIL_UUID;
+        mutated.presetSource = 'user';
+      }
     }
 
     player.pokemon[pokemonIndex] = mutated;

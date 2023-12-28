@@ -29,6 +29,7 @@ import styles from './Hellodex.module.scss';
 export interface HellodexProps {
   openCalcdexInstance?: (battleId: string) => void;
   openHonkdexInstance?: (instanceId?: string) => void;
+  removeHonkdexInstances?: (...instanceIds: string[]) => void;
 }
 
 const packageVersion = `v${env('package-version', 'X.X.X')}`;
@@ -42,6 +43,7 @@ const communityUrl = env('hellodex-community-url');
 export const Hellodex = ({
   openCalcdexInstance,
   openHonkdexInstance,
+  removeHonkdexInstances,
 }: HellodexProps): JSX.Element => {
   const colorScheme = useColorScheme();
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -297,6 +299,7 @@ export const Hellodex = ({
                             ? openHonkdexInstance
                             : openCalcdexInstance
                         )?.(instance.battleId)}
+                        onRequestRemove={() => removeHonkdexInstances?.(instance.battleId)}
                       />
                     ))}
 
