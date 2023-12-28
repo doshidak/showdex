@@ -111,6 +111,6 @@ export const PokemonToggleAbilities: Record<GameType, AbilityName[]> = {
   Doubles: [
     ...PokemonPseudoToggleAbilities,
     ...PokemonRuinAbilities,
-    ...PokemonPseudoToggleAbilities,
+    ...PokemonPassiveToggleAbilities,
   ],
 };
