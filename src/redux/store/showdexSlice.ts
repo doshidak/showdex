@@ -9,12 +9,14 @@ import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,
+  type ShowdexSettingsGroup,
+  ShowdexSettingsGroups,
 } from '@showdex/interfaces/app';
-import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
+import { hydrateSettings } from '@showdex/utils/hydro';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/host';
-import { readLocalStorageItem, writeLocalStorageItem } from '@showdex/utils/storage';
+import { writeSettingsDb } from '@showdex/utils/storage';
 import { useDispatch, useSelector } from './hooks';
 
 /**
@@ -105,7 +107,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
 
   initialState: {
     authUsername: getAuthUsername(), // won't probably exist on init btw
-    settings: hydrateSettings(readLocalStorageItem('local-storage-deprecated-settings-key')),
+    settings: hydrateSettings(),
   },
 
   reducers: {
@@ -145,7 +147,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       }
 
       Object.entries(action.payload).forEach(([key, value]) => {
-        if (['hellodex', 'calcdex'].includes(key) && nonEmptyObject(value)) {
+        if (ShowdexSettingsGroups.includes(key as ShowdexSettingsGroup) && key !== 'showdex' && nonEmptyObject(value)) {
           Object.entries(value).forEach((
             [objKey, objValue]: [
               keyof ShowdexHellodexSettings | keyof ShowdexCalcdexSettings,
@@ -163,10 +165,10 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       });
 
       const stateSnapshot = current(state);
-      const dehydratedSettings = dehydrateSettings(stateSnapshot.settings);
+      const { settings: updatedSettings } = stateSnapshot;
 
-      if (dehydratedSettings) {
-        writeLocalStorageItem('local-storage-deprecated-settings-key', dehydratedSettings);
+      if (nonEmptyObject(updatedSettings)) {
+        void writeSettingsDb(updatedSettings);
       }
 
       l.debug(

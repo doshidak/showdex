@@ -13,6 +13,7 @@ export interface CalcdexSettingsPaneProps {
   style?: React.CSSProperties;
   value?: ShowdexCalcdexSettings;
   presetCacheSize?: number;
+  maxCacheSize?: number;
   inBattle?: boolean;
 }
 
@@ -21,6 +22,7 @@ export const CalcdexSettingsPane = ({
   style,
   value,
   presetCacheSize,
+  maxCacheSize,
   inBattle,
 }: CalcdexSettingsPaneProps): JSX.Element => (
   <div
@@ -348,7 +350,11 @@ export const CalcdexSettingsPane = ({
         )}
         label={[
           'Cache Sets',
-          presetCacheSize && `(${fileSize(presetCacheSize, {
+          !!presetCacheSize && `(~${fileSize(presetCacheSize, {
+            precision: 1,
+            omitSymbolPrefix: true,
+          })}${maxCacheSize ? '' : ')'}`,
+          !!presetCacheSize && !!maxCacheSize && `of ${fileSize(maxCacheSize, {
             precision: 1,
             omitSymbolPrefix: true,
           })})`,
@@ -368,6 +374,18 @@ export const CalcdexSettingsPane = ({
           ),
           value: 1,
         }, {
+          label: '3 Days',
+          tooltip: (
+            <div className={styles.tooltipContent}>
+              Downloads sets &amp; reuses them for <strong>3 Days</strong>,
+              persisting between Showdown sessions.
+              <br />
+              <br />
+              Enabling this may improve Calcdex initialization performance.
+            </div>
+          ),
+          value: 3,
+        }, {
           label: '1 Week',
           tooltip: (
             <div className={styles.tooltipContent}>
@@ -379,7 +397,7 @@ export const CalcdexSettingsPane = ({
             </div>
           ),
           value: 7,
-        }, {
+        }, /* {
           label: '2 Weeks',
           tooltip: (
             <div className={styles.tooltipContent}>
@@ -391,7 +409,7 @@ export const CalcdexSettingsPane = ({
             </div>
           ),
           value: 14,
-        }, {
+        }, */ {
           label: '1 Month',
           tooltip: (
             <div className={styles.tooltipContent}>

@@ -105,7 +105,7 @@ export const hydrateSettings = (
       downloadSmogonPresets: true,
       downloadRandomsPresets: true,
       downloadUsageStats: true,
-      maxPresetAge: 7,
+      maxPresetAge: 3,
       prioritizeUsageStats: false,
       includeTeambuilder: 'always',
       autoImportTeamSheets: true,
@@ -170,10 +170,10 @@ export const hydrateSettings = (
   };
 
   if (!value || typeof value !== 'string') {
-    l.debug(
-      'No dehydrated settings string was provided, so returning default settings', settings,
-      '\n', 'value', value, '(should be falsy)',
-    );
+    // l.silly(
+    //   'No dehydrated settings string was provided, so returning default settings', settings,
+    //   '\n', 'value', value, '(should be falsy)',
+    // );
 
     return settings;
   }

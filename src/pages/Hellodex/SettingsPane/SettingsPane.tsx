@@ -28,7 +28,7 @@ import {
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateSettings, hydrateSettings, possiblyDehydrated } from '@showdex/utils/hydro';
-import { purgeLocalStorageItem, readLocalStorageItem } from '@showdex/utils/storage';
+import { clearPresetsDb } from '@showdex/utils/storage';
 import { CalcdexSettingsPane } from './CalcdexSettingsPane';
 import { HellodexSettingsPane } from './HellodexSettingsPane';
 import { ShowdexSettingsPane } from './ShowdexSettingsPane';
@@ -43,7 +43,7 @@ export interface SettingsPaneProps {
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
 
-const getPresetCacheSize = () => (readLocalStorageItem('local-storage-deprecated-preset-cache-key')?.length ?? 0) * 2;
+// const getPresetCacheSize = () => (readLocalStorageItem('local-storage-deprecated-preset-cache-key')?.length ?? 0) * 2;
 
 /**
  * Showdex settings UI.
@@ -237,34 +237,51 @@ export const SettingsPane = ({
   */
 
   const [presetCacheSize, setPresetCacheSize] = React.useState(0);
-  const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
+  const [maxCacheSize, setMaxCacheSize] = React.useState(0);
+  // const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
 
   // only updates the state when the size actually changes
-  const updatePresetCacheSize = () => {
-    const size = getPresetCacheSize();
-
-    if (size === presetCacheSize) {
+  const updatePresetCacheSize = () => void (async () => {
+    if (typeof navigator?.storage?.estimate !== 'function') {
       return;
     }
 
-    setPresetCacheSize(size);
-  };
+    // const size = getPresetCacheSize();
+    const estimates = await navigator.storage.estimate();
 
-  // every 30 sec, check the preset cache size lmfao
+    // doesn't appear to be a way to easily measure the size of just Showdex's IndexedDB,
+    // but at the time of writing (2023/12/28), next to Permutive's 2 object stores w/ 4 total entries,
+    // safe to say majority of the size is from our object stores lmao
+    const {
+      quota,
+      usage,
+      // usageDetails: { indexedDB }, // not typed for some reason, but appears on Chrome
+    } = estimates || {};
+
+    if ((usage || 0) !== presetCacheSize) {
+      setPresetCacheSize(usage);
+    }
+
+    if ((quota || 0) !== maxCacheSize) {
+      setMaxCacheSize(quota);
+    }
+  })();
+
+  // check the estimated preset cache size on mount only
   React.useEffect(() => {
-    if (presetCacheTimeout.current) {
-      return;
-    }
+    // if (presetCacheTimeout.current) {
+    //   return;
+    // }
 
-    presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
+    // presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
     updatePresetCacheSize();
 
-    return () => {
-      if (presetCacheTimeout.current) {
-        clearTimeout(presetCacheTimeout.current);
-        presetCacheTimeout.current = null;
-      }
-    };
+    // return () => {
+    //   if (presetCacheTimeout.current) {
+    //     clearTimeout(presetCacheTimeout.current);
+    //     presetCacheTimeout.current = null;
+    //   }
+    // };
   });
 
   const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
@@ -280,8 +297,11 @@ export const SettingsPane = ({
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
     if (presetCacheSize && calcdex?.maxPresetAge === 0) {
-      purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
-      updatePresetCacheSize();
+      void (async () => {
+        // purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
+        await clearPresetsDb();
+        updatePresetCacheSize();
+      })();
     }
 
     updateSettings(values);
@@ -473,6 +493,7 @@ export const SettingsPane = ({
               <CalcdexSettingsPane
                 value={values?.calcdex}
                 presetCacheSize={presetCacheSize}
+                maxCacheSize={maxCacheSize}
                 inBattle={inBattle}
               />
 

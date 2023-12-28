@@ -179,4 +179,14 @@ export interface CalcdexPokemonPreset {
   evs?: Showdown.StatsTable;
   spreads?: CalcdexPokemonPresetSpread[];
   pokeball?: string;
+
+  /**
+   * Unix epoch timestamp of when this preset was cached, in milliseconds.
+   *
+   * * Primarily used for determining which presets should be considered stale.
+   * * Using a numerical value instead of an ISO 8601 date for use as an IndexedDB index in key range queries.
+   *
+   * @since 1.2.0
+   */
+  cached?: number;
 }
