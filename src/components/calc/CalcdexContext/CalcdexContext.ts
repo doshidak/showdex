@@ -13,12 +13,14 @@ import { type CalcdexBattlePresetsHookValue } from '@showdex/utils/presets';
 export interface CalcdexContextValue {
   state: CalcdexBattleState;
   settings: ShowdexCalcdexSettings;
+  saving: [value: boolean, dispatch: React.Dispatch<React.SetStateAction<boolean>>];
   presets: CalcdexBattlePresetsHookValue;
 }
 
 export const CalcdexContext = React.createContext<CalcdexContextValue>({
   state: {} as CalcdexBattleState,
   settings: {} as ShowdexCalcdexSettings,
+  saving: [false, () => void 0],
 
   presets: {
     loading: false,

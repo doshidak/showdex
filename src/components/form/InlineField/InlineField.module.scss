@@ -1,0 +1,147 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/position';
+@use 'mixins/transition';
+
+$container: (
+  hover: (
+    color: (
+      light: color.alpha(colors.$blue, 0.94),
+      dark: color.alpha(colors.$blue, 0.94),
+    ),
+  ),
+
+  active: (
+    color: (
+      light: colors.$black,
+      dark: colors.$white,
+    ),
+  ),
+
+  hint: (
+    light: color.alpha(colors.$black, 0.4),
+    dark: color.alpha(colors.$white, 0.4),
+  ),
+);
+
+$shadow: (
+  padding: 4px,
+  border-radius: 8px,
+  outline-offset: 4px,
+
+  hover: (
+    background-color: (
+      light: color.alpha(colors.$blue, 0.08),
+      dark: color.alpha(colors.$blue, 0.08),
+    ),
+
+    box-shadow: (
+      light: none,
+      dark: none,
+    ),
+  ),
+
+  active: (
+    background-color: (
+      light: color.alpha(colors.$black, 0.12),
+      dark: color.alpha(colors.$white, 0.2),
+    ),
+
+    box-shadow: (
+      light: 0 0 3px color.alpha(colors.$black, 0.16),
+      dark: 0 0 3px color.alpha(colors.$white, 0.08),
+    ),
+  ),
+);
+
+.container {
+  position: relative;
+  display: inline-block;
+  word-break: break-all;
+  outline: none;
+  @include transition.apply(color);
+
+  &::before {
+    content: '';
+    @include position.absolute($all: -(map.get($shadow, padding)));
+    border-radius: map.get($shadow, border-radius);
+    @include transition.apply(background-color, box-shadow);
+    z-index: -1;
+  }
+
+  &:hover {
+    &.light {
+      color: map.get($container, hover, light);
+
+      &::before {
+        background-color: map.get($shadow, hover, background-color, light);
+        box-shadow: map.get($shadow, hover, background-color, light);
+      }
+    }
+
+    &.dark {
+      color: map.get($container, hover, dark);
+
+      &::before {
+        background-color: map.get($shadow, hover, background-color, dark);
+        box-shadow: map.get($shadow, hover, background-color, dark);
+      }
+    }
+  }
+
+  &.active {
+    &.light {
+      color: map.get($container, active, light);
+
+      &::before {
+        background-color: map.get($shadow, active, background-color, light);
+        box-shadow: map.get($shadow, active, background-color, light);
+      }
+    }
+
+    &.dark {
+      color: map.get($container, active, dark);
+
+      &::before {
+        background-color: map.get($shadow, active, background-color, dark);
+        box-shadow: map.get($shadow, active, background-color, dark);
+      }
+    }
+  }
+
+  &.hint {
+    &.light {
+      color: map.get($container, hint, light);
+    }
+
+    &.dark {
+      color: map.get($container, hint, dark);
+    }
+  }
+
+  &.disabled {
+    pointer-events: none;
+    touch-action: none;
+  }
+
+  @include aria.outline(
+    $position: null,
+    $offset: map.get($shadow, padding) + map.get($shadow, outline-offset),
+    $radius: map.get($shadow, border-radius) - map.get($shadow, padding),
+    $z-index: -1,
+  );
+
+  &.light:hover::after {
+    @include aria.outline-hover;
+  }
+
+  &.dark:hover::after {
+    @include aria.outline-hover($color: colors.$white);
+  }
+
+  &.active::after {
+    @include aria.outline-show;
+  }
+}

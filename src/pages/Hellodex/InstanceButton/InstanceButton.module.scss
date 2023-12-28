@@ -1,6 +1,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/aria';
 @use 'mixins/font';
 @use 'mixins/flex';
 @use 'mixins/spacing';
@@ -42,13 +43,33 @@ div.container {
     pointer-events: none;
   }
 
+  @include aria.outline($radius: 12px);
+
   &:hover {
-    &.light::before {
-      background-color: color.alpha(colors.$black, 0.05);
+    &.light {
+      &::before {
+        background-color: color.alpha(colors.$black, 0.05);
+      }
+
+      &::after {
+        @include aria.outline-hover;
+      }
     }
 
-    &.dark::before {
-      background-color: color.alpha(colors.$white, 0.05);
+    &.dark {
+      &::before {
+        background-color: color.alpha(colors.$white, 0.05);
+      }
+
+      &::after {
+        @include aria.outline-hover($color: colors.$white);
+      }
+    }
+  }
+
+  &:focus {
+    &.light::after, &.dark::after {
+      @include aria.outline-show;
     }
   }
 
@@ -139,8 +160,18 @@ div.container {
 }
 
 .honkName {
-  @include font.apply(fonts.$mono);
+  // @include font.apply(fonts.$mono);
+  font-weight: 500;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   opacity: 0.4;
+  overflow: hidden;
+  @include transition.apply(opacity);
+
+  &.saved {
+    opacity: 1;
+  }
 }
 
 .players {

@@ -122,7 +122,7 @@ export const readPresetsDb = (
 
       const stale = maxAgeSupplied
         && !!preset.cached
-        && compareAsc(new Date(), add(new Date(preset.cached), maxAge)) > -1;
+        && compareAsc(new Date(), add(preset.cached, maxAge)) > -1;
 
       if (stale) {
         store.delete(cursor.key);

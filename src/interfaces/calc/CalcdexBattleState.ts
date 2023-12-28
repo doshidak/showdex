@@ -72,6 +72,16 @@ export interface CalcdexBattleState extends Partial<Record<CalcdexPlayerKey, Cal
   battleNonce?: string;
 
   /**
+   * User-provided saved Honkdex (aka. a "honk") name.
+   *
+   * * Only used when the `operatingMode` is `'standalone'`.
+   *
+   * @example 'My Cool OU Threat List'
+   * @since 1.2.0
+   */
+  name?: string;
+
+  /**
    * Generation number.
    *
    * * Derived from `gen` of the Showdown `battle` state.
@@ -293,4 +303,17 @@ export interface CalcdexBattleState extends Partial<Record<CalcdexPlayerKey, Cal
    * @since 1.1.3
    */
   sheets: CalcdexPokemonPreset[];
+
+  /**
+   * Unix epoch timestamp of when the state was cached, in milliseconds.
+   *
+   * * Only used when the `operatingMode` is `'standalone'`.
+   * * Primarily used when the user using the Honkdex saves their honk.
+   *   - Can also be shown as a "last saved" field.
+   * * Using a numerical value instead of an ISO 8601 date for use as an IndexedDB index in key range queries.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  cached?: number;
 }

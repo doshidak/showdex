@@ -17,7 +17,7 @@ import {
 import { syncBattle, SyncBattleActionType } from '@showdex/redux/actions';
 import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
 import { calcPokemonCalcdexId } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { detectLegacyGen, determineDefaultLevel, parseBattleFormat } from '@showdex/utils/dex';
 import { useSelector } from './hooks';
@@ -133,6 +133,16 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
     state: Draft<CalcdexSliceState>,
     action: PayloadAction<string>,
   ) => void;
+
+  /**
+   * Restores the provided `CalcdexBattleState`'s into the `CalcdexSliceState`.
+   *
+   * @since 1.2.0
+   */
+  restore: (
+    state: Draft<CalcdexSliceState>,
+    action: PayloadAction<CalcdexSliceState>,
+  ) => void;
 }
 
 const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
@@ -158,6 +168,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         scope, // used for debugging; not used here, but destructuring it from `...payload`
         operatingMode,
         battleId,
+        name,
         gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
         format: formatFromPayload = null,
         gameType = 'Singles',
@@ -173,6 +184,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         opponentKey = null,
         switchPlayers = false,
         field,
+        cached,
         ...payload
       } = action.payload;
 
@@ -210,6 +222,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         operatingMode,
         battleId,
         gen,
+        name,
         format: gen && base ? `gen${gen}${base}` : null,
         subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
         gameType,
@@ -267,6 +280,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         sheetsNonce: null,
         sheets: [],
+
+        cached,
       };
 
       if (!state[battleId].defaultLevel) {
@@ -298,6 +313,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       const {
         battleId,
         battleNonce,
+        name,
         gen,
         format,
         gameType,
@@ -307,6 +323,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         containerSize,
         playerKey,
         opponentKey,
+        cached,
       } = action.payload;
 
       if (!battleId) {
@@ -343,6 +360,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         battleId: battleId || currentState.battleId,
         battleNonce: battleNonce || currentState.battleNonce,
+        name: name || currentState.name,
         gen: updatedGen,
         legacy,
         format: format || currentState.format,
@@ -353,6 +371,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         containerSize: containerSize || currentState.containerSize,
         playerKey: playerKey || currentState.playerKey,
         opponentKey: opponentKey || currentState.opponentKey,
+        cached: cached || currentState.cached,
       };
 
       // for the active state, only update if previously true and the new value is false
@@ -577,6 +596,29 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       l.debug(
         'DONE', action.type,
         '\n', 'battleId (payload)', action.payload,
+        '\n', 'state', __DEV__ && current(state),
+      );
+    },
+
+    restore: (state, action) => {
+      if (!nonEmptyObject(action.payload)) {
+        return;
+      }
+
+      Object.entries(action.payload).forEach(([
+        battleId,
+        battleState,
+      ]) => {
+        if (!nonEmptyObject(battleState) || battleState.battleId !== battleId) {
+          return;
+        }
+
+        state[battleId] = battleState;
+      });
+
+      l.debug(
+        'DONE', action.type,
+        '\n', 'action.payload', action.payload,
         '\n', 'state', __DEV__ && current(state),
       );
     },

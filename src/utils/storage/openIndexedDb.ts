@@ -1,5 +1,6 @@
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { createHonksDb } from './createHonksDb';
 import { createMetaDb } from './createMetaDb';
 import { createPresetsDb } from './createPresetsDb';
 import { createSettingsDb } from './createSettingsDb';
@@ -86,6 +87,7 @@ export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
     createMetaDb(db);
     createSettingsDb(db);
     createPresetsDb(db);
+    createHonksDb(db);
 
     l.verbose(
       'req.onupgradeneeded()', 'Upgrade complete.',

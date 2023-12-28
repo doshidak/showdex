@@ -38,6 +38,7 @@ export const CalcdexProvider = ({
 }: CalcdexProviderProps): JSX.Element => {
   const state = useCalcdexBattleState(battleId);
   const settings = useCalcdexSettings();
+  const saving = React.useState(false);
 
   // note: we're passing the **entire** return object from the hook as `presets`,
   // which means the actual presets are in presets.presets[] LOL
@@ -53,9 +54,11 @@ export const CalcdexProvider = ({
   const value = React.useMemo<CalcdexContextValue>(() => ({
     state,
     settings,
+    saving,
     presets,
   }), [
     presets,
+    saving,
     settings,
     state,
   ]);

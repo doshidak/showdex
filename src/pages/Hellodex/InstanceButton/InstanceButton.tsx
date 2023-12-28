@@ -28,7 +28,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 
   const {
     operatingMode,
-    battleId,
+    name,
     gen,
     format,
     subFormats,
@@ -109,8 +109,13 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
         </div>
 
         {operatingMode === 'standalone' ? (
-          <div className={styles.honkName}>
-            {(!!battleId && `honk:${battleId.slice(-7)}`) || 'untitled honk'}
+          <div
+            className={cx(
+              styles.honkName,
+              !!name && styles.saved,
+            )}
+          >
+            {name || 'untitled honk'}
           </div>
         ) : (
           <div className={styles.players}>

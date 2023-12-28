@@ -300,7 +300,8 @@ export const SettingsPane = ({
       void (async () => {
         // purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
         await clearPresetsDb();
-        updatePresetCacheSize();
+        // updatePresetCacheSize();
+        setPresetCacheSize(0); // kekw
       })();
     }
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useDebouncyFn } from 'use-debouncy';
 import { NIL as NIL_UUID } from 'uuid';
 import { type ItemName, type MoveName } from '@smogon/calc';
 import {
@@ -47,6 +48,7 @@ import {
   hasMegaForme,
 } from '@showdex/utils/dex';
 import { detectCompletePreset } from '@showdex/utils/presets';
+import { writeHonksDb } from '@showdex/utils/storage';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
 /**
@@ -132,7 +134,31 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   const ctx = React.useContext(CalcdexContext);
   const dispatch = useDispatch();
 
-  const { state } = ctx;
+  const {
+    state,
+    saving,
+  } = ctx;
+
+  const saveHonk = useDebouncyFn(() => void (async () => {
+    const cached = await writeHonksDb(state);
+
+    dispatch(calcdexSlice.actions.update({
+      scope: `${l.scope}:saveHonk()`,
+      battleId: state.battleId,
+      cached,
+    }));
+
+    saving[1](false);
+  })(), 3000);
+
+  const queueHonkSave = () => {
+    if (saving[0]) {
+      return;
+    }
+
+    saving[1](true);
+    saveHonk();
+  };
 
   const updateBattle: CalcdexContextConsumables['updateBattle'] = (
     battle,
@@ -168,6 +194,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       scope,
       ...payload,
     }));
+
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
+    }
 
     endTimer('(dispatched)');
   };
@@ -212,6 +242,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     });
 
     newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
+    newPokemon.source = 'user';
     newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
 
     payload.selectionIndex = payload.pokemon.push(newPokemon) - 1;
@@ -234,6 +265,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       if (payload.pokemon.length >= state[playerKey].maxPokemon) {
         payload.maxPokemon = state[playerKey].maxPokemon + Math.abs(env.int('honkdex-player-extend-pokemon', 0));
       }
+    }
+
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
     }
 
     dispatch(calcdexSlice.actions.updatePlayer({
@@ -660,6 +695,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       });
     }
 
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
+    }
+
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
@@ -723,6 +762,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       );
     }
 
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
+    }
+
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
@@ -754,6 +797,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     if (!player?.active) {
       return void endTimer('(bad player state)');
+    }
+
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
     }
 
     dispatch(calcdexSlice.actions.updatePlayer({
@@ -844,6 +891,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
     }
 
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
+    }
+
     dispatch(calcdexSlice.actions.updateField({
       scope,
       battleId: state.battleId,
@@ -892,6 +943,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         pokemon,
       },
     }));
+
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
+    }
 
     endTimer('(dispatched)');
   };

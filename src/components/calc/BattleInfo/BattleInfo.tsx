@@ -1,12 +1,11 @@
 import * as React from 'react';
+import { useDebouncyFn } from 'use-debouncy';
 import cx from 'classnames';
+import { formatDistanceToNow } from 'date-fns';
 import { type GenerationNum } from '@smogon/calc';
-import { BattleGenOptionTooltip, HomieButton } from '@showdex/components/app';
-import { Dropdown } from '@showdex/components/form';
-// import { ToggleButton } from '@showdex/components/ui';
-import { ShowdexPatronTiers } from '@showdex/consts/app';
-import { useAuthUsername, useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/core';
+import { BattleGenOptionTooltip } from '@showdex/components/app';
+import { Dropdown, InlineField } from '@showdex/components/form';
+import { useColorScheme } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import { buildFormatOptions, buildGenOptions } from '@showdex/utils/ui';
 import { useCalcdexContext } from '../CalcdexContext';
@@ -18,11 +17,6 @@ export interface BattleInfoProps {
 }
 
 const genOptions = buildGenOptions();
-
-const flatMembers = ShowdexPatronTiers
-  .filter((t) => t?.members?.length)
-  .flatMap((t) => t.members);
-
 const l = logger('@showdex/components/calc/BattleInfo');
 
 export const BattleInfo = ({
@@ -31,33 +25,21 @@ export const BattleInfo = ({
 }: BattleInfoProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
-  const authUsername = useAuthUsername();
-  const authId = formatId(authUsername);
-
-  const homie = React.useMemo(() => (
-    flatMembers.find((m) => formatId(m.name) === authId)
-  ) || {
-    name: authUsername,
-    showdownUser: true,
-    periods: [],
-  }, [
-    authId,
-    authUsername,
-  ]);
-
   const {
     state,
     // settings,
+    saving,
     updateBattle,
   } = useCalcdexContext();
 
   const {
+    containerSize,
     operatingMode,
     battleId,
+    name,
     gen,
-    // legacy,
     format,
-    // gameType,
+    cached,
   } = state || {};
 
   const formatOptions = React.useMemo(
@@ -65,10 +47,14 @@ export const BattleInfo = ({
     [gen],
   );
 
+  // used for the honk name, so it doesn't lag when you type fast af
+  const debouncyUpdate = useDebouncyFn(updateBattle, 1000);
+
   return (
     <div
       className={cx(
         styles.container,
+        containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -149,29 +135,28 @@ export const BattleInfo = ({
         />
       </div>
 
-      <div>
-        <div className={styles.honkNameContainer}>
-          <div className={styles.honkName}>
-            {(!!battleId && `honk:${battleId.slice(-7)}`) || 'untitled honk'}
-          </div>
-        </div>
+      <div className={styles.honkInfo}>
+        <InlineField
+          className={styles.honkName}
+          hint="give this nice honk a nice name"
+          input={{
+            name: `${l.scope}:Dropdown~Name`,
+            value: name,
+            onChange: (value: string) => debouncyUpdate({
+              name: value,
+            }, `${l.scope}:Dropdown~Format:input.onChange()`),
+          }}
+        />
 
         {
-          !__DEV__ &&
-          <div className={styles.honkInProgress}>
-            <i className="fa fa-heart" />
-
-            <div className={styles.description}>
-              hello{' '}
-              <HomieButton
-                homie={homie}
-                term="monthly"
-                showTitles
-              />
-              {' '}!!
-              <em>something something</em> this is <strong>pre-&alpha;</strong> af &amp; all the little fixins are missing.
-              hope you still enjoy!
-            </div>
+          (!!cached || saving?.[0]) &&
+          <div
+            className={cx(
+              styles.honkStatus,
+              !saving?.[0] && styles.saved,
+            )}
+          >
+            {saving?.[0] ? 'saving...' : `saved ${formatDistanceToNow(cached, { addSuffix: true })}`}
           </div>
         }
       </div>
