@@ -196,12 +196,15 @@ const copyPatterns = [{
 
     parsed.version = finalEnv.PACKAGE_VERSION;
     parsed.description = finalEnv.PACKAGE_DESCRIPTION;
-    parsed.author = { email: finalEnv.PACKAGE_AUTHOR_EMAIL };
+    // parsed.author = { email: finalEnv.PACKAGE_AUTHOR_EMAIL };
     parsed.homepage_url = finalEnv.PACKAGE_URL;
 
-    if (finalEnv.PACKAGE_AUTHOR_NAME) {
-      parsed.author.name = finalEnv.PACKAGE_AUTHOR_NAME;
-    }
+    // if (finalEnv.PACKAGE_AUTHOR_NAME) {
+    //   parsed.author.name = finalEnv.PACKAGE_AUTHOR_NAME;
+    // }
+
+    // update (2023/12/26): actually, better to not include this so that none of the web stores freak out lol
+    delete parsed.author;
 
     const {
       applications,
