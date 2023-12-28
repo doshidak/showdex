@@ -5,6 +5,7 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
+import { DefaultShowdexSettings } from '@showdex/consts/hydro';
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
@@ -12,10 +13,9 @@ import {
   type ShowdexSettingsGroup,
   ShowdexSettingsGroups,
 } from '@showdex/interfaces/app';
-import { hydrateSettings } from '@showdex/utils/hydro';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/host';
+import { getAuthUsername, getColorScheme, getSystemColorScheme } from '@showdex/utils/host';
 import { writeSettingsDb } from '@showdex/utils/storage';
 import { useDispatch, useSelector } from './hooks';
 
@@ -107,7 +107,10 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
 
   initialState: {
     authUsername: getAuthUsername(), // won't probably exist on init btw
-    settings: hydrateSettings(),
+    settings: {
+      ...DefaultShowdexSettings,
+      colorScheme: getColorScheme(),
+    },
   },
 
   reducers: {
@@ -215,13 +218,10 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       //   '\n', 'state', __DEV__ && current(state),
       // );
 
-      // defaults are stored in hydrateSettings(),
-      // which is returned by passing in no args
-      const defaultSettings = hydrateSettings();
-
-      // hydrateSettings() creates a new object every time,
-      // so no worries about deep-copying here (I say that now tho...)
-      state.settings = defaultSettings;
+      state.settings = {
+        ...DefaultShowdexSettings,
+        colorScheme: getColorScheme(),
+      };
 
       l.debug(
         'DONE', action.type,

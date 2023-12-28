@@ -7,6 +7,112 @@ import {
 import { reverseObjectKv } from '@showdex/utils/core';
 
 /**
+ * Default Showdex settings.
+ *
+ * @since 1.2.0
+ */
+export const DefaultShowdexSettings: ShowdexSettings = {
+  colorScheme: null,
+  forcedColorScheme: 'showdown',
+  developerMode: __DEV__,
+
+  hellodex: {
+    openOnStart: true,
+    focusRoomsRoom: false,
+    showBattleRecord: true,
+    showDonateButton: true,
+  },
+
+  calcdex: {
+    openOnStart: 'always',
+    openAs: 'showdown',
+    openOnPanel: 'showdown',
+    closeOn: 'battle-tab',
+    destroyOnClose: true,
+
+    defaultAutoSelect: {
+      auth: true,
+      p1: true,
+      p2: true,
+      p3: true,
+      p4: true,
+    },
+
+    showPlayerRatings: true,
+    authPosition: 'top',
+    showNicknames: false,
+    openSmogonPage: true,
+    showAllOptions: false,
+    showSpreadsFirst: false,
+    showNonDamageRanges: true,
+    downloadSmogonPresets: true,
+    downloadRandomsPresets: true,
+    downloadUsageStats: true,
+    maxPresetAge: 3,
+    prioritizeUsageStats: false,
+    includeTeambuilder: 'always',
+    autoImportTeamSheets: true,
+    autoExportOpponent: false,
+
+    defaultAutoMoves: {
+      auth: false,
+      p1: true,
+      p2: true,
+      p3: true,
+      p4: true,
+    },
+
+    forceNonVolatile: true,
+    lockUsedTera: false,
+    resetDirtyBoosts: true,
+    editPokemonTypes: 'always',
+    showMoveEditor: 'meta',
+    enableQuickEditor: true,
+    showBaseStats: 'meta',
+    showLegacyEvs: false,
+
+    lockGeneticsVisibility: {
+      auth: [],
+      p1: ['iv', 'ev'],
+      p2: ['iv', 'ev'],
+      p3: ['iv', 'ev'],
+      p4: ['iv', 'ev'],
+    },
+
+    allowIllegalSpreads: 'meta',
+    showUiTooltips: true,
+    showAbilityTooltip: true,
+    showItemTooltip: true,
+    showMoveTooltip: true,
+    showMatchupTooltip: true,
+    prettifyMatchupDescription: true,
+    showMatchupDamageAmounts: 'nfe',
+    formatMatchupDamageAmounts: true,
+    copyMatchupDescription: true,
+    showFieldTooltips: true,
+
+    nhkoColors: [
+      '#4CAF50',
+      '#FF9800',
+      '#FF9800',
+      '#F44336',
+      '#F44336',
+    ],
+
+    nhkoLabels: [
+      '1HKO',
+      '2HKO',
+      '3HKO',
+      '4HKO',
+    ],
+  },
+
+  showdown: {
+    autoAcceptSheets: false,
+  },
+};
+
+/**
  * Opcode mappings for the dehydrated root `ShowdexSettings`.
  *
  * @since 1.0.3
