@@ -419,7 +419,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
       if (mutated.source !== 'server' && mutated.presetId) {
         const dex = getDexForFormat(state.format);
+        const prevBaseForme = dex.species.get(prevPokemon.speciesForme)?.baseSpecies;
         const baseForme = dex.species.get(mutated.speciesForme)?.baseSpecies;
+        const baseChanged = prevBaseForme !== baseForme;
 
         const shouldClearPreset = (
           // presetId would be NIL_UUID when the user manually fills in everything, but we'd want to clear it for the
@@ -430,8 +432,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           (!mutated.presetSource || !['server', 'sheet'].includes(mutated.presetSource))
             && !PokemonPresetFuckedBaseFormes.includes(baseForme)
             && !PokemonPresetFuckedBattleFormes.includes(mutated.speciesForme)
-            && !hasMegaForme(prevPokemon.speciesForme)
-            && !hasMegaForme(pokemon.speciesForme)
+            && (baseChanged || (!hasMegaForme(prevPokemon.speciesForme) && !hasMegaForme(pokemon.speciesForme)))
         );
 
         if (shouldClearPreset) {

@@ -75,8 +75,8 @@ export const sanitizePokemon = <
     gender: pokemon?.gender || 'N',
     shiny: pokemon?.shiny || false,
 
-    dmaxable: (pokemon as Partial<CalcdexPokemon>)?.dmaxable || false,
-    gmaxable: (pokemon as Partial<CalcdexPokemon>)?.gmaxable || false,
+    dmaxable: (gen > 7 && (pokemon as Partial<CalcdexPokemon>)?.dmaxable) || false,
+    gmaxable: (gen > 7 && (pokemon as Partial<CalcdexPokemon>)?.gmaxable) || false,
 
     types: (
       typeChanged
@@ -302,7 +302,7 @@ export const sanitizePokemon = <
 
         return !dexAltForme?.gen
           || !gen
-          || dexAltForme.gen === gen;
+          || gen >= dexAltForme.gen;
       });
   }
 
