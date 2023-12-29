@@ -105,8 +105,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
         //   return; // also prevents the field from blurring
         // }
 
-        // initialValue.current = input?.value ?? containerRef.current.innerText;
-        initialValue.current = containerRef.current.innerText;
+        initialValue.current = containerRef.current.innerText?.replace(/\n/g, '') || '';
         input?.onChange(initialValue.current);
 
         break;
@@ -130,7 +129,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
   ]);
 
   React.useEffect(() => {
-    const currentText = containerRef.current?.innerText;
+    const currentText = containerRef.current?.innerText?.replace(/\n/g, '') || '';
 
     if (active && currentText === hint) {
       containerRef.current.innerText = '';
