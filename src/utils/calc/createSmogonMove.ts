@@ -8,6 +8,7 @@ import {
   getGenDexForFormat,
 } from '@showdex/utils/dex';
 import { calcMoveBasePower } from './calcMoveBasePower';
+import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
 import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
@@ -69,6 +70,7 @@ export const createSmogonMove = (
     isCrit: determineCriticalHit(pokemon, moveName, format),
   };
 
+  const defaultOverrides = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon);
   const overrides: SmogonMoveOverrides = {
     ...determineMoveTargets(format, pokemon, moveName),
   };
@@ -123,8 +125,11 @@ export const createSmogonMove = (
     options.isCrit = criticalHitOverride;
   }
 
-  if (hitsOverride) {
-    options.hits = hitsOverride;
+  // update (2023/12/29): checking the default number of hits (if any) for cases such as Kyurem w/ Loaded Dice,
+  // which should be 4 Scale Shot hits, but since `options.hits` wasn't provided, @smogon/calc uses 3 hits
+  // (despite PokeMoves showing the value from getMoveOverrideDefaults(), which is dynamically set at 4 due to the item)
+  if (hitsOverride || defaultOverrides.hits) {
+    options.hits = hitsOverride || defaultOverrides.hits;
   }
 
   if (defensiveStatOverride) {
