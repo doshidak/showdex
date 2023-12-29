@@ -177,6 +177,7 @@ export const useBattlePresets = (
   } = usePokemonFormatStatsQuery({
     gen,
     format,
+    formatOnly: true,
     maxAge,
   }, {
     skip: shouldSkipFormatStats,
@@ -201,6 +202,7 @@ export const useBattlePresets = (
   } = usePokemonRandomsStatsQuery({
     gen,
     format,
+    formatOnly: true,
     maxAge,
   }, {
     skip: shouldSkipRandomsStats,
