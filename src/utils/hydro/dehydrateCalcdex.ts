@@ -43,20 +43,20 @@ export const dehydratePlayerSide = (
  *
  * Each "root" property of the `state` is given its own "opcode":
  *
- * * `g` refers to the gen number (`state.gen`) & game type (`state.gameType`).
- * * `m` refers to the battle format (`state.format`).
+ * * `s` refers to the base-64 encoded error message, if any.
+ * * `o` refers to the operating mode (`state.operatingMode`).
+ * * `g` refers to the gen number (`state.gen`), battle format (`state.format`) & game type (`state.gameType`).
  * * `p` refers to the player keys in the battle.
  * * `p#` refers to each player in the battle (e.g., `state.p1`, `state.p2`).
  * * `f` refers to the battle field (`state.field`).
- * * `s` refers to the base-64 encoded error message, if any.
  *
  * Dehydrated `state`, whose properties are deliminated by a semi-colon (`';'`), is in the following format:
  *
  * ```
  * {...header};
  * s:{error};
- * g:{gen}/{gameType};
- * m:{format};
+ * o:{operatingMode};
+ * g:{gen}/{format}/{gameType};
  * p:{authPlayerKey}/{playerKey}/{opponentKey};
  * p1:{player};
  * p2:{player};
@@ -130,8 +130,8 @@ export const dehydratePlayerSide = (
  * #:18B43D81603;
  * $:calcdex;
  * s:Q2Fubm90IHJlYWQgcHJvcGVydGllcyBvZiB1bmRlZmluZWQgKHJlYWRpbmcgJ2FiaWxpdHlUb2dnbGVkJyk=;
- * g:7/Singles;
- * m:gen7randombattle;
+ * o:battle;
+ * g:7/gen7randombattle/Singles;
  * p:p1/p1/p2/n;
  * n:1;
  * p1:showdex_testee|?|0|0|y|
@@ -156,9 +156,10 @@ export const dehydrateCalcdex = (
   }
 
   const {
+    operatingMode,
     gen,
-    turn,
     format,
+    turn,
     authPlayerKey,
     playerKey,
     opponentKey,
@@ -169,8 +170,8 @@ export const dehydrateCalcdex = (
   const output: string[] = [
     dehydrateHeader(HydroDescriptor.Calcdex),
     `s:${error?.message ? base64.encode(error.message) : '?'}`,
-    `g:${dehydrateValue(gen)}/${dehydrateValue(state.gameType)}`,
-    `m:${dehydrateValue(format)}`,
+    `o:${dehydrateValue(operatingMode)}`,
+    `g:${dehydrateValue(gen)}/${dehydrateValue(format)}/${dehydrateValue(state.gameType)}`,
     'p:' + dehydrateArray([
       authPlayerKey,
       playerKey,
