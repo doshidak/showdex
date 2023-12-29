@@ -130,7 +130,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   // this is only a visual value, so that we don't forcibly change the user's value as they're typing it
   const [inputValue, setInputValue] = React.useState<string>((
     typeof !!(input?.value || fallbackValue) === 'number'
-      && (input?.value || fallbackValue).toString()
+      && String(input?.value || fallbackValue)
   ) || '');
 
   // type number fields don't do a good job preventing users from typing in non-numeric characters
@@ -313,7 +313,11 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
 
   // handle updates in final-form's input.value
   React.useEffect(() => {
-    const value = input?.value?.toString();
+    if (typeof input?.value !== 'number' || Number.isNaN(input.value)) {
+      return void setInputValue('');
+    }
+
+    const value = String(input.value);
 
     if (active || !value || value === inputValue) {
       return;

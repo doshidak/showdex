@@ -544,7 +544,7 @@ export const PokeInfo = ({
                   absoluteHover
                   input={{
                     name: `${l.scope}:${pokemonKey}:Level`,
-                    value: pokemon?.speciesForme ? (pokemon.level || defaultLevel) : null,
+                    value: (!!pokemon?.speciesForme && (pokemon.level || defaultLevel)) || null,
                     onChange: (value: number) => updatePokemon({
                       level: value,
                     }, `${l.scope}:ValueField~Level:input.onChange()`),
