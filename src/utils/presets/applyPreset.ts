@@ -5,6 +5,7 @@ import {
 } from '@showdex/interfaces/calc';
 import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
+import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getDefaultSpreadValue } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
@@ -143,13 +144,13 @@ export const applyPreset = (
 
   // update (2023/02/07): always clear the dirtyAbility from the preset if its actual ability
   // has been already revealed (even when transformed)
-  const clearDirtyAbility = !!pokemon.ability;
+  const clearDirtyAbility = !!pokemon.ability || formatId(output.dirtyAbility) === 'noability';
 
   if (clearDirtyAbility) {
     output.dirtyAbility = null;
   }
 
-  const clearDirtyItem = (pokemon.item && pokemon.item !== '(exists)')
+  const clearDirtyItem = (pokemon.item && formatId(pokemon.item) !== 'exists')
     || (pokemon.prevItem && pokemon.prevItemEffect);
 
   if (clearDirtyItem) {
@@ -157,11 +158,11 @@ export const applyPreset = (
   }
 
   if (preset.altAbilities?.length) {
-    output.altAbilities = [...preset.altAbilities];
+    output.altAbilities = [...preset.altAbilities].filter((a) => !!a && formatId(flattenAlt(a)) !== 'noability');
 
     // apply the top usage ability (if available)
     const abilityUsageAvailable = usage?.altAbilities?.length > 1
-      && output.altAbilities?.length > 1
+      && output.altAbilities.length > 1
       && !clearDirtyAbility;
 
     if (abilityUsageAvailable) {

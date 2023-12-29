@@ -5,6 +5,7 @@ import { calcPokemonCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import {
   clamp,
   env,
+  formatId,
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
@@ -292,6 +293,19 @@ export const sanitizePokemon = <
       ];
   }
 
+  // update (2023/12/29): if we have any altFormes[], verify that they exist in the gen so that Slowbro-Mega or
+  // Slowbro-Galar don't show up in gen 1 or something... LOL imagine
+  if (sanitizedPokemon.altFormes.length) {
+    sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
+      .filter((altForme) => {
+        const dexAltForme = dex.species.get(altForme);
+
+        return !dexAltForme?.gen
+          || !gen
+          || dexAltForme.gen === gen;
+      });
+  }
+
   if (nonEmptyObject(transformedSpecies?.baseStats)) {
     sanitizedPokemon.transformedBaseStats = { ...transformedSpecies.baseStats };
 
@@ -324,12 +338,12 @@ export const sanitizePokemon = <
   // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
   sanitizedPokemon.abilities = [
     ...(Object.values(species?.abilities || {}) as AbilityName[]),
-  ].filter(Boolean);
+  ].filter((a) => !!a && formatId(a) !== 'noability');
 
   // if transformed, update the legal abilities of the transformed Pokemon
   sanitizedPokemon.transformedAbilities = [
     ...(Object.values(transformedSpecies?.abilities || {}) as AbilityName[]),
-  ].filter(Boolean);
+  ].filter((a) => !!a && formatId(a) !== 'noability');
 
   // check if we should auto-set the ability
   const abilitiesSource = sanitizedPokemon.transformedAbilities.length
