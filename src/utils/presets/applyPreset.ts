@@ -7,7 +7,7 @@ import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, getDefaultSpreadValue } from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, getDefaultSpreadValue } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -37,6 +37,7 @@ export const applyPreset = (
   usage?: CalcdexPokemonPreset,
 ): Partial<CalcdexPokemon> => {
   const gen = detectGenFromFormat(format);
+  const legacy = detectLegacyGen(gen);
 
   if (!gen || !preset?.calcdexId || !pokemon?.calcdexId || !pokemon.speciesForme) {
     return null;
@@ -326,6 +327,22 @@ export const applyPreset = (
     output.moves = transformed && pokemon.transformedMoves.length === 4
       ? [...pokemon.transformedMoves] // preserves the order
       : mergeRevealedMoves({ ...pokemon, ...output });
+  }
+
+  // in legacy gens, make sure SPA & SPD always equal (for SPC)
+  // (otherwise, the `gen12` mechanics file in @smogon/calc will throw an Error(), crashing the Calcdex!)
+  if (legacy) {
+    if (typeof output.ivs.spa === 'number') {
+      output.ivs.spd = output.ivs.spa;
+    } else if (typeof output.ivs.spd === 'number') {
+      output.ivs.spa = output.ivs.spd;
+    }
+
+    if (typeof output.evs.spa === 'number') {
+      output.evs.spd = output.evs.spa;
+    } else if (typeof output.evs.spd === 'number') {
+      output.evs.spa = output.evs.spd;
+    }
   }
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,
