@@ -59,6 +59,7 @@ export const PokeMoves = ({
   } = useCalcdexPokeContext();
 
   const {
+    operatingMode,
     containerSize,
     active: battleActive,
     gen,
@@ -77,9 +78,10 @@ export const PokeMoves = ({
     format,
     pokemon,
     usage,
-    settings?.showAllOptions,
+    (settings?.showAllOptions && 'all') || (operatingMode === 'standalone' && 'hidden-power') || null,
   ), [
     format,
+    operatingMode,
     pokemon,
     settings?.showAllOptions,
     usage,

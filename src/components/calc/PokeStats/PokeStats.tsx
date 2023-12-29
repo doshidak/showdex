@@ -329,17 +329,14 @@ export const PokeStats = ({
               return null;
             }
 
-            const statName = gen === 1 && stat === 'spa'
-              ? 'spc'
-              : stat;
-
+            const statName = gen === 1 && stat === 'spa' ? 'spc' : stat;
             const statLabel = statName.toUpperCase();
 
             const iv = pokemon?.ivs?.[stat] || 0;
             const value = legacy ? convertIvToLegacyDv(iv) : iv;
             const maxValue = legacy ? 15 : 31;
 
-            const pristine = !missingIvs && pristineSpreadValue('iv', value);
+            const pristine = !missingIvs && pristineSpreadValue('iv', iv);
             const disabled = !pokemon?.speciesForme
               || (legacy && stat === 'hp')
               || (gen === 2 && stat === 'spd');

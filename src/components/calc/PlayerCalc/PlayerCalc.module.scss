@@ -120,7 +120,19 @@
   }
 
   .selected & {
-    border-color: color.alpha(colors.$blue, 0.8);
+    .light & {
+      border-color: color.alpha(colors.$black, 0.32);
+    }
+
+    .dark & {
+      border-color: color.alpha(colors.$white, 0.32);
+    }
+  }
+
+  .piconButton.selected:hover & {
+    .light &, .dark & {
+      border-color: color.alpha(colors.$blue, 0.8);
+    }
   }
 }
 

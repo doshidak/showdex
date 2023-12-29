@@ -31,7 +31,7 @@ export const buildMoveOptions = (
   format: string,
   pokemon: DeepPartial<CalcdexPokemon>,
   usage?: CalcdexPokemonPreset,
-  showAll?: boolean,
+  include?: 'all' | 'hidden-power',
 ): CalcdexPokemonMoveOption[] => {
   const options: CalcdexPokemonMoveOption[] = [];
 
@@ -41,7 +41,8 @@ export const buildMoveOptions = (
 
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
-  const showAllMoves = showAll || !legalLockedFormat(format);
+  const legalLocked = legalLockedFormat(format);
+  const showAllMoves = include === 'all' || !legalLocked;
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
@@ -178,20 +179,18 @@ export const buildMoveOptions = (
     const unsortedPoolMoves = altMoves
       .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
 
-    const poolMoves = hasUsageStats
-      ? unsortedPoolMoves // should be sorted already (despite the name)
-      : flattenAlts(unsortedPoolMoves).sort(usageSorter);
+    const poolMoves = flattenAlts(unsortedPoolMoves).sort(usageSorter);
 
     options.push({
       label: 'Pool',
       options: poolMoves.map((alt) => ({
         label: flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
+        rightLabel: findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });
 
-    filterMoves.push(...flattenAlts(poolMoves));
+    filterMoves.push(...poolMoves);
   }
 
   const remainingUsageMoves = hasUsageStats
@@ -240,7 +239,8 @@ export const buildMoveOptions = (
 
   // Hidden Power moves were introduced in gen 2
   const includeHiddenPower = gen > 1 && (
-    showAllMoves
+    ['all', 'hidden-power'].includes(include)
+      || !legalLocked
       || gen < 8 // Hidden Power natively exists in Gens 2-7
       || /nat(?:ional)?dex/i.test(formatId(format))
   );

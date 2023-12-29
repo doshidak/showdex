@@ -189,11 +189,12 @@ export const PokeInfo = ({
 
   const showSpreadsToggle = (
     !!pokemon?.speciesForme
+      && !legacy
       && !!spreadOptions.length
       && (
         spreadOptions.length > 1
           || !currentSpread
-          || spreadOptions[0].value !== currentSpread
+          || (spreadOptions[0]?.options?.[0] || spreadOptions[0])?.value !== currentSpread
       )
   );
 

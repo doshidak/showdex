@@ -150,13 +150,21 @@ export const FieldCalc = ({
         ) : <>&uarr; {doubles ? 'Field' : 'Screens'}</>}
       </TableGridItem>
       <TableGridItem
-        className={cx(styles.label, styles.weatherLabel)}
+        className={cx(
+          styles.label,
+          styles.weatherLabel,
+          gen === 1 && styles.legacy,
+        )}
         header
       >
         Weather
       </TableGridItem>
       <TableGridItem
-        className={cx(styles.label, styles.terrainLabel)}
+        className={cx(
+          styles.label,
+          styles.terrainLabel,
+          gen < 6 && styles.legacy,
+        )}
         header
       >
         Terrain

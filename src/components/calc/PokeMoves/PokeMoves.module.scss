@@ -28,7 +28,7 @@
   }
 
   &.dark {
-    background-color: color.alpha(#121212, 0.8);
+    background-color: color.alpha(colors.$gray-darkest, 0.8);
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.32),
       0 0 16px color.alpha(colors.$black, 0.48),
@@ -177,7 +177,7 @@ button.ultButton {
     max-width: 16px;
 
     &::before {
-      @include position.absolute-xy($x: -3px, $y: 0);
+      @include position.absolute($x: -3px, $y: 0);
     }
   }
 
@@ -274,7 +274,7 @@ button.damageButton {
     @include spacing.margin($right: 6px);
 
     &::before {
-      @include position.absolute-xy($x: -3px, $y: 0); // remove "padding" from absoluteHover
+      @include position.absolute($x: -3px, $y: 0); // remove "padding" from absoluteHover
     }
   }
 }
@@ -304,7 +304,7 @@ button.editorButton {
 }
 
 .statVsLabel {
-  @include spacing.margin-xy($x: 3px);
+  @include spacing.margin($x: 3px);
   @include font.apply(fonts.$mono, ( font-weight: 600 ));
   font-size: 6px;
   letter-spacing: 0.25px;

@@ -26,11 +26,11 @@
   // gen 2 has SPD, so this should only be applied for gen 1.
   &.legacySpc {
     // grid-template-columns: minmax(36px, 1fr) repeat(5, minmax(48px, 1.25fr));
-    grid-template-columns: minmax(36px, min-content) repeat(5, min-content);
+    grid-template-columns: minmax(36px, min-content) repeat(5, minmax(48px, min-content));
 
     &.verySmol {
       // grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));
-      grid-template-columns: repeat(6, min-content);
+      grid-template-columns: repeat(6, minmax(36px, min-content));
     }
   }
 }
@@ -95,7 +95,7 @@
     color: colors.$orange;
   }
 
-  &.dim:not(:active) {
+  .valueField:not(.disabled) &.dim:not(:active) {
     opacity: 0.64;
   }
 }

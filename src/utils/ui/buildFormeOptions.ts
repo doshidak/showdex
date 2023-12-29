@@ -55,15 +55,15 @@ export const buildFormeOptions = (
   const filterFormes: string[] = [];
 
   if (pokemon?.altFormes?.length) {
-    const speciesForme = pokemon.transformedForme || pokemon.speciesForme;
-    const dexSpecies = dex.species.get(speciesForme);
+    // const speciesForme = pokemon.transformedForme || pokemon.speciesForme;
+    // const dexSpecies = dex.species.get(speciesForme);
 
     groups.push({
-      label: (!!pokemon.transformedForme && 'Transformed') || dexSpecies?.baseSpecies || 'Current',
+      label: (!!pokemon.transformedForme && 'Transformed') || 'Formes',
       options: pokemon.altFormes.map((forme) => ({
         value: forme,
         label: forme,
-        rightLabel: forme === dexSpecies?.baseSpecies ? 'BASE' : undefined,
+        // rightLabel: forme === dexSpecies?.baseSpecies ? 'BASE' : undefined,
       })),
     });
 
