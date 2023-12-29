@@ -44,6 +44,7 @@ import {
   getDexForFormat,
   getGenfulFormat,
   hasMegaForme,
+  toggleableAbility,
 } from '@showdex/utils/dex';
 import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
 
@@ -174,7 +175,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!nonEmptyObject(battle) || (battle?.battleId && battle.battleId !== state.battleId)) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     const payload = {
@@ -218,7 +219,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !pokemon?.speciesForme) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[playerKey]?.active) {
@@ -299,7 +300,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !state[playerKey] || !pokemon?.calcdexId) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[playerKey]?.active) {
@@ -748,7 +749,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       : pokemonOrId?.calcdexId;
 
     if (!playerKey || !pokemonId || !state[playerKey]?.active) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     const pokemonIndex = state[playerKey].pokemon.findIndex((p) => p?.calcdexId === pokemonId);
@@ -811,7 +812,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !state[playerKey] || !nonEmptyObject(side)) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     // note: no need to clone the player here
@@ -858,7 +859,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!nonEmptyObject(field)) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (state.gen > 8 && ('weather' in field || 'terrain' in field)) {
@@ -866,19 +867,22 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {};
 
       AllPlayerKeys.forEach((playerKey) => {
-        if (!state[playerKey]?.active || !state[playerKey].pokemon?.length) {
+        const playerState = state[playerKey];
+
+        if ((state.operatingMode === 'battle' && !playerState?.active) || !playerState.pokemon?.length) {
           return;
         }
 
-        const pokemon = cloneAllPokemon(state[playerKey].pokemon);
-
-        const retoggleIds = pokemon
-          .filter((p) => PokemonRuinAbilities.includes(p?.dirtyAbility || p?.ability))
+        const retoggleIds = playerState.pokemon
+          // .filter((p) => PokemonRuinAbilities.includes(p?.dirtyAbility || p?.ability))
+          .filter((p) => toggleableAbility(p))
           .map((p) => p.calcdexId);
 
         if (!retoggleIds.length) {
           return;
         }
+
+        const pokemon = cloneAllPokemon(playerState.pokemon);
 
         retoggleIds.forEach((id) => {
           const retoggleIndex = pokemon.findIndex((p) => p.calcdexId === id);
@@ -892,8 +896,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           retoggle.abilityToggled = detectToggledAbility(retoggle, {
             gameType: state.gameType,
             pokemonIndex: retoggleIndex,
-            selectionIndex: state[playerKey].selectionIndex,
-            activeIndices: state[playerKey].activeIndices,
+            selectionIndex: playerState.selectionIndex,
+            activeIndices: playerState.activeIndices,
             weather: updatedField.weather,
             terrain: updatedField.terrain,
           });
@@ -940,7 +944,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !state[playerKey] || !Array.isArray(activeIndices)) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[playerKey]?.active) {
@@ -987,7 +991,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !state[playerKey] || (pokemonIndex || 0) < 0) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[playerKey]?.active) {
@@ -1091,7 +1095,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     ].forEach((pKey) => {
       const playerSource = pKey === playerKey ? playerPayload : state[pKey];
 
-      if (!playerSource?.active || !playerSource.pokemon?.length) {
+      if ((state.operatingMode === 'battle' && !playerSource?.active) || !playerSource.pokemon?.length) {
         return;
       }
 
@@ -1156,7 +1160,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !state[playerKey] || typeof autoSelect !== 'boolean') {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[playerKey]?.active) {
@@ -1185,7 +1189,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!playerKey || !state[playerKey]) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[playerKey]?.active) {
@@ -1215,7 +1219,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (!opponentKey || !state[opponentKey]) {
-      return void endTimer('(invalid args)');
+      return void endTimer('(bad args)');
     }
 
     if (!state[opponentKey]?.active) {
