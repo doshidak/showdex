@@ -121,6 +121,8 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
     playerKey: CalcdexPlayerKey,
     scope?: string,
   ) => void;
+
+  saveHonk: () => void;
 }
 
 const l = logger('@showdex/components/calc/useCalcdexContext()');
@@ -134,8 +136,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   const saveRequestTimeout = React.useRef<NodeJS.Timeout>(null);
 
   const saveHonk = () => void (async () => {
-    l.debug('saving honk', state.battleId);
-
     await dispatch(saveHonkdex({
       battleId: state.battleId,
     }));
@@ -145,6 +145,11 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   })();
 
   const queueHonkSave = () => {
+    // this seemingly redundant check is for calls outside of this hook, such as in BattleInfo
+    if (state.operatingMode !== 'standalone') {
+      return;
+    }
+
     if (saveRequestTimeout.current) {
       clearTimeout(saveRequestTimeout.current);
     }
@@ -186,11 +191,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       payload.defaultLevel = determineDefaultLevel(payload.format) || 100;
     }
 
-    const shouldSaveHonk = state.operatingMode === 'standalone'
-      && !!(state.name || payload.name)
-      && AllPlayerKeys.some((k) => !!state[k]?.pokemon?.length);
-
-    if (shouldSaveHonk) {
+    // only requirement to save a honk is to give it a name
+    if (state.operatingMode === 'standalone' && (state.name || payload.name)) {
       queueHonkSave();
     }
 
@@ -1243,5 +1245,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     autoSelectPokemon,
     assignPlayer,
     assignOpponent,
+    saveHonk: queueHonkSave,
   };
 };

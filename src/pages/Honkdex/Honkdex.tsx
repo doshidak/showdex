@@ -9,10 +9,17 @@ import {
 } from '@showdex/components/calc';
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
+import { type CalcdexBattleState } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import styles from './Honkdex.module.scss';
 
-export const Honkdex = (): JSX.Element => {
+export interface HonkdexProps {
+  openHonkdexInstance?: (instanceId?: string, initState?: Partial<CalcdexBattleState>) => void;
+}
+
+export const Honkdex = ({
+  openHonkdexInstance,
+}: HonkdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useCalcdexSize(containerRef);
@@ -45,6 +52,7 @@ export const Honkdex = (): JSX.Element => {
 
         <BattleInfo
           className={styles.battleInfo}
+          openHonkdexInstance={openHonkdexInstance}
         />
 
         <PlayerCalc

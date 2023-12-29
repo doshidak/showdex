@@ -34,13 +34,13 @@ $active-color: (
 .picon {
   position: relative;
   @include flex.row-center;
+  z-index: 1; // to go over the tooltip's arrow (circularHp will be behind it otherwise)
 
   .circularHp {
     @include position.absolute-center;
     width: 36px;
     height: 36px;
     @include transition.apply(color);
-    z-index: 1;
 
     .light & {
       color: color.alpha(map.get($active-color, light), 0.64);
@@ -79,26 +79,6 @@ $active-color: (
     @include spacing.margin($right: 4px);
     @include font.apply(fonts.$mono);
   }
-
-  /*
-  .activeLabel {
-    @include spacing.margin($right: 4px);
-    font-weight: 700;
-    font-size: 8px;
-    letter-spacing: 0.01px;
-    text-indent: 0.01px;
-    text-transform: uppercase;
-    line-height: 9px;
-
-    .light & {
-      color: map.get($active-color, light);
-    }
-
-    .dark & {
-      color: map.get($active-color, dark);
-    }
-  }
-  */
 
   .species {
     font-weight: 600;
@@ -155,24 +135,6 @@ $active-color: (
   @include spacing.margin($left: 2px);
 }
 
-/*
-.status {
-  @include flex.row($align: center);
-  @include spacing.margin($x: auto);
-  @include font.apply(fonts.$mono);
-
-  & > *:not(:last-child) {
-    @include spacing.margin($right: 4px);
-  }
-
-  .hpPercentage {
-    font-size: 10px;
-    line-height: 11px;
-    opacity: 0.88;
-  }
-}
-*/
-
 .stats {
   display: grid;
   grid-area: span 1 / 1;
@@ -198,6 +160,7 @@ $active-color: (
   }
 
   .statValue {
+    @include font.apply(fonts.$mono);
     font-size: 10px;
     line-height: 11px;
 

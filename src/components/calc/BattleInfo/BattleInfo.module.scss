@@ -8,81 +8,103 @@
 
 .container {
   display: grid;
-  grid-template-columns: minmax(0, 0.25fr) minmax(0, 0.25fr) minmax(150px, 1fr);
+  grid-template-columns: min-content minmax(150px, 1fr);
   column-gap: 12px;
   align-content: center;
-  @include spacing.padding($all: 12px, $top: 10px);
+  @include spacing.padding($all: 8px);
   border-radius: 12px;
-  // @include transition.apply(background-color, box-shadow);
   @include transition.apply(box-shadow);
 
-  &.verySmol {
-    grid-template-columns: repeat(2, minmax(100px, 1fr));
-    row-gap: 10px;
-  }
-
   &.light {
-    // background-color: color.alpha(colors.$white, 0.48);
     box-shadow: (
       0 0 1px color.alpha(colors.$black, 0.16),
-      0 0 8px color.alpha(colors.$gray-dark, 0.16),
+      0 0 6px color.alpha(colors.$gray-dark, 0.16),
     );
   }
 
   &.dark {
-    // background-color: color.alpha(#121212, 0.4);
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.32),
-      0 0 8px color.alpha(colors.$black, 0.48),
+      0 0 6px color.alpha(colors.$black, 0.4),
     );
   }
-}
-
-.tooltipContent {
-  position: relative;
-  text-align: center;
-  white-space: normal;
-  user-select: none;
 }
 
 button.toggleButton {
   font-size: 8px;
 }
 
-.labelContainer {
+.genWarning {
   @include flex.row($align: center);
-  @include spacing.margin($bottom: 4px, $left: 5px);
+  @include spacing.margin($bottom: 10px);
+  @include spacing.padding($all: 8px);
+  border: 0.5px solid colors.$transparent;
+  border-radius: 8px;
+  @include transition.apply(color, background-color, border-color, box-shadow);
+  z-index: 1; // to go over the Tooltip's arrow
 
-  button.toggleButton {
-    @include spacing.margin($left: 8px);
+  &.light {
+    color: color.shade(colors.$pink, 16%);
+    background-color: color.alpha(color.shade(colors.$pink, 16%), 0.16);
+    border-color: color.alpha(color.shade(colors.$pink, 16%), 0.4);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 4px color.alpha(color.shade(colors.$pink, 16%), 0.48),
+    );
+  }
+
+  &.dark {
+    color: colors.$pink;
+    background-color: color.alpha(colors.$pink, 0.16);
+    border-color: color.alpha(colors.$pink, 0.4);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$white, 0.16),
+      0 0 4px color.alpha(colors.$pink, 0.4),
+    );
+  }
+
+  i {
+    display: inline-block;
+    vertical-align: middle;
+    @include spacing.margin($right: 4px);
+    font-size: 12px;
+    line-height: 13px;
+    opacity: 0.72;
+  }
+
+  .description {
+    @include font.apply(fonts.$primary, ( font-weight: 400 ));
+    font-size: 10px;
+    line-height: 13px;
+    white-space: normal;
   }
 }
 
-.dropdownLabel {
-  @include font.apply(fonts.$primary, ( font-weight: 500 ));
-  text-transform: uppercase;
-  user-select: none;
-  @include transition.apply(color);
+div.genOptionButton {
+  &.genLocked {
+    &.light .label {
+      color: color.alpha(colors.$black, 0.64);
+    }
 
-  .light & {
-    color: color.alpha(colors.$black, 0.8);
-  }
-
-  .dark & {
-    color: color.alpha(colors.$white, 0.8);
+    &.dark .label {
+      color: color.alpha(colors.$white, 0.64);
+    }
   }
 }
 
 .honkInfo {
-  @include flex.row($align: center);
+  @include flex.column;
+  align-self: center;
+  @include spacing.padding($right: 6px);
+}
 
-  .verySmol & {
-    grid-area: 2 / span 2;
-  }
+.honkProps {
+  @include flex.row($align: center);
+  @include spacing.margin($top: 6px);
 }
 
 .honkName {
-  @include spacing.padding($x: 2px);
+  @include spacing.padding($x: 4px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
   font-size: 14px;
   letter-spacing: 0.1px;
@@ -90,13 +112,13 @@ button.toggleButton {
 }
 
 .honkStatus {
-  @include spacing.margin($left: 8px);
-  @include font.apply(fonts.$mono);
-  font-size: 10px;
-  line-height: 11px;
-  opacity: 0.64;
-  user-select: none;
-  @include transition.apply(color);
+  @include spacing.margin($left: 12px);
+  // @include font.apply(fonts.$mono);
+  // font-size: 10px;
+  // line-height: 11px;
+  // opacity: 0.64;
+  // user-select: none;
+  // @include transition.apply(color);
 
   &.saved {
     .light & {

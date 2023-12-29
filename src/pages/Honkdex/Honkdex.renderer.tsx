@@ -5,6 +5,7 @@ import { CalcdexErrorBoundary, CalcdexProvider } from '@showdex/components/calc'
 import { ErrorBoundary } from '@showdex/components/debug';
 import { SandwichProvider } from '@showdex/components/layout';
 import { type RootStore } from '@showdex/redux/store';
+import { openHonkdexInstance } from '@showdex/utils/app';
 import { Honkdex } from './Honkdex';
 
 /**
@@ -24,7 +25,17 @@ export const HonkdexRenderer = (
     >
       <SandwichProvider>
         <CalcdexProvider battleId={instanceId}>
-          <Honkdex />
+          <Honkdex
+            openHonkdexInstance={(
+              id,
+              initState,
+            ) => openHonkdexInstance(
+              store,
+              HonkdexRenderer, // *inception_horn.wav*
+              id,
+              initState,
+            )}
+          />
         </CalcdexProvider>
       </SandwichProvider>
     </ErrorBoundary>

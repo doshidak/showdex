@@ -1,4 +1,5 @@
 export * from './Dropdown';
+export * from './GenField';
 export * from './InlineField';
 export * from './MoveCategoryField';
 export * from './PokeTypeField';

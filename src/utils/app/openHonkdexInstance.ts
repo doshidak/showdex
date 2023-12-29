@@ -1,6 +1,7 @@
 import * as ReactDOM from 'react-dom/client';
 import { v4 as uuidv4 } from 'uuid';
 import { type GenerationNum } from '@smogon/calc';
+import { type CalcdexBattleState } from '@showdex/interfaces/calc';
 import { type CalcdexSliceState, type RootStore, calcdexSlice } from '@showdex/redux/store';
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -25,6 +26,7 @@ export const openHonkdexInstance = (
     instanceId: string,
   ) => void,
   instanceId?: string,
+  initState?: Partial<CalcdexBattleState>,
 ): void => {
   const shouldOpen = nonEmptyObject(app?.rooms)
     && typeof store?.getState === 'function'
@@ -46,12 +48,12 @@ export const openHonkdexInstance = (
   if (!instances?.[id]) {
     // setting defaults for now; user will be able to change these in the UI shortly
     // (as a future feature, could store the user's last config & restore them here)
-    const gen = env.int<GenerationNum>(
+    const gen = initState?.gen || env.int<GenerationNum>(
       'honkdex-default-gen',
       env.int<GenerationNum>('calcdex-default-gen', null),
     );
 
-    const format = getGenfulFormat(gen, env('honkdex-default-format'));
+    const format = getGenfulFormat(gen, initState?.format || env('honkdex-default-format'));
 
     // note: in 'standalone' mode, maxPokemon will extend by the HONKDEX_PLAYER_EXTEND_POKEMON value when the length of
     // the pokemon[] exceeds the current value; HONKDEX_PLAYER_MIN_POKEMON is the minimum shown Pokemon in the UI,

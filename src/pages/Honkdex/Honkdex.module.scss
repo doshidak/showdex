@@ -30,7 +30,7 @@
     color: colors.$white;
 
     &::before {
-      background-color: color.alpha(#121212, 0.88);
+      background-color: color.alpha(colors.$gray-darkest, 0.88);
     }
   }
 }

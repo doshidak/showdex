@@ -1,10 +1,10 @@
 import { eacute, times } from '@showdex/consts/core';
 
 /**
- * Labels for rendering group labels in the Pokemon presets dropdown.
+ * Kinda-standardized dictionary of genless format labels based on how Showdown formats them.
  *
- * * Used to be all abbreviations, but since v0.1.3, these are now spelled out
- *   for less-common formats, like `'AG'` (Anything Goes) & `'BH'` (Balanced Hackmons).
+ * * Used to be all abbreviations, but since v0.1.3, these are now spelled out for less-common formats, like `'AG'`
+ *   (Anything Goes) & `'BH'` (Balanced Hackmons).
  *
  * @since 0.1.0
  */
@@ -12,13 +12,17 @@ export const FormatLabels: Record<string, string> = {
   '1v1': '1v1',
   '2v2doubles': '2v2 Doubles',
   '350cup': '350 Cup',
+  '3v3singles': '3v3 Singles',
   '4v4doublesdraft': '4v4 Doubles Draft',
   '6v6doublesdraft': '6v6 Doubles Draft',
   almostanyability: 'AAA',
   alternatium: 'Alternatium',
   anythinggoes: 'AG',
   balancedhackmons: 'BH',
-  battlefactory: 'Battle Factory',
+  battlefactory: 'B-Factory',
+  battlefestival: 'B-Fest',
+  battlefestivaldoubles: 'B-Fest Doubles',
+  battlespot: 'B-Spot',
   battlespotsingles: 'B-Spot Singles',
   battlespotdoubles: 'B-Spot Doubles',
   battlespottriples: 'B-Spot Triples',
@@ -27,6 +31,7 @@ export const FormatLabels: Record<string, string> = {
   bdsp3v3singles: 'BDSP 3v3 Singles',
   bdspbattlefestivaldoubles: 'BDSP B-Fest Doubles',
   bdspcap: 'BDSP CAP',
+  bdspdoublesou: 'BDSP Doubles OU',
   bdspdraft: 'BDSP Draft',
   bdspmonotype: 'BDSP Monotype',
   bdspnu: 'BDSP NU',
@@ -36,6 +41,7 @@ export const FormatLabels: Record<string, string> = {
   bdspru: 'BDSP RU',
   bdspubers: 'BDSP Ubers',
   bdspuu: 'BDSP UU',
+  blueberryprologue: 'Blueberry Prologue',
   bonustype: 'Bonus Type',
   brokencup: 'Broken Cup',
   bss: 'BSS',
@@ -50,6 +56,7 @@ export const FormatLabels: Record<string, string> = {
   challengecup6v6: 'Challenge Cup 6v6',
   chimera1v1: 'Chimera 1v1',
   computergeneratedteams: 'CG Teams',
+  convergence: 'Convergence',
   crossevolution: 'Cross Evo',
   customgame: 'Customs',
   doublescustomgame: 'Doubles Customs',
@@ -85,9 +92,26 @@ export const FormatLabels: Record<string, string> = {
   linked: 'Linked',
   metronomebattle: 'Metronome',
   mixandmega: 'Mix & Mega',
-  moderngen1: 'Modern RB',
+  moderngen1: 'Modern RBY',
+  moderngen2: 'Modern GSC',
+  monothreatbug: 'Monothreat Bug',
+  monothreatdark: 'Monothreat Dark',
+  monothreatdragon: 'Monothreat Dragon',
+  monothreatelectric: 'Monothreat Electric',
   monothreatfairy: 'Monothreat Fairy',
+  monothreatfighting: 'Monothreat Fighting',
   monothreatfire: 'Monothreat Fire',
+  monothreatflying: 'Monothreat Flying',
+  monothreatghost: 'Monothreat Ghost',
+  monothreatgrass: 'Monothreat Grass',
+  monothreatground: 'Monothreat Ground',
+  monothreatice: 'Monothreat Ice',
+  monothreatnormal: 'Monothreat Normal',
+  monothreatpoison: 'Monothreat Poison',
+  monothreatpsychic: 'Monothreat Psychic',
+  monothreatrock: 'Monothreat Rock',
+  monothreatsteel: 'Monothreat Steel',
+  monothreatwater: 'Monothreat Water',
   monotype: 'Monotype',
   monotypebattlefactory: 'B-Factory Monotype',
   monotypecap: 'CAP Monotype',
@@ -111,6 +135,10 @@ export const FormatLabels: Record<string, string> = {
   natureswap: 'Nature Swap',
   nextou: 'Next OU',
   nfe: 'NFE', // NotFullyEvolved
+  nc1997: 'Nintendo Cup 1997',
+  nc1998: 'Nintendo Cup 1998',
+  nc1999: 'Nintendo Cup 1999',
+  nc2000: 'Nintendo Cup 2000',
   nintendocup1997: 'Nintendo Cup 1997',
   nintendocup1998: 'Nintendo Cup 1998',
   nintendocup1999: 'Nintendo Cup 1999',
@@ -124,8 +152,8 @@ export const FormatLabels: Record<string, string> = {
   petitcup: 'Petit Cup',
   pickyourteamrandombattle: 'PYT Randoms', // pretty young thing?
   pikacup: 'Pika Cup',
-  pokebilities: 'Pokebilities',
-  pokebilitiesaaa: 'Pokebilities AAA',
+  pokebilities: `Pok${eacute}bilities`,
+  pokebilitiesaaa: `Pok${eacute}bilities AAA`,
   pokecup: `Pok${eacute} Cup`,
   proteanpalace: 'Protean Palace',
   pu: 'PU', // PU (as in, "P-U, smells like ass"... I think)
@@ -133,10 +161,10 @@ export const FormatLabels: Record<string, string> = {
   randombattle: 'Randoms',
   randombattleblitz: 'Randoms Blitz',
   randombattlemayhem: 'Randoms Mayhem',
-  randombattlenodmax: 'Randoms No-Dmax',
-  randombattlepotd: 'Randoms PotD', // Pokemon of the Day
-  randomdex: 'Randoms Dex',
-  randomdoublesbattle: 'Randoms Doubles',
+  randombattlenodmax: 'No-Dmax Randoms',
+  randombattlepotd: 'PotD Randoms', // Pokemon of the Day
+  randomdex: 'Dex Randoms',
+  randomdoublesbattle: 'Doubles Randoms',
   randomroulette: 'Randoms Roulette',
   revelationmons: 'Revelationmons',
   ru: 'RU', // RarelyUsed
@@ -151,10 +179,10 @@ export const FormatLabels: Record<string, string> = {
   superstaffbros4: 'SSB4',
   tagteamsingles: 'Tag Team Singles',
   teradonation: 'Tera Donation',
-  terapreviewnatdexdraft: 'Tera NatDex Draft',
-  terapreviewpaldeadexdraft: 'Tera Paldea Draft',
-  thecardgame: 'The Card Game',
-  thelosersgame: 'The Loser\'s Game',
+  terapreviewnatdexdraft: 'NatDex Tera Draft',
+  terapreviewpaldeadexdraft: 'Paldea Tera Draft',
+  thecardgame: 'Card Game',
+  thelosersgame: 'Loser\'s Game',
   tiershift: 'Tier Shift',
   tradebacksou: 'Tradebacks OU',
   trademarked: 'Trademarked',
@@ -206,6 +234,26 @@ export const FormatSuffixes: [test: RegExp, replacement: string][] = [
 ];
 
 /**
+ * Dictionary of kinda-standardized format section names from Showdown's `BattleFormats` global.
+ *
+ * * Keys are formatted as IDs, so section names should be formatted prior before performing a lookup.
+ * * Not an exhasutive list & only includes those that must be matched entirely.
+ * * Partial matched section names like `'Past Generations'` & `'Past Gens Doubles OU'` should be handled separately.
+ * * This is primarily used by `buildFormatOptions()` for building out the dropdown group option labels.
+ *
+ * @since 1.2.0
+ */
+export const FormatSectionLabels: Record<string, string> = {
+  nationaldex: 'NatDex',
+  omofthemonth: 'Featured OMs',
+  othermetagames: 'OMs',
+  randomizedformatspotlight: 'Featured Randoms',
+  randomizedmetas: 'OM Randoms',
+  roaspotlight: 'Featured RoA', // Ruins of Alph (aka. old gens)
+  unofficialmetagames: 'UMs',
+};
+
+/**
  * Format-to-slug dictionary for accessing the Pokemon's Smogon StrategyDex page specific to the format.
  *
  * @since 0.1.2
@@ -240,6 +288,10 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
   nationaldexru: 'national-dex-ru',
   nationaldexuu: 'national-dex-uu',
   nfe: 'nfe',
+  nc1997: 'nintendo-cup-1997',
+  nc1998: 'nintendo-cup-1998',
+  nc1999: 'nintendo-cup-1999',
+  nc2000: 'nintendo-cup-2000',
   nintendocup1997: 'nintendo-cup-1997',
   nintendocup1998: 'nintendo-cup-1998',
   nintendocup1999: 'nintendo-cup-1999',

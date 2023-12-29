@@ -6,12 +6,11 @@ import { PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, getDexForFormat, hasNickname } from '@showdex/utils/dex';
 import { pluralize } from '@showdex/utils/humanize';
 import { determineColorScheme } from '@showdex/utils/ui';
 import { Picon } from '../Picon';
-// import { PokeHpBar } from '../PokeHpBar';
 import { PokeStatus } from '../PokeStatus';
 import { PokeType } from '../PokeType';
 import styles from './PokeGlance.module.scss';
@@ -94,9 +93,14 @@ export const PokeGlance = ({
     || (!!typesFromDex?.length && typesFromDex)
     || [];
 
-  const abilities = (!!currentAbilities?.length && currentAbilities)
-    || (nonEmptyObject(abilitiesFromDex) && Object.values(abilitiesFromDex))
-    || [];
+  const abilities = (
+    (!!currentAbilities?.length && currentAbilities)
+      || (nonEmptyObject(abilitiesFromDex) && Object.values(abilitiesFromDex))
+      || []
+  ).filter((a) => !!a && formatId(a) !== 'noability');
+
+  const shouldShowAbility = showAbility && !!(ability || abilities.length);
+  const shouldShowItem = showItem && !!prevItem;
 
   const activeBadgeRef = React.useRef<BadgeInstance>(null);
 
@@ -127,13 +131,6 @@ export const PokeGlance = ({
 
       <div className={styles.top}>
         <div className={styles.picon}>
-          <Picon
-            pokemon={{
-              speciesForme,
-              item: (!itemEffect && item) || null,
-            }}
-          />
-
           {
             (showStatus && !!hpPercentage && (hpPercentage !== 1)) &&
             <CircularBar
@@ -141,17 +138,17 @@ export const PokeGlance = ({
               value={hpPercentage}
             />
           }
+
+          <Picon
+            pokemon={{
+              speciesForme,
+              item: (!itemEffect && item) || null,
+            }}
+          />
         </div>
 
         <div className={styles.details}>
           <div className={cx(styles.detailsRow, styles.name)}>
-            {/* {
-              active &&
-              <div className={styles.activeLabel}>
-                Active
-              </div>
-            } */}
-
             {
               (showStatus && (status !== 'ok' || !hpPercentage || hpPercentage !== 1)) &&
               <PokeStatus
@@ -210,6 +207,7 @@ export const PokeGlance = ({
                   <PokeType
                     key={`PokeGlanceContent:${id}:PokeType:${type}`}
                     className={styles.type}
+                    containerSize={types.length > 1 && teraType ? 'sm' : 'xl'}
                     type={type}
                     highlight={!terastallized}
                     reverseColorScheme={reverseColorScheme}
@@ -219,9 +217,10 @@ export const PokeGlance = ({
             }
 
             {
-              (!!teraType && teraType !== '???') &&
+              !!teraType &&
               <PokeType
                 className={styles.teraType}
+                containerSize={types.length > 1 ? 'sm' : 'xl'}
                 type={teraType}
                 teraTyping
                 highlight={terastallized}
@@ -231,28 +230,6 @@ export const PokeGlance = ({
           </div>
         </div>
       </div>
-
-      {/* {
-        showStatus &&
-        <div className={styles.status}>
-          <PokeHpBar
-            hp={hpPercentage}
-            width={84}
-            reverseColorScheme={reverseColorScheme}
-          />
-
-          <div className={styles.hpPercentage}>
-            {Math.round(hpPercentage * 100)}%
-          </div>
-
-          <PokeStatus
-            status={status === 'ok' ? undefined : status}
-            override={status === 'ok' ? status : undefined}
-            fainted={!hpPercentage}
-            highlight
-          />
-        </div>
-      } */}
 
       {
         (showBaseStats && nonEmptyObject(baseStats)) &&
@@ -297,7 +274,7 @@ export const PokeGlance = ({
       }
 
       {
-        (showAbility || (showItem && !!prevItem)) &&
+        (shouldShowAbility || shouldShowItem) &&
         <div className={styles.specs}>
           {
             !!ability &&
@@ -313,7 +290,7 @@ export const PokeGlance = ({
           }
 
           {
-            (showAbility && !ability && !!abilities.length) &&
+            (shouldShowAbility && !ability) &&
             <>
               <div className={styles.specName}>
                 {pluralize(abilities.length, 'Abilit:ies:y', { printNum: false })}
