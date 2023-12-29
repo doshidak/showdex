@@ -447,7 +447,7 @@ export const PokeInfo = ({
                 optionTooltip={PokeGlanceOptionTooltip}
                 optionTooltipProps={{ format }}
                 input={{
-                  name: `PokeInfo:SpeciesForme:${pokemonKey}`,
+                  name: `${l.scope}:${pokemonKey}:SpeciesForme`,
                   value: pokemon?.speciesForme,
                   onChange: (value: string) => {
                     const s = `${l.scope}:Dropdown~SpeciesForme:input.onChange()`;
@@ -512,7 +512,7 @@ export const PokeInfo = ({
 
             {
               operatingMode === 'standalone' &&
-              <div className={styles.level}>
+              <div className={cx(styles.level, styles.standalone)}>
                 <div
                   className={cx(
                     styles.dim,
@@ -530,8 +530,12 @@ export const PokeInfo = ({
                   inputClassName={styles.levelInputField}
                   label={`Level for ${friendlyPokemonName}`}
                   hideLabel
-                  hint={pokemon?.level?.toString() || defaultLevel}
-                  fallbackValue={defaultLevel}
+                  hint={(
+                    pokemon?.speciesForme
+                      ? (pokemon.level?.toString() || defaultLevel)
+                      : '???'
+                  )}
+                  fallbackValue={pokemon?.speciesForme ? defaultLevel : null}
                   min={1}
                   max={100}
                   step={1}
@@ -539,8 +543,8 @@ export const PokeInfo = ({
                   clearOnFocus
                   absoluteHover
                   input={{
-                    name: `PokeInfo:Level:${pokemonKey}`,
-                    value: pokemon?.level || defaultLevel,
+                    name: `${l.scope}:${pokemonKey}:Level`,
+                    value: pokemon?.speciesForme ? (pokemon.level || defaultLevel) : null,
                     onChange: (value: number) => updatePokemon({
                       level: value,
                     }, `${l.scope}:ValueField~Level:input.onChange()`),
@@ -555,7 +559,7 @@ export const PokeInfo = ({
               label={`Types for ${friendlyPokemonName}`}
               multi
               input={{
-                name: `PokeInfo:Types:${pokemonKey}`,
+                name: `${l.scope}:${pokemonKey}:Types`,
                 value: [...(pokemon?.dirtyTypes || [])],
                 onChange: (types: Showdown.TypeName[]) => updatePokemon({
                   dirtyTypes: [...(types || [])],
@@ -581,7 +585,7 @@ export const PokeInfo = ({
                 label={`Tera Type for ${friendlyPokemonName}`}
                 title="Tera Type"
                 input={{
-                  name: `PokeInfo:TeraType:${pokemonKey}`,
+                  name: `${l.scope}:${pokemonKey}:TeraType`,
                   value: pokemon?.dirtyTeraType || pokemon?.teraType || '???',
                   onChange: (type: Showdown.TypeName) => updatePokemon({
                     dirtyTeraType: type,
@@ -644,9 +648,15 @@ export const PokeInfo = ({
                         styles.status,
                         !pokemon?.speciesForme && styles.disabled,
                       )}
-                      status={currentStatus === 'ok' ? undefined : currentStatus}
-                      override={currentStatus === 'ok' ? currentStatus : undefined}
-                      fainted={!hpPercentage}
+                      status={!pokemon?.speciesForme || currentStatus === 'ok' ? undefined : currentStatus}
+                      override={(
+                        !pokemon?.speciesForme
+                          ? '???'
+                          : currentStatus === 'ok'
+                            ? currentStatus
+                            : undefined
+                      )}
+                      fainted={!!pokemon?.speciesForme && !hpPercentage}
                       highlight
                       containerSize={containerSize}
                     />
@@ -747,9 +757,9 @@ export const PokeInfo = ({
 
           <Dropdown
             aria-label={`Available Sets for ${friendlyPokemonName}`}
-            hint="None"
+            hint={pokemon?.speciesForme ? 'None' : '???'}
             input={{
-              name: `PokeInfo:${pokemonKey}:Preset`,
+              name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
               onChange: (id: string) => applyPreset(
                 id,
@@ -836,7 +846,7 @@ export const PokeInfo = ({
                 hidden: !settings?.showAbilityTooltip,
               }}
               input={{
-                name: `PokeInfo:${pokemonKey}:Ability`,
+                name: `${l.scope}:${pokemonKey}:${pokemonKey}:Ability`,
                 value: legacy ? null : abilityName,
                 onChange: (value: AbilityName) => updatePokemon({
                   dirtyAbility: value,
@@ -884,7 +894,7 @@ export const PokeInfo = ({
               aria-label={`Available ${showPresetSpreads ? 'Spreads' : 'Natures'} for ${friendlyPokemonName}`}
               hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               input={{
-                name: `PokeInfo:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
+                name: `${l.scope}:${pokemonKey}:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
                 value: legacy ? null : (showPresetSpreads ? currentSpread : pokemon?.nature),
                 onChange: (name: string) => updatePokemon(
                   showPresetSpreads
@@ -944,7 +954,7 @@ export const PokeInfo = ({
 
             <Dropdown
               aria-label={`Available Items for ${friendlyPokemonName}`}
-              hint={gen === 1 ? 'N/A' : 'None'}
+              hint={gen === 1 ? 'N/A' : (pokemon?.speciesForme ? 'None' : '???')}
               tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
                 <div
                   className={cx(
@@ -978,7 +988,7 @@ export const PokeInfo = ({
                 hidden: !settings?.showItemTooltip,
               }}
               input={{
-                name: `PokeInfo:${pokemonKey}:Item`,
+                name: `${l.scope}:${pokemonKey}:${pokemonKey}:Item`,
                 value: gen === 1 ? null : itemName,
                 onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),

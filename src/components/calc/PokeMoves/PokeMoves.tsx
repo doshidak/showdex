@@ -420,6 +420,7 @@ export const PokeMoves = ({
                   clearOnFocus
                   absoluteHover
                   input={{
+                    name: `${l.scope}:${pokemonKey}:FaintCounter`,
                     value: pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0),
                     onChange: (value: number) => updatePokemon({
                       dirtyFaintCounter: value === pokemon.faintCounter
@@ -609,11 +610,11 @@ export const PokeMoves = ({
           && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange);
 
         return (
-          <React.Fragment key={`PokeMoves:Moves:${pokemonKey}:MoveRow:${i}`}>
+          <React.Fragment key={`${l.scope}:${pokemonKey}:MoveRow:Moves:${i}`}>
             <TableGridItem align="left">
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for ${friendlyPokemonName}`}
-                hint="--"
+                hint={pokemon?.speciesForme ? '--' : '???'}
                 optionTooltip={PokeMoveOptionTooltip}
                 optionTooltipProps={{
                   format,
@@ -622,12 +623,12 @@ export const PokeMoves = ({
                   hidden: !settings?.showMoveTooltip,
                 }}
                 input={{
-                  name: `PokeMoves:Moves:${pokemonKey}:Dropdown:${i}`,
+                  name: `${l.scope}:${pokemonKey}:Moves:${i}`,
                   value: moveName,
                   onChange: (name: MoveName) => handleMoveChange(name, i),
                 }}
                 options={moveOptions}
-                noOptionsMessage="No Moves Found"
+                noOptionsMessage="No Moves"
                 disabled={!pokemon?.speciesForme}
               />
             </TableGridItem>
@@ -637,7 +638,7 @@ export const PokeMoves = ({
                 <div className={styles.editorLeft}>
                   <PokeTypeField
                     input={{
-                      name: `PokeMoves:${pokemonKey}:Moves:PokeTypeField:${moveName}`,
+                      name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Type`,
                       value: moveOverrides.type,
                       onChange: (value: Showdown.TypeName) => updatePokemon({
                         moveOverrides: {
@@ -651,7 +652,7 @@ export const PokeMoves = ({
                     ariaLabel={`Stat Overrides for ${moveName} of ${friendlyPokemonName}`}
                     format={format}
                     input={{
-                      name: `PokeMoves:${pokemonKey}:Moves:MoveCategoryField:${moveName}`,
+                      name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Category`,
                       value: moveOverrides,
                       onChange: (value: Partial<CalcdexMoveOverride>) => updatePokemon({
                         moveOverrides: { [moveName]: value },
@@ -713,7 +714,7 @@ export const PokeMoves = ({
                         clearOnFocus
                         absoluteHover
                         input={{
-                          name: `PokeMoves:${pokemonKey}:Moves:ValueField~Hits:${moveName}`,
+                          name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Hits`,
                           value: moveOverrides.hits,
                           onChange: (value: number) => updatePokemon({
                             moveOverrides: {
@@ -745,7 +746,7 @@ export const PokeMoves = ({
                         clearOnFocus
                         absoluteHover
                         input={{
-                          name: `PokeMoves:${pokemonKey}:Moves:ValueField~BasePower:${moveName}`,
+                          name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:BasePower`,
                           value: moveOverrides[basePowerKey],
                           onChange: (value: number) => updatePokemon({
                             moveOverrides: {
@@ -799,7 +800,7 @@ export const PokeMoves = ({
                         clearOnFocus
                         absoluteHover
                         input={{
-                          name: `PokeMoves:${pokemonKey}:Moves:ValueField~Hits:${moveName}`,
+                          name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Hits`,
                           value: moveOverrides.hits,
                           onChange: (value: number) => updatePokemon({
                             moveOverrides: {

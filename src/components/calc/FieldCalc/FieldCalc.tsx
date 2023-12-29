@@ -15,6 +15,7 @@ import {
 import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
+import { logger } from '@showdex/utils/debug';
 import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
 import { useCalcdexContext } from '../CalcdexContext';
 import styles from './FieldCalc.module.scss';
@@ -25,6 +26,8 @@ export interface FieldCalcProps {
   playerKey?: CalcdexPlayerKey;
   opponentKey?: CalcdexPlayerKey;
 }
+
+const l = logger('@showdex/components/calc/FieldCalc');
 
 export const FieldCalc = ({
   className,
@@ -211,9 +214,7 @@ export const FieldCalc = ({
             ?.replace("This Pokemon's allies", 'Allies');
 
           return (
-            <React.Fragment
-              key={`FieldCalc:${battleId || '???'}:${playerKey}:${label}:ToggleButton`}
-            >
+            <React.Fragment key={`${l.scope}:${battleId || '???'}:${playerKey}:${label}`}>
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}
@@ -317,9 +318,7 @@ export const FieldCalc = ({
             ?.replace("This Pokemon's allies", 'Allies');
 
           return (
-            <React.Fragment
-              key={`FieldCalc:${battleId || '???'}:${opponentKey}:${label}:ToggleButton`}
-            >
+            <React.Fragment key={`${l.scope}:${battleId || '???'}:${opponentKey}:${label}`}>
               <ToggleButton
                 className={styles.toggleButton}
                 label={label}

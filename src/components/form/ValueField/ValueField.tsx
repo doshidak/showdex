@@ -128,10 +128,10 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   const [active, setActive] = React.useState<boolean>(false);
 
   // this is only a visual value, so that we don't forcibly change the user's value as they're typing it
-  const [inputValue, setInputValue] = React.useState<string>(
-    input?.value?.toString()
-      || fallbackValue?.toString(),
-  );
+  const [inputValue, setInputValue] = React.useState<string>((
+    typeof !!(input?.value || fallbackValue) === 'number'
+      && (input?.value || fallbackValue).toString()
+  ) || '');
 
   // type number fields don't do a good job preventing users from typing in non-numeric characters
   // (like '.' and 'e') nor does it enforce the `min` and `max` values if typed in manually.

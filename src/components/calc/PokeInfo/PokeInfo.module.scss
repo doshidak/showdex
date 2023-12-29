@@ -160,6 +160,10 @@ button.nameButton {
   line-height: 9px;
   user-select: none;
 
+  &.standalone {
+    @include spacing.margin($left: 6px);
+  }
+
   .dim {
     opacity: 0.64;
     @include transition.apply(opacity);
