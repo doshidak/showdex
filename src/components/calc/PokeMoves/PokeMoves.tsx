@@ -65,6 +65,7 @@ export const PokeMoves = ({
     gen,
     format,
     rules,
+    field,
   } = state;
 
   const colorScheme = useColorScheme();
@@ -77,9 +78,15 @@ export const PokeMoves = ({
   const moveOptions = React.useMemo(() => buildMoveOptions(
     format,
     pokemon,
-    usage,
-    (settings?.showAllOptions && 'all') || (operatingMode === 'standalone' && 'hidden-power') || null,
+    {
+      usage,
+      field,
+      include: (settings?.showAllOptions && 'all')
+        || (operatingMode === 'standalone' && 'hidden-power')
+        || null,
+    },
   ), [
+    field,
     format,
     operatingMode,
     pokemon,
@@ -507,12 +514,12 @@ export const PokeMoves = ({
 
         // getMoveOverrideDefaults() could return null, so spreading here to avoid a "Cannot read properties of null" error
         // (could make it not return null, but too lazy atm lol)
-        const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon) };
+        const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) };
         const moveOverrides = { ...moveDefaults, ...pokemon?.moveOverrides?.[moveName] };
         const damagingMove = ['Physical', 'Special'].includes(moveOverrides.category);
 
         const hasOverrides = pokemon?.showMoveOverrides
-          && hasMoveOverrides(format, pokemon, moveName, opponentPokemon);
+          && hasMoveOverrides(format, pokemon, moveName, opponentPokemon, field);
 
         const showStellarToggle = (pokemon?.dirtyTeraType || pokemon?.teraType) === 'Stellar'
           && pokemon.terastallized;
@@ -522,7 +529,8 @@ export const PokeMoves = ({
             ?? (!!moveOverrides.type && !pokemon?.stellarMoveMap?.[moveOverrides.type])
         );
 
-        const showHitsField = !!moveDefaults.hits
+        const showHitsField = (!pokemon?.useZ && !pokemon?.useMax)
+          && !!moveDefaults.hits
           && !!moveDefaults.minHits
           && !!moveDefaults.maxHits
           && (moveDefaults.hits !== moveDefaults.minHits || moveDefaults.hits !== moveDefaults.maxHits);
@@ -620,6 +628,7 @@ export const PokeMoves = ({
                   format,
                   pokemon,
                   opponentPokemon,
+                  field,
                   hidden: !settings?.showMoveTooltip,
                 }}
                 input={{

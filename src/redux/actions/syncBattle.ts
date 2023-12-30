@@ -932,7 +932,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         // if revealed to have a Stellar teraType, update the stellarMoveMap for the Stellar STAB mechanic
         if (syncedPokemon.teraType === 'Stellar') {
-          syncedPokemon.stellarMoveMap = mapStellarMoves(syncedPokemon, battle.stepQueue, battleState.format);
+          syncedPokemon.stellarMoveMap = mapStellarMoves(syncedPokemon, battle.stepQueue, {
+            format: battleState.format,
+            field: syncedField,
+          });
         }
 
         // l.debug(

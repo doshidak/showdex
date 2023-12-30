@@ -1,5 +1,5 @@
 import { type AbilityName, type MoveName, Move as SmogonMove } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
@@ -28,6 +28,7 @@ export const createSmogonMove = (
   pokemon: CalcdexPokemon,
   moveName: MoveName,
   opponentPokemon: CalcdexPokemon,
+  field?: CalcdexBattleField,
 ): SmogonMove => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
@@ -67,13 +68,11 @@ export const createSmogonMove = (
     // isStellarFirstUse: false, // note: populated below
 
     // for moves that always crit, we need to make sure the crit doesn't apply when Z/Max'd
-    isCrit: determineCriticalHit(pokemon, moveName, format),
+    isCrit: determineCriticalHit(pokemon, moveName, { format }),
   };
 
-  const defaultOverrides = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon);
-  const overrides: SmogonMoveOverrides = {
-    ...determineMoveTargets(format, pokemon, moveName),
-  };
+  const defaultOverrides = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field);
+  const overrides: SmogonMoveOverrides = { ...determineMoveTargets(format, pokemon, moveName) };
 
   // check if the user specified any overrides for this move
   const {
@@ -104,7 +103,11 @@ export const createSmogonMove = (
 
   overrides.basePower = overrodeBasePower
     ? clamp(0, basePowerOverride)
-    : calcMoveBasePower(format, pokemon, moveName, opponentPokemon, overrides);
+    : calcMoveBasePower(format, pokemon, moveName, {
+      opponentPokemon,
+      field,
+      overrides,
+    });
 
   // update (2023/01/02): @smogon/calc added an alliesFainted property to their Pokemon class,
   // so no need to manually provide that functionality now; specified in createSmogonPokemon()

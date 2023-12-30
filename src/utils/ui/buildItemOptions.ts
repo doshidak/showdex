@@ -67,8 +67,10 @@ const findItemGroupIndices = (
  */
 export const buildItemOptions = (
   format: string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  usage?: CalcdexPokemonPreset,
+  pokemon: CalcdexPokemon,
+  config?: {
+    usage?: CalcdexPokemonPreset;
+  },
 ): CalcdexPokemonItemOption[] => {
   const gen = detectGenFromFormat(format);
   const options: CalcdexPokemonItemOption[] = [];
@@ -77,9 +79,8 @@ export const buildItemOptions = (
     return options;
   }
 
-  const {
-    altItems,
-  } = pokemon;
+  const { altItems } = pokemon;
+  const { usage } = config || {};
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
@@ -136,26 +137,6 @@ export const buildItemOptions = (
 
   const formatKey = guessTableFormatKey(format);
   const items = BattleTeambuilderTable[formatKey]?.items || BattleTeambuilderTable?.items;
-
-  if (!nonEmptyObject(items)) {
-    const allItems = Object.values(BattleItems || {})
-      .map((item) => item?.name as ItemName)
-      .filter((n) => !!n && !filterItems.includes(n))
-      .sort(usageSorter);
-
-    if (allItems.length) {
-      options.push({
-        label: 'All',
-        options: allItems.map((name) => ({
-          label: name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
-    }
-
-    return options;
-  }
 
   // use the BattleTeambuilderTable to group items by:
   // Popular, Items, Pokemon-Specific, Usually Useless & Useless
@@ -268,6 +249,26 @@ export const buildItemOptions = (
 
       filterItems.push(...uselessItems);
     }
+  }
+
+  if (!nonEmptyObject(items)) {
+    const allItems = Object.values(BattleItems || {})
+      .map((item) => item?.name as ItemName)
+      .filter((n) => !!n && !filterItems.includes(n))
+      .sort(usageSorter);
+
+    if (allItems.length) {
+      options.push({
+        label: 'Other',
+        options: allItems.map((name) => ({
+          label: name,
+          rightLabel: findUsagePercent(name),
+          value: name,
+        })),
+      });
+    }
+
+    // return options;
   }
 
   const otherItems = Object.values(BattleItems || {})

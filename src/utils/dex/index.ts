@@ -1,6 +1,7 @@
 export * from './alwaysCriticalHits';
 export * from './detectDoublesFormat';
 export * from './detectGenFromFormat';
+export * from './detectGroundedness';
 export * from './detectLegacyGen';
 export * from './determineCriticalHit';
 export * from './determineDefaultLevel';

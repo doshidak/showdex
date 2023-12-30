@@ -1,6 +1,5 @@
 import { type AbilityName, type MoveName } from '@smogon/calc';
 import { PokemonDmaxAbilityMoves, PokemonDmaxMoves, PokemonGmaxMoves } from '@showdex/consts/dex';
-import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from './getDexForFormat';
 
 /**
@@ -9,15 +8,20 @@ import { getDexForFormat } from './getDexForFormat';
  * * If `allowGmax` is `true`, any matching G-max move will be returned regardless of the `'-Gmax'` suffix in the `speciesForme`.
  * * Otherwise, this requires the `'-Gmax'` suffix in the passed-in `speciesForme` to distinguish between D-max and G-max moves!
  *   - e.g., `'Alcremie-Gmax'` should be passed in for the `speciesForme` argument, not just `'Alcremie'`.
+ * * As of v1.2.0, similar to `getZMove()`, you can provide the optional `config.moveType` to specify a dynamic type.
+ *   - This is also for moves like *Weather Ball* & *Terrain Pulse*.
  *
  * @see https://github.com/smogon/damage-calc/blob/bdf9e8c39fec7670ed0ce64e1fb58d1a4dc83b73/calc/src/move.ts#L242
  * @since 0.1.2
  */
 export const getMaxMove = (
   moveName: MoveName,
-  abilityName?: AbilityName,
-  speciesForme?: string,
-  allowGmax?: boolean,
+  config?: {
+    moveType?: Showdown.TypeName;
+    speciesForme?: string;
+    allowGmax?: boolean;
+    ability?: AbilityName;
+  },
 ): MoveName => {
   const dex = getDexForFormat();
   const dexMove = dex?.moves.get(moveName);
@@ -28,15 +32,28 @@ export const getMaxMove = (
 
   const {
     category: moveCategory,
-    type: moveType,
+    type: dexMoveType,
   } = dexMove;
 
   if (moveCategory === 'Status') {
     return 'Max Guard' as MoveName;
   }
 
-  const dexAbility = dex.abilities.get(abilityName);
-  const ability = (dexAbility?.exists && dexAbility.name as AbilityName) || null;
+  const {
+    moveType: configMoveType,
+    speciesForme,
+    allowGmax,
+    ability: abilityName,
+  } = config || {};
+
+  const moveType = configMoveType || dexMoveType;
+
+  const {
+    exists: abilityExists,
+    name: dexAbilityName,
+  } = dex.abilities.get(abilityName) || {};
+
+  const ability = (abilityExists && (dexAbilityName as AbilityName || abilityName)) || null;
 
   const hasAbilityMove = !!ability
     && !!PokemonDmaxAbilityMoves[ability]
@@ -47,16 +64,14 @@ export const getMaxMove = (
   }
 
   // check for G-max moves
-  if (speciesForme && (allowGmax || speciesForme.includes('-Gmax')) && PokemonGmaxMoves[moveType]) {
-    const gmaxMoves = PokemonGmaxMoves[moveType];
-    const speciesId = formatId(speciesForme);
+  const gmaxMove = (
+    !!speciesForme
+      && (allowGmax || speciesForme.includes('-Gmax'))
+      && PokemonGmaxMoves[moveType]?.[speciesForme.replace('-Gmax', '')]
+  ) || null;
 
-    // e.g., if move.type is 'Water' and speciesId is 'urshifurapidstrikegmax', the 'urshifurapidstrike' key would match
-    const matchedKey = Object.keys(gmaxMoves).find((k) => speciesId.includes(k));
-
-    if (gmaxMoves[matchedKey]) {
-      return gmaxMoves[matchedKey];
-    }
+  if (gmaxMove) {
+    return gmaxMove;
   }
 
   return PokemonDmaxMoves[moveType];

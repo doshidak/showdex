@@ -23,7 +23,9 @@ export const buildPresetOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   presets: CalcdexPokemonPreset[],
-  usages?: CalcdexPokemonPreset[],
+  config?: {
+    usages?: CalcdexPokemonPreset[];
+  },
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
 
@@ -31,6 +33,7 @@ export const buildPresetOptions = (
     return options;
   }
 
+  const { usages } = config || {};
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
 

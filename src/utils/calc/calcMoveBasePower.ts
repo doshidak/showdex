@@ -1,8 +1,8 @@
-import { type AbilityName, type MoveName } from '@smogon/calc';
+import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
 import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
-import { detectGenFromFormat, getDexForFormat } from '@showdex/utils/dex';
+import { detectGenFromFormat, detectGroundedness, getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
 import { type SmogonMoveOverrides } from './createSmogonMove';
 import { shouldBoostTeraStab } from './shouldBoostTeraStab';
@@ -21,14 +21,23 @@ import { shouldBoostTeraStab } from './shouldBoostTeraStab';
  * @since 1.1.0
  */
 export const calcMoveBasePower = (
-  format: string,
+  format: string | GenerationNum,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
-  opponentPokemon?: CalcdexPokemon,
-  overrides?: SmogonMoveOverrides,
+  config?: {
+    opponentPokemon?: CalcdexPokemon;
+    field?: CalcdexBattleField;
+    overrides?: SmogonMoveOverrides;
+  },
 ): number => {
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
+
+  const {
+    opponentPokemon,
+    field,
+    overrides,
+  } = config || {};
 
   const {
     teraType: revealedTeraType,
@@ -44,16 +53,24 @@ export const calcMoveBasePower = (
     hitCounter: currentHitCounter,
     faintCounter: currentFaintCounter,
     dirtyFaintCounter,
-    volatiles,
+    volatiles: volatileMap,
   } = pokemon || {};
 
-  const move = dex.moves.get(moveName);
-  const hiddenPowerMove = moveName?.startsWith('Hidden Power');
+  const {
+    exists: moveExists,
+    name: dexMoveName,
+    type: dexMoveType,
+    basePower: dexBasePower,
+    isZ,
+  } = dex.moves.get(moveName) || {};
+
+  const move = (moveExists && (dexMoveName as MoveName || moveName)) || null;
+  const hiddenPowerMove = move?.startsWith('Hidden Power');
 
   let basePower = (
     hiddenPowerMove
       ? calcHiddenPower(format, pokemon)
-      : (move?.exists && move.basePower)
+      : (!!move && dexBasePower)
   ) || 0;
 
   // note: the BP returned for Beat Up here is for the current `pokemon` only!
@@ -63,7 +80,7 @@ export const calcMoveBasePower = (
   // also also note: I lied, actually this BP might be used in the event where there are no eligible allies
   // for Beat Up (including the attacker itself) in gens 5+, so only the attacker actually strikes with
   // the base power calculated & returned here! c:
-  if (moveName === 'Beat Up' as MoveName && !basePower && gen > 4) { // basePower should be 0 in gens 5+
+  if (move === 'Beat Up' as MoveName && !basePower && gen > 4) { // basePower should be 0 in gens 5+
     const dexBaseAtk = transformedBaseStats?.atk ?? baseStats?.atk ?? 0;
     const baseAtk = dirtyBaseStats?.atk ?? dexBaseAtk;
 
@@ -75,12 +92,13 @@ export const calcMoveBasePower = (
   }
 
   // note: dirtyItem can be set to an empty string (i.e., '') to "clear" the item
-  const moveType = overrides?.type || move.type;
+  const moveType = overrides?.type || dexMoveType;
   const teraType = dirtyTeraType || revealedTeraType;
   const ability = dirtyAbility || revealedAbility;
   const item = dirtyItem ?? revealedItem;
   const hitCounter = clamp(0, currentHitCounter || 0);
   const faintCounter = clamp(0, dirtyFaintCounter ?? (currentFaintCounter || 0));
+  const volatiles = Object.keys(volatileMap || {});
 
   if (Object.keys(PokemonMoveSkinAbilities).includes(ability)) {
     // 4 of the 5 skinning abilities modify any Normal type moves, while the last one, Normalize, modifies all moves to
@@ -103,26 +121,42 @@ export const calcMoveBasePower = (
     const shouldBoostNormalize = ability === 'Normalize' as AbilityName
       && gen > 6 // hence this check (following the comment above)
       && !hiddenPowerMove
-      && !move.isZ
-      && !PokemonDenormalizedMoves.includes(moveName);
+      && !isZ
+      && !PokemonDenormalizedMoves.includes(move);
 
     if (shouldBoostNormalize) {
       basePower *= 1.2;
     }
   }
 
-  if (moveName === 'Rage Fist' as MoveName && hitCounter > 0) {
+  // according to the Bulbapedia (as of 2023/12/29):
+  // "During any type of weather except strong winds, Weather Ball's power doubles to 100."
+  if (move === 'Weather Ball' as MoveName && field?.weather && field.weather !== 'Strong Winds') {
+    basePower *= 2; // could do this, as long as basePower is 50 from the dex o_O
+    // basePower = 100; // fuck it yolo
+  }
+
+  if (move === 'Terrain Pulse' as MoveName && field?.terrain && detectGroundedness(pokemon, field)) {
+    // with the Mega Launcher ability, they gain a 50% boost for Pulse moves
+    if (ability === 'Mega Launcher' as AbilityName) {
+      basePower *= 1.5; // e.g., basePower = 50 -> 75
+    }
+
+    basePower *= 2; // e.g., w/ Mega Launcher = 150; w/o = 100
+  }
+
+  if (move === 'Rage Fist' as MoveName && hitCounter > 0) {
     basePower = clamp(0, basePower * (1 + hitCounter), 350);
   }
 
-  if (moveName === 'Last Respects' as MoveName && faintCounter > 0) {
+  if (move === 'Last Respects' as MoveName && faintCounter > 0) {
     basePower = clamp(0, basePower * (1 + faintCounter), 5050);
   }
 
   // note: had to manually disable the auto-boost in @smogon/calc (specifically in the gen56 & gen789 mechanics files),
   // which is included in this project's @smogon/calc patch
   // update (2023/11/06): this needs to be applied BEFORE the Tera STAB boost oops
-  if (moveName === 'Acrobatics' as MoveName && !item) {
+  if (move === 'Acrobatics' as MoveName && !item) {
     basePower *= 2;
   }
 
@@ -130,12 +164,12 @@ export const calcMoveBasePower = (
   // leaving this logic here to show the boosted BP in the move's tooltip;
   // also, this mechanic comes AFTER any boosts from Rage Fist/Last Respects
   // (verified from the Showdown server source code)
-  if (shouldBoostTeraStab(format, pokemon, moveName, basePower)) {
+  if (shouldBoostTeraStab(format, pokemon, move, basePower)) {
     basePower = 60;
   }
 
   // Tera Blast becomes 100 BP when Terastallized to the Stellar type
-  if (moveName === 'Tera Blast' as MoveName && teraType === 'Stellar' && terastallized) {
+  if (move === 'Tera Blast' as MoveName && teraType === 'Stellar' && terastallized) {
     basePower = 100;
   }
 

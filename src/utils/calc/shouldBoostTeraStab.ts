@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc';
+import { type GenerationNum, type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
@@ -13,7 +13,7 @@ import { calcHiddenPower } from './calcHiddenPower';
  * @since 1.1.2
  */
 export const shouldBoostTeraStab = (
-  format: string,
+  format: string | GenerationNum,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
   basePowerOverride?: number,

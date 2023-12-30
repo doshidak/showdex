@@ -1,11 +1,12 @@
 import { type MoveName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   getDexForFormat,
+  getDynamicMoveType,
   getMaxMove,
   getZMove,
   getPokemonLearnset,
@@ -29,15 +30,24 @@ export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
  */
 export const buildMoveOptions = (
   format: string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  usage?: CalcdexPokemonPreset,
-  include?: 'all' | 'hidden-power',
+  pokemon: CalcdexPokemon,
+  config?: {
+    usage?: CalcdexPokemonPreset;
+    field?: CalcdexBattleField;
+    include?: 'all' | 'hidden-power';
+  },
 ): CalcdexPokemonMoveOption[] => {
   const options: CalcdexPokemonMoveOption[] = [];
 
   if (!pokemon?.speciesForme) {
     return options;
   }
+
+  const {
+    usage,
+    field,
+    include,
+  } = config || {};
 
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
@@ -80,35 +90,49 @@ export const buildMoveOptions = (
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
   if (useZ && !useMax && moves?.length) {
-    const zMoves = moves
-      .filter((n) => !!n && (getZMove(n, item) || n) !== n)
-      .sort(usageSorter);
+    const zTuple = moves
+      // .filter((n) => !!n && (getZMove(n, item) || n) !== n)
+      .map((n) => [
+        n,
+        (!!n && getZMove(n, {
+          moveType: getDynamicMoveType(pokemon, n, {
+            format,
+            field,
+          }),
+          item,
+        })) || n,
+      ])
+      .filter(([n, z]) => !!n && !!z && n !== z)
+      .sort(([a], [b]) => usageSorter(a, b));
 
     options.push({
       label: 'Z',
-      options: zMoves.map((name) => {
-        const zMove = getZMove(name, item) || name;
-
-        return {
-          label: zMove,
-          rightLabel: findUsagePercent(name),
-          subLabel: zMove === name ? null : `${uarr} ${name}`,
-          value: name,
-        };
-      }),
+      options: zTuple.map(([name, zMove]) => ({
+        label: zMove,
+        rightLabel: findUsagePercent(name),
+        subLabel: zMove === name ? null : `${uarr} ${name}`,
+        value: name,
+      })),
     });
 
-    filterMoves.push(...zMoves);
+    filterMoves.push(...zTuple.map(([n]) => n));
   }
 
-  // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
+  // unlike Z moves, every move becomes a Max move, hence no initial filtering
   if (useMax && moves?.length) {
     const sortedMoves = [...moves].sort(usageSorter);
 
     options.push({
       label: 'Max',
       options: sortedMoves.map((name) => {
-        const maxMove = getMaxMove(name, ability, speciesForme) || name;
+        const maxMove = getMaxMove(name, {
+          moveType: getDynamicMoveType(pokemon, name, {
+            format,
+            field,
+          }),
+          speciesForme,
+          ability,
+        }) || name;
 
         return {
           label: maxMove,

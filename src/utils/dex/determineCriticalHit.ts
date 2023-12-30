@@ -15,18 +15,30 @@ import { getZMove } from './getZMove';
 export const determineCriticalHit = (
   pokemon: CalcdexPokemon,
   moveName: MoveName,
-  format?: string | GenerationNum,
+  config?: {
+    format?: string | GenerationNum;
+  },
 ): boolean => {
   if (!pokemon?.speciesForme) {
     return;
   }
 
-  const ability = pokemon.dirtyAbility ?? pokemon.ability;
-  const item = pokemon.dirtyItem ?? pokemon.item;
+  const {
+    speciesForme,
+    ability: revealedAbility,
+    dirtyAbility,
+    item: revealedItem,
+    dirtyItem,
+  } = pokemon || {};
+
+  const { format } = config || {};
+
+  const ability = dirtyAbility ?? revealedAbility;
+  const item = dirtyItem ?? revealedItem;
 
   return (
     alwaysCriticalHits(moveName, format)
-      && (!pokemon.useZ || !getZMove(moveName, item))
-      && (!pokemon.useMax || !getMaxMove(moveName, ability, pokemon.speciesForme))
+      && (!pokemon.useZ || !getZMove(moveName, { item }))
+      && (!pokemon.useMax || !getMaxMove(moveName, { speciesForme, ability }))
   ) || pokemon.criticalHit;
 };

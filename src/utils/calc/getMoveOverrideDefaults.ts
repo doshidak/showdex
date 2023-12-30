@@ -1,5 +1,5 @@
 import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
 import {
   alwaysCriticalHits,
@@ -26,13 +26,14 @@ export const getMoveOverrideDefaults = (
   pokemon: CalcdexPokemon,
   moveName: MoveName,
   opponentPokemon?: CalcdexPokemon,
+  field?: CalcdexBattleField,
 ): CalcdexMoveOverride => {
   if (!pokemon?.speciesForme || !moveName || !format) {
     return null;
   }
 
   const dex = getDexForFormat(format);
-  const dexMove = dex.moves.get(moveName);
+  const dexMove = dex?.moves.get(moveName);
 
   if (!dexMove?.exists) {
     return null;
@@ -63,7 +64,10 @@ export const getMoveOverrideDefaults = (
   } = dexMove;
 
   // update (2023/07/27): running the type through getDynamicMoveType() now to handle moves like Raging Bull & Revelation Dance
-  const type = getDynamicMoveType(pokemon, moveName, format) || typeFromDex;
+  const type = getDynamicMoveType(pokemon, moveName, {
+    format,
+    field,
+  }) || typeFromDex;
 
   // only doing this for 1 move atm, so not making it into a function... yet o_O
   const stellarastallized = teraType === 'Stellar' && terastallized;
@@ -80,8 +84,12 @@ export const getMoveOverrideDefaults = (
   // update (2023/02/02): came across G-Max Fireball on a Cinderace-Gmax, which showed 140 BP.
   // turns out we need to separately lookup G-Max moves since maxMove.basePower refers to Max Flare.
   const gmaxMoveName = (
-    speciesForme.endsWith('-Gmax')
-      && getMaxMove(moveName, ability, speciesForme)
+    speciesForme.includes('-Gmax')
+      && getMaxMove(moveName, {
+        moveType: type,
+        speciesForme,
+        ability,
+      })
   ) || null;
 
   const gmaxBasePower = (
@@ -89,7 +97,11 @@ export const getMoveOverrideDefaults = (
       && dex.moves.get(gmaxMoveName)?.basePower
   ) || 0;
 
-  const basePower = calcMoveBasePower(format, pokemon, moveName, opponentPokemon);
+  const basePower = calcMoveBasePower(format, pokemon, moveName, {
+    opponentPokemon,
+    field,
+  });
+
   const criticalHit = alwaysCriticalHits(moveName, format);
 
   const minHits = (typeof multihit === 'number' && multihit) || (Array.isArray(multihit) && multihit[0]) || null;

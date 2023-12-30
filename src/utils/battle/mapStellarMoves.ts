@@ -1,5 +1,5 @@
 import { type GenerationNum, type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { getDexForFormat, getDynamicMoveType } from '@showdex/utils/dex';
 import { chunkStepQueueTurns } from './chunkStepQueueTurns';
 
@@ -16,11 +16,19 @@ import { chunkStepQueueTurns } from './chunkStepQueueTurns';
 export const mapStellarMoves = (
   pokemon: CalcdexPokemon,
   stepQueue: string[],
-  format?: string | GenerationNum,
+  config?: {
+    format?: string | GenerationNum;
+    field?: CalcdexBattleField,
+  },
 ): Partial<Record<Showdown.TypeName, MoveName>> => {
   if (!pokemon?.speciesForme || !pokemon.playerKey || !stepQueue.length) {
     return {};
   }
+
+  const {
+    format,
+    field,
+  } = config || {};
 
   const {
     speciesForme,
@@ -73,7 +81,11 @@ export const mapStellarMoves = (
 
     const dexMove = dex.moves.get(movePart);
     const moveName = (dexMove?.exists && dexMove.name as MoveName) || null;
-    const type = getDynamicMoveType(pokemon, moveName, format) || dexMove?.type;
+
+    const type = getDynamicMoveType(pokemon, moveName, {
+      format,
+      field,
+    }) || dexMove?.type;
 
     // note: we're only interested in the **first** successful move of the current `type` (hence the second conditional)
     if (!type || output[type]) {

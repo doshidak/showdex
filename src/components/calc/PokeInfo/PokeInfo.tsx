@@ -105,8 +105,10 @@ export const PokeInfo = ({
   const abilityOptions = React.useMemo(() => buildAbilityOptions(
     format,
     pokemon,
-    usage,
-    settings?.showAllOptions,
+    {
+      usage,
+      showAll: settings?.showAllOptions,
+    },
   ), [
     format,
     pokemon,
@@ -203,7 +205,7 @@ export const PokeInfo = ({
   const itemOptions = React.useMemo(() => buildItemOptions(
     format,
     pokemon,
-    usage,
+    { usage },
   ), [
     format,
     pokemon,
@@ -280,7 +282,7 @@ export const PokeInfo = ({
     format,
     pokemon,
     presets,
-    usages,
+    { usages },
   ), [
     format,
     pokemon,

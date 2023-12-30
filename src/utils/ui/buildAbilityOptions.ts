@@ -21,9 +21,11 @@ export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
  */
 export const buildAbilityOptions = (
   format: string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  usage?: CalcdexPokemonPreset,
-  showAll?: boolean,
+  pokemon: CalcdexPokemon,
+  config?: {
+    usage?: CalcdexPokemonPreset;
+    showAll?: boolean;
+  },
 ): CalcdexPokemonAbilityOption[] => {
   const options: CalcdexPokemonAbilityOption[] = [];
 
@@ -35,6 +37,11 @@ export const buildAbilityOptions = (
   if (legacy || !pokemon?.speciesForme) {
     return options;
   }
+
+  const {
+    usage,
+    showAll,
+  } = config || {};
 
   // const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
