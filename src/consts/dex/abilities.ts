@@ -114,3 +114,23 @@ export const PokemonToggleAbilities: Record<GameType, AbilityName[]> = {
     ...PokemonPassiveToggleAbilities,
   ],
 };
+
+/**
+ * Abilities that "skin" (i.e., override) the default types of a Pokemon's moves.
+ *
+ * * Strange name comes from the words *peau* (French), *sukin* (Japanese) & *seukin* (Korean) used in the non-English
+ *   counterparts, such as for *Pixilate*:
+ *   - *peau feerique* (French)
+ *   - *fearii-sukin* (Japanese)
+ *   - *peuri-seukin* (Korean)
+ * * Couldn't think of a better name, sorry.
+ *
+ * @since 1.2.0
+ */
+export const PokemonMoveSkinAbilities: Record<AbilityName, Showdown.TypeName> = {
+  Aerilate: 'Flying',
+  Galvanize: 'Electric',
+  Normalize: 'Normal',
+  Pixilate: 'Fairy',
+  Refrigerate: 'Ice',
+} as Record<AbilityName, Showdown.TypeName>;

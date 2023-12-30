@@ -1,14 +1,7 @@
 import { type AbilityName, type MoveName } from '@smogon/calc';
-import {
-  PokemonDmaxMoves,
-  PokemonDmaxAbilityMoves,
-  PokemonGmaxMoves,
-} from '@showdex/consts/dex';
+import { PokemonDmaxAbilityMoves, PokemonDmaxMoves, PokemonGmaxMoves } from '@showdex/consts/dex';
 import { formatId } from '@showdex/utils/core';
-import { logger } from '@showdex/utils/debug';
 import { getDexForFormat } from './getDexForFormat';
-
-const l = logger('@showdex/utils/dex/getMaxMove()');
 
 /**
  * Returns the corresponding Max/G-Max move for a given move.
@@ -21,50 +14,41 @@ const l = logger('@showdex/utils/dex/getMaxMove()');
  * @since 0.1.2
  */
 export const getMaxMove = (
-  // dex: Generation,
   moveName: MoveName,
   abilityName?: AbilityName,
   speciesForme?: string,
   allowGmax?: boolean,
 ): MoveName => {
   const dex = getDexForFormat();
+  const dexMove = dex?.moves.get(moveName);
 
-  if (!dex) {
+  if (!dexMove?.exists) {
     return null;
   }
 
-  const move = dex.moves.get(moveName);
+  const {
+    category: moveCategory,
+    type: moveType,
+  } = dexMove;
 
-  if (!move?.exists) {
-    if (__DEV__) {
-      l.warn(
-        'Provided moveName is not a valid move!',
-        '\n', 'move', move,
-        '\n', 'moveName', moveName,
-        '\n', 'abilityName', abilityName,
-        '\n', 'speciesForme', speciesForme,
-        '\n', 'allowGmax?', allowGmax,
-        '\n', '(You will only see this warning on development.)',
-      );
-    }
-
-    return null;
-  }
-
-  if (move.category === 'Status') {
+  if (moveCategory === 'Status') {
     return 'Max Guard' as MoveName;
   }
 
-  const ability = abilityName ? dex.abilities.get(abilityName) : null;
-  const abilityId = ability?.exists && ability.name ? formatId(ability.name) : null;
+  const dexAbility = dex.abilities.get(abilityName);
+  const ability = (dexAbility?.exists && dexAbility.name as AbilityName) || null;
 
-  if (abilityId === 'normalize') {
-    return PokemonDmaxMoves.Normal;
+  const hasAbilityMove = !!ability
+    && !!PokemonDmaxAbilityMoves[ability]
+    && (ability === 'Normalize' as AbilityName || moveType === 'Normal');
+
+  if (hasAbilityMove) {
+    return PokemonDmaxAbilityMoves[ability];
   }
 
   // check for G-max moves
-  if (speciesForme && (allowGmax || speciesForme.includes('-Gmax')) && PokemonGmaxMoves[move.type]) {
-    const gmaxMoves = PokemonGmaxMoves[move.type];
+  if (speciesForme && (allowGmax || speciesForme.includes('-Gmax')) && PokemonGmaxMoves[moveType]) {
+    const gmaxMoves = PokemonGmaxMoves[moveType];
     const speciesId = formatId(speciesForme);
 
     // e.g., if move.type is 'Water' and speciesId is 'urshifurapidstrikegmax', the 'urshifurapidstrike' key would match
@@ -75,10 +59,5 @@ export const getMaxMove = (
     }
   }
 
-  // check for abilities that override the Normal typing
-  if (move.type === 'Normal' && abilityId && PokemonDmaxAbilityMoves[abilityId]) {
-    return PokemonDmaxAbilityMoves[abilityId];
-  }
-
-  return PokemonDmaxMoves[move.type];
+  return PokemonDmaxMoves[moveType];
 };

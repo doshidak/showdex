@@ -73,7 +73,7 @@ export const mapStellarMoves = (
 
     const dexMove = dex.moves.get(movePart);
     const moveName = (dexMove?.exists && dexMove.name as MoveName) || null;
-    const type = getDynamicMoveType(pokemon, moveName) || dexMove?.type;
+    const type = getDynamicMoveType(pokemon, moveName, format) || dexMove?.type;
 
     // note: we're only interested in the **first** successful move of the current `type` (hence the second conditional)
     if (!type || output[type]) {

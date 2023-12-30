@@ -63,7 +63,7 @@ export const getMoveOverrideDefaults = (
   } = dexMove;
 
   // update (2023/07/27): running the type through getDynamicMoveType() now to handle moves like Raging Bull & Revelation Dance
-  const type = getDynamicMoveType(pokemon, moveName) || typeFromDex;
+  const type = getDynamicMoveType(pokemon, moveName, format) || typeFromDex;
 
   // only doing this for 1 move atm, so not making it into a function... yet o_O
   const stellarastallized = teraType === 'Stellar' && terastallized;

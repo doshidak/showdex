@@ -1,7 +1,10 @@
-import { type MoveName } from '@smogon/calc';
-import { PokemonTypeAssociativeItems } from '@showdex/consts/dex';
+import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
+import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities, PokemonTypeAssociativeItems } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
+import { detectGenFromFormat } from './detectGenFromFormat';
+import { getDexForFormat } from './getDexForFormat';
+import { getZMove } from './getZMove';
 
 /**
  * Determines the dynamic type of the provided `moveName`.
@@ -15,10 +18,25 @@ import { formatId } from '@showdex/utils/core';
 export const getDynamicMoveType = (
   pokemon: CalcdexPokemon,
   moveName: MoveName,
+  format?: string | GenerationNum,
 ): Showdown.TypeName => {
   if (!pokemon?.speciesForme || !moveName) {
     return null;
   }
+
+  const gen = detectGenFromFormat(format);
+  const dex = getDexForFormat(format);
+  const dexMove = dex?.moves.get(moveName);
+
+  if (!dexMove?.exists) {
+    return null;
+  }
+
+  const {
+    id: dexMoveId,
+    type: moveType,
+    isZ,
+  } = dexMove;
 
   const {
     speciesForme,
@@ -26,14 +44,30 @@ export const getDynamicMoveType = (
     teraType: revealedTeraType,
     dirtyTeraType,
     terastallized,
+    ability: revealedAbility,
+    dirtyAbility,
     item: revealedItem,
     dirtyItem,
+    useZ,
   } = pokemon;
 
   const formeId = formatId(speciesForme);
   const teraType = dirtyTeraType || revealedTeraType;
+  const ability = dirtyAbility || revealedAbility;
   const item = dirtyItem ?? revealedItem; // note: dirtyItem can be `''`, so using the nullish coalescing operator (`??`)
-  const moveId = formatId(moveName);
+  const moveId = dexMoveId || formatId(moveName);
+
+  // check Aerilate, Galvanize, Normalize, Pixilate & Refrigerate (possibly more idk check the const)
+  if (Object.keys(PokemonMoveSkinAbilities).includes(ability)) {
+    const hiddenPowerMove = moveName.startsWith('Hidden Power');
+    const zMove = !!isZ || (useZ && !!getZMove(moveName, item));
+    const shouldNormalize = ability === 'Normalize' as AbilityName
+      && (gen < 5 || (!hiddenPowerMove && !zMove && !PokemonDenormalizedMoves.includes(moveName)));
+
+    if (shouldNormalize || moveType === 'Normal') {
+      return PokemonMoveSkinAbilities[ability];
+    }
+  }
 
   switch (moveId) {
     // Aura Wheel, primarily used by Morpeko

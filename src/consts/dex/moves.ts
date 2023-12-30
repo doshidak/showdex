@@ -1,4 +1,5 @@
-import { type MoveName } from '@smogon/calc';
+import { type AbilityName, type MoveName } from '@smogon/calc';
+import { PokemonMoveSkinAbilities } from './abilities';
 
 /**
  * Z moves by type.
@@ -84,19 +85,32 @@ export const PokemonDmaxMoves: Record<Showdown.TypeName, MoveName> = {
 } as Record<Showdown.TypeName, MoveName>;
 
 /**
- * Dynamax moves by abilities that override the Normal typing.
- *
- * * Keys for abilities are formatted as IDs.
- *   - e.g., `'pixilate'` instead of `'Pixilate'`.
+ * Dynamax moves by abilities that override the moves' types.
  *
  * @since 1.0.3
  */
-export const PokemonDmaxAbilityMoves: Record<string, MoveName> = {
-  aerilate: PokemonDmaxMoves.Flying,
-  galvanize: PokemonDmaxMoves.Electric,
-  pixilate: PokemonDmaxMoves.Fairy,
-  refrigerate: PokemonDmaxMoves.Ice,
-};
+export const PokemonDmaxAbilityMoves: Record<AbilityName, MoveName> = {
+  // this is what the `Object.entries(PokemonMoveSkinAbilities)` bit below will do:
+  // Aerilate: PokemonDmaxMoves.Flying,
+  // Galvanize: PokemonDmaxMoves.Electric,
+  // Normalize: PokemonDmaxMoves.Normal,
+  // Pixilate: PokemonDmaxMoves.Fairy,
+  // Refrigerate: PokemonDmaxMoves.Ice,
+
+  ...(Object.entries(PokemonMoveSkinAbilities) as [AbilityName, Showdown.TypeName][])
+    .reduce((
+      prev,
+      [ability, type],
+    ) => {
+      if (!PokemonDmaxMoves[type]) {
+        return prev;
+      }
+
+      prev[ability] = PokemonDmaxMoves[type];
+
+      return prev;
+    }, {} as Record<AbilityName, MoveName>),
+} as Record<AbilityName, MoveName>;
 
 /**
  * Gigantamax moves by type, then by species forme.
@@ -151,6 +165,7 @@ export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName
     copperajah: 'G-Max Steelsurge' as MoveName,
     melmetal: 'G-Max Meltdown' as MoveName,
   },
+  Stellar: null,
   Water: {
     blastoise: 'G-Max Cannonade' as MoveName,
     drednaw: 'G-Max Stonesurge' as MoveName,
@@ -205,4 +220,36 @@ export const PokemonPivotMoves: MoveName[] = [
  */
 export const PokemonToggleMoves: MoveName[] = [
   'Power Trick',
+] as MoveName[];
+
+/**
+ * Moves that cannot be affected by the *Normalize* ability, which turns every move, including Status moves, into a
+ * Normal type move.
+ *
+ * * Note that in gen 4, the gen *Normalize* was introduced, these moves **are** affected by it.
+ *   - In other words, you shouldn't be using this list in gen 4 since a move like *Hidden Power Fire* will become Normal.
+ *   - You should check the gen first to make sure it's at least gen 5 before using this as an ignore list.
+ * * Starting in gens 5+, these moves are **no longer** affected by it.
+ *   - From the previous example, *Hidden Power Fire* will retain its Fire type, no longer becoming Normal like before.
+ * * This list does **not** include Z moves, which are **not** affected by it (i.e., should be in this list, but it ain't).
+ *   - While we do have all possible Z moves hardcoded where this list is defined, I'm too lazy to make it into a nice
+ *     array so just do a `dex.moves.get()` lookup & check the falsiness of the resulting `isZ` to pass this filter.
+ * * This list includes *Hidden Power*, but it doesn't include specific typed versions like *Hidden Power Fire*.
+ *   - Be wary that using `includes()` on this list will fail for typed *Hidden Power* moves, e.g.,
+ *     `PokemonDenormalizedMoves.includes('Hidden Power Fire')` produces `false`.
+ *   - In addition to the aforementioned gen 4 check, you should also do a partial string match for `'Hidden Power'`
+ *     using `moveName.startsWith()`.
+ *   - e.g., `'Hidden Power Fire'.startsWith('Hidden Power')` produces `true`.
+ *
+ * @since 1.2.0
+ */
+export const PokemonDenormalizedMoves: MoveName[] = [
+  'Hidden Power', // gens 5+ (warning: does not check typed Hidden Power's !!)
+  'Judgment', // gens 5+
+  'Multi-Attack', // gens 7+
+  'Natural Gift', // gens 5+
+  'Techno Blast', // gens 5+
+  'Terrain Pulse', // gens 7+
+  'Weather Ball', // gens 5+
+  // note: Z moves are supposed to be in this list, but I'm too lazy to programmatically construct it rn lmao
 ] as MoveName[];
