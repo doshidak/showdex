@@ -13,6 +13,7 @@ export const detectDoublesFormat = (
   && !detectLegacyGen(format) // if gen detection fails, this would pass anyway
   && [
     /doubles/,
+    /freeforall/,
     /triples/, // eh, @smogon/calc doesn't support a 'Triples' GameType, so 'Doubles' is better than nothing
     /vgc\d{2,4}/,
   ].some((r) => r.test(format));
