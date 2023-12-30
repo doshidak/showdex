@@ -136,6 +136,7 @@ export const useCalcdexPresets = (
           pokemon,
           {
             format: state.format,
+            formatOnly: true,
             source: 'usage',
             select: 'any',
           },
