@@ -27,6 +27,7 @@ export interface CalcdexPokeContextValue extends Omit<CalcdexContextValue, 'pres
   opponent: CalcdexPlayer;
   opponentPokemon: CalcdexPokemon;
   presetsLoading: boolean;
+  allUsages: CalcdexPokemonPreset[]; // for all Pokemon, used by buildFormeOptions() in the Honkdex
   presets: CalcdexPokemonPreset[];
   usages: CalcdexPokemonPreset[];
   usage: CalcdexPokemonPreset;
@@ -41,19 +42,21 @@ export interface CalcdexPokeContextValue extends Omit<CalcdexContextValue, 'pres
  * @since 1.1.1
  */
 export const CalcdexPokeContext = React.createContext<CalcdexPokeContextValue>({
-  state: null,
-  settings: null,
+  state: {} as CalcdexPokeContextValue['state'],
+  settings: {} as CalcdexPokeContextValue['settings'],
+  saving: [false, () => void 0],
 
   playerKey: null,
-  player: null,
-  playerPokemon: null,
-  opponent: null,
-  opponentPokemon: null,
+  player: {} as CalcdexPlayer,
+  playerPokemon: {} as CalcdexPokemon,
+  opponent: {} as CalcdexPlayer,
+  opponentPokemon: {} as CalcdexPokemon,
 
   presetsLoading: false,
+  allUsages: [],
   presets: [],
   usages: [],
-  usage: null,
+  usage: {} as CalcdexPokemonPreset,
 
   matchups: [],
 });

@@ -66,6 +66,7 @@ export const PokeInfo = ({
     player,
     playerPokemon: pokemon,
     presetsLoading,
+    allUsages,
     presets,
     usages,
     usage,
@@ -248,15 +249,17 @@ export const PokeInfo = ({
     </div>
   );
 
-  const showFormeDropdown = operatingMode === 'standalone';
-
-  const formeOptions = React.useMemo(() => buildFormeOptions(
-    showFormeDropdown ? format : null,
-    pokemon,
-  ), [
+  const formeOptions = React.useMemo(() => (operatingMode === 'standalone' && buildFormeOptions(
     format,
+    {
+      pokemon,
+      usages: allUsages,
+    },
+  )) || [], [
+    allUsages,
+    format,
+    operatingMode,
     pokemon,
-    showFormeDropdown,
   ]);
 
   const formeDisabled = !pokemon?.altFormes?.length;

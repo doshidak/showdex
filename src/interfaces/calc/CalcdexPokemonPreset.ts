@@ -68,7 +68,7 @@ export interface CalcdexPokemonPreset {
    *
    * @since 0.1.0
    */
-  calcdexId?: string;
+  calcdexId: string;
 
   /**
    * Alias of `calcdexId`, used internally by RTK Query in its internal tagging system.
@@ -159,8 +159,38 @@ export interface CalcdexPokemonPreset {
    */
   usage?: number;
 
-  speciesForme?: string;
+  /**
+   * Species forme that this preset applies to.
+   *
+   * * Generally this isn't hard filtered for & may appear for Pokemon of the same base species, but different forme.
+   *   - e.g., if this preset was for a *Charizard-Gmax*, it could appear if the current Pokemon was just *Charizard*.
+   *
+   * @example 'Talonflame'
+   * @since 0.1.0
+   */
+  speciesForme: string;
+
+  /**
+   * Usage percentage of this particular species forme in this specific `format`.
+   *
+   * * Primarily only available in the pkmn Usage Stats API (for formats like OU) & not Randoms.
+   * * Also primarily only visible in standalone Calcdexes, aka. Honkdexes, where the user can manually add Pokemon.
+   * * Value is a percentage represented as a decimal in the interval `[0, 1]`, both inclusive.
+   *
+   * @since 1.2.0
+   */
+  formeUsage?: number;
+
+  /**
+   * Pokemon's level.
+   *
+   * * Defaults to the `CalcdexBattleState`'s `defaultLevel` if unspecified.
+   *
+   * @example 50
+   * @since 0.1.0
+   */
   level?: number;
+
   gender?: Showdown.GenderName;
   hiddenPowerType?: string;
   teraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];

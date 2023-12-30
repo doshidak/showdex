@@ -1,8 +1,9 @@
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { getDexForFormat, guessTableFormatKey, guessTableFormatSlice } from '@showdex/utils/dex';
+import { usageAltPercentFinder, usageAltPercentSorter } from '@showdex/utils/presets';
 
 export type CalcdexPokemonFormeOption = DropdownOption<string>;
 
@@ -15,7 +16,10 @@ export type CalcdexPokemonFormeOption = DropdownOption<string>;
  */
 export const buildFormeOptions = (
   format: string,
-  pokemon?: CalcdexPokemon,
+  config?: {
+    pokemon?: CalcdexPokemon;
+    usages?: CalcdexPokemonPreset[];
+  },
 ): CalcdexPokemonFormeOption[] => {
   const options: CalcdexPokemonFormeOption[] = [];
 
@@ -46,29 +50,45 @@ export const buildFormeOptions = (
 
   const dex = getDexForFormat(format);
 
-  const groups: CalcdexPokemonFormeOption[] = [];
-  const otherFormes: CalcdexPokemonFormeOption = {
-    label: 'Other',
-    options: [],
-  };
+  const {
+    pokemon,
+    usages,
+  } = config || {};
+
+  // build the usage alts, if provided from usages[]
+  // e.g., [['Great Tusk', 0.3739], ['Kingambit', 0.3585], ['Dragapult', 0.0746], ...]
+  const formeAlts: CalcdexPokemonUsageAlt<string>[] = usages
+    ?.filter((u) => !!u?.speciesForme && !!u.formeUsage)
+    .map((u) => [u.speciesForme, u.formeUsage]);
+
+  const findUsagePercent = usageAltPercentFinder(formeAlts, true);
+  const usageSorter = usageAltPercentSorter(findUsagePercent);
+
+  const {
+    altFormes,
+    transformedForme,
+  } = pokemon || {};
 
   const filterFormes: string[] = [];
 
-  if (pokemon?.altFormes?.length) {
-    // const speciesForme = pokemon.transformedForme || pokemon.speciesForme;
-    // const dexSpecies = dex.species.get(speciesForme);
+  if (altFormes?.length) {
+    const sortedAltFormes = [...altFormes].sort(usageSorter);
 
-    groups.push({
-      label: (!!pokemon.transformedForme && 'Transformed') || 'Formes',
-      options: pokemon.altFormes.map((forme) => ({
+    options.push({
+      label: (!!transformedForme && 'Transformed') || 'Formes',
+      options: sortedAltFormes.map((forme) => ({
         value: forme,
         label: forme,
-        // rightLabel: forme === dexSpecies?.baseSpecies ? 'BASE' : undefined,
+        rightLabel: findUsagePercent(forme),
       })),
     });
 
-    filterFormes.push(...pokemon.altFormes);
+    filterFormes.push(...altFormes);
   }
+
+  const tierMap: Record<string, string[]> = {
+    Other: [],
+  };
 
   tiers.forEach((tier) => {
     if (!tier) {
@@ -79,10 +99,7 @@ export const buildFormeOptions = (
 
     if (Array.isArray(tier)) {
       if (tier[0] === 'header' && tier[1]) {
-        return void groups.push({
-          label: tier[1],
-          options: [],
-        });
+        tierMap[tier[1]] = [];
       }
 
       // typically from tierSet[], copied from tiers[] by the Teambuilder o_O
@@ -92,27 +109,54 @@ export const buildFormeOptions = (
     }
 
     const dexSpecies = dex.species.get(forme as string);
-    const { exists, name } = dexSpecies || {};
+    const { exists, name: formeName } = dexSpecies || {};
 
-    if (!exists || filterFormes.includes(name)) {
+    if (!exists || filterFormes.includes(formeName)) {
       return;
     }
 
-    const lastGroup = groups.slice(-1)[0];
-    const target = lastGroup || otherFormes;
+    const [lastTier] = Object.keys(tierMap).slice(-1);
 
-    target.options.push({
-      value: name,
-      label: name,
-    });
+    if (!Array.isArray(tierMap[lastTier])) {
+      return;
+    }
 
-    filterFormes.push(name);
+    tierMap[lastTier].push(formeName);
+    filterFormes.push(formeName);
   });
 
-  options.push(
-    ...groups.filter((g) => !!g.options.length),
-    ...(otherFormes.options.length ? [otherFormes] : []),
-  );
+  Object.entries(tierMap).forEach(([
+    tier,
+    speciesFormes,
+  ]) => {
+    if (!tier || tier === 'Other' || !speciesFormes?.length) {
+      return;
+    }
+
+    const sortedFormes = [...speciesFormes].sort(usageSorter);
+
+    options.push({
+      label: tier,
+      options: sortedFormes.map((name) => ({
+        value: name,
+        label: name,
+        rightLabel: findUsagePercent(name),
+      })),
+    });
+  });
+
+  if (tierMap.Other.length) {
+    const sortedFormes = [...tierMap.Other].sort(usageSorter);
+
+    options.push({
+      label: 'Other',
+      options: sortedFormes.map((name) => ({
+        value: name,
+        label: name,
+        rightLabel: findUsagePercent(name),
+      })),
+    });
+  }
 
   return options;
 };

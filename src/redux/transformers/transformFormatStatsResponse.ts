@@ -42,6 +42,7 @@ export const transformFormatStatsResponse = (
     }
 
     const {
+      usage,
       abilities,
       items,
       moves,
@@ -57,6 +58,10 @@ export const transformFormatStatsResponse = (
       format: getGenlessFormat(args.format),
       speciesForme,
     };
+
+    if (typeof usage?.weighted === 'number' && (usage.weighted || 0) > 0) {
+      preset.formeUsage = usage.weighted;
+    }
 
     const altAbilities = processUsageAlts(abilities, args.format, 'abilities');
     const altItems = processUsageAlts(items, args.format, 'items');

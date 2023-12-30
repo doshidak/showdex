@@ -225,8 +225,7 @@ export const CalcdexPokeProvider = ({
   ]);
 
   const value = React.useMemo<CalcdexPokeContextValue>(() => ({
-    state,
-    settings,
+    ...ctx,
 
     playerKey,
     player,
@@ -235,12 +234,15 @@ export const CalcdexPokeProvider = ({
     opponentPokemon,
 
     presetsLoading,
+    allUsages,
     presets,
     usages,
     usage,
 
     matchups,
   }), [
+    allUsages,
+    ctx,
     matchups,
     opponent,
     opponentPokemon,
@@ -249,8 +251,6 @@ export const CalcdexPokeProvider = ({
     playerPokemon,
     presets,
     presetsLoading,
-    settings,
-    state,
     usage,
     usages,
   ]);
