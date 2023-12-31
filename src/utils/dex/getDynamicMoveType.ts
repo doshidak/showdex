@@ -1,6 +1,7 @@
 import {
   type AbilityName,
   type GenerationNum,
+  type ItemName,
   type MoveName,
   type Terrain,
   type Weather,
@@ -249,6 +250,17 @@ export const getDynamicMoveType = (
     case 'Weather Ball': {
       // in gen 4, Normalize affects this move, so it should keep its default Normal type in that case
       if (!field?.weather || (gen < 5 && ability === 'Normalize' as AbilityName)) {
+        break;
+      }
+
+      const shouldIgnoreWeather = item === 'Utility Umbrella' as ItemName && ([
+        'Harsh Sunshine',
+        'Heavy Rain',
+        'Rain',
+        'Sun',
+      ] as Weather[]).includes(field.weather);
+
+      if (shouldIgnoreWeather) {
         break;
       }
 
