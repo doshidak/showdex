@@ -180,7 +180,7 @@ export const createSmogonPokemon = (
 
     // update (2023/05/15): typically only used to provide the client-reported stat
     // from Protosynthesis & Quark Drive (populated in syncPokemon() via `volatiles`)
-    boostedStat: pokemon.boostedStat,
+    boostedStat: pokemon.dirtyBoostedStat || pokemon.boostedStat,
 
     boosts: {
       atk: pokemon.dirtyBoosts?.atk ?? pokemon.boosts?.atk ?? 0,
