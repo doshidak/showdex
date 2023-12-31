@@ -1,4 +1,10 @@
-import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
+import {
+  type AbilityName,
+  type GenerationNum,
+  type ItemName,
+  type MoveName,
+  type Weather,
+} from '@smogon/calc';
 import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
@@ -40,6 +46,8 @@ export const calcMoveBasePower = (
   } = config || {};
 
   const {
+    speciesForme,
+    transformedForme,
     teraType: revealedTeraType,
     dirtyTeraType,
     terastallized,
@@ -53,6 +61,7 @@ export const calcMoveBasePower = (
     hitCounter: currentHitCounter,
     faintCounter: currentFaintCounter,
     dirtyFaintCounter,
+    moveOverrides,
     volatiles: volatileMap,
   } = pokemon || {};
 
@@ -62,6 +71,7 @@ export const calcMoveBasePower = (
     type: dexMoveType,
     basePower: dexBasePower,
     isZ,
+    multihit,
   } = dex.moves.get(moveName) || {};
 
   const move = (moveExists && (dexMoveName as MoveName || moveName)) || null;
@@ -91,14 +101,32 @@ export const calcMoveBasePower = (
     return 0;
   }
 
-  // note: dirtyItem can be set to an empty string (i.e., '') to "clear" the item
   const moveType = overrides?.type || dexMoveType;
+  const moveHits = overrides?.hits
+    || moveOverrides?.[move]?.hits
+    || (Array.isArray(multihit) && multihit[0])
+    || (typeof multihit === 'number' && multihit);
+
+  const currentForme = transformedForme || speciesForme;
   const teraType = dirtyTeraType || revealedTeraType;
   const ability = dirtyAbility || revealedAbility;
   const item = dirtyItem ?? revealedItem;
   const hitCounter = clamp(0, currentHitCounter || 0);
   const faintCounter = clamp(0, dirtyFaintCounter ?? (currentFaintCounter || 0));
   const volatiles = Object.keys(volatileMap || {});
+
+  if (move === 'Water Shuriken' as MoveName) {
+    basePower = currentForme === 'Greninja-Ash' && ability === 'Battle Bond' as AbilityName ? 20 : 15;
+  }
+
+  // perform the same BP math hacks that @smogon/calc does for Triple Axel & Triple Kick
+  if (move === 'Triple Axel' as MoveName) {
+    basePower = moveHits === 2 ? 30 : moveHits === 3 ? 40 : 20;
+  }
+
+  if (move === 'Triple Kick' as MoveName) {
+    basePower = moveHits === 2 ? 15 : moveHits === 3 ? 30 : 10;
+  }
 
   if (Object.keys(PokemonMoveSkinAbilities).includes(ability)) {
     // 4 of the 5 skinning abilities modify any Normal type moves, while the last one, Normalize, modifies all moves to
@@ -131,9 +159,19 @@ export const calcMoveBasePower = (
 
   // according to the Bulbapedia (as of 2023/12/29):
   // "During any type of weather except strong winds, Weather Ball's power doubles to 100."
-  if (move === 'Weather Ball' as MoveName && field?.weather && field.weather !== 'Strong Winds') {
-    basePower *= 2; // could do this, as long as basePower is 50 from the dex o_O
-    // basePower = 100; // fuck it yolo
+  if (move === 'Weather Ball' as MoveName) {
+    const shouldApplyBoost = (field?.weather && field.weather !== 'Strong Winds')
+      && (item !== 'Utility Umbrella' as ItemName || !([
+        'Harsh Sunshine',
+        'Heavy Rain',
+        'Rain',
+        'Sun',
+      ] as Weather[]).includes(field.weather));
+
+    if (shouldApplyBoost) {
+      basePower *= 2; // could do this, as long as basePower is 50 from the dex o_O
+      // basePower = 100; // fuck it yolo
+    }
   }
 
   if (move === 'Terrain Pulse' as MoveName && field?.terrain && detectGroundedness(pokemon, field)) {
