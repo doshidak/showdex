@@ -332,6 +332,8 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
   vgc2024: 'vgc24',
   vgc2024regf: 'vgc24-regulation-f',
   vgc2024regulationf: 'vgc24-regulation-f',
+  vgc2024regg: 'vgc24-regulation-g',
+  vgc2024regulationg: 'vgc24-regulation-g',
   zu: 'zu',
 };
 
@@ -340,8 +342,9 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
  *
  * * Do not use this array directly; instead, use the `legalLockedFormat()` utility since some special
  *   handling is required for some formats.
- *   - As of v1.1.1, any format starting **and** ending with a forward-slash (`/`) will be converted
- *     into a `RegExp` & `test()`'d.
+ *   - ~~As of v1.1.1, any format starting **and** ending with a forward-slash (`/`) will be converted
+ *     into a `RegExp` & `test()`'d.~~
+ *   - As of v1.2.0, any entry in this array can either be a `string` literal or `RegExp`.
  *   - Otherwise, the format after stripping the `'gen#'` prefix will be tested with `endsWith()`.
  * * Formats not in this array should allow any illegal abilities and moves to be selected.
  *   - However, if no Pokemon legal abilities and/or moves are available,
@@ -353,22 +356,22 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
  *
  * @since 1.0.1
  */
-export const LegalLockedFormats: string[] = [
+export const LegalLockedFormats: (string | RegExp)[] = [
   '1v1',
   '2v2doubles',
-  '/^battlespot/', // e.g., 'battlespotsingles', 'battlespotdoubles'
-  '/^battlestadium/', // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
-  '/^bdsp/', // e.g., 'bdspou'
+  /^battlespot/i, // e.g., 'battlespotsingles', 'battlespotdoubles'
+  /^battlestadium/i, // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
+  /^bdsp/i, // e.g., 'bdspou'
   'computergeneratedteams',
   'doubleslc',
   'doublesou',
   'doublesubers',
   'doublesuu',
-  '/draft$/', // e.g., '6v6doublesdraft'
-  '/factory/', // e.g., 'battlefactory', 'bssfactory'
+  /draft$/i, // e.g., '6v6doublesdraft'
+  /factory/i, // e.g., 'battlefactory', 'bssfactory'
   'lc',
   'lcuu',
-  '/^letsgo/', // e.g., 'letsgorandombattle', 'letsgoou'
+  /^letsgo/i, // e.g., 'letsgorandombattle', 'letsgoou'
   'monotype',
   'nationaldex',
   'nationaldexmonotype',
@@ -379,10 +382,43 @@ export const LegalLockedFormats: string[] = [
   'ou',
   'oublitz',
   'pu',
-  '/random/', // e.g., 'randombattle', 'unratedrandombattle', 'randombattleblitz'
+  /random/i, // e.g., 'randombattle', 'unratedrandombattle', 'randombattleblitz'
   'ru',
   'ubers',
   'uu',
-  '/^vgc/', // e.g., 'vgc2022', 'vgc2023series1'
+  /^vgc/i, // e.g., 'vgc2022', 'vgc2023series1'
+  'zu',
+];
+
+/**
+ * Sort ordering of format labels, typically used to order groups of presets.
+ *
+ * * List will be referred to after sorting formats relative to the current one in `sortPresetGroupsByFormat()`.
+ * * Higher the format (i.e., lower index in this array), the higher it will appear.
+ * * Each value will be partially matched, but only at the beginning & end of the current format.
+ *   - This is to prevent erroneous matches like the "ou" in "d*ou*bles."
+ * * Values can be anything, but recommended to base them off of the values in the aforementioned dictionary.
+ *   - Also recommended to format them as IDs, i.e., lowercasing all letters & removing all symbols, including spaces.
+ *   - e.g., `'vgc'` is preferred over `'VGC 2024'`.
+ *
+ * @since 1.2.0
+ */
+export const FormatSortPriorities: string[] = [
+  'ou',
+  'uu',
+  'ubers',
+  'ru',
+  'nu',
+  'pu',
+  'monotype',
+  'vgc',
+  'battlestadium',
+  'battlefactory',
+  'battlespot',
+  'battlefestival',
+  'draft',
+  'natdex',
+  'lc',
+  'nfe',
   'zu',
 ];

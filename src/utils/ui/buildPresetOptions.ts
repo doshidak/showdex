@@ -1,10 +1,10 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
-// import { FormatLabels } from '@showdex/consts/dex';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import { detectCompletePreset, getPresetFormes, sortPresetsByFormat } from '@showdex/utils/presets';
+import { detectCompletePreset, getPresetFormes } from '@showdex/utils/presets';
+import { sortPresetGroupsByFormat } from './sortPresetGroupsByFormat';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -34,12 +34,22 @@ export const buildPresetOptions = (
   }
 
   const { usages } = config || {};
+
+  const {
+    gen,
+    base: formatBase,
+    label: formatLabel,
+  } = parseBattleFormat(format);
+
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
 
-  const presetsSource = [...presets].sort(sortPresetsByFormat(format));
+  // const presetsSource = [...presets].sort(sortPresetsByFormat(format));
+  const formatLabelMap: Record<string, string> = {
+    [getGenfulFormat(gen, formatBase)]: formatLabel,
+  };
 
-  presetsSource.forEach((preset) => {
+  presets.forEach((preset) => {
     if (!detectCompletePreset(preset)) {
       return;
     }
@@ -95,7 +105,13 @@ export const buildPresetOptions = (
       option.rightLabel = percentage(usage, 2);
     }
 
-    const { label } = parseBattleFormat(getGenfulFormat(preset.gen, preset.format));
+    const presetFormat = getGenfulFormat(preset.gen, preset.format);
+
+    if (!formatLabelMap[presetFormat]) {
+      formatLabelMap[presetFormat] = parseBattleFormat(presetFormat).label;
+    }
+
+    const label = formatLabelMap[presetFormat];
     const group = options.find((o) => o.label === label);
 
     if (!group) {
@@ -107,6 +123,8 @@ export const buildPresetOptions = (
 
     group.options.push(option);
   });
+
+  options.sort(sortPresetGroupsByFormat(formatLabelMap));
 
   return options;
 };

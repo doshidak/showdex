@@ -10,3 +10,4 @@ export * from './detectStatBoostDelta';
 export * from './determineColorScheme';
 export * from './formatDamageAmounts';
 export * from './formatStatBoost';
+export * from './sortPresetGroupsByFormat';
