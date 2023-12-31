@@ -66,10 +66,7 @@ export const calcPokemonFinalStats = (
     return record.export();
   }
 
-  const gen = typeof format === 'string'
-    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
-    : format;
-
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(gen);
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
@@ -106,7 +103,9 @@ export const calcPokemonFinalStats = (
   // find out what the highest *boosted* stat is (excluding HP) for use in some abilities,
   // particularly Protosynthesis & Quark Drive (gen 9),
   // which will boost the highest stat after stage boosts are applied
-  const highestBoostedStat = pokemon.boostedStat || findHighestStat(record.stats());
+  const highestBoostedStat = pokemon.dirtyBoostedStat
+    || pokemon.boostedStat
+    || findHighestStat(record.stats());
 
   // apply status condition effects
   const status = pokemon?.dirtyStatus && pokemon.dirtyStatus !== '???'

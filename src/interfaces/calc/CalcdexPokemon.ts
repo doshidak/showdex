@@ -632,6 +632,14 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   boostedStat?: Showdown.StatNameNoHp;
 
   /**
+   * User-reported boosted stat of the Pokemon.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  dirtyBoostedStat?: Showdown.StatNameNoHp;
+
+  /**
    * Stage boosts of the Pokemon.
    *
    * * Note that the client can report a `spc` boost if in gen 1.

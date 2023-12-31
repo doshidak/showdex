@@ -2,6 +2,7 @@ export * from './Dropdown';
 export * from './GenField';
 export * from './InlineField';
 export * from './MoveCategoryField';
+export * from './PokeStatField';
 export * from './PokeTypeField';
 export * from './Segmented';
 export * from './Switch';

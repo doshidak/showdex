@@ -11,7 +11,12 @@ import {
   PokeStatus,
   PokeStatusTooltip,
 } from '@showdex/components/app';
-import { Dropdown, PokeTypeField, ValueField } from '@showdex/components/form';
+import {
+  Dropdown,
+  PokeStatField,
+  PokeTypeField,
+  ValueField,
+} from '@showdex/components/form';
 import { useSandwich } from '@showdex/components/layout';
 import {
   type BadgeInstance,
@@ -21,7 +26,12 @@ import {
   ToggleButton,
 } from '@showdex/components/ui';
 import { eacute } from '@showdex/consts/core';
-import { PokemonCommonNatures, PokemonNatureBoosts, PokemonRuinAbilities } from '@showdex/consts/dex';
+import {
+  PokemonBoosterAbilities,
+  PokemonCommonNatures,
+  PokemonNatureBoosts,
+  PokemonRuinAbilities,
+} from '@showdex/consts/dex';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonHpPercentage, populateStatsTable } from '@showdex/utils/calc';
@@ -138,12 +148,14 @@ export const PokeInfo = ({
     showAbilityToggle,
   ]);
 
-  const showResetAbility = !!pokemon?.speciesForme && (
-    pokemon.dirtyAbility
-      && !pokemon.transformedForme
-      && !!pokemon.ability
-      && pokemon.ability !== pokemon.dirtyAbility
-  );
+  const showBoostedStat = !!pokemon?.speciesForme
+    && PokemonBoosterAbilities.includes(pokemon.dirtyAbility || pokemon.ability);
+
+  const showResetAbility = !!pokemon?.speciesForme
+    && !!pokemon.dirtyAbility
+    && !pokemon.transformedForme
+    && !!pokemon.ability
+    && pokemon.ability !== pokemon.dirtyAbility;
 
   const appliedPreset = React.useMemo(() => (
     !!pokemon?.speciesForme
@@ -695,10 +707,7 @@ export const PokeInfo = ({
 
               <div className={cx(styles.presetHeaderPart, styles.presetHeaderRight)}>
                 <ToggleButton
-                  className={cx(
-                    styles.toggleButton,
-                    styles.importButton,
-                  )}
+                  className={cx(styles.toggleButton, styles.importButton)}
                   label="Import"
                   tooltip={(
                     <div className={styles.tooltipContent}>
@@ -819,6 +828,38 @@ export const PokeInfo = ({
               }
 
               {
+                showBoostedStat &&
+                <PokeStatField
+                  className={styles.toggleButton}
+                  label={pokemon.dirtyBoostedStat || pokemon.boostedStat ? 'Boosted Stat' : 'Auto-Boost Enabled'}
+                  override={pokemon.dirtyBoostedStat || pokemon.boostedStat ? undefined : 'Auto'}
+                  headerSuffix={pokemon.boostedStat && pokemon.boostedStat !== pokemon.dirtyBoostedStat ? (
+                    <ToggleButton
+                      label="Reset"
+                      absoluteHover
+                      active
+                      onPress={() => updatePokemon({
+                        dirtyBoostedStat: null,
+                      }, `${l.scope}:ToggleButton~DirtyBoostedStat:onPress()`)}
+                    />
+                  ) : null}
+                  input={{
+                    name: `${l.scope}:${pokemonKey}:BoostedStat`,
+                    value: pokemon.dirtyBoostedStat || pokemon.boostedStat,
+                    onChange: (value: Showdown.StatNameNoHp) => updatePokemon({
+                      dirtyBoostedStat: value,
+                    }, `${l.scope}:PokeStatField~DirtyBoostedStat:input.onChange()`),
+                  }}
+                  format={format}
+                  omitHpStat
+                  clearable
+                  highlightLabel={!pokemon.dirtyBoostedStat && !pokemon.boostedStat}
+                  toggleActive={!pokemon.dirtyBoostedStat && !pokemon.boostedStat}
+                  absoluteHover
+                />
+              }
+
+              {
                 showResetAbility &&
                 <ToggleButton
                   className={styles.toggleButton}
@@ -851,7 +892,7 @@ export const PokeInfo = ({
                 hidden: !settings?.showAbilityTooltip,
               }}
               input={{
-                name: `${l.scope}:${pokemonKey}:${pokemonKey}:Ability`,
+                name: `${l.scope}:${pokemonKey}:Ability`,
                 value: legacy ? null : abilityName,
                 onChange: (value: AbilityName) => updatePokemon({
                   dirtyAbility: value,
@@ -959,7 +1000,7 @@ export const PokeInfo = ({
 
             <Dropdown
               aria-label={`Available Items for ${friendlyPokemonName}`}
-              hint={gen === 1 ? 'N/A' : (pokemon?.speciesForme ? 'None' : '???')}
+              hint={gen === 1 ? 'N/A' : 'None'}
               tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
                 <div
                   className={cx(

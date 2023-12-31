@@ -422,6 +422,10 @@ export const syncPokemon = (
             && boosterVolatile.replace(/^(?:protosynthesis|quarkdrive)/i, '')
         ) as Showdown.StatNameNoHp || null;
 
+        if (syncedPokemon.boostedStat && syncedPokemon.dirtyBoostedStat) {
+          syncedPokemon.dirtyBoostedStat = null;
+        }
+
         // check for a server-reported faintCounter
         // e.g., { fallen1: ['fallen1'] }
         const fallenVolatile = Object.keys(volatiles).find((k) => k?.startsWith('fallen'));

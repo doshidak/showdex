@@ -51,7 +51,7 @@ export const sanitizePokemon = <
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: (pokemon as Partial<CalcdexPokemon>)?.calcdexId || null,
     source: (pokemon as Partial<CalcdexPokemon>)?.source || null,
-    playerKey: detectPlayerKeyFromPokemon(pokemon),
+    playerKey: (pokemon as Partial<CalcdexPokemon>)?.playerKey || detectPlayerKeyFromPokemon(pokemon),
 
     slot: (pokemon as Partial<Showdown.Pokemon>)?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
@@ -137,6 +137,7 @@ export const sanitizePokemon = <
     // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
     // (populated in syncPokemon() & used in createSmogonPokemon())
     boostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
+    dirtyBoostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
 
     boosts: PokemonBoostNames.reduce((table, stat) => {
       const boosts = (pokemon as Partial<Showdown.Pokemon>)?.boosts;
