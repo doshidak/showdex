@@ -5,15 +5,15 @@ import { Segmented, Switch, TextField } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
 import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import { env } from '@showdex/utils/core';
-import { fileSize } from '@showdex/utils/humanize';
+// import { fileSize } from '@showdex/utils/humanize';
 import styles from './SettingsPane.module.scss';
 
 export interface CalcdexSettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
   value?: ShowdexCalcdexSettings;
-  presetCacheSize?: number;
-  maxCacheSize?: number;
+  // presetCacheSize?: number;
+  // maxCacheSize?: number;
   inBattle?: boolean;
 }
 
@@ -21,8 +21,8 @@ export const CalcdexSettingsPane = ({
   className,
   style,
   value,
-  presetCacheSize,
-  maxCacheSize,
+  // presetCacheSize,
+  // maxCacheSize,
   inBattle,
 }: CalcdexSettingsPaneProps): JSX.Element => (
   <div
@@ -59,9 +59,7 @@ export const CalcdexSettingsPane = ({
           label: 'Never',
           tooltip: (
             <div className={styles.tooltipContent}>
-              Never open the Calcdex under <strong>any</strong> circumstances...
-              <br />
-              ... <em>but why tho ?</em>
+              Never open the Calcdex under <strong>any</strong> circumstances.
             </div>
           ),
           value: 'never',
@@ -348,18 +346,19 @@ export const CalcdexSettingsPane = ({
           styles.field,
           !inBattle && styles.singleColumn,
         )}
-        label={[
-          'Cache Sets',
-          !!presetCacheSize && `(~${fileSize(presetCacheSize, {
-            precision: 1,
-            omitSymbolPrefix: true,
-          })}${maxCacheSize ? '' : ')'}`,
-          !!presetCacheSize && !!maxCacheSize && `of ${fileSize(maxCacheSize, {
-            precision: 1,
-            omitSymbolPrefix: true,
-          })})`,
-          'for',
-        ].filter(Boolean).join(' ')}
+        // label={[
+        //   'Cache Sets',
+        //   !!presetCacheSize && `(~${fileSize(presetCacheSize, {
+        //     precision: 1,
+        //     omitSymbolPrefix: true,
+        //   })}${maxCacheSize ? '' : ')'}`,
+        //   !!presetCacheSize && !!maxCacheSize && `of ${fileSize(maxCacheSize, {
+        //     precision: 1,
+        //     omitSymbolPrefix: true,
+        //   })})`,
+        //   'for',
+        // ].filter(Boolean).join(' ')}
+        label="Cache Sets for"
         labelPosition={inBattle ? 'top' : 'left'}
         options={[{
           label: '1 Day',
@@ -540,7 +539,7 @@ export const CalcdexSettingsPane = ({
         tooltip={(
           <div className={styles.tooltipContent}>
             Imports &amp; applies sets to your opponent's (or spectating players') Pok&eacute;mon
-            derived from open team sheets (typical of VGC 2023 formats) or the !showteam chat command.
+            derived from open team sheets (typical of VGC formats) or the !showteam chat command.
             <br />
             <br />
             Note that open team sheets may omit spreads, i.e., the EVs, IVs &amp; nature.
@@ -887,10 +886,10 @@ export const CalcdexSettingsPane = ({
         name="calcdex.enableQuickEditor"
         component={Switch}
         className={cx(styles.field, styles.switchField)}
-        label="Quick-Edit Multihit Moves"
+        label="Quick-Edit Move Hits"
         tooltip={(
           <div className={styles.tooltipContent}>
-            Allows you to quickly edit the number of hits for multihitting moves,
+            Allows you to quickly edit the number of hits for multi-hitting moves,
             such as <em>Icicle Spear</em>.
             <br />
             <br />
@@ -926,7 +925,7 @@ export const CalcdexSettingsPane = ({
           label: 'UI Info',
           tooltip: (
             <div className={styles.tooltipContent}>
-              Shows explainer tooltips for buttons in the UI when hovered over.
+              Shows explainer tooltips (like this one) for buttons in the UI when hovered over.
               <br />
               <br />
               Disable this if you're a Calcdex pro &amp; know what everything does already.
