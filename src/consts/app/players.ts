@@ -168,7 +168,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     'dastardlydwarf',
   ],
 }, {
-  title: 'Aww what a cute teddy bear! <3 uwu',
+  title: 'uwu',
   supporterId: 'patreon-tier-03',
   custom: true,
   icon: 'teddy-bear',
@@ -181,6 +181,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     ['goddessmina', 'warning: ratch af'],
+    'swiftmochi',
   ],
 }, {
   title: 'Carried by Showdex',

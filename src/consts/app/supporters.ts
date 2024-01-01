@@ -161,7 +161,12 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
         ],
       },
       {
-        name: 'goddess mina',
+        name: 'Ah Ok Got It',
+        showdownUser: true,
+        periods: [['2023-10-28T16:57:56Z']],
+      },
+      {
+        name: 'Swift Mochi',
         showdownUser: true,
         periods: [['2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z']],
       },
@@ -169,11 +174,6 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
         name: 'Zzodz',
         showdownUser: true,
         periods: [['2023-05-13T00:02:51Z', '2023-06-13T00:02:51Z']],
-      },
-      {
-        name: 'Ah Ok Got It',
-        showdownUser: true,
-        periods: [['2023-10-28T16:57:56Z']],
       },
     ],
   },
@@ -209,8 +209,13 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
         periods: [['2023-04-10T13:35:32Z']],
       },
       {
+        name: 'TheNexyr',
+        showdownUser: true,
+        periods: [['2023-07-21T01:24:21Z']],
+      },
+      {
         name: 'Christopher Y',
-        periods: [['2023-07-02T21:05:52Z']],
+        periods: [['2023-07-02T21:05:52Z', '2024-01-02T22:05:52Z']],
       },
       {
         name: 'PokePastry',
@@ -218,17 +223,12 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
         periods: [['2023-08-04T03:41:08Z']],
       },
       {
-        name: 'TheNexyr',
-        showdownUser: true,
-        periods: [['2023-07-21T01:24:21Z', '2023-11-21T01:24:21Z']],
+        name: 'Kristen G',
+        periods: [['2023-10-29T10:46:04Z']],
       },
       {
         name: 'Michael K',
         periods: [['2023-09-05T09:02:03Z']],
-      },
-      {
-        name: 'Kristen G',
-        periods: [['2023-10-29T10:46:04Z']],
       },
     ],
   },
