@@ -14,7 +14,7 @@
 }
 
 .description {
-  @include spacing.margin($bottom: 0.4em);
+  @include spacing.margin($bottom: 6px);
   text-align: center;
 }
 
@@ -24,25 +24,43 @@
 }
 
 .type {
-  @include spacing.margin($right: 0.8em);
+  @include spacing.margin($right: 6px);
 }
 
 .property {
   @include flex.row($align: center);
 
   &:not(:last-of-type) {
-    @include spacing.margin($right: 1em);
+    @include spacing.margin($right: 6px);
   }
 
   .propertyName {
     @include flex.row-center;
     font-weight: 500;
     text-transform: uppercase;
-    opacity: 0.75;
+    opacity: 0.8;
+  }
+
+  .prevValue {
+    opacity: 0.64;
+  }
+
+  .rawr {
+    display: inline-block;
+    @include spacing.padding($x: 2px);
+    opacity: 0.44;
+  }
+
+  .statLabel {
+    font-weight: 700;
+  }
+
+  .statVsLabel {
+    @include spacing.margin($x: 2px);
   }
 
   .propertyValue {
-    @include spacing.margin($left: 0.5em);
+    @include spacing.margin($left: 4px);
     @include font.apply(fonts.$mono);
     font-size: 10px;
   }

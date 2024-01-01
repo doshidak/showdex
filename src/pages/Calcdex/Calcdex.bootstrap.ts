@@ -1,13 +1,13 @@
 import * as ReactDOM from 'react-dom/client';
 import { NIL as NIL_UUID } from 'uuid';
 import { type GenerationNum } from '@smogon/calc';
+import { type ShowdexBootstrapper } from '@showdex/interfaces/app';
 import {
   type CalcdexPlayer,
   type CalcdexPlayerKey,
   type CalcdexPokemon,
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
-import { type ShowdexBootstrapper } from '@showdex/main';
 import { syncBattle } from '@showdex/redux/actions';
 import {
   type CalcdexSliceState,
@@ -87,7 +87,7 @@ const updateBattleRecord = (
   store.dispatch(hellodexSlice.actions[reducerName]());
 };
 
-const l = logger('@showdex/pages/Calcdex/Calcdex.bootstrap');
+const l = logger('@showdex/pages/Calcdex/CalcdexBootstrapper()');
 
 export const CalcdexBootstrapper: ShowdexBootstrapper = (
   store,
@@ -96,7 +96,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
 ) => {
   const endTimer = runtimer(l.scope, l);
 
-  l.debug(
+  l.silly(
     'Calcdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
     '\n', 'roomid', roomid,
@@ -138,6 +138,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
 
     if (battleState?.active) {
       store.dispatch(calcdexSlice.actions.update({
+        scope: l.scope,
         battleId: roomid,
         active: false,
       }));
@@ -451,6 +452,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
       const visible = !state?.overlayVisible;
 
       store.dispatch(calcdexSlice.actions.update({
+        scope: `${l.scope}:battleRoom.toggleCalcdexOverlay()`,
         battleId: battle.id || roomid,
         overlayVisible: visible,
       }));
@@ -865,8 +867,6 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
           // note: sanitizePlayerSide() needs the updated side.conditions, so we're initializing
           // it like this here first
           prev[playerKey].side = {
-            // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
-            // conditions: structuredClone(player?.sideConditions || {}),
             conditions: clonePlayerSideConditions(player?.sideConditions),
           };
 

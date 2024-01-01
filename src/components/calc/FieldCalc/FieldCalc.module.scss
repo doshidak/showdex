@@ -20,7 +20,7 @@
 }
 
 .label {
-  @include spacing.margin($bottom: 1px);
+  @include spacing.margin($bottom: 4px);
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
   @include transition.apply(color);
 
@@ -62,9 +62,9 @@
 }
 
 .weatherLabel {
-  .veryThicc & {
-    @include spacing.margin($bottom: 4px);
-  }
+  // .veryThicc & {
+  //   @include spacing.margin($bottom: 4px);
+  // }
 
   .doubles:not(.veryThicc) & {
     grid-area: 1 / 1;
@@ -85,9 +85,9 @@
 }
 
 .terrainLabel {
-  .veryThicc & {
-    @include spacing.margin($bottom: 4px);
-  }
+  // .veryThicc & {
+  //   @include spacing.margin($bottom: 4px);
+  // }
 
   .doubles:not(.veryThicc) & {
     grid-area: 1 / 2;

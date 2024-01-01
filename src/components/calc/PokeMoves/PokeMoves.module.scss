@@ -36,7 +36,7 @@
   }
 
   &.glassy {
-    backdrop-filter: blur(2px);
+    // backdrop-filter: blur(2px); // warning: causes some weird z-index issues; tooltips don't appear; not recommended
 
     &.light {
       background-color: color.alpha(colors.$white, 0.24);

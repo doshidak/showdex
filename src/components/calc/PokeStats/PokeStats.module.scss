@@ -9,14 +9,14 @@
 
 .container {
   // grid-template-columns: minmax(36px, 1fr) repeat(6, minmax(48px, 1.25fr));
-  grid-template-columns: minmax(36px, min-content) repeat(6, minmax(48px, min-content));
+  grid-template-columns: minmax(36px, min-content) repeat(6, minmax(44px, min-content));
   column-gap: 8px;
   // row-gap: 3px;
   @include spacing.margin-xy($x: auto);
 
-  // &.verySmol {
-  //   grid-template-columns: minmax(0, 1fr) repeat(6, minmax(0, 1.25fr));
-  // }
+  &.verySmol {
+    grid-template-columns: repeat(7, minmax(32px, 1fr));
+  }
 
   // &.veryThicc {
   //   max-width: 450px;
@@ -26,7 +26,7 @@
   // gen 2 has SPD, so this should only be applied for gen 1.
   &.legacySpc {
     // grid-template-columns: minmax(36px, 1fr) repeat(5, minmax(48px, 1.25fr));
-    grid-template-columns: minmax(36px, min-content) repeat(5, minmax(48px, min-content));
+    grid-template-columns: minmax(36px, min-content) repeat(5, minmax(44px, min-content));
 
     &.verySmol {
       // grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));

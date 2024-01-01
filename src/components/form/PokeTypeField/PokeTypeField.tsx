@@ -54,7 +54,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   label,
   title,
   // tooltip,
-  tooltipPlacement = 'top-start',
+  tooltipPlacement = 'top',
   // tooltipDisabled,
   multi,
   maxMultiTypes = 2,

@@ -89,7 +89,7 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
   const handleChange = (
     value: GenerationNum,
   ) => {
-    if (value && typeof input.onChange === 'function' && value !== input.value) {
+    if (value && typeof input?.onChange === 'function' && value !== input.value) {
       input.onChange(value);
     }
 

@@ -7,7 +7,7 @@
   @include flex.column($justify: stretch, $align: stretch);
   @include spacing.margin($top: 16px);
 
-  .ultraThicc & {
+  .thicc & {
     flex-direction: row;
     align-items: center;
 

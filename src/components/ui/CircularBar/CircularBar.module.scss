@@ -7,7 +7,7 @@
 .pathArc {
   stroke: currentColor;
   stroke-linecap: round;
-  opacity: 0.12;
+  opacity: 0.24;
   @include transition.apply(stroke);
 }
 

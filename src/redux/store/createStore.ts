@@ -6,20 +6,20 @@ import {
 } from '@reduxjs/toolkit';
 // import { setupListeners } from '@reduxjs/toolkit/query/react';
 import { logger } from '@showdex/utils/debug';
-import { pkmnApi, showdownApi } from '../services';
-import { calcdexSlice } from './calcdexSlice';
-import { hellodexSlice } from './hellodexSlice';
-import { showdexSlice } from './showdexSlice';
-import { teamdexSlice } from './teamdexSlice';
+import { pkmnApi, showdownApi } from '@showdex/redux/services';
+import { type CalcdexSliceState, calcdexSlice } from './calcdexSlice';
+import { type HellodexSliceState, hellodexSlice } from './hellodexSlice';
+import { type ShowdexSliceState, showdexSlice } from './showdexSlice';
+import { type TeamdexSliceState, teamdexSlice } from './teamdexSlice';
 
 export type RootStore = ReturnType<typeof createStore>;
 export type RootDispatch = RootStore['dispatch'];
 
 export interface RootState extends ReturnType<RootStore['getState']> {
-  showdex: ReturnType<typeof showdexSlice.getInitialState>;
-  hellodex: ReturnType<typeof hellodexSlice.getInitialState>;
-  calcdex: ReturnType<typeof calcdexSlice.getInitialState>;
-  teamdex: ReturnType<typeof teamdexSlice.getInitialState>;
+  showdex: ShowdexSliceState;
+  hellodex: HellodexSliceState;
+  calcdex: CalcdexSliceState;
+  teamdex: TeamdexSliceState;
 }
 
 /**
@@ -33,7 +33,7 @@ export type CreateReduxStoreOptions<
   // TMiddlewares extends Middlewares<TState> = Middlewares<TState>,
 > = Omit<Partial<ConfigureStoreOptions<TState, TAction>>, 'middleware' | 'reducer'>;
 
-const l = logger('@showdex/redux/store/createStore');
+const l = logger('@showdex/redux/store/createStore()');
 
 /**
  * A friendly abstraction for another friendly abstraction, RTK's `configureStore()`.

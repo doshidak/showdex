@@ -8,7 +8,7 @@
 .container {
   width: 100%;
 
-  &.thicc.standalone {
+  &.big.standalone {
     display: grid;
     grid-template-columns: min-content minmax(0, 1fr);
     grid-template-rows: max-content;
@@ -21,7 +21,7 @@
   @include flex.row($justify: space-between);
   width: 100%;
 
-  .standalone:not(.thicc) & {
+  .standalone:not(.big) & {
     flex-direction: column;
     align-items: center;
   }
@@ -48,12 +48,17 @@
   grid-template-columns: repeat(6, min-content);
   grid-auto-rows: min-content;
 
-  .thicc & {
+  .big &, .smol:not(.verySmol).standalone & {
     grid-template-columns: repeat(12, min-content);
   }
 
-  .thicc.standalone & {
+  .big.standalone & {
     grid-template-columns: repeat(3, min-content);
+    align-self: center;
+  }
+
+  .veryThicc.standalone & {
+    grid-template-columns: repeat(4, min-content);
     align-self: center;
   }
 

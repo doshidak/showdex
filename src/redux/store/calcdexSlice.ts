@@ -335,7 +335,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       } = action.payload;
 
       if (!battleId) {
-        l.warn(
+        l.debug(
           'Attempted to update a CalcdexBattleState with a falsy battleId.',
           '\n', 'action.type', action.type,
           '\n', 'action.payload', action.payload,

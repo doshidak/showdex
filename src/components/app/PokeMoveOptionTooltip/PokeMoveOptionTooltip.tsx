@@ -3,7 +3,7 @@ import cx from 'classnames';
 import { type MoveName } from '@smogon/calc';
 import { PokeType } from '@showdex/components/app';
 import { type SelectOptionTooltipProps, findCategoryLabel } from '@showdex/components/form';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
@@ -17,6 +17,7 @@ export interface PokeMoveOptionTooltipProps extends SelectOptionTooltipProps<Mov
   format?: string;
   pokemon?: Partial<CalcdexPokemon>;
   opponentPokemon?: Partial<CalcdexPokemon>;
+  field?: CalcdexBattleField;
 }
 
 export const PokeMoveOptionTooltip = ({
@@ -25,6 +26,7 @@ export const PokeMoveOptionTooltip = ({
   format,
   pokemon,
   opponentPokemon,
+  field,
   label,
   value,
   hidden,
@@ -54,8 +56,8 @@ export const PokeMoveOptionTooltip = ({
       || dexMove.desc,
   );
 
-  const hasOverrides = hasMoveOverrides(format, pokemon, value, opponentPokemon);
-  const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon) };
+  const hasOverrides = hasMoveOverrides(format, pokemon, value, opponentPokemon, field);
+  const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon, field) };
   const userOverrides = pokemon?.moveOverrides?.[value];
   const moveOverrides = { ...moveDefaults, ...userOverrides };
 
@@ -143,52 +145,63 @@ export const PokeMoveOptionTooltip = ({
           reverseColorScheme
         />
 
-        {
-          !!moveOverrides.category &&
-          <div className={styles.property}>
-            <div className={styles.propertyName}>
-              {categoryLabel?.[2] || (
-                <>
-                  <div>{moveOverrides.offensiveStat}</div>
-                  <div className={styles.statVsLabel}>
-                    vs
-                  </div>
-                  <div>{moveOverrides.defensiveStat}</div>
-                </>
-              )}
-            </div>
-
-            {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
-            {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
-            {
-              basePower > 1 &&
-              <div className={styles.propertyValue}>
-                {
-                  !!basePowerDelta &&
-                  <>
-                    <span style={{ opacity: 0.65 }}>
-                      {baseBasePower}
-                    </span>
-                    <span style={{ display: 'inline-block', padding: '0 0.2em', opacity: 0.45 }}>
-                      &rarr;
-                    </span>
-                  </>
-                }
-
-                <span
-                  className={cx(
-                    styles.deltaValue,
-                    basePowerDelta === 'positive' && styles.positive,
-                    basePowerDelta === 'negative' && styles.negative,
-                  )}
-                  style={basePowerDeltaColor ? { color: basePowerDeltaColor } : undefined}
-                >
-                  {basePower}
-                </span>
-              </div>
-            }
+        <div className={styles.property}>
+          <div className={styles.propertyName}>
+            {categoryLabel?.[2] || (
+              <>
+                <div className={styles.statLabel}>
+                  {moveOverrides.offensiveStat}
+                </div>
+                <div className={styles.statVsLabel}>
+                  vs
+                </div>
+                <div className={styles.statLabel}>
+                  {moveOverrides.defensiveStat}
+                </div>
+              </>
+            )}
           </div>
-        }
+
+          {/* note: Dex.forGen(1).moves.get('seismictoss').basePower = 1 */}
+          {/* lowest BP of a move whose BP isn't dependent on another mechanic should be 10 */}
+          {
+            basePower > 1 &&
+            <div className={styles.propertyValue}>
+              {
+                !!basePowerDelta &&
+                <>
+                  <span className={styles.prevValue}>
+                    {baseBasePower}
+                  </span>
+                  <span className={styles.rawr}>
+                    &rarr;
+                  </span>
+                </>
+              }
+
+              <span
+                className={cx(
+                  styles.deltaValue,
+                  basePowerDelta === 'positive' && styles.positive,
+                  basePowerDelta === 'negative' && styles.negative,
+                )}
+                style={basePowerDeltaColor ? { color: basePowerDeltaColor } : undefined}
+              >
+                {basePower}
+              </span>
+            </div>
+          }
+
+          {
+            !categoryLabel?.[2] &&
+            <div
+              className={styles.propertyName}
+              style={{ marginLeft: 4 }}
+            >
+              BP
+            </div>
+          }
+        </div>
 
         {
           showFaintCount &&

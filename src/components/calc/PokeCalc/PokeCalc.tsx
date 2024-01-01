@@ -22,8 +22,8 @@ export const PokeCalc = ({
     <div
       className={cx(
         styles.container,
-        // ['lg', 'xl'].includes(containerSize) && styles.thicc,
-        containerSize === 'xl' && styles.ultraThicc,
+        ['lg', 'xl'].includes(containerSize) && styles.thicc,
+        // containerSize === 'xl' && styles.veryThicc,
         className,
       )}
       style={style}

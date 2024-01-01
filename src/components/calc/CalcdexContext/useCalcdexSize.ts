@@ -8,10 +8,6 @@ const l = logger('@showdex/components/calc/useCalcdexSize()');
 
 export const useCalcdexSize = (
   containerRef: React.MutableRefObject<HTMLDivElement>,
-  initialSize?: {
-    width?: number;
-    height?: number;
-  },
 ): void => {
   const { state } = React.useContext(CalcdexContext);
   const dispatch = useDispatch();
@@ -21,8 +17,8 @@ export const useCalcdexSize = (
     height,
     size,
   } = useElementSize(containerRef, {
-    initialWidth: initialSize?.width || 400,
-    initialHeight: initialSize?.height || 700,
+    initialWidth: 400,
+    initialHeight: 700,
   });
 
   React.useEffect(() => {

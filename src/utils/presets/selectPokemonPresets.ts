@@ -20,7 +20,7 @@ import { sortPresetsByForme } from './sortPresetsByForme';
  * * Sometimes you want just presets for the `transformedForme`, so just set `select` to `'transformed'`.
  *   - Or just the `speciesForme`? Set it to `'species'`.
  *   - How about `transformedForme` if it exists, otherwise, default to `speciesForme`? Set it to `'one'`.
- *   - Wait, you said **both** `transformedForme` (if applicable) & `speciesForme`? Set it to `'both'` (default behavior).
+ *   - Wait, you said **both** `transformedForme` (if applicable) & `speciesForme`? Set it to `'any'` (default behavior).
  * * Guaranteed to return an empty array.
  *
  * @since 1.1.7
@@ -69,7 +69,7 @@ export const selectPokemonPresets = (
 
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
 
-  // fixed originally by malaow3 for OTS where non-serverSourced Urshifu-Rapid-Strike's init'd speciesForme is 'Urshifu'
+  // fixed originally by malaow3 for OTS where non-server-sourced Urshifu-Rapid-Strike's init'd speciesForme is 'Urshifu'
   // from the Team Preview (until it's sent out), so when OTS is revealed at the beginning of the battle, the sheet for
   // 'Urshifu-Rapid-Strike' doesn't apply to the 'Urshifu' -- unfortunately this isn't a simple "fucked forme" fix cause
   // 'Urshifu' & 'Urshifu-Rapid-Strike' are distinct; adding 'Urshifu' to the aforementioned list would **always** treat
@@ -94,13 +94,9 @@ export const selectPokemonPresets = (
 
   const filtered = presets.filter((preset) => (
     (!source || ignoreSource || preset.source === source)
-      // && (!genlessFormat || (preset.gen === gen && getGenlessFormat(preset.format) === genlessFormat))
       && (!genlessFormat || (getGenfulFormat(gen, genlessFormat) === getGenfulFormat(preset.gen, preset.format)))
       && presetFormes.includes(preset.speciesForme)
-      && (
-        typeof additionalPredicate !== 'function'
-          || additionalPredicate(preset)
-      )
+      && (typeof additionalPredicate !== 'function' || additionalPredicate(preset))
   ));
 
   return filtered.sort(sortPresetsByForme(currentForme));

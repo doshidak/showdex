@@ -16,7 +16,7 @@ import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfa
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
+import { formatDexDescription, getDexForFormat, getWeatherConditions } from '@showdex/utils/dex';
 import { useCalcdexContext } from '../CalcdexContext';
 import styles from './FieldCalc.module.scss';
 
@@ -101,16 +101,18 @@ export const FieldCalc = ({
     settings,
   ]);
 
-  const doubles = operatingMode === 'standalone' || state?.gameType === 'Doubles';
+  const doubles = state?.gameType === 'Doubles';
+  const natDexFormat = !['nationaldex', 'natdex'].some((f) => format?.includes(f));
 
-  const sideFieldMap = {
+  const sideFieldMap: typeof PlayerSideScreensToggleMap = {
     ...PlayerSideScreensToggleMap,
+    ...(operatingMode === 'standalone' && !doubles && { Twind: PlayerSideConditionsToggleMap.Twind }),
     ...(doubles && PlayerSideConditionsToggleMap),
   };
 
   // update (2023/01/06): as per an executive order from camdawgboi, these toggles will be removed in
   // Gen 9 for non-National Dex formats (though, are there any doubles National Dex formats?)
-  if (gen === 9 && doubles && !['nationaldex', 'natdex'].some((f) => format?.includes(f))) {
+  if (gen === 9 && doubles && natDexFormat) {
     delete sideFieldMap.Gift;
     delete sideFieldMap.Battery;
     delete sideFieldMap.Power;
@@ -150,7 +152,7 @@ export const FieldCalc = ({
         {/* p1 screens header */}
         {authPlayerKey ? (
           authPlayerKey === playerKey ? 'Yours' : 'Theirs'
-        ) : <>&uarr; {doubles ? 'Field' : 'Screens'}</>}
+        ) : <>&uarr; {operatingMode === 'standalone' || doubles ? 'Field' : 'Screens'}</>}
       </TableGridItem>
       <TableGridItem
         className={cx(
@@ -184,7 +186,7 @@ export const FieldCalc = ({
         {/* p2 screens header */}
         {authPlayerKey ? (
           authPlayerKey === playerKey ? 'Theirs' : 'Yours'
-        ) : <>{doubles ? 'Field' : 'Screens'} &darr;</>}
+        ) : <>{operatingMode === 'standalone' || doubles ? 'Field' : 'Screens'} &darr;</>}
       </TableGridItem>
 
       {/* p1 screens */}
@@ -210,8 +212,10 @@ export const FieldCalc = ({
             return null;
           }
 
-          const effectDescription = (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
-            ?.replace("This Pokemon's allies", 'Allies');
+          const effectDescription = formatDexDescription(
+            (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
+              ?.replace("This Pokemon's allies", 'Allies'),
+          );
 
           return (
             <React.Fragment key={`${l.scope}:${battleId || '???'}:${playerKey}:${label}`}>
@@ -314,8 +318,10 @@ export const FieldCalc = ({
             return null;
           }
 
-          const effectDescription = (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
-            ?.replace("This Pokemon's allies", 'Allies');
+          const effectDescription = formatDexDescription(
+            (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
+              ?.replace("This Pokemon's allies", 'Allies'),
+          );
 
           return (
             <React.Fragment key={`${l.scope}:${battleId || '???'}:${opponentKey}:${label}`}>

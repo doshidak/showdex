@@ -4,10 +4,6 @@ import { useElementSize } from '@showdex/utils/hooks';
 
 export const useHellodexSize = (
   containerRef: React.MutableRefObject<HTMLDivElement>,
-  initialSize?: {
-    width?: number;
-    height?: number;
-  },
 ): void => {
   const state = useHellodexState();
   const dispatch = useDispatch();
@@ -17,8 +13,8 @@ export const useHellodexSize = (
     height,
     size,
   } = useElementSize(containerRef, {
-    initialWidth: initialSize?.width || 400,
-    initialHeight: initialSize?.height || 700,
+    initialWidth: 400,
+    initialHeight: 700,
   });
 
   React.useEffect(() => {

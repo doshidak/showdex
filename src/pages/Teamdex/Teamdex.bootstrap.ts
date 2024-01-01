@@ -1,13 +1,13 @@
 // import * as React from 'react';
-import { type ShowdexBootstrapper } from '@showdex/main';
+import { type ShowdexBootstrapper } from '@showdex/interfaces/app';
 import { teamdexSlice } from '@showdex/redux/store';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { getTeambuilderPresets } from '@showdex/utils/presets';
 
-const l = logger('@showdex/pages/Teamdex/Teamdex.bootstrap');
+const l = logger('@showdex/pages/Teamdex/TeamdexBootstrapper()');
 
 export const TeamdexBootstrapper: ShowdexBootstrapper = (store) => {
-  l.debug(
+  l.silly(
     'Teamdex bootstrapper was invoked;',
     'determining if there\'s anything to do...',
   );

@@ -41,7 +41,10 @@ export interface TeamdexSliceReducers extends SliceCaseReducers<TeamdexSliceStat
    *
    * @since 1.1.3
    */
-  setPresets: (state: Draft<TeamdexSliceState>, action: PayloadAction<CalcdexPokemonPreset[]>) => void;
+  setPresets: (
+    state: Draft<TeamdexSliceState>,
+    action: PayloadAction<CalcdexPokemonPreset[]>,
+  ) => void;
 }
 
 const l = logger('@showdex/redux/store/teamdexSlice');
@@ -55,11 +58,11 @@ export const teamdexSlice = createSlice<TeamdexSliceState, TeamdexSliceReducers,
 
   reducers: {
     setPresets: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'action.payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'action.payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       if (!Array.isArray(action.payload)) {
         if (__DEV__) {
@@ -78,8 +81,10 @@ export const teamdexSlice = createSlice<TeamdexSliceState, TeamdexSliceReducers,
 
       l.debug(
         'DONE', action.type,
-        '\n', 'action.payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
+        // '\n', 'action.payload', action.payload,
+        '\n', '#action.payload', action.payload.length,
+        // '\n', 'state', __DEV__ && current(state),
+        '\n', '#state.presets', state.presets.length,
       );
     },
   },

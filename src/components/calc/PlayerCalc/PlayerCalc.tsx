@@ -66,7 +66,9 @@ export const PlayerCalc = ({
         styles.container,
         !!colorScheme && styles[colorScheme],
         containerSize === 'xs' && styles.verySmol,
-        ['md', 'lg', 'xl'].includes(containerSize) && styles.thicc,
+        ['xs', 'sm'].includes(containerSize) && styles.smol,
+        ['md', 'lg', 'xl'].includes(containerSize) && styles.big,
+        containerSize === 'xl' && styles.veryThicc,
         operatingMode === 'standalone' && styles.standalone,
         className,
       )}
@@ -148,7 +150,7 @@ export const PlayerCalc = ({
                     reverseColorScheme
                   />
                 ) : undefined}
-                tooltipPlacement="top-start"
+                tooltipPlacement="top"
                 tooltipOffset={[0, -4]}
                 disabled={disabled}
                 onPress={() => selectPokemon(

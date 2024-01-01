@@ -40,7 +40,7 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
   tabIndex = 0,
   ariaLabel,
   labels = [],
-  tooltipPlacement = 'top-start',
+  tooltipPlacement = 'top',
   input,
   readOnly,
   format,
