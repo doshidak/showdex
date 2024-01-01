@@ -18,7 +18,7 @@ import {
 } from '@showdex/components/ui';
 import { PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
@@ -69,6 +69,7 @@ export const PokeMoves = ({
   } = state;
 
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
   const randomUuid = useRandomUuid();
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
 
@@ -237,8 +238,8 @@ export const PokeMoves = ({
       className={cx(
         styles.container,
         containerSize === 'xs' && styles.verySmol,
-        // ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         className,
       )}
       style={style}
@@ -373,16 +374,11 @@ export const PokeMoves = ({
         {
           showEditButton &&
           <ToggleButton
-            className={cx(
-              styles.toggleButton,
-              styles.editButton,
-              // pokemon?.showMoveOverrides && styles.hideButton,
-            )}
+            className={cx(styles.toggleButton, styles.editButton)}
             label={pokemon?.showMoveOverrides ? 'Hide' : 'Edit'}
             tooltip={`${pokemon?.showMoveOverrides ? 'Close' : 'Open'} Move Editor`}
             tooltipDisabled={!settings?.showUiTooltips}
             primary={pokemon?.showMoveOverrides}
-            // active={pokemon?.showMoveOverrides}
             disabled={!pokemon?.speciesForme}
             onPress={() => updatePokemon({
               showMoveOverrides: !pokemon?.showMoveOverrides,
@@ -401,10 +397,6 @@ export const PokeMoves = ({
           header
           align="left"
         >
-          {/* <div className={styles.headerTitle}>
-            Properties
-          </div> */}
-
           {
             showFaintCounter &&
             <>
@@ -529,11 +521,13 @@ export const PokeMoves = ({
             ?? (!!moveOverrides.type && !pokemon?.stellarMoveMap?.[moveOverrides.type])
         );
 
+        // update (2023/12/30): for moves like Triple Axel with no minHits/maxHits defined, since you could theoretically
+        // miss, the fallback minHits will be 1 & maxHits the current `hits` value from the `moveDefaults`
         const showHitsField = (!pokemon?.useZ && !pokemon?.useMax)
           && !!moveDefaults.hits
           && !!moveDefaults.minHits
-          && !!moveDefaults.maxHits
-          && (moveDefaults.hits !== moveDefaults.minHits || moveDefaults.hits !== moveDefaults.maxHits);
+          && !!moveDefaults.maxHits;
+          // && (moveDefaults.hits !== moveDefaults.minHits || moveDefaults.hits !== moveDefaults.maxHits);
 
         const basePowerKey: keyof CalcdexMoveOverride = (pokemon?.useZ && 'zBasePower')
           || (pokemon?.useMax && 'maxBasePower')
@@ -622,7 +616,7 @@ export const PokeMoves = ({
             <TableGridItem align="left">
               <Dropdown
                 aria-label={`Move Slot ${i + 1} for ${friendlyPokemonName}`}
-                hint={pokemon?.speciesForme ? '--' : '???'}
+                hint="--"
                 optionTooltip={PokeMoveOptionTooltip}
                 optionTooltipProps={{
                   format,
@@ -717,7 +711,7 @@ export const PokeMoves = ({
                         hideLabel
                         hint={moveOverrides.hits}
                         fallbackValue={moveDefaults.hits}
-                        min={moveDefaults.minHits}
+                        min={moveDefaults.minHits === moveDefaults.hits ? 1 : moveDefaults.minHits}
                         max={moveDefaults.maxHits}
                         step={1}
                         clearOnFocus
@@ -727,7 +721,13 @@ export const PokeMoves = ({
                           value: moveOverrides.hits,
                           onChange: (value: number) => updatePokemon({
                             moveOverrides: {
-                              [moveName]: { hits: clamp(moveDefaults.minHits, value, moveDefaults.maxHits) },
+                              [moveName]: {
+                                hits: clamp(
+                                  moveDefaults.minHits === moveDefaults.hits ? 1 : moveDefaults.minHits,
+                                  value,
+                                  moveDefaults.maxHits,
+                                ),
+                              },
                             },
                           }, `${l.scope}:ValueField~Hits:input.onChange()`),
                         }}
@@ -803,7 +803,7 @@ export const PokeMoves = ({
                         hideLabel
                         hint={moveOverrides.hits}
                         fallbackValue={moveDefaults.hits}
-                        min={moveDefaults.minHits}
+                        min={moveDefaults.minHits === moveDefaults.hits ? 1 : moveDefaults.minHits}
                         max={moveDefaults.maxHits}
                         step={1}
                         clearOnFocus
@@ -813,7 +813,13 @@ export const PokeMoves = ({
                           value: moveOverrides.hits,
                           onChange: (value: number) => updatePokemon({
                             moveOverrides: {
-                              [moveName]: { hits: clamp(moveDefaults.minHits, value, moveDefaults.maxHits) },
+                              [moveName]: {
+                                hits: clamp(
+                                  moveDefaults.minHits === moveDefaults.hits ? 1 : moveDefaults.minHits,
+                                  value,
+                                  moveDefaults.maxHits,
+                                ),
+                              },
                             },
                           }, `${l.scope}:ValueField~Hits:input.onChange()`),
                         }}

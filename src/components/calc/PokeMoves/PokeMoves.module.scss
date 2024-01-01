@@ -34,6 +34,18 @@
       0 0 16px color.alpha(colors.$black, 0.48),
     );
   }
+
+  &.glassy {
+    backdrop-filter: blur(2px);
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.24);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$black, 0.24);
+    }
+  }
 }
 
 .header {
