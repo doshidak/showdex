@@ -36,7 +36,12 @@ import {
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
-import { env, nonEmptyObject, similarArrays } from '@showdex/utils/core';
+import {
+  clamp,
+  env,
+  nonEmptyObject,
+  similarArrays,
+} from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   detectDoublesFormat,
@@ -330,8 +335,86 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       ...keys: Exclude<keyof CalcdexPokemon, 'calcdexId'>[]
     ) => keys.some((key) => key in pokemon);
 
+    if (mutating('dirtyBoosts')) {
+      mutated.dirtyBoosts = {
+        ...prevPokemon.dirtyBoosts,
+        ...pokemon.dirtyBoosts,
+      };
+
+      // we can only reset dirtyBoosts if there are reported boosts from the current battle, obviously!
+      if (nonEmptyObject(mutated.boosts)) {
+        Object.entries(mutated.dirtyBoosts).forEach(([
+          stat,
+          dirtyBoost,
+        ]: [
+          stat: Showdown.StatNameNoHp,
+          dirtyBoost: number,
+        ]) => {
+          const boost = mutated.boosts?.[stat] || 0;
+
+          if (dirtyBoost !== boost) {
+            return;
+          }
+
+          mutated.dirtyBoosts[stat] = null;
+        });
+      }
+    }
+
+    // auto-update any special formes when Terastallizing
+    if (mutating('terastallized')) {
+      if (mutated.speciesForme.startsWith('Ogerpon')) {
+        // "toggle" on its Tera forme
+        // e.g., 'Ogerpon' -> 'Ogerpon-Teal-Tera', 'Ogerpon-Wellspring' (+ Wellspring Mask) -> 'Ogerpon-Wellspring-Tera'
+        mutated.speciesForme = mutated.terastallized
+          ? mutated.speciesForme === 'Ogerpon' || (mutated.dirtyItem ?? mutated.item).endsWith('Mask')
+            // replacing '-Tera' here in case we're already in the Tera forme, but not Terastallized o_O
+            ? `${mutated.speciesForme.replace('-Tera', '')}${mutated.speciesForme === 'Ogerpon' ? '-Teal' : ''}-Tera`
+            : mutated.speciesForme // no-op
+          // toggle off, e.g., 'Ogerpon-Teal-Tera' -> 'Ogerpon', 'Ogerpon-Wellspring-Tera' -> 'Ogerpon-Wellspring'
+          : mutated.speciesForme.endsWith('-Tera')
+            ? mutated.speciesForme.replace(/(?:-Teal)?-Tera$/, '')
+            : mutated.speciesForme; // no-op
+      }
+
+      // while it's entirely possible that we're dealing with the base Terapagos forme (especially in standalone mode),
+      // we're not bothering handling that since it normally becomes Terapagos-Terastal on switch-in anyways
+      if (mutated.speciesForme.startsWith('Terapagos')) {
+        mutated.speciesForme = mutated.terastallized ? 'Terapagos-Stellar' : 'Terapagos-Terastal';
+      }
+    }
+
+    // auto-apply/remove the Embody Aspect boost if the battle hasn't reported the boost already (or we're in standalone mode)
+    if (mutating('speciesForme', 'terastallized') && mutated.speciesForme.startsWith('Ogerpon')) {
+      const boostedStat = ([
+        // ['-Teal', 'spe'],
+        ['-Cornerstone', 'def'],
+        ['-Hearthflame', 'atk'],
+        ['-Wellspring', 'spd'],
+      ] as [partialForme: string, stat: Showdown.StatNameNoHp][])
+        .find(([f]) => mutated.speciesForme.includes(f))
+        ?.[1] || 'spe';
+
+      const shouldAutoBoost = !mutated.boosts?.[boostedStat] && (
+        mutated.speciesForme === 'Ogerpon'
+          || mutated.speciesForme.includes('-Teal')
+          || (mutated.dirtyItem ?? mutated.item).endsWith('Mask')
+      );
+
+      if (shouldAutoBoost) {
+        const teraFormed = mutated.speciesForme.endsWith('-Tera');
+
+        // boosting relative to the user's dirtied boost, if any, hence why we're allowing all possible stages
+        mutated.dirtyBoosts[boostedStat] = clamp(
+          -6,
+          (mutated.dirtyBoosts[boostedStat] || 0) + (teraFormed ? 1 : -1),
+          6,
+        ) || null;
+      }
+    }
+
     // note: using `prevPokemon` & `pokemon` over `mutated` is important here !!
-    if (mutating('speciesForme') && prevPokemon.speciesForme !== pokemon.speciesForme) {
+    if (prevPokemon.speciesForme !== mutated.speciesForme) {
       const {
         altFormes,
         types,
@@ -603,62 +686,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // recalculate the stats with the updated base stats/EVs/IVs
     mutated.spreadStats = calcPokemonSpreadStats(state.format, mutated);
 
-    if (mutating('dirtyBoosts')) {
-      mutated.dirtyBoosts = {
-        ...prevPokemon.dirtyBoosts,
-        ...pokemon.dirtyBoosts,
-      };
-
-      // we can only reset dirtyBoosts if there are reported boosts from the current battle, obviously!
-      if (nonEmptyObject(mutated.boosts)) {
-        Object.entries(mutated.dirtyBoosts).forEach(([
-          stat,
-          dirtyBoost,
-        ]: [
-          stat: Showdown.StatNameNoHp,
-          dirtyBoost: number,
-        ]) => {
-          const boost = mutated.boosts?.[stat] || 0;
-
-          if (dirtyBoost === boost) {
-            mutated.dirtyBoosts[stat] = null;
-          }
-        });
-      }
-    }
-
     // when the user manually fills in a preset-less Pokemon, set its presetId to some value so that the auto-preset
     // doesn't clear the changes when another Pokemon is added (auto-preset runs on each pokemon[] mutation)
     // (note: also checking if the manualPreset was previously applied in case it's no longer "complete")
     if (mutating('speciesForme') ? mutated.presetId === NIL_UUID : !mutated.presetId) {
-      /*
-      // create a pseudo-preset based on the user's current inputs to feed into detectCompletePreset()
-      const manualPreset: CalcdexPokemonPreset = {
-        calcdexId: NIL_UUID,
-        id: NIL_UUID,
-        name: 'User',
-        source: 'user',
-        gen: state.gen,
-        format: getGenlessFormat(state.format),
-        speciesForme: mutated.speciesForme,
-        level: mutated.level,
-        teraTypes: [mutated.dirtyTeraType].filter(Boolean),
-        ability: mutated.dirtyAbility,
-        item: mutated.dirtyItem,
-        nature: mutated.nature,
-        ivs: { ...mutated.ivs },
-        evs: { ...mutated.evs },
-
-        // note: purposefully defaulting to [null] to satisfy the moves[].length check in detectCompletePreset()
-        moves: mutated.moves.length ? [...mutated.moves] : [null],
-      };
-
-      const manuallyComplete = detectCompletePreset(manualPreset);
-
-      mutated.presetId = manuallyComplete ? manualPreset.calcdexId : null;
-      mutated.presetSource = manuallyComplete ? manualPreset.source : null;
-      */
-
       const manuallyDirtied = !!mutated.dirtyTypes?.length
         || !!mutated.dirtyTeraType
         || !!mutated.dirtyHp
