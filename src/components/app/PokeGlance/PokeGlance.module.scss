@@ -34,6 +34,7 @@ $active-color: (
 .picon {
   position: relative;
   @include flex.row-center;
+  @include spacing.margin($left: -6px); // most picons are "aligned right" so this offsets it a bit
   z-index: 1; // to go over the tooltip's arrow (circularHp will be behind it otherwise)
 
   .circularHp {
@@ -212,8 +213,18 @@ $active-color: (
     line-height: 13px;
     @include transition.apply(color);
 
+    span.boostedStat {
+      font-size: 8px;
+      line-height: 9px;
+      text-transform: uppercase;
+    }
+
     &.active {
       font-weight: 600;
+
+      span.boostedStat {
+        font-weight: 400;
+      }
     }
 
     .light &.active {

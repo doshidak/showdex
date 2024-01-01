@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { type GenerationNum } from '@smogon/calc';
 import { type BadgeInstance, Badge, CircularBar } from '@showdex/components/ui';
-import { PokemonStatNames } from '@showdex/consts/dex';
+import { PokemonBoosterAbilities, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
@@ -68,6 +68,8 @@ export const PokeGlance = ({
     prevItemEffect,
     status: currentStatus,
     dirtyStatus,
+    boostedStat,
+    dirtyBoostedStat,
   } = pokemon || {};
 
   const nickname = (showNickname && hasNickname(pokemon) && pokemonName) || null;
@@ -285,6 +287,13 @@ export const PokeGlance = ({
 
               <div className={cx(styles.specValues, abilityToggled && styles.active)}>
                 {ability}
+
+                {
+                  (PokemonBoosterAbilities.includes(ability) && !!(dirtyBoostedStat || boostedStat)) &&
+                  <span className={styles.boostedStat}>
+                    {' '}{dirtyBoostedStat || boostedStat}
+                  </span>
+                }
               </div>
             </>
           }
