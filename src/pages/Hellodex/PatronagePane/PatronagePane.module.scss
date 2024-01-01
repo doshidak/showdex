@@ -19,12 +19,24 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
 
   &.light {
     color: colors.$black;
-    background-color: color.alpha(colors.$white, 0.95);
+    background-color: color.alpha(colors.$white, 0.94);
   }
 
   &.dark {
     color: colors.$white;
-    background-color: color.alpha(#121212, 0.95);
+    background-color: color.alpha(colors.$gray-darkest, 0.94);
+  }
+
+  &.glassy {
+    backdrop-filter: blur(4px);
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.64);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$gray-darkest, 0.8);
+    }
   }
 }
 
@@ -73,7 +85,7 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
 
     .dark & {
       color: #9C27B0;
-      background-color: color.alpha(#121212, 0.5);
+      background-color: color.alpha(colors.$gray-darkest, 0.5);
       box-shadow: (
         0 0 1px color.alpha(colors.$white, 0.3),
         0 0 25px color.alpha(#9C27B0, 0.5),
@@ -185,44 +197,55 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
 
   .info {
     height: 100%;
-    // @include spacing.padding-xy($x: 10px, $y: 15px);
-    @include spacing.padding-all(15px);
-    // @include spacing.padding($top: 15px, $right: 15px, $bottom: 30px, $left: 15px);
-    border-radius: 10px;
+    @include spacing.padding-all(16px);
+    border-radius: 12px;
     @include transition.apply(background-color, box-shadow);
 
     .light & {
-      background-color: color.alpha(colors.$white, 0.85);
+      background-color: color.alpha(colors.$white, 0.8);
       box-shadow: (
-        0 0 1px color.alpha(colors.$black, 0.15),
-        0 0 15px color.alpha(colors.$gray-dark, 0.3),
+        0 0 1px color.alpha(colors.$black, 0.16),
+        0 0 16px color.alpha(colors.$gray-dark, 0.32),
       );
     }
 
     .dark & {
-      background-color: color.alpha(#121212, 0.85);
+      background-color: color.alpha(colors.$gray-darkest, 0.8);
       box-shadow: (
-        0 0 1px color.alpha(colors.$white, 0.3),
-        0 0 7px color.alpha(colors.$gray-dark, 0.3),
+        0 0 1px color.alpha(colors.$white, 0.32),
+        0 0 8px color.alpha(colors.$gray-dark, 0.32),
       );
+    }
+
+    .glassy & {
+      backdrop-filter: blur(4px);
+    }
+
+    .glassy.light & {
+      background-color: color.alpha(colors.$white, 0.24);
+    }
+
+    .glassy.dark & {
+      background-color: color.alpha(colors.$black, 0.24);
     }
   }
 
   .description {
+    font-size: 10px;
     letter-spacing: 0.1px;
+    line-height: 13px;
     // text-align: justify;
-    opacity: 0.65;
+    opacity: 0.64;
   }
 
   .value {
-    // @include spacing.padding-xy($x: 5px, $y: 3px);
-    @include spacing.padding-all(5px);
+    @include spacing.padding-all(6px);
     // @include font.apply(fonts.$mono);
     font-size: 12px;
     user-select: none;
 
     &.empty {
-      opacity: 0.3;
+      opacity: 0.32;
     }
   }
 

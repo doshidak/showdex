@@ -9,7 +9,12 @@ import {
   Tooltip,
 } from '@showdex/components/ui';
 import { ShowdexDonorTiers, ShowdexPatronTiers } from '@showdex/consts/app';
-import { useAuthUsername, useColorScheme, useHellodexState } from '@showdex/redux/store';
+import {
+  useAuthUsername,
+  useColorScheme,
+  useGlassyTerrain,
+  useHellodexState,
+} from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
 import { GradientButton } from '../GradientButton';
@@ -32,6 +37,7 @@ export const PatronagePane = ({
 }: PatronagePaneProps): JSX.Element => {
   const state = useHellodexState();
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
 
   const authUser = useAuthUsername();
   const authTitle = findPlayerTitle(authUser, true);
@@ -41,6 +47,7 @@ export const PatronagePane = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         ['xs', 'sm'].includes(state.containerSize) && styles.verySmol,
         className,
       )}
