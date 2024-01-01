@@ -1,5 +1,6 @@
 import { type ShowdexCalcdexSettings } from './ShowdexCalcdexSettings';
 import { type ShowdexHellodexSettings } from './ShowdexHellodexSettings';
+import { type ShowdexHonkdexSettings } from './ShowdexHonkdexSettings';
 import { type ShowdexShowdownSettings } from './ShowdexShowdownSettings';
 
 /**
@@ -60,6 +61,13 @@ export interface ShowdexSettings {
    * @since 1.0.3
    */
   calcdex: ShowdexCalcdexSettings;
+
+  /**
+   * Honkdex-specific settings.
+   *
+   * @since 1.2.0
+   */
+  honkdex: ShowdexHonkdexSettings;
 
   /**
    * Showdown-specific settings.

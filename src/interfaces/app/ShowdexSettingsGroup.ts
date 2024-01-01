@@ -7,7 +7,7 @@ export const ShowdexSettingsGroups = [
   'showdex',
   'hellodex',
   'calcdex',
-  // 'honkdex',
+  'honkdex',
   'showdown',
 ] as const;
 

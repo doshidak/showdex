@@ -1,6 +1,7 @@
 export * from './ShowdexBootstrapper';
 export * from './ShowdexCalcdexSettings';
 export * from './ShowdexHellodexSettings';
+export * from './ShowdexHonkdexSettings';
 export * from './ShowdexPlayerTitle';
 export * from './ShowdexSettings';
 export * from './ShowdexSettingsGroup';

@@ -13,6 +13,7 @@ import {
   useGlassyTerrain,
   useHellodexSettings,
   useHellodexState,
+  useHonkdexSettings,
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
@@ -61,12 +62,18 @@ export const Hellodex = ({
   const glassyTerrain = useGlassyTerrain();
   const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
+  const honkdexSettings = useHonkdexSettings();
 
   const state = useHellodexState();
   const calcdexState = useCalcdexState();
-
   const neverOpens = calcdexSettings?.openOnStart === 'never';
-  const instancesEmpty = !Object.keys(calcdexState).length;
+
+  const instances = Object.values(calcdexState).reverse().filter((b) => (
+    !!b?.battleId
+      && (b.operatingMode === 'battle' || honkdexSettings?.visuallyEnabled)
+  ));
+
+  const instancesEmpty = !instances.length;
 
   // donate button visibility
   const showDonateButton = settings?.showDonateButton;
@@ -244,55 +251,63 @@ export const Hellodex = ({
                     )}
                   </div>
 
-                  <div className={styles.divider}>
-                    <div className={styles.dividerLine} />
-                    <div className={styles.dividerLabel}>
-                      or
-                    </div>
-                    <div className={styles.dividerLine} />
-                  </div>
+                  {
+                    honkdexSettings?.visuallyEnabled &&
+                    <>
+                      <div className={styles.divider}>
+                        <div className={styles.dividerLine} />
+                        <div className={styles.dividerLabel}>
+                          or
+                        </div>
+                        <div className={styles.dividerLine} />
+                      </div>
 
-                  <GradientButton
-                    className={styles.honkButton}
-                    aria-label="Create New Honkdex"
-                    hoverScale={1}
-                    onPress={() => openHonkdexInstance?.()}
-                  >
-                    <span>
-                      {/* Create{' '} */}
-                      <strong>New</strong>
-                    </span>
-                    <i
-                      className="fa fa-car"
-                      style={{ padding: '0 8px' }}
-                    />
-                    <strong>Honk</strong>
-                    <span>dex</span>
-                  </GradientButton>
+                      <GradientButton
+                        className={styles.honkButton}
+                        aria-label="Create New Honkdex"
+                        hoverScale={1}
+                        onPress={() => openHonkdexInstance?.()}
+                      >
+                        <span>
+                          {/* Create{' '} */}
+                          <strong>New</strong>
+                        </span>
+                        <i
+                          className="fa fa-car"
+                          style={{ padding: '0 8px' }}
+                        />
+                        <strong>Honk</strong>
+                        <span>dex</span>
+                      </GradientButton>
+                    </>
+                  }
                 </div>
               ) : (
                 <Scrollable className={styles.scrollableInstances}>
                   <div className={styles.instances}>
-                    <GradientButton
-                      className={cx(styles.instanceButton, styles.newHonkButton)}
-                      display="block"
-                      aria-label="New Honkdex"
-                      hoverScale={1}
-                      onPress={() => openHonkdexInstance()}
-                    >
-                      <i
-                        className="fa fa-plus"
-                        style={{ fontSize: 10, lineHeight: 11 }}
-                      />
-                      <i
-                        className="fa fa-car"
-                        style={{ padding: '0 8px' }}
-                      />
-                      <strong>Honk</strong>
-                      <span>dex</span>
-                    </GradientButton>
+                    {
+                      honkdexSettings?.visuallyEnabled &&
+                      <GradientButton
+                        className={cx(styles.instanceButton, styles.newHonkButton)}
+                        display="block"
+                        aria-label="New Honkdex"
+                        hoverScale={1}
+                        onPress={() => openHonkdexInstance()}
+                      >
+                        <i
+                          className="fa fa-plus"
+                          style={{ fontSize: 10, lineHeight: 11 }}
+                        />
+                        <i
+                          className="fa fa-car"
+                          style={{ padding: '0 8px' }}
+                        />
+                        <strong>Honk</strong>
+                        <span>dex</span>
+                      </GradientButton>
+                    }
 
-                    {Object.values(calcdexState).reverse().filter((b) => !!b?.battleId).map((instance) => (
+                    {instances.map((instance) => (
                       <InstanceButton
                         key={`Hellodex:InstanceButton:${instance.battleId}`}
                         className={styles.instanceButton}

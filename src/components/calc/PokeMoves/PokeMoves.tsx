@@ -18,7 +18,7 @@ import {
 } from '@showdex/components/ui';
 import { PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
+import { useColorScheme, useGlassyTerrain, useHonkdexSettings } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
@@ -68,6 +68,7 @@ export const PokeMoves = ({
     field,
   } = state;
 
+  const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
   const randomUuid = useRandomUuid();
@@ -120,7 +121,8 @@ export const PokeMoves = ({
   const disableMaxToggle = !pokemon?.speciesForme;
 
   const showEditButton = !!pokemon?.speciesForme && (
-    settings?.showMoveEditor === 'always'
+    (operatingMode === 'standalone' && honkdexSettings?.alwaysEditMoves)
+      || settings?.showMoveEditor === 'always'
       || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
   );
 

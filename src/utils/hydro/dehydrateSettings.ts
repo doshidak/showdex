@@ -1,12 +1,14 @@
 import {
   DehydratedCalcdexSettingsMap,
   DehydratedHellodexSettingsMap,
+  DehydratedHonkdexSettingsMap,
   DehydratedShowdexSettingsMap,
   DehydratedShowdownSettingsMap,
 } from '@showdex/consts/hydro';
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
+  type ShowdexHonkdexSettings,
   type ShowdexSettings,
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
@@ -66,6 +68,8 @@ export const dehydratePerSide = (
  * * `dm` refers to the `developerMode`.
  * * `hd` refers to the `hellodex` settings.
  * * `cd` refers to the `calcdex` settings.
+ * * `kd` refers to the `honkdex` settings (cause `hd` was already taken lmao).
+ * * `sd` refers to the `showdown` settings.
  *
  * * Note that the `colorScheme` setting is not dehydrated as it pertains to the current value at runtime, subject to change.
  *
@@ -80,8 +84,11 @@ export const dehydratePerSide = (
  * {...header};
  * fc:{forcedColorScheme};
  * dm:{developerMode};
+ * ...
  * hd:{hellodexSettings};
- * cd:{calcdexSettings}
+ * cd:{calcdexSettings};
+ * kd:{honkdexSettings};
+ * sd:{showdownSettings}
  * ```
  *
  * * Note that the output string contains no newlines (`\n`) despite being depicted in the formatting above,
@@ -115,15 +122,18 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
 
   const {
     forcedColorScheme,
+    glassyTerrain,
     developerMode,
     hellodex,
     calcdex,
+    honkdex,
     showdown,
   } = settings;
 
   const output: string[] = [
     dehydrateHeader(HydroDescriptor.Settings),
     `${DehydratedShowdexSettingsMap.forcedColorScheme}:${dehydrateValue(forcedColorScheme)}`,
+    `${DehydratedShowdexSettingsMap.glassyTerrain}:${dehydrateBoolean(glassyTerrain)}`,
     `${DehydratedShowdexSettingsMap.developerMode}:${dehydrateBoolean(developerMode)}`,
   ];
 
@@ -170,6 +180,26 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
   }).filter(Boolean);
 
   output.push(`${DehydratedShowdexSettingsMap.calcdex}:${calcdexOutput.join('|')}`);
+
+  const honkdexOutput: string[] = Object.entries(honkdex || {}).map(([
+    key,
+    value,
+  ]: [
+    keyof ShowdexHonkdexSettings,
+    ShowdexHonkdexSettings[keyof ShowdexHonkdexSettings],
+  ]) => {
+    const dehydratedKey = DehydratedHonkdexSettingsMap[key];
+
+    if (!dehydratedKey) {
+      return null;
+    }
+
+    const dehydratedValue = dehydrateValue(value);
+
+    return `${dehydratedKey.toLowerCase()}~${dehydratedValue}`;
+  }).filter(Boolean);
+
+  output.push(`${DehydratedShowdexSettingsMap.honkdex}:${honkdexOutput.join('|')}`);
 
   const showdownOutput: string[] = Object.entries(showdown || {}).map(([
     key,

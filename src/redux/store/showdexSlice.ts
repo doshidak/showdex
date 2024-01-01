@@ -296,6 +296,15 @@ export const useCalcdexSettings = () => useSelector(
 );
 
 /**
+ * Convenient hook to access the `ShowdexHonkdexSettings` from the `ShowdexSettings` state.
+ *
+ * @since 1.2.0
+ */
+export const useHonkdexSettings = () => useSelector(
+  (state) => state?.showdex?.settings?.honkdex,
+);
+
+/**
  * Convenient hook to access the `ShowdexShowdownSettings` from the `ShowdexSettings` state.
  *
  * @since 1.1.7

@@ -137,6 +137,7 @@ export const Calcdex = ({
         }
 
         <PlayerCalc
+          className={styles.playerCalc}
           position="top"
           playerKey={topKey}
           defaultName="Player 1"

@@ -37,29 +37,34 @@ button.toggleButton {
 .genWarning {
   @include flex.row($align: center);
   @include spacing.margin($bottom: 10px);
-  @include spacing.padding($all: 8px);
+  @include spacing.padding($x: 10px, $y: 8px);
   border: 0.5px solid colors.$transparent;
   border-radius: 8px;
   @include transition.apply(color, background-color, border-color, box-shadow);
   z-index: 1; // to go over the Tooltip's arrow
 
+  // $light-color: color.shade(colors.$pink, 16%);
+  // $dark-color: colors.$pink;
+  $light-color: colors.$gray-darkest;
+  $dark-color: colors.$gray-lighter;
+
   &.light {
-    color: color.shade(colors.$pink, 16%);
-    background-color: color.alpha(color.shade(colors.$pink, 16%), 0.16);
-    border-color: color.alpha(color.shade(colors.$pink, 16%), 0.4);
+    color: $light-color;
+    background-color: color.alpha($light-color, 0.12);
+    border-color: color.alpha($light-color, 0.32);
     box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.16),
-      0 0 4px color.alpha(color.shade(colors.$pink, 16%), 0.48),
+      0 0 1px color.alpha(colors.$black, 0.08),
+      0 0 4px color.alpha($light-color, 0.24),
     );
   }
 
   &.dark {
-    color: colors.$pink;
-    background-color: color.alpha(colors.$pink, 0.16);
-    border-color: color.alpha(colors.$pink, 0.4);
+    color: $dark-color;
+    background-color: color.alpha($dark-color, 0.08);
+    border-color: color.alpha($dark-color, 0.32);
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.16),
-      0 0 4px color.alpha(colors.$pink, 0.4),
+      0 0 4px color.alpha($dark-color, 0.24),
     );
   }
 

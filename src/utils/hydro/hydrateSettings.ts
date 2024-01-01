@@ -4,6 +4,7 @@ import {
   DehydratedShowdexSettingsMap,
   HydratedCalcdexSettingsMap,
   HydratedHellodexSettingsMap,
+  HydratedHonkdexSettingsMap,
   HydratedShowdexSettingsMap,
   HydratedShowdownSettingsMap,
 } from '@showdex/consts/hydro';
@@ -187,6 +188,41 @@ export const hydrateSettings = (
             ].includes(dehydratedCalcdexKey)
               ? hydratePerSide(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey]
               : hydrateValue(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
+        });
+
+        break;
+      }
+
+      case DehydratedShowdexSettingsMap.honkdex: {
+        const dehydratedHonkdexSettings = dehydratedValue?.split('|') || [];
+
+        if (!dehydratedHonkdexSettings.length) {
+          break;
+        }
+
+        dehydratedHonkdexSettings.forEach((dehydratedHonkdexSetting) => {
+          const [
+            rawDehydratedHonkdexKey,
+            ...dehydratedHonkdexValues
+          ] = dehydratedHonkdexSetting?.split('~') || [];
+
+          const dehydratedHonkdexKey = rawDehydratedHonkdexKey?.toLowerCase();
+
+          if (!dehydratedHonkdexKey) {
+            return;
+          }
+
+          const dehydratedHonkdexValue = dehydratedHonkdexValues.join('~');
+          const hydratedHonkdexKey = HydratedHonkdexSettingsMap[dehydratedHonkdexKey];
+
+          if (!hydratedHonkdexKey || !(hydratedHonkdexKey in settings.honkdex)) {
+            return;
+          }
+
+          // currently, only boolean values exist in ShowdexHonkdexSettings
+          settings.honkdex[hydratedHonkdexKey] = ['y', 'n'].includes(dehydratedHonkdexValue)
+            ? hydrateBoolean(dehydratedHonkdexValue)
+            : null;
         });
 
         break;

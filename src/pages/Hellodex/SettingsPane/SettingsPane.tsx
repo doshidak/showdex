@@ -34,6 +34,7 @@ import { dehydrateSettings, hydrateSettings, possiblyDehydrated } from '@showdex
 import { clearPresetsDb } from '@showdex/utils/storage';
 import { CalcdexSettingsPane } from './CalcdexSettingsPane';
 import { HellodexSettingsPane } from './HellodexSettingsPane';
+import { HonkdexSettingsPane } from './HonkdexSettingsPane';
 import { ShowdexSettingsPane } from './ShowdexSettingsPane';
 import { ShowdownSettingsPane } from './ShowdownSettingsPane';
 import styles from './SettingsPane.module.scss';
@@ -518,6 +519,8 @@ export const SettingsPane = ({
                 // maxCacheSize={maxCacheSize}
                 inBattle={inBattle}
               />
+
+              <HonkdexSettingsPane />
 
               <ShowdownSettingsPane />
 

@@ -33,7 +33,7 @@ import {
   PokemonRuinAbilities,
 } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
 import { calcPokemonHpPercentage, populateStatsTable } from '@showdex/utils/calc';
 import { readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -97,6 +97,7 @@ export const PokeInfo = ({
     defaultLevel,
   } = state;
 
+  const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
   const randomUuid = useRandomUuid();
 
@@ -290,7 +291,8 @@ export const PokeInfo = ({
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
     : null;
 
-  const editableTypes = settings?.editPokemonTypes === 'always'
+  const editableTypes = (operatingMode === 'standalone' && honkdexSettings?.alwaysEditTypes)
+    || settings?.editPokemonTypes === 'always'
     || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
 
   const presetOptions = React.useMemo(() => buildPresetOptions(

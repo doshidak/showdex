@@ -6,7 +6,7 @@ import { type GenerationNum } from '@smogon/calc';
 import { Dropdown, GenField, InlineField } from '@showdex/components/form';
 import { ToggleButton } from '@showdex/components/ui';
 import { type CalcdexBattleState, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import { buildFormatOptions, determineColorScheme } from '@showdex/utils/ui';
 import { useCalcdexContext } from '../CalcdexContext';
@@ -35,6 +35,8 @@ export const BattleInfo = ({
     saveHonk,
   } = useCalcdexContext();
 
+  const honkdexSettings = useHonkdexSettings();
+
   const {
     operatingMode,
     battleId,
@@ -52,8 +54,8 @@ export const BattleInfo = ({
   const saved = !!cached && !saving?.[0];
 
   const formatOptions = React.useMemo(
-    () => buildFormatOptions(gen),
-    [gen],
+    () => buildFormatOptions(gen, { showAll: honkdexSettings?.showAllFormats }),
+    [gen, honkdexSettings?.showAllFormats],
   );
 
   // used for the honk name, so it doesn't lag when you type fast af
@@ -97,8 +99,8 @@ export const BattleInfo = ({
           >
             <div className={styles.description}>
               <i className="fa fa-exclamation-circle" />
-              Changing the gen with Pok&eacute;mon in the calc will open a <strong>new</strong>,{' '}
-              <strong>blank</strong> Honkdex with your selected gen.
+              Switching the gen with Pok&eacute;mon in the calc will open a <strong>new</strong>,{' '}
+              <strong>blank</strong> Honkdex.
             </div>
           </div>
         ) : null}

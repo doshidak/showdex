@@ -5,7 +5,7 @@ import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { PokemonBoostNames, PokemonNatureBoosts, PokemonStatNames } from '@showdex/consts/dex';
 import { CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -39,6 +39,7 @@ export const PokeStats = ({
   } = useCalcdexPokeContext();
 
   const {
+    operatingMode,
     containerSize,
     gen,
     format,
@@ -47,6 +48,7 @@ export const PokeStats = ({
     field,
   } = state;
 
+  const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
   const randomUuid = useRandomUuid();
 
@@ -56,7 +58,9 @@ export const PokeStats = ({
   const statNames = PokemonStatNames.filter((stat) => gen !== 1 || stat !== 'spd');
   const boostNames = PokemonBoostNames.filter((stat) => gen !== 1 || stat !== 'spd');
 
-  const shouldShowBaseStats = settings?.showBaseStats === 'always'
+  const forceShowGenetics = operatingMode === 'standalone' && honkdexSettings?.alwaysShowGenetics;
+  const shouldShowBaseStats = forceShowGenetics
+    || settings?.showBaseStats === 'always'
     || (settings?.showBaseStats === 'meta' && !legalLockedFormat(format));
 
   const geneticsKey = authPlayerKey === playerKey ? 'auth' : playerKey;
@@ -71,15 +75,18 @@ export const PokeStats = ({
   ) => lockedVisibilities.includes(k));
 
   const showBaseRow = shouldShowBaseStats && (
-    pokemon?.showGenetics
+    forceShowGenetics
+      || pokemon?.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('base'))
   );
 
-  const showIvsRow = pokemon?.showGenetics
+  const showIvsRow = forceShowGenetics
+    || pokemon?.showGenetics
     || (!defaultShowBehavior && lockedVisibilities.includes('iv'));
 
   const showEvsRow = (!legacy || settings?.showLegacyEvs) && (
-    pokemon?.showGenetics
+    forceShowGenetics
+      || pokemon?.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('ev'))
   );
 
@@ -158,26 +165,29 @@ export const PokeStats = ({
     >
       {/* table headers (horizontal) */}
       <TableGridItem align="right" header>
-        <ToggleButton
-          className={styles.small}
-          label={pokemon?.showGenetics ? 'Hide' : 'Show'}
-          tooltip={(
-            <div className={styles.tooltipContent}>
-              {pokemon?.showGenetics ? 'Hide' : 'Show'}{' '}
-              {[
-                shouldShowBaseStats && (defaultShowBehavior || !lockedVisibilities.includes('base')) && 'Base',
-                (defaultShowBehavior || !lockedVisibilities.includes('iv')) && (legacy ? 'DVs' : 'IVs'),
-                !legacy && (defaultShowBehavior || !lockedVisibilities.includes('ev')) && 'EVs',
-              ].filter(Boolean).join('/')}
-            </div>
-          )}
-          tooltipDisabled={!settings?.showUiTooltips}
-          primary
-          disabled={!pokemon?.speciesForme || missingIvs || missingEvs}
-          onPress={() => updatePokemon({
-            showGenetics: !pokemon.showGenetics,
-          }, `${l.scope}:ToggleButton~Genetics:onPress()`)}
-        />
+        {
+          !forceShowGenetics &&
+          <ToggleButton
+            className={styles.small}
+            label={pokemon?.showGenetics ? 'Hide' : 'Show'}
+            tooltip={(
+              <div className={styles.tooltipContent}>
+                {pokemon?.showGenetics ? 'Hide' : 'Show'}{' '}
+                {[
+                  shouldShowBaseStats && (defaultShowBehavior || !lockedVisibilities.includes('base')) && 'Base',
+                  (defaultShowBehavior || !lockedVisibilities.includes('iv')) && (legacy ? 'DVs' : 'IVs'),
+                  !legacy && (defaultShowBehavior || !lockedVisibilities.includes('ev')) && 'EVs',
+                ].filter(Boolean).join('/')}
+              </div>
+            )}
+            tooltipDisabled={!settings?.showUiTooltips}
+            primary
+            disabled={!pokemon?.speciesForme || missingIvs || missingEvs}
+            onPress={() => updatePokemon({
+              showGenetics: !pokemon.showGenetics,
+            }, `${l.scope}:ToggleButton~Genetics:onPress()`)}
+          />
+        }
       </TableGridItem>
 
       {statNames.map((stat) => {

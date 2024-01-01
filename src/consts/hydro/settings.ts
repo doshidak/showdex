@@ -1,6 +1,7 @@
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
+  type ShowdexHonkdexSettings,
   type ShowdexSettings,
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
@@ -108,6 +109,14 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     ],
   },
 
+  honkdex: {
+    visuallyEnabled: true,
+    showAllFormats: false,
+    alwaysEditTypes: true,
+    alwaysEditMoves: true,
+    alwaysShowGenetics: true,
+  },
+
   showdown: {
     autoAcceptSheets: false,
   },
@@ -125,6 +134,7 @@ export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string>
   developerMode: 'dm',
   hellodex: 'hd',
   calcdex: 'cd',
+  honkdex: 'kd',
   showdown: 'sd',
 };
 
@@ -212,6 +222,26 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
  * @since 1.0.3
  */
 export const HydratedCalcdexSettingsMap = reverseObjectKv(DehydratedCalcdexSettingsMap);
+
+/**
+ * Opcode mappings for the dehydrated `ShowdexHonkdexSettings`.
+ *
+ * @since 1.2.0
+ */
+export const DehydratedHonkdexSettingsMap: Record<keyof ShowdexHonkdexSettings, string> = {
+  visuallyEnabled: 'ven',
+  showAllFormats: 'saf',
+  alwaysEditTypes: 'aet',
+  alwaysEditMoves: 'aem',
+  alwaysShowGenetics: 'asg',
+};
+
+/**
+ * Reverse opcode-to-key mappings for the hydrated `ShowdexHonkdexSettings`.
+ *
+ * @since 1.2.0
+ */
+export const HydratedHonkdexSettingsMap = reverseObjectKv(DehydratedHonkdexSettingsMap);
 
 /**
  * Opcode mappings for the dehydrated `ShowdexShowdownSettings`.
