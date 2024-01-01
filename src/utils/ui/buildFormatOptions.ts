@@ -45,6 +45,9 @@ const standardizeSection = (
  */
 export const buildFormatOptions = (
   gen: GenerationNum,
+  config?: {
+    showAll?: boolean;
+  },
 ): CalcdexBattleFormatOption[] => {
   const options: CalcdexBattleFormatOption[] = [];
 
@@ -52,12 +55,15 @@ export const buildFormatOptions = (
     return options;
   }
 
+  const { showAll } = config || {};
+  const eligible = (f: string) => !!f && (showAll || (!f.includes('random') && !f.includes('custom')));
+
   const favoritedFormats = Object.entries(Dex?.prefs('starredformats') || {})
-    .filter(([format, faved]) => detectGenFromFormat(format) === gen && faved)
+    .filter(([format, faved]) => eligible(format) && detectGenFromFormat(format) === gen && faved)
     .map(([format]) => format);
 
   const genFormats = Object.values(BattleFormats)
-    .filter((f) => detectGenFromFormat(f?.id) === gen);
+    .filter((f) => eligible(f?.id) && detectGenFromFormat(f.id) === gen);
 
   if (!favoritedFormats.length && !genFormats.length) {
     return options;
