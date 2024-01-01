@@ -14,6 +14,7 @@ import { reverseObjectKv } from '@showdex/utils/core';
 export const DefaultShowdexSettings: ShowdexSettings = {
   colorScheme: null,
   forcedColorScheme: 'showdown',
+  glassyTerrain: false,
   developerMode: __DEV__,
 
   hellodex: {
@@ -120,6 +121,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
 export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string> = {
   colorScheme: 'cs',
   forcedColorScheme: 'fc',
+  glassyTerrain: 'gt',
   developerMode: 'dm',
   hellodex: 'hd',
   calcdex: 'cd',

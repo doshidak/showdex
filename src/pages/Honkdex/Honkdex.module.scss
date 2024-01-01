@@ -33,6 +33,20 @@
       background-color: color.alpha(colors.$gray-darkest, 0.88);
     }
   }
+
+  &.glassy {
+    &::before {
+      backdrop-filter: blur(4px);
+    }
+
+    &.light::before {
+      background-color: color.alpha(colors.$showdown-background-light, 0.56);
+    }
+
+    &.dark::before {
+      background-color: color.alpha(colors.$gray-darkest, 0.8);
+    }
+  }
 }
 
 .content {

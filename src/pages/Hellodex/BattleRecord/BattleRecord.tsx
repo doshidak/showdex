@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { useBattleRecord, useColorScheme } from '@showdex/redux/store';
+import { useBattleRecord, useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import styles from './BattleRecord.module.scss';
 
 export interface BattleRecordProps {
@@ -12,8 +12,10 @@ export const BattleRecord = ({
   className,
   style,
 }: BattleRecordProps): JSX.Element => {
-  const battleRecord = useBattleRecord();
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
+
+  const battleRecord = useBattleRecord();
 
   const {
     wins: currentWins = 0,
@@ -25,6 +27,7 @@ export const BattleRecord = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         className,
       )}
       style={style}

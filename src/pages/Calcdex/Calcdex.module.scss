@@ -1,11 +1,13 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/aria';
 @use 'mixins/device';
 @use 'mixins/flex';
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
+@use 'mixins/transition';
 
 .overlayContainer {
   // positioning based off of those of .battle-log
@@ -52,89 +54,128 @@
     content: '';
     @include position.absolute-fill;
     pointer-events: none;
-    // z-index: -1;
   }
 
   &.light {
     &::before {
-      background-color: color.alpha(colors.$showdown-background-light, 0.8);
+      background-color: color.alpha(colors.$showdown-background-light, 0.88);
     }
 
     &.overlay::before {
-      // background-color: color.alpha(colors.$showdown-background-light, 0.9);
       background-color: colors.$showdown-background-light;
     }
   }
 
   &.dark {
     &::before {
-      // background-color: color.alpha(colors.$showdown-background-dark, 0.85);
-      background-color: color.alpha(#121212, 0.88);
+      background-color: color.alpha(colors.$gray-darkest, 0.88);
     }
 
     &.overlay::before {
-      // background-color: color.alpha(colors.$black, 0.9);
-      background-color: #121212;
+      background-color: colors.$gray-darkest;
+    }
+  }
+
+  &.glassy {
+    &::before {
+      backdrop-filter: blur(4px);
+    }
+
+    &.light {
+      &::before, &.overlay::before {
+        background-color: color.alpha(colors.$showdown-background-light, 0.56);
+      }
+    }
+
+    &.dark {
+      &::before, &.overlay::before {
+        background-color: color.alpha(colors.$gray-darkest, 0.8);
+      }
     }
   }
 }
 
 .content {
   @include position.absolute-fill;
-  // max-height: 100%;
-  @include spacing.padding-xy($x: 16px, $y: 12px);
+  @include spacing.padding($x: 16px, $top: 12px, $bottom: 16px);
   @include font.apply(fonts.$mono);
   font-size: 10px;
-  // overflow: hidden auto;
   overflow-x: hidden;
 
-  // hr {
-  //   width: 100%;
-  //   height: 1px;
-  //   @include spacing.margin-xy($y: 5px);
-  //   margin-block-start: 0;
-  //   margin-block-end: 0;
-  //   border: none;
-  //   outline: none;
-  //   user-select: none;
-  // }
-
-  // .light & hr {
-  //   background-color: color.alpha(colors.$black, 0.15);
-  // }
-
-  // .dark & hr {
-  //   background-color: color.alpha(colors.$white, 0.15);
-  // }
-}
-
-.section {
-  max-width: 650px;
+  .overlay:not(.verySmol) & {
+    @include spacing.padding($top: 32px);
+  }
 }
 
 .fieldCalc {
-  @include spacing.margin($top: 13px);
+  @include spacing.margin($top: 16px);
 }
 
 .opponentCalc {
-  @include spacing.margin($top: 10px);
+  @include spacing.margin($top: 12px);
 }
 
-div.topCloseButton {
-  justify-content: flex-start;
-  @include spacing.margin($top: 3px, $bottom: 5px);
+.overlayCloseButton {
+  @include position.absolute($top: 8px, $right: 8px);
+  @include flex.row-center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  border-radius: 100px;
+  @include transition.apply(color, background-color);
+
+  i {
+    line-height: 12px;
+  }
+
+  .light & {
+    color: color.alpha(colors.$gray-darkest, 0.72);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.72);
+  }
+
+  @include aria.outline(
+    $position: null,
+    $radius: 100px,
+  );
+
+  &:hover {
+    .light & {
+      color: colors.$gray-darkest;
+      background-color: color.alpha(colors.$black, 0.08);
+
+      &::after {
+        @include aria.outline-hover;
+      }
+    }
+
+    .dark & {
+      color: colors.$white;
+      background-color: color.alpha(colors.$white, 0.08);
+
+      &::after {
+        @include aria.outline-hover($color: colors.$white);
+      }
+    }
+  }
+
+  &:focus::after {
+    @include aria.outline-show;
+  }
 }
 
 div.bottomCloseButton {
-  @include spacing.margin($top: 13px, $bottom: 5px);
+  // @include spacing.margin($top: 13px, $bottom: 5px);
 
   &.mobile {
-    @include spacing.margin($top: 10px, $bottom: 3px);
+    @include spacing.margin($top: 16px, $bottom: 4px);
   }
 
-  &:not(.mobile)::before {
-    @include position.absolute-xy($x: 0, $y: -3px);
-  }
+  // &:not(.mobile)::before {
+  //   @include position.absolute-xy($x: 0, $y: -3px);
+  // }
 }
 
 .playerOption {

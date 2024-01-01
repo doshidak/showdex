@@ -3,8 +3,9 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
 import { bullop } from '@showdex/consts/core';
+import { GenLabels } from '@showdex/consts/dex';
 import { type CalcdexBattleState } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { parseBattleFormat } from '@showdex/utils/dex';
@@ -28,6 +29,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
 
   const {
     operatingMode,
@@ -41,6 +43,8 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     p2: opponent,
     cached,
   } = instance || {};
+
+  const { label: genLabel } = GenLabels[gen] || {};
 
   const {
     label,
@@ -100,6 +104,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         active && styles.active,
         (!!name && !!cached) && styles.saved,
         removalQueued && styles.removing,
@@ -129,6 +134,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
             !!label &&
             <>
               {' '}&bull;{' '}
+              {!!genLabel && `${genLabel} `}
               <strong>{label}</strong>
             </>
           }

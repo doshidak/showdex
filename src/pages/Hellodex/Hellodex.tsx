@@ -10,6 +10,7 @@ import {
   useCalcdexSettings,
   useCalcdexState,
   useColorScheme,
+  useGlassyTerrain,
   useHellodexSettings,
   useHellodexState,
 } from '@showdex/redux/store';
@@ -45,7 +46,6 @@ export const Hellodex = ({
   openHonkdexInstance,
   removeHonkdexInstances,
 }: HellodexProps): JSX.Element => {
-  const colorScheme = useColorScheme();
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   useHellodexSize(contentRef);
@@ -57,12 +57,15 @@ export const Hellodex = ({
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
   useRoomNavigation();
 
-  const state = useHellodexState();
+  const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
   const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
-  const neverOpens = calcdexSettings?.openOnStart === 'never';
 
+  const state = useHellodexState();
   const calcdexState = useCalcdexState();
+
+  const neverOpens = calcdexSettings?.openOnStart === 'never';
   const instancesEmpty = !Object.keys(calcdexState).length;
 
   // donate button visibility
@@ -89,6 +92,7 @@ export const Hellodex = ({
         'showdex-module',
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
       )}
     >
       <BuildInfo

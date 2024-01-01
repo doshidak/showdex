@@ -10,7 +10,7 @@ import {
 import { BuildInfo } from '@showdex/components/debug';
 import { Scrollable } from '@showdex/components/ui';
 import { type CalcdexBattleState } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import styles from './Honkdex.module.scss';
 
 export interface HonkdexProps {
@@ -25,6 +25,7 @@ export const Honkdex = ({
   useCalcdexSize(containerRef);
 
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
   const { state } = useCalcdexContext();
 
   const {
@@ -43,6 +44,7 @@ export const Honkdex = ({
         'showdex-module',
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
       )}
     >
       <Scrollable className={styles.content}>

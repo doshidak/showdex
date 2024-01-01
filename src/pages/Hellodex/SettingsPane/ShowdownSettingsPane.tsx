@@ -8,13 +8,11 @@ import styles from './SettingsPane.module.scss';
 export interface ShowdownSettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
-  children?: React.ReactNode;
 }
 
 export const ShowdownSettingsPane = ({
   className,
   style,
-  children,
 }: ShowdownSettingsPaneProps): JSX.Element => (
   <div
     className={cx(styles.settingsGroup, className)}
@@ -38,7 +36,5 @@ export const ShowdownSettingsPane = ({
         )}
       />
     </div>
-
-    {children}
   </div>
 );

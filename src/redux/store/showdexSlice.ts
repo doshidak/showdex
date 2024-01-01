@@ -269,6 +269,15 @@ export const useColorScheme = () => useSelector((state) => {
 });
 
 /**
+ * Convenient hook to access the `grassyTerrain` graphics setting value from the `ShowdexSettings` state.
+ *
+ * @since 1.2.0
+ */
+export const useGlassyTerrain = () => useSelector(
+  (state) => state?.showdex?.settings?.glassyTerrain,
+);
+
+/**
  * Convenient hook to access the `ShowdexHellodexSettings` from the `ShowdexSettings` state.
  *
  * @since 1.0.3

@@ -22,7 +22,7 @@ div.container {
     background-color: colors.$white;
     box-shadow: (
       0 0 1px color.alpha(colors.$black, 0.32),
-      0 0 5px color.alpha(colors.$gray-darker, 0.16),
+      0 0 4px color.alpha(colors.$gray-darker, 0.16),
     );
   }
 
@@ -30,8 +30,20 @@ div.container {
     background-color: colors.$gray-darker;
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.32),
-      0 0 5px color.alpha(colors.$black, 0.32),
+      0 0 4px color.alpha(colors.$black, 0.32),
     );
+  }
+
+  &.glassy {
+    backdrop-filter: blur(2px);
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.56);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$gray-darker, 0.64);
+    }
   }
 
   &::before {
@@ -153,19 +165,19 @@ div.container {
   height: 26px;
   opacity: 0.48;
   @include transition.apply(color, opacity);
+
+  .light & {
+    color: colors.$gray-darker;
+  }
+
+  .dark & {
+    color: colors.$white;
+  }
 }
 
 .battleIcon {
   .active & {
     opacity: 0.8;
-  }
-
-  .light & {
-    color: #121212;
-  }
-
-  .dark & {
-    color: colors.$white;
   }
 }
 
@@ -323,6 +335,7 @@ div.container {
 
   @include aria.outline(
     $position: null,
+    $offset: 3px,
     $radius: 100px,
   );
 

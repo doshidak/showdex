@@ -14,11 +14,14 @@ import {
 } from '@showdex/components/ui';
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import {
+  useAuthUsername,
   useColorScheme,
+  useGlassyTerrain,
   useHellodexState,
   useShowdexSettings,
   useUpdateSettings,
 } from '@showdex/redux/store';
+import { findPlayerTitle } from '@showdex/utils/app';
 import {
   env,
   getResourceUrl,
@@ -56,8 +59,12 @@ export const SettingsPane = ({
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
   const state = useHellodexState();
   const inBattle = ['xs', 'sm'].includes(state.containerSize);
+
+  const authUsername = useAuthUsername();
+  const authTitle = React.useMemo(() => findPlayerTitle(authUsername, true), [authUsername]);
 
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
@@ -122,6 +129,12 @@ export const SettingsPane = ({
       }
 
       const hydratedSettings = hydrateSettings(importedSettings);
+
+      // nt ^_~
+      if (!authTitle) {
+        hydratedSettings.glassyTerrain = false;
+        hydratedSettings.hellodex.showDonateButton = true;
+      }
 
       if (!hydratedSettings) {
         l.debug(
@@ -236,10 +249,11 @@ export const SettingsPane = ({
   ]);
   */
 
-  const [presetCacheSize, setPresetCacheSize] = React.useState(0);
-  const [maxCacheSize, setMaxCacheSize] = React.useState(0);
+  // const [presetCacheSize, setPresetCacheSize] = React.useState(0);
+  // const [maxCacheSize, setMaxCacheSize] = React.useState(0);
   // const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
 
+  /*
   // only updates the state when the size actually changes
   const updatePresetCacheSize = () => void (async () => {
     if (typeof navigator?.storage?.estimate !== 'function') {
@@ -266,8 +280,10 @@ export const SettingsPane = ({
       setMaxCacheSize(quota);
     }
   })();
+  */
 
   // check the estimated preset cache size on mount only
+  /*
   React.useEffect(() => {
     // if (presetCacheTimeout.current) {
     //   return;
@@ -283,6 +299,7 @@ export const SettingsPane = ({
     //   }
     // };
   });
+  */
 
   const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
     if (!nonEmptyObject(values)) {
@@ -296,13 +313,15 @@ export const SettingsPane = ({
 
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
-    if (presetCacheSize && calcdex?.maxPresetAge === 0) {
-      void (async () => {
-        // purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
-        await clearPresetsDb();
-        // updatePresetCacheSize();
-        setPresetCacheSize(0); // kekw
-      })();
+    if (calcdex?.maxPresetAge === 0) {
+      // void (async () => {
+      //   // purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
+      //   await clearPresetsDb();
+      //   // updatePresetCacheSize();
+      //   setPresetCacheSize(0); // kekw
+      // })();
+
+      void clearPresetsDb();
     }
 
     updateSettings(values);
@@ -312,8 +331,9 @@ export const SettingsPane = ({
     <div
       className={cx(
         styles.container,
-        !!colorScheme && styles[colorScheme],
         inBattle && styles.inBattle,
+        !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         className,
       )}
       style={style}
@@ -485,23 +505,21 @@ export const SettingsPane = ({
 
               <ShowdexSettingsPane
                 inBattle={inBattle}
+                special={!!authTitle}
               />
 
               <HellodexSettingsPane
-                value={values?.hellodex}
+                special={!!authTitle}
               />
 
               <CalcdexSettingsPane
                 value={values?.calcdex}
-                presetCacheSize={presetCacheSize}
-                maxCacheSize={maxCacheSize}
+                // presetCacheSize={presetCacheSize}
+                // maxCacheSize={maxCacheSize}
                 inBattle={inBattle}
               />
 
-              <ShowdownSettingsPane>
-                {/* temporary spacer cause too lazy to do it in CSS lol */}
-                <div style={{ height: 5 }} />
-              </ShowdownSettingsPane>
+              <ShowdownSettingsPane />
 
               <div className={styles.notice}>
                 plz excuse the mess, this is a work in progress
