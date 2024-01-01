@@ -70,9 +70,14 @@ export const hydrateSettings = (
 ): ShowdexSettings => {
   // these settings have their default values, which will be individually overwritten with the hydrated values
   // from the dehydrated settings in the passed-in `value` (otherwise, the default settings will be returned)
+  // update (2023/12/31): there's a read-only error on Firefox, so need to spread out each object value .-.
   const settings: ShowdexSettings = {
     ...DefaultShowdexSettings,
     colorScheme: getColorScheme(),
+    hellodex: { ...DefaultShowdexSettings.hellodex },
+    calcdex: { ...DefaultShowdexSettings.calcdex },
+    honkdex: { ...DefaultShowdexSettings.honkdex },
+    showdown: { ...DefaultShowdexSettings.showdown },
   };
 
   if (!value || typeof value !== 'string') {
