@@ -85,20 +85,17 @@ export const applyPreset = (
     },
   };
 
+  const transformed = !!pokemon.transformedForme;
+  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
+  const formeKey = transformed && !speciesFormes.includes(preset.speciesForme) ? 'transformedForme' : 'speciesForme';
+  const currentForme = pokemon[formeKey];
+
   // determine if this preset reveals actual info
-  const revealingPreset = ['server', 'sheet'].includes(preset.source);
+  const revealingPreset = ['server', 'sheet'].includes(preset.source)
+    && (!transformed || speciesFormes.includes(preset.speciesForme));
 
   // determine if we have a completed preset (to distinguish partial presets w/o any spreads derived from OTS)
   const completePreset = detectCompletePreset(preset);
-
-  const transformed = !!pokemon.transformedForme;
-
-  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
-  const formeKey = transformed && !speciesFormes.includes(preset.speciesForme)
-    ? 'transformedForme'
-    : 'speciesForme';
-
-  const currentForme = pokemon[formeKey];
 
   // update to the speciesForme (& update relevant info) if different
   // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
