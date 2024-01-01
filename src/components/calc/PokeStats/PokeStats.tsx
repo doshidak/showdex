@@ -74,19 +74,21 @@ export const PokeStats = ({
     k: 'base' | 'iv' | 'ev',
   ) => lockedVisibilities.includes(k));
 
-  const showBaseRow = shouldShowBaseStats && (
+  const showBaseRow = !!pokemon?.speciesForme && shouldShowBaseStats && (
     forceShowGenetics
-      || pokemon?.showGenetics
+      || pokemon.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('base'))
   );
 
-  const showIvsRow = forceShowGenetics
-    || pokemon?.showGenetics
-    || (!defaultShowBehavior && lockedVisibilities.includes('iv'));
-
-  const showEvsRow = (!legacy || settings?.showLegacyEvs) && (
+  const showIvsRow = !!pokemon?.speciesForme && (
     forceShowGenetics
-      || pokemon?.showGenetics
+      || pokemon.showGenetics
+      || (!defaultShowBehavior && lockedVisibilities.includes('iv'))
+  );
+
+  const showEvsRow = !!pokemon?.speciesForme && (!legacy || settings?.showLegacyEvs) && (
+    forceShowGenetics
+      || pokemon.showGenetics
       || (!defaultShowBehavior && lockedVisibilities.includes('ev'))
   );
 
