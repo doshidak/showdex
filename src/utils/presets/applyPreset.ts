@@ -7,7 +7,12 @@ import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, detectLegacyGen, getDefaultSpreadValue } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  determineDefaultLevel,
+  getDefaultSpreadValue,
+} from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -43,6 +48,7 @@ export const applyPreset = (
     return null;
   }
 
+  const defaultLevel = determineDefaultLevel(format);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
 
@@ -56,6 +62,7 @@ export const applyPreset = (
 
     // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
     // the new preset (don't want alts from a previous set to persist if none are defined)
+    level: preset.level || defaultLevel,
     altTeraTypes: [],
     altAbilities: [],
     dirtyAbility: preset.ability,
