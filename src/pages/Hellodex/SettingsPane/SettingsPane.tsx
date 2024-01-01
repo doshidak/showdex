@@ -6,7 +6,6 @@ import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import {
   type BadgeInstance,
-  type BaseButtonProps,
   Badge,
   BaseButton,
   Button,
@@ -15,23 +14,27 @@ import {
 } from '@showdex/components/ui';
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import {
+  useAuthUsername,
   useColorScheme,
+  useGlassyTerrain,
+  useHellodexState,
   useShowdexSettings,
   useUpdateSettings,
 } from '@showdex/redux/store';
+import { findPlayerTitle } from '@showdex/utils/app';
 import {
-  clearStoredItem,
   env,
   getResourceUrl,
-  getStoredItem,
   nonEmptyObject,
   readClipboardText,
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { dehydrateSettings, hydrateSettings, possiblyDehydrated } from '@showdex/utils/hydro';
+import { clearPresetsDb } from '@showdex/utils/storage';
 import { CalcdexSettingsPane } from './CalcdexSettingsPane';
 import { HellodexSettingsPane } from './HellodexSettingsPane';
+import { HonkdexSettingsPane } from './HonkdexSettingsPane';
 import { ShowdexSettingsPane } from './ShowdexSettingsPane';
 import { ShowdownSettingsPane } from './ShowdownSettingsPane';
 import styles from './SettingsPane.module.scss';
@@ -39,28 +42,31 @@ import styles from './SettingsPane.module.scss';
 export interface SettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
-  inBattle?: boolean;
-  onRequestClose?: BaseButtonProps['onPress'];
+  onRequestClose?: () => void;
 }
 
 const l = logger('@showdex/pages/Hellodex/SettingsPane');
 
-const getPresetCacheSize = () => (getStoredItem('storage-preset-cache-key')?.length ?? 0) * 2;
+// const getPresetCacheSize = () => (readLocalStorageItem('local-storage-deprecated-preset-cache-key')?.length ?? 0) * 2;
 
 /**
  * Showdex settings UI.
  *
- * @todo This file is gross. It's over 1500 lines.
- * @warning Also a warning lol.
  * @since 1.0.3
  */
 export const SettingsPane = ({
   className,
   style,
-  inBattle,
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
+  const state = useHellodexState();
+  const inBattle = ['xs', 'sm'].includes(state.containerSize);
+
+  const authUsername = useAuthUsername();
+  const authTitle = React.useMemo(() => findPlayerTitle(authUsername, true), [authUsername]);
+
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
 
@@ -92,10 +98,6 @@ export const SettingsPane = ({
         return;
       }
 
-      // const importedSettings = env('build-target') === 'firefox'
-      //   // ? await (browser.runtime.sendMessage('clipboardReadText') as Promise<string>)
-      //   ? await dispatchShowdexEvent<string>({ type: 'clipboardReadText' })
-      //   : await navigator.clipboard.readText();
       const importedSettings = await readClipboardText();
 
       l.debug(
@@ -128,6 +130,12 @@ export const SettingsPane = ({
       }
 
       const hydratedSettings = hydrateSettings(importedSettings);
+
+      // nt ^_~
+      if (!authTitle) {
+        hydratedSettings.glassyTerrain = false;
+        hydratedSettings.hellodex.showDonateButton = true;
+      }
 
       if (!hydratedSettings) {
         l.debug(
@@ -169,7 +177,6 @@ export const SettingsPane = ({
         return void exportFailedBadgeRef.current?.show();
       }
 
-      // await navigator.clipboard.writeText(dehydratedSettings);
       await writeClipboardText(dehydratedSettings);
       exportBadgeRef.current?.show();
     } catch (error) {
@@ -207,7 +214,7 @@ export const SettingsPane = ({
           return void defaultsFailedBadgeRef.current?.show();
         }
 
-        await navigator.clipboard.writeText(dehydratedDefaults);
+        await writeClipboardText(dehydratedDefaults);
         defaultsBadgeRef.current?.show();
       } catch (error) {
         if (__DEV__) {
@@ -243,36 +250,57 @@ export const SettingsPane = ({
   ]);
   */
 
-  const [presetCacheSize, setPresetCacheSize] = React.useState(0);
-  const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
+  // const [presetCacheSize, setPresetCacheSize] = React.useState(0);
+  // const [maxCacheSize, setMaxCacheSize] = React.useState(0);
+  // const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
 
+  /*
   // only updates the state when the size actually changes
-  const updatePresetCacheSize = () => {
-    const size = getPresetCacheSize();
-
-    if (size === presetCacheSize) {
+  const updatePresetCacheSize = () => void (async () => {
+    if (typeof navigator?.storage?.estimate !== 'function') {
       return;
     }
 
-    setPresetCacheSize(size);
-  };
+    // const size = getPresetCacheSize();
+    const estimates = await navigator.storage.estimate();
 
-  // every 30 sec, check the preset cache size lmfao
+    // doesn't appear to be a way to easily measure the size of just Showdex's IndexedDB,
+    // but at the time of writing (2023/12/28), next to Permutive's 2 object stores w/ 4 total entries,
+    // safe to say majority of the size is from our object stores lmao
+    const {
+      quota,
+      usage,
+      // usageDetails: { indexedDB }, // not typed for some reason, but appears on Chrome
+    } = estimates || {};
+
+    if ((usage || 0) !== presetCacheSize) {
+      setPresetCacheSize(usage);
+    }
+
+    if ((quota || 0) !== maxCacheSize) {
+      setMaxCacheSize(quota);
+    }
+  })();
+  */
+
+  // check the estimated preset cache size on mount only
+  /*
   React.useEffect(() => {
-    if (presetCacheTimeout.current) {
-      return;
-    }
+    // if (presetCacheTimeout.current) {
+    //   return;
+    // }
 
-    presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
+    // presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
     updatePresetCacheSize();
 
-    return () => {
-      if (presetCacheTimeout.current) {
-        clearTimeout(presetCacheTimeout.current);
-        presetCacheTimeout.current = null;
-      }
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- empty deps are intentional to only run on first mount
+    // return () => {
+    //   if (presetCacheTimeout.current) {
+    //     clearTimeout(presetCacheTimeout.current);
+    //     presetCacheTimeout.current = null;
+    //   }
+    // };
+  });
+  */
 
   const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
     if (!nonEmptyObject(values)) {
@@ -284,23 +312,17 @@ export const SettingsPane = ({
       calcdex,
     } = values;
 
-    /*
-    if (newColorScheme && colorScheme !== newColorScheme) {
-      // note: Storage is a native Web API (part of the Web Storage API), but Showdown redefines it with its own Storage() function
-      // also, Dex.prefs() is an alias of Storage.prefs(), but w/o the `value` and `save` args
-      (Storage as unknown as Showdown.ClientStorage)?.prefs?.('theme', newColorScheme, true);
-
-      // this is how Showdown natively applies the theme lmao
-      // see: https://github.com/smogon/pokemon-showdown-client/blob/1ea5210a360b64ede48813d9572b59b7f3d7365f/js/client.js#L473
-      $?.('html').toggleClass('dark', newColorScheme === 'dark');
-    }
-    */
-
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
-    if (presetCacheSize && calcdex?.maxPresetAge === 0) {
-      clearStoredItem('storage-preset-cache-key');
-      updatePresetCacheSize();
+    if (calcdex?.maxPresetAge === 0) {
+      // void (async () => {
+      //   // purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
+      //   await clearPresetsDb();
+      //   // updatePresetCacheSize();
+      //   setPresetCacheSize(0); // kekw
+      // })();
+
+      void clearPresetsDb();
     }
 
     updateSettings(values);
@@ -310,8 +332,9 @@ export const SettingsPane = ({
     <div
       className={cx(
         styles.container,
-        !!colorScheme && styles[colorScheme],
         inBattle && styles.inBattle,
+        !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         className,
       )}
       style={style}
@@ -483,22 +506,23 @@ export const SettingsPane = ({
 
               <ShowdexSettingsPane
                 inBattle={inBattle}
+                special={!!authTitle}
               />
 
               <HellodexSettingsPane
-                value={values?.hellodex}
+                special={!!authTitle}
               />
 
               <CalcdexSettingsPane
                 value={values?.calcdex}
-                presetCacheSize={presetCacheSize}
+                // presetCacheSize={presetCacheSize}
+                // maxCacheSize={maxCacheSize}
                 inBattle={inBattle}
               />
 
-              <ShowdownSettingsPane>
-                {/* temporary spacer cause too lazy to do it in CSS lol */}
-                <div style={{ height: 5 }} />
-              </ShowdownSettingsPane>
+              <HonkdexSettingsPane />
+
+              <ShowdownSettingsPane />
 
               <div className={styles.notice}>
                 plz excuse the mess, this is a work in progress

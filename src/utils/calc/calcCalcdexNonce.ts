@@ -36,7 +36,7 @@ const calcPokemonCalcdexNonce = (
   teraType: (!!pokemon?.speciesForme && 'teraType' in pokemon && pokemon.teraType)
     || (typeof pokemon?.terastallized === 'string' && pokemon.terastallized)
     || null,
-  revealedTeraType: (!!pokemon?.speciesForme && 'revealedTeraType' in pokemon && pokemon.revealedTeraType) || null,
+  dirtyTeraType: (!!pokemon?.speciesForme && 'dirtyTeraType' in pokemon && pokemon.dirtyTeraType) || null,
   item: pokemon?.item,
   dirtyItem: (!!pokemon?.speciesForme && 'dirtyItem' in pokemon && pokemon.dirtyItem) || null,
   // altItems: (!!pokemon?.speciesForme && 'altItems' in pokemon && flattenAlts(pokemon.altItems)?.join(';')) || null,

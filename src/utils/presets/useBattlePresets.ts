@@ -7,7 +7,8 @@ import {
   usePokemonRandomsPresetQuery,
   usePokemonRandomsStatsQuery,
 } from '@showdex/redux/services';
-import { useCalcdexSettings } from '@showdex/redux/store';
+import { useCalcdexSettings, useTeamdexPresets } from '@showdex/redux/store';
+// import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { sortPresetsByFormat } from './sortPresetsByFormat';
 
@@ -96,6 +97,8 @@ export interface CalcdexBattlePresetsHookValue {
   usages: CalcdexPokemonPreset[];
 }
 
+// const l = logger('@showdex/utils/presets/useBattlePresets()');
+
 /**
  * Conveniently initiates preset fetching via RTK Query & "neatly" parses them for the given `format`.
  *
@@ -115,22 +118,45 @@ export const useBattlePresets = (
     disabled,
   } = options || {};
 
-  const settings = useCalcdexSettings();
+  const {
+    downloadSmogonPresets,
+    downloadRandomsPresets,
+    downloadUsageStats,
+    includeTeambuilder,
+    maxPresetAge,
+  } = useCalcdexSettings();
 
-  const maxAge: Duration = typeof settings?.maxPresetAge === 'number'
-    && settings.maxPresetAge > 0
-    ? { days: settings.maxPresetAge }
+  const teamdexPresets = useTeamdexPresets();
+
+  const maxAge: Duration = typeof maxPresetAge === 'number' && maxPresetAge > 0
+    ? { days: maxPresetAge }
     : null;
 
   const gen = detectGenFromFormat(format);
   const genlessFormat = getGenlessFormat(format);
   const randoms = genlessFormat?.includes('random');
 
+  const teambuilderPresets = React.useMemo(() => (
+    includeTeambuilder !== 'never'
+      && !!gen
+      && !randoms
+      && teamdexPresets.filter((p) => (
+        p?.gen === gen
+          && (includeTeambuilder !== 'teams' || p.source === 'storage')
+          && (includeTeambuilder !== 'boxes' || p.source === 'storage-box')
+      ))
+  ) || [], [
+    gen,
+    includeTeambuilder,
+    randoms,
+    teamdexPresets,
+  ]);
+
   const shouldSkipAny = disabled || !gen || !genlessFormat;
-  const shouldSkipFormats = shouldSkipAny || randoms || !settings?.downloadSmogonPresets;
-  const shouldSkipFormatStats = shouldSkipAny || randoms || !settings?.downloadUsageStats;
-  const shouldSkipRandoms = shouldSkipAny || !randoms || !settings?.downloadRandomsPresets;
-  const shouldSkipRandomsStats = shouldSkipAny || !randoms || !settings?.downloadUsageStats;
+  const shouldSkipFormats = shouldSkipAny || randoms || !downloadSmogonPresets;
+  const shouldSkipFormatStats = shouldSkipAny || randoms || !downloadUsageStats;
+  const shouldSkipRandoms = shouldSkipAny || !randoms || !downloadRandomsPresets;
+  const shouldSkipRandomsStats = shouldSkipAny || !randoms || !downloadUsageStats;
 
   const {
     data: formatPresets,
@@ -151,6 +177,7 @@ export const useBattlePresets = (
   } = usePokemonFormatStatsQuery({
     gen,
     format,
+    formatOnly: true,
     maxAge,
   }, {
     skip: shouldSkipFormatStats,
@@ -175,6 +202,7 @@ export const useBattlePresets = (
   } = usePokemonRandomsStatsQuery({
     gen,
     format,
+    formatOnly: true,
     maxAge,
   }, {
     skip: shouldSkipRandomsStats,
@@ -184,6 +212,7 @@ export const useBattlePresets = (
     randoms
       ? [...(randomsPresets || [])]
       : [
+        ...(teambuilderPresets || []),
         ...(formatPresets || []),
         ...(formatStats || []),
       ].sort(sortPresetsByFormat(genlessFormat))
@@ -193,6 +222,7 @@ export const useBattlePresets = (
     formatStats,
     randoms,
     randomsPresets,
+    teambuilderPresets,
   ]);
 
   const usages = React.useMemo<CalcdexPokemonPreset[]>(() => (
@@ -205,41 +235,22 @@ export const useBattlePresets = (
     randomsStats,
   ]);
 
-  const pending = React.useMemo<boolean>(() => (
+  const pending = (
     (!shouldSkipFormats && formatPresetsPending)
       || (!shouldSkipFormatStats && formatStatsPending)
       || (!shouldSkipRandoms && randomsPresetsPending)
       || (!shouldSkipRandomsStats && randomsStatsPending)
-  ), [
-    formatPresetsPending,
-    formatStatsPending,
-    randomsPresetsPending,
-    randomsStatsPending,
-    shouldSkipFormats,
-    shouldSkipFormatStats,
-    shouldSkipRandoms,
-    shouldSkipRandomsStats,
-  ]);
+  );
 
-  const loading = React.useMemo<boolean>(() => (
+  const loading = (
     pending
       || (!shouldSkipFormats && formatPresetsLoading)
       || (!shouldSkipFormatStats && formatStatsLoading)
       || (!shouldSkipRandoms && randomsPresetsLoading)
       || (!shouldSkipRandomsStats && randomsStatsLoading)
-  ), [
-    formatPresetsLoading,
-    formatStatsLoading,
-    pending,
-    randomsPresetsLoading,
-    randomsStatsLoading,
-    shouldSkipFormats,
-    shouldSkipFormatStats,
-    shouldSkipRandoms,
-    shouldSkipRandomsStats,
-  ]);
+  );
 
-  const ready = React.useMemo<boolean>(() => (
+  const ready = (
     shouldSkipFormats
       && shouldSkipFormatStats
       && shouldSkipRandoms
@@ -247,17 +258,7 @@ export const useBattlePresets = (
   ) || (
     !pending
       && !loading
-      // && !!(presets?.length || usages?.length)
-  ), [
-    loading,
-    pending,
-    // presets,
-    shouldSkipFormats,
-    shouldSkipFormatStats,
-    shouldSkipRandoms,
-    shouldSkipRandomsStats,
-    // usages,
-  ]);
+  );
 
   return {
     loading,

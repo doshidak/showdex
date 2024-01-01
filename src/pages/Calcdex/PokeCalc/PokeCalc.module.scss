@@ -1,9 +1,0 @@
-@use 'mixins/spacing';
-
-.moves {
-  @include spacing.margin($top: 10px);
-}
-
-.stats {
-  @include spacing.margin($top: 10px);
-}

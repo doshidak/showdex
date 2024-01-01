@@ -1,19 +1,21 @@
 import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
-import { AllPlayerKeys } from '@showdex/consts/battle';
+import {
+  CloseButton,
+  FieldCalc,
+  PlayerCalc,
+  useCalcdexContext,
+  useCalcdexSize,
+} from '@showdex/components/calc';
 import { BuildInfo } from '@showdex/components/debug';
 import { type DropdownOption } from '@showdex/components/form';
-import { Scrollable } from '@showdex/components/ui';
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { useColorScheme } from '@showdex/redux/store';
+import { BaseButton, Scrollable } from '@showdex/components/ui';
+import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
+import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
-import { useElementSize, useMobileViewport } from '@showdex/utils/hooks';
-import { useCalcdexContext } from './CalcdexContext';
-import { CloseButton } from './CloseButton';
-import { FieldCalc } from './FieldCalc';
-import { PlayerCalc } from './PlayerCalc';
+import { useMobileViewport } from '@showdex/utils/hooks';
 import styles from './Calcdex.module.scss';
 
 export interface CalcdexProps {
@@ -25,10 +27,7 @@ export const Calcdex = ({
 }: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const { size } = useElementSize(containerRef, {
-    initialWidth: 400,
-    initialHeight: 700,
-  });
+  useCalcdexSize(containerRef);
 
   const {
     state,
@@ -36,9 +35,11 @@ export const Calcdex = ({
   } = useCalcdexContext();
 
   const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
   const mobile = useMobileViewport();
 
   const {
+    containerSize,
     renderMode,
     playerCount,
     playerKey,
@@ -112,8 +113,10 @@ export const Calcdex = ({
       className={cx(
         'showdex-module',
         styles.container,
-        renderAsOverlay && styles.overlay,
+        containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        renderAsOverlay && styles.overlay,
+        glassyTerrain && styles.glassy,
       )}
     >
       <Scrollable className={styles.content}>
@@ -122,44 +125,45 @@ export const Calcdex = ({
         />
 
         {
-          (renderAsOverlay && mobile) &&
-          <CloseButton
-            className={styles.topCloseButton}
+          renderAsOverlay &&
+          <BaseButton
+            className={styles.overlayCloseButton}
+            display="block"
+            aria-label="Close Calcdex"
             onPress={onRequestOverlayClose}
-          />
+          >
+            <i className="fa fa-close" />
+          </BaseButton>
         }
 
         <PlayerCalc
-          className={styles.section}
+          className={styles.playerCalc}
           position="top"
           playerKey={topKey}
           defaultName="Player 1"
-          containerSize={size}
           playerOptions={playerOptions}
         />
 
         <FieldCalc
-          className={cx(styles.section, styles.fieldCalc)}
+          className={styles.fieldCalc}
           playerKey={topKey}
           opponentKey={bottomKey}
-          containerSize={size}
         />
 
         <PlayerCalc
-          className={cx(styles.section, styles.opponentCalc)}
+          className={styles.opponentCalc}
           position="bottom"
           playerKey={bottomKey}
           defaultName="Player 2"
-          containerSize={size}
           playerOptions={playerOptions}
         />
 
         {
-          renderAsOverlay &&
+          (renderAsOverlay && mobile) &&
           <CloseButton
             className={cx(
               styles.bottomCloseButton,
-              mobile && styles.mobile,
+              styles.mobile,
             )}
             onPress={onRequestOverlayClose}
           />

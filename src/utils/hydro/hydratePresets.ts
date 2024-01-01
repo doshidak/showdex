@@ -1,6 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
 import {
-  type HydroPresetsHydration,
   HydroPresetsDefaultName,
   HydroPresetsDehydrationMap,
   HydroPresetsHydrationMap,
@@ -10,6 +9,7 @@ import {
   type CalcdexPokemonPreset,
   type CalcdexPokemonPresetSource,
 } from '@showdex/interfaces/calc';
+import { type HydroPresets } from '@showdex/interfaces/hydro';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlt, flattenAlts } from '@showdex/utils/presets';
@@ -188,25 +188,14 @@ export const hydratePreset = (
             altDelimiter,
           }));
 
-        output.nature = output[key][0]?.nature;
-        output.ivs = { ...output[key][0]?.ivs };
-        output.evs = { ...output[key][0]?.evs };
+        const [firstSpread] = output[key];
+
+        output.nature = firstSpread?.nature;
+        output.ivs = { ...firstSpread?.ivs };
+        output.evs = { ...firstSpread?.evs };
 
         break;
       }
-
-      /*
-      case 'ivs':
-      case 'evs': {
-        // e.g., partValue = '84/0/84/84/84/84'
-        // (also technically not an array, but everyone knows what those obscure numbers mean!)
-        if (partValue.includes(arrayDelimiter)) {
-          output[key] = hydrateStatsTable(partValue);
-        }
-
-        break;
-      }
-      */
 
       default: {
         output[key] = hydrateValue(partValue);
@@ -272,7 +261,7 @@ export const hydratePresets = (
   presetOpcodeDelimiter = '~',
   presetArrayDelimiter?: string,
   presetAltDelimiter?: string,
-): HydroPresetsHydration => {
+): HydroPresets => {
   if (!value?.includes(delimiter)) {
     return null;
   }
@@ -286,7 +275,7 @@ export const hydratePresets = (
     return null;
   }
 
-  const output: HydroPresetsHydration = {
+  const output: HydroPresets = {
     ...header,
     presets: null,
   };

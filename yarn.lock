@@ -1767,10 +1767,10 @@
     redux-thunk "^2.4.2"
     reselect "^4.1.8"
 
-"@smogon/calc@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@smogon/calc/-/calc-0.8.0.tgz#913b76733929571a3b9d86ae24190e7b15d6badc"
-  integrity sha512-HQHzmTqGRhsYl0KBdNdSd8up9rIiqb4siN9qhm6MYn28Ppp5mCnmpGLrQPKlF2AmTgWcyK0wvKVglIxM/mXXxg==
+"@smogon/calc@^0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@smogon/calc/-/calc-0.8.1.tgz#bc3c99313d76bacaadfe4b60d9375330b13f33ba"
+  integrity sha512-O/h2lgqUNJWbT8uvFZfNdsZffFU1HQNog+lrEFH8Ed0yy6KBXqPoxU/kw7X9aqZCrVGkDIQzWw0kZljca9IAZA==
   dependencies:
     "@types/node" "^18.14.2"
 
@@ -3161,7 +3161,14 @@ cosmiconfig@^8.2.0:
     parse-json "^5.0.0"
     path-type "^4.0.0"
 
-cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
+cross-env@^7.0.3:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-7.0.3.tgz#865264b29677dc015ba8418918965dd232fc54cf"
+  integrity sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==
+  dependencies:
+    cross-spawn "^7.0.1"
+
+cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
   integrity sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==
@@ -6167,10 +6174,10 @@ react-redux@^8.1.1:
     react-is "^18.0.0"
     use-sync-external-store "^1.0.0"
 
-react-select@^5.7.4:
-  version "5.7.4"
-  resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.7.4.tgz#d8cad96e7bc9d6c8e2709bdda8f4363c5dd7ea7d"
-  integrity sha512-NhuE56X+p9QDFh4BgeygHFIvJJszO1i1KSkg/JPcIJrbovyRtI+GuOEa4XzFCEpZRAEoEI8u/cAHK+jG/PgUzQ==
+react-select@^5.8.0:
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.8.0.tgz#bd5c467a4df223f079dd720be9498076a3f085b5"
+  integrity sha512-TfjLDo58XrhP6VG5M/Mi56Us0Yt8X7xD6cDybC7yoRMUNm7BGO7qk8J0TLQOua/prb8vUOtsfnXZwfm30HGsAA==
   dependencies:
     "@babel/runtime" "^7.12.0"
     "@emotion/cache" "^11.4.0"
@@ -6489,6 +6496,11 @@ rimraf@~2.6.2:
   integrity sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==
   dependencies:
     glob "^7.1.3"
+
+romans@^2.0.15:
+  version "2.0.15"
+  resolved "https://registry.yarnpkg.com/romans/-/romans-2.0.15.tgz#71b0f1f1859c4b1ca9e7ba05428902e9d361a5d1"
+  integrity sha512-/0/Wdz+Q948fkUlBt+JUgkxdYAmlBStLoSIqpBxaEDg9NGORrGaMCu9iYk8eRsiwRe2cLWflJswZP6g9vGIE1w==
 
 run-async@^2.2.0:
   version "2.4.1"

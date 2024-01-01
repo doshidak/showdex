@@ -11,21 +11,27 @@ $container: (
   padding-x: 20px,
   padding-y: 7px,
   border-radius: 30px,
+  glassy-blur: 4px,
 
   background-color: (
-    light: color.alpha(colors.$white, 0.9),
-    dark: color.alpha(colors.$black, 0.75),
+    light: color.alpha(colors.$white, 0.88),
+    dark: color.alpha(colors.$black, 0.76),
+
+    glassy: (
+      light: color.alpha(colors.$white, 0.32),
+      dark: color.alpha(colors.$black, 0.24),
+    ),
   ),
 
   box-shadow: (
     light: (
-      0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 5px color.alpha(colors.$gray-dark, 0.3),
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 4px color.alpha(colors.$gray-dark, 0.32),
     ),
 
     dark: (
-      0 0 1px color.alpha(colors.$white, 0.3),
-      0 0 5px color.alpha(colors.$black, 0.5),
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 4px color.alpha(colors.$black, 0.48),
     ),
   ),
 );
@@ -33,11 +39,11 @@ $container: (
 $record-separator: (
   width: 1px,
   height: 10px,
-  spacing: 15px,
+  spacing: 16px,
 
   background-color: (
-    light: color.alpha(colors.$black, 0.3),
-    dark: color.alpha(colors.$white, 0.3),
+    light: color.alpha(colors.$black, 0.28),
+    dark: color.alpha(colors.$white, 0.28),
   ),
 );
 
@@ -46,13 +52,13 @@ $record-value: (
 
   color: (
     default: (
-      light: color.alpha(colors.$black, 0.95),
-      dark: color.alpha(colors.$white, 0.95),
+      light: color.alpha(colors.$black, 0.94),
+      dark: color.alpha(colors.$white, 0.94),
     ),
 
     zero: (
-      light: color.alpha(colors.$black, 0.5),
-      dark: color.alpha(colors.$white, 0.5),
+      light: color.alpha(colors.$black, 0.48),
+      dark: color.alpha(colors.$white, 0.48),
     ),
   ),
 );
@@ -71,7 +77,7 @@ $record-label: (
 
 .container {
   position: relative;
-  @include spacing.padding-xy($x: map.get($container, padding-x), $y: map.get($container, padding-y));
+  @include spacing.padding($x: map.get($container, padding-x), $y: map.get($container, padding-y));
   border-radius: map.get($container, border-radius);
   @include transition.apply(background-color, box-shadow);
 
@@ -83,6 +89,18 @@ $record-label: (
   &.dark {
     background-color: map.get($container, background-color, dark);
     box-shadow: map.get($container, box-shadow, dark);
+  }
+
+  &.glassy {
+    backdrop-filter: blur(map.get($container, glassy-blur));
+
+    &.light {
+      background-color: map.get($container, background-color, glassy, light);
+    }
+
+    &.dark {
+      background-color: map.get($container, background-color, glassy, dark);
+    }
   }
 }
 
@@ -143,7 +161,7 @@ $record-label: (
 .recordSeparator {
   width: map.get($record-separator, width);
   height: map.get($record-separator, height);
-  @include spacing.margin-xy($x: map.get($record-separator, spacing));
+  @include spacing.margin($x: map.get($record-separator, spacing));
   @include transition.apply(background-color);
   // user-select: none;
   pointer-events: none;

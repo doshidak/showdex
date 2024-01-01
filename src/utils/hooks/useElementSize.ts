@@ -46,8 +46,8 @@ export const ElementSizeDefaultBreakpoints: Record<ElementSizeLabel, number> = {
   xs: 380,
   sm: 550,
   md: 750,
-  lg: 1000,
-  xl: 1500,
+  lg: 900,
+  xl: 1100,
 };
 
 /**
@@ -82,9 +82,8 @@ export const useElementSize = <T extends HTMLElement>(
     ...breakpointOverrides,
   };
 
-  const size = (<[ElementSizeLabel, number][]> Object.entries(breakpoints))
-    .find(([, breakpoint]) => breakpoint >= width)
-    ?.[0];
+  const sizes = Object.entries(breakpoints).sort(([, a], [, b]) => b - a) as [ElementSizeLabel, number][];
+  const size = (sizes.find(([, breakpoint]) => width >= breakpoint) || sizes.slice(-1)[0])?.[0];
 
   return {
     width,

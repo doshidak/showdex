@@ -1,0 +1,324 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  grid-template-columns: minmax(150px, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 3px;
+  @include spacing.padding($all: 12px, $top: 8px);
+  border-radius: 12px;
+  @include transition.apply(background-color, box-shadow);
+
+  &.verySmol {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+
+  &.light {
+    background-color: color.alpha(colors.$white, 0.64);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 16px color.alpha(colors.$gray-dark, 0.16),
+    );
+  }
+
+  &.dark {
+    background-color: color.alpha(colors.$gray-darkest, 0.8);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 16px color.alpha(colors.$black, 0.48),
+    );
+  }
+
+  &.glassy {
+    // backdrop-filter: blur(2px); // warning: causes some weird z-index issues; tooltips don't appear; not recommended
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.24);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$black, 0.24);
+    }
+  }
+}
+
+.header {
+  @include spacing.margin($bottom: 2px);
+}
+
+.headerTitle {
+  @include spacing.margin($bottom: 0.5px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+}
+
+.movesHeader {
+  @include flex.row($align: center);
+  @include spacing.margin($left: 6px);
+}
+
+.dmgHeader {
+  @include flex.row-center;
+}
+
+.editorHeader {
+  grid-area: span 1 / span 2;
+}
+
+.label {
+  font-weight: 500;
+  text-transform: uppercase;
+  user-select: none;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.8);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.8);
+  }
+}
+
+.moveProperty {
+  @include flex.row($align: center);
+
+  &:not(:last-of-type) {
+    @include spacing.margin($right: 8px);
+  }
+
+  .propertyName {
+    @include flex.row-center;
+    font-weight: 500;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .propertyValue {
+    @include spacing.margin($left: 4px);
+    @include font.apply(fonts.$mono);
+    font-size: 10px;
+  }
+}
+
+button.toggleButton {
+  @include spacing.margin($left: 4px);
+  font-size: 8px;
+
+  &.lessSpacing {
+    @include spacing.margin($left: 2px);
+  }
+}
+
+button.editButton {
+  @include spacing.margin($left: 2px);
+}
+
+.teraButtonLabel {
+  $gradient: linear-gradient(
+    // to right,
+    60deg,
+
+    color.alpha(colors.$black, 0.75) 26%,
+
+    // #55C0EC,
+    color.shade(#63B44A, 15%) 26%,
+    // #E96B7D,
+    color.shade(#43B9DC, 15%) 48%,
+
+    // #7ECADA,
+    // #DBE6A7,
+    #ACD7BF 48%,
+    color.shade(#6DC5E5, 10%) 70%,
+
+    color.alpha(colors.$white, 0.75) 70%,
+  );
+
+  // position: relative;
+  // color: colors.$transparent;
+  // background-image: $gradient;
+  // background-size: 400% 100%;
+  // background-position: 0% 0%;
+  // background-clip: text;
+  // mix-blend-mode: multiply;
+  @include transition.apply((color, 150ms), background-position);
+
+  &.available {
+    color: colors.$transparent;
+    background-image: $gradient;
+    background-size: 400% 100%;
+    background-position: 0% 0%;
+    background-clip: text;
+  }
+
+  .light & {
+    background-position: 0% 0%;
+
+    &.available {
+      background-position: 165% 0%;
+    }
+  }
+
+  .dark & {
+    background-position: 365% 0%;
+
+    &.available {
+      background-position: 325% 0%;
+    }
+  }
+}
+
+button.ultButton {
+  min-width: 26px;
+}
+
+.quickEditor {
+  @include flex.row-center;
+
+  .moveProperty {
+    @include spacing.margin($right: 6px);
+    font-size: 8px;
+    user-select: none;
+  }
+
+  .valueField {
+    max-width: 16px;
+
+    &::before {
+      @include position.absolute($x: -3px, $y: 0);
+    }
+  }
+
+  .propertyName {
+    opacity: 0.4;
+
+    i:global(.fa-close) {
+      font-size: 8px;
+      line-height: 9px;
+    }
+  }
+}
+
+button.damageButton {
+  .light &:not(:hover):not(.active) .damageButtonLabel.noDamage {
+    color: color.alpha(colors.$black, 0.48);
+  }
+
+  .dark &:not(:hover):not(.active) .damageButtonLabel.noDamage {
+    color: color.alpha(colors.$white, 0.48);
+  }
+
+  // by default, a disabled button will have 0.3 opacity
+  &.disabled {
+    opacity: 1;
+  }
+}
+
+.damageButtonLabel {
+  .light & {
+    color: colors.$black;
+  }
+
+  .dark & {
+    color: colors.$white;
+  }
+
+  &.noCopy.noDamage {
+    .light & {
+      color: color.alpha(colors.$black, 0.48);
+    }
+
+    .dark & {
+      color: color.alpha(colors.$white, 0.48);
+    }
+  }
+}
+
+.copiedBadge {
+  @include position.absolute($top: -3px, $left: 50%);
+  white-space: nowrap;
+}
+
+.descTooltip {
+  position: relative;
+  max-width: 200px;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+
+  .ultUsage {
+    font-size: 8px;
+    text-transform: uppercase;
+    @include transition.apply(color, opacity);
+
+    &.available {
+      color: colors.$blue;
+    }
+
+    &.consumed {
+      opacity: 0.8;
+    }
+  }
+}
+
+.editorItem {
+  grid-area: span 1 / span 2;
+  @include flex.row-between;
+  align-self: center;
+  @include spacing.margin($right: 6px);
+
+  &.editorHeader {
+    @include flex.row-between;
+    @include spacing.margin($bottom: 0);
+  }
+
+  .moveProperty {
+    font-size: 8px;
+    user-select: none;
+  }
+
+  .valueField {
+    max-width: 22px;
+    @include spacing.margin($right: 6px);
+
+    &::before {
+      @include position.absolute($x: -3px, $y: 0); // remove "padding" from absoluteHover
+    }
+  }
+}
+
+.editorLeft {
+  @include flex.row($align: center);
+  flex-wrap: wrap;
+
+  & > *:not(:last-child) {
+    @include spacing.margin($right: 6px);
+  }
+}
+
+.editorRight {
+  text-align: right;
+}
+
+button.editorButton {
+  font-size: 8px;
+  line-height: 9px;
+  @include transition.apply(color, background-color, box-shadow, opacity);
+
+  &.readOnly {
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+.statVsLabel {
+  @include spacing.margin($x: 3px);
+  @include font.apply(fonts.$mono, ( font-weight: 600 ));
+  font-size: 6px;
+  letter-spacing: 0.25px;
+  opacity: 0.64;
+}

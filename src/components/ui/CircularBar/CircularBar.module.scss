@@ -1,0 +1,18 @@
+@use 'mixins/transition';
+
+.container {
+  width: 100%; // fix for 0 width in flex container
+}
+
+.pathArc {
+  stroke: currentColor;
+  stroke-linecap: round;
+  opacity: 0.24;
+  @include transition.apply(stroke);
+}
+
+.valueArc {
+  stroke: currentColor;
+  stroke-linecap: round;
+  @include transition.apply(stroke, stroke-dashoffset);
+}

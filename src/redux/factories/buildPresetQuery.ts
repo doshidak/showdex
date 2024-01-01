@@ -3,8 +3,9 @@ import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@sho
 import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
-import { getCachedPresets } from '@showdex/utils/presets/getCachedPresets'; /** @todo fix circular dependency import */
+import { readPresetsDb, writePresetsDb } from '@showdex/utils/storage';
+// import { cachePresets } from '@showdex/utils/presets/cachePresets'; /** @todo fix circular dependency import */
+// import { getCachedPresets } from '@showdex/utils/presets/getCachedPresets'; /** @todo fix circular dependency import */
 
 const l = logger('@showdex/redux/factories/buildPresetQuery()');
 
@@ -148,19 +149,23 @@ export const buildPresetQuery = <TResponse>(
     );
 
     // attempt to guess the endpoint from the args
-    const endpoint = filterByFormat
-      ? formatEndpointFormat(format)
-      : `gen${gen}`;
-
+    const endpoint = (filterByFormat && formatEndpointFormat(format)) || `gen${gen}`;
     const cacheEnabled = nonEmptyObject(maxAge);
 
     if (cacheEnabled) {
-      const [presets, stale] = getCachedPresets(
-        endpoint,
+      // const [presets, stale] = getCachedPresets(
+      //   endpoint,
+      //   source,
+      //   maxAge,
+      // );
+
+      const presets = await readPresetsDb(format, {
+        formatOnly,
         source,
         maxAge,
-      );
+      });
 
+      /*
       if (presets?.length) {
         output = presets;
 
@@ -169,6 +174,13 @@ export const buildPresetQuery = <TResponse>(
 
           return { data: output };
         }
+      }
+      */
+
+      if (presets.length) {
+        endTimer('(cache hit)', 'endpoint', endpoint);
+
+        return { data: presets };
       }
     }
 
@@ -208,7 +220,8 @@ export const buildPresetQuery = <TResponse>(
 
     // update the cache if enabled
     if (cacheEnabled && output.length) {
-      cachePresets(output, endpoint, source);
+      // cachePresets(output, endpoint, source);
+      void writePresetsDb(output);
     }
 
     endTimer('(cache miss)', 'endpoint', endpoint);

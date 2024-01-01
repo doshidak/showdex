@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
+import { determineColorScheme } from '@showdex/utils/ui';
 import styles from './PokeHpBar.module.scss';
 
 export interface PokeHpBarProps {
@@ -24,6 +25,8 @@ export interface PokeHpBarProps {
    * @since 0.1.2
    */
   width?: number;
+
+  reverseColorScheme?: boolean;
 }
 
 export const PokeHpBar = ({
@@ -31,8 +34,10 @@ export const PokeHpBar = ({
   style,
   hp = 0,
   width = 100,
+  reverseColorScheme,
 }: PokeHpBarProps): JSX.Element => {
-  const colorScheme = useColorScheme();
+  const currentColorScheme = useColorScheme();
+  const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
   return (
     <span

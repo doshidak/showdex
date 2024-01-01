@@ -6,30 +6,30 @@
 @use 'mixins/transition';
 
 $tooltip-container: (
-  padding: 7px,
+  padding: 8px,
 );
 
 $container: (
   // columns: 5, // determined programatically now (up to maxColumns prop)
   // column-width: 45px, // set via columnWidth prop
-  column-gap: 5px,
-  row-gap: 5px,
+  column-gap: 6px,
+  row-gap: 6px,
 );
 
 $forme-button: (
   padding-x: 0,
   padding-y: 3px,
-  border-radius: 7px,
+  border-radius: 8px,
 
   color: (
     default: (
-      light: color.alpha(colors.$white, 0.65),
-      dark: color.alpha(colors.$black, 0.65),
+      light: color.alpha(colors.$white, 0.64),
+      dark: color.alpha(colors.$black, 0.64),
     ),
 
     selected: (
       light: colors.$blue,
-      dark: color.shade(colors.$blue, 15%),
+      dark: color.shade(colors.$blue, 16%),
     ),
   ),
 
@@ -40,26 +40,26 @@ $forme-button: (
     ),
 
     hover: (
-      light: color.alpha(colors.$white, 0.1),
-      dark: color.alpha(colors.$black, 0.1),
+      light: color.alpha(colors.$white, 0.12),
+      dark: color.alpha(colors.$black, 0.12),
     ),
 
     selected: (
       light: color.alpha(colors.$blue, 0.2),
-      dark: color.alpha(color.shade(colors.$blue, 15%), 0.2),
+      dark: color.alpha(color.shade(colors.$blue, 16%), 0.2),
     ),
   ),
 
   box-shadow: (
     selected: (
       light: (
-        0 0 1px color.alpha(colors.$blue, 0.95),
-        0 0 3px color.alpha(colors.$blue, 0.5),
+        0 0 1px color.alpha(colors.$blue, 0.94),
+        0 0 3px color.alpha(colors.$blue, 0.48),
       ),
 
       dark: (
-        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
-        0 0 3px color.alpha(colors.$blue, 0.5),
+        0 0 1px color.alpha(color.shade(colors.$blue, 16%), 0.94),
+        0 0 3px color.alpha(colors.$blue, 0.48),
       ),
     ),
   ),
@@ -72,7 +72,7 @@ $picon-label: (
 );
 
 .tooltipContainer {
-  @include spacing.padding-all(map.get($tooltip-container, padding));
+  @include spacing.padding($all: map.get($tooltip-container, padding));
   z-index: 99;
 }
 
@@ -87,7 +87,7 @@ $picon-label: (
 .formeButton {
   @include flex.column($align: center);
   grid-area: span 1 / span 1;
-  @include spacing.padding-xy($x: map.get($forme-button, padding-x), $y: map.get($forme-button, padding-y));
+  @include spacing.padding($x: map.get($forme-button, padding-x), $y: map.get($forme-button, padding-y));
   border-radius: map.get($forme-button, border-radius);
   @include transition.apply(color, background-color, box-shadow);
   z-index: 1;

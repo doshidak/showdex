@@ -3,27 +3,35 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
+import { useSandwich } from '@showdex/components/layout';
 import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
 import {
   useAuthUsername,
   useCalcdexSettings,
   useCalcdexState,
   useColorScheme,
+  useGlassyTerrain,
   useHellodexSettings,
+  useHellodexState,
+  useHonkdexSettings,
 } from '@showdex/redux/store';
-import { findPlayerTitle, openUserPopup } from '@showdex/utils/app';
+import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
-import { useElementSize, useRoomNavigation } from '@showdex/utils/hooks';
+import { useRoomNavigation } from '@showdex/utils/hooks';
+import { openUserPopup } from '@showdex/utils/host';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
 import { GradientButton } from './GradientButton';
 import { InstanceButton } from './InstanceButton';
 import { PatronagePane } from './PatronagePane';
 import { SettingsPane } from './SettingsPane';
+import { useHellodexSize } from './useHellodexSize';
 import styles from './Hellodex.module.scss';
 
 export interface HellodexProps {
   openCalcdexInstance?: (battleId: string) => void;
+  openHonkdexInstance?: (instanceId?: string) => void;
+  removeHonkdexInstances?: (...instanceIds: string[]) => void;
 }
 
 const packageVersion = `v${env('package-version', 'X.X.X')}`;
@@ -33,20 +41,15 @@ const buildSuffix = env('build-suffix');
 const forumUrl = env('hellodex-forum-url');
 const repoUrl = env('hellodex-repo-url');
 const communityUrl = env('hellodex-community-url');
-// const releasesUrl = env('hellodex-releases-url');
-// const bugsUrl = env('hellodex-bugs-url');
-// const featuresUrl = env('hellodex-features-url');
 
 export const Hellodex = ({
   openCalcdexInstance,
+  openHonkdexInstance,
+  removeHonkdexInstances,
 }: HellodexProps): JSX.Element => {
-  const colorScheme = useColorScheme();
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  const { size } = useElementSize(contentRef, {
-    initialWidth: 400,
-    initialHeight: 700,
-  });
+  useHellodexSize(contentRef);
 
   const authName = useAuthUsername();
   const authTitle = findPlayerTitle(authName, true);
@@ -55,19 +58,40 @@ export const Hellodex = ({
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
   useRoomNavigation();
 
+  const colorScheme = useColorScheme();
+  const glassyTerrain = useGlassyTerrain();
   const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
+  const honkdexSettings = useHonkdexSettings();
+
+  const state = useHellodexState();
+  const calcdexState = useCalcdexState();
   const neverOpens = calcdexSettings?.openOnStart === 'never';
 
-  const calcdexState = useCalcdexState();
-  const instancesEmpty = !Object.keys(calcdexState).length;
+  const instances = Object.values(calcdexState).reverse().filter((b) => (
+    !!b?.battleId
+      && (b.operatingMode === 'battle' || honkdexSettings?.visuallyEnabled)
+  ));
+
+  const instancesEmpty = !instances.length;
 
   // donate button visibility
   const showDonateButton = settings?.showDonateButton;
 
   // pane visibilities
-  const [patronageVisible, setPatronageVisible] = React.useState(false);
-  const [settingsVisible, setSettingsVisible] = React.useState(false);
+  const {
+    active: patronageVisible,
+    requestOpen: openPatronagePane,
+    notifyClose: closePatronagePane,
+  } = useSandwich();
+
+  const {
+    active: settingsVisible,
+    requestOpen: openSettingsPane,
+    notifyClose: closeSettingsPane,
+  } = useSandwich();
+
+  const toggleSettingsPane = settingsVisible ? closeSettingsPane : openSettingsPane;
 
   return (
     <div
@@ -75,6 +99,7 @@ export const Hellodex = ({
         'showdex-module',
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
       )}
     >
       <BuildInfo
@@ -85,22 +110,20 @@ export const Hellodex = ({
         ref={contentRef}
         className={cx(
           styles.content,
-          ['xs', 'sm'].includes(size) && styles.verySmol,
+          ['xs', 'sm'].includes(state.containerSize) && styles.verySmol,
         )}
       >
         {
           patronageVisible &&
           <PatronagePane
-            containerSize={size}
-            onRequestClose={() => setPatronageVisible(false)}
+            onRequestClose={closePatronagePane}
           />
         }
 
         {
           settingsVisible &&
           <SettingsPane
-            inBattle={['xs', 'sm'].includes(size)}
-            onRequestClose={() => setSettingsVisible(false)}
+            onRequestClose={closeSettingsPane}
           />
         }
 
@@ -180,7 +203,7 @@ export const Hellodex = ({
                           tooltip="Open Settings"
                           hoverScale={1}
                           absoluteHover
-                          onPress={() => setSettingsVisible(true)}
+                          onPress={openSettingsPane}
                         />
                         .
                       </>
@@ -227,29 +250,75 @@ export const Hellodex = ({
                       </>
                     )}
                   </div>
+
+                  {
+                    honkdexSettings?.visuallyEnabled &&
+                    <>
+                      <div className={styles.divider}>
+                        <div className={styles.dividerLine} />
+                        <div className={styles.dividerLabel}>
+                          or
+                        </div>
+                        <div className={styles.dividerLine} />
+                      </div>
+
+                      <GradientButton
+                        className={styles.honkButton}
+                        aria-label="Create New Honkdex"
+                        hoverScale={1}
+                        onPress={() => openHonkdexInstance?.()}
+                      >
+                        <span>
+                          {/* Create{' '} */}
+                          <strong>New</strong>
+                        </span>
+                        <i
+                          className="fa fa-car"
+                          style={{ padding: '0 8px' }}
+                        />
+                        <strong>Honk</strong>
+                        <span>dex</span>
+                      </GradientButton>
+                    </>
+                  }
                 </div>
               ) : (
                 <Scrollable className={styles.scrollableInstances}>
                   <div className={styles.instances}>
-                    {Object.values(calcdexState).reverse().filter((b) => !!b?.battleId).map(({
-                      battleId,
-                      format,
-                      subFormats,
-                      active,
-                      playerCount,
-                      p1,
-                      p2,
-                    }) => (
+                    {
+                      honkdexSettings?.visuallyEnabled &&
+                      <GradientButton
+                        className={cx(styles.instanceButton, styles.newHonkButton)}
+                        display="block"
+                        aria-label="New Honkdex"
+                        hoverScale={1}
+                        onPress={() => openHonkdexInstance()}
+                      >
+                        <i
+                          className="fa fa-plus"
+                          style={{ fontSize: 10, lineHeight: 11 }}
+                        />
+                        <i
+                          className="fa fa-car"
+                          style={{ padding: '0 8px' }}
+                        />
+                        <strong>Honk</strong>
+                        <span>dex</span>
+                      </GradientButton>
+                    }
+
+                    {instances.map((instance) => (
                       <InstanceButton
-                        key={`Hellodex:InstanceButton:${battleId}`}
+                        key={`Hellodex:InstanceButton:${instance.battleId}`}
                         className={styles.instanceButton}
-                        format={`${format}${subFormats?.join('') || ''}`}
+                        instance={instance}
                         authName={authName}
-                        playerName={p1?.name}
-                        opponentName={p2?.name}
-                        active={active}
-                        hasMorePlayers={playerCount > 2}
-                        onPress={() => openCalcdexInstance?.(battleId)}
+                        onPress={() => (
+                          instance.operatingMode === 'standalone'
+                            ? openHonkdexInstance
+                            : openCalcdexInstance
+                        )?.(instance.battleId)}
+                        onRequestRemove={() => removeHonkdexInstances?.(instance.battleId)}
                       />
                     ))}
 
@@ -281,15 +350,12 @@ export const Hellodex = ({
               <GradientButton
                 className={styles.donateButton}
                 aria-label="Support Showdex"
-                onPress={() => {
-                  setPatronageVisible(true);
-                  setSettingsVisible(false);
-                }}
+                onPress={openPatronagePane}
               >
                 {authTitle?.title ? (
                   <i
                     className="fa fa-heart"
-                    style={{ padding: '0 7px' }}
+                    style={{ padding: '0 8px' }}
                   />
                 ) : (
                   <>
@@ -303,7 +369,12 @@ export const Hellodex = ({
                 )}
               </GradientButton>
 
-              <div className={styles.donateFootnote}>
+              <div
+                className={cx(
+                  styles.donateFootnote,
+                  !!authTitle?.title && styles.withTitle,
+                )}
+              >
                 {authTitle?.title ? (
                   <>Thanks for supporting Showdex!</>
                 ) : (
@@ -326,17 +397,13 @@ export const Hellodex = ({
           >
             <FooterButton
               className={cx(styles.linkItem, styles.settingsButton)}
-              // iconClassName={styles.settingsIcon}
               labelClassName={styles.linkButtonLabel}
               iconAsset={settingsVisible ? 'close-circle.svg' : 'cog.svg'}
               iconDescription={settingsVisible ? 'Close Circle Icon' : 'Cog Icon'}
               label={settingsVisible ? 'Close' : 'Settings'}
               aria-label="Showdex Extension Settings"
               tooltip={`${settingsVisible ? 'Close' : 'Open'} Showdex Settings`}
-              onPress={() => {
-                setPatronageVisible(false);
-                setSettingsVisible(!settingsVisible);
-              }}
+              onPress={toggleSettingsPane}
             />
 
             {

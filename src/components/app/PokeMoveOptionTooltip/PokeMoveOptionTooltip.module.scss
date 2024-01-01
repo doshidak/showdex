@@ -1,0 +1,89 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  @include flex.column-center;
+  max-width: 160px;
+  white-space: normal;
+  user-select: none;
+}
+
+.description {
+  @include spacing.margin($bottom: 6px);
+  text-align: center;
+}
+
+.properties {
+  @include flex.row-center;
+  font-size: 8px;
+}
+
+.type {
+  @include spacing.margin($right: 6px);
+}
+
+.property {
+  @include flex.row($align: center);
+
+  &:not(:last-of-type) {
+    @include spacing.margin($right: 6px);
+  }
+
+  .propertyName {
+    @include flex.row-center;
+    font-weight: 500;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .prevValue {
+    opacity: 0.64;
+  }
+
+  .rawr {
+    display: inline-block;
+    @include spacing.padding($x: 2px);
+    opacity: 0.44;
+  }
+
+  .statLabel {
+    font-weight: 700;
+  }
+
+  .statVsLabel {
+    @include spacing.margin($x: 2px);
+  }
+
+  .propertyValue {
+    @include spacing.margin($left: 4px);
+    @include font.apply(fonts.$mono);
+    font-size: 10px;
+  }
+}
+
+.deltaValue {
+  @include transition.apply(color);
+
+  &.positive {
+    color: colors.$green;
+  }
+
+  &.negative {
+    color: colors.$red;
+  }
+
+  &.dark {
+    &.positive {
+      color: color.shade(colors.$green, 10%);
+    }
+
+    &.negative {
+      color: color.shade(colors.$red, 10%);
+    }
+  }
+}

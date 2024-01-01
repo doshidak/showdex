@@ -121,7 +121,8 @@ export const exportPokePaste = (
     level,
     // happiness, // doesn't exist in CalcdexPokemon atm
     types,
-    teraType,
+    teraType: revealedTeraType,
+    dirtyTeraType,
     nature,
     ivs,
     evs,
@@ -181,6 +182,8 @@ export const exportPokePaste = (
 
   // Tera Type: <teraType>
   // (<teraType> shouldn't print when '???' or matches the default Tera type, i.e., the first type of the Pokemon)
+  const teraType = dirtyTeraType || revealedTeraType;
+
   if (teraType && teraType !== '???' && teraType !== types[0]) {
     output.push(`Tera Type: ${teraType}`);
   }

@@ -14,7 +14,6 @@ import {
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
-// import { toggleableAbility } from '@showdex/utils/dex';
 
 /**
  * Determines whether the Pokemon's toggleable ability is active (if applicable).
@@ -79,10 +78,6 @@ export const detectToggledAbility = (
     weather,
     terrain,
   } = config || {};
-
-  // if (!toggleableAbility(pokemon, gameType)) {
-  //   return false;
-  // }
 
   const ability = pokemon.dirtyAbility || pokemon.ability;
 

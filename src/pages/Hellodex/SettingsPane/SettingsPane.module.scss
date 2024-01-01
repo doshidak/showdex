@@ -11,45 +11,52 @@ $settings-icon-size: 36px;
 $close-icon-size: 28px;
 
 .container {
-  @include position.absolute($top: 0, $right: 0, $bottom: 73px, $left: 0); // 73px = height of Hellodex footer
+  @include position.absolute($x: 0, $top: 0, $bottom: 73px); // 73px = height of Hellodex footer
   // backdrop-filter: blur(2px); // causes scrolling lag due to blurred pixel recalculations
   @include transition.apply(color, background-color);
   overflow: hidden;
   z-index: 1;
 
-  // &, *, *::before, *::after {
-  //   box-sizing: border-box;
-  // }
-
   &.light {
     color: colors.$black;
-    background-color: color.alpha(colors.$white, 0.95);
+    background-color: color.alpha(colors.$white, 0.94);
   }
 
   &.dark {
     color: colors.$white;
-    background-color: color.alpha(#121212, 0.95);
+    background-color: color.alpha(colors.$gray-darkest, 0.94);
+  }
+
+  &.glassy {
+    backdrop-filter: blur(4px);
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.64);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$gray-darkest, 0.8);
+    }
   }
 }
 
 .contentContainer {
   @include position.absolute-fill;
   overflow-x: hidden;
-  // z-index: 1;
 }
 
 .content {
-  @include spacing.padding-all(15px);
+  @include spacing.padding($all: 16px);
 }
 
 .header {
   @include flex.row-between;
-  @include spacing.padding-xy($x: 10px, $y: 5px);
+  @include spacing.padding($x: 12px, $y: 6px);
   @include transition.apply(padding);
   user-select: none;
 
   .inBattle & {
-    @include spacing.padding-xy($x: 5px);
+    @include spacing.padding($x: 6px);
   }
 
   &:hover .settingsIcon {
@@ -58,7 +65,7 @@ $close-icon-size: 28px;
 
   .left {
     @include flex.row-start;
-    opacity: 0.9;
+    opacity: 0.88;
 
     .settingsIcon {
       width: $settings-icon-size;
@@ -69,7 +76,7 @@ $close-icon-size: 28px;
     }
 
     .title {
-      @include spacing.margin($left: 10px);
+      @include spacing.margin($left: 12px);
       font-weight: 500;
       font-size: 14px;
       text-transform: uppercase;
@@ -98,20 +105,18 @@ $close-icon-size: 28px;
       }
 
       &:not(:last-of-type) {
-        @include spacing.margin($right: 7px);
+        @include spacing.margin($right: 8px);
       }
 
       &:last-of-type {
-        @include spacing.margin($right: 15px);
+        @include spacing.margin($right: 16px);
       }
     }
 
     .importButton {
-      // @include spacing.margin($right: 5px);
-
       &.undoButton {
         .light & {
-          color: color.shade(colors.$red, 15%);
+          color: color.shade(colors.$red, 16%);
         }
 
         .dark & {
@@ -120,16 +125,8 @@ $close-icon-size: 28px;
       }
     }
 
-    // .exportButton {
-    //   @include spacing.margin($right: 5px);
-    //
-    //   .inBattle & {
-    //     @include spacing.margin($right: 15px);
-    //   }
-    // }
-
     .defaultsButton {
-      @include spacing.margin($right: 15px);
+      @include spacing.margin($right: 16px);
     }
   }
 }
@@ -150,7 +147,7 @@ $close-icon-size: 28px;
 }
 
 .closeButton {
-  @include position.absolute($top: 24px, $right: 25px);
+  @include position.absolute($top: 24px, $right: 24px);
   color: inherit;
   z-index: 2;
 
@@ -167,8 +164,7 @@ $close-icon-size: 28px;
 }
 
 .notice {
-  // @include spacing.padding-all(10px);
-  @include spacing.padding($top: 10px, $right: 10px, $left: 10px);
+  @include spacing.padding($x: 12px, $top: 12px);
   font-size: 12px;
   text-align: center;
   opacity: 0.6;
@@ -180,31 +176,43 @@ $close-icon-size: 28px;
 }
 
 .settingsGroup {
-  @include spacing.margin-all(10px);
-  @include spacing.padding-xy($x: 10px, $y: 15px);
-  border-radius: 10px;
+  @include spacing.margin($all: 12px);
+  @include spacing.padding($x: 12px, $top: 20px, $bottom: 24px);
+  border-radius: 12px;
   @include transition.apply(background-color, box-shadow);
 
   .light & {
-    background-color: color.alpha(colors.$white, 0.85);
+    background-color: color.alpha(colors.$white, 0.8);
     box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.15),
-      0 0 15px color.alpha(colors.$gray-dark, 0.3),
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 16px color.alpha(colors.$gray-dark, 0.16),
     );
   }
 
   .dark & {
-    background-color: color.alpha(#121212, 0.85);
+    background-color: color.alpha(colors.$gray-darkest, 0.8);
     box-shadow: (
-      0 0 1px color.alpha(colors.$white, 0.3),
-      0 0 7px color.alpha(colors.$gray-dark, 0.3),
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 8px color.alpha(colors.$gray-dark, 0.48),
     );
+  }
+
+  .glassy & {
+    backdrop-filter: blur(4px);
+  }
+
+  .glassy.light & {
+    background-color: color.alpha(colors.$white, 0.24);
+  }
+
+  .glassy.dark & {
+    background-color: color.alpha(colors.$black, 0.24);
   }
 }
 
 .settingsGroupTitle {
-  @include spacing.margin($bottom: 12px);
-  @include spacing.padding-xy($x: 10px);
+  @include spacing.margin($bottom: 16px);
+  @include spacing.padding($x: 12px);
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.5px;
@@ -213,20 +221,20 @@ $close-icon-size: 28px;
   user-select: none;
 
   .light & {
-    color: color.alpha(colors.$black, 0.85);
+    color: color.alpha(colors.$black, 0.84);
   }
 
   .dark & {
-    color: color.alpha(colors.$white, 0.85);
+    color: color.alpha(colors.$white, 0.84);
   }
 }
 
 .settingsGroupFields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr)); // note: 0 must come first before 1fr in minmax()
-  column-gap: 10px;
-  row-gap: 10px;
-  @include spacing.padding-xy($x: 15px);
+  column-gap: 12px;
+  row-gap: 12px;
+  @include spacing.padding($x: 16px);
 
   .inBattle & {
     grid-template-columns: minmax(0, 1fr);
@@ -235,8 +243,8 @@ $close-icon-size: 28px;
 
   .settingsGroupTitle {
     grid-area: span 1 / span 2;
-    @include spacing.margin($top: 15px, $bottom: 5px);
-    @include spacing.padding-xy($x: 0);
+    @include spacing.margin($top: 16px, $bottom: 6px);
+    @include spacing.padding($x: 0);
     font-size: 12px;
 
     .inBattle & {
@@ -246,11 +254,11 @@ $close-icon-size: 28px;
     }
 
     .light & {
-      color: color.alpha(colors.$black, 0.65);
+      color: color.alpha(colors.$black, 0.64);
     }
 
     .dark & {
-      color: color.alpha(colors.$white, 0.65);
+      color: color.alpha(colors.$white, 0.64);
     }
   }
 
@@ -274,7 +282,7 @@ $close-icon-size: 28px;
 // from other components (namely the NHKO fields)
 // (should typically be applied with .field)
 .customField {
-  @include spacing.padding-xy($x: 5px, $y: 2px);
+  @include spacing.padding($x: 5px, $y: 2px);
 }
 
 // mimics the labels of form components
@@ -317,12 +325,8 @@ $close-icon-size: 28px;
   }
 }
 
-// .customFieldInput {
-//   @include spacing.margin-xy($x: 5px, $y: 2px);
-// }
-
 .textField {
-  @include spacing.padding-xy($x: 3px, $y: 5px);
+  @include spacing.padding($x: 3px, $y: 5px);
   font-size: 10px;
 
   &.nhkoLabelField {

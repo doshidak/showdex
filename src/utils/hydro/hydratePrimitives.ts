@@ -1,11 +1,13 @@
 import { toDate } from 'date-fns';
 
 /**
- * Hydrates a string `value` into a `boolean`, where `'y'` becomes `true` and `false` otherwise.
+ * Hydrates a string `value` into a `boolean`, where `'y'` becomes `true` & `false` otherwise.
  *
  * @since 1.0.3
  */
-export const hydrateBoolean = (value: string): boolean => (
+export const hydrateBoolean = (
+  value: string,
+): boolean => (
   value?.toLowerCase?.() === 'y'
 );
 
@@ -14,7 +16,9 @@ export const hydrateBoolean = (value: string): boolean => (
  *
  * @since 1.0.3
  */
-export const hydrateString = (value: string): string => (
+export const hydrateString = (
+  value: string,
+): string => (
   value === '?'
     ? null
     : String(value)
@@ -25,7 +29,9 @@ export const hydrateString = (value: string): string => (
  *
  * @since 1.0.3
  */
-export const hydrateNumber = (value: string): number => {
+export const hydrateNumber = (
+  value: string,
+): number => {
   const hydratedString = hydrateString(value);
 
   if (!hydratedString) {

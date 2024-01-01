@@ -16,12 +16,33 @@ export const getDynamaxHpModifier = (
     pokemon?.speciesForme
       && pokemon.useMax
       && (
-        !pokemon.serverSourced
+        pokemon.source !== 'server'
           || (nonEmptyObject(pokemon.volatiles) && !('dynamax' in pokemon.volatiles))
       )
   )
     ? 2
     : 1
+);
+
+/**
+ * Determines if the `pokemon`'s HP is known or a percentage.
+ *
+ * * HP %'s come in 3 unique flavors: 1, 100 & 1000 ...? LOL
+ *
+ * @since 1.2.0
+ */
+export const knownPokemonHp = (
+  pokemon: CalcdexPokemon,
+  ignoreSource?: boolean,
+): boolean => (
+  !!pokemon?.speciesForme
+    && typeof pokemon.maxhp === 'number'
+    && (pokemon.maxhp || 0) > 1 // catches decimal percentages HP (maxhp = 1)
+    && (
+      (!ignoreSource && pokemon.source === 'server')
+        // only allow 100 or 1000 max HP if the Pokemon actually has that much
+        || ((pokemon.maxhp === 100 || pokemon.maxhp === 1000) && pokemon.spreadStats?.hp === pokemon.maxhp)
+    )
 );
 
 /**
@@ -56,26 +77,18 @@ export const calcPokemonCurrentHp = (
   }
 
   const {
-    serverSourced,
-    hp,
+    hp: currentHp,
     dirtyHp,
-    maxhp,
+    maxhp: rawMaxHp,
     spreadStats,
   } = pokemon;
 
-  if (!ignoreDirty && typeof dirtyHp === 'number' && !Number.isNaN(dirtyHp)) {
-    return dirtyHp;
-  }
-
+  const known = knownPokemonHp(pokemon);
+  const maxHp = known ? rawMaxHp : (spreadStats?.hp || 100);
+  const hp = (ignoreDirty ? null : dirtyHp) ?? (known ? currentHp : ((currentHp / (rawMaxHp || 1)) * maxHp));
   const dmaxMod = getDynamaxHpModifier(pokemon);
 
-  if (serverSourced) {
-    return Math.floor(hp * dmaxMod);
-  }
-
-  const estHp = Math.round((spreadStats?.hp || 0) * (hp / maxhp));
-
-  return Math.floor(estHp * dmaxMod);
+  return Math.floor(hp * dmaxMod);
 };
 
 /**

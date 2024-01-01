@@ -1,14 +1,16 @@
 import { type GenerationNum } from '@smogon/calc';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { env, formatId, getStoredItem } from '@showdex/utils/core';
-import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
+import { formatId } from '@showdex/utils/core';
+import { detectGenFromFormat } from '@showdex/utils/dex';
+import { readLocalStorageItem } from '@showdex/utils/storage';
 import { unpackStorageTeam } from './unpackStorageTeam';
+import { detectCompletePreset } from './detectCompletePreset';
 
 /**
  * Reads Teambuilder teams stored in `LocalStorage` and returns `CalcdexPokemonPreset[]`s.
  *
  * * Teambuilder teams are typically stored under the `LocalStorage` key `'showdown_teams'`,
- *   which (in case it changes) is provided by the `STORAGE_TEAMBUILDER_KEY` environment variable.
+ *   which (in case it changes) is provided by the `LOCAL_STORAGE_SHOWDOWN_TEAMS_KEY` environment variable.
  * * If `format` is provided, only presets of the matching gen derived from the `format` will be returned.
  *   - Otherwise, all presets will be converted, regardless of format.
  * * You'll need to sift through the returned array to grab presets for specific Pokemon.
@@ -53,7 +55,7 @@ export const getTeambuilderPresets = (
   const packedTeams = (Storage as unknown as Showdown.ClientStorage).teams
     ?.map((team) => (team?.format && team.team ? `${team.format}${(team.capacity ?? 0) > 6 ? '-box' : ''}]${team.name}|${team.team}` : null))
     .filter(Boolean)
-    || getStoredItem('storage-teambuilder-key')?.split('\n')
+    || readLocalStorageItem('local-storage-showdown-teams-key')?.split('\n')
     || [];
 
   const matchedTeams = packedTeams
@@ -69,12 +71,7 @@ export const getTeambuilderPresets = (
   }
 
   return matchedTeams.flatMap(unpackStorageTeam).reduce<CalcdexPokemonPreset[]>((prev, preset) => {
-    const {
-      calcdexId,
-      format: presetFormat,
-      moves,
-      evs,
-    } = preset;
+    const { calcdexId } = preset;
 
     const uniquePreset = !prev.length
       || !prev.some((p) => p.calcdexId === calcdexId);
@@ -83,15 +80,7 @@ export const getTeambuilderPresets = (
       return prev;
     }
 
-    const legacy = detectLegacyGen(presetFormat);
-    const maxLegalEvs = legacy
-      ? 0 // EVs don't exist in legacy gens, so this value shouldn't even be used
-      : env.int('calcdex-pokemon-max-legal-evs', 0);
-
-    const validPreset = !!moves?.length
-      && (legacy || Object.values(evs || {}).reduce((sum, val) => sum + (val || 0), 0) >= maxLegalEvs);
-
-    if (validPreset) {
+    if (detectCompletePreset(preset)) {
       prev.push(preset);
     }
 

@@ -79,7 +79,7 @@ export const presetApi = pkmnApi.injectEndpoints({
       providesTags: createTagProvider(PokemonReduxTagType.Preset),
     }),
 
-    pokemonFormatStats: build.query<CalcdexPokemonPreset[], Omit<PkmnApiSmogonPresetRequest, 'formatOnly'>>({
+    pokemonFormatStats: build.query<CalcdexPokemonPreset[], PkmnApiSmogonPresetRequest>({
       queryFn: buildPresetQuery<PkmnApiSmogonFormatStatsResponse>(
         'usage',
         env('pkmn-presets-format-stats-path'),
@@ -99,7 +99,7 @@ export const presetApi = pkmnApi.injectEndpoints({
       providesTags: createTagProvider(PokemonReduxTagType.Preset),
     }),
 
-    pokemonRandomsStats: build.query<CalcdexPokemonPreset[], Omit<PkmnApiSmogonPresetRequest, 'formatOnly'>>({
+    pokemonRandomsStats: build.query<CalcdexPokemonPreset[], PkmnApiSmogonPresetRequest>({
       queryFn: buildPresetQuery<PkmnApiSmogonRandomsStatsResponse>(
         'usage',
         env('pkmn-presets-randoms-stats-path'),

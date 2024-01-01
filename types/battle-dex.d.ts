@@ -61,6 +61,7 @@ declare namespace Showdown {
     prefs(prop: 'theme'): ColorSchemeOption;
     prefs(prop: 'onepanel'): boolean;
     prefs(prop: 'rightpanelbattles'): boolean;
+    prefs(prop: 'starredformats'): Record<string, boolean>;
     prefs<T = unknown>(prop: string): T;
 
     moves: {

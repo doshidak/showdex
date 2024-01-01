@@ -2,11 +2,7 @@ import { type AbilityName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
-import {
-  detectGenFromFormat,
-  detectLegacyGen,
-  legalLockedFormat,
-} from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -25,9 +21,11 @@ export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
  */
 export const buildAbilityOptions = (
   format: string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  usage?: CalcdexPokemonPreset,
-  showAll?: boolean,
+  pokemon: CalcdexPokemon,
+  config?: {
+    usage?: CalcdexPokemonPreset;
+    showAll?: boolean;
+  },
 ): CalcdexPokemonAbilityOption[] => {
   const options: CalcdexPokemonAbilityOption[] = [];
 
@@ -40,10 +38,15 @@ export const buildAbilityOptions = (
     return options;
   }
 
+  const {
+    usage,
+    showAll,
+  } = config || {};
+
   // const ability = pokemon.dirtyAbility ?? pokemon.ability;
 
   const {
-    serverSourced,
+    source,
     baseAbility,
     ability,
     abilities,
@@ -84,7 +87,7 @@ export const buildAbilityOptions = (
   if (transformedForme) {
     const transformed = Array.from(new Set([
       // filter out "revealed" abilities with parentheses, like "(suppressed)"
-      serverSourced && !/^\([\w\s]+\)$/.test(ability) && ability,
+      source === 'server' && !/^\([\w\s]+\)$/.test(ability) && ability,
       ...transformedAbilities,
     ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 

@@ -42,6 +42,7 @@ export const transformFormatStatsResponse = (
     }
 
     const {
+      usage,
       abilities,
       items,
       moves,
@@ -57,6 +58,10 @@ export const transformFormatStatsResponse = (
       format: getGenlessFormat(args.format),
       speciesForme,
     };
+
+    if (typeof usage?.weighted === 'number' && (usage.weighted || 0) > 0) {
+      preset.formeUsage = usage.weighted;
+    }
 
     const altAbilities = processUsageAlts(abilities, args.format, 'abilities');
     const altItems = processUsageAlts(items, args.format, 'items');
@@ -125,7 +130,7 @@ export const transformFormatStatsResponse = (
 
     // note: `ivs` don't exist here!
     preset.nature = preset.spreads[0]?.nature;
-    preset.evs = { ...preset.spreads[1]?.evs };
+    preset.evs = { ...preset.spreads[0]?.evs };
 
     preset.calcdexId = calcPresetCalcdexId(preset);
     preset.id = preset.calcdexId;

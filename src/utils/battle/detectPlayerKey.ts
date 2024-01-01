@@ -1,6 +1,8 @@
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { getAuthUsername } from '@showdex/utils/app';
+import { getAuthUsername } from '@showdex/utils/host';
 import { detectPokemonIdent } from './detectPokemonIdent';
+
+const PokemonPlayerKeyRegex = /^(p\d)[a-z]?:/;
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -16,11 +18,11 @@ export const detectPlayerKeyFromPokemon = <
 ): CalcdexPlayerKey => {
   const ident = detectPokemonIdent(pokemon);
 
-  if (!ident || !/^p\d+:/.test(ident)) {
+  if (!ident) {
     return null;
   }
 
-  return ident.slice(0, ident.indexOf(':')) as CalcdexPlayerKey;
+  return PokemonPlayerKeyRegex.exec(ident)?.[1] as CalcdexPlayerKey;
 };
 
 /* eslint-enable @typescript-eslint/indent */
@@ -36,10 +38,6 @@ export const detectPlayerKeyFromPokemon = <
 export const detectAuthPlayerKeyFromBattle = (
   battle: Partial<Showdown.Battle>,
 ): CalcdexPlayerKey => {
-  // if (typeof app === 'undefined') {
-  //   return null;
-  // }
-
   const authName = getAuthUsername();
 
   if (!authName) {

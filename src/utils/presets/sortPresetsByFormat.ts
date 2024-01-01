@@ -14,9 +14,9 @@ import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 export const sortPresetsByFormat = (
   format?: string,
 ): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => {
-  const battleFormat = parseBattleFormat(format);
+  const { gen, base } = parseBattleFormat(format);
 
-  if (!battleFormat) {
+  if (!gen || !base) {
     return () => 0;
   }
 
@@ -24,12 +24,12 @@ export const sortPresetsByFormat = (
     const formatA = getGenfulFormat(a.gen, a.format);
     const formatB = getGenfulFormat(b.gen, b.format);
 
-    const battleFormatA = parseBattleFormat(formatA);
-    const battleFormatB = parseBattleFormat(formatB);
+    const { gen: genA, base: baseA } = parseBattleFormat(formatA);
+    const { gen: genB, base: baseB } = parseBattleFormat(formatB);
 
     // first, hard match the genless formats
-    const matchesA = battleFormatA === battleFormat;
-    const matchesB = battleFormatB === battleFormat;
+    const matchesA = genA === gen && baseA === base;
+    const matchesB = genB === gen && baseB === base;
 
     if (matchesA) {
       // no need to repeat this case below since this only occurs when `a` and `b` both match
@@ -45,8 +45,8 @@ export const sortPresetsByFormat = (
     }
 
     // at this point, we should've gotten all the hard matches, so we can do partial matching
-    const partialMatchesA = formatA.startsWith(format);
-    const partialMatchesB = formatB.startsWith(format);
+    const partialMatchesA = genA === gen && formatA.includes(base);
+    const partialMatchesB = genB === gen && formatB.includes(base);
 
     if (partialMatchesA) {
       if (partialMatchesB) {

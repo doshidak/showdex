@@ -5,9 +5,14 @@ import {
 } from '@showdex/interfaces/calc';
 import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
-// import { nonEmptyObject } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, getDefaultSpreadValue, hasMegaForme } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectLegacyGen,
+  determineDefaultLevel,
+  getDefaultSpreadValue,
+} from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -37,11 +42,13 @@ export const applyPreset = (
   usage?: CalcdexPokemonPreset,
 ): Partial<CalcdexPokemon> => {
   const gen = detectGenFromFormat(format);
+  const legacy = detectLegacyGen(gen);
 
   if (!gen || !preset?.calcdexId || !pokemon?.calcdexId || !pokemon.speciesForme) {
     return null;
   }
 
+  const defaultLevel = determineDefaultLevel(format);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
 
@@ -55,6 +62,7 @@ export const applyPreset = (
 
     // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
     // the new preset (don't want alts from a previous set to persist if none are defined)
+    level: preset.level || defaultLevel,
     altTeraTypes: [],
     altAbilities: [],
     dirtyAbility: preset.ability,
@@ -84,26 +92,24 @@ export const applyPreset = (
     },
   };
 
+  const transformed = !!pokemon.transformedForme;
+  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
+  const formeKey = transformed && !speciesFormes.includes(preset.speciesForme) ? 'transformedForme' : 'speciesForme';
+  const currentForme = pokemon[formeKey];
+
   // determine if this preset reveals actual info
-  const revealingPreset = ['server', 'sheet'].includes(preset.source);
+  const revealingPreset = ['server', 'sheet'].includes(preset.source)
+    && (!transformed || speciesFormes.includes(preset.speciesForme));
 
   // determine if we have a completed preset (to distinguish partial presets w/o any spreads derived from OTS)
   const completePreset = detectCompletePreset(preset);
-
-  const transformed = !!pokemon.transformedForme;
-
-  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
-  const formeKey = transformed && !speciesFormes.includes(preset.speciesForme)
-    ? 'transformedForme'
-    : 'speciesForme';
-
-  const currentForme = pokemon[formeKey];
 
   // update to the speciesForme (& update relevant info) if different
   // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
   //   || (!transformed && pokemon.speciesForme !== preset.speciesForme);
   const shouldUpdateSpecies = currentForme !== preset.speciesForme
-    && !hasMegaForme(currentForme);
+    // && !hasMegaForme(currentForme);
+    && !speciesFormes.includes(currentForme);
 
   if (shouldUpdateSpecies) {
     output[formeKey] = preset.speciesForme;
@@ -115,7 +121,11 @@ export const applyPreset = (
   //   delete output.dirtyAbility;
   // }
 
-  const didRevealTeraType = !!pokemon.revealedTeraType && pokemon.revealedTeraType !== '???';
+  if (preset.level && preset.level !== output.level) {
+    output.level = preset.level;
+  }
+
+  const didRevealTeraType = !!pokemon.teraType && pokemon.teraType !== '???';
   const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
 
   // check if we have Tera typing usage data
@@ -126,12 +136,12 @@ export const applyPreset = (
     output.altTeraTypes = teraTypesUsage.sort(sortUsageAlts);
 
     if (!didRevealTeraType) {
-      [output.teraType] = output.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
+      [output.dirtyTeraType] = output.altTeraTypes[0] as CalcdexPokemonUsageAlt<Showdown.TypeName>;
     }
   } else if (altTeraTypes?.[0]) {
     // apply the first teraType from the preset's teraTypes
     if (!didRevealTeraType) {
-      [output.teraType] = flattenAlts(altTeraTypes);
+      [output.dirtyTeraType] = flattenAlts(altTeraTypes);
     }
 
     output.altTeraTypes = altTeraTypes;
@@ -139,13 +149,13 @@ export const applyPreset = (
 
   // update (2023/02/07): always clear the dirtyAbility from the preset if its actual ability
   // has been already revealed (even when transformed)
-  const clearDirtyAbility = !!pokemon.ability;
+  const clearDirtyAbility = !!pokemon.ability || formatId(output.dirtyAbility) === 'noability';
 
   if (clearDirtyAbility) {
     output.dirtyAbility = null;
   }
 
-  const clearDirtyItem = (pokemon.item && pokemon.item !== '(exists)')
+  const clearDirtyItem = (pokemon.item && formatId(pokemon.item) !== 'exists')
     || (pokemon.prevItem && pokemon.prevItemEffect);
 
   if (clearDirtyItem) {
@@ -153,11 +163,11 @@ export const applyPreset = (
   }
 
   if (preset.altAbilities?.length) {
-    output.altAbilities = [...preset.altAbilities];
+    output.altAbilities = [...preset.altAbilities].filter((a) => !!a && formatId(flattenAlt(a)) !== 'noability');
 
     // apply the top usage ability (if available)
     const abilityUsageAvailable = usage?.altAbilities?.length > 1
-      && output.altAbilities?.length > 1
+      && output.altAbilities.length > 1
       && !clearDirtyAbility;
 
     if (abilityUsageAvailable) {
@@ -259,8 +269,9 @@ export const applyPreset = (
 
   // determine if we should be updating the actual info instead of the dirty ones
   if (revealingPreset) {
-    if (output.teraType && !pokemon.revealedTeraType) {
-      output.revealedTeraType = output.teraType;
+    if (!pokemon.teraType && preset.teraTypes?.length) {
+      [output.teraType] = flattenAlts(preset.teraTypes);
+      output.dirtyTeraType = null;
     }
 
     if (output.dirtyAbility && !pokemon.ability) {
@@ -278,18 +289,20 @@ export const applyPreset = (
     }
   }
 
+  const sanitized = sanitizePokemon({
+    ...pokemon,
+    ...output,
+  }, format);
+
   if (currentForme !== output[formeKey]) {
     const {
+      altFormes,
       types,
       abilities,
-      altFormes,
       baseStats,
       transformedAbilities,
       transformedBaseStats,
-    } = sanitizePokemon({
-      ...pokemon,
-      ...output,
-    }, format);
+    } = sanitized;
 
     output.types = types;
     output.altFormes = altFormes;
@@ -301,6 +314,10 @@ export const applyPreset = (
       output.abilities = abilities;
       output.baseStats = baseStats;
     }
+  }
+
+  if (!pokemon.ability && sanitized.abilityToggled) {
+    output.abilityToggled = sanitized.abilityToggled;
   }
 
   // we probably have an OTS (Open Team Sheet) if revealing & not complete
@@ -316,10 +333,27 @@ export const applyPreset = (
       : mergeRevealedMoves({ ...pokemon, ...output });
   }
 
+  // in legacy gens, make sure SPA & SPD always equal (for SPC)
+  // (otherwise, the `gen12` mechanics file in @smogon/calc will throw an Error(), crashing the Calcdex!)
+  if (legacy) {
+    if (typeof output.ivs.spa === 'number') {
+      output.ivs.spd = output.ivs.spa;
+    } else if (typeof output.ivs.spd === 'number') {
+      output.ivs.spa = output.ivs.spd;
+    }
+
+    if (typeof output.evs.spa === 'number') {
+      output.evs.spd = output.evs.spa;
+    } else if (typeof output.evs.spd === 'number') {
+      output.evs.spa = output.evs.spd;
+    }
+  }
+
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,
   // which won't have any EVs/IVs, so we'll still have to rely on spreads from other presets)
   if (completePreset) {
     output.presetId = preset.calcdexId;
+    output.presetSource = preset.source;
     output.spreadStats = calcPokemonSpreadStats(format, { ...pokemon, ...output });
 
     if (revealingPreset) {
@@ -343,7 +377,7 @@ export const applyPreset = (
   }
 
   // if the applied preset doesn't have a completed EV/IV spread, forcibly show them
-  if (!pokemon.serverSourced && !pokemon.showGenetics) {
+  if (pokemon.source !== 'server' && !pokemon.showGenetics) {
     output.showGenetics = true;
   }
 
@@ -351,6 +385,7 @@ export const applyPreset = (
   // (this should spin-up the auto-preset effect in useCalcdexPresets() or something lol)
   if (pokemon.presetId) {
     output.presetId = null;
+    output.presetSource = null;
   }
 
   return output;

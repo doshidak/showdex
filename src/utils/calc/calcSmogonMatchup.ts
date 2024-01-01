@@ -118,9 +118,9 @@ export const calcSmogonMatchup = (
   };
 
   const dex = getGenDexForFormat(format);
-  // const gen = detectGenFromFormat(format);
 
   if (!dex || !format || !gameType || !playerPokemon?.speciesForme || !opponentPokemon?.speciesForme || !playerMove) {
+    /*
     if (__DEV__ && playerMove) {
       l.debug(
         'Calculation ignored due to invalid arguments.',
@@ -131,10 +131,9 @@ export const calcSmogonMatchup = (
         '\n', 'player', player,
         '\n', 'opponent', opponent,
         '\n', 'field', field,
-        '\n', 'settings', settings,
-        // '\n', '(You will only see this warning on development.)',
       );
     }
+    */
 
     return matchup;
   }
@@ -142,7 +141,7 @@ export const calcSmogonMatchup = (
   const smogonField = createSmogonField(format, gameType, field, player, opponent, allPlayers);
 
   matchup.attacker = createSmogonPokemon(format, gameType, playerPokemon, playerMove, opponentPokemon);
-  matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon);
+  matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon, field);
   matchup.defender = createSmogonPokemon(format, gameType, opponentPokemon, null, playerPokemon);
 
   // pretty much only used for Beat Up lmao

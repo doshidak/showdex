@@ -1,6 +1,8 @@
 import * as React from 'react';
 import cx from 'classnames';
+import { type ItemName } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { ItemIcon } from '../ItemIcon';
 import styles from './Picon.module.scss';
 
 export interface PiconProps {
@@ -10,49 +12,30 @@ export interface PiconProps {
   facingLeft?: boolean;
 }
 
-const iconCssPrefix = 'background:';
-
 export const Picon = ({
   className,
   style,
   pokemon,
   facingLeft,
 }: PiconProps): JSX.Element => {
-  /** @todo replace all `null`'s with the empty icon */
-  if (typeof Dex?.getPokemonIcon !== 'function') {
-    return null;
-  }
+  const css = Dex?.getPokemonIcon(pokemon || 'pokeball-none', facingLeft).split(';')[0];
+  const background = css?.replace(/^background:/, '');
 
-  let [iconCss] = pokemon
-    ? (Dex.getPokemonIcon(pokemon, facingLeft) || '').split(';')
-    : [];
-
-  if (!iconCss) {
-    iconCss = Dex.getPokemonIcon('pokeball-none', facingLeft).split(';')?.[0];
-  }
-
-  if (iconCss?.startsWith?.(iconCssPrefix)) {
-    iconCss = iconCss.slice(iconCssPrefix.length);
-  }
-
-  let itemIconCss = typeof pokemon !== 'string' && pokemon?.item
-    ? Dex.getItemIcon(pokemon.item)
-    : null;
-
-  if (itemIconCss?.startsWith?.(iconCssPrefix)) {
-    itemIconCss = itemIconCss.slice(iconCssPrefix.length);
-  }
+  const item = (typeof pokemon !== 'string' && pokemon?.item as ItemName) || null;
 
   return (
     <div
       className={cx(styles.container, className)}
-      style={{ ...style, background: iconCss }}
+      style={{
+        ...style,
+        ...(!!background && { background }),
+      }}
     >
       {
-        !!itemIconCss &&
-        <div
+        !!item &&
+        <ItemIcon
           className={styles.itemIcon}
-          style={{ background: itemIconCss }}
+          item={item}
         />
       }
     </div>

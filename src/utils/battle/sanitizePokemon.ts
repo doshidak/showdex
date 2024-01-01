@@ -1,15 +1,11 @@
-import {
-  type AbilityName,
-  type GenerationNum,
-  type ItemName,
-  // type MoveName,
-} from '@smogon/calc';
+import { type AbilityName, type GenerationNum, type ItemName } from '@smogon/calc';
 import { PokemonBoostNames, PokemonNatures, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { calcPokemonCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import {
   clamp,
   env,
+  formatId,
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
@@ -54,8 +50,8 @@ export const sanitizePokemon = <
 
   const sanitizedPokemon: CalcdexPokemon = {
     calcdexId: (pokemon as Partial<CalcdexPokemon>)?.calcdexId || null,
-    serverSourced: (pokemon as Partial<CalcdexPokemon>)?.serverSourced || false,
-    playerKey: detectPlayerKeyFromPokemon(pokemon),
+    source: (pokemon as Partial<CalcdexPokemon>)?.source || null,
+    playerKey: (pokemon as Partial<CalcdexPokemon>)?.playerKey || detectPlayerKeyFromPokemon(pokemon),
 
     slot: (pokemon as Partial<Showdown.Pokemon>)?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
@@ -79,8 +75,8 @@ export const sanitizePokemon = <
     gender: pokemon?.gender || 'N',
     shiny: pokemon?.shiny || false,
 
-    dmaxable: (pokemon as Partial<CalcdexPokemon>)?.dmaxable || false,
-    gmaxable: (pokemon as Partial<CalcdexPokemon>)?.gmaxable || false,
+    dmaxable: (gen > 7 && (pokemon as Partial<CalcdexPokemon>)?.dmaxable) || false,
+    gmaxable: (gen > 7 && (pokemon as Partial<CalcdexPokemon>)?.gmaxable) || false,
 
     types: (
       typeChanged
@@ -97,24 +93,17 @@ export const sanitizePokemon = <
       || (pokemon as Partial<CalcdexPokemon>)?.teraType
       || null,
 
-    revealedTeraType: (
-      typeof (pokemon as Partial<Showdown.Pokemon>)?.terastallized === 'string'
-        && (pokemon as Partial<Showdown.Pokemon>).terastallized
-    )
-      || (pokemon as Partial<CalcdexPokemon>)?.revealedTeraType
-      || null,
-
+    dirtyTeraType: (pokemon as Partial<CalcdexPokemon>)?.dirtyTeraType || null,
     altTeraTypes: (pokemon as Partial<CalcdexPokemon>)?.altTeraTypes || [],
 
-    hp: (pokemon as Partial<Showdown.Pokemon>)?.hp || 0,
+    hp: (pokemon as Partial<Showdown.Pokemon>)?.hp ?? 100,
     dirtyHp: (pokemon as Partial<CalcdexPokemon>)?.dirtyHp ?? null, // note: 0 = fainted, so null is when the user resets back to `hp`
-    maxhp: (pokemon as Partial<Showdown.Pokemon>)?.maxhp || 1,
-    fainted: ((pokemon as Partial<Showdown.Pokemon>)?.hp || 0) <= 0,
+    maxhp: (pokemon as Partial<Showdown.Pokemon>)?.maxhp || 100,
+    fainted: !(pokemon as Partial<Showdown.Pokemon>)?.hp,
 
     baseAbility: (pokemon as Partial<Showdown.Pokemon>)?.baseAbility?.replace(/no\s?ability/i, '') as AbilityName,
     ability: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.ability) || null,
     dirtyAbility: (pokemon as Partial<CalcdexPokemon>)?.dirtyAbility || null,
-    // abilityToggleable: (pokemon as Partial<CalcdexPokemon>)?.abilityToggleable || false,
     abilityToggled: (pokemon as Partial<CalcdexPokemon>)?.abilityToggled || false,
     abilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.abilities) || [],
     altAbilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.altAbilities) || [],
@@ -135,26 +124,9 @@ export const sanitizePokemon = <
     prevItem: (pokemon as Partial<Showdown.Pokemon>)?.prevItem as ItemName || null,
     prevItemEffect: (pokemon as Partial<Showdown.Pokemon>)?.prevItemEffect || null,
 
-    nature: (!legacy && (
-      (pokemon as Partial<CalcdexPokemon>)?.nature
-        || PokemonNatures.slice(-1)[0])
-    ) || null,
-
-    ivs: populateStatsTable(
-      (pokemon as Partial<CalcdexPokemon>)?.ivs,
-      {
-        spread: 'iv',
-        format,
-      },
-    ),
-
-    evs: populateStatsTable(
-      (pokemon as Partial<CalcdexPokemon>)?.evs,
-      {
-        spread: 'ev',
-        format,
-      },
-    ),
+    nature: (!legacy && ((pokemon as Partial<CalcdexPokemon>)?.nature || PokemonNatures.slice(-1)[0])) || null,
+    ivs: populateStatsTable((pokemon as Partial<CalcdexPokemon>)?.ivs, { spread: 'iv', format }),
+    evs: populateStatsTable((pokemon as Partial<CalcdexPokemon>)?.evs, { spread: 'ev', format }),
 
     showPresetSpreads: (pokemon as Partial<CalcdexPokemon>)?.showPresetSpreads || false,
 
@@ -165,6 +137,7 @@ export const sanitizePokemon = <
     // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
     // (populated in syncPokemon() & used in createSmogonPokemon())
     boostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
+    dirtyBoostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
 
     boosts: PokemonBoostNames.reduce((table, stat) => {
       const boosts = (pokemon as Partial<Showdown.Pokemon>)?.boosts;
@@ -234,6 +207,7 @@ export const sanitizePokemon = <
     serverMoves: (pokemon as Partial<CalcdexPokemon>)?.serverMoves || [],
     transformedMoves: (pokemon as Partial<CalcdexPokemon>)?.transformedMoves || [],
     altMoves: (pokemon as Partial<CalcdexPokemon>)?.altMoves || [],
+    stellarMoveMap: { ...(pokemon as Partial<CalcdexPokemon>)?.stellarMoveMap },
     moveOverrides: { ...(pokemon as Partial<CalcdexPokemon>)?.moveOverrides },
     showMoveOverrides: (pokemon as Partial<CalcdexPokemon>)?.showMoveOverrides || false,
 
@@ -241,6 +215,7 @@ export const sanitizePokemon = <
     ...sanitizeMoveTrack(pokemon, format),
 
     presetId: (pokemon as Partial<CalcdexPokemon>)?.presetId || null,
+    presetSource: (pokemon as Partial<CalcdexPokemon>)?.presetSource || null,
     presets: (pokemon as Partial<CalcdexPokemon>)?.presets || [],
     autoPreset: (pokemon as Partial<CalcdexPokemon>)?.autoPreset || true,
 
@@ -281,7 +256,7 @@ export const sanitizePokemon = <
   )
     ? [
       transformedBaseForme,
-      ...(transformedBaseSpecies.otherFormes as string[]),
+      ...transformedBaseSpecies.otherFormes,
     ]
     : baseSpecies?.otherFormes?.length && (
       baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
@@ -289,7 +264,7 @@ export const sanitizePokemon = <
     )
       ? [
         baseSpeciesForme,
-        ...(baseSpecies.otherFormes as string[]),
+        ...baseSpecies.otherFormes,
       ]
       : [];
 
@@ -319,6 +294,19 @@ export const sanitizePokemon = <
       ];
   }
 
+  // update (2023/12/29): if we have any altFormes[], verify that they exist in the gen so that Slowbro-Mega or
+  // Slowbro-Galar don't show up in gen 1 or something... LOL imagine
+  if (sanitizedPokemon.altFormes.length) {
+    sanitizedPokemon.altFormes = sanitizedPokemon.altFormes
+      .filter((altForme) => {
+        const dexAltForme = dex.species.get(altForme);
+
+        return !dexAltForme?.gen
+          || !gen
+          || gen >= dexAltForme.gen;
+      });
+  }
+
   if (nonEmptyObject(transformedSpecies?.baseStats)) {
     sanitizedPokemon.transformedBaseStats = { ...transformedSpecies.baseStats };
 
@@ -331,7 +319,7 @@ export const sanitizePokemon = <
 
   // only update the types if the dex returned types
   // (checking against typeChanged since if true, should've been already updated above)
-  const speciesTypes = (transformedSpecies || species)?.types as Showdown.TypeName[];
+  const speciesTypes = (transformedSpecies || species)?.types;
 
   if (!typeChanged && speciesTypes?.length) {
     sanitizedPokemon.types = [...speciesTypes];
@@ -344,34 +332,24 @@ export const sanitizePokemon = <
   }
 
   // if no teraType in gen 9, default to the Pokemon's first type
-  if (gen > 8 && !sanitizedPokemon.teraType && sanitizedPokemon.types[0]) {
-    sanitizedPokemon.teraType = sanitizedPokemon.revealedTeraType || sanitizedPokemon.types[0];
+  if (gen > 8 && !sanitizedPokemon.teraType && !sanitizedPokemon.dirtyTeraType && sanitizedPokemon.types[0]) {
+    [sanitizedPokemon.dirtyTeraType] = sanitizedPokemon.types;
   }
 
   // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
   sanitizedPokemon.abilities = [
     ...(Object.values(species?.abilities || {}) as AbilityName[]),
-  ].filter(Boolean);
+  ].filter((a) => !!a && formatId(a) !== 'noability');
 
   // if transformed, update the legal abilities of the transformed Pokemon
   sanitizedPokemon.transformedAbilities = [
     ...(Object.values(transformedSpecies?.abilities || {}) as AbilityName[]),
-  ].filter(Boolean);
+  ].filter((a) => !!a && formatId(a) !== 'noability');
 
   // check if we should auto-set the ability
   const abilitiesSource = sanitizedPokemon.transformedAbilities.length
     ? sanitizedPokemon.transformedAbilities
     : [...flattenAlts(sanitizedPokemon.altAbilities), ...sanitizedPokemon.abilities];
-
-  /*
-  const updateDirtyAbility = (
-    !sanitizedPokemon.ability
-      && !sanitizedPokemon.transformedForme
-  ) || (
-    sanitizedPokemon.dirtyAbility
-      && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility)
-  );
-  */
 
   const updateDirtyAbility = (
     (!sanitizedPokemon.ability || !!sanitizedPokemon.transformedForme)
@@ -382,11 +360,7 @@ export const sanitizePokemon = <
     [sanitizedPokemon.dirtyAbility] = abilitiesSource;
   }
 
-  // abilityToggleable is mainly used for UI, hence why there are two of
-  // what seems to be essentially the same thing
-  // (but note that abilityToggled stores the current toggle state)
-  // update (2023/10/18): abilityToggleable is no longer being stored in the CalcdexPokemon so yeetus
-  // sanitizedPokemon.abilityToggleable = toggleableAbility(sanitizedPokemon);
+  // determine the toggle state of the toggleable ability, if applicable
   sanitizedPokemon.abilityToggled = detectToggledAbility(sanitizedPokemon);
 
   if (!sanitizedPokemon?.calcdexId) {

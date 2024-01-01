@@ -28,28 +28,29 @@ declare namespace Showdown {
     readonly baseForme: string;
 
     readonly num: number;
-    readonly types: ReadonlyArray<TypeName>;
-    readonly abilities: Readonly<{ 0: string; 1?: string; H?: string; S?: string; }>;
-    readonly baseStats: Readonly<{ [stat in StatName]: number; }>;
+    readonly types: TypeName[];
+    readonly abilities: Partial<Record<'0' | '1' | 'H' | 'S', string>>;
+    readonly baseStats: Required<StatsTable>;
+    readonly bst: number;
     readonly weightkg: number;
 
     readonly heightm: number;
     readonly gender: GenderName;
     readonly color: string;
-    readonly genderRatio?: Readonly<{ M: number; F: number; }>;
-    readonly eggGroups: ReadonlyArray<string>;
-    readonly tags: ReadonlyArray<string>;
+    readonly genderRatio?: Record<Exclude<GenderName, 'N'>, number>;
+    readonly eggGroups: string[];
+    readonly tags: string[];
 
-    readonly otherFormes?: ReadonlyArray<string>;
-    readonly cosmeticFormes?: ReadonlyArray<string>;
-    readonly evos?: ReadonlyArray<string>;
+    readonly otherFormes?: string[];
+    readonly cosmeticFormes?: string[];
+    readonly evos?: string[];
     readonly prevo: string;
     readonly evoType: SpeciesEvoType | '';
     readonly evoLevel: number;
     readonly evoMove: string;
     readonly evoItem: string;
     readonly evoCondition: string;
-    readonly requiredItems: ReadonlyArray<string>;
+    readonly requiredItems: string[];
     readonly tier: string;
     readonly isTotem: boolean;
     readonly isMega: boolean;

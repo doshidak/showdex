@@ -2,8 +2,8 @@ import { type ItemName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
-import { formatId } from '@showdex/utils/core';
-import { guessTableFormatKey, legalLockedFormat } from '@showdex/utils/dex';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
+import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
   detectUsageAlt,
@@ -67,19 +67,20 @@ const findItemGroupIndices = (
  */
 export const buildItemOptions = (
   format: string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  usage?: CalcdexPokemonPreset,
-  showAll?: boolean,
+  pokemon: CalcdexPokemon,
+  config?: {
+    usage?: CalcdexPokemonPreset;
+  },
 ): CalcdexPokemonItemOption[] => {
+  const gen = detectGenFromFormat(format);
   const options: CalcdexPokemonItemOption[] = [];
 
-  if (!pokemon?.speciesForme) {
+  if (!pokemon?.speciesForme || gen < 2) {
     return options;
   }
 
-  const {
-    altItems,
-  } = pokemon;
+  const { altItems } = pokemon;
+  const { usage } = config || {};
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
@@ -134,32 +135,8 @@ export const buildItemOptions = (
     }
   }
 
-  if (typeof BattleTeambuilderTable === 'undefined' || !format || !BattleTeambuilderTable.items?.length) {
-    const allItems = Object.values(BattleItems || {})
-      .map((item) => item?.name as ItemName)
-      .filter((n) => !!n && !filterItems.includes(n))
-      .sort(usageSorter);
-
-    if (allItems.length) {
-      options.push({
-        label: 'All',
-        options: allItems.map((name) => ({
-          label: name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
-    }
-
-    return options;
-  }
-
   const formatKey = guessTableFormatKey(format);
-
-  // const { items } = BattleTeambuilderTable;
-  const items = !!format && formatKey in BattleTeambuilderTable && BattleTeambuilderTable[formatKey]?.items?.length
-    ? BattleTeambuilderTable[formatKey].items
-    : BattleTeambuilderTable.items;
+  const items = BattleTeambuilderTable[formatKey]?.items || BattleTeambuilderTable?.items;
 
   // use the BattleTeambuilderTable to group items by:
   // Popular, Items, Pokemon-Specific, Usually Useless & Useless
@@ -274,22 +251,40 @@ export const buildItemOptions = (
     }
   }
 
-  if (showAll || !legalLockedFormat(format)) {
-    const otherItems = Object.values(BattleItems || {})
+  if (!nonEmptyObject(items)) {
+    const allItems = Object.values(BattleItems || {})
       .map((item) => item?.name as ItemName)
       .filter((n) => !!n && !filterItems.includes(n))
       .sort(usageSorter);
 
-    if (otherItems.length) {
+    if (allItems.length) {
       options.push({
-        label: 'All',
-        options: otherItems.map((name) => ({
+        label: 'Other',
+        options: allItems.map((name) => ({
           label: name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
       });
     }
+
+    // return options;
+  }
+
+  const otherItems = Object.values(BattleItems || {})
+    .map((item) => item?.name as ItemName)
+    .filter((n) => !!n && !filterItems.includes(n))
+    .sort(usageSorter);
+
+  if (otherItems.length) {
+    options.push({
+      label: 'All',
+      options: otherItems.map((name) => ({
+        label: name,
+        rightLabel: findUsagePercent(name),
+        value: name,
+      })),
+    });
   }
 
   return options;

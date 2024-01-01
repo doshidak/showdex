@@ -1,10 +1,10 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
-// import { FormatLabels } from '@showdex/consts/dex';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { detectLegacyGen, getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
+import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import { getPresetFormes, sortPresetsByFormat } from '@showdex/utils/presets';
+import { detectCompletePreset, getPresetFormes } from '@showdex/utils/presets';
+import { sortPresetGroupsByFormat } from './sortPresetGroupsByFormat';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -20,32 +20,37 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
  * @since 1.0.3
  */
 export const buildPresetOptions = (
+  format: string,
+  pokemon: CalcdexPokemon,
   presets: CalcdexPokemonPreset[],
-  usages?: CalcdexPokemonPreset[],
-  pokemon?: CalcdexPokemon,
-  format?: string,
+  config?: {
+    usages?: CalcdexPokemonPreset[];
+  },
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
 
-  if (!presets?.length) {
+  if (!format || !pokemon?.speciesForme || !presets?.length) {
     return options;
   }
 
-  const currentForme = pokemon?.transformedForme || pokemon?.speciesForme;
+  const { usages } = config || {};
+
+  const {
+    gen,
+    base: formatBase,
+    label: formatLabel,
+  } = parseBattleFormat(format);
+
+  const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
 
-  const presetsSource = format
-    ? [...presets].sort(sortPresetsByFormat(format))
-    : presets;
+  // const presetsSource = [...presets].sort(sortPresetsByFormat(format));
+  const formatLabelMap: Record<string, string> = {
+    [getGenfulFormat(gen, formatBase)]: formatLabel,
+  };
 
-  presetsSource.forEach((preset) => {
-    const validPreset = !!preset?.calcdexId
-      && !!preset.name
-      && !!preset.format
-      && !!preset.speciesForme
-      && (detectLegacyGen(preset.gen) || Object.values(preset.evs || {}).some((ev) => ev > 0));
-
-    if (!validPreset) {
+  presets.forEach((preset) => {
+    if (!detectCompletePreset(preset)) {
       return;
     }
 
@@ -58,21 +63,19 @@ export const buildPresetOptions = (
     // 'Defensive (Physical Attacker)' -> { label: 'Defensive', subLabel: 'PHYSICAL ATTACKER' },
     // 'Metal Sound + Steelium Z' -> { label: 'Metal Sound', subLabel: '+ STEELIUM Z' },
     // 'The Pex' -> (regex fails) -> { label: 'The Pex' } (untouched lol)
-    if (SubLabelRegex.test(String(option.label))) {
-      // update (2022/10/18): added default `[]` here cause the regex is letting some invalid
-      // option.label through and I'm too lazy to find out what that is rn lol
-      const [
-        ,
-        label,
-        plusLabel,
-        subLabel,
-      ] = SubLabelRegex.exec(String(option.label)) || [];
+    const [
+      subLabelMatch,
+      extractedLabel,
+      plusLabel,
+      subLabel,
+    ] = SubLabelRegex.exec(String(option.label)) || [];
 
+    if (subLabelMatch) {
       // it'll be one or the other since the capture groups are alternatives in a non-capturing group
       const actualSubLabel = (!!plusLabel && `+ ${plusLabel}`) || subLabel;
 
-      if (label && actualSubLabel) {
-        option.label = label;
+      if (extractedLabel && actualSubLabel) {
+        option.label = extractedLabel;
         option.subLabel = actualSubLabel;
       }
     }
@@ -102,20 +105,26 @@ export const buildPresetOptions = (
       option.rightLabel = percentage(usage, 2);
     }
 
-    const { label } = parseBattleFormat(getGenfulFormat(preset.gen, preset.format));
+    const presetFormat = getGenfulFormat(preset.gen, preset.format);
+
+    if (!formatLabelMap[presetFormat]) {
+      formatLabelMap[presetFormat] = parseBattleFormat(presetFormat).label;
+    }
+
+    const label = formatLabelMap[presetFormat];
     const group = options.find((o) => o.label === label);
 
     if (!group) {
-      options.push({
+      return void options.push({
         label,
         options: [option],
       });
-
-      return;
     }
 
     group.options.push(option);
   });
+
+  options.sort(sortPresetGroupsByFormat(formatLabelMap));
 
   return options;
 };

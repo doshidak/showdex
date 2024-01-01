@@ -13,10 +13,11 @@ import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
  * * `'server'` refers to any preset provided by the Showdown server, typically for the logged-in user's Pokemon.
  * * `'sheet'` refers to any preset derived from an open team sheet or the `!showteam` chat command.
  * * `'smogon'` refers to any preset downloaded from a repository of Smogon sets.
- * * `'storage'` refers to any preset derived from locally-stored Teambuilder teams and boxes.
+ * * `'storage'` refers to any preset derived from locally-stored Teambuilder teams & boxes.
  *   - `'storage'` refers to any preset derived from a Teambuilder team.
  *   - `'storage-box'` refers to any preset derived from a Teambuilder box.
  * * `'usage'` refers to any preset derived from Showdown usage stats.
+ * * `'user'` refers to the user's manual modifications represented as a preset.
  *
  * @since 1.0.7
  */
@@ -27,7 +28,8 @@ export type CalcdexPokemonPresetSource =
   | 'smogon'
   | 'storage'
   | 'storage-box'
-  | 'usage';
+  | 'usage'
+  | 'user';
 
 /**
  * Single Pokemon spread configuration.
@@ -66,7 +68,7 @@ export interface CalcdexPokemonPreset {
    *
    * @since 0.1.0
    */
-  calcdexId?: string;
+  calcdexId: string;
 
   /**
    * Alias of `calcdexId`, used internally by RTK Query in its internal tagging system.
@@ -157,8 +159,38 @@ export interface CalcdexPokemonPreset {
    */
   usage?: number;
 
-  speciesForme?: string;
+  /**
+   * Species forme that this preset applies to.
+   *
+   * * Generally this isn't hard filtered for & may appear for Pokemon of the same base species, but different forme.
+   *   - e.g., if this preset was for a *Charizard-Gmax*, it could appear if the current Pokemon was just *Charizard*.
+   *
+   * @example 'Talonflame'
+   * @since 0.1.0
+   */
+  speciesForme: string;
+
+  /**
+   * Usage percentage of this particular species forme in this specific `format`.
+   *
+   * * Primarily only available in the pkmn Usage Stats API (for formats like OU) & not Randoms.
+   * * Also primarily only visible in standalone Calcdexes, aka. Honkdexes, where the user can manually add Pokemon.
+   * * Value is a percentage represented as a decimal in the interval `[0, 1]`, both inclusive.
+   *
+   * @since 1.2.0
+   */
+  formeUsage?: number;
+
+  /**
+   * Pokemon's level.
+   *
+   * * Defaults to the `CalcdexBattleState`'s `defaultLevel` if unspecified.
+   *
+   * @example 50
+   * @since 0.1.0
+   */
   level?: number;
+
   gender?: Showdown.GenderName;
   hiddenPowerType?: string;
   teraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
@@ -177,4 +209,14 @@ export interface CalcdexPokemonPreset {
   evs?: Showdown.StatsTable;
   spreads?: CalcdexPokemonPresetSpread[];
   pokeball?: string;
+
+  /**
+   * Unix epoch timestamp of when this preset was cached, in milliseconds.
+   *
+   * * Primarily used for determining which presets should be considered stale.
+   * * Using a numerical value instead of an ISO 8601 date for use as an IndexedDB index in key range queries.
+   *
+   * @since 1.2.0
+   */
+  cached?: number;
 }

@@ -1,0 +1,331 @@
+@use 'sass:math';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  .row:not(:first-child) {
+    @include spacing.margin($top: 3px);
+  }
+}
+
+.row {
+  @include flex.row-between;
+
+  .rowItem {
+    flex: 1;
+    @include spacing.margin($x: 3px);
+
+    &:first-child {
+      @include spacing.margin($left: 0);
+    }
+
+    &:last-child {
+      @include spacing.margin($right: 0);
+    }
+  }
+
+  &:nth-child(2) {
+    align-items: flex-start;
+    @include spacing.margin($x: 12px);
+  }
+}
+
+.small {
+  font-size: 8px;
+}
+
+.label {
+  font-weight: 500;
+  text-transform: uppercase;
+  user-select: none;
+  @include transition.apply(color);
+
+  .light & {
+    color: color.alpha(colors.$black, 0.8);
+
+    &.legacy {
+      color: color.alpha(colors.$black, 0.32);
+    }
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.8);
+
+    &.legacy {
+      color: color.alpha(colors.$white, 0.32);
+    }
+  }
+}
+
+button.toggleButton {
+  font-size: 8px;
+}
+
+.dropdownLabel {
+  @include flex.row($align: center);
+  @include spacing.margin($bottom: 4px, $left: 5px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+
+  button.toggleButton {
+    @include spacing.margin($left: 8px);
+  }
+}
+
+.firstLine {
+  @include flex.row($align: center);
+  max-width: 100%;
+  @include spacing.margin($bottom: 1px);
+
+  &.standalone {
+    @include spacing.margin($bottom: 2px);
+  }
+}
+
+.piconContainer {
+  flex: 0 0 40px;
+  transform: translateY(-2px);
+  // z-index: 1;
+}
+
+.infoContainer {
+  flex: 1.25;
+  max-width: calc((100% - 40px - 6em) * math.div(5, 8));
+
+  .thicc & {
+    flex: 2;
+    max-width: none;
+  }
+}
+
+.formeDropdown {
+  max-width: 200px;
+}
+
+button.nameButton {
+  flex: 0 1 auto;
+  @include flex.row-center;
+  @include spacing.margin($x: -5px, $y: -1px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  color: inherit;
+  overflow-x: hidden;
+  z-index: 1;
+
+  &.missingForme {
+    font-weight: 400;
+  }
+
+  &:not(.missingForme).disabled {
+    opacity: 1;
+  }
+}
+
+.nameLabel {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
+  .withFormes & {
+    @include spacing.margin($right: 3px);
+  }
+}
+
+.formeChevron {
+  @include spacing.margin($right: 5px);
+  font-size: 10px;
+  line-height: 11px;
+  opacity: 0.3;
+  @include transition.apply(opacity, transform);
+
+  .nameButton:hover & {
+    opacity: 0.95;
+  }
+
+  &.open {
+    transform: rotate(-180deg);
+  }
+}
+
+.level {
+  @include flex.row($align: center);
+  flex: 0 0;
+  @include spacing.margin($left: 4px);
+  font-size: 8px;
+  text-transform: uppercase;
+  line-height: 9px;
+  user-select: none;
+
+  &.standalone {
+    @include spacing.margin($left: 6px);
+  }
+
+  .dim {
+    opacity: 0.64;
+    @include transition.apply(opacity);
+
+    &.disabled {
+      opacity: 0.32;
+    }
+  }
+}
+
+.levelField {
+  width: 16px;
+
+  &.absoluteHover::before {
+    @include position.absolute($x: -2px, $y: -1px);
+  }
+
+  &.disabled input.levelInputField {
+    color: inherit;
+  }
+
+  input.levelInputField {
+    font-size: 8px;
+    line-height: 9px;
+
+    &::placeholder {
+      font-size: 8px;
+      line-height: 9px;
+    }
+  }
+}
+
+.typesField {
+  flex: 0 0;
+  @include spacing.margin($left: 4px);
+
+  &.teraTypeField {
+    @include spacing.margin($left: 6px);
+  }
+}
+
+.secondLine {
+  @include flex.row($align: center);
+  max-width: 100%;
+  min-height: 15px;
+  user-select: none;
+}
+
+.hpPercentage {
+  @include spacing.margin($left: 6px);
+  font-size: 10px;
+  line-height: 11px;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.88);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.88);
+  }
+}
+
+.statuses {
+  @include flex.row($align: center);
+  @include spacing.margin-xy($x: 4px);
+
+  // .status:not(:last-child) {
+  //   display: inline-block;
+  //   @include spacing.margin($right: 4px);
+  // }
+
+  .status {
+    @include transition.apply(opacity);
+
+    &.disabled {
+      opacity: 0.32;
+    }
+  }
+}
+
+.statusButton {
+  position: relative;
+
+  &::before {
+    content: '';
+    @include position.absolute($top: -2px, $right: 2px, $bottom: -2px, $left: 1px);
+    border-radius: 7px;
+    @include transition.apply(background-color, box-shadow);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .light &:hover::before {
+    background-color: color.alpha(colors.$black, 0.05);
+  }
+
+  .dark &:hover::before {
+    background-color: color.alpha(colors.$white, 0.075);
+  }
+}
+
+.presetContainer {
+  flex: 1;
+  min-width: 140px;
+  @include spacing.margin($left: 1em);
+
+  .verySmol & {
+    flex: 0.75;
+    min-width: auto;
+  }
+
+  .thicc & {
+    max-width: 225px;
+  }
+}
+
+.presetHeader {
+  @include flex.row-between;
+  width: 100%;
+}
+
+.presetHeaderPart {
+  @include flex.row($align: center);
+}
+
+.presetHeaderRight {
+  @include spacing.padding($right: 5px);
+}
+
+.tooltipContent {
+  position: relative;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
+.importButton {
+  z-index: 3;
+}
+
+.importBadge {
+  @include position.absolute($top: -22px, $left: 50%);
+  white-space: nowrap;
+}
+
+.pokePasteTooltip {
+  position: relative;
+  max-width: 200px;
+  white-space: pre-wrap;
+}
+
+.descTooltip {
+  max-width: 165px;
+}
+
+.itemTooltip {
+  .itemEffect {
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+
+  .itemName {
+    font-weight: 500;
+  }
+}

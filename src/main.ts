@@ -1,13 +1,9 @@
-import { calcdexBootstrapper, hellodexBootstrapper, teamdexBootstrapper } from '@showdex/pages';
-import { type RootStore, createStore, showdexSlice } from '@showdex/redux/store';
+import { CalcdexBootstrapper, HellodexBootstrapper, TeamdexBootstrapper } from '@showdex/pages';
+import { calcdexSlice, createStore, showdexSlice } from '@showdex/redux/store';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { openIndexedDb, readHonksDb, readSettingsDb } from '@showdex/utils/storage';
 import '@showdex/styles/global.scss';
-
-export type ShowdexBootstrapper = (
-  store?: RootStore,
-  data?: string,
-  roomId?: string,
-) => void;
 
 const l = logger('@showdex/main');
 
@@ -22,10 +18,23 @@ if (typeof app === 'undefined' || typeof Dex === 'undefined') {
 
 const store = createStore();
 
-// list of bootstrappers dependent on a room
-const bootstrappers: ShowdexBootstrapper[] = [
-  calcdexBootstrapper,
-];
+// note: don't inline await, otherwise, there'll be a race condition with the login
+// (also makes the Hellodex not appear immediately when Showdown first opens)
+void (async () => {
+  const db = await openIndexedDb();
+  const settings = await readSettingsDb(db);
+
+  if (nonEmptyObject(settings)) {
+    delete settings.colorScheme;
+    store.dispatch(showdexSlice.actions.updateSettings(settings));
+  }
+
+  const honks = await readHonksDb(db);
+
+  if (nonEmptyObject(honks)) {
+    store.dispatch(calcdexSlice.actions.restore(honks));
+  }
+})();
 
 l.debug('Hooking into the client\'s app.receive()...');
 
@@ -46,12 +55,11 @@ app.receive = (data: string) => {
 
     l.debug(
       'receive() for', roomId,
-      // '\n', 'room', room,
       '\n', data,
     );
 
-    // call each bootstrapper
-    bootstrappers.forEach((bootstrapper) => bootstrapper(store, data, roomId));
+    // call the Calcdex bootstrapper
+    CalcdexBootstrapper(store, data, roomId);
   }
 };
 
@@ -85,14 +93,13 @@ colorSchemeObserver.observe(document.documentElement, {
 });
 
 // open the Hellodex when the Showdown client starts
-// (hence why it's not part of the bootstrappers array)
-hellodexBootstrapper(store);
+HellodexBootstrapper(store);
 
 /**
  * @todo May require some special logic to detect when the Teambuilder room opens.
  *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
  *   i.e., doesn't render anything, this implementation is fine.
  */
-teamdexBootstrapper(store);
+TeamdexBootstrapper(store);
 
-l.info('Completed main execution!');
+l.success('Completed main execution!');

@@ -1,6 +1,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/aria';
 @use 'mixins/font';
 @use 'mixins/position';
 @use 'mixins/spacing';
@@ -44,6 +45,8 @@
     z-index: -1;
   }
 
+  @include aria.outline($radius: 100px);
+
   &:hover {
     color: colors.$white;
     background-clip: border-box;
@@ -51,6 +54,20 @@
     &::before {
       background-position: 100% 0;
       opacity: 0.65;
+    }
+
+    &.light::after {
+      @include aria.outline-hover;
+    }
+
+    &.dark::after {
+      @include aria.outline-hover($color: colors.$white);
+    }
+  }
+
+  &:focus {
+    &.light::after, &.dark::after {
+      @include aria.outline-show;
     }
   }
 

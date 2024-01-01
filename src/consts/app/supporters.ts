@@ -1,159 +1,238 @@
-/**
- * Term of the supporter tier.
- *
- * @since 1.1.6
- */
-export type ShowdexSupporterTierTerm =
-  | 'once'
-  | 'monthly';
-
-/**
- * Supporter tier & its members.
- *
- * * Primarily only used by the `PatronagePane` in the Hellodex.
- * * Actual player titles are assigned in `players.ts`.
- *
- * @since 1.1.3
- */
-export interface ShowdexSupporterTier {
-  /**
-   * Unique ID of the supporter tier.
-   *
-   * * Primarily used to link a `ShowdexPlayerTitle` to a `ShowdexSupporterTier`,
-   *   particularly in instances where the user's name is **not** a Showdown user ID.
-   *   - `findPlayerTitle()` won't know which styling to apply for non-Showdown user IDs
-   *     in the `PatronagePageRenderer`.
-   *
-   * @example 'tier-3-pokemane-sub'
-   * @since 1.1.6
-   */
-  id?: string;
-
-  /**
-   * Name of the supporter tier.
-   *
-   * @example 'Tier 3 Pokemane Sub'
-   * @since 1.1.3
-   */
-  title: string;
-
-  /**
-   * Term of the supporter tier.
-   *
-   * @default 'monthly'
-   * @since 1.1.6
-   */
-  term?: ShowdexSupporterTierTerm;
-
-  /**
-   * Names/usernames of individuals within the supporter tier.
-   *
-   * * If the element is a `string` (& not the `[name, user?, start?, end?]` tuple),
-   *   the name will be implicitly treated as if `user` is `false`.
-   * * When the `term` of the tier is `'once'`, the `start` & `end` elements of the tuple
-   *   will be ignored as it only applies to `'monthly'` terms.
-   * * When the `term` is `'monthly'` & the `end` element is specified, the name will
-   *   appear faded in the `PatronagePane`.
-   *   - More specifically, the opacity of the name will be set to `0.5` (i.e., 50%).
-   * * For tuple elements in `names`, the `start` & `end` elements are both ISO 8601 date strings.
-   *   - For `'once'` terms, only the `start` date is used to display the date of donation.
-   *     (If `end` is provided for whatever reason, it will be ignored.)
-   *   - For `'monthly' terms, the length of the term is determined by the `start` date up until
-   *     the build date (`process.env.BUILD_DATE`) or the `end` date, whichever comes first.
-   * * Specify the `user` value in the tuple as `true` if the `name` is a Showdown username.
-   *   - This will allow the user's profile to appear when clicked on via `openUserPopup()`.
-   *   - This logic also occurs in `PatronagePane`.
-   *
-   * @example
-   * ```ts
-   * [
-   *   'Active Patron', // by default for strings, user = false (implicit)
-   *   ['Another Active Patron', false], // user = false (explicit)
-   *   ['ActivePatronUsername', true, '2023-04-20T04:20:00Z'], // user = true (explicit)
-   *   ['InactivePatron', null, '2023-04-20T04:20:00Z', '2023-04-21T16:20:00Z'], // user = false (implicit)
-   *   ['InactivePatronUsername', true, '2023-04-20T04:20:00Z', '2023-04-21T16:20:00Z'], // user = true (explicit)
-   * ]
-   * ```
-   * @since 1.1.3
-   */
-  names: (string | [name: string, user?: boolean, start?: string, end?: string])[];
-}
+import { type ShowdexSupporterTier } from '@showdex/interfaces/app';
 
 /**
  * List of PayPal donors.
  *
  * @since 1.1.3
  */
-export const ShowdexDonorTiers: ShowdexSupporterTier[] = [{
-  id: 'donor',
-  title: 'Paid Pals',
-  term: 'once',
-  names: [
-    ['CPL593H', true, '2023-09-14T03:46:43Z'],
-    ['Angie L', false, '2022-12-31T23:26:59Z'],
-    ['Fubwubs', true, '2022-12-31T06:38:03Z'],
-    ['Timothy B', false, '2023-03-09T00:08:19Z'],
-    ['PastGenOUFan', true, '2023-05-11T01:52:57Z'],
-    ['Luc H', false, '2023-09-25T08:47:33Z'],
-    ['joshtheking7', true, '2023-05-17T22:21:31Z'],
-    ['Michael L', false, '2022-11-09T05:17:33Z'],
-    ['Bongphan', true, '2023-04-17T23:56:43Z'],
-    ['Pulse_kS', true, '2023-10-23T18:54:34Z'],
-    ['Thilo P', false, '2023-10-30T11:01:05Z'],
-    ['GenOne', true, '2023-03-18T20:56:43Z'],
-    ['Lunarvania', true, '2022-12-30T19:24:14Z'],
-    ['Leman T', false, '2022-12-01T20:08:37Z'],
-    ['Sunny B', false, '2023-01-03T16:12:09Z'],
-    ['Peter T', false, '2023-01-30T03:50:05Z'],
-    ['Sam P', false, '2023-05-08T10:35:08Z'],
-    ['PokePastry', true, '2023-05-17T22:21:31Z'],
-    ['DoubleCaret', true, '2023-07-25T17:41:33Z'],
-    ['JesskyKhemically', true, '2023-08-04T23:22:33Z'],
-    ['Plague von Karma', true, '2023-08-07T20:25:23Z'],
-    ['MrMimikry', true, '2023-08-09T06:00:54Z'],
-    ['momalaharris', true, '2022-12-23T18:48:45Z'],
-    ['FR1E5', true, '2022-10-22T16:18:20Z'],
-    ['Tanuj C', false, '2023-02-07T06:39:25Z'],
-    ['GoldenGottaGo', true, '2023-02-14T12:14:18Z'],
-  ],
-}];
+export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
+  {
+    id: 'donor',
+    title: 'Paid Pals',
+    term: 'once',
+
+    members: [
+      {
+        name: 'CPL593H',
+        showdownUser: true,
+        periods: [['2023-09-14T03:46:43Z']],
+      },
+      {
+        name: 'Angie L',
+        periods: [['2022-12-31T23:26:59Z']],
+      },
+      {
+        name: 'Fubwubs',
+        showdownUser: true,
+        periods: [['2022-12-31T06:38:03Z']],
+      },
+      {
+        name: 'Timothy B',
+        periods: [['2023-03-09T00:08:19Z']],
+      },
+      {
+        name: 'PastGenOUFan',
+        showdownUser: true,
+        periods: [['2023-05-11T01:52:57Z']],
+      },
+      {
+        name: 'Luc H',
+        periods: [['2023-09-25T08:47:33Z']],
+      },
+      {
+        name: 'joshtheking7',
+        showdownUser: true,
+        periods: [['2023-05-17T22:21:31Z']],
+      },
+      {
+        name: 'Michael L',
+        periods: [['2022-11-09T05:17:33Z']],
+      },
+      {
+        name: 'Bongphan',
+        showdownUser: true,
+        periods: [['2023-04-17T23:56:43Z']],
+      },
+      {
+        name: 'Pulse_kS',
+        showdownUser: true,
+        periods: [['2023-10-23T18:54:34Z']],
+      },
+      {
+        name: 'Thilo P',
+        periods: [['2023-10-30T11:01:05Z']],
+      },
+      {
+        name: 'GenOne',
+        showdownUser: true,
+        periods: [['2023-03-18T20:56:43Z']],
+      },
+      {
+        name: 'Jacek L',
+        periods: [['2023-11-23T01:56:38Z']],
+      },
+      {
+        name: 'Lunarvania',
+        showdownUser: true,
+        periods: [['2022-12-30T19:24:14Z']],
+      },
+      {
+        name: 'Leman T',
+        periods: [['2022-12-01T20:08:37Z']],
+      },
+      {
+        name: 'Sunny B',
+        periods: [['2023-01-03T16:12:09Z']],
+      },
+      {
+        name: 'Peter T',
+        periods: [['2023-01-30T03:50:05Z']],
+      },
+      {
+        name: 'Sam P',
+        periods: [['2023-05-08T10:35:08Z']],
+      },
+      {
+        name: 'PokePastry',
+        showdownUser: true,
+        periods: [['2023-05-17T22:21:31Z']],
+      },
+      {
+        name: 'DoubleCaret',
+        showdownUser: true,
+        periods: [['2023-07-25T17:41:33Z']],
+      },
+      {
+        name: 'JesskyKhemically',
+        showdownUser: true,
+        periods: [['2023-08-04T23:22:33Z']],
+      },
+      {
+        name: 'Plague von Karma',
+        showdownUser: true,
+        periods: [['2023-08-07T20:25:23Z']],
+      },
+      {
+        name: 'MrMimikry',
+        showdownUser: true,
+        periods: [['2023-08-09T06:00:54Z']],
+      },
+      {
+        name: 'momalaharris',
+        showdownUser: true,
+        periods: [['2022-12-23T18:48:45Z']],
+      },
+      {
+        name: 'FR1E5',
+        showdownUser: true,
+        periods: [['2022-10-22T16:18:20Z']],
+      },
+      {
+        name: 'Tanuj C',
+        periods: [['2023-02-07T06:39:25Z']],
+      },
+      {
+        name: 'GoldenGottaGo',
+        showdownUser: true,
+        periods: [['2023-02-14T12:14:18Z']],
+      },
+    ],
+  },
+];
 
 /**
  * List of Patreon patrons.
  *
  * @since 1.1.3
  */
-export const ShowdexPatronTiers: ShowdexSupporterTier[] = [{
-  id: 'patreon-tier-03',
-  title: 'Supreme Overlords',
-  term: 'monthly',
-  names: [
-    ['Dastardlydwarf', true, '2023-04-12T21:25:18Z', '2023-11-12T23:25:18Z'],
-    ['goddess mina', true, '2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z'],
-    ['Zzodz', true, '2023-05-13T00:02:51Z', '2023-06-13T00:02:51Z'],
-    ['Ah Ok Got It', true, '2023-10-28T16:57:56Z', null],
-  ],
-}, {
-  id: 'patreon-tier-02',
-  title: 'Pop Bombers',
-  term: 'monthly',
-  names: [
-    ['benzyne', true, '2023-03-31T06:12:04Z', null],
-  ],
-}, {
-  id: 'patreon-tier-01',
-  title: 'Blazikens',
-  term: 'monthly',
-  names: [
-    ['GabrielPBC', true, '2023-08-11T10:33:15Z', null],
-    ['BruhMomentMaker', true, '2023-04-10T13:35:32Z', null],
-    ['Christopher Y', false, '2023-07-02T21:05:52Z', null],
-    ['PokePastry', true, '2023-08-04T03:41:08Z', null],
-    ['TheNexyr', true, '2023-07-21T01:24:21Z', null],
-    ['Michael K', false, '2023-09-05T09:02:03Z', null],
-    ['Kristen G', false, '2023-10-29T10:46:04Z', null],
-  ],
-}];
+export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
+  {
+    id: 'patreon-tier-03',
+    title: 'Supreme Overlords',
+    term: 'monthly',
+
+    members: [
+      {
+        name: 'Dastardlydwarf',
+        showdownUser: true,
+        periods: [
+          ['2023-04-12T21:25:18Z', '2023-11-12T23:25:18Z'],
+          ['2023-11-22T07:17:40Z'],
+        ],
+      },
+      {
+        name: 'Ah Ok Got It',
+        showdownUser: true,
+        periods: [['2023-10-28T16:57:56Z']],
+      },
+      {
+        name: 'Swift Mochi',
+        showdownUser: true,
+        periods: [['2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z']],
+      },
+      {
+        name: 'Zzodz',
+        showdownUser: true,
+        periods: [['2023-05-13T00:02:51Z', '2023-06-13T00:02:51Z']],
+      },
+    ],
+  },
+
+  {
+    id: 'patreon-tier-02',
+    title: 'Pop Bombers',
+    term: 'monthly',
+
+    members: [
+      {
+        name: 'benzyne',
+        showdownUser: true,
+        periods: [['2023-03-31T06:12:04Z']],
+      },
+    ],
+  },
+
+  {
+    id: 'patreon-tier-01',
+    title: 'Blazikens',
+    term: 'monthly',
+
+    members: [
+      {
+        name: 'GabrielPBC',
+        showdownUser: true,
+        periods: [['2023-08-11T10:33:15Z']],
+      },
+      {
+        name: 'BruhMomentMaker',
+        showdownUser: true,
+        periods: [['2023-04-10T13:35:32Z']],
+      },
+      {
+        name: 'TheNexyr',
+        showdownUser: true,
+        periods: [['2023-07-21T01:24:21Z']],
+      },
+      {
+        name: 'Christopher Y',
+        periods: [['2023-07-02T21:05:52Z', '2024-01-02T22:05:52Z']],
+      },
+      {
+        name: 'PokePastry',
+        showdownUser: true,
+        periods: [['2023-08-04T03:41:08Z']],
+      },
+      {
+        name: 'Kristen G',
+        periods: [['2023-10-29T10:46:04Z']],
+      },
+      {
+        name: 'Michael K',
+        periods: [['2023-09-05T09:02:03Z']],
+      },
+    ],
+  },
+];
 
 /**
  * Combined list of all Showdex supporters.

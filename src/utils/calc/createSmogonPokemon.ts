@@ -4,7 +4,7 @@ import {
   type Specie,
   Pokemon as SmogonPokemon,
 } from '@smogon/calc';
-import { PokemonPseudoToggleAbilities, PokemonRuinAbilities } from '@showdex/consts/dex';
+import { PokemonPseudoToggleAbilities, PokemonRuinAbilities, PokemonSturdyAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -81,7 +81,7 @@ export const createSmogonPokemon = (
       ? null
       : pokemon.status;
 
-  const ability = (!legacy && (pokemon.dirtyAbility ?? pokemon.ability)) || null;
+  const ability = (!legacy && (pokemon.dirtyAbility || pokemon.ability)) || null;
   const abilityId = formatId(ability);
 
   // note: these are in the PokemonToggleAbilities list, but isn't technically toggleable, per se.
@@ -107,16 +107,13 @@ export const createSmogonPokemon = (
     // also note: seems that maxhp is internally calculated in the instance's rawStats.hp,
     // so we can't specify it here
     curHP: (() => { // js wizardry
-      const shouldMultiscale = pseudoToggled
-        && ['multiscale', 'shadowshield'].includes(abilityId);
+      const shouldMultiscale = pseudoToggled && PokemonSturdyAbilities.includes(ability);
 
       // note that spreadStats may not be available yet, hence the fallback object
-      const { hp: maxHp } = pokemon.spreadStats
-        || { hp: pokemon.maxhp || 100 };
+      const maxHp = pokemon.spreadStats?.hp || pokemon.maxhp || 100;
+      const hp = pokemon.dirtyHp ?? (pokemon.hp || 0);
 
-      const hp = (pokemon.dirtyHp ?? (pokemon.hp || 0));
-
-      if (pokemon.serverSourced) {
+      if (pokemon.source === 'server') {
         return shouldMultiscale && !hp ? maxHp : hp;
       }
 
@@ -130,7 +127,7 @@ export const createSmogonPokemon = (
     level: pokemon.level,
     gender: pokemon.gender,
 
-    teraType: (pokemon.terastallized && pokemon.teraType) || null,
+    teraType: (pokemon.terastallized && (pokemon.dirtyTeraType || pokemon.teraType)) || null,
     status,
     toxicCounter: pokemon.toxicCounter,
 
@@ -183,7 +180,7 @@ export const createSmogonPokemon = (
 
     // update (2023/05/15): typically only used to provide the client-reported stat
     // from Protosynthesis & Quark Drive (populated in syncPokemon() via `volatiles`)
-    boostedStat: pokemon.boostedStat,
+    boostedStat: pokemon.dirtyBoostedStat || pokemon.boostedStat,
 
     boosts: {
       atk: pokemon.dirtyBoosts?.atk ?? pokemon.boosts?.atk ?? 0,

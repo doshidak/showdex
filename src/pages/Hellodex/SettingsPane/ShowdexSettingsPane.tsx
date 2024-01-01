@@ -9,12 +9,14 @@ export interface ShowdexSettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
   inBattle?: boolean;
+  special?: boolean;
 }
 
 export const ShowdexSettingsPane = ({
   className,
   style,
   inBattle,
+  special,
 }: ShowdexSettingsPaneProps): JSX.Element => (
   <div
     className={cx(styles.settingsGroup, className)}
@@ -78,6 +80,35 @@ export const ShowdexSettingsPane = ({
           readOnly
           format={() => false}
         />
+      }
+
+      {
+        special &&
+        <>
+          <div className={styles.settingsGroupTitle}>
+            Special
+          </div>
+
+          <Field<ShowdexSettings['glassyTerrain']>
+            name="glassyTerrain"
+            component={Switch}
+            className={cx(styles.field, styles.switchField)}
+            label="I'm Feeling Glassy"
+            tooltip={(
+              <div className={styles.tooltipContent}>
+                Tastefully applies a slight background blur to all Showdex panels,
+                including the Calcdex <strong>Battle Overlay</strong>, if enabled.
+                <br />
+                <br />
+                Note that this is a CPU-intensive graphics setting &amp; may cause
+                unpleasant stuttering on lower-spec machines.
+                <br />
+                <br />
+                Enable at your own risk!
+              </div>
+            )}
+          />
+        </>
       }
     </div>
   </div>

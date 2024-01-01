@@ -17,13 +17,9 @@ export const legalLockedFormat = (format: string) => {
   // e.g., 'gen9vgc2023series1' -> 'vgc2023series1'
   const genlessFormat = getGenlessFormat(format);
 
-  return LegalLockedFormats.some((f) => {
-    // reject any formats that's just '//' lol
-    // '//'.slice(1, -1) -> '' (empty string) btw
-    if (f.startsWith('/') && f.endsWith('/') && f.slice(1, -1).length) {
-      return new RegExp(f.slice(1, -1), 'i').test(genlessFormat);
-    }
-
-    return genlessFormat.endsWith(f);
-  });
+  return LegalLockedFormats.some((f) => (
+    typeof f === 'string'
+      ? genlessFormat.endsWith(f)
+      : f?.test(genlessFormat)
+  ));
 };

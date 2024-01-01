@@ -1,0 +1,75 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  @include position.absolute-fill;
+  overflow: hidden;
+  z-index: 15;
+
+  &::before {
+    content: '';
+    @include position.absolute-fill;
+    pointer-events: none;
+    @include transition.apply(background-color);
+  }
+
+  &.light {
+    color: colors.$black;
+
+    &::before {
+      background-color: color.alpha(colors.$showdown-background-light, 0.8);
+    }
+  }
+
+  &.dark {
+    color: colors.$white;
+
+    &::before {
+      background-color: color.alpha(colors.$gray-darkest, 0.88);
+    }
+  }
+
+  &.glassy {
+    &::before {
+      backdrop-filter: blur(4px);
+    }
+
+    &.light::before {
+      background-color: color.alpha(colors.$showdown-background-light, 0.56);
+    }
+
+    &.dark::before {
+      background-color: color.alpha(colors.$gray-darkest, 0.8);
+    }
+  }
+}
+
+.content {
+  @include position.absolute-fill;
+  @include spacing.padding($all: 16px);
+  @include font.apply(fonts.$mono);
+  font-size: 10px;
+  overflow-x: hidden;
+}
+
+.battleInfo {
+  @include spacing.margin($x: 12px);
+}
+
+.playerCalc {
+  @include spacing.margin($top: 12px);
+}
+
+.fieldCalc {
+  max-width: 680px;
+  @include spacing.margin($x: auto, $top: 16px);
+}
+
+.opponentCalc {
+  @include spacing.margin($top: 12px);
+}

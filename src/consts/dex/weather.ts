@@ -189,3 +189,16 @@ export const WeatherDescriptions: Record<Weather, FieldConditionDescription> = {
     //   + 'the weather is changed by the Desolate land or Primordial Sea abilities.',
   },
 };
+
+/**
+ * Type mappings for the *Weather Ball* move, which is dependent on the `Weather`.
+ *
+ * @since 1.2.0
+ */
+export const WeatherBallTypeConditions: Partial<Record<Showdown.TypeName, Weather[]>> = {
+  Normal: ['Strong Winds'],
+  Fire: ['Sun', 'Harsh Sunshine'],
+  Water: ['Rain', 'Heavy Rain'],
+  Ice: ['Hail', 'Snow'],
+  Rock: ['Sand'],
+};

@@ -1,6 +1,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/aria';
 @use 'mixins/font';
 @use 'mixins/flex';
 @use 'mixins/spacing';
@@ -10,8 +11,7 @@
 div.container {
   position: relative;
   @include flex.row-between;
-  // max-height: 53px;
-  @include spacing.padding-xy($x: 15px);
+  @include spacing.padding($x: 16px);
   @include font.apply(fonts.$primary);
   color: inherit;
   border-radius: 12px;
@@ -21,17 +21,29 @@ div.container {
   &.light {
     background-color: colors.$white;
     box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.3),
-      0 0 5px color.alpha(colors.$gray-darker, 0.15),
+      0 0 1px color.alpha(colors.$black, 0.32),
+      0 0 4px color.alpha(colors.$gray-darker, 0.16),
     );
   }
 
   &.dark {
     background-color: colors.$gray-darker;
     box-shadow: (
-      0 0 1px color.alpha(colors.$white, 0.3),
-      0 0 5px color.alpha(colors.$black, 0.3),
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 4px color.alpha(colors.$black, 0.32),
     );
+  }
+
+  &.glassy {
+    backdrop-filter: blur(2px);
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.56);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$gray-darker, 0.64);
+    }
   }
 
   &::before {
@@ -42,40 +54,60 @@ div.container {
     pointer-events: none;
   }
 
+  @include aria.outline($radius: 12px);
+
   &:hover {
-    &.light::before {
-      background-color: color.alpha(colors.$black, 0.05);
+    &.light {
+      &::before {
+        background-color: color.alpha(colors.$black, 0.06);
+      }
+
+      &::after {
+        @include aria.outline-hover;
+      }
     }
 
-    &.dark::before {
-      background-color: color.alpha(colors.$white, 0.05);
+    &.dark {
+      &::before {
+        background-color: color.alpha(colors.$white, 0.06);
+      }
+
+      &::after {
+        @include aria.outline-hover($color: colors.$white);
+      }
+    }
+  }
+
+  &:focus {
+    &.light::after, &.dark::after {
+      @include aria.outline-show;
     }
   }
 
   &.active {
     &.light {
       box-shadow: (
-        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
-        0 0 3px color.alpha(colors.$blue, 0.5),
+        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.94),
+        0 0 3px color.alpha(colors.$blue, 0.48),
       );
 
       &:hover::before {
-        background-color: color.alpha(color.shade(colors.$blue, 15%), 0.1);
+        background-color: color.alpha(color.shade(colors.$blue, 15%), 0.12);
       }
 
       .battleIcon {
-        color: color.shade(colors.$blue, 15%);
+        color: color.shade(colors.$blue, 16%);
       }
     }
 
     &.dark {
       box-shadow: (
-        0 0 1px color.alpha(colors.$blue, 0.95),
-        0 0 3px color.alpha(colors.$blue, 0.5),
+        0 0 1px color.alpha(colors.$blue, 0.94),
+        0 0 3px color.alpha(colors.$blue, 0.48),
       );
 
       &:hover::before {
-        background-color: color.alpha(colors.$blue, 0.1);
+        background-color: color.alpha(colors.$blue, 0.12);
       }
 
       .battleIcon {
@@ -83,25 +115,79 @@ div.container {
       }
     }
   }
+
+  @keyframes container-removing {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    80% {
+      transform: scale(0.8);
+      opacity: 0.48;
+    }
+
+    100% {
+      transform: scale(0.48);
+      opacity: 0;
+    }
+  }
+
+  &.removing {
+    animation: container-removing ease 7s both;
+
+    &, &:hover {
+      &.light::after {
+        @include aria.outline-hover($color: color.shade(colors.$red, 16%));
+      }
+
+      &.dark::after {
+        @include aria.outline-hover($color: colors.$red);
+      }
+    }
+
+    &:active {
+      &.light::after {
+        @include aria.outline-show($color: color.shade(colors.$red, 16%));
+      }
+
+      &.dark::after {
+        @include aria.outline-show($color: colors.$red);
+      }
+    }
+  }
 }
 
-.battleIcon {
+.icon {
+  @include flex.row-center;
   width: 26px;
   min-width: 26px;
   height: 26px;
-  opacity: 0.5;
+  opacity: 0.48;
   @include transition.apply(color, opacity);
 
-  .active & {
-    opacity: 0.75;
-  }
-
   .light & {
-    color: colors.$black;
+    color: colors.$gray-darker;
   }
 
   .dark & {
     color: colors.$white;
+  }
+}
+
+.battleIcon {
+  .active & {
+    opacity: 0.8;
+  }
+}
+
+.standaloneIcon {
+  i {
+    font-size: 22px;
+  }
+
+  .saved & {
+    opacity: 0.94;
   }
 }
 
@@ -125,6 +211,21 @@ div.container {
   white-space: nowrap;
   opacity: 0.6;
   overflow: hidden;
+}
+
+.honkName {
+  // @include font.apply(fonts.$mono);
+  font-weight: 500;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.4;
+  overflow: hidden;
+  @include transition.apply(opacity);
+
+  .saved & {
+    opacity: 1;
+  }
 }
 
 .players {
@@ -154,7 +255,7 @@ div.container {
 }
 
 .versus {
-  @include spacing.padding-xy($x: 5px);
+  @include spacing.padding($x: 5px);
   font-weight: 600;
   font-size: 9px;
   text-transform: uppercase;
@@ -173,4 +274,96 @@ div.container {
   white-space: nowrap;
   opacity: 0.6;
   overflow: hidden;
+}
+
+@keyframes undo-overlay-fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.undoOverlay {
+  @include position.absolute-fill;
+  @include flex.row-center;
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  font-size: 10px;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+  border-radius: 12px;
+  animation: undo-overlay-fade-in ease 300ms;
+  @include transition.apply(color);
+
+  .light & {
+    color: color.shade(colors.$red, 16%);
+  }
+
+  .dark & {
+    color: colors.$red;
+  }
+}
+
+.removeButton {
+  @include position.absolute($top: 24px, $right: 12px);
+  width: 16px;
+  height: 16px;
+  border-radius: 100px;
+  opacity: 0;
+  @include transition.apply(top, color, opacity);
+  pointer-events: none;
+
+  i {
+    font-size: 16px;
+  }
+
+  div.container:not(.removing):hover &, div.container:not(.removing):focus & {
+    top: 10px;
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .light & {
+    color: color.alpha(colors.$black, 0.4);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.4);
+  }
+
+  @include aria.outline(
+    $position: null,
+    $offset: 3px,
+    $radius: 100px,
+  );
+
+  &:hover {
+    .light & {
+      color: color.alpha(color.shade(colors.$red, 12%), 0.94);
+      // background-color: color.alpha(colors.$black, 0.12);
+    }
+
+    .dark & {
+      color: color.alpha(colors.$red, 0.94);
+      // background-color: color.alpha(colors.$white, 0.12);
+    }
+
+    &::after {
+      .light & {
+        @include aria.outline-hover;
+      }
+
+      .dark & {
+        @include aria.outline-hover($color: colors.$white);
+      }
+    }
+  }
+
+  &:focus::after {
+    .light &, .dark & {
+      @include aria.outline-show;
+    }
+  }
 }

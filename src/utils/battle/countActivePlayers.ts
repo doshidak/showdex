@@ -1,5 +1,4 @@
-import { AllPlayerKeys } from '@showdex/consts/battle';
-import { type CalcdexBattleState } from '@showdex/redux/store';
+import { type CalcdexBattleState, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 
 /**
  * Returns the number of active players in the battle `state`.

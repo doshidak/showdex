@@ -1,11 +1,12 @@
 import { type MoveName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
-import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   getDexForFormat,
+  getDynamicMoveType,
   getMaxMove,
   getZMove,
   getPokemonLearnset,
@@ -29,9 +30,12 @@ export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
  */
 export const buildMoveOptions = (
   format: string,
-  pokemon: DeepPartial<CalcdexPokemon>,
-  usage?: CalcdexPokemonPreset,
-  showAll?: boolean,
+  pokemon: CalcdexPokemon,
+  config?: {
+    usage?: CalcdexPokemonPreset;
+    field?: CalcdexBattleField;
+    include?: 'all' | 'hidden-power';
+  },
 ): CalcdexPokemonMoveOption[] => {
   const options: CalcdexPokemonMoveOption[] = [];
 
@@ -39,15 +43,22 @@ export const buildMoveOptions = (
     return options;
   }
 
+  const {
+    usage,
+    field,
+    include,
+  } = config || {};
+
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
-  const showAllMoves = showAll || !legalLockedFormat(format);
+  const legalLocked = legalLockedFormat(format);
+  const showAllMoves = include === 'all' || !legalLocked;
 
   const ability = pokemon.dirtyAbility ?? pokemon.ability;
   const item = pokemon.dirtyItem ?? pokemon.item;
 
   const {
-    serverSourced,
+    source,
     speciesForme,
     transformedForme,
     moves,
@@ -79,35 +90,49 @@ export const buildMoveOptions = (
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
   if (useZ && !useMax && moves?.length) {
-    const zMoves = moves
-      .filter((n) => !!n && (getZMove(n, item) || n) !== n)
-      .sort(usageSorter);
+    const zTuple = moves
+      // .filter((n) => !!n && (getZMove(n, item) || n) !== n)
+      .map((n) => [
+        n,
+        (!!n && getZMove(n, {
+          moveType: getDynamicMoveType(pokemon, n, {
+            format,
+            field,
+          }),
+          item,
+        })) || n,
+      ])
+      .filter(([n, z]) => !!n && !!z && n !== z)
+      .sort(([a], [b]) => usageSorter(a, b));
 
     options.push({
       label: 'Z',
-      options: zMoves.map((name) => {
-        const zMove = getZMove(name, item) || name;
-
-        return {
-          label: zMove,
-          rightLabel: findUsagePercent(name),
-          subLabel: zMove === name ? null : `${uarr} ${name}`,
-          value: name,
-        };
-      }),
+      options: zTuple.map(([name, zMove]) => ({
+        label: zMove,
+        rightLabel: findUsagePercent(name),
+        subLabel: zMove === name ? null : `${uarr} ${name}`,
+        value: name,
+      })),
     });
 
-    filterMoves.push(...zMoves);
+    filterMoves.push(...zTuple.map(([n]) => n));
   }
 
-  // note: entirely possible to have both useZ and useMax enabled, such as in nationaldexag
+  // unlike Z moves, every move becomes a Max move, hence no initial filtering
   if (useMax && moves?.length) {
     const sortedMoves = [...moves].sort(usageSorter);
 
     options.push({
       label: 'Max',
       options: sortedMoves.map((name) => {
-        const maxMove = getMaxMove(name, ability, speciesForme) || name;
+        const maxMove = getMaxMove(name, {
+          moveType: getDynamicMoveType(pokemon, name, {
+            format,
+            field,
+          }),
+          speciesForme,
+          ability,
+        }) || name;
 
         return {
           label: maxMove,
@@ -121,7 +146,7 @@ export const buildMoveOptions = (
     filterMoves.push(...sortedMoves);
   }
 
-  if (serverSourced && serverMoves?.length) {
+  if (source === 'server' && serverMoves?.length) {
     const filteredServerMoves = serverMoves
       .filter((n) => !!n && !filterMoves.includes(n))
       .sort(usageSorter);
@@ -172,29 +197,24 @@ export const buildMoveOptions = (
     filterMoves.push(...filteredRevealedMoves);
   }
 
-  // const hasUsageStats = !!altMoves?.length && altMoves
-  //   .some((a) => Array.isArray(a) && typeof a[1] === 'number');
-
   const hasUsageStats = !!usageAltSource?.length;
 
   if (altMoves?.length) {
     const unsortedPoolMoves = altMoves
       .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
 
-    const poolMoves = hasUsageStats
-      ? unsortedPoolMoves // should be sorted already (despite the name)
-      : flattenAlts(unsortedPoolMoves).sort(usageSorter);
+    const poolMoves = flattenAlts(unsortedPoolMoves).sort(usageSorter);
 
     options.push({
       label: 'Pool',
       options: poolMoves.map((alt) => ({
         label: flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
+        rightLabel: findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });
 
-    filterMoves.push(...flattenAlts(poolMoves));
+    filterMoves.push(...poolMoves);
   }
 
   const remainingUsageMoves = hasUsageStats
@@ -243,7 +263,8 @@ export const buildMoveOptions = (
 
   // Hidden Power moves were introduced in gen 2
   const includeHiddenPower = gen > 1 && (
-    showAllMoves
+    ['all', 'hidden-power'].includes(include)
+      || !legalLocked
       || gen < 8 // Hidden Power natively exists in Gens 2-7
       || /nat(?:ional)?dex/i.test(formatId(format))
   );

@@ -1,6 +1,5 @@
 import {
   type AbilityName,
-  // type GameType,
   type GenerationNum,
   type ItemName,
   type MoveName,
@@ -18,7 +17,6 @@ import {
 } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import {
-  // diffArrays,
   env,
   formatId,
   nonEmptyObject,
@@ -30,7 +28,6 @@ import {
   detectLegacyGen,
   getDexForFormat,
   hasMegaForme,
-  // toggleableAbility,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
 
@@ -40,7 +37,6 @@ export const syncPokemon = (
   pokemon: CalcdexPokemon,
   config?: {
     format: string;
-    // gameType?: GameType;
     clientPokemon: Partial<Showdown.Pokemon>;
     serverPokemon?: Showdown.ServerPokemon;
     weather?: Weather;
@@ -50,7 +46,6 @@ export const syncPokemon = (
 ): CalcdexPokemon => {
   const {
     format,
-    // gameType,
     clientPokemon,
     serverPokemon,
     autoMoves,
@@ -61,9 +56,12 @@ export const syncPokemon = (
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
 
   // final synced Pokemon that will be returned at the end
-  // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
-  // const syncedPokemon = structuredClone(pokemon) || {};
   const syncedPokemon = clonePokemon(pokemon);
+
+  // if server-sourced, will be updated below
+  if (!syncedPokemon.source && clientPokemon?.speciesForme) {
+    syncedPokemon.source = 'client';
+  }
 
   // you should not be looping through any special CalcdexPokemon-specific properties here!
   ([
@@ -138,11 +136,12 @@ export const syncPokemon = (
           }
         }
 
-        const shouldClearPreset = (!syncedPokemon.serverSourced && !serverPokemon?.speciesForme)
+        const shouldClearPreset = (syncedPokemon.source !== 'server' && !serverPokemon?.speciesForme)
           && (!hasMegaForme(syncedPokemon.speciesForme) || hasMegaForme(value));
 
         if (shouldClearPreset) {
           syncedPokemon.presetId = null;
+          syncedPokemon.presetSource = null;
         }
 
         break;
@@ -167,10 +166,8 @@ export const syncPokemon = (
         // (also no point storing a '???' type; null is perfectly acceptable since the UI should show '???' for falsy values)
         // update (2022/12/12): don't sync falsy values; clears your Pokemon's Tera types! LOL
         if (!value || value === '???') {
-          // value = null;
           syncedPokemon.terastallized = false;
 
-          // break;
           return;
         }
 
@@ -183,10 +180,9 @@ export const syncPokemon = (
           return;
         }
 
-        syncedPokemon.revealedTeraType = value as Showdown.TypeName;
-        syncedPokemon.teraType = syncedPokemon.revealedTeraType;
+        syncedPokemon.teraType = value as Showdown.TypeName;
+        syncedPokemon.dirtyTeraType = null;
 
-        // break;
         return;
       }
 
@@ -313,7 +309,7 @@ export const syncPokemon = (
 
         value = moveTrack;
 
-        if (syncedPokemon.serverSourced) {
+        if (syncedPokemon.source === 'server') {
           break;
         }
 
@@ -351,7 +347,7 @@ export const syncPokemon = (
         const resetTypes = (
           'typechange' in syncedPokemon.volatiles
             && !changedTypes.length
-            && dex.species.get(syncedPokemon.speciesForme)?.types as Showdown.TypeName[]
+            && dex.species.get(syncedPokemon.speciesForme)?.types
         ) || [];
 
         if (resetTypes?.length) {
@@ -384,6 +380,7 @@ export const syncPokemon = (
 
         if (shouldResetPreset) {
           syncedPokemon.presetId = null;
+          syncedPokemon.presetSource = null;
         }
 
         syncedPokemon.transformedForme = transformedForme || null;
@@ -424,6 +421,10 @@ export const syncPokemon = (
           !!boosterVolatile
             && boosterVolatile.replace(/^(?:protosynthesis|quarkdrive)/i, '')
         ) as Showdown.StatNameNoHp || null;
+
+        if (syncedPokemon.boostedStat && syncedPokemon.dirtyBoostedStat) {
+          syncedPokemon.dirtyBoostedStat = null;
+        }
 
         // check for a server-reported faintCounter
         // e.g., { fallen1: ['fallen1'] }
@@ -476,6 +477,8 @@ export const syncPokemon = (
 
   // fill in some additional fields if the serverPokemon was provided
   if (serverPokemon?.ident) {
+    syncedPokemon.source = 'server';
+
     // should always be the case, idk why it shouldn't be (but you know we gotta check)
     if (typeof serverPokemon.hp === 'number' && typeof serverPokemon.maxhp === 'number') {
       syncedPokemon.hp = serverPokemon.hp;
@@ -485,16 +488,12 @@ export const syncPokemon = (
       if (serverPokemon.hp || serverPokemon.maxhp !== 100) {
         syncedPokemon.maxhp = serverPokemon.maxhp;
       }
-
-      // serverSourced is used primarily as a flag to distinguish `hp` as the actual value or as a percentage
-      // (but since this conditional should always succeed in theory, should be ok to use to distinguish other properties)
-      syncedPokemon.serverSourced = true;
     }
 
     // check if the Tera type has been revealed
     if (serverPokemon.teraType && serverPokemon.teraType !== '???') {
       syncedPokemon.teraType = serverPokemon.teraType;
-      syncedPokemon.revealedTeraType = serverPokemon.teraType;
+      syncedPokemon.dirtyTeraType = null;
     }
 
     // sometimes, the server may only provide the baseAbility (w/ an undefined ability)
@@ -545,10 +544,6 @@ export const syncPokemon = (
       && !syncedPokemon.transformedForme;
 
     if (shouldUpdateServerMoves) {
-      // const transformed = !!syncedPokemon.transformedForme || 'transform' in (clientPokemon?.volatiles || {});
-      // const moveKey = transformed ? 'transformedMoves' : 'serverMoves';
-
-      // syncedPokemon[moveKey] = [...serverMoves];
       syncedPokemon.serverMoves = [...serverMoves];
     }
 
@@ -566,7 +561,6 @@ export const syncPokemon = (
     dirtyAbility,
     abilities,
     transformedAbilities,
-    // abilityToggleable, // update (2023/10/09): there's now a `gameType` arg to toggleableAbility() lol
     // abilityToggled, // update (2022/12/09): recalculating this w/ the `field` arg below for gen 9 support
     baseStats,
     transformedBaseStats,
@@ -597,11 +591,7 @@ export const syncPokemon = (
   }
 
   // check for toggleable abilities
-  // update (2023/10/18): abilityToggleable is now deprecated & directly determined by PokeInfo during renders
-  // syncedPokemon.abilityToggleable = toggleableAbility(syncedPokemon, gameType);
-
   if (syncedPokemon.dirtyAbility !== dirtyAbility) {
-    // [syncedPokemon.dirtyAbility] = transformedAbilities;
     syncedPokemon.dirtyAbility = dirtyAbility;
   }
 
@@ -627,14 +617,14 @@ export const syncPokemon = (
   ) || null;
 
   // clear the list of transformed moves if the Pokemon is no longer transformed
-  // (this one applies to both client [i.e., non-serverSourced] & [redundantly] serverSourced syncedPokemon)
+  // (this one applies to both client [i.e., non-server-sourced] & [redundantly] server-sourced syncedPokemon)
   if (!transformedForme) {
     syncedPokemon.transformedMoves = [];
   }
 
   // if the Pokemon is transformed, auto-set the moves
   if (syncedPokemon.transformedMoves?.length) {
-    syncedPokemon.moves = syncedPokemon.serverSourced
+    syncedPokemon.moves = syncedPokemon.source === 'server'
       ? [...syncedPokemon.transformedMoves]
       : mergeRevealedMoves(syncedPokemon);
   }

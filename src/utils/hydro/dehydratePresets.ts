@@ -1,10 +1,10 @@
 import {
   type HydroPresetsDehydrationKeys,
-  HydroDescriptor,
   HydroPresetsDehydrationAltMap,
   HydroPresetsDehydrationMap,
 } from '@showdex/consts/hydro';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
+import { HydroDescriptor } from '@showdex/interfaces/hydro';
 // import { logger } from '@showdex/utils/debug';
 import { detectUsageAlts } from '@showdex/utils/presets';
 import { dehydrateHeader } from './dehydrateHeader';

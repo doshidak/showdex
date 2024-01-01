@@ -5,15 +5,18 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
+import { DefaultShowdexSettings } from '@showdex/consts/hydro';
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
   type ShowdexSettings,
+  type ShowdexSettingsGroup,
+  ShowdexSettingsGroups,
 } from '@showdex/interfaces/app';
-import { dehydrateSettings, hydrateSettings } from '@showdex/utils/hydro';
-import { getAuthUsername, getSystemColorScheme } from '@showdex/utils/app';
-import { getStoredItem, setStoredItem } from '@showdex/utils/core';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { getAuthUsername, getColorScheme, getSystemColorScheme } from '@showdex/utils/host';
+import { writeSettingsDb } from '@showdex/utils/storage';
 import { useDispatch, useSelector } from './hooks';
 
 /**
@@ -50,18 +53,24 @@ export interface ShowdexSliceReducers extends SliceCaseReducers<ShowdexSliceStat
    *
    * @since 1.1.3
    */
-  setAuthUsername: (state: Draft<ShowdexSliceState>, action: PayloadAction<string>) => void;
+  setAuthUsername: (
+    state: Draft<ShowdexSliceState>,
+    action: PayloadAction<string>,
+  ) => void;
 
   /**
    * Sets any specified `ShowdexSettings`.
    *
-   * * Also will store the dehydrated settings in `LocalStorage` via `setStoredItem()`.
+   * * Also will store the dehydrated settings in `LocalStorage` via `writeLocalStorageItem()`.
    *   - Dehydration occurs via `dehydrateShowdexSettings()`.
    *   - Stored dehydrated settings won't be hydrated again until the next Showdown session.
    *
    * @since 1.0.3
    */
-  updateSettings: (state: Draft<ShowdexSliceState>, action: PayloadAction<DeepPartial<ShowdexSettings>>) => void;
+  updateSettings: (
+    state: Draft<ShowdexSliceState>,
+    action: PayloadAction<DeepPartial<ShowdexSettings>>,
+  ) => void;
 
   /**
    * Sets the `colorScheme` value in the `ShowdexSettings`.
@@ -73,16 +82,22 @@ export interface ShowdexSliceReducers extends SliceCaseReducers<ShowdexSliceStat
    *
    * @since 1.0.2
    */
-  setColorScheme: (state: Draft<ShowdexSliceState>, action: PayloadAction<Showdown.ColorSchemeOption>) => void;
+  setColorScheme: (
+    state: Draft<ShowdexSliceState>,
+    action: PayloadAction<Showdown.ColorSchemeOption>,
+  ) => void;
 
   /**
    * Restores the `ShowdexSettings` back to their defaults.
    *
-   * * Restored defaults will also be written to `LocalStorage` via `setStoredItem()`.
+   * * Restored defaults will also be written to `LocalStorage` via `writeLocalStorageItem()`.
    *
    * @since 1.0.3
    */
-  restoreDefaults: (state: Draft<ShowdexSliceState>, action: PayloadAction<null>) => void;
+  restoreDefaults: (
+    state: Draft<ShowdexSliceState>,
+    action: PayloadAction<null>,
+  ) => void;
 }
 
 const l = logger('@showdex/redux/store/showdexSlice');
@@ -92,16 +107,19 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
 
   initialState: {
     authUsername: getAuthUsername(), // won't probably exist on init btw
-    settings: hydrateSettings(getStoredItem('storage-settings-key')),
+    settings: {
+      ...DefaultShowdexSettings,
+      colorScheme: getColorScheme(),
+    },
   },
 
   reducers: {
     setAuthUsername: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       state.authUsername = action.payload || null;
 
@@ -113,13 +131,13 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
     },
 
     updateSettings: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
-      if (!Object.keys(action.payload || {}).length) {
+      if (!nonEmptyObject(action.payload)) {
         if (__DEV__) {
           l.warn(
             'Received an empty payload!',
@@ -132,7 +150,7 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       }
 
       Object.entries(action.payload).forEach(([key, value]) => {
-        if (['hellodex', 'calcdex'].includes(key) && typeof value === 'object' && Object.keys(value).length) {
+        if (ShowdexSettingsGroups.includes(key as ShowdexSettingsGroup) && key !== 'showdex' && nonEmptyObject(value)) {
           Object.entries(value).forEach((
             [objKey, objValue]: [
               keyof ShowdexHellodexSettings | keyof ShowdexCalcdexSettings,
@@ -150,10 +168,10 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
       });
 
       const stateSnapshot = current(state);
-      const dehydratedSettings = dehydrateSettings(stateSnapshot.settings);
+      const { settings: updatedSettings } = stateSnapshot;
 
-      if (dehydratedSettings) {
-        setStoredItem('storage-settings-key', dehydratedSettings);
+      if (nonEmptyObject(updatedSettings)) {
+        void writeSettingsDb(updatedSettings);
       }
 
       l.debug(
@@ -164,11 +182,11 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
     },
 
     setColorScheme: (state, action) => {
-      l.debug(
-        'RECV', action.type,
-        '\n', 'action.payload', action.payload,
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action.type,
+      //   '\n', 'action.payload', action.payload,
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
       if (!['light', 'dark', 'system'].includes(action.payload)) {
         if (__DEV__) {
@@ -194,19 +212,16 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
     },
 
     restoreDefaults: (state, action) => {
-      l.debug(
-        'RECV', action,
-        '\n', 'action.payload', action.payload, '(should be null btw)',
-        '\n', 'state', __DEV__ && current(state),
-      );
+      // l.debug(
+      //   'RECV', action,
+      //   '\n', 'action.payload', action.payload, '(should be null btw)',
+      //   '\n', 'state', __DEV__ && current(state),
+      // );
 
-      // defaults are stored in hydrateSettings(),
-      // which is returned by passing in no args
-      const defaultSettings = hydrateSettings();
-
-      // hydrateSettings() creates a new object every time,
-      // so no worries about deep-copying here (I say that now tho...)
-      state.settings = defaultSettings;
+      state.settings = {
+        ...DefaultShowdexSettings,
+        colorScheme: getColorScheme(),
+      };
 
       l.debug(
         'DONE', action.type,
@@ -254,6 +269,15 @@ export const useColorScheme = () => useSelector((state) => {
 });
 
 /**
+ * Convenient hook to access the `grassyTerrain` graphics setting value from the `ShowdexSettings` state.
+ *
+ * @since 1.2.0
+ */
+export const useGlassyTerrain = () => useSelector(
+  (state) => state?.showdex?.settings?.glassyTerrain,
+);
+
+/**
  * Convenient hook to access the `ShowdexHellodexSettings` from the `ShowdexSettings` state.
  *
  * @since 1.0.3
@@ -269,6 +293,15 @@ export const useHellodexSettings = () => useSelector(
  */
 export const useCalcdexSettings = () => useSelector(
   (state) => state?.showdex?.settings?.calcdex,
+);
+
+/**
+ * Convenient hook to access the `ShowdexHonkdexSettings` from the `ShowdexSettings` state.
+ *
+ * @since 1.2.0
+ */
+export const useHonkdexSettings = () => useSelector(
+  (state) => state?.showdex?.settings?.honkdex,
 );
 
 /**

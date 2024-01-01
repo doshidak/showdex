@@ -19,7 +19,7 @@
   }
 
   &.disabled {
-    opacity: 0.3;
+    opacity: 0.32;
     pointer-events: none;
   }
 }
@@ -27,13 +27,14 @@
 .icon {
   width: 24px;
   height: 24px;
-  @include spacing.margin($bottom: 5px);
+  @include spacing.margin($bottom: 6px);
 }
 
 .label {
-  font-weight: inherit;
+  font-weight: 600;
   font-size: 10px;
   color: inherit;
+  letter-spacing: 0.01px;
   text-align: center;
   text-transform: uppercase;
   cursor: pointer;

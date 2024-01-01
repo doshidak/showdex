@@ -32,16 +32,15 @@ export const sanitizePlayerSide = (
   // } = battleSide || {};
 
   const {
-    // activeIndex,
-    activeIndices,
+    // activeIndices,
     selectionIndex,
     pokemon: playerPokemon,
     side,
   } = player || {};
 
-  const activePokemon = activeIndices
-    ?.map((i) => i > -1 && playerPokemon?.[i])
-    .filter(Boolean);
+  // const activePokemon = activeIndices
+  //   ?.map((i) => i > -1 && playerPokemon?.[i])
+  //   .filter(Boolean);
 
   // obtain the "active" Pokemon by using the selectionIndex to properly apply the screens in
   // gen 1 (since they're directly applied to the Pokemon as a volatile), otherwise don't bother
@@ -59,13 +58,13 @@ export const sanitizePlayerSide = (
 
   const volatileNames = Object.keys(currentPokemon?.volatiles || {})
     .map((v) => formatId(v))
-    .filter(Boolean);
+    .filter(Boolean) as Showdown.PokemonVolatile[];
 
-  const turnStatusNames = activePokemon
-    ?.flatMap((p) => Object.keys(p?.turnstatuses || {})
-      .map((s) => formatId(s))
-      .filter(Boolean))
-    ?? [];
+  // const turnStatusNames = activePokemon
+  //   ?.flatMap((p) => Object.keys(p?.turnstatuses || {})
+  //     .map((s) => formatId(s))
+  //     .filter(Boolean))
+  //   ?? [];
 
   const output: CalcdexPlayerSide = {
     // conditionally remove Spikes & Stealth Rocks from the calc if the Pokemon is
@@ -84,14 +83,14 @@ export const sanitizePlayerSide = (
     isReflect: (gen === 1 ? volatileNames : sideConditionNames).includes('reflect'),
     isLightScreen: (gen === 1 ? volatileNames : sideConditionNames).includes('lightscreen'),
     isAuroraVeil: sideConditionNames.includes('auroraveil'),
-    // isProtected: null,
+    isProtected: volatileNames.includes('protect'),
 
-    // isSeeded: null,
+    isSeeded: volatileNames.includes('leechseed'),
     isForesight: volatileNames.includes('foresight'),
     isTailwind: sideConditionNames.includes('tailwind'),
-    isHelpingHand: turnStatusNames.includes('helpinghand'),
-    isFlowerGift: turnStatusNames.includes('flowergift'), // not sure if Showdown has Flower Gift in pokemon.turnstatuses
-    // isFriendGuard: turnStatusNames.includes('friendguard'), // can't find in battle.js
+    isHelpingHand: volatileNames.includes('helpinghand'),
+    // isFlowerGift: null,
+    // isFriendGuard: null,
     // isBattery: null,
     // isPowerSpot: null,
 
@@ -99,15 +98,9 @@ export const sanitizePlayerSide = (
     isGrassPledge: sideConditionNames.includes('grasspledge'),
     isWaterPledge: sideConditionNames.includes('waterpledge'),
 
-    // update (2023/02/01): now returned by countSideRuinAbilities()
-    // ruinBeadsCount: activeRuinAbilities.filter((a) => a === 'beadsofruin').length,
-    // ruinSwordCount: activeRuinAbilities.filter((a) => a === 'swordofruin').length,
-    // ruinTabletsCount: activeRuinAbilities.filter((a) => a === 'tabletsofruin').length,
-    // ruinVesselCount: activeRuinAbilities.filter((a) => a === 'vesselofruin').length,
-
     ...(gen > 8 && countSideRuinAbilities(player)),
 
-    // isSwitching: player?.active?.[0]?.ident === player?.pokemon?.[activeIndex]?.ident ? 'out' : 'in',
+    isSwitching: currentPokemon?.active ? 'out' : 'in',
   };
 
   // l.debug(

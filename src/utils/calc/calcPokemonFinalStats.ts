@@ -1,10 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
-// import { times } from '@showdex/consts/core';
-import {
-  // PokemonInitialStats,
-  PokemonSpeedReductionItems,
-  PokemonStatNames,
-} from '@showdex/consts/dex';
+import { PokemonSpeedReductionItems } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
 import { env, formatId as id, nonEmptyObject } from '@showdex/utils/core';
@@ -16,6 +11,7 @@ import {
   notFullyEvolved,
   shouldIgnoreItem,
 } from '@showdex/utils/dex';
+import { calcBoostedStats } from './calcBoostedStats';
 import { calcPokemonHpPercentage } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
 import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
@@ -70,10 +66,7 @@ export const calcPokemonFinalStats = (
     return record.export();
   }
 
-  const gen = typeof format === 'string'
-    ? detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'))
-    : format;
-
+  const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(gen);
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
@@ -89,8 +82,8 @@ export const calcPokemonFinalStats = (
   const species = dex.species.get(speciesForme);
   const baseForme = id(species?.baseSpecies);
 
-  const types = pokemon.terastallized && pokemon.teraType
-    ? [pokemon.teraType]
+  const types = pokemon.terastallized && (pokemon.dirtyTeraType || pokemon.teraType)
+    ? [pokemon.dirtyTeraType || pokemon.teraType]
     : pokemon.types;
 
   // note: using optional chaining here (over logical OR) in case the user clears the item on purpose
@@ -104,39 +97,15 @@ export const calcPokemonFinalStats = (
   }
 
   // apply stat boosts
-  const boostTable = legacy
-    ? [1, 100 / 66, 2, 2.5, 100 / 33, 100 / 28, 4]
-    : [1, 1.5, 2, 2.5, 3, 3.5, 4];
-
-  const boosts: Showdown.StatsTable = {
-    atk: (pokemon?.dirtyBoosts?.atk ?? pokemon?.boosts?.atk) || 0,
-    def: (pokemon?.dirtyBoosts?.def ?? pokemon?.boosts?.def) || 0,
-    spa: (pokemon?.dirtyBoosts?.spa ?? pokemon?.boosts?.spa) || 0,
-    spd: (pokemon?.dirtyBoosts?.spd ?? pokemon?.boosts?.spd) || 0,
-    spe: (pokemon?.dirtyBoosts?.spe ?? pokemon?.boosts?.spe) || 0,
-  };
-
-  PokemonStatNames.forEach((stat) => {
-    // apply effects to non-HP stats
-    if (stat === 'hp') {
-      return;
-    }
-
-    // apply stat boosts if not 0 (cause it'd do nothing)
-    const stage = boosts[stat];
-
-    if (stage) {
-      const boostValue = boostTable[Math.abs(stage)];
-      const modifier = stage > 0 ? boostValue : (1 / boostValue);
-
-      record.apply(stat, modifier, 'boost', `${stage > 0 ? '+' : ''}${stage} Stage`);
-    }
-  });
+  // note: calcBoostedStats() writes directly to our existing record via record.apply()
+  void calcBoostedStats(format, pokemon, record);
 
   // find out what the highest *boosted* stat is (excluding HP) for use in some abilities,
   // particularly Protosynthesis & Quark Drive (gen 9),
   // which will boost the highest stat after stage boosts are applied
-  const highestBoostedStat = pokemon.boostedStat || findHighestStat(record.stats());
+  const highestBoostedStat = pokemon.dirtyBoostedStat
+    || pokemon.boostedStat
+    || findHighestStat(record.stats());
 
   // apply status condition effects
   const status = pokemon?.dirtyStatus && pokemon.dirtyStatus !== '???'

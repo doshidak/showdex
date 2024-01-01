@@ -3,7 +3,17 @@ import { type CalcdexLeanPokemon } from './CalcdexLeanPokemon';
 import { type CalcdexMoveOverride } from './CalcdexMoveOverride';
 import { type CalcdexPlayerKey } from './CalcdexPlayerKey';
 import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
-import { type CalcdexPokemonPreset } from './CalcdexPokemonPreset';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from './CalcdexPokemonPreset';
+
+/**
+ * Where the `CalcdexPokemon` originally came from.
+ *
+ * @since 1.2.0
+ */
+export type CalcdexPokemonSource =
+  | 'client'
+  | 'server'
+  | 'user';
 
 export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
@@ -19,29 +29,18 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   calcdexId?: string;
 
   /**
-   * Internal checksum of the Pokemon's mutable properties used by the extension.
+   * Where the Pokemon object originates from.
    *
-   * @deprecated As of v0.1.3, although assigned, don't think this is used anymore.
+   * * Prior to v1.2.0, this was called `serverSourced`, where `true` maps to `'server'` & `false` to `'client'`.
+   *   - In these cases (typical of `'battle'` mode Calcdexes), this value determines how certain values should be
+   *     treated, such as whether the `hp` & `maxhp` are potentially percentages.
+   * * `'user'`-sourced objects are typical of `'standalone'` mode Calcdexes (aka. Honkdexes introduced in v1.2.0),
+   *   signifying that much of the data were supplied by the user.
+   *
+   * @default null
    * @since 0.1.0
    */
-  calcdexNonce?: string;
-
-  /**
-   * Whether the Pokemon object originates from the client or server.
-   *
-   * * Used to determine whether the Pokemon's `hp` is a percentage or not.
-   *   - If it's a percentage (`false`), then we'll need to calculate it from the `maxhp`,
-   *     which may also need to be calculated.
-   * * `ServerPokemon` provides the actual values for `hp` and `maxhp`,
-   *   while (client) `Pokemon` only provides a value range of `[0, 100]`, both inclusive.
-   *   - Using the `ServerPokemon` allows for more accurate calculations,
-   *     so if it's available, we'll use it.
-   * * This is primarily used in the `createSmogonPokemon()` utility.
-   *
-   * @default false
-   * @since 0.1.0
-   */
-  serverSourced?: boolean;
+  source?: CalcdexPokemonSource;
 
   /**
    * Player key (or "side ID", as it's referred to in the client) that the Pokemon belongs to.
@@ -133,7 +132,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * * Derived from the transformed `Showdown.Pokemon` in the current Pokemon's `volatiles.transform[1]`.
    * * Separately tracked from `speciesForme` as this is primarily used to determine if the Pokemon has transformed.
-   * * This should be prioritized over `speciesForme` in `createSmogonPokemon()` so that the calculations are based off of the transformed Pokemon.
+   * * This should be prioritized over `speciesForme` in `createSmogonPokemon()` so that the calculations are based off
+   *   of the transformed Pokemon.
    *
    * @default null
    * @since 0.1.3
@@ -143,8 +143,12 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   /**
    * Current types of the Pokemon.
    *
-   * * Could change in certain instances, such as if the Pokemon has the *Protean* ability or
-   *   the Pokemon transformed into another Pokemon.
+   * * Could change in certain instances, such as if the Pokemon has the *Protean* ability or the Pokemon transformed
+   *   into another Pokemon.
+   * * As of v1.2.0 when the Gen 9 DLC 2 mechanics were introduced, the Stellar type, though defined in `TypeName`,
+   *   should not be present here or `dirtyTypes[]`.
+   *   - Stellar type can only be achieved through Terastallization, hence this type should only be present in
+   *     `teraType` & `dirtyTeraType`.
    *
    * @default
    * ```ts
@@ -166,12 +170,26 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyTypes?: Showdown.TypeName[];
 
   /**
-   * Terastallizing type that the terastallizable Pokemon can terastallizingly terastallize into during terastallization.
+   * Terastallizing type that the Terastallizable Pokemon can Terastallizingly Terastallize into during Terastallization.
+   *
+   * * As of v1.2.0, this is now functionally being used as `revealedTeraType`, which is now deprecated.
+   *   - Additionally, since the Gen 9 DLC 2 mechanics were implemented in the aforementioned version, any Pokemon can
+   *     have the new Stellar type as their `teraType` & `dirtyTeraType`.
+   *   - As mentioned in `types[]`, the Stellar type should not be present in `types[]` & `dirtyTypes[]`.
+   * * Similar to all other dirty fields, this should only be populated if reported by the battle.
    *
    * @default null
    * @since 1.1.0
    */
   teraType?: Showdown.TypeName;
+
+  /**
+   * User-modified Tera type.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  dirtyTeraType?: Showdown.TypeName;
 
   /**
    * Alternative Tera types from the currently applied `preset`.
@@ -183,21 +201,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.0
    */
   altTeraTypes?: CalcdexPokemonAlt<Showdown.TypeName>[];
-
-  /**
-   * Revealed Tera type from the battle.
-   *
-   * * Can be populated from the `terastallized` property of `Showdown.Pokemon` or from a team sheet.
-   * * Why isn't this just `teraType` and the existing `teraType` not `dirtyTeraType`?
-   *   - No idea.
-   *   - Sounds like a good idea though.
-   *   - I'll leave it like this for now as to not break anything.
-   *
-   * @todo Update (2023/06/04 @ v1.1.6): fuck lmao gotta refactor the names for sure
-   * @default null
-   * @since 1.1.3
-   */
-  revealedTeraType?: Showdown.TypeName;
 
   /**
    * Original level of the *Transform*-target Pokemon.
@@ -256,35 +259,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   baseAbility?: AbilityName;
 
   /**
-   * Whether the current `ability`/`dirtyAbility` is toggleable.
+   * Whether some conditional abilities are active, such as *Flash Fire*.
    *
-   * * & the dev award for the best variable names goes to...
-   * * Used for showing the ability toggle button in `PokeInfo`.
-   * * Should be determined by whether the ability is in the list of `PokemonToggleAbilities`.
-   *   - Special handling is required for the *Multiscale* ability,
-   *     in which this value should be `false` if the Pokemon's HP is not 100%.
+   * * For toggleable abilities natively supported by `@smogon/calc`, such as the aforementioned *Flash Fire*, this will
+   *    directly set the `abilityOn` option when constructing a new `SmogonPokemon` in `createSmogonPokemon()`.
+   * * There are some "special" abilities like *Protean* & *Beads of Ruin* that require special handling.
+   *   - These are known as "pseudo-toggleable" abilities.
+   *   - In these instances, Showdex will report the Pokemon's ability as *Pressure*, which is essentially a no-op in
+   *     regards to damages, when this value is `true`.
+   * * This is initially populated by `detectToggledAbility()`, then synced by the battle via `syncPokemon()` &
+   *   `syncBattle()`, or manually toggled by the user if visible in `PokeInfo` by `toggleableAbility()`.
    *
-   * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
-   * @default false
-   * @deprecated As of v1.1.7, this is no longer being used since it was exclusively being used for short-circuit rendering
-   *   in `PokeInfo`. As part of the great v1.1.7 refactor, `abilityToggleable` & `abilityToggled` are now mutually independent
-   *   (i.e., `abilityToggled` no longer depends on `abilityToggleable` to be `true`).
-   * @since 0.1.3
-   */
-  abilityToggleable?: boolean;
-
-  /**
-   * Some abilities are conditionally toggled, such as *Flash Fire*.
-   *
-   * * ~~While we don't have to worry about those conditions~~ (a year later: ... LOL),
-   *   we need to keep track of whether the ability is active.
-   * * Allows toggling by the user, but will sync with the battle state as the turn ends.
-   * * ~~Internally, this value depends on `abilityToggleable`.~~
-   *   - ~~See `detectToggledAbility()` for implementation details.~~
-   * * ~~If the ability is not in `PokemonToggleAbilities` in `consts`,
-   *   this value will always be `true`, despite the default value being `false`.~~
-   *
-   * @see `PokemonToggleAbilities` in `src/consts/abilities.ts`.
    * @default false
    * @todo rename this to `abilityActive`
    * @since 0.1.2
@@ -566,6 +551,43 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   revealedMoves?: MoveName[];
 
   /**
+   * Mapping of successfully hit moves while Terastallized to the Stellar type.
+   *
+   * * Introduced in the Gen 9 DLC 2 update, Stellar type Terastallizations use a unique STAB mechanic that only applies
+   *   to the first move used of that type.
+   *   - Stellar STAB will apply a 2x base power boost for moves matching the Pokemon's *original* types & 1.2x otherwise.
+   *   - For instance, the Stellar STAB is applied to *Aqua Jet*, a Water type move, on its first use.
+   *   - When *Hydro Pump*, another Water type move, is used, since *Aqua Jet* was the previously used Water type move,
+   *     it does **not** get the Stellar STAB (or any Water type move for the remainder of the battle).
+   * * Only exception is *Terapagos*, which will *always* get the Stellar STAB for every damaging move, regardless of
+   *   what moves were used prior.
+   *   - Technically speaking, this is for *Terapagos-Stellar*, which is the forme *Terapagos-Terastal* changes into
+   *     when Terastallizing to Stellar.
+   *   - (Also for completeness, *Terapagos* will immediately change into *Terapagos-Terastal* once it's active on the
+   *     field due to its *Tera Shift* ability.)
+   * * This is primarily used to populate the `isStellarFirstUse` property in `createSmogonMove()`.
+   *   - Could technically store boolean values instead, but just in case, we'll store the `MoveName`.
+   *   - In any case, you only need to check the truthiness of the type's value for the aforementioned property.
+   * * Should be populated during battle syncs by reading the `stepQueue[]`.
+   *   - Moves that successfully hit will begin with `|move|`, followed by, but not necessarily right after, `|-damage|`.
+   *   - Otherwise, moves that failed to hit may have `|-fail|`, `|-miss|`, `|-immune|`, etc., but no `|-damage|` step.
+   *
+   * @example
+   * ```ts
+   * {
+   *   Ground: 'Earthquake',
+   *   Stellar: 'Tera Blast',
+   * }
+   * ```
+   * @default
+   * ```ts
+   * {}
+   * ```
+   * @since 1.2.0
+   */
+  stellarMoveMap?: Partial<Record<Showdown.TypeName, MoveName>>;
+
+  /**
    * Whether to show editing controls for overriding moves.
    *
    * * Applies to this specific Pokemon only.
@@ -608,6 +630,14 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.6
    */
   boostedStat?: Showdown.StatNameNoHp;
+
+  /**
+   * User-reported boosted stat of the Pokemon.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  dirtyBoostedStat?: Showdown.StatNameNoHp;
 
   /**
    * Stage boosts of the Pokemon.
@@ -851,20 +881,6 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyFaintCounter?: number;
 
   /**
-   * Preset that's currently being applied to the Pokemon.
-   *
-   * * Could use the preset's `name`, but you may run into some issues with uniqueness.
-   *   - See the `name` property in `CalcdexPokemonPreset` for more information.
-   * * Recommended you use the preset's `calcdexId` as this property's value instead.
-   *
-   * @deprecated As of v1.1.3, this property is no longer being used in favor of `presetId`.
-   *   Most instances of `preset` have been replaced with `presetId`, but just in case, I'm leaving this
-   *   still defined for now.
-   * @since 0.1.0
-   */
-  preset?: string;
-
-  /**
    * ID of the preset that's currently applied to the Pokemon.
    *
    * * ID refers to the `calcdexId` of the preset.
@@ -875,6 +891,19 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 1.1.3
    */
   presetId?: string;
+
+  /**
+   * Source of the preset that's currently applied to the Pokemon.
+   *
+   * * Should be populated alongside any `presetId` popultations.
+   * * Primarily used to alter `CalcdexPokemon` mutation behavior, such as whether to clear the `presetId` depending on
+   *   the applied `presetSource`.
+   * * Needs to be accessed at this level since applied presets can be from outside sources & not necessarily in `presets[]`.
+   *
+   * @default null
+   * @since 1.2.0
+   */
+  presetSource?: CalcdexPokemonPresetSource;
 
   /**
    * Available presets (i.e., sets) for the Pokemon.

@@ -47,7 +47,6 @@ export const PokemonPresetFuckedBaseFormes: string[] = [
   'Meloetta', // -> Meloetta-Pirouette
   'Meowstic', // -> Meowstic-F
   'Mimikyu', // -> Mimikyu-Busted
-  'Minior', // -> Minior-Meteor
   'Morpeko', // -> Morpeko-Hangry
   // 'Oricorio', // -> Oricorio-Pa'u -> Oricorio-Pom-Pom -> Oricorio-Sensu (other formes have their own sets)
   'Palafin', // -> Palafin-Hero
@@ -61,6 +60,7 @@ export const PokemonPresetFuckedBaseFormes: string[] = [
   'Sinistea', // -> Sinistea-Antique
   'Squawkabilly', // -> Squawkabilly-Blue -> Squawkabilly-White -> Squawkabilly-Yellow
   'Tatsugiri', // -> Tatsugiri-Droopy -> Tatsugiri-Stretchy
+  'Terapagos', // -> Terapagos-Terastal -> Terapagos-Stellar
   'Toxtricity', // -> Toxtricity-Low-Key
   'Vivillon', // -> Vivillon-Fancy -> Vivillon-Pokeball
   'Wishiwashi', // -> Wishiwashi-School
@@ -101,6 +101,7 @@ export const PokemonPresetFuckedBattleFormes: string[] = [
   'Genesect-Chill', // <- Genesect (changesFrom)
   'Genesect-Douse', // <- Genesect (changesFrom)
   'Genesect-Shock', // <- Genesect (changesFrom)
+  'Minior-Meteor', // <- Minior (battleOnly)
   'Necrozma-Ultra', // <- Necrozma-Dawn-Wings <- Necrozma-Dusk-Mane (battleOnly[])
   'Ogerpon-Teal-Tera', // <- Ogerpon (battleOnly)
   'Ogerpon-Cornerstone-Tera', // <- Ogerpon-Cornerstone (battleOnly)

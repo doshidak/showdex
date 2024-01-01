@@ -1,0 +1,380 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$container: (
+  width: 52px,
+  height: 48px,
+  padding-x: 4px,
+  padding-y: 4px,
+  border-radius: 8px,
+  disabled-opacity: 0.32,
+
+  background-color: (
+    default: (
+      light: colors.$transparent,
+      dark: colors.$transparent,
+    ),
+
+    hover: (
+      light: color.alpha(colors.$black, 0.12),
+      dark: color.alpha(colors.$white, 0.12),
+    ),
+  ),
+
+  box-shadow: (
+    light: (
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 3px color.alpha(colors.$gray-dark, 0.16),
+    ),
+
+    dark: (
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 3px color.alpha(colors.$black, 0.48),
+    ),
+  ),
+);
+
+$options: (
+  tooltip: (
+    padding: 8px,
+  ),
+
+  container: (
+    spacing: 4px, // between tooltipPrefix <-> optionsGrid <-> optionDescription <-> tooltipSuffix
+    max-width: 164px, // measured via inspector with 3 columns
+  ),
+
+  grid: (
+    columns: 3,
+    column-gap: 4px,
+    row-gap: 4px,
+  ),
+
+  button: (
+    width: map.get($container, width),
+    height: map.get($container, height),
+    border-radius: map.get($container, border-radius),
+
+    background-color: (
+      default: (
+        light: colors.$transparent,
+        dark: colors.$transparent,
+      ),
+
+      hover: (
+        light: color.alpha(colors.$black, 0.12),
+        dark: color.alpha(colors.$white, 0.12),
+      ),
+
+      selected: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.2),
+        dark: color.alpha(colors.$blue, 0.2),
+      ),
+    ),
+
+    box-shadow: (
+      selected: (
+        light: (
+          0 0 1px color.alpha(color.shade(colors.$blue, 16%), 0.94),
+          0 0 4px color.alpha(colors.$blue, 0.48),
+        ),
+
+        dark: (
+          0 0 1px color.alpha(colors.$blue, 0.94),
+          0 0 4px color.alpha(colors.$blue, 0.48),
+        ),
+      ),
+    ),
+  ),
+
+  description: (
+    padding-x: 8px,
+    font-weight: 400,
+    font-size: 10px,
+    line-height: 13px,
+
+    color: (
+      light: color.alpha(colors.$black, 0.64),
+      dark: color.alpha(colors.$white, 0.64),
+    ),
+  ),
+);
+
+$gen-item: (
+  spacing: 1px,
+
+  label: (
+    font-weight: 500,
+    font-size: 14px,
+    letter-spacing: 0.75px,
+    line-height: 17px,
+
+    color: (
+      default: (
+        light: colors.$gray-darkest,
+        dark: colors.$white,
+      ),
+
+      empty: (
+        light: color.alpha(colors.$black, 0.64),
+        dark: color.alpha(colors.$white, 0.64),
+      ),
+
+      selected: (
+        light: color.shade(colors.$blue, 16%),
+        dark: colors.$blue,
+      ),
+    ),
+  ),
+
+  sub-label: (
+    font-size: 8px,
+    letter-spacing: 0.05px,
+    line-height: 9px,
+
+    color: (
+      default: (
+        light: color.alpha(colors.$black, 0.48),
+        dark: color.alpha(colors.$white, 0.48),
+      ),
+
+      empty: (
+        light: color.alpha(colors.$black, 0.48),
+        dark: color.alpha(colors.$white, 0.48),
+      ),
+
+      selected: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.48),
+        dark: color.alpha(colors.$blue, 0.48),
+      ),
+    ),
+  ),
+);
+
+div.container {
+  width: map.get($container, width);
+  height: map.get($container, height);
+  @include spacing.padding($x: map.get($container, padding-x), $y: map.get($container, padding-y));
+  border-radius: map.get($container, border-radius);
+  @include transition.apply(background-color, box-shadow, opacity);
+  user-select: none;
+
+  &.light {
+    background-color: map.get($container, background-color, default, light);
+    box-shadow: map.get($container, box-shadow, light);
+  }
+
+  &.dark {
+    background-color: map.get($container, background-color, default, dark);
+    box-shadow: map.get($container, box-shadow, dark);
+  }
+
+  @include aria.outline($radius: map.get($container, border-radius));
+
+  &:hover {
+    &.light {
+      background-color: map.get($container, background-color, hover, light);
+
+      &::after {
+        @include aria.outline-hover;
+      }
+    }
+
+    &.dark {
+      background-color: map.get($container, background-color, hover, dark);
+
+      &::after {
+        @include aria.outline-hover($color: colors.$white);
+      }
+    }
+  }
+
+  &:focus {
+    &.light::after, &.dark::after {
+      @include aria.outline-show;
+    }
+  }
+
+  &.readOnly, &.disabled {
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  &.disabled {
+    opacity: map.get($container, disabled-opacity);
+  }
+}
+
+.optionsTooltip {
+  @include spacing.padding($all: map.get($options, tooltip, padding));
+}
+
+.optionsContainer {
+  @include flex.column($align: center);
+  max-width: map.get($options, container, max-width);
+  user-select: none;
+
+  // & > *:not(:last-child) {
+  //   @include spacing.margin($bottom: map.get($options, container, spacing));
+  // }
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(map.get($options, grid, columns), minmax(0, 1fr));
+  column-gap: map.get($options, grid, column-gap);
+  row-gap: map.get($options, grid, row-gap);
+}
+
+div.optionButton {
+  @include flex.column-center;
+  grid-area: span 1 / span 1;
+  width: map.get($options, button, width);
+  height: map.get($options, button, height);
+  border-radius: map.get($options, button, border-radius);
+  @include transition.apply(background-color, box-shadow);
+  z-index: 1;
+
+  .light & {
+    background-color: map.get($options, button, background-color, default, light);
+  }
+
+  .dark & {
+    background-color: map.get($options, button, background-color, default, dark);
+  }
+
+  &:hover {
+    .light & {
+      background-color: map.get($options, button, background-color, hover, light);
+    }
+
+    .dark & {
+      background-color: map.get($options, button, background-color, hover, dark);
+    }
+  }
+
+  &.selected {
+    .light & {
+      background-color: map.get($options, button, background-color, selected, light);
+      box-shadow: map.get($options, button, box-shadow, selected, light);
+    }
+
+    .dark & {
+      background-color: map.get($options, button, background-color, selected, dark);
+      box-shadow: map.get($options, button, box-shadow, selected, dark);
+    }
+  }
+}
+
+.optionDescription {
+  @include spacing.margin($top: map.get($options, container, spacing));
+  @include spacing.padding($x: map.get($options, description, padding-x));
+  @include font.apply(fonts.$primary, ( font-weight: map.get($options, description, font-weight) ));
+  font-size: map.get($options, description, font-size);
+  text-align: center;
+  line-height: map.get($options, description, line-height);
+  white-space: normal;
+  @include transition.apply(color);
+
+  .light & {
+    color: map.get($options, description, color, light);
+  }
+
+  .dark & {
+    color: map.get($options, description, color, dark);
+  }
+}
+
+.genItem {
+  @include flex.column($align: center);
+  text-align: center;
+  text-transform: uppercase;
+
+  // & > *:not(:last-child) {
+  //   @include spacing.margin($bottom: map.get($gen-item, spacing));
+  // }
+
+  .label {
+    @include spacing.margin($bottom: map.get($gen-item, spacing));
+    @include font.apply(fonts.$mono, ( font-weight: map.get($gen-item, label, font-weight) ));
+    font-size: map.get($gen-item, label, font-size);
+    letter-spacing: map.get($gen-item, label, letter-spacing);
+    line-height: map.get($gen-item, label, line-height);
+    @include transition.apply(color);
+
+    .light & {
+      color: map.get($gen-item, label, color, default, light);
+    }
+
+    .dark & {
+      color: map.get($gen-item, label, color, default, dark);
+    }
+  }
+
+  .subLabel {
+    @include font.apply(fonts.$mono);
+    font-size: map.get($gen-item, sub-label, font-size);
+    letter-spacing: map.get($gen-item, sub-label, letter-spacing);
+    line-height: map.get($gen-item, sub-label, line-height);
+    @include transition.apply(color);
+
+    .light & {
+      color: map.get($gen-item, sub-label, color, default, light);
+    }
+
+    .dark & {
+      color: map.get($gen-item, sub-label, color, default, dark);
+    }
+  }
+
+  &.empty {
+    .label {
+      .light & {
+        color: map.get($gen-item, label, color, empty, light);
+      }
+
+      .dark & {
+        color: map.get($gen-item, label, color, empty, dark);
+      }
+    }
+
+    .subLabel {
+      .light & {
+        color: map.get($gen-item, sub-label, color, empty, light);
+      }
+
+      .dark & {
+        color: map.get($gen-item, sub-label, color, empty, dark);
+      }
+    }
+  }
+
+  .selected & {
+    .light & {
+      .label {
+        color: map.get($gen-item, label, color, selected, light);
+      }
+
+      .subLabel {
+        color: map.get($gen-item, sub-label, color, selected, light);
+      }
+    }
+
+    .dark & {
+      .label {
+        color: map.get($gen-item, label, color, selected, dark);
+      }
+
+      .subLabel {
+        color: map.get($gen-item, sub-label, color, selected, dark);
+      }
+    }
+  }
+}

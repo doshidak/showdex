@@ -278,6 +278,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           tabSelectsValue={tabSelectsValue}
           escapeClearsValue={clearable && clearOnEsc}
           hideSelectedOptions={hideSelections}
+          menuPosition="absolute"
           menuPlacement={menuPlacement}
           openMenuOnClick={openMenuOnPress}
           openMenuOnFocus={openMenuOnFocus}

@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc';
+import { type GenerationNum, type MoveName } from '@smogon/calc';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
@@ -13,15 +13,16 @@ import { calcHiddenPower } from './calcHiddenPower';
  * @since 1.1.2
  */
 export const shouldBoostTeraStab = (
-  format: string,
+  format: string | GenerationNum,
   pokemon: CalcdexPokemon,
   moveName: MoveName,
   basePowerOverride?: number,
 ): boolean => {
   const dex = getDexForFormat(format);
   const move = dex.moves.get(moveName);
+  const teraType = pokemon?.dirtyTeraType || pokemon?.teraType;
 
-  if (!move?.exists || !pokemon?.teraType) {
+  if (!move?.exists || !teraType) {
     return false;
   }
 
@@ -37,7 +38,7 @@ export const shouldBoostTeraStab = (
   const hasTechnician = abilityId === 'technician';
 
   return pokemon.terastallized
-    && move.type === pokemon.teraType
+    && move.type === teraType
     && basePower < 60
     && (!hasTechnician || Math.floor(basePower * 1.5) < 60)
     && !move.multihit

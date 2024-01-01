@@ -1,0 +1,202 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  // grid-template-columns: minmax(36px, 1fr) repeat(6, minmax(48px, 1.25fr));
+  grid-template-columns: minmax(36px, min-content) repeat(6, minmax(44px, min-content));
+  column-gap: 8px;
+  // row-gap: 3px;
+  @include spacing.margin-xy($x: auto);
+
+  &.verySmol {
+    grid-template-columns: repeat(7, minmax(32px, 1fr));
+  }
+
+  // &.veryThicc {
+  //   max-width: 450px;
+  // }
+
+  // in gen 1, there's one less column since SPD isn't a thing (and SPA is called SPC).
+  // gen 2 has SPD, so this should only be applied for gen 1.
+  &.legacySpc {
+    // grid-template-columns: minmax(36px, 1fr) repeat(5, minmax(48px, 1.25fr));
+    grid-template-columns: minmax(36px, min-content) repeat(5, minmax(44px, min-content));
+
+    &.verySmol {
+      // grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));
+      grid-template-columns: repeat(6, minmax(36px, min-content));
+    }
+  }
+}
+
+.small {
+  font-size: 8px;
+}
+
+.header {
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  @include transition.apply(color);
+
+  &.warning {
+    color: colors.$orange;
+  }
+}
+
+.statHeader {
+  @include transition.apply(color);
+
+  &.up {
+    color: color.alpha(colors.$red, 0.8);
+  }
+
+  &.down {
+    color: color.alpha(colors.$blue, 0.8);
+  }
+}
+
+.valueFieldContainer {
+  @include flex.row($justify: center);
+}
+
+.valueField {
+  &.disabled {
+    opacity: 1;
+  }
+
+  .light &.disabled {
+    color: colors.$black;
+  }
+
+  .dark &.disabled {
+    color: colors.$white;
+  }
+
+  // by defaults, applies -$padding-x and -$padding-y in ValueField's styles,
+  // so we reset the absolute positions to 0 with position.absolute-fill()
+  &::before {
+    @include position.absolute-fill;
+  }
+}
+
+.valueFieldInput {
+  @include transition.apply(color, opacity);
+
+  .pristine &, .disabled & {
+    color: inherit;
+  }
+
+  &.warning {
+    color: colors.$orange;
+  }
+
+  .valueField:not(.disabled) &.dim:not(:active) {
+    opacity: 0.64;
+  }
+}
+
+.ivField {
+  max-width: 32px;
+}
+
+.evField {
+  max-width: 32px;
+}
+
+.statValue {
+  @include transition.apply(color);
+
+  &.positive {
+    color: colors.$green;
+  }
+
+  &.negative {
+    color: colors.$red;
+  }
+
+  &.finalStat {
+    font-size: 11px;
+  }
+}
+
+.statModsTable {
+  display: grid;
+  grid-template-columns: min-content max-content;
+  grid-auto-rows: max-content;
+  column-gap: 6px;
+  row-gap: 2px;
+  align-items: center;
+  max-width: 200px;
+}
+
+.statModValue {
+  grid-area: span 1 / span 1;
+  align-self: center;
+  font-weight: 600;
+  font-size: 11px;
+  text-align: right;
+
+  .light & {
+    &.positive {
+      color: color.shade(colors.$green, 16%);
+    }
+
+    &.negative {
+      color: color.shade(colors.$red, 16%);
+    }
+  }
+}
+
+.statModLabel {
+  grid-area: span 1 / span 1;
+  align-self: center;
+  font-size: 10px;
+  opacity: 0.88;
+}
+
+.stageValue {
+  @include flex.row-center;
+}
+
+.boostButton {
+  @include spacing.margin-xy($x: 3px);
+
+  &.pristine {
+    color: inherit;
+
+    .boostButtonLabel {
+      color: inherit;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.64; // default 0.3 opacity is too faded
+  }
+}
+
+.boostBaseStatButton {
+  @include spacing.margin-none;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  text-transform: inherit;
+
+  &.disabled {
+    opacity: 1;
+  }
+}
+
+.boostModButtonLabel {
+  .light & {
+    color: colors.$black;
+  }
+
+  .dark & {
+    color: colors.$white;
+  }
+}

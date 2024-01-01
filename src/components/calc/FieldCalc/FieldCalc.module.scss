@@ -1,0 +1,149 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
+  column-gap: 10px;
+
+  &.veryThicc {
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.5fr);
+  }
+
+  &:not(.veryThicc).doubles {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 6px;
+  }
+}
+
+.label {
+  @include spacing.margin($bottom: 4px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  @include transition.apply(color);
+
+  .light & {
+    color: color.alpha(colors.$black, 0.8);
+
+    &.legacy {
+      color: color.alpha(colors.$black, 0.32);
+    }
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.8);
+
+    &.legacy {
+      color: color.alpha(colors.$white, 0.32);
+    }
+  }
+}
+
+.leftFieldLabel {
+  @include spacing.margin($left: 8px);
+
+  &.spectating {
+    @include spacing.margin($left: 4px);
+  }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 3 / 1;
+    @include spacing.margin($top: 4px);
+  }
+}
+
+.leftFieldInput {
+  .doubles:not(.veryThicc) & {
+    grid-area: 4 / 1;
+    @include spacing.margin($top: 1px);
+  }
+}
+
+.weatherLabel {
+  // .veryThicc & {
+  //   @include spacing.margin($bottom: 4px);
+  // }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 1 / 1;
+  }
+}
+
+.weatherInput {
+  align-self: flex-start;
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 2 / 1;
+    @include spacing.margin($top: 4px, $right: 20px, $bottom: 10px, $left: 20px);
+
+    .verySmol & {
+      @include spacing.margin-xy($x: 10px);
+    }
+  }
+}
+
+.terrainLabel {
+  // .veryThicc & {
+  //   @include spacing.margin($bottom: 4px);
+  // }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 1 / 2;
+  }
+}
+
+.terrainInput {
+  align-self: flex-start;
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 2 / 2;
+    @include spacing.margin($top: 4px, $right: 20px, $bottom: 10px, $left: 20px);
+
+    .verySmol & {
+      @include spacing.margin-xy($x: 10px);
+    }
+  }
+}
+
+.rightFieldLabel {
+  @include spacing.margin($right: 8px);
+
+  &.spectating {
+    @include spacing.margin($right: 4px);
+  }
+
+  .doubles:not(.veryThicc) & {
+    grid-area: 3 / 2;
+    @include spacing.margin($top: 4px);
+  }
+}
+
+.rightFieldInput {
+  .doubles:not(.veryThicc) & {
+    grid-area: 4 / 2;
+    @include spacing.margin($top: 1px);
+  }
+}
+
+button.toggleButton {
+  min-width: 60px;
+  @include spacing.margin($all: 1px);
+  font-size: 10px;
+  text-transform: none;
+
+  .doubles & {
+    min-width: 58px;
+  }
+}
+
+.tooltipContent {
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
+.descTooltip {
+  max-width: 165px;
+}

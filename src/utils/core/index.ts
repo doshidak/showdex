@@ -13,6 +13,5 @@ export * from './reverseObjectKv';
 export * from './runtimeFetch';
 export * from './safeJsonParse';
 export * from './similarArrays';
-export * from './storage';
 export * from './tolerance';
 export * from './upsizeArray';

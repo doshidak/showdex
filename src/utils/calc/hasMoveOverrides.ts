@@ -1,5 +1,5 @@
 import { type MoveName } from '@smogon/calc';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
 
@@ -16,6 +16,7 @@ export const hasMoveOverrides = (
   pokemon: CalcdexPokemon,
   moveName: MoveName,
   opponentPokemon?: CalcdexPokemon,
+  field?: CalcdexBattleField,
 ): boolean => {
   if (!pokemon?.speciesForme || !moveName || !format) {
     return false;
@@ -25,7 +26,7 @@ export const hasMoveOverrides = (
     return false;
   }
 
-  const defaults = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon) || {};
+  const defaults = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) || {};
   const current = pokemon.moveOverrides[moveName] || {};
 
   // only compare overrides that currently exist, otherwise, this will frequently return true

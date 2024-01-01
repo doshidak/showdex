@@ -1,44 +1,19 @@
+import {
+  DefaultShowdexSettings,
+  DehydratedCalcdexSettingsMap,
+  DehydratedShowdexSettingsMap,
+  HydratedCalcdexSettingsMap,
+  HydratedHellodexSettingsMap,
+  HydratedHonkdexSettingsMap,
+  HydratedShowdexSettingsMap,
+  HydratedShowdownSettingsMap,
+} from '@showdex/consts/hydro';
 import { type ShowdexSettings, type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
-import { getColorScheme } from '@showdex/utils/app';
-import { reverseObjectKv } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import {
-  DehydratedCalcdexSettingsMap,
-  DehydratedHellodexSettingsMap,
-  DehydratedShowdexSettingsMap,
-  DehydratedShowdownSettingsMap,
-} from './dehydrateSettings';
+import { getColorScheme } from '@showdex/utils/host';
 import { hydrateHeader } from './hydrateHeader';
 import { hydrateArray, hydrateBoolean, hydrateValue } from './hydratePrimitives';
-
-/**
- * Reverse opcode-to-key mappings for the hydrated root `ShowdexSettings`.
- *
- * @since 1.0.3
- */
-export const HydratedShowdexSettingsMap = reverseObjectKv(DehydratedShowdexSettingsMap);
-
-/**
- * Reverse opcode-to-key mappings for the hydrated `ShowdexHellodexSettings`.
- *
- * @since 1.0.3
- */
-export const HydratedHellodexSettingsMap = reverseObjectKv(DehydratedHellodexSettingsMap);
-
-/**
- * Reverse opcode-to-key mappings for the hydrated `ShowdexCalcdexSettings`.
- *
- * @since 1.0.3
- */
-export const HydratedCalcdexSettingsMap = reverseObjectKv(DehydratedCalcdexSettingsMap);
-
-/**
- * Reverse opcode-to-key mappings for the hydrated `ShowdexShowdownSettings`.
- *
- * @since 1.1.7
- */
-export const HydratedShowdownSettingsMap = reverseObjectKv(DehydratedShowdownSettingsMap);
 
 /**
  * Internally-used list of keys to ignore when hydrating the root `ShowdexSettings`.
@@ -90,114 +65,26 @@ const l = logger('@showdex/utils/hydro/hydrateSettings()');
  *
  * @since 1.0.3
  */
-export const hydrateSettings = (value?: string): ShowdexSettings => {
+export const hydrateSettings = (
+  value?: string,
+): ShowdexSettings => {
   // these settings have their default values, which will be individually overwritten with the hydrated values
   // from the dehydrated settings in the passed-in `value` (otherwise, the default settings will be returned)
+  // update (2023/12/31): there's a read-only error on Firefox, so need to spread out each object value .-.
   const settings: ShowdexSettings = {
+    ...DefaultShowdexSettings,
     colorScheme: getColorScheme(),
-    forcedColorScheme: 'showdown',
-    developerMode: __DEV__,
-
-    hellodex: {
-      openOnStart: true,
-      focusRoomsRoom: false,
-      showBattleRecord: true,
-      showDonateButton: true,
-    },
-
-    calcdex: {
-      openOnStart: 'always',
-      openAs: 'showdown',
-      openOnPanel: 'showdown',
-      closeOn: 'battle-tab',
-      destroyOnClose: true,
-
-      defaultAutoSelect: {
-        auth: true,
-        p1: true,
-        p2: true,
-        p3: true,
-        p4: true,
-      },
-
-      showPlayerRatings: true,
-      authPosition: 'top',
-      showNicknames: false,
-      openSmogonPage: true,
-      showAllOptions: false,
-      showSpreadsFirst: false,
-      showNonDamageRanges: true,
-      downloadSmogonPresets: true,
-      downloadRandomsPresets: true,
-      downloadUsageStats: true,
-      maxPresetAge: 7,
-      prioritizeUsageStats: false,
-      includeTeambuilder: 'always',
-      autoImportTeamSheets: true,
-      autoExportOpponent: false,
-
-      defaultAutoMoves: {
-        auth: false,
-        p1: true,
-        p2: true,
-        p3: true,
-        p4: true,
-      },
-
-      forceNonVolatile: true,
-      lockUsedTera: false,
-      resetDirtyBoosts: true,
-      editPokemonTypes: 'always',
-      showMoveEditor: 'meta',
-      showBaseStats: 'meta',
-      showLegacyEvs: false,
-
-      lockGeneticsVisibility: {
-        auth: [],
-        p1: ['iv', 'ev'],
-        p2: ['iv', 'ev'],
-        p3: ['iv', 'ev'],
-        p4: ['iv', 'ev'],
-      },
-
-      allowIllegalSpreads: 'meta',
-      showUiTooltips: true,
-      showAbilityTooltip: true,
-      showItemTooltip: true,
-      showMoveTooltip: true,
-      showMatchupTooltip: true,
-      prettifyMatchupDescription: true,
-      showMatchupDamageAmounts: 'nfe',
-      formatMatchupDamageAmounts: true,
-      copyMatchupDescription: true,
-      showFieldTooltips: true,
-
-      nhkoColors: [
-        '#4CAF50',
-        '#FF9800',
-        '#FF9800',
-        '#F44336',
-        '#F44336',
-      ],
-
-      nhkoLabels: [
-        '1HKO',
-        '2HKO',
-        '3HKO',
-        '4HKO',
-      ],
-    },
-
-    showdown: {
-      autoAcceptSheets: false,
-    },
+    hellodex: { ...DefaultShowdexSettings.hellodex },
+    calcdex: { ...DefaultShowdexSettings.calcdex },
+    honkdex: { ...DefaultShowdexSettings.honkdex },
+    showdown: { ...DefaultShowdexSettings.showdown },
   };
 
   if (!value || typeof value !== 'string') {
-    l.debug(
-      'No dehydrated settings string was provided, so returning default settings', settings,
-      '\n', 'value', value, '(should be falsy)',
-    );
+    // l.silly(
+    //   'No dehydrated settings string was provided, so returning default settings', settings,
+    //   '\n', 'value', value, '(should be falsy)',
+    // );
 
     return settings;
   }
@@ -293,7 +180,6 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
           // (without this declaration, you'll get a type <type> is not assignable to type 'never' error lmfao)
           const calcdexSettings: Partial<Record<typeof hydratedCalcdexKey, ShowdexCalcdexSettings[typeof hydratedCalcdexKey]>> = settings.calcdex;
 
-          // currently, there are no number values in ShowdexCalcdexSettings
           calcdexSettings[hydratedCalcdexKey] = [
             DehydratedCalcdexSettingsMap.nhkoColors,
             DehydratedCalcdexSettingsMap.nhkoLabels,
@@ -306,12 +192,42 @@ export const hydrateSettings = (value?: string): ShowdexSettings => {
               DehydratedCalcdexSettingsMap.lockGeneticsVisibility,
             ].includes(dehydratedCalcdexKey)
               ? hydratePerSide(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey]
-              // : ['y', 'n'].includes(dehydratedCalcdexValue)
-              //   ? hydrateBoolean(dehydratedCalcdexValue)
-              //   : /^\d+$/.test(dehydratedCalcdexValue)
-              //     ? hydrateNumber(dehydratedCalcdexValue)
-              //     : hydrateString(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
               : hydrateValue(dehydratedCalcdexValue) as ShowdexCalcdexSettings[typeof hydratedCalcdexKey];
+        });
+
+        break;
+      }
+
+      case DehydratedShowdexSettingsMap.honkdex: {
+        const dehydratedHonkdexSettings = dehydratedValue?.split('|') || [];
+
+        if (!dehydratedHonkdexSettings.length) {
+          break;
+        }
+
+        dehydratedHonkdexSettings.forEach((dehydratedHonkdexSetting) => {
+          const [
+            rawDehydratedHonkdexKey,
+            ...dehydratedHonkdexValues
+          ] = dehydratedHonkdexSetting?.split('~') || [];
+
+          const dehydratedHonkdexKey = rawDehydratedHonkdexKey?.toLowerCase();
+
+          if (!dehydratedHonkdexKey) {
+            return;
+          }
+
+          const dehydratedHonkdexValue = dehydratedHonkdexValues.join('~');
+          const hydratedHonkdexKey = HydratedHonkdexSettingsMap[dehydratedHonkdexKey];
+
+          if (!hydratedHonkdexKey || !(hydratedHonkdexKey in settings.honkdex)) {
+            return;
+          }
+
+          // currently, only boolean values exist in ShowdexHonkdexSettings
+          settings.honkdex[hydratedHonkdexKey] = ['y', 'n'].includes(dehydratedHonkdexValue)
+            ? hydrateBoolean(dehydratedHonkdexValue)
+            : null;
         });
 
         break;

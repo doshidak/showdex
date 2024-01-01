@@ -1,4 +1,5 @@
-import { type MoveName } from '@smogon/calc';
+import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
+import { PokemonMoveSkinAbilities } from './abilities';
 
 /**
  * Z moves by type.
@@ -30,31 +31,56 @@ export const PokemonZMoves: Record<Showdown.TypeName, MoveName> = {
 /**
  * Special Z moves by pre-Z move, then by Z Crystal.
  *
- * * Keys for both the pre-Z move and Z Crystal are formatted as IDs.
- *   - e.g., `'darkestlariat'` instead of `'Darkest Lariat'` and `'inciniumz'` instead of `'Incinium Z'`.
- *
  * @since 1.0.3
  */
-export const PokemonSpecialZMoves: Record<string, Record<string, MoveName>> = {
-  clangingscales: { kommoniumz: 'Clangorous Soulblaze' as MoveName },
-  darkestlariat: { inciniumz: 'Malicious Moonsault' as MoveName },
-  gigaimpact: { snorliumz: 'Pulverizing Pancake' as MoveName },
-  moongeistbeam: { lunaliumz: 'Menacing Moonraze Maelstrom' as MoveName },
-  naturesmadness: { tapuniumz: 'Guardian of Alola' as MoveName },
-  photongeyser: { ultranecroziumz: 'Light That Burns the Sky' as MoveName },
-  playrough: { mimikiumz: "Let's Snuggle Forever" as MoveName },
-  psychic: { mewniumz: 'Genesis Supernova' as MoveName },
-  sparklingaria: { primariumz: 'Oceanic Operetta' as MoveName },
-  spectralthief: { marshadiumz: 'Soul-Stealing 7-Star Strike' as MoveName },
-  spiritshackle: { decidiumz: 'Sinister Arrow Raid' as MoveName },
-  stoneedge: { lycaniumz: 'Splintered Stormshards' as MoveName },
-  sunsteelstrike: { solganiumz: 'Searing Sunraze Smash' as MoveName },
-  thunderbolt: {
-    aloraichiumz: 'Stoked Sparksurfer' as MoveName,
-    pikashuniumz: '10,000,000 Volt Thunderbolt' as MoveName,
+export const PokemonSpecialZMoves: Record<MoveName, Record<ItemName, MoveName>> = {
+  'Clanging Scales': {
+    'Kommonium Z': 'Clangorous Soulblaze',
   },
-  volttackle: { pikaniumz: 'Catastropika' as MoveName },
-};
+  'Darkest Lariat': {
+    'Incinium Z': 'Malicious Moonsault',
+  },
+  'Giga Impact': {
+    'Snorlium Z': 'Pulverizing Pancake',
+  },
+  'Moongeist Beam': {
+    'Lunalium Z': 'Menacing Moonraze Maelstrom',
+  },
+  "Nature's Madness": {
+    'Tapunium Z': 'Guardian of Alola',
+  },
+  'Photon Geyser': {
+    'Ultranecrozium Z': 'Light That Burns the Sky',
+  },
+  'Play Rough': {
+    'Mimikium Z': "Let's Snuggle Forever",
+  },
+  Psychic: {
+    'Mewnium Z': 'Genesis Supernova',
+  },
+  'Sparkling Aria': {
+    'Primarium Z': 'Oceanic Operetta',
+  },
+  'Spectral Thief': {
+    'Marshadium Z': 'Soul-Stealing 7-Star Strike',
+  },
+  'Spirit Shackle': {
+    'Decidium Z': 'Sinister Arrow Raid',
+  },
+  'Stone Edge': {
+    'Lycanium Z': 'Splintered Stormshards',
+  },
+  'Sunsteel Strike': {
+    'Solganium Z': 'Searing Sunraze Smash',
+  },
+  Thunderbolt: {
+    'Aloraichium Z': 'Stoked Sparksurfer',
+    'Pikashunium Z': '10,000,000 Volt Thunderbolt',
+  },
+  'Volt Tackle': {
+    'Pikanium Z': 'Catastropika',
+  },
+} as Record<MoveName, Record<ItemName, MoveName>>;
 
 /**
  * Dynamax moves by type.
@@ -84,81 +110,111 @@ export const PokemonDmaxMoves: Record<Showdown.TypeName, MoveName> = {
 } as Record<Showdown.TypeName, MoveName>;
 
 /**
- * Dynamax moves by abilities that override the Normal typing.
- *
- * * Keys for abilities are formatted as IDs.
- *   - e.g., `'pixilate'` instead of `'Pixilate'`.
+ * Dynamax moves by abilities that override the moves' types.
  *
  * @since 1.0.3
  */
-export const PokemonDmaxAbilityMoves: Record<string, MoveName> = {
-  aerilate: PokemonDmaxMoves.Flying,
-  galvanize: PokemonDmaxMoves.Electric,
-  pixilate: PokemonDmaxMoves.Fairy,
-  refrigerate: PokemonDmaxMoves.Ice,
-};
+export const PokemonDmaxAbilityMoves: Record<AbilityName, MoveName> = {
+  // this is what the `Object.entries(PokemonMoveSkinAbilities)` bit below will do:
+  // Aerilate: PokemonDmaxMoves.Flying,
+  // Galvanize: PokemonDmaxMoves.Electric,
+  // Normalize: PokemonDmaxMoves.Normal,
+  // Pixilate: PokemonDmaxMoves.Fairy,
+  // Refrigerate: PokemonDmaxMoves.Ice,
+
+  ...(Object.entries(PokemonMoveSkinAbilities) as [AbilityName, Showdown.TypeName][])
+    .reduce((
+      prev,
+      [ability, type],
+    ) => {
+      if (!PokemonDmaxMoves[type]) {
+        return prev;
+      }
+
+      prev[ability] = PokemonDmaxMoves[type];
+
+      return prev;
+    }, {} as Record<AbilityName, MoveName>),
+} as Record<AbilityName, MoveName>;
 
 /**
  * Gigantamax moves by type, then by species forme.
  *
- * * Species forme should **not** include the `'-Gmax'` suffix.
- * * Keys for species formes are formatted as IDs.
- *   - e.g., `'grimmsnarl'` instead of `'Grimmsnarl'`.
+ * * Species formes should **not** include the `'-Gmax'` suffix.
  *
  * @since 1.0.3
  */
 export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName>> = {
-  '???': null,
-  Bug: null,
+  // '???': null,
+  // Bug: null,
   Dark: {
-    grimmsnarl: 'G-Max Snooze' as MoveName,
-    urshifu: 'G-Max One Blow' as MoveName,
+    Grimmsnarl: 'G-Max Snooze',
+    Urshifu: 'G-Max One Blow',
   },
-  Dragon: { duraludon: 'G-Max Depletion' as MoveName },
+  Dragon: {
+    Duraludon: 'G-Max Depletion',
+  },
   Electric: {
-    pikachu: 'G-Max Volt Crash' as MoveName,
-    toxtricity: 'G-Max Stun Shock' as MoveName,
+    Pikachu: 'G-Max Volt Crash',
+    Toxtricity: 'G-Max Stun Shock',
   },
   Fairy: {
-    alcremie: 'G-Max Finale' as MoveName,
-    hatterene: 'G-Max Smite' as MoveName,
+    Alcremie: 'G-Max Finale',
+    Hatterene: 'G-Max Smite',
   },
-  Fighting: { machamp: 'G-Max Chi Strike' as MoveName },
+  Fighting: {
+    Machamp: 'G-Max Chi Strike',
+  },
   Fire: {
-    centiskorch: 'G-Max Centiferno' as MoveName,
-    charizard: 'G-Max Wildfire' as MoveName,
-    cinderace: 'G-Max Fireball' as MoveName,
+    Centiskorch: 'G-Max Centiferno',
+    Charizard: 'G-Max Wildfire',
+    Cinderace: 'G-Max Fireball',
   },
-  Flying: { corviknight: 'G-Max Wind Rage' as MoveName },
-  Ghost: { gengar: 'G-Max Terror' as MoveName },
+  Flying: {
+    Corviknight: 'G-Max Wind Rage',
+  },
+  Ghost: {
+    Gengar: 'G-Max Terror',
+  },
   Grass: {
-    appletun: 'G-Max Sweetness' as MoveName,
-    flapple: 'G-Max Tartness' as MoveName,
-    rillaboom: 'G-Max Drum Solo' as MoveName,
-    venusaur: 'G-Max Vine Lash' as MoveName,
+    Appletun: 'G-Max Sweetness',
+    Flapple: 'G-Max Tartness',
+    Rillaboom: 'G-Max Drum Solo',
+    Venusaur: 'G-Max Vine Lash',
   },
-  Ground: { sandaconda: 'G-Max Sandblast' as MoveName },
-  Ice: { lapras: 'G-Max Resonance' as MoveName },
+  Ground: {
+    Sandaconda: 'G-Max Sandblast',
+  },
+  Ice: {
+    Lapras: 'G-Max Resonance',
+  },
   Normal: {
-    eevee: 'G-Max Cuddle' as MoveName,
-    meowth: 'G-Max Gold Rush' as MoveName,
-    snorlax: 'G-Max Replenish' as MoveName,
+    Eevee: 'G-Max Cuddle',
+    Meowth: 'G-Max Gold Rush',
+    Snorlax: 'G-Max Replenish',
   },
-  Poison: { garbodor: 'G-Max Malodor' as MoveName },
-  Psychic: { orbeetle: 'G-Max Gravitas' as MoveName },
-  Rock: { coalossal: 'G-Max Volcalith' as MoveName },
+  Poison: {
+    Garbodor: 'G-Max Malodor',
+  },
+  Psychic: {
+    Orbeetle: 'G-Max Gravitas',
+  },
+  Rock: {
+    Coalossal: 'G-Max Volcalith',
+  },
   Steel: {
-    copperajah: 'G-Max Steelsurge' as MoveName,
-    melmetal: 'G-Max Meltdown' as MoveName,
+    Copperajah: 'G-Max Steelsurge',
+    Melmetal: 'G-Max Meltdown',
   },
+  // Stellar: null,
   Water: {
-    blastoise: 'G-Max Cannonade' as MoveName,
-    drednaw: 'G-Max Stonesurge' as MoveName,
-    inteleon: 'G-Max Hydrosnipe' as MoveName,
-    kingler: 'G-Max Foam Burst' as MoveName,
-    urshifurapidstrike: 'G-Max Rapid Flow' as MoveName,
+    Blastoise: 'G-Max Cannonade',
+    Drednaw: 'G-Max Stonesurge',
+    Inteleon: 'G-Max Hydrosnipe',
+    Kingler: 'G-Max Foam Burst',
+    'Urshifu-Rapid-Strike': 'G-Max Rapid Flow',
   },
-};
+} as unknown as Record<Showdown.TypeName, Record<string, MoveName>>;
 
 /**
  * Moves that always critical hit.
@@ -205,4 +261,36 @@ export const PokemonPivotMoves: MoveName[] = [
  */
 export const PokemonToggleMoves: MoveName[] = [
   'Power Trick',
+] as MoveName[];
+
+/**
+ * Moves that cannot be affected by the *Normalize* ability, which turns every move, including Status moves, into a
+ * Normal type move.
+ *
+ * * Note that in gen 4, the gen *Normalize* was introduced, these moves **are** affected by it.
+ *   - In other words, you shouldn't be using this list in gen 4 since a move like *Hidden Power Fire* will become Normal.
+ *   - You should check the gen first to make sure it's at least gen 5 before using this as an ignore list.
+ * * Starting in gens 5+, these moves are **no longer** affected by it.
+ *   - From the previous example, *Hidden Power Fire* will retain its Fire type, no longer becoming Normal like before.
+ * * This list does **not** include Z moves, which are **not** affected by it (i.e., should be in this list, but it ain't).
+ *   - While we do have all possible Z moves hardcoded where this list is defined, I'm too lazy to make it into a nice
+ *     array so just do a `dex.moves.get()` lookup & check the falsiness of the resulting `isZ` to pass this filter.
+ * * This list includes *Hidden Power*, but it doesn't include specific typed versions like *Hidden Power Fire*.
+ *   - Be wary that using `includes()` on this list will fail for typed *Hidden Power* moves, e.g.,
+ *     `PokemonDenormalizedMoves.includes('Hidden Power Fire')` produces `false`.
+ *   - In addition to the aforementioned gen 4 check, you should also do a partial string match for `'Hidden Power'`
+ *     using `moveName.startsWith()`.
+ *   - e.g., `'Hidden Power Fire'.startsWith('Hidden Power')` produces `true`.
+ *
+ * @since 1.2.0
+ */
+export const PokemonDenormalizedMoves: MoveName[] = [
+  'Hidden Power', // gens 5+ (warning: does not check typed Hidden Power's !!)
+  'Judgment', // gens 5+
+  'Multi-Attack', // gens 7+
+  'Natural Gift', // gens 5+
+  'Techno Blast', // gens 5+
+  'Terrain Pulse', // gens 7+
+  'Weather Ball', // gens 5+
+  // note: Z moves are supposed to be in this list, but I'm too lazy to programmatically construct it rn lmao
 ] as MoveName[];

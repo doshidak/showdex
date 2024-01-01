@@ -10,7 +10,6 @@
 @use 'mixins/transition';
 
 $container: (
-  // min-width: 28px,
   padding-x: 3px,
   padding-y: 3px,
   border-radius: 8px,
@@ -23,14 +22,9 @@ $container: (
     ),
 
     hover: (
-      light: color.alpha(colors.$black, 0.05),
-      dark: color.alpha(colors.$white, 0.075),
+      light: color.alpha(colors.$black, 0.06),
+      dark: color.alpha(colors.$white, 0.08),
     ),
-
-    // active: (
-    //   light: color.alpha(colors.$black, 0.065),
-    //   dark: color.alpha(colors.$white, 0.09),
-    // ),
   ),
 );
 
@@ -47,8 +41,8 @@ $options-tooltip-title: (
   font-size: 8px,
 
   color: (
-    light: color.alpha(colors.$white, 0.65),
-    dark: color.alpha(colors.$black, 0.65),
+    light: color.alpha(colors.$white, 0.64),
+    dark: color.alpha(colors.$black, 0.64),
   ),
 );
 
@@ -69,36 +63,29 @@ $type-option-button: (
     ),
 
     hover: (
-      light: color.alpha(colors.$white, 0.075),
-      dark: color.alpha(colors.$black, 0.05),
+      light: color.alpha(colors.$white, 0.08),
+      dark: color.alpha(colors.$black, 0.06),
     ),
 
     selected: (
-      light: color.alpha(colors.$blue, 0.15),
-      dark: color.alpha(colors.$blue, 0.2),
+      light: color.alpha(colors.$blue, 0.16),
+      dark: color.alpha(colors.$blue, 0.24),
     ),
   ),
 
   box-shadow: (
     selected: (
       light: (
-        0 0 1px color.alpha(colors.$blue, 0.95),
-        0 0 3px color.alpha(colors.$blue, 0.75),
+        0 0 1px color.alpha(colors.$blue, 0.94),
+        0 0 3px color.alpha(colors.$blue, 0.76),
       ),
 
       dark: (
-        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.95),
-        0 0 3px color.alpha(colors.$blue, 0.75),
+        0 0 1px color.alpha(color.shade(colors.$blue, 15%), 0.94),
+        0 0 3px color.alpha(colors.$blue, 0.76),
       ),
     ),
   ),
-
-  // grayscale: (
-  //   default: 0.95,
-  //   hover: 0.3,
-  //   selected: 0,
-  //   disabled: 1,
-  // ),
 
   opacity: (
     default: 0.9,
@@ -111,23 +98,23 @@ $type-option-button: (
 $type-option-type: (
   color: (
     default: (
-      light: color.alpha(colors.$white, 0.85),
-      dark: color.alpha(colors.$black, 0.75),
+      light: color.alpha(colors.$white, 0.8),
+      dark: color.alpha(colors.$black, 0.8),
     ),
   ),
 
   background-color: (
     default: (
-      light: color.alpha(colors.$white, 0.15),
-      dark: color.alpha(colors.$black, 0.15),
+      light: color.alpha(colors.$white, 0.16),
+      dark: color.alpha(colors.$black, 0.16),
     ),
 
     // note: confusingly not named after the `highlight` PokeType prop,
     // but rather refers to a subtle blue background applied to the PokeType
     // in order to draw the user's attention to it
     highlighted: (
-      light: color.alpha(colors.$blue, 0.3),
-      dark: color.alpha(color.tint(colors.$blue, 30%), 0.3),
+      light: color.alpha(colors.$blue, 0.32),
+      dark: color.alpha(color.tint(colors.$blue, 30%), 0.32),
     ),
   ),
 );
@@ -138,8 +125,8 @@ $type-option-usage: (
   font-size: 8px,
 
   color: (
-    light: color.alpha(colors.$white, 0.75),
-    dark: color.alpha(colors.$black, 0.75),
+    light: color.alpha(colors.$white, 0.76),
+    dark: color.alpha(colors.$black, 0.76),
   ),
 );
 
@@ -168,12 +155,11 @@ $revealed-types: (
 
 .container {
   position: relative;
-  // min-width: map.get($container, min-width);
   @include transition.apply(opacity);
 
   &::before {
     content: '';
-    @include position.absolute-xy($x: -(map.get($container, padding-x)), $y: -(map.get($container, padding-y)));
+    @include position.absolute($x: -(map.get($container, padding-x)), $y: -(map.get($container, padding-y)));
     border-radius: map.get($container, border-radius);
     @include transition.apply(background-color);
     user-select: none;
@@ -198,16 +184,6 @@ $revealed-types: (
     }
   }
 
-  // &:active {
-  //   &.light::before {
-  //     background-color: map.get($container, background-color, active, light);
-  //   }
-  //
-  //   &.dark::before {
-  //     background-color: map.get($container, background-color, active, dark);
-  //   }
-  // }
-
   &.readOnly, &.disabled {
     user-select: none;
     pointer-events: none;
@@ -219,8 +195,7 @@ $revealed-types: (
 }
 
 .optionsTooltip {
-  // @include spacing.padding-none;
-  @include spacing.padding-xy($x: map.get($options-tooltip, column-gap) * 2, $y: map.get($options-tooltip, row-gap) * 2);
+  @include spacing.padding($x: map.get($options-tooltip, column-gap) * 2, $y: map.get($options-tooltip, row-gap) * 2);
 }
 
 .optionsTooltipTitle {
@@ -249,11 +224,18 @@ $revealed-types: (
   grid-template-columns: repeat(map.get($options-tooltip, grid-columns), minmax(0, 1fr));
   column-gap: map.get($options-tooltip, column-gap);
   row-gap: map.get($options-tooltip, row-gap);
-  // @include spacing.margin-xy($x: math.div(map.get($options-tooltip, column-gap), 2), $y: map.get($options-tooltip, row-gap));
+
+  .spanAllColumns {
+    grid-area: span 1 / span #{map.get($options-tooltip, grid-columns)};
+
+    .typeOption {
+      width: 100%;
+    }
+  }
 }
 
 .usageTypes {
-  @include spacing.padding-xy($y: map.get($options-tooltip-usage-types, padding-y));
+  @include spacing.padding($y: map.get($options-tooltip-usage-types, padding-y));
 }
 
 .typeOption {
@@ -262,14 +244,13 @@ $revealed-types: (
 
 .typeOptionButton {
   position: relative;
-  // filter: grayscale(map.get($type-option-button, grayscale, default));
   opacity: map.get($type-option-button, opacity, default);
   @include transition.apply(opacity);
   z-index: 1;
 
   &::before {
     content: '';
-    @include position.absolute-xy($x: -(map.get($type-option-button, padding-x)), $y: -(map.get($type-option-button, padding-y)));
+    @include position.absolute($x: -(map.get($type-option-button, padding-x)), $y: -(map.get($type-option-button, padding-y)));
     border-radius: map.get($type-option-button, border-radius);
     @include transition.apply(background-color, box-shadow);
     user-select: none;
@@ -285,7 +266,6 @@ $revealed-types: (
   }
 
   &:hover {
-    // filter: grayscale(map.get($type-option-button, grayscale, hover));
     opacity: map.get($type-option-button, opacity, hover);
 
     .light &::before {
@@ -298,7 +278,6 @@ $revealed-types: (
   }
 
   &.selected {
-    // filter: grayscale(map.get($type-option-button, grayscale, selected));
     opacity: map.get($type-option-button, opacity, selected);
 
     .light &::before {
@@ -313,36 +292,29 @@ $revealed-types: (
   }
 
   &.disabled {
-    // filter: grayscale(map.get($type-option-button, grayscale, disabled));
     opacity: map.get($type-option-button, opacity, disabled);
   }
 }
 
-// .typeOptionType {
-//   grid-area: span 1 / span 1;
-//   z-index: 1;
-// }
-
 .typeOptionLabel {
   .typeOptionButton:not(.selected):not(.withUsage) & {
+    & > span {
+      background-image: none;
+      background-clip: border-box;
+    }
+
     .light & {
-      color: map.get($type-option-type, color, default, light);
+      &, & > span {
+        color: map.get($type-option-type, color, default, light);
+      }
     }
 
     .dark & {
-      color: map.get($type-option-type, color, default, dark);
+      &, & > span {
+        color: map.get($type-option-type, color, default, dark);
+      }
     }
   }
-
-  // .typeOptionButton:not(.selected).highlighted & {
-  //   .light & {
-  //     text-shadow: map.get($type-option-type, text-shadow, highlighted);
-  //   }
-  //
-  //   .dark & {
-  //     text-shadow: map.get($type-option-type, text-shadow, highlighted);
-  //   }
-  // }
 
   .typeOptionButton:not(.selected):not(.withUsage):not(:hover) & {
     .light & {
@@ -406,7 +378,7 @@ $revealed-types: (
 .revealedTypesContent {
   width: 100%;
   @include flex.row-between;
-  @include spacing.padding-xy(
+  @include spacing.padding(
     $x: map.get($revealed-types, content, padding-x),
     $y: map.get($revealed-types, content, padding-y),
   );

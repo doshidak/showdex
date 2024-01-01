@@ -84,3 +84,15 @@ export const TerrainDescriptions: Record<Terrain, FieldConditionDescription> = {
     //   + 'Fails if the current terrain is Psychic Terrain.',
   },
 };
+
+/**
+ * Type mappings for the *Terrain Pulse* move, which is dependent on the `Terrain`.
+ *
+ * @since 1.2.0
+ */
+export const TerrainPulseTypeConditions: Partial<Record<Showdown.TypeName, Terrain>> = {
+  Electric: 'Electric',
+  Grass: 'Grassy',
+  Fairy: 'Misty',
+  Psychic: 'Psychic',
+};

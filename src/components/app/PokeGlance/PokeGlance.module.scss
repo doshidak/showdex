@@ -1,0 +1,251 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$active-color: (
+  light: color.shade(colors.$blue, 16%),
+  dark: colors.$blue,
+);
+
+.container {
+  position: relative;
+  display: grid;
+  grid-template-columns: max-content;
+  grid-auto-rows: auto;
+  row-gap: 6px;
+}
+
+.activeBadge {
+  @include position.absolute($top: -17px, $left: 50%);
+  white-space: nowrap;
+}
+
+.top {
+  @include flex.row($align: center);
+  grid-area: span 1 / 1;
+}
+
+.picon {
+  position: relative;
+  @include flex.row-center;
+  @include spacing.margin($left: -6px); // most picons are "aligned right" so this offsets it a bit
+  z-index: 1; // to go over the tooltip's arrow (circularHp will be behind it otherwise)
+
+  .circularHp {
+    @include position.absolute-center;
+    width: 36px;
+    height: 36px;
+    @include transition.apply(color);
+
+    .light & {
+      color: color.alpha(map.get($active-color, light), 0.64);
+    }
+
+    .dark & {
+      color: color.alpha(map.get($active-color, dark), 0.64);
+    }
+  }
+}
+
+.details {
+  @include spacing.margin($left: 2px);
+  @include font.apply(fonts.$mono);
+}
+
+.detailsRow {
+  @include flex.row($align: center);
+
+  &:not(:first-child) {
+    @include spacing.margin($top: 2px);
+  }
+
+  &.spaced > *:not(:last-child) {
+    @include spacing.margin($right: 4px);
+  }
+}
+
+// note: .detailsRow added mostly for clarity
+.detailsRow.name {
+  @include font.apply(fonts.$primary);
+  font-size: 10px;
+  line-height: 11px;
+
+  .status {
+    @include spacing.margin($right: 4px);
+    @include font.apply(fonts.$mono);
+  }
+
+  .species {
+    font-weight: 600;
+
+    &.empty {
+      font-weight: 400;
+      opacity: 0.32;
+    }
+  }
+
+  .forme {
+    opacity: 0.8;
+  }
+
+  .level {
+    @include spacing.margin($left: 4px);
+    @include font.apply(fonts.$mono);
+    font-size: 8px;
+    text-transform: uppercase;
+    line-height: 9px;
+    opacity: 0.64;
+  }
+}
+
+.detailsRow.nickname {
+  @include font.apply(fonts.$primary);
+  font-size: 8px;
+  line-height: 9px;
+
+  .aka {
+    @include spacing.margin($right: 2px);
+    font-weight: 500;
+    letter-spacing: 0.01px;
+    text-indent: 0.01px;
+    text-transform: uppercase;
+    opacity: 0.4;
+  }
+
+  .value {
+    font-style: italic;
+    opacity: 0.72;
+  }
+}
+
+.types {
+  @include flex.row($align: center);
+
+  .type:not(:last-child) {
+    @include spacing.margin($right: 2px);
+  }
+}
+
+.teraType {
+  @include spacing.margin($left: 2px);
+}
+
+.stats {
+  display: grid;
+  grid-area: span 1 / 1;
+  grid-auto-columns: max-content;
+  grid-template-rows: max-content;
+  column-gap: 6px;
+  align-content: center;
+  @include spacing.margin($x: auto);
+}
+
+.stat {
+  @include flex.column-center;
+  grid-area: 1 / span 1;
+  text-align: center;
+
+  .statName {
+    // @include spacing.margin($bottom: 2px);
+    @include font.apply(fonts.$primary, ( font-weight: 600 ));
+    font-size: 8px;
+    text-transform: uppercase;
+    line-height: 9px;
+    opacity: 0.64;
+  }
+
+  .statValue {
+    @include font.apply(fonts.$mono);
+    font-size: 10px;
+    line-height: 11px;
+
+    // mimicing Showdown's Pokemon list selector thingy; BST values are faded like the header
+    &.bst {
+      opacity: 0.64;
+    }
+  }
+}
+
+.specs {
+  display: grid;
+  grid-area: span 1 / 1;
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-auto-rows: max-content;
+  column-gap: 8px;
+  row-gap: 2px;
+
+  .specName {
+    @include font.apply(fonts.$primary, ( font-weight: 600 ));
+    font-size: 8px;
+    text-transform: uppercase;
+    text-align: right;
+    line-height: 13px;
+    opacity: 0.64;
+    @include transition.apply(color, opacity);
+
+    &.centered {
+      align-self: center;
+    }
+
+    &.active {
+      opacity: 0.8;
+    }
+
+    .light &.active {
+      color: map.get($active-color, light);
+    }
+
+    .dark &.active {
+      color: map.get($active-color, dark);
+    }
+  }
+
+  .specValues {
+    @include flex.row($align: center);
+    @include font.apply(fonts.$mono);
+    font-size: 10px;
+    line-height: 13px;
+    @include transition.apply(color);
+
+    span.boostedStat {
+      font-size: 8px;
+      line-height: 9px;
+      text-transform: uppercase;
+    }
+
+    &.active {
+      font-weight: 600;
+
+      span.boostedStat {
+        font-weight: 400;
+      }
+    }
+
+    .light &.active {
+      color: map.get($active-color, light);
+    }
+
+    .dark &.active {
+      color: map.get($active-color, dark);
+    }
+
+    &.prev {
+      filter: grayscale(1);
+
+      span {
+        text-decoration: line-through;
+        opacity: 0.64;
+      }
+    }
+
+    & > *:not(:last-child) {
+      @include spacing.margin($right: 4px);
+    }
+  }
+}

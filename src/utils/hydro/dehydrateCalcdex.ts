@@ -1,9 +1,10 @@
 import base64 from 'base-64';
-import { AllPlayerKeys } from '@showdex/consts/battle';
-import { HydroDescriptor } from '@showdex/consts/hydro';
-import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
-// import { env } from '@showdex/utils/core';
-import { type CalcdexBattleState } from '@showdex/redux/store';
+import {
+  type CalcdexBattleState,
+  type CalcdexPlayerSide,
+  CalcdexPlayerKeys as AllPlayerKeys,
+} from '@showdex/interfaces/calc';
+import { HydroDescriptor } from '@showdex/interfaces/hydro';
 import { dehydrateHeader } from './dehydrateHeader';
 import { dehydrateArray, dehydrateBoolean, dehydrateValue } from './dehydratePrimitives';
 import { dehydrateStatsTable } from './dehydrateStatsTable';
@@ -42,20 +43,20 @@ export const dehydratePlayerSide = (
  *
  * Each "root" property of the `state` is given its own "opcode":
  *
- * * `g` refers to the gen number (`state.gen`) & game type (`state.gameType`).
- * * `m` refers to the battle format (`state.format`).
+ * * `s` refers to the base-64 encoded error message, if any.
+ * * `o` refers to the operating mode (`state.operatingMode`).
+ * * `g` refers to the gen number (`state.gen`), battle format (`state.format`) & game type (`state.gameType`).
  * * `p` refers to the player keys in the battle.
  * * `p#` refers to each player in the battle (e.g., `state.p1`, `state.p2`).
  * * `f` refers to the battle field (`state.field`).
- * * `s` refers to the base-64 encoded error message, if any.
  *
  * Dehydrated `state`, whose properties are deliminated by a semi-colon (`';'`), is in the following format:
  *
  * ```
  * {...header};
  * s:{error};
- * g:{gen}/{gameType};
- * m:{format};
+ * o:{operatingMode};
+ * g:{gen}/{format}/{gameType};
  * p:{authPlayerKey}/{playerKey}/{opponentKey};
  * p1:{player};
  * p2:{player};
@@ -80,16 +81,16 @@ export const dehydratePlayerSide = (
  * `{pokemon}`, whose properties are deliminated by a comma (`','`), is in the following format:
  *
  * ```
- * {slot}/{serverSourced ? 's' : 'c'},
+ * {slot}/{source},
  * {name},
  * {speciesForme}>{transformedForme},
  * {gender},
  * {level},
  * {shiny},
- * {types[0]}[/{types[1]}...]~{dirtyTypes[0]}[/{dirtyTypes[1]}...]>{revealedTeraType}~{teraType},
+ * {types[0]}[/{types[1]}...]~{dirtyTypes[0]}[/{dirtyTypes[1]}...]>{teraType}~{dirtyTeraType},
  * {hp}~{dirtyHp}/{maxhp}/{fainted},
  * {status}~{dirtyStatus}/{sleepCounter}/{toxicCounter}/{hitCounter}/{faintCounter}~{dirtyFaintCounter},
- * {presetId ? 'y' : 'n'},
+ * {presetId ? 'y' : 'n'}/{presetSource},
  * {baseAbility}/{ability}~{dirtyAbility}/{abilityToggled},
  * {item}~{dirtyItem}>{itemEffect}/{prevItem}>{prevItemEffect},
  * {nature},
@@ -129,8 +130,8 @@ export const dehydratePlayerSide = (
  * #:18B43D81603;
  * $:calcdex;
  * s:Q2Fubm90IHJlYWQgcHJvcGVydGllcyBvZiB1bmRlZmluZWQgKHJlYWRpbmcgJ2FiaWxpdHlUb2dnbGVkJyk=;
- * g:7/Singles;
- * m:gen7randombattle;
+ * o:battle;
+ * g:7/gen7randombattle/Singles;
  * p:p1/p1/p2/n;
  * n:1;
  * p1:showdex_testee|?|0|0|y|
@@ -155,9 +156,10 @@ export const dehydrateCalcdex = (
   }
 
   const {
+    operatingMode,
     gen,
-    turn,
     format,
+    turn,
     authPlayerKey,
     playerKey,
     opponentKey,
@@ -168,8 +170,8 @@ export const dehydrateCalcdex = (
   const output: string[] = [
     dehydrateHeader(HydroDescriptor.Calcdex),
     `s:${error?.message ? base64.encode(error.message) : '?'}`,
-    `g:${dehydrateValue(gen)}/${dehydrateValue(state.gameType)}`,
-    `m:${dehydrateValue(format)}`,
+    `o:${dehydrateValue(operatingMode)}`,
+    `g:${dehydrateValue(gen)}/${dehydrateValue(format)}/${dehydrateValue(state.gameType)}`,
     'p:' + dehydrateArray([
       authPlayerKey,
       playerKey,
@@ -190,7 +192,6 @@ export const dehydrateCalcdex = (
       sideid,
       name: playerName,
       rating,
-      // activeIndex = -1,
       activeIndices,
       selectionIndex = -1,
       autoSelect,
@@ -201,7 +202,6 @@ export const dehydrateCalcdex = (
     const playerOutput: string[] = [
       dehydrateValue(playerName),
       dehydrateValue(rating),
-      // typeof activeIndex === 'number' ? String(activeIndex) : '-1',
       dehydrateArray(activeIndices),
       typeof selectionIndex === 'number' ? String(selectionIndex) : '-1',
       dehydrateBoolean(autoSelect),
@@ -211,7 +211,7 @@ export const dehydrateCalcdex = (
     for (const pokemon of playerPokemon) {
       const {
         slot = -1,
-        serverSourced,
+        source,
         name: pokemonName,
         speciesForme,
         transformedForme,
@@ -220,25 +220,23 @@ export const dehydrateCalcdex = (
         shiny,
         types = [],
         teraType,
-        revealedTeraType,
+        dirtyTeraType,
         hp,
         dirtyHp,
         maxhp,
         fainted,
         status,
         dirtyStatus,
-        // statusData,
         sleepCounter,
         toxicCounter,
         hitCounter,
         faintCounter,
         dirtyFaintCounter,
-        // preset,
         presetId,
+        presetSource,
         baseAbility,
         ability,
         dirtyAbility,
-        // abilityToggleable,
         abilityToggled,
         item,
         dirtyItem,
@@ -261,14 +259,13 @@ export const dehydrateCalcdex = (
         terastallized,
         criticalHit,
         moves,
-        // moveTrack,
         revealedMoves,
         transformedMoves,
         volatiles,
       } = pokemon || {};
 
       const pokemonOutput: string[] = [
-        dehydrateArray([slot, serverSourced ? 's' : 'c']),
+        dehydrateArray([slot, source]),
         dehydrateValue(pokemonName),
         dehydrateArray([speciesForme, transformedForme], '>'),
         dehydrateValue(gender),
@@ -276,7 +273,7 @@ export const dehydrateCalcdex = (
         dehydrateBoolean(shiny),
         dehydrateArray([
           dehydrateArray(types),
-          dehydrateArray([revealedTeraType, teraType], '~'),
+          dehydrateArray([teraType, dirtyTeraType], '~'),
         ], '>'),
         dehydrateArray([
           dehydrateArray([hp, dirtyHp], '~'),
@@ -290,11 +287,13 @@ export const dehydrateCalcdex = (
           hitCounter,
           dehydrateArray([faintCounter, dirtyFaintCounter], '~'),
         ]),
-        dehydrateBoolean(!!presetId),
+        dehydrateArray([
+          dehydrateBoolean(!!presetId),
+          dehydrateValue(presetSource),
+        ]),
         dehydrateArray([
           baseAbility,
           dehydrateArray([ability, dirtyAbility], '~'),
-          // abilityToggleable,
           abilityToggled,
         ]),
         dehydrateArray([
@@ -353,23 +352,14 @@ export const dehydrateCalcdex = (
     output.push(`${sideid}:${playerOutput.join('|')}`);
   }
 
-  // update (2023/02/06): attackerSide & defenderSide (of type CalcdexPlayerSide) are now attached to
-  // the individual players (of type CalcdexPlayer), i.e., they're no longer in the CalcdexBattleField
-  // update (2023/10/10): gameType is now up a level in CalcdexBattleState
   const {
-    // gameType,
     weather,
     terrain,
-    // attackerSide,
-    // defenderSide,
   } = field || {};
 
   const fieldOutput: string[] = [
-    // gameType === 'Doubles' ? 'd' : 's',
     dehydrateValue(weather),
     dehydrateValue(terrain),
-    // dehydrateFieldSide(attackerSide),
-    // dehydrateFieldSide(defenderSide),
   ];
 
   output.push(`f:${fieldOutput.join('|')}`);

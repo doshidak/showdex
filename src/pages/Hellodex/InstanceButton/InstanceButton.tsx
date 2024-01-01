@@ -3,45 +3,64 @@ import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
 import { bullop } from '@showdex/consts/core';
-// import { FormatLabels } from '@showdex/consts/dex';
-import { useColorScheme } from '@showdex/redux/store';
+import { GenLabels } from '@showdex/consts/dex';
+import { type CalcdexBattleState } from '@showdex/interfaces/calc';
+import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { parseBattleFormat } from '@showdex/utils/dex';
 import styles from './InstanceButton.module.scss';
 
 export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
-  format?: string;
+  instance: CalcdexBattleState;
   authName?: string;
-  playerName?: string;
-  opponentName?: string;
-  active?: boolean;
-  hasMorePlayers?: boolean;
+  onRequestRemove?: () => void;
 }
 
 export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
   className,
-  format,
+  instance,
   authName,
-  playerName,
-  opponentName: opponentNameFromProps,
   hoverScale = 1,
   activeScale = 0.98,
-  active,
-  hasMorePlayers,
   disabled,
+  onPress,
+  onRequestRemove,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
-
-  // const gen = detectGenFromFormat(format);
-  // const genlessFormat = gen > 0 ? format.replace(`gen${gen}`, '') : null;
+  const glassyTerrain = useGlassyTerrain();
 
   const {
+    operatingMode,
+    name,
     gen,
+    format,
+    subFormats,
+    active,
+    playerCount,
+    p1: player,
+    p2: opponent,
+    cached,
+  } = instance || {};
+
+  const { label: genLabel } = GenLabels[gen] || {};
+
+  const {
     label,
     suffixes,
-  } = parseBattleFormat(format);
+  } = React.useMemo(() => parseBattleFormat(
+    [format, ...(subFormats || [])].filter(Boolean).join(''),
+    { populateSuffixes: true },
+  ), [
+    format,
+    subFormats,
+  ]);
+
+  const hasMorePlayers = (playerCount || 0) > 2;
+
+  const playerName = player?.name;
+  const opponentNameFromProps = opponent?.name;
 
   const authPlayer = !!authName
     && [playerName, opponentNameFromProps].includes(authName);
@@ -57,6 +76,27 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   const opponentLabelColor = opponentTitle?.color?.[colorScheme];
   const opponentIconColor = opponentTitle?.iconColor?.[colorScheme];
 
+  const [removalQueued, setRemovalQueued] = React.useState(false);
+  const removalRequestTimeout = React.useRef<NodeJS.Timeout>(null);
+
+  const queueRemovalRequest = () => {
+    if (typeof onRequestRemove !== 'function') {
+      return;
+    }
+
+    if (removalQueued) {
+      if (removalRequestTimeout.current) {
+        clearTimeout(removalRequestTimeout.current);
+        removalRequestTimeout.current = null;
+      }
+
+      return void setRemovalQueued(false);
+    }
+
+    removalRequestTimeout.current = setTimeout(onRequestRemove, 5000);
+    setRemovalQueued(true);
+  };
+
   return (
     <BaseButton
       ref={forwardedRef}
@@ -64,90 +104,131 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        glassyTerrain && styles.glassy,
         active && styles.active,
+        (!!name && !!cached) && styles.saved,
+        removalQueued && styles.removing,
         className,
       )}
       display="block"
       hoverScale={hoverScale}
       activeScale={activeScale}
+      onPress={removalQueued ? queueRemovalRequest : onPress}
     >
-      <Svg
-        className={styles.battleIcon}
-        description="Sword Icon"
-        src={getResourceUrl('sword.svg')}
-      />
+      {operatingMode === 'standalone' ? (
+        <div className={cx(styles.icon, styles.standaloneIcon)}>
+          <i className="fa fa-car" />
+        </div>
+      ) : (
+        <Svg
+          className={cx(styles.icon, styles.battleIcon)}
+          description="Sword Icon"
+          src={getResourceUrl('sword.svg')}
+        />
+      )}
 
       <div className={styles.info}>
-        {
-          !!label &&
-          <div className={styles.format}>
-            Gen {gen} &bull;{' '}
-            <strong>{label}</strong>
-            {!!suffixes && ' '}
-            {suffixes.map((s) => s[1]).join(` ${bullop} `)}
-          </div>
-        }
-
-        <div className={styles.players}>
+        <div className={styles.format}>
+          Gen {gen}
           {
-            (!!playerName && !!opponentName) &&
+            !!label &&
             <>
-              {
-                !authPlayer &&
+              {' '}&bull;{' '}
+              {!!genLabel && `${genLabel} `}
+              <strong>{label}</strong>
+            </>
+          }
+          {!!suffixes && ' '}
+          {suffixes.map((s) => s[1]).join(` ${bullop} `)}
+        </div>
+
+        {operatingMode === 'standalone' ? (
+          <div className={styles.honkName}>
+            {name || 'untitled honk'}
+          </div>
+        ) : (
+          <div className={styles.players}>
+            {
+              (!!playerName && !!opponentName) &&
+              <>
+                {
+                  !authPlayer &&
+                  <div
+                    className={styles.username}
+                    style={playerLabelColor ? { color: playerLabelColor } : undefined}
+                  >
+                    {playerName}
+
+                    {
+                      !!playerTitle?.icon &&
+                      <Svg
+                        className={styles.usernameIcon}
+                        style={playerIconColor ? { color: playerIconColor } : undefined}
+                        description={playerTitle.iconDescription}
+                        src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                      />
+                    }
+                  </div>
+                }
+
+                <div
+                  className={cx(
+                    styles.versus,
+                    authPlayer && styles.noPlayerName,
+                  )}
+                >
+                  vs
+                </div>
+
                 <div
                   className={styles.username}
-                  style={playerLabelColor ? { color: playerLabelColor } : undefined}
+                  style={opponentLabelColor ? { color: opponentLabelColor } : undefined}
                 >
-                  {playerName}
+                  {opponentName}
 
                   {
-                    !!playerTitle?.icon &&
+                    !!opponentTitle?.icon &&
                     <Svg
                       className={styles.usernameIcon}
-                      style={playerIconColor ? { color: playerIconColor } : undefined}
-                      description={playerTitle.iconDescription}
-                      src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                      style={opponentIconColor ? { color: opponentIconColor } : undefined}
+                      description={opponentTitle.iconDescription}
+                      src={getResourceUrl(`${opponentTitle.icon}.svg`)}
                     />
                   }
                 </div>
-              }
-
-              <div
-                className={cx(
-                  styles.versus,
-                  authPlayer && styles.noPlayerName,
-                )}
-              >
-                vs
-              </div>
-
-              <div
-                className={styles.username}
-                style={opponentLabelColor ? { color: opponentLabelColor } : undefined}
-              >
-                {opponentName}
 
                 {
-                  !!opponentTitle?.icon &&
-                  <Svg
-                    className={styles.usernameIcon}
-                    style={opponentIconColor ? { color: opponentIconColor } : undefined}
-                    description={opponentTitle.iconDescription}
-                    src={getResourceUrl(`${opponentTitle.icon}.svg`)}
-                  />
+                  hasMorePlayers &&
+                  <span className={styles.morePlayers}>
+                    &amp; friends
+                  </span>
                 }
-              </div>
-
-              {
-                hasMorePlayers &&
-                <span className={styles.morePlayers}>
-                  &amp; friends
-                </span>
-              }
-            </>
-          }
-        </div>
+              </>
+            }
+          </div>
+        )}
       </div>
+
+      {
+        operatingMode === 'standalone' &&
+        <BaseButton
+          className={styles.removeButton}
+          aria-label="Permanently Delete Honkdex"
+          hoverScale={1}
+          activeScale={0.98}
+          disabled={typeof onRequestRemove !== 'function'}
+          onPress={queueRemovalRequest}
+        >
+          <i className="fa fa-times-circle" />
+        </BaseButton>
+      }
+
+      {
+        (operatingMode === 'standalone' && removalQueued) &&
+        <div className={styles.undoOverlay}>
+          Undo?
+        </div>
+      }
     </BaseButton>
   );
 });
