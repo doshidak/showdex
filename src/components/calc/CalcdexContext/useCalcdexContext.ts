@@ -1058,7 +1058,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           // hence the spread array args in order to get ['foo'], while achieving that "1-liner" for max street cred LOL
           player.activeIndices.splice(...([
             activeIndicesIndex,
-            state.gameType === 'Doubles' && player.pokemon.length < 2 ? 0 : 1,
+            state.gameType === 'Doubles' && player.activeIndices.length < 2 && activeIndicesIndex < 0 ? 0 : 1,
             activeIndicesIndex < 0 && player.selectionIndex,
           ].filter((v) => typeof v === 'number') as Parameters<typeof player.activeIndices.splice>));
 
