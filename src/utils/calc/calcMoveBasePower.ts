@@ -135,6 +135,8 @@ export const calcMoveBasePower = (
       // these abilities were introduced in gen 6
       if ((['Aerilate', 'Pixilate', 'Refrigerate'] as AbilityName[]).includes(ability) && gen > 5) {
         // note: in gen 6 (X/Y), it's a 30% boost; after in gens 7+, it got nerfed to 20%
+        // update (2024/01/04): in the gen56 mechanics file, this is a bpMod, so a lil accuracy loss here potentially
+        // (actually in my testing, discrepancy must be real smol)
         basePower *= gen > 6 ? 1.2 : 1.3;
       }
 
