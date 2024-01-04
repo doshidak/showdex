@@ -578,7 +578,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
     }
 
     l.debug(
-      'Overriding addPokemon() of player', playerKey,
+      'Overriding side.addPokemon() of player', playerKey,
       '\n', 'battleId', roomid,
     );
 
@@ -595,7 +595,17 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
       }
 
       // retrieve any previously tagged Pokemon in the state if we don't have any candidates atm
-      const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battle.id];
+      const battleState = (store.getState()?.calcdex as CalcdexSliceState)?.[battle?.id];
+
+      // update (2024/01/03): someone encountered a strange case in Gen 9 VGC 2024 Reg F when after using Parting Shot,
+      // accessing battleState.format in the similarPokemon() call below would result in a TypeError, causing their
+      // Showdown to break (spitting the runMajor() stack trace into the BattleRoom chat)... which means battleState was
+      // undefined for some reason o_O (apparently this doesn't happen often tho)
+      if (!battleState?.battleId) {
+        // we'll just let the client deal with whatever this is
+        return addPokemon(name, ident, details, replaceSlot);
+      }
+
       const pokemonState = battleState?.[playerKey]?.pokemon || [];
 
       if (pokemonState.length) {
