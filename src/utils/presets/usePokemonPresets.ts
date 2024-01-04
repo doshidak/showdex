@@ -14,7 +14,6 @@ import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 // import { fileSize } from '@showdex/utils/humanize';
 // import { dehydratePresets, hydratePresets } from '@showdex/utils/hydro';
 import { getPresetFormes } from './getPresetFormes';
-import { sortPresetsByFormat as sortPresets } from './sortPresetsByFormat';
 
 /**
  * Options for the `usePokemonPresets()` hook.
@@ -278,7 +277,9 @@ export const usePokemonPresets = (
       }
 
       if (sorted.length) {
-        sorted.sort(sortPresets(genlessFormat));
+        // update (2024/01/03): tho this hook isn't used anymore, still updating it just in case; but basically, sorting
+        // is done in useCalcdexPresets() instead, which is where the auto-preset effect resides
+        // sorted.sort(sortPresets(genlessFormat));
         output.push(...sorted);
       }
     }
@@ -290,7 +291,6 @@ export const usePokemonPresets = (
 
     return output;
   }, [
-    genlessFormat,
     formatPresets,
     formatStatsPresets,
     nonStoragePresets,

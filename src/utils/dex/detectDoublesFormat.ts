@@ -1,4 +1,6 @@
+import { DoublesFormatMatchers } from '@showdex/consts/dex';
 import { detectLegacyGen } from './detectLegacyGen';
+
 /**
  * Determines if the provided `format` should have `'Doubles'` as its `gameType`.
  *
@@ -11,9 +13,4 @@ export const detectDoublesFormat = (
   format: string,
 ): boolean => !!format
   && !detectLegacyGen(format) // if gen detection fails, this would pass anyway
-  && [
-    /doubles/,
-    /freeforall/,
-    /triples/, // eh, @smogon/calc doesn't support a 'Triples' GameType, so 'Doubles' is better than nothing
-    /vgc\d{2,4}/,
-  ].some((r) => r.test(format));
+  && DoublesFormatMatchers.some((r) => r.test(format));

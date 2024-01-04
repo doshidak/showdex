@@ -31,6 +31,7 @@ export interface CalcdexPokeContextValue extends Omit<CalcdexContextValue, 'pres
   presets: CalcdexPokemonPreset[];
   usages: CalcdexPokemonPreset[];
   usage: CalcdexPokemonPreset;
+  formatLabelMap: Record<string, string>;
   matchups: CalcdexMatchupResult[];
 }
 
@@ -57,6 +58,7 @@ export const CalcdexPokeContext = React.createContext<CalcdexPokeContextValue>({
   presets: [],
   usages: [],
   usage: {} as CalcdexPokemonPreset,
+  formatLabelMap: {},
 
   matchups: [],
 });

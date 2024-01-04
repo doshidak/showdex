@@ -80,6 +80,7 @@ export const PokeInfo = ({
     presets,
     usages,
     usage,
+    formatLabelMap,
     addPokemon,
     updatePokemon,
     removePokemon,
@@ -299,9 +300,13 @@ export const PokeInfo = ({
     format,
     pokemon,
     presets,
-    { usages },
+    {
+      usages,
+      formatLabelMap,
+    },
   ), [
     format,
+    formatLabelMap,
     pokemon,
     presets,
     usages,

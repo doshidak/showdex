@@ -3,7 +3,7 @@ import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@show
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { flattenAlts, selectPokemonPresets } from '@showdex/utils/presets';
+import { flattenAlts, selectPokemonPresets, sortPresetsByFormat } from '@showdex/utils/presets';
 import { CalcdexContext } from '../CalcdexContext';
 import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
@@ -86,6 +86,7 @@ export const CalcdexPokeProvider = ({
     loading: presetsLoading,
     presets: allPresets,
     usages: allUsages,
+    formatLabelMap,
   } = battlePresets;
 
   const pokemonSheets = React.useMemo(() => selectPokemonPresets(
@@ -166,9 +167,10 @@ export const CalcdexPokeProvider = ({
     ...teamPresets,
     ...boxPresets,
     ...pokemonPresets,
-  ], [
+  ].sort(sortPresetsByFormat(format, formatLabelMap)), [
     boxPresets,
     format,
+    formatLabelMap,
     playerPokemon?.presets,
     pokemonPresets,
     pokemonSheets,
@@ -238,11 +240,13 @@ export const CalcdexPokeProvider = ({
     presets,
     usages,
     usage,
+    formatLabelMap,
 
     matchups,
   }), [
     allUsages,
     ctx,
+    formatLabelMap,
     matchups,
     opponent,
     opponentPokemon,

@@ -9,8 +9,12 @@ import {
 } from '@showdex/redux/services';
 import { useCalcdexSettings, useTeamdexPresets } from '@showdex/redux/store';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
-import { sortPresetsByFormat } from './sortPresetsByFormat';
+import {
+  detectGenFromFormat,
+  getGenfulFormat,
+  getGenlessFormat,
+  parseBattleFormat,
+} from '@showdex/utils/dex';
 
 /**
  * Options for the `useBattlePresets()` hook.
@@ -95,6 +99,15 @@ export interface CalcdexBattlePresetsHookValue {
    * @since 1.1.7
    */
   usages: CalcdexPokemonPreset[];
+
+  /**
+   * Memoized mapping of format labels from `parseBattleFormat()`.
+   *
+   * * Used as an optimization to provide into sorters like `sortPresetsByFormat()` & `buildPresetOptions()`.
+   *
+   * @since 1.2.1
+   */
+  formatLabelMap: Record<string, string>;
 }
 
 // const l = logger('@showdex/utils/presets/useBattlePresets()');
@@ -117,6 +130,11 @@ export const useBattlePresets = (
     format,
     disabled,
   } = options || {};
+
+  const {
+    base: formatBase,
+    label: formatLabel,
+  } = parseBattleFormat(format);
 
   const {
     downloadSmogonPresets,
@@ -215,14 +233,33 @@ export const useBattlePresets = (
         ...(teambuilderPresets || []),
         ...(formatPresets || []),
         ...(formatStats || []),
-      ].sort(sortPresetsByFormat(genlessFormat))
+      ]
   ), [
-    genlessFormat,
     formatPresets,
     formatStats,
     randoms,
     randomsPresets,
     teambuilderPresets,
+  ]);
+
+  const formatLabelMap = React.useMemo(() => presets.reduce((prev, preset) => {
+    if (!preset?.calcdexId) {
+      return prev;
+    }
+
+    const presetFormat = getGenfulFormat(preset.gen, preset.format);
+
+    if (presetFormat && !prev[presetFormat]) {
+      prev[presetFormat] = parseBattleFormat(presetFormat).label;
+    }
+
+    return prev;
+  }, {
+    ...(!!formatBase && !!formatLabel && { [formatBase]: formatLabel }),
+  } as Record<string, string>), [
+    formatBase,
+    formatLabel,
+    presets,
   ]);
 
   const usages = React.useMemo<CalcdexPokemonPreset[]>(() => (
@@ -265,5 +302,6 @@ export const useBattlePresets = (
     ready,
     presets,
     usages,
+    formatLabelMap,
   };
 };

@@ -234,6 +234,22 @@ export const FormatSuffixes: [test: RegExp, replacement: string][] = [
 ];
 
 /**
+ * Matchers that match Doubles formats.
+ *
+ * * This also includes any Triples since `@smogon/calc` doesn't support a `GameType` of `'Triples'`... yet o_O ?
+ * * Originally hardcoded in `detectDoublesFormat()`, now moved here in v1.2.1.
+ *
+ * @since 1.2.0
+ */
+export const DoublesFormatMatchers: RegExp[] = [
+  /doubles/,
+  /freeforall/,
+  /partnersincrime/,
+  /triples/,
+  /vgc\d{2,4}/,
+];
+
+/**
  * Dictionary of kinda-standardized format section names from Showdown's `BattleFormats` global.
  *
  * * Keys are formatted as IDs, so section names should be formatted prior before performing a lookup.

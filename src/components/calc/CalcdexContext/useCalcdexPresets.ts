@@ -67,10 +67,10 @@ export const useCalcdexPresets = (
     format: state?.format,
   });
 
-  /* eslint-disable react-hooks/exhaustive-deps -- look at me, I'm the captain now */
-
   // keep track of whether we applied Team Sheets yet (whether initially or later)
   const appliedSheets = React.useRef(false);
+
+  /* eslint-disable react-hooks/exhaustive-deps -- look at me, I'm the captain now */
 
   // auto-apply the first preset for every presetless Pokemon, if possible
   React.useEffect(() => {
@@ -129,7 +129,7 @@ export const useCalcdexPresets = (
             select: 'any',
             filter: (p) => p.source !== 'usage',
           },
-        );
+        ).sort(sortPresetsByFormat(state.format, presets.formatLabelMap));
 
         const pokemonUsages = selectPokemonPresets(
           presets.usages,
@@ -258,7 +258,7 @@ export const useCalcdexPresets = (
                 format: state.format,
                 select: 'transformed',
               },
-            ).sort(sortPresetsByFormat(state.format));
+            );
 
             preset = (
               !!pokemon.transformedMoves?.length
