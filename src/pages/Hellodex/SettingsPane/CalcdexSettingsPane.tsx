@@ -512,6 +512,20 @@ export const CalcdexSettingsPane = ({
         }]}
       />
 
+      <Field<ShowdexCalcdexSettings['includeOtherMetaPresets']>
+        name="calcdex.includeOtherMetaPresets"
+        component={Switch}
+        className={cx(styles.field, styles.switchField)}
+        label="Always Include OM Sets"
+        tooltip={(
+          <div className={styles.tooltipContent}>
+            Includes any available sets from <em>Other Metagame</em> (OM) formats,
+            such as from <em>Balanced Hackmons</em> &amp; <em>Almost Any Ability</em>,
+            in legal-locked formats like <em>OU</em> & <em>VGC {new Date().getFullYear() || 2077}</em>.
+          </div>
+        )}
+      />
+
       <Field<ShowdexCalcdexSettings['prioritizeUsageStats']>
         name="calcdex.prioritizeUsageStats"
         component={Switch}
@@ -1123,14 +1137,12 @@ export const CalcdexSettingsPane = ({
           ),
           value: 'always',
         }, {
-          label: 'Meta',
+          labelStyle: { textTransform: 'none' },
+          label: 'OMs',
           tooltip: (
             <div className={styles.tooltipContent}>
-              Only allow the Pok&eacute;mon's types to be edited in nonstandard metagame
-              formats when clicked on.
-              <br />
-              <br />
-              <em>This option is not affiliated with Meta, the Social Metaverse Company.</em>
+              Only allow the Pok&eacute;mon's types to be edited in nonstandard{' '}
+              <em>Other Metagame</em> (OM) formats when clicked on.
             </div>
           ),
           value: 'meta',
@@ -1168,10 +1180,12 @@ export const CalcdexSettingsPane = ({
           ),
           value: 'always',
         }, {
-          label: 'Meta',
+          labelStyle: { textTransform: 'none' },
+          label: 'OMs',
           tooltip: (
             <div className={styles.tooltipContent}>
-              Only show the <em>Edit</em> button in nonstandard metagame formats.
+              Only show the <em>Edit</em> button in nonstandard{' '}
+              <em>Other Metagame</em> (OM) formats.
               <br />
               <br />
               Hover over the <strong>Always</strong> option to learn more about move editing.
@@ -1211,10 +1225,12 @@ export const CalcdexSettingsPane = ({
           ),
           value: 'always',
         }, {
-          label: 'Meta',
+          labelStyle: { textTransform: 'none' },
+          label: 'OMs',
           tooltip: (
             <div className={styles.tooltipContent}>
-              Only allow illegal values for a Pok&eacute;mon's EVs/IVs in nonstandard metagame formats.
+              Only allow illegal values for a Pok&eacute;mon's EVs/IVs in nonstandard{' '}
+              <em>Other Metagame</em> (OM) formats.
               <br />
               <br />
               Hover over the <strong>Always</strong> option to learn more about illegal EV/IV values.
@@ -1256,10 +1272,12 @@ export const CalcdexSettingsPane = ({
           ),
           value: 'always',
         }, {
-          label: 'Meta',
+          labelStyle: { textTransform: 'none' },
+          label: 'OMs',
           tooltip: (
             <div className={styles.tooltipContent}>
-              Only show the Pok&eacute;mon's base stats in nonstandard metagame formats.
+              Only show the Pok&eacute;mon's base stats in nonstandard{' '}
+              <em>Other Metagame</em> (OM) formats.
               <br />
               <br />
               Hover over the <strong>Always</strong> option to learn more about base stat editing.
@@ -1348,8 +1366,7 @@ export const CalcdexSettingsPane = ({
         tooltip={(
           <div className={styles.tooltipContent}>
             Allows you to select from all possible abilities &amp; moves in
-            legal-locked formats like{' '}
-            <em>OU</em> &amp; <em>Randoms</em>.
+            legal-locked formats like <em>OU</em> &amp; <em>Randoms</em>.
           </div>
         )}
       />

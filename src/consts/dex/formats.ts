@@ -375,34 +375,32 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
 export const LegalLockedFormats: (string | RegExp)[] = [
   '1v1',
   '2v2doubles',
-  /^battlespot/i, // e.g., 'battlespotsingles', 'battlespotdoubles'
-  /^battlestadium/i, // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
-  /^bdsp/i, // e.g., 'bdspou'
+  /battlefestival/,
+  /battlespot/, // e.g., 'battlespotsingles', 'battlespotdoubles'
+  /battlestadium/, // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
+  /^bdsp/, // e.g., 'bdspou'
   'computergeneratedteams',
   'doubleslc',
   'doublesou',
   'doublesubers',
   'doublesuu',
-  /draft$/i, // e.g., '6v6doublesdraft'
-  /factory/i, // e.g., 'battlefactory', 'bssfactory'
-  'lc',
-  'lcuu',
-  /^letsgo/i, // e.g., 'letsgorandombattle', 'letsgoou'
-  'monotype',
-  'nationaldex',
-  'nationaldexmonotype',
-  'nationaldexru',
-  'nationaldexuu',
+  /draft$/, // e.g., '6v6doublesdraft'
+  /factory/, // e.g., 'battlefactory', 'bssfactory'
+  /lc(?:uu)?$/,
+  /^letsgo/, // e.g., 'letsgorandombattle', 'letsgoou'
+  /monothreat/,
+  /monotype/,
+  /natdex/,
+  /nationaldex/,
   'nfe',
   'nu',
-  'ou',
-  'oublitz',
+  /ou(?:blitz)?$/,
   'pu',
   /random/i, // e.g., 'randombattle', 'unratedrandombattle', 'randombattleblitz'
   'ru',
-  'ubers',
+  /ubers(?:uu)?$/,
   'uu',
-  /^vgc/i, // e.g., 'vgc2022', 'vgc2023series1'
+  /^vgc/, // e.g., 'vgc2022', 'vgc2023series1'
   'zu',
 ];
 

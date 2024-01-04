@@ -73,12 +73,12 @@ export interface CalcdexPokemonPreset {
   /**
    * Alias of `calcdexId`, used internally by RTK Query in its internal tagging system.
    *
-   * * Wherever the `calcdexId` is set, this property will be set to the same value as well.
+   * * Wherever the `calcdexId` is set, this property should be set to the same value as well.
    * * Recommended you use `calcdexId` over this property to avoid confusion.
    *
    * @since 0.1.3
    */
-  id?: string;
+  id: string;
 
   /**
    * Source of the preset.

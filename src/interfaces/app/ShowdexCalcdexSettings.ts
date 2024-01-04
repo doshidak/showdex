@@ -256,6 +256,20 @@ export interface ShowdexCalcdexSettings {
   includeTeambuilder: 'always' | 'teams' | 'boxes' | 'never';
 
   /**
+   * Whether to include OM (Other Metagame) presets, like AAA (Almost Any Ability), in legal-locked formats, like OU.
+   *
+   * * Affects presets of any source, including `'storage'`/`'storage-box'` (i.e., Teambuilder) & `'smogon'`.
+   *   - `'server'`, `'sheet'` & `'import'` sources will always be of the current format, so this won't have any effect.
+   * * Has no effect if the current format is an OM (otherwise we'd have no presets, duh!).
+   * * When disabled (default), any preset with a non-legal-locked format as determined by `legalLockedFormat()` will
+   *   be omitted from the auto-preset & preset options.
+   *
+   * @default false
+   * @since 1.2.1
+   */
+  includeOtherMetaPresets: boolean;
+
+  /**
    * Whether to auto-import and apply presets derived from open team sheets or the `!showteam` chat command.
    *
    * @default true

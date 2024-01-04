@@ -13,6 +13,7 @@ import {
   detectGenFromFormat,
   getGenfulFormat,
   getGenlessFormat,
+  legalLockedFormat,
   parseBattleFormat,
 } from '@showdex/utils/dex';
 
@@ -136,11 +137,14 @@ export const useBattlePresets = (
     label: formatLabel,
   } = parseBattleFormat(format);
 
+  const legalFormat = legalLockedFormat(format);
+
   const {
     downloadSmogonPresets,
     downloadRandomsPresets,
     downloadUsageStats,
     includeTeambuilder,
+    includeOtherMetaPresets,
     maxPresetAge,
   } = useCalcdexSettings();
 
@@ -226,17 +230,44 @@ export const useBattlePresets = (
     skip: shouldSkipRandomsStats,
   });
 
-  const presets = React.useMemo<CalcdexPokemonPreset[]>(() => (
-    randoms
-      ? [...(randomsPresets || [])]
-      : [
-        ...(teambuilderPresets || []),
-        ...(formatPresets || []),
-        ...(formatStats || []),
-      ]
-  ), [
+  // const presets = React.useMemo<CalcdexPokemonPreset[]>(() => (
+  //   randoms
+  //     ? [...(randomsPresets || [])]
+  //     : [
+  //       ...(teambuilderPresets || []),
+  //       ...(formatPresets || []),
+  //       ...(formatStats || []),
+  //     ]
+  // ), [
+  //   formatPresets,
+  //   formatStats,
+  //   randoms,
+  //   randomsPresets,
+  //   teambuilderPresets,
+  // ]);
+
+  const presets = React.useMemo<CalcdexPokemonPreset[]>(() => {
+    if (randoms) {
+      return [...(randomsPresets || [])];
+    }
+
+    const output = [
+      ...(teambuilderPresets || []),
+      ...(formatPresets || []),
+      ...(formatStats || []),
+    ];
+
+    if (!legalFormat || includeOtherMetaPresets) {
+      return output;
+    }
+
+    // note: legalLockedFormat() internally removes the gen, so `p.format` being genless is all g
+    return output.filter((p) => legalLockedFormat(p.format));
+  }, [
     formatPresets,
     formatStats,
+    includeOtherMetaPresets,
+    legalFormat,
     randoms,
     randomsPresets,
     teambuilderPresets,
