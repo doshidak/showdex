@@ -516,7 +516,8 @@ export const PokeMoves = ({
           && hasMoveOverrides(format, pokemon, moveName, opponentPokemon, field);
 
         const showStellarToggle = (pokemon?.dirtyTeraType || pokemon?.teraType) === 'Stellar'
-          && pokemon.terastallized;
+          && pokemon.terastallized
+          && damagingMove;
 
         const stellarToggled = showStellarToggle && (
           moveOverrides.stellar
