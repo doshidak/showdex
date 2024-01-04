@@ -696,6 +696,7 @@ export const PokeMoves = ({
                       )}
                       tooltipDisabled={!settings?.showUiTooltips}
                       active={stellarToggled}
+                      disabled={pokemon.speciesForme === 'Terapagos-Stellar'} // always on
                       onPress={() => updatePokemon({
                         moveOverrides: {
                           [moveName]: { stellar: !stellarToggled },
