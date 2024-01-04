@@ -12,6 +12,7 @@ import {
   detectLegacyGen,
   determineDefaultLevel,
   getDefaultSpreadValue,
+  legalLockedFormat,
 } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
@@ -48,6 +49,7 @@ export const applyPreset = (
     return null;
   }
 
+  const legal = legalLockedFormat(format);
   const defaultLevel = determineDefaultLevel(format);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
@@ -320,6 +322,17 @@ export const applyPreset = (
       output.abilities = abilities;
       output.baseStats = baseStats;
     }
+  }
+
+  const shouldClearDirtyAbility = legal
+    && !!output.dirtyAbility
+    && ![...sanitized.abilities, ...sanitized.transformedAbilities].includes(output.dirtyAbility);
+
+  if (shouldClearDirtyAbility) {
+    // [output.dirtyAbility] = sanitized.transformedAbilities.length
+    //   ? sanitized.transformedAbilities
+    //   : sanitized.abilities;
+    delete output.dirtyAbility;
   }
 
   if (!pokemon.ability && sanitized.abilityToggled) {
