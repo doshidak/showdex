@@ -76,11 +76,11 @@ export const PokeInfo = ({
     player,
     playerPokemon: pokemon,
     presetsLoading,
-    allUsages,
     presets,
     usages,
     usage,
     formatLabelMap,
+    formeUsages,
     addPokemon,
     updatePokemon,
     removePokemon,
@@ -267,11 +267,11 @@ export const PokeInfo = ({
     format,
     {
       pokemon,
-      usages: allUsages,
+      formeUsages,
     },
   )) || [], [
-    allUsages,
     format,
+    formeUsages,
     operatingMode,
     pokemon,
   ]);

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { type Duration } from 'date-fns';
-import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import {
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
@@ -102,10 +102,25 @@ export interface CalcdexBattlePresetsHookValue {
   usages: CalcdexPokemonPreset[];
 
   /**
+   * Compiled species forme usage data derived from `usages[]`.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.2.1
+   */
+  formeUsages: CalcdexPokemonUsageAlt<string>[];
+
+  /**
    * Memoized mapping of format labels from `parseBattleFormat()`.
    *
    * * Used as an optimization to provide into sorters like `sortPresetsByFormat()` & `buildPresetOptions()`.
    *
+   * @default
+   * ```ts
+   * {}
+   * ```
    * @since 1.2.1
    */
   formatLabelMap: Record<string, string>;
@@ -303,6 +318,16 @@ export const useBattlePresets = (
     randomsStats,
   ]);
 
+  // build the usage alts, if provided from usages[]
+  // e.g., [['Great Tusk', 0.3739], ['Kingambit', 0.3585], ['Dragapult', 0.0746], ...]
+  const formeUsages = React.useMemo<CalcdexPokemonUsageAlt<string>[]>(() => (
+    usages
+      .filter((u) => !!u?.speciesForme && !!u.formeUsage)
+      .map((u) => [u.speciesForme, u.formeUsage])
+  ), [
+    usages,
+  ]);
+
   const pending = (
     (!shouldSkipFormats && formatPresetsPending)
       || (!shouldSkipFormatStats && formatStatsPending)
@@ -334,5 +359,6 @@ export const useBattlePresets = (
     presets,
     usages,
     formatLabelMap,
+    formeUsages,
   };
 };

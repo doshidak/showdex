@@ -87,6 +87,7 @@ export const CalcdexPokeProvider = ({
     presets: allPresets,
     usages: allUsages,
     formatLabelMap,
+    formeUsages,
   } = battlePresets;
 
   const pokemonSheets = React.useMemo(() => selectPokemonPresets(
@@ -241,12 +242,14 @@ export const CalcdexPokeProvider = ({
     usages,
     usage,
     formatLabelMap,
+    formeUsages,
 
     matchups,
   }), [
     allUsages,
     ctx,
     formatLabelMap,
+    formeUsages,
     matchups,
     opponent,
     opponentPokemon,

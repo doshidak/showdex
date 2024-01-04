@@ -4,6 +4,7 @@ import {
   type CalcdexPlayerKey,
   type CalcdexPokemon,
   type CalcdexPokemonPreset,
+  type CalcdexPokemonUsageAlt,
 } from '@showdex/interfaces/calc';
 import { type CalcdexMatchupResult } from '@showdex/utils/calc';
 import { type CalcdexContextValue } from '../CalcdexContext';
@@ -32,6 +33,7 @@ export interface CalcdexPokeContextValue extends Omit<CalcdexContextValue, 'pres
   usages: CalcdexPokemonPreset[];
   usage: CalcdexPokemonPreset;
   formatLabelMap: Record<string, string>;
+  formeUsages: CalcdexPokemonUsageAlt<string>[];
   matchups: CalcdexMatchupResult[];
 }
 
@@ -59,6 +61,7 @@ export const CalcdexPokeContext = React.createContext<CalcdexPokeContextValue>({
   usages: [],
   usage: {} as CalcdexPokemonPreset,
   formatLabelMap: {},
+  formeUsages: [],
 
   matchups: [],
 });

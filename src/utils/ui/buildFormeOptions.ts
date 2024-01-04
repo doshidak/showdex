@@ -1,5 +1,5 @@
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { getDexForFormat, guessTableFormatKey, guessTableFormatSlice } from '@showdex/utils/dex';
@@ -18,7 +18,7 @@ export const buildFormeOptions = (
   format: string,
   config?: {
     pokemon?: CalcdexPokemon;
-    usages?: CalcdexPokemonPreset[];
+    formeUsages?: CalcdexPokemonUsageAlt<string>[];
   },
 ): CalcdexPokemonFormeOption[] => {
   const options: CalcdexPokemonFormeOption[] = [];
@@ -52,16 +52,10 @@ export const buildFormeOptions = (
 
   const {
     pokemon,
-    usages,
+    formeUsages,
   } = config || {};
 
-  // build the usage alts, if provided from usages[]
-  // e.g., [['Great Tusk', 0.3739], ['Kingambit', 0.3585], ['Dragapult', 0.0746], ...]
-  const formeAlts: CalcdexPokemonUsageAlt<string>[] = usages
-    ?.filter((u) => !!u?.speciesForme && !!u.formeUsage)
-    .map((u) => [u.speciesForme, u.formeUsage]);
-
-  const findUsagePercent = usageAltPercentFinder(formeAlts, true);
+  const findUsagePercent = usageAltPercentFinder(formeUsages, true);
   const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   const {
