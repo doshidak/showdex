@@ -92,6 +92,12 @@ export const applyPreset = (
     },
   };
 
+  // update (2024/01/03): shouldn't apply the level if the `pokemon` isn't being `'user'`-handled, i.e., in a battle
+  // (was causing server-sourced Pokemon to be level 100 vs. level 50 client-sourced ones in VGC LOL... oopsies)
+  if (pokemon.source !== 'user') {
+    delete output.level;
+  }
+
   const transformed = !!pokemon.transformedForme;
   const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
   const formeKey = transformed && !speciesFormes.includes(preset.speciesForme) ? 'transformedForme' : 'speciesForme';
