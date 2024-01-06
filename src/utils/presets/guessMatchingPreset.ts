@@ -1,11 +1,12 @@
+import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { detectGenFromFormat } from '@showdex/utils/dex';
-import type { CalcdexPokemon, CalcdexPokemonPreset } from '@showdex/redux/store';
 import { flattenAlts } from './flattenAlts';
 
 /**
  * Attempts to find the best matching preset based on what's been revealed for the `pokemon` in battle.
  *
  * * Only presets sourced from `'smogon'` will be considered.
+ *   - As of v1.2.1, `'bundle'` sources will also be considered.
  * * Best matching preset is based on the following conditions:
  *   - Matching items (if applicable to the gen & revealed),
  *   - Matching abilities (if applicable to the gen & revealed), and
@@ -28,7 +29,7 @@ export const guessMatchingPreset = (
     return null;
   }
 
-  const smogonPresets = presets.filter((p) => p?.source === 'smogon');
+  const smogonPresets = presets.filter((p) => ['bundle', 'smogon'].includes(p?.source));
 
   if (!smogonPresets.length) {
     return null;

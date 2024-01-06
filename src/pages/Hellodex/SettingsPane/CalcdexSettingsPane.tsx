@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { Field } from 'react-final-form';
 import cx from 'classnames';
+import { format } from 'date-fns';
 import { Segmented, Switch, TextField } from '@showdex/components/form';
+import { ShowdexPresetsBundles } from '@showdex/consts/app/presets';
 import { eacute } from '@showdex/consts/core';
+import { GenLabels } from '@showdex/consts/dex';
 import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import { env } from '@showdex/utils/core';
+import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 // import { fileSize } from '@showdex/utils/humanize';
 import styles from './SettingsPane.module.scss';
 
@@ -510,6 +514,44 @@ export const CalcdexSettingsPane = ({
           ),
           value: 'never',
         }]}
+      />
+
+      <Field<ShowdexCalcdexSettings['includePresetsBundles']>
+        name="calcdex.includePresetsBundles"
+        component={Segmented}
+        className={cx(
+          styles.field,
+          !inBattle && styles.singleColumn,
+        )}
+        label="Include Bundled Sets From"
+        labelPosition={inBattle ? 'top' : 'left'}
+        options={ShowdexPresetsBundles?.filter((b) => !!b?.id && b.tag === 'presets').map((bundle) => ({
+          label: bundle.label || bundle.name,
+          tooltip: bundle.gen && bundle.format ? (
+            <div className={styles.tooltipContent}>
+              Gen {bundle.gen} &bull; {GenLabels[bundle.gen]?.label}{' '}
+              {parseBattleFormat(getGenfulFormat(bundle.gen, bundle.format)).label}
+              <br />
+              <strong>{bundle.name}</strong>
+              {
+                !!bundle.author &&
+                <>
+                  <br />
+                  by {bundle.author}
+                </>
+              }
+              <br />
+              <br />
+              {bundle.description || (
+                <em>Updated {format(new Date(bundle.updated || bundle.created), 'PP')}</em>
+              )}
+            </div>
+          ) : null,
+          value: bundle.id,
+          disabled: bundle.disabled,
+        }))}
+        multi
+        unique
       />
 
       <Field<ShowdexCalcdexSettings['includeOtherMetaPresets']>

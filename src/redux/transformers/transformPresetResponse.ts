@@ -62,6 +62,7 @@ export const transformPresetResponse = (
           speciesForme,
           presetName,
           pkmnPreset,
+          args.source,
         );
 
         // shouldn't be the case, but check if the preset already exists in our output

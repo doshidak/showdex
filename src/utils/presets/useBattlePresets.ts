@@ -2,6 +2,7 @@ import * as React from 'react';
 import { type Duration } from 'date-fns';
 import { type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import {
+  usePokemonBundledPresetQuery,
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
@@ -160,6 +161,7 @@ export const useBattlePresets = (
     downloadUsageStats,
     includeTeambuilder,
     includeOtherMetaPresets,
+    includePresetsBundles,
     maxPresetAge,
   } = useCalcdexSettings();
 
@@ -190,10 +192,22 @@ export const useBattlePresets = (
   ]);
 
   const shouldSkipAny = disabled || !gen || !genlessFormat;
+  const shouldSkipBundles = shouldSkipAny || !includePresetsBundles?.length;
   const shouldSkipFormats = shouldSkipAny || randoms || !downloadSmogonPresets;
   const shouldSkipFormatStats = shouldSkipAny || randoms || !downloadUsageStats;
   const shouldSkipRandoms = shouldSkipAny || !randoms || !downloadRandomsPresets;
   const shouldSkipRandomsStats = shouldSkipAny || !randoms || !downloadUsageStats;
+
+  const {
+    data: bundledPresets,
+    isUninitialized: bundledPresetsPending,
+    isLoading: bundledPresetsLoading,
+  } = usePokemonBundledPresetQuery({
+    gen,
+    bundleIds: includePresetsBundles,
+  }, {
+    skip: shouldSkipBundles,
+  });
 
   const {
     data: formatPresets,
@@ -245,22 +259,6 @@ export const useBattlePresets = (
     skip: shouldSkipRandomsStats,
   });
 
-  // const presets = React.useMemo<CalcdexPokemonPreset[]>(() => (
-  //   randoms
-  //     ? [...(randomsPresets || [])]
-  //     : [
-  //       ...(teambuilderPresets || []),
-  //       ...(formatPresets || []),
-  //       ...(formatStats || []),
-  //     ]
-  // ), [
-  //   formatPresets,
-  //   formatStats,
-  //   randoms,
-  //   randomsPresets,
-  //   teambuilderPresets,
-  // ]);
-
   const presets = React.useMemo<CalcdexPokemonPreset[]>(() => {
     if (randoms) {
       return [...(randomsPresets || [])];
@@ -268,6 +266,7 @@ export const useBattlePresets = (
 
     const output = [
       ...(teambuilderPresets || []),
+      ...(bundledPresets || []),
       ...(formatPresets || []),
       ...(formatStats || []),
     ];
@@ -279,6 +278,7 @@ export const useBattlePresets = (
     // note: legalLockedFormat() internally removes the gen, so `p.format` being genless is all g
     return output.filter((p) => legalLockedFormat(p.format));
   }, [
+    bundledPresets,
     formatPresets,
     formatStats,
     includeOtherMetaPresets,
@@ -330,6 +330,7 @@ export const useBattlePresets = (
 
   const pending = (
     (!shouldSkipFormats && formatPresetsPending)
+      || (!shouldSkipBundles && bundledPresetsPending)
       || (!shouldSkipFormatStats && formatStatsPending)
       || (!shouldSkipRandoms && randomsPresetsPending)
       || (!shouldSkipRandomsStats && randomsStatsPending)
@@ -337,6 +338,7 @@ export const useBattlePresets = (
 
   const loading = (
     pending
+      || (!shouldSkipBundles && bundledPresetsLoading)
       || (!shouldSkipFormats && formatPresetsLoading)
       || (!shouldSkipFormatStats && formatStatsLoading)
       || (!shouldSkipRandoms && randomsPresetsLoading)
@@ -345,6 +347,7 @@ export const useBattlePresets = (
 
   const ready = (
     shouldSkipFormats
+      && shouldSkipBundles
       && shouldSkipFormatStats
       && shouldSkipRandoms
       && shouldSkipRandomsStats

@@ -270,6 +270,21 @@ export interface ShowdexCalcdexSettings {
   includeOtherMetaPresets: boolean;
 
   /**
+   * Additional bundled presets to load, if any.
+   *
+   * * These can only be selected from if the metadata for each bundled preset is defined in `ShowdexPresetsBundles[]`
+   *   from `@showdex/consts/app`.
+   * * Each value refers to the bundle's `id`.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.2.1
+   */
+  includePresetsBundles: string[];
+
+  /**
    * Whether to auto-import and apply presets derived from open team sheets or the `!showteam` chat command.
    *
    * @default true

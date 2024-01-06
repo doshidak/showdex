@@ -147,6 +147,20 @@ export const CalcdexPokeProvider = ({
     playerPokemon,
   ]);
 
+  const bundledPresets = React.useMemo(() => selectPokemonPresets(
+    allPresets,
+    playerPokemon,
+    {
+      format,
+      source: 'bundle',
+      select: 'any',
+    },
+  ), [
+    allPresets,
+    format,
+    playerPokemon,
+  ]);
+
   const pokemonPresets = React.useMemo(() => selectPokemonPresets(
     allPresets,
     playerPokemon,
@@ -167,9 +181,11 @@ export const CalcdexPokeProvider = ({
     ...(format?.includes('random') ? [] : usages),
     ...teamPresets,
     ...boxPresets,
+    ...bundledPresets,
     ...pokemonPresets,
   ].sort(sortPresetsByFormat(format, formatLabelMap)), [
     boxPresets,
+    bundledPresets,
     format,
     formatLabelMap,
     playerPokemon?.presets,

@@ -13,8 +13,8 @@ export const isMaybeJson = (value?: unknown): value is string => (
   !!value
     && typeof value === 'string'
     && (
-      (value.startsWith('{') && value.endsWith('}'))
-        || (value.startsWith('[') && value.endsWith(']'))
+      (value.startsWith('{') && value.trim().endsWith('}'))
+        || (value.startsWith('[') && value.trim().endsWith(']'))
     )
 );
 

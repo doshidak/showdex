@@ -6,6 +6,7 @@ import {
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
 import { reverseObjectKv } from '@showdex/utils/core';
+import { ShowdexPresetsBundles } from '@showdex/consts/app';
 
 /**
  * Default Showdex settings.
@@ -54,6 +55,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     prioritizeUsageStats: false,
     includeTeambuilder: 'always',
     includeOtherMetaPresets: false,
+    includePresetsBundles: ShowdexPresetsBundles.map((b) => !b?.disabled && b.id).filter(Boolean),
     autoImportTeamSheets: true,
     autoExportOpponent: false,
 
@@ -191,6 +193,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   prioritizeUsageStats: 'pus',
   includeTeambuilder: 'itb',
   includeOtherMetaPresets: 'iom',
+  includePresetsBundles: 'ipb',
   autoImportTeamSheets: 'ats',
   autoExportOpponent: 'aeo',
   defaultAutoMoves: 'dam',

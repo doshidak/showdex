@@ -89,10 +89,12 @@ export const buildFormeOptions = (
       return;
     }
 
-    let forme = tier;
+    // update (2024/01/05): somehow I didn't notice that I had to type asset `forme` below, just because I hid all the union'd
+    // types under Showdown.BattleTeambuilderTier, so that solves the mysterious 'header,OU' Pokemon in the Honkdex HAHAHA
+    let forme: string = (typeof tier === 'string' && tier) || null;
 
     if (Array.isArray(tier)) {
-      if (tier[0] === 'header' && tier[1]) {
+      if (tier[0] === 'header' && tier[1] && !Array.isArray(tierMap[tier[1]])) {
         tierMap[tier[1]] = [];
       }
 
@@ -102,7 +104,11 @@ export const buildFormeOptions = (
       }
     }
 
-    const dexSpecies = dex.species.get(forme as string);
+    if (!forme) {
+      return;
+    }
+
+    const dexSpecies = dex.species.get(forme);
     const { exists, name: formeName } = dexSpecies || {};
 
     if (!exists || filterFormes.includes(formeName)) {

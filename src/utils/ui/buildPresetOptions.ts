@@ -89,6 +89,16 @@ export const buildPresetOptions = (
       }
     }
 
+    if (preset.source === 'bundle' && preset.bundleName) {
+      if (option.subLabel) {
+        (option.subLabel as string) += ` ${bull} `;
+      } else {
+        option.subLabel = '';
+      }
+
+      (option.subLabel as string) += preset.bundleName;
+    }
+
     // attempt to find this preset's usage percentage (typically only in Gen 9 Randoms)
     const usage = preset.usage
       || usages?.find((p) => p?.source === 'usage' && p.name.includes(preset.name))?.usage
