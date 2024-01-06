@@ -1,11 +1,13 @@
 import { CalcdexBootstrapper, HellodexBootstrapper, TeamdexBootstrapper } from '@showdex/pages';
 import { calcdexSlice, createStore, showdexSlice } from '@showdex/redux/store';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { openIndexedDb, readHonksDb, readSettingsDb } from '@showdex/utils/storage';
 import '@showdex/styles/global.scss';
 
 const l = logger('@showdex/main');
+
+l.debug('Starting', env('build-name', 'showdex'));
 
 if (typeof app === 'undefined' || typeof Dex === 'undefined') {
   l.error(
@@ -34,6 +36,9 @@ void (async () => {
   if (nonEmptyObject(honks)) {
     store.dispatch(calcdexSlice.actions.restore(honks));
   }
+
+  // open the Hellodex when the Showdown client starts
+  HellodexBootstrapper(store);
 })();
 
 l.debug('Hooking into the client\'s app.receive()...');
@@ -92,9 +97,6 @@ colorSchemeObserver.observe(document.documentElement, {
   characterData: false,
 });
 
-// open the Hellodex when the Showdown client starts
-HellodexBootstrapper(store);
-
 /**
  * @todo May require some special logic to detect when the Teambuilder room opens.
  *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
@@ -102,4 +104,4 @@ HellodexBootstrapper(store);
  */
 TeamdexBootstrapper(store);
 
-l.success('Completed main execution!');
+l.success(env('build-name', 'showdex'), 'initialized!');
