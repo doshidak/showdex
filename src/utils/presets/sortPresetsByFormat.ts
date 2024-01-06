@@ -35,20 +35,35 @@ export const sortPresetsByFormat = (
   const formatLabel = labelMap[format];
 
   // e.g., formatLabel = 'VGC 2023' -> partialFormatLabel = 'vgc'
-  const partialLabel = (l: string) => formatId(l.replace(/\d+$/, ''));
-  const partialFormatLabel = partialLabel(formatLabel);
+  // const partialLabel = (l: string) => formatId(l?.replace(/\d+$/, ''));
+  // const partialFormatLabel = partialLabel(formatLabel);
 
-  const partialMatch = (
-    label: string,
-    candidate: string,
-  ) => (
-    label.startsWith(candidate)
-      || label.endsWith(candidate)
-  );
+  // const partialMatch = (
+  //   label: string,
+  //   candidate: string,
+  // ) => (
+  //   label.startsWith(candidate)
+  //     || label.endsWith(candidate)
+  // );
+
+  // const priorityIndex = (
+  //   label: string,
+  // ) => FormatSortPriorities.findIndex((f) => partialMatch(label, formatId(f)));
+
+  // update (2024/01/05):
+  // e.g., formatLabel = 'VGC 2024' -> partialFormatLabel = ['vgc', '2024'];
+  // formatLabel = 'Ubers UU' -> partialFormatLabel = ['ubers', 'uu']
+  const splitLabel = (l: string) => l?.split(' ').map((p) => formatId(p)).filter(Boolean) ?? [];
+  const partialFormatLabel = splitLabel(formatLabel);
+
+  const indexMatch = (
+    labelParts: string[],
+    candidateParts: string[],
+  ) => (candidateParts?.findIndex((p) => labelParts?.includes(p)) ?? -1);
 
   const priorityIndex = (
-    label: string,
-  ) => FormatSortPriorities.findIndex((f) => partialMatch(label, formatId(f)));
+    labelParts: string[],
+  ) => indexMatch(labelParts, FormatSortPriorities);
 
   return (a, b) => {
     if (!a?.calcdexId || !b?.calcdexId) {
@@ -81,22 +96,28 @@ export const sortPresetsByFormat = (
       return 1;
     }
 
-    const partialLabelA = partialLabel(labelA);
-    const partialLabelB = partialLabel(labelB);
+    // e.g., labelA -> partialLabelA = ['vgc', '2024']
+    // labelB -> partialLabelB = ['aaa']
+    const partialLabelA = splitLabel(labelA);
+    const partialLabelB = splitLabel(labelB);
 
     // partial match next
-    const partialMatchesA = partialMatch(partialFormatLabel, partialLabelA);
-    const partialMatchesB = partialMatch(partialFormatLabel, partialLabelB);
+    // const partialMatchesA = partialMatch(partialFormatLabel, partialLabelA);
+    // const partialMatchesB = partialMatch(partialFormatLabel, partialLabelB);
+    const partialIndexA = indexMatch(partialFormatLabel, partialLabelA);
+    const partialIndexB = indexMatch(partialFormatLabel, partialLabelB);
 
-    if (partialMatchesA) {
-      if (partialMatchesB) {
-        return 0;
+    if (partialIndexA > -1) {
+      if (partialIndexB > -1) {
+        return partialIndexA < partialIndexB
+          ? -1
+          : partialIndexA > partialIndexB ? 1 : 0;
       }
 
       return -1;
     }
 
-    if (partialMatchesB) {
+    if (partialIndexB > -1) {
       return 1;
     }
 
@@ -121,7 +142,9 @@ export const sortPresetsByFormat = (
 
     if (priorityA > -1) {
       if (priorityB > -1) {
-        return priorityA - priorityB;
+        return priorityA < priorityB
+          ? -1
+          : priorityA > priorityB ? 1 : 0;
       }
 
       return -1;

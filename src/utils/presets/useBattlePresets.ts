@@ -301,10 +301,13 @@ export const useBattlePresets = (
 
     return prev;
   }, {
-    ...(!!formatBase && !!formatLabel && { [formatBase]: formatLabel }),
+    ...(!!formatBase && !!formatLabel && {
+      [getGenfulFormat(gen, formatBase)]: formatLabel,
+    }),
   } as Record<string, string>), [
     formatBase,
     formatLabel,
+    gen,
     presets,
   ]);
 
