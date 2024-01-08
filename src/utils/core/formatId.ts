@@ -10,6 +10,9 @@
  *   - Nothing wrong with the system of course.
  *   - Just means we just need to make certain directories like `core` & `dex` don't import from other
  *     parts of the project like `redux` o_O
+ * * As of v1.2.1, this now replaces all diacritics with their ASCII equivalents (e.g., "é" -> "e").
+ *   - Pre-v1.2.1, `formatId('Flabébé-Yellow')` would result in `'flabbyellow'` (a yellow flabby ?).
+ *   - Post-v1.2.1, `formatId('Flabébé-Yellow')` now results in `'flabebeyellow'`.
  *
  * @example
  * ```ts
@@ -23,5 +26,6 @@ export const formatId = (
   value: string,
 ) => value
   ?.toString?.()
-  .toLowerCase()
-  .replace(/[^a-z0-9]/g, '');
+  .normalize('NFD') // splits combined graphemes; e.g., 'Flabébé-Yellow' -> 'Flabe´be´-Yellow'
+  .toLowerCase() // e.g., -> 'flabe´be´-yellow'
+  .replace(/[^a-z0-9]/g, ''); // e.g., -> 'flabebeyellow'

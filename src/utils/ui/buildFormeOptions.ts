@@ -24,6 +24,8 @@ export const buildFormeOptions = (
   config?: {
     pokemon?: CalcdexPokemon;
     formeUsages?: CalcdexPokemonUsageAlt<string>[];
+    translate?: (value: string) => string;
+    translateHeader?: (value: string) => string;
   },
 ): CalcdexPokemonFormeOption[] => {
   const options: CalcdexPokemonFormeOption[] = [];
@@ -137,6 +139,8 @@ export const buildFormeOptions = (
   const {
     pokemon,
     formeUsages,
+    translate,
+    translateHeader,
   } = config || {};
 
   const findUsagePercent = usageAltPercentFinder(formeUsages, true);
@@ -151,11 +155,12 @@ export const buildFormeOptions = (
 
   if (altFormes?.length) {
     const sortedAltFormes = [...altFormes].sort(usageSorter);
+    const groupLabel = (!!transformedForme && 'Transformed') || 'Formes';
 
     options.push({
-      label: (!!transformedForme && 'Transformed') || 'Formes',
+      label: translateHeader?.(groupLabel) || groupLabel,
       options: sortedAltFormes.map((forme) => ({
-        value: forme,
+        value: translate?.(forme) || forme,
         label: forme,
         rightLabel: findUsagePercent(forme),
       })),
@@ -220,9 +225,9 @@ export const buildFormeOptions = (
     const sortedFormes = [...speciesFormes].sort(usageSorter);
 
     options.push({
-      label: tier,
+      label: translateHeader?.(tier) || tier,
       options: sortedFormes.map((name) => ({
-        value: name,
+        value: translate?.(name) || name,
         label: name,
         rightLabel: findUsagePercent(name),
       })),
@@ -233,7 +238,7 @@ export const buildFormeOptions = (
     const sortedFormes = [...tierMap.Other].sort(usageSorter);
 
     options.push({
-      label: 'Other',
+      label: translateHeader?.('Other') || 'Other',
       options: sortedFormes.map((name) => ({
         value: name,
         label: name,

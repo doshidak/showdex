@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { PokemonStatuses, PokemonStatusLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
@@ -33,6 +34,7 @@ export const PokeStatus = ({
   containerSize,
   highlight = true,
 }: PokeStatusProps): JSX.Element => {
+  const { t } = useTranslation('pokedex');
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
@@ -44,7 +46,10 @@ export const PokeStatus = ({
 
   const label = (fainted && 'RIP') || override || (
     status !== '???'
-      && PokemonStatusLabels[status as Exclude<Showdown.PokemonStatus, '???' | ''>]?.[labelIndex]
+      && t(
+        `nonvolatiles.${status}.2`,
+        PokemonStatusLabels[status as Exclude<Showdown.PokemonStatus, '???' | ''>]?.[labelIndex],
+      )
   ) || defaultLabel || '???';
 
   return (

@@ -10,6 +10,14 @@ import { type ShowdexShowdownSettings } from './ShowdexShowdownSettings';
  */
 export interface ShowdexSettings {
   /**
+   * Language locale that Showdex should appear in.
+   *
+   * @default 'en'
+   * @since 1.2.1
+   */
+  locale: string;
+
+  /**
    * Current color scheme.
    *
    * @default 'light'

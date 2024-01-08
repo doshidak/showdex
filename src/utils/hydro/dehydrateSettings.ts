@@ -82,6 +82,7 @@ export const dehydratePerSide = (
  *
  * ```
  * {...header};
+ * lc:{locale};
  * fc:{forcedColorScheme};
  * dm:{developerMode};
  * ...
@@ -121,6 +122,7 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
   }
 
   const {
+    locale,
     forcedColorScheme,
     glassyTerrain,
     developerMode,
@@ -132,6 +134,7 @@ export const dehydrateSettings = (settings: ShowdexSettings): string => {
 
   const output: string[] = [
     dehydrateHeader(HydroDescriptor.Settings),
+    `${DehydratedShowdexSettingsMap.locale}:${dehydrateValue(locale)}`,
     `${DehydratedShowdexSettingsMap.forcedColorScheme}:${dehydrateValue(forcedColorScheme)}`,
     `${DehydratedShowdexSettingsMap.glassyTerrain}:${dehydrateBoolean(glassyTerrain)}`,
     `${DehydratedShowdexSettingsMap.developerMode}:${dehydrateBoolean(developerMode)}`,

@@ -1,7 +1,9 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { PokemonTypeLabels } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { determineColorScheme } from '@showdex/utils/ui';
 import styles from './PokeType.module.scss';
@@ -33,6 +35,7 @@ export const PokeType = ({
   containerSize,
   teraTyping,
 }: PokeTypeProps): JSX.Element => {
+  const { t } = useTranslation('pokedex');
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
@@ -51,7 +54,10 @@ export const PokeType = ({
   const label = override || (
     typeof labelIndex === 'number'
       && type !== '???' // this is also necessary for TypeScript lol
-      && PokemonTypeLabels[type]?.[labelIndex]
+      && t(
+        `types.${formatId(type)}.${labelIndex + 1}`,
+        PokemonTypeLabels[type]?.[labelIndex],
+      )
   ) || defaultLabel || '???';
 
   return (

@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import cx from 'classnames';
-import { type MoveName } from '@smogon/calc';
+import { type AbilityName, type MoveName } from '@smogon/calc';
 import { PokeMoveOptionTooltip } from '@showdex/components/app';
 import {
   Dropdown,
@@ -31,7 +32,6 @@ import {
 import { logger } from '@showdex/utils/debug';
 import { legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
-import { pluralize } from '@showdex/utils/humanize';
 import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import styles from './PokeMoves.module.scss';
@@ -47,6 +47,8 @@ export const PokeMoves = ({
   className,
   style,
 }: PokeMovesProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
+
   const {
     state,
     settings,
@@ -128,7 +130,7 @@ export const PokeMoves = ({
 
   // nice one me 10/10
   const showFaintCounter = !!pokemon?.speciesForme && (
-    formatId(pokemon.dirtyAbility || pokemon.ability) === 'supremeoverlord'
+    (pokemon.dirtyAbility || pokemon.ability) === 'Supreme Overlord' as AbilityName
       || pokemon.moves?.includes('Last Respects' as MoveName)
   );
 
@@ -253,7 +255,7 @@ export const PokeMoves = ({
         header
       >
         <div className={styles.headerTitle}>
-          Moves
+          {t('poke.moves.label')}
         </div>
 
         {
@@ -264,34 +266,37 @@ export const PokeMoves = ({
               styles.teraButtonLabel,
               (battleActive && !player?.usedTera && !pokemon?.terastallized) && styles.available,
             )}
-            label="Tera"
+            label={t('poke.moves.tera.label')}
             tooltip={(
               <div className={styles.descTooltip}>
                 {
                   settings?.showUiTooltips &&
-                  <div style={battleActive ? { marginBottom: 2 } : undefined}>
-                    {pokemon?.terastallized ? 'Revert' : 'Terastallize'} to{' '}
-                    <strong>
-                      {(
-                        pokemon?.terastallized
-                          ? pokemon?.types?.join('/')
-                          : (pokemon?.dirtyTeraType || pokemon?.teraType)
-                      ) || '???'}
-                    </strong>
-                  </div>
+                  <Trans
+                    t={t}
+                    i18nKey={`poke.moves.tera.${pokemon?.terastallized ? '' : 'in'}activeTooltip`}
+                    parent="div"
+                    style={battleActive ? { marginBottom: 2 } : undefined}
+                    shouldUnescape
+                    values={{
+                      types: pokemon?.types?.join('/') || t('pokedex:types.unknown.0'),
+                      teraType: pokemon?.dirtyTeraType || pokemon?.teraType || t('pokedex:types.unknown.0'),
+                    }}
+                  />
                 }
 
                 {
                   battleActive &&
-                  <div
+                  <Trans
+                    t={t}
+                    i18nKey={`poke.moves.tera.${player?.usedTera ? 'un' : ''}availableTooltip`}
+                    parent="div"
                     className={cx(
                       styles.ultUsage,
                       !player?.usedTera && styles.available,
                       player?.usedTera && styles.consumed,
                     )}
-                  >
-                    Tera <strong>{player?.usedTera ? 'Used' : 'Available'}</strong>
-                  </div>
+                    shouldUnescape
+                  />
                 }
               </div>
             )}
@@ -315,8 +320,8 @@ export const PokeMoves = ({
               styles.ultButton,
               showTeraToggle && styles.lessSpacing,
             )}
-            label="Z"
-            tooltip={`${pokemon?.useZ ? 'Deactivate' : 'Activate'} Z-Moves`}
+            label={t('poke.moves.z.label')}
+            tooltip={t(`poke.moves.z.${pokemon?.useZ ? '' : 'in'}activeTooltip`) as React.ReactNode}
             tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useZ}
@@ -337,27 +342,37 @@ export const PokeMoves = ({
               styles.ultButton,
               (showTeraToggle || showZToggle) && styles.lessSpacing,
             )}
-            label="Max"
+            label={t('poke.moves.dmax.label', {
+              ultimate: `$t(pokedex:ultimates.${pokemon?.gmaxable ? 'g' : 'd'}max.2)`,
+            })}
             tooltip={(
               <div className={styles.descTooltip}>
                 {
                   settings?.showUiTooltips &&
-                  <div style={battleActive ? { marginBottom: 2 } : undefined}>
-                    {pokemon?.useMax ? 'Deactivate' : 'Activate'} Max Moves
-                  </div>
+                  <Trans
+                    t={t}
+                    i18nKey={`poke.moves.dmax.${pokemon?.useMax ? '' : 'in'}activeTooltip`}
+                    parent="div"
+                    style={battleActive ? { marginBottom: 2 } : undefined}
+                    shouldUnescape
+                    values={{ ultimate: `$t(pokedex:ultimates.${pokemon?.gmaxable ? 'g' : 'd'}max.0)` }}
+                  />
                 }
 
                 {
                   battleActive &&
-                  <div
+                  <Trans
+                    t={t}
+                    i18nKey={`poke.moves.dmax${player?.usedMax ? 'un' : ''}availableTooltip`}
+                    parent="div"
                     className={cx(
                       styles.ultUsage,
                       !player?.usedMax && styles.available,
                       player?.usedMax && styles.consumed,
                     )}
-                  >
-                    Dmax <strong>{player?.usedMax ? 'Used' : 'Available'}</strong>
-                  </div>
+                    shouldUnescape
+                    values={{ ultimate: `$t(pokedex:ultimates.${pokemon?.gmaxable ? 'g' : 'd'}max.0)` }}
+                  />
                 }
               </div>
             )}
@@ -377,8 +392,16 @@ export const PokeMoves = ({
           showEditButton &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.editButton)}
-            label={pokemon?.showMoveOverrides ? 'Hide' : 'Edit'}
-            tooltip={`${pokemon?.showMoveOverrides ? 'Close' : 'Open'} Move Editor`}
+            label={t(`poke.moves.editor.${pokemon?.showMoveOverrides ? '' : 'in'}activeLabel`)}
+            tooltip={(
+              <Trans
+                t={t}
+                i18nKey={`poke.moves.editor.${pokemon?.showMoveOverrides ? '' : 'in'}activeTooltip`}
+                parent="div"
+                className={styles.descTooltip}
+                shouldUnescape
+              />
+            )}
             tooltipDisabled={!settings?.showUiTooltips}
             primary={pokemon?.showMoveOverrides}
             disabled={!pokemon?.speciesForme}
@@ -405,7 +428,7 @@ export const PokeMoves = ({
               <div className={styles.moveProperty}>
                 <ValueField
                   className={styles.valueField}
-                  label={`Fallen Allies Count for Pokemon ${friendlyPokemonName}`}
+                  label={t('poke.moves.editor.faintCounter.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
                   hideLabel
                   hint={pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0)}
                   fallbackValue={pokemon.faintCounter || 0}
@@ -432,15 +455,24 @@ export const PokeMoves = ({
                 />
 
                 <div className={styles.propertyName}>
-                  Fallen
+                  {t('poke.moves.editor.faintCounter.label')}
                 </div>
               </div>
 
               <ToggleButton
                 className={styles.editorButton}
                 style={typeof pokemon.dirtyFaintCounter === 'number' ? undefined : { opacity: 0 }}
-                label="Reset"
-                tooltip={`Reset to ${pokemon.faintCounter} Fallen`}
+                label={t('poke.moves.editor.faintCounter.resetLabel')}
+                tooltip={(
+                  <Trans
+                    t={t}
+                    i18nKey="poke.moves.editor.faintCounter.resetTooltip"
+                    parent="div"
+                    className={styles.descTooltip}
+                    shouldUnescape
+                    values={{ count: pokemon.faintCounter }}
+                  />
+                )}
                 tooltipDisabled={!settings?.showUiTooltips}
                 primary={typeof pokemon.dirtyFaintCounter === 'number'}
                 disabled={typeof pokemon.dirtyFaintCounter !== 'number'}
@@ -458,13 +490,21 @@ export const PokeMoves = ({
             header
           >
             <div className={styles.headerTitle}>
-              DMG
+              {t('poke.moves.dmg')}
             </div>
 
             <ToggleButton
               className={styles.toggleButton}
-              label="Crit"
-              tooltip={`${pokemon?.criticalHit ? 'Hide' : 'Show'} Critical Hit Damages`}
+              label={t('poke.moves.criticalHit.label')}
+              tooltip={(
+                <Trans
+                  t={t}
+                  i18nKey={`poke.moves.criticalHit.${pokemon?.criticalHit ? '' : 'in'}activeTooltip`}
+                  parent="div"
+                  className={styles.descTooltip}
+                  shouldUnescape
+                />
+              )}
               tooltipDisabled={!settings?.showUiTooltips}
               primary
               active={pokemon?.criticalHit}
@@ -480,7 +520,7 @@ export const PokeMoves = ({
             header
           >
             <div className={styles.headerTitle}>
-              KO %
+              {t('poke.moves.nhko')}
             </div>
           </TableGridItem>
         </>
@@ -618,8 +658,11 @@ export const PokeMoves = ({
           <React.Fragment key={`${l.scope}:${pokemonKey}:MoveRow:Moves:${i}`}>
             <TableGridItem align="left">
               <Dropdown
-                aria-label={`Move Slot ${i + 1} for ${friendlyPokemonName}`}
-                hint="--"
+                aria-label={t('poke.moves.slot.aria', {
+                  count: i + 1,
+                  pokemon: friendlyPokemonName,
+                }) as React.ReactNode}
+                hint={t('poke.moves.slot.hint') as React.ReactNode}
                 optionTooltip={PokeMoveOptionTooltip}
                 optionTooltipProps={{
                   format,
@@ -634,7 +677,7 @@ export const PokeMoves = ({
                   onChange: (name: MoveName) => handleMoveChange(name, i),
                 }}
                 options={moveOptions}
-                noOptionsMessage="No Moves"
+                noOptionsMessage={t('poke.moves.slot.empty') as React.ReactNode}
                 disabled={!pokemon?.speciesForme}
               />
             </TableGridItem>
@@ -655,7 +698,10 @@ export const PokeMoves = ({
                   />
 
                   <MoveCategoryField
-                    ariaLabel={`Stat Overrides for ${moveName} of ${friendlyPokemonName}`}
+                    ariaLabel={t('poke.moves.editor.category.aria', {
+                      move: moveName,
+                      pokemon: friendlyPokemonName,
+                    }) as React.ReactNode}
                     format={format}
                     input={{
                       name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Category`,
@@ -671,12 +717,16 @@ export const PokeMoves = ({
                     PokemonToggleMoves.includes(moveName) &&
                     <ToggleButton
                       className={styles.editorButton}
-                      label="Active"
+                      label={t('poke.moves.editor.active.label')}
                       tooltip={(
-                        <div className={styles.descTooltip}>
-                          {moveToggled ? 'Deactivate' : 'Activate'}{' '}
-                          <strong>{moveName}</strong>
-                        </div>
+                        <Trans
+                          t={t}
+                          i18nKey={`poke.moves.editor.active.${moveToggled ? '' : 'in'}activeTooltip`}
+                          parent="div"
+                          className={styles.descTooltip}
+                          shouldUnescape
+                          values={{ move: moveName }}
+                        />
                       )}
                       tooltipDisabled={!settings?.showUiTooltips}
                       active={moveToggled}
@@ -688,12 +738,15 @@ export const PokeMoves = ({
                     showStellarToggle &&
                     <ToggleButton
                       className={styles.editorButton}
-                      label="Stellar"
+                      label={t('poke.moves.editor.stellar.label')}
                       tooltip={(
-                        <div className={styles.descTooltip}>
-                          {stellarToggled ? 'Deactivate' : 'Activate'}{' '}
-                          <strong>Stellar STAB</strong>
-                        </div>
+                        <Trans
+                          t={t}
+                          i18nKey={`poke.moves.editor.stellar.${stellarToggled ? '' : 'in'}activeTooltip`}
+                          parent="div"
+                          className={styles.descTooltip}
+                          shouldUnescape
+                        />
                       )}
                       tooltipDisabled={!settings?.showUiTooltips}
                       active={stellarToggled}
@@ -711,7 +764,10 @@ export const PokeMoves = ({
                     <div className={styles.moveProperty}>
                       <ValueField
                         className={styles.valueField}
-                        label={`Number of Hits Override for ${moveName} of ${friendlyPokemonName}`}
+                        label={t('poke.moves.editor.hits.aria', {
+                          move: moveName,
+                          pokemon: friendlyPokemonName,
+                        }) as React.ReactNode}
                         hideLabel
                         hint={moveOverrides.hits}
                         fallbackValue={moveDefaults.hits}
@@ -738,7 +794,7 @@ export const PokeMoves = ({
                       />
 
                       <div className={styles.propertyName}>
-                        {pluralize(moveOverrides.hits, 'Hit:s', { printNum: false })}
+                        {t('poke.moves.editor.hits.label', { count: moveOverrides.hits })}
                       </div>
                     </div>
                   }
@@ -748,7 +804,10 @@ export const PokeMoves = ({
                     <div className={styles.moveProperty}>
                       <ValueField
                         className={styles.valueField}
-                        label={`Base Power Override for ${moveName} of ${friendlyPokemonName}`}
+                        label={t('poke.moves.editor.bp.aria', {
+                          move: moveName,
+                          pokemon: friendlyPokemonName,
+                        }) as React.ReactNode}
                         hideLabel
                         hint={moveOverrides[basePowerKey]?.toString() || 0}
                         fallbackValue={fallbackBasePower}
@@ -770,9 +829,9 @@ export const PokeMoves = ({
                       />
 
                       <div className={styles.propertyName}>
-                        {pokemon?.useZ && !pokemon?.useMax && 'Z '}
-                        {pokemon?.useMax && 'Max '}
-                        BP
+                        {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2')} `}
+                        {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2')} `}
+                        {t('poke.moves.editor.bp.label')}
                       </div>
                     </div>
                   }
@@ -782,8 +841,17 @@ export const PokeMoves = ({
                   <ToggleButton
                     className={styles.editorButton}
                     style={hasOverrides ? undefined : { opacity: 0 }}
-                    label="Reset"
-                    tooltip="Reset Move to Defaults"
+                    label={t('poke.moves.editor.resetLabel')}
+                    tooltip={(
+                      <Trans
+                        t={t}
+                        i18nKey="poke.moves.editor.resetTooltip"
+                        parent="div"
+                        className={styles.descTooltip}
+                        shouldUnescape
+                        values={{ move: moveName }}
+                      />
+                    )}
                     tooltipDisabled={!settings?.showUiTooltips}
                     primary={hasOverrides}
                     disabled={!hasOverrides}
@@ -803,7 +871,10 @@ export const PokeMoves = ({
                     <div className={styles.moveProperty}>
                       <ValueField
                         className={styles.valueField}
-                        label={`Number of Hits Override for ${moveName} of ${friendlyPokemonName}`}
+                        label={t('poke.moves.editor.hits.aria', {
+                          move: moveName,
+                          pokemon: friendlyPokemonName,
+                        }) as React.ReactNode}
                         hideLabel
                         hint={moveOverrides.hits}
                         fallbackValue={moveDefaults.hits}
@@ -865,7 +936,7 @@ export const PokeMoves = ({
                         <Badge
                           ref={(ref) => { copiedRefs.current[i] = ref; }}
                           className={styles.copiedBadge}
-                          label="Copied!"
+                          label={t('poke.moves.editor.copiedBadge')}
                           color="green"
                         />
                       </Button>
@@ -885,7 +956,11 @@ export const PokeMoves = ({
                             !hasDamageRange && styles.noDamage,
                           )}
                         >
-                          {parsedDamageRange}
+                          {(
+                            (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune'))
+                              || (parsedDamageRange === 'N/A' && t('poke.moves.na'))
+                              || parsedDamageRange
+                          )}
                         </div>
                       </Tooltip>
                     )

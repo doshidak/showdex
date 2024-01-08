@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Field } from 'react-final-form';
 import cx from 'classnames';
 import { Switch } from '@showdex/components/form';
@@ -13,99 +14,99 @@ export interface HonkdexSettingsPaneProps {
 export const HonkdexSettingsPane = ({
   className,
   style,
-}: HonkdexSettingsPaneProps): JSX.Element => (
-  <div
-    className={cx(styles.settingsGroup, className)}
-    style={style}
-  >
-    <div className={styles.settingsGroupTitle}>
-      Honkdex
+}: HonkdexSettingsPaneProps): JSX.Element => {
+  const { t } = useTranslation('settings');
+
+  return (
+    <div
+      className={cx(styles.settingsGroup, className)}
+      style={style}
+    >
+      <div className={styles.settingsGroupTitle}>
+        {t('pane.sections.primary.honkdex')}
+      </div>
+
+      <div className={styles.settingsGroupFields}>
+        <Field<ShowdexHonkdexSettings['visuallyEnabled']>
+          name="honkdex.visuallyEnabled"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('honkdex.visuallyEnabled.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="honkdex.visuallyEnabled.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
+
+        <Field<ShowdexHonkdexSettings['showAllFormats']>
+          name="honkdex.showAllFormats"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('honkdex.showAllFormats.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="honkdex.showAllFormats.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
+
+        <Field<ShowdexHonkdexSettings['alwaysEditTypes']>
+          name="honkdex.alwaysEditTypes"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('honkdex.alwaysEditTypes.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="honkdex.alwaysEditTypes.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
+
+        <Field<ShowdexHonkdexSettings['alwaysEditMoves']>
+          name="honkdex.alwaysEditMoves"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('honkdex.alwaysEditMoves.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="honkdex.alwaysEditMoves.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
+
+        <Field<ShowdexHonkdexSettings['alwaysShowGenetics']>
+          name="honkdex.alwaysShowGenetics"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('honkdex.alwaysShowGenetics.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="honkdex.alwaysShowGenetics.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
+      </div>
     </div>
-
-    <div className={styles.settingsGroupFields}>
-      <Field<ShowdexHonkdexSettings['visuallyEnabled']>
-        name="honkdex.visuallyEnabled"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Enable the Honk"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Enables the <em>Honkdex</em>, an out-of-battle Calcdex.
-            You can view &amp; edit previously saved calcs (called <em>honks</em>)
-            within the Hellodex.
-            <br />
-            <br />
-            Disabling this will only hide the Honkdex feature &amp; any saved honks
-            will remain in your browser's storage for Showdown.
-          </div>
-        )}
-      />
-
-      <Field<ShowdexHonkdexSettings['showAllFormats']>
-        name="honkdex.showAllFormats"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Include Randoms & Customs"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Allows Randoms &amp; Customs formats, if applicable for the current gen,
-            to appear in the format dropdown list.
-          </div>
-        )}
-      />
-
-      <Field<ShowdexHonkdexSettings['alwaysEditTypes']>
-        name="honkdex.alwaysEditTypes"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Always Edit Types"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Allows Pok&eacute;mon types to be editable in the Honkdex,
-            regardless of the selected format.
-            <br />
-            <br />
-            Disabling this will revert to the configured Calcdex behavior,
-            as specified by the <em>Edit Types</em> setting.
-          </div>
-        )}
-      />
-
-      <Field<ShowdexHonkdexSettings['alwaysEditMoves']>
-        name="honkdex.alwaysEditMoves"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Always Edit Moves"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Allows acces to the move editor in the Pok&eacute;mon's moves table,
-            regardless of the selected format.
-            <br />
-            <br />
-            Disabling this will revert to the configured Calcdex behavior,
-            as specified by the <em>Edit Moves</em> setting.
-          </div>
-        )}
-      />
-
-      <Field<ShowdexHonkdexSettings['alwaysShowGenetics']>
-        name="honkdex.alwaysShowGenetics"
-        component={Switch}
-        className={cx(styles.field, styles.switchField)}
-        label="Always Show Stats"
-        tooltip={(
-          <div className={styles.tooltipContent}>
-            Always shows the base stats, EVs &amp; IVs in the Pok&eacute;mon's
-            stats table. EVs may be still hidden in legacy gens, unless the{' '}
-            <em>Show EVs in Legacy Gens</em> Calcdex setting is enabled.
-            <br />
-            <br />
-            Disabling this will revert to the configured Calcdex behaviors,
-            as specified by the <em>Show My Pok&eacute;mon's</em> &amp;{' '}
-            <em>Show Opponent's</em> settings.
-          </div>
-        )}
-      />
-    </div>
-  </div>
-);
+  );
+};

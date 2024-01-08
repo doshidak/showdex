@@ -4,6 +4,7 @@
  * @since 1.2.1
  */
 export type ShowdexAssetBundleTag =
+  | 'locale'
   | 'presets';
 
 /**

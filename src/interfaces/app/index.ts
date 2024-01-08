@@ -3,6 +3,7 @@ export * from './ShowdexBootstrapper';
 export * from './ShowdexCalcdexSettings';
 export * from './ShowdexHellodexSettings';
 export * from './ShowdexHonkdexSettings';
+export * from './ShowdexLocaleBundle';
 export * from './ShowdexPlayerTitle';
 export * from './ShowdexPresetsBundle';
 export * from './ShowdexSettings';

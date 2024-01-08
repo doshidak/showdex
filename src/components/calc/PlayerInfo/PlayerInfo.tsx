@@ -1,9 +1,9 @@
 import * as React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
-import { eacute } from '@showdex/consts/core';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { useColorScheme } from '@showdex/redux/store';
@@ -34,6 +34,7 @@ export const PlayerInfo = ({
   defaultName = '--',
   playerOptions,
 }: PlayerInfoProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 
   const {
@@ -128,12 +129,17 @@ export const PlayerInfo = ({
     >
       {playerOptions?.length ? (
         <Dropdown
-          aria-label={`${capitalize(position)} Player Selector`}
+          aria-label={t('player.user.aria', { position: capitalize(position) }) as React.ReactNode}
           hint={name || defaultName}
           tooltip={settings?.showUiTooltips ? (
-            <div className={styles.tooltipContent}>
-              Switch <strong>{capitalize(position)}</strong> Player
-            </div>
+            <Trans
+              t={t}
+              i18nKey="player.user.selectorTooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+              values={{ position: capitalize(position) }}
+            />
           ) : null}
           input={{
             name: `PlayerInfo:${position}:Dropdown`,
@@ -148,7 +154,7 @@ export const PlayerInfo = ({
             ),
           }}
           options={playerOptions}
-          noOptionsMessage="No Players Found"
+          noOptionsMessage={t('player.user.empty') as React.ReactNode}
           clearable={false}
           disabled={!playerKey}
         />
@@ -174,15 +180,12 @@ export const PlayerInfo = ({
               }
               {
                 settings?.showUiTooltips &&
-                <>
-                  Open{' '}
-                  {name ? (
-                    <>
-                      <strong>{name}</strong>'s
-                    </>
-                  ) : 'User'}{' '}
-                  Profile
-                </>
+                <Trans
+                  t={t}
+                  i18nKey="player.user.buttonTooltip"
+                  shouldUnescape
+                  values={{ player: name || 'User' }}
+                />
               }
             </div>
           )}
@@ -207,8 +210,8 @@ export const PlayerInfo = ({
       <div className={styles.playerActions}>
         <ToggleButton
           className={styles.toggleButton}
-          label="Auto"
-          tooltip={`${autoSelect ? 'Manually ' : 'Auto-'}Select Pok${eacute}mon`}
+          label={t('player.autoSelect.label')}
+          tooltip={t(`player.autoSelect.${autoSelect ? '' : 'in'}activeTooltip`)}
           tooltipDisabled={!settings?.showUiTooltips}
           absoluteHover
           active={autoSelect}

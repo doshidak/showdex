@@ -50,7 +50,7 @@ export const PatronageTierRenderer = (
     <React.Fragment key={containerKey}>
       <div
         className={styles.heading}
-        style={notFirstTier ? { marginTop: 15 } : undefined}
+        style={notFirstTier ? { marginTop: 16 } : undefined}
       >
         {title}
       </div>

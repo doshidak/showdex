@@ -4,6 +4,7 @@ export * from './createHonkdexRoom';
 export * from './findPlayerTitle';
 export * from './getCalcdexRoomId';
 export * from './getHonkdexRoomId';
+export * from './loadI18nextLocales';
 export * from './openCalcdexInstance';
 export * from './openHonkdexInstance';
 export * from './removeHonkdexInstances';

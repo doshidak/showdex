@@ -1,0 +1,297 @@
+{
+  "--meta": {
+    "name": "pokedex",
+    "version": "1.0.0",
+    "locale": "en",
+    "created": "2024-01-05T11:35:50.967Z",
+    "updated": "2024-01-08T16:35:47.680Z"
+  },
+
+  "abilities": {
+    "noability_one": "No Ability",
+    "noability_other": "No Abilities"
+  },
+
+  "items": {
+    "noitem_one": "No Item",
+    "noitem_other": "No Items"
+  },
+
+  "moves": {
+    "nomove_one": "No Move",
+    "nomove_other": "No Moves"
+  },
+
+  "categories": {
+    "physical": ["Physical", "PHYS"],
+    "special": ["Special", "SPEC"],
+    "status": ["Status", "STAT"]
+  },
+
+  "natures": {
+    "adamant": "Adamant",
+    "bashful": "Bashful",
+    "bold": "Bold",
+    "brave": "Brave",
+    "calm": "Calm",
+    "careful": "Careful",
+    "docile": "Docile",
+    "gentle": "Gentle",
+    "hardy": "Hardy",
+    "impish": "Impish",
+    "jolly": "Jolly",
+    "lax": "Lax",
+    "lonely": "Lonely",
+    "mild": "Mild",
+    "modest": "Modest",
+    "naive": "Naive",
+    "naughty": "Naughty",
+    "quiet": "Quiet",
+    "quirky": "Quirky",
+    "rash": "Rash",
+    "relaxed": "Relaxed",
+    "sassy": "Sassy",
+    "serious": "Serious",
+    "timid": "Timid"
+  },
+
+  "species": {
+    "nopokemon": "No Pokémon",
+    "missingno": "MissingNo."
+  },
+
+  "speciesAliases": {
+    "chomp": "Garchomp",
+    "landot": "Landorous-Therian",
+    "pex": "Toxapex",
+    "pult": "Dragapult",
+    "ttar": "Tyranitar"
+  },
+
+  "stats": {
+    "acc": ["Accuracy", "ACC"],
+    "atk": ["Attack", "ATK"],
+    "bp": ["Base Power", "BP"],
+    "base_one": ["Base Stat", "Base"],
+    "base_other": ["Base Stats", "Base"],
+    "bst_one": ["Base Stat Total", "BST"],
+    "bst_other": ["Base Stat Totals", "BSTs"],
+    "def": ["Defense", "DEF"],
+    "dvs_one": ["Determinant Value", "DV"],
+    "dvs_other": ["Determinant Values", "DVs"],
+    "eva": ["Evasion", "EVA"],
+    "evs_one": ["Effort Value", "EV"],
+    "evs_other": ["Effort Values", "EVs"],
+    "hp": ["Hit Points", "HP"],
+    "ivs_one": ["Individual Value", "IV"],
+    "ivs_other": ["Individual Values", "IVs"],
+    "spa": ["Special Attack", "SPA"],
+    "spc": ["Special", "SPC"],
+    "spd": ["Special Defense", "SPD"],
+    "spe": ["Speed", "SPE"]
+  },
+
+  "headers": {
+    "ability_one": "Ability",
+    "ability_other": "Abilities",
+    "abilities": "Abilities",
+    "ag": "AG",
+    "all": "$(common:labels.all)",
+    "belowduu": "Below DUU",
+    "belowpu": "Below PU",
+    "cap": "CAP",
+    "caplc": "CAP LC",
+    "capmoves": "CAP Moves",
+    "current": "$(common:labels.current)",
+    "dou": "Doubles OU",
+    "dnu": "Doubles NU",
+    "duber": "Doubles Ubers",
+    "duu": "Doubles UU",
+    "field": "Field",
+    "formes": "Formes",
+    "hiddenability": "Hidden Ability",
+    "hiddenpower": "Hidden Power",
+    "illegalresults": "Illegal Results",
+    "inherited": "Inherited",
+    "item_one": "Item",
+    "item_other": "Items",
+    "items": "Items",
+    "lc": "LC",
+    "learnset": "Learnset",
+    "legal": "Legal",
+    "level_one": "Level",
+    "level_other": "Levels",
+    "maxmoves": "$t(ultimates.dmax.2)",
+    "move_one": "Move",
+    "move_other": "Moves",
+    "moves": "Moves",
+    "mythical": "Mythical",
+    "nature_one": "Nature",
+    "nature_other": "Natures",
+    "neutral": "Neutral",
+    "new": "New",
+    "nfesnotinahighertier": "NFEs Not in a Higher Tier",
+    "nu": "NU",
+    "nubl": "NUBL",
+    "other": "$(common:labels.other)",
+    "ou": "OU",
+    "oubytechnicality": "OU by Technicality",
+    "physicalmoves": "Physical Moves",
+    "pokemon": "Pokémon",
+    "pokemonspecificitems": "Pokémon-Specific",
+    "pool": "Pool",
+    "popular": "Popular",
+    "popularitems": "Popular",
+    "pretransform": "Pre-Transform",
+    "pu": "PU",
+    "publ": "PUBL",
+    "regular": "Regular",
+    "restrictedlegendary": "Restricted Legendary",
+    "revealed": "Revealed",
+    "ru": "RU",
+    "rubl": "RUBL",
+    "sketchedmoves": "Sketched Moves",
+    "situationalabilities": "Situational Abilities",
+    "specialeventability": "Special Event Ability",
+    "specialmoves": "Special Moves",
+    "spread_one": "Spread",
+    "spread_other": "Spreads",
+    "stat_one": "Stat",
+    "stat_other": "Stats",
+    "teratype_one": "Tera Type",
+    "teratype_other": "Tera Types",
+    "terrain": "Terrain",
+    "traced": "Traced",
+    "transformed": "Transformed",
+    "type_one": "Type",
+    "type_other": "Types",
+    "uber": "Ubers",
+    "unviableabilities": "Unviable Abilities",
+    "usage": "Usage",
+    "useless": "Useless",
+    "uselessitems": "Useless",
+    "uselesssketchedmoves": "Useless Sketched Moves",
+    "usuallyuseless": "Usually Useless",
+    "usuallyuselessitems": "Usually Useless",
+    "usuallyuselessmoves": "Usually Useless",
+    "uu": "UU",
+    "uubl": "UUBL",
+    "weather": "Weather",
+    "zmoves": "$t(ultimates.z.2)"
+  },
+
+  "types": {
+    "bug": ["Bug", "BUG", "BUG", "BUG"],
+    "dark": ["Dark", "DARK", "DARK", "DRK"],
+    "dragon": ["Dragon", "DRAGON", "DRGN", "DRG"],
+    "electric": ["Electric", "ELECTR", "ELCR", "ELC"],
+    "fairy": ["Fairy", "FAIRY", "FARY", "FRY"],
+    "fighting": ["Fighting", "FIGHT", "FGHT", "FGT"],
+    "fire": ["Fire", "FIRE", "FIRE", "FRE"],
+    "flying": ["Flying", "FLYING", "FLY", "FLY"],
+    "ghost": ["Ghost", "GHOST", "GHST", "GST"],
+    "grass": ["Grass", "GRASS", "GRSS", "GRS"],
+    "ground": ["Ground", "GROUND", "GRND", "GND"],
+    "ice": ["Ice", "ICE", "ICE", "ICE"],
+    "normal": ["Normal", "NORMAL", "NRML", "NRM"],
+    "poison": ["Poison", "POISON", "PSN", "PSN"],
+    "psychic": ["Psychic", "PSYCHIC", "PSYC", "PSY"],
+    "rock": ["Rock", "ROCK", "ROCK", "RCK"],
+    "steel": ["Steel", "STEEL", "STL", "STL"],
+    "stellar": ["Stellar", "STELLR", "STLR", "SLR"],
+    "unknown": ["Unknown", "???", "???", "???"],
+    "water": ["Water", "WATER", "WATR", "WTR"]
+  },
+
+  "effects": {
+    "bestowed": "Bestowed",
+    "consumed": "Consumed",
+    "disturbed": "Disturbed",
+    "eaten": "Eaten",
+    "flung": "Flung",
+    "found": "Found",
+    "frisked": "Frisked",
+    "harvested": "Harvested",
+    "heldup": "Held Up",
+    "incinerated": "Incinerated",
+    "knockedoff": "Knocked Off",
+    "popped": "Popped",
+    "stolen": "Stolen",
+    "tricked": "Tricked"
+  },
+
+  "nonvolatiles": {
+    "ok": ["Healthy", "OK", "OK"],
+    "fnt": ["Fainted", "FAINT", "RIP"],
+    "brn": ["Burned", "BURNED", "BRN"],
+    "frz": ["Frozen", "FROZEN", "FRZ"],
+    "par": ["Paralyzed", "PARLYZ", "PAR"],
+    "psn": ["Poisoned", "POISON", "PSN"],
+    "slp": ["Asleep", "ASLEEP", "SLP"],
+    "tox": ["Badly Poisoned", "TOXIC", "TOX"]
+  },
+
+  "volatiles": {},
+
+  "weather": {
+    "hail": {
+      "label": "Hail",
+      "shortDesc": "For 5 turns (8 w/ Icy Rock), -6% HP (non-Ice, non-Ice Body/Magic Guard/Overcoat/Snow Cloak)."
+    },
+    "harshsunshine": {
+      "label": "Intense Sun",
+      "shortDesc": "Until switch-out, Fire 1.5{{times}}, Water 0{{times}} (non-Air Lock/Cloud Nine)."
+    },
+    "heavyrain": {
+      "label": "Heavy Rain",
+      "shortDesc": "Until switch-out, Water 1.5{{times}}, Fire 0{{times}} (non-Air Lock/Cloud Nine)."
+    },
+    "rain": {
+      "label": "Rain",
+      "shortDesc": "For 5 turns (8 w/ Damp Rock), Water 1.5{{times}}, Fire 0.5{{times}}."
+    },
+    "sand": {
+      "label": "Sand",
+      "shortDesc": "For 5 turns (8 w/ Smooth Rock), SPD 1.5{{times}} (Rock only), -6% HP (non-Ground/Rock/Steel, non-Magic Guard/Overcoat/Sand Force/Sand Rush/Sand Veil)."
+    },
+    "snow": {
+      "label": "Snow",
+      "shortDesc": "For 5 turns (8 w/ Icy Rock), DEF 1.5{{times}} (Ice only)."
+    },
+    "strongwinds": {
+      "label": "Strong Winds",
+      "shortDesc": "Until switch-out, no Flying weaknesses."
+    },
+    "sun": {
+      "label": "Sun",
+      "shortDesc": "For 5 turns (8 w/ Heat Rock), Fire 1.5{{times}}, Water 0.5{{times}}."
+    }
+  },
+
+  "terrain": {
+    "electric": {
+      "label": "Electric",
+      "shortDesc": "For 5 turns, Electric 1.3{{times}} (grounded), can't sleep."
+    },
+    "grassy": {
+      "label": "Grassy",
+      "shortDesc": "For 5 turns, Grass 1.3{{times}} (grounded), Bulldoze/Earthquake/Magnitude 0.5{{times}}, +6% HP."
+    },
+    "misty": {
+      "label": "Misty",
+      "shortDesc": "For 5 turns, Dragon 0.5{{times}} (grounded), can't status."
+    },
+    "psychic": {
+      "label": "Psychic",
+      "shortDesc": "For 5 turns, Psychic 1.3{{times}} (grounded), no priority."
+    }
+  },
+
+  "ultimates": {
+    "gmax": ["Gigantamax", "Gigantamax", "Gmax"],
+    "dmax": ["Dynamax", "Dynamax", "Max"],
+    "mega": ["Mega-Evolution", "Mega-evolve", "Mega"],
+    "tera": ["Terastallization", "Terastallize", "Tera"],
+    "z": ["Z-Power", "Z-Power up", "Z"]
+  }
+}

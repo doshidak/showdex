@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { type GenerationNum } from '@smogon/calc';
 import { type BadgeInstance, Badge, CircularBar } from '@showdex/components/ui';
@@ -8,7 +9,6 @@ import { useColorScheme } from '@showdex/redux/store';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, getDexForFormat, hasNickname } from '@showdex/utils/dex';
-import { pluralize } from '@showdex/utils/humanize';
 import { determineColorScheme } from '@showdex/utils/ui';
 import { Picon } from '../Picon';
 import { PokeStatus } from '../PokeStatus';
@@ -41,6 +41,7 @@ export const PokeGlance = ({
   showBaseStats,
   reverseColorScheme,
 }: PokeGlanceProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
@@ -89,6 +90,15 @@ export const PokeGlance = ({
     baseStats,
     bst,
   } = dex?.species.get(speciesForme) || {};
+
+  const translatedBaseSpecies = (!!baseSpecies && t(`pokedex:species.${formatId(baseSpecies)}`, baseSpecies))
+    || t('pokedex:species.missingno');
+
+  const translatedForme = (
+    !!baseSpecies
+      && !!forme
+      && t(`pokedex:species.${formatId(baseSpecies + forme)}`, '').replace(translatedBaseSpecies, forme)
+  ) || forme;
 
   const types = (!!dirtyTypes?.length && dirtyTypes)
     || (!!currentTypes?.length && currentTypes)
@@ -170,20 +180,20 @@ export const PokeGlance = ({
                 (!exists || !baseSpecies) && styles.empty,
               )}
             >
-              {baseSpecies || 'MissingNo.'}
+              {translatedBaseSpecies}
             </div>
 
             {
-              !!forme &&
+              !!translatedForme &&
               <div className={styles.forme}>
-                &ndash;{forme}
+                &ndash;{translatedForme}
               </div>
             }
 
             {
               (!!level && level !== 100) &&
               <div className={styles.level}>
-                L{level}
+                {t('poke.info.level.label')}{level}
               </div>
             }
           </div>
@@ -192,7 +202,7 @@ export const PokeGlance = ({
             !!nickname &&
             <div className={cx(styles.detailsRow, styles.nickname)}>
               <div className={styles.aka}>
-                aka.
+                {t('common:labels.aka')}
               </div>
 
               <div className={styles.value}>
@@ -250,7 +260,7 @@ export const PokeGlance = ({
                 className={styles.stat}
               >
                 <div className={styles.statName}>
-                  {name}
+                  {t(`pokedex:stats.${formatId(name)}.1`, name)}
                 </div>
 
                 <div className={styles.statValue}>
@@ -264,7 +274,7 @@ export const PokeGlance = ({
             !!bst &&
             <div className={styles.stat}>
               <div className={styles.statName}>
-                BST
+                {t('pokedex:stats.bst_one.1')}
               </div>
 
               <div className={cx(styles.statValue, styles.bst)}>
@@ -282,16 +292,20 @@ export const PokeGlance = ({
             !!ability &&
             <>
               <div className={cx(styles.specName, abilityToggled && styles.active)}>
-                {abilityToggled ? 'Active' : 'Ability'}
+                {t(abilityToggled ? 'common:labels.active' : 'pokedex:headers.ability_one')}
               </div>
 
               <div className={cx(styles.specValues, abilityToggled && styles.active)}>
-                {ability}
+                {t(`pokedex:abilities.${formatId(ability)}`, ability)}
 
                 {
                   (PokemonBoosterAbilities.includes(ability) && !!(dirtyBoostedStat || boostedStat)) &&
                   <span className={styles.boostedStat}>
-                    {' '}{dirtyBoostedStat || boostedStat}
+                    {' '}
+                    {t(
+                      `pokedex:stats.${formatId(dirtyBoostedStat || boostedStat)}.1`,
+                      dirtyBoostedStat || boostedStat,
+                    )}
                   </span>
                 }
               </div>
@@ -302,14 +316,14 @@ export const PokeGlance = ({
             (shouldShowAbility && !ability) &&
             <>
               <div className={styles.specName}>
-                {pluralize(abilities.length, 'Abilit:ies:y', { printNum: false })}
+                {t('pokedex:headers.ability', { count: abilities.length })}
               </div>
               <div className={styles.specValues}>
                 {/* feeling lazy rn lmao */}
                 <div>
                   {abilities.map((a) => (
                     <div key={`PokeGlanceContent:${id}:Abilities:${a}`}>
-                      {a}
+                      {t(`pokedex:abilities.${formatId(a)}`, a)}
                     </div>
                   ))}
                 </div>
@@ -321,11 +335,11 @@ export const PokeGlance = ({
             (!!item && !!itemEffect) &&
             <>
               <div className={cx(styles.specName, styles.centered)}>
-                {itemEffect}
+                {t(`pokedex:effects.${formatId(itemEffect)}`, itemEffect)}
               </div>
               <div className={styles.specValues}>
                 <ItemIcon item={item} />
-                <span>{item}</span>
+                <span>{t(`pokedex:items.${formatId(item)}`, item)}</span>
               </div>
             </>
           }
@@ -334,11 +348,11 @@ export const PokeGlance = ({
             (showItem && !!prevItem) &&
             <>
               <div className={cx(styles.specName, styles.centered)}>
-                {prevItemEffect || 'Prev'}
+                {t(`pokedex:effects.${formatId(prevItemEffect)}`, prevItemEffect) || t('common:labels.previous')}
               </div>
               <div className={cx(styles.specValues, styles.prev)}>
                 <ItemIcon item={prevItem} />
-                <span>{prevItem}</span>
+                <span>{t(`pokedex:items.${formatId(prevItem)}`, prevItem)}</span>
               </div>
             </>
           }
