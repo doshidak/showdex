@@ -46,7 +46,15 @@ export const ShowdexSettingsPane = ({
             label: bundle.label || bundle.name,
             tooltip: (
               <div className={styles.tooltipContent}>
-                <strong>{bundle.name}</strong>
+                {bundle.name === '(i18n)' ? (
+                  <Trans
+                    t={t}
+                    i18nKey={`showdex.locale.options.${bundle.locale}.name`}
+                    parent="strong"
+                    shouldUnescape
+                  />
+                ) : <strong>{bundle.name}</strong>}
+
                 {
                   !!bundle.author &&
                   <>
@@ -54,8 +62,8 @@ export const ShowdexSettingsPane = ({
                     <Trans
                       t={t}
                       i18nKey="showdex.locale.tooltip.author"
-                      values={{ name: bundle.author }}
                       shouldUnescape
+                      values={{ name: bundle.author }}
                     />
                   </>
                 }
@@ -65,7 +73,17 @@ export const ShowdexSettingsPane = ({
                   <>
                     <br />
                     <br />
-                    {bundle.description}
+                    {bundle.description === '(i18n)' ? (
+                      <Trans
+                        t={t}
+                        i18nKey={`showdex.locale.options.${bundle.locale}.description`}
+                        shouldUnescape
+                        components={{
+                          code: <code />,
+                          ndash: <span>&ndash;</span>,
+                        }}
+                      />
+                    ) : bundle.description}
                   </>
                 }
 
@@ -77,8 +95,8 @@ export const ShowdexSettingsPane = ({
                     <Trans
                       t={t}
                       i18nKey="showdex.locale.tooltip.updated"
-                      values={{ date: format(new Date(bundle.updated || bundle.created), 'PP') }}
                       shouldUnescape
+                      values={{ date: format(new Date(bundle.updated || bundle.created), 'PP') }}
                     />
                   </>
                 }
@@ -87,8 +105,6 @@ export const ShowdexSettingsPane = ({
             value: bundle.locale,
             disabled: bundle.disabled,
           }))}
-          multi
-          unique
         />
 
         <Field<ShowdexSettings['forcedColorScheme']>

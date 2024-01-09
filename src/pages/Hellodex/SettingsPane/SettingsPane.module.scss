@@ -38,6 +38,10 @@ $close-icon-size: 28px;
       background-color: color.alpha(colors.$gray-darkest, 0.8);
     }
   }
+
+  code {
+    @include font.apply(fonts.$mono);
+  }
 }
 
 .contentContainer {

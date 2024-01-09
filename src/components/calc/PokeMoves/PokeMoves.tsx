@@ -88,6 +88,8 @@ export const PokeMoves = ({
       include: (settings?.showAllOptions && 'all')
         || (operatingMode === 'standalone' && 'hidden-power')
         || null,
+      translate: (v) => t(`pokedex:moves.${formatId(v)}`, v),
+      translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
     },
   ), [
     field,
@@ -95,6 +97,7 @@ export const PokeMoves = ({
     operatingMode,
     pokemon,
     settings?.showAllOptions,
+    t,
     usage,
   ]);
 
@@ -278,8 +281,16 @@ export const PokeMoves = ({
                     style={battleActive ? { marginBottom: 2 } : undefined}
                     shouldUnescape
                     values={{
-                      types: pokemon?.types?.join('/') || t('pokedex:types.unknown.0'),
-                      teraType: pokemon?.dirtyTeraType || pokemon?.teraType || t('pokedex:types.unknown.0'),
+                      types: (
+                        pokemon?.types
+                          ?.map((tp) => t(`pokedex:types.${formatId(tp)}.0`))
+                          .join('/')
+                      ) || t('pokedex:types.unknown.0'),
+                      teraType: (
+                        (!!pokemon?.dirtyTeraType && t(`pokedex:types.${formatId(pokemon.dirtyTeraType)}.0`))
+                          || (!!pokemon?.teraType && t(`pokedex:types.${formatId(pokemon.teraType)}.0`))
+                          || t('pokedex:types.unknown.0')
+                      ),
                     }}
                   />
                 }

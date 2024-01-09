@@ -191,7 +191,7 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Revealed') || 'Revealed',
+      label: translateHeader?.('Revealed Moves') || 'Revealed',
       options: filteredRevealedMoves.map((name) => ({
         label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),

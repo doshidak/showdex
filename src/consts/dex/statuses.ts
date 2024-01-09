@@ -24,6 +24,7 @@ export const PokemonStatuses: Showdown.PokemonStatus[] = [
  * * Works similarly to `PokemonTypeLabels`, except that the `'xm'` case doesn't exist.
  * * Primarily used in `PokeStatus`.
  *
+ * @deprecated As of v1.2.1, these are stored in translation strings in `@showdex/assets/i18n`.
  * @since 1.1.6
  */
 export const PokemonStatusLabels: Record<Exclude<Showdown.PokemonStatus, '???'>, [full: string, sm: string]> = {
@@ -40,6 +41,7 @@ export const PokemonStatusLabels: Record<Exclude<Showdown.PokemonStatus, '???'>,
  *
  * * Primarily used in `PokeStatusTooltip`.
  *
+ * @deprecated As of v1.2.1, these are stored in translation strings in `@showdex/assets/i18n`.
  * @since 1.1.6
  */
 export const PokemonStatusTitles: Record<Showdown.PokemonStatus, string> = {

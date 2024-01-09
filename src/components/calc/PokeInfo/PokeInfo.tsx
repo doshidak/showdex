@@ -190,8 +190,8 @@ export const PokeInfo = ({
   const natureOptions = React.useMemo(() => PokemonCommonNatures.map((name) => ({
     label: t(`pokedex:natures.${formatId(name)}`, name),
     rightLabel: PokemonNatureBoosts[name]?.length ? [
-      !!PokemonNatureBoosts[name][0] && `+${PokemonNatureBoosts[name][0].toUpperCase()}`,
-      !!PokemonNatureBoosts[name][1] && `-${PokemonNatureBoosts[name][1].toUpperCase()}`,
+      !!PokemonNatureBoosts[name][0] && `+${t(`pokedex:stats.${formatId(PokemonNatureBoosts[name][0])}.1`)}`,
+      !!PokemonNatureBoosts[name][1] && `-${t(`pokedex:stats.${formatId(PokemonNatureBoosts[name][1])}.1`)}`,
     ].filter(Boolean).join(' ') : t('pokedex:headers.neutral'),
     value: name,
   })), [

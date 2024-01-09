@@ -234,7 +234,7 @@ export const CalcdexSettingsPane = ({
             30,
             0, // never
           ].map((count) => ({
-            label: t(`calcdex.maxPresetAge.options.${count ? '$count' : '0'}.label`, count ? {
+            label: t(`calcdex.maxPresetAge.options.${count ? '$count.label_interval' : '0.label'}`, count ? {
               postProcess: 'interval',
               count,
             } : undefined),
@@ -393,6 +393,7 @@ export const CalcdexSettingsPane = ({
               parent="div"
               className={styles.tooltipContent}
               shouldUnescape
+              components={{ code: <code /> }}
             />
           )}
         />
@@ -597,6 +598,7 @@ export const CalcdexSettingsPane = ({
               parent="div"
               className={styles.tooltipContent}
               shouldUnescape
+              components={{ ndash: <span>&ndash;</span> }}
             />
           )}
         />

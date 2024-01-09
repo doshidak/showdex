@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
 import { type GenerationNum } from '@smogon/calc';
@@ -11,6 +12,7 @@ import {
 } from '@showdex/components/ui';
 import { PokemonStatNames } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
 import { determineColorScheme } from '@showdex/utils/ui';
 import styles from './PokeStatField.module.scss';
@@ -66,6 +68,7 @@ export const PokeStatField = React.forwardRef<ButtonElement, PokeStatFieldProps>
     () => containerRef.current,
   );
 
+  const { t } = useTranslation('pokedex');
   const colorScheme = useColorScheme();
   const reversedColorScheme = determineColorScheme(colorScheme, true);
 
@@ -136,7 +139,8 @@ export const PokeStatField = React.forwardRef<ButtonElement, PokeStatFieldProps>
               }
 
               const active = input?.value === stat;
-              const statLabel = (gen === 1 && stat === 'spa' && 'spc') || stat;
+              const statName = (gen === 1 && stat === 'spa' && 'spc') || stat;
+              const statLabel = t(`stats.${formatId(statName)}.1`);
 
               return (
                 <ToggleButton

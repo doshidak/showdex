@@ -97,7 +97,7 @@ export const PokeGlance = ({
   const translatedForme = (
     !!baseSpecies
       && !!forme
-      && t(`pokedex:species.${formatId(baseSpecies + forme)}`, '').replace(translatedBaseSpecies, forme)
+      && t(`pokedex:species.${formatId(baseSpecies + forme)}`, '').replace(`${translatedBaseSpecies}-`, '')
   ) || forme;
 
   const types = (!!dirtyTypes?.length && dirtyTypes)

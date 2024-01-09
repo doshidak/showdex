@@ -2,9 +2,9 @@
   "--meta": {
     "name": "settings",
     "version": "1.0.0",
-    "locale": "en",
-    "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-09T22:20:18.539Z"
+    "locale": "fr",
+    "created": "2024-01-08T19:45:21.842Z",
+    "updated": "2024-01-09T21:58:04.957Z"
   },
 
   "pane": {
@@ -15,23 +15,23 @@
         "undoLabel": "$t(common:labels.undo)?",
         "importedBadge": "$t(common:labels.imported)",
         "failedBadge": "$t(common:labels.failed)",
-        "tooltip": "Import Settings from Clipboard"
+        "tooltip": "Importer les Paramètres Depuis le Presse-papiers"
       },
       "export": {
         "label": "$t(common:labels.export)",
         "exportedBadge": "$t(common:labels.copied)!",
         "failedBadge": "$t(common:labels.failed)",
-        "tooltip": "Export Settings to Clipboard"
+        "tooltip": "Exporter les Paramètres Depuis le Presse-papiers"
       },
       "defaults": {
         "label": "$t(common:labels.default_other)",
         "exportedBadge": "$t(common:labels.copied)!",
         "failedBadge": "$t(common:labels.failed)",
-        "tooltip": "Export Defaults to Clipboard"
+        "tooltip": "Exporter les Paramètres par Défaut Depuis le Presse-papiers"
       },
       "close": {
         "label": "$t(common:labels.close)",
-        "tooltip": "Close $t(common:products.showdex) Settings"
+        "tooltip": "Fermer les Paramètres $t(common:products.showdex)"
       }
     },
 
@@ -45,54 +45,52 @@
       },
 
       "secondary": {
-        "advanced": "Advanced",
-        "behavior": "Behavior",
+        "advanced": "Avancés",
+        "behavior": "Comportement",
         "interface": "Interface",
-        "matchup_one": "Matchup",
-        "matchup_other": "Matchups",
-        "panel": "Panel Tab",
+        "matchup_one": "Match",
+        "matchup_other": "Matchs",
+        "panel": "Onglet du Panneau",
         "presets": "Sets",
-        "special": "Special"
+        "special": "Spéciaux"
       }
     },
 
     "footer": {
-      "message": "plz excuse the mess, this is a work in progress"
+      "message": "veuillez excuser le désordre, c'est un travail en cours"
     }
   },
 
   "showdex": {
     "locale": {
-      "label": "Language",
+      "label": "Langue",
       "tooltip": {
-        "author": "by {{name}}",
-        "updated": "<em>Updated {{date}}</em>"
+        "author": "par {{name}}",
+        "updated": "<em>Mis à jour le {{date}}</em>"
       },
       "options": {
         "en": {
-          "name": "English",
-          "description": "Standard issue."
+          "name": "Anglais"
         },
         "fr": {
-          "name": "French (Kinda)",
-          "description": "Contains French versions of all <em>talents</em>, <em>natures</em>, <em>objets</em>, <em>capacités</em> &amp; Pokémon, sourced from Sykless's <code>pokemon-showdown-fr</code> extension!<br /><br />Also with the help of Google Translate, majority of the UI is also in French, minus the settings. (Excuse my French, I don't speak it sorry.)<br /><br /><em>bone apple teeth</em> <ndash />BOT Keith"
+          "name": "Français (un peu)"
         }
       }
     },
 
     "forcedColorScheme": {
-      "label": "Color Mode",
+      "label": "Mode de Couleur",
       "options": {
         "showdown": {
           "label": "$t(common:products.showdown)",
           "tooltip": "Matches $t(common:products.showdown)'s graphics theme."
         },
         "light": {
-          "label": "Light",
+          "label": "Lumière",
           "tooltip": "Forces a light mode for everything $t(common:products.showdex), regardlesss of $t(common:products.showdown)'s graphics theme."
         },
         "dark": {
-          "label": "Dark",
+          "label": "Sombre",
           "tooltip": "Forces a dark mode for everything $t(common:products.showdex), regardlesss of $t(common:products.showdown)'s graphics theme."
         }
       }
@@ -272,8 +270,8 @@
     "includePresetsBundles": {
       "label": "Include Bundled Sets From",
       "tooltip": {
-        "author": "by {{name}}",
-        "updated": "<em>Updated {{date}}</em>"
+        "author": "par {{name}}",
+        "updated": "<em>Mis à jour le {{date}}</em>"
       }
     },
 
@@ -372,7 +370,7 @@
 
     "showNicknames": {
       "label": "Show Pokémon Nicknames",
-      "tooltip": "Shows the Pokémon's nickname, if any, instead of its forme.<br /><br />(\"but why tho?\" <ndash /><em>analogcam</em>, 2022)"
+      "tooltip": "Shows the Pokémon's nickname, if any, instead of its forme.<br /><br />(\"but why tho?\" &mdash;<em>analogcam</em>, 2022)"
     },
 
     "forceNonVolatile": {

@@ -14,7 +14,7 @@ import { ShowdexPresetsBundles } from '@showdex/consts/app';
  * @since 1.2.0
  */
 export const DefaultShowdexSettings: ShowdexSettings = {
-  locale: 'en',
+  locale: null, // falling back to LanguageDetector
   colorScheme: null,
   forcedColorScheme: 'showdown',
   glassyTerrain: false,

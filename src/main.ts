@@ -99,8 +99,15 @@ void (async () => {
     store.dispatch(showdexSlice.actions.updateSettings(settings));
   }
 
-  // todo: load locale from settings
-  await loadI18nextLocales('en');
+  // note: settings.locale's default value is `null`, which will allow the i18next LanguageDetector plugin to kick in
+  const i18next = await loadI18nextLocales(settings.locale);
+
+  // only update the stored locale if not in settings & we've detected one
+  if (!settings.locale && i18next?.language) {
+    store.dispatch(showdexSlice.actions.updateSettings({
+      locale: i18next.language,
+    }));
+  }
 
   const honks = await readHonksDb(db);
 

@@ -8,7 +8,7 @@ import { PokemonBoostNames, PokemonNatureBoosts, PokemonStatNames } from '@showd
 import { CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
@@ -563,27 +563,37 @@ export const PokeStats = ({
             key={`PokeStats:StatValue:${pokemonKey}:${stat}`}
             content={(
               <div className={styles.statModsTable}>
-                {mods?.map((mod) => (
-                  <React.Fragment
-                    key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
-                  >
-                    <div
-                      className={cx(
-                        styles.statModValue,
-                        styles.statValue,
-                        (mod?.modifier ?? 1) > 1 && styles.positive,
-                        (mod?.modifier ?? 1) < 1 && styles.negative,
-                      )}
+                {mods?.map((mod) => {
+                  const tSource = (mod?.source === 'ability' && 'abilities')
+                    || (mod?.source === 'item' && 'items')
+                    || (mod?.source === 'move' && 'moves')
+                    || (mod?.source === 'status' && 'nonvolatiles')
+                    || (mod?.source === 'ultimate' && 'ultimates');
+
+                  const tLabel = t(`pokedex:${tSource}.${formatId(mod?.label)}`, '??? HUH');
+
+                  return (
+                    <React.Fragment
+                      key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
                     >
-                      {(mod?.modifier ?? -1) >= 0 ? (
-                        <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
-                      ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
-                    </div>
-                    <div className={styles.statModLabel}>
-                      {mod?.label || '??? HUH'}
-                    </div>
-                  </React.Fragment>
-                ))}
+                      <div
+                        className={cx(
+                          styles.statModValue,
+                          styles.statValue,
+                          (mod?.modifier ?? 1) > 1 && styles.positive,
+                          (mod?.modifier ?? 1) < 1 && styles.negative,
+                        )}
+                      >
+                        {(mod?.modifier ?? -1) >= 0 ? (
+                          <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
+                        ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
+                      </div>
+                      <div className={styles.statModLabel}>
+                        {tLabel}
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
               </div>
             )}
             offset={[0, 10]}

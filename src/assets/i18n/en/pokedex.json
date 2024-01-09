@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-08T16:35:47.680Z"
+    "updated": "2024-01-09T21:25:19.175Z"
   },
 
   "abilities": {
@@ -61,10 +61,7 @@
   },
 
   "speciesAliases": {
-    "chomp": "Garchomp",
     "landot": "Landorous-Therian",
-    "pex": "Toxapex",
-    "pult": "Dragapult",
     "ttar": "Tyranitar"
   },
 
@@ -96,13 +93,13 @@
     "ability_other": "Abilities",
     "abilities": "Abilities",
     "ag": "AG",
-    "all": "$(common:labels.all)",
+    "all": "$t(common:labels.all)",
     "belowduu": "Below DUU",
     "belowpu": "Below PU",
     "cap": "CAP",
     "caplc": "CAP LC",
     "capmoves": "CAP Moves",
-    "current": "$(common:labels.current)",
+    "current": "$t(common:labels.current)",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
@@ -121,7 +118,7 @@
     "legal": "Legal",
     "level_one": "Level",
     "level_other": "Levels",
-    "maxmoves": "$t(ultimates.dmax.2)",
+    "maxmoves": "$t(pokedex:ultimates.dmax.2)",
     "move_one": "Move",
     "move_other": "Moves",
     "moves": "Moves",
@@ -133,7 +130,7 @@
     "nfesnotinahighertier": "NFEs Not in a Higher Tier",
     "nu": "NU",
     "nubl": "NUBL",
-    "other": "$(common:labels.other)",
+    "other": "$t(common:labels.other)",
     "ou": "OU",
     "oubytechnicality": "OU by Technicality",
     "physicalmoves": "Physical Moves",
@@ -147,7 +144,7 @@
     "publ": "PUBL",
     "regular": "Regular",
     "restrictedlegendary": "Restricted Legendary",
-    "revealed": "Revealed",
+    "revealedmoves": "Revealed",
     "ru": "RU",
     "rubl": "RUBL",
     "sketchedmoves": "Sketched Moves",
@@ -177,7 +174,7 @@
     "uu": "UU",
     "uubl": "UUBL",
     "weather": "Weather",
-    "zmoves": "$t(ultimates.z.2)"
+    "zmoves": "$t(pokedex:ultimates.z.2)"
   },
 
   "types": {
@@ -195,7 +192,7 @@
     "ice": ["Ice", "ICE", "ICE", "ICE"],
     "normal": ["Normal", "NORMAL", "NRML", "NRM"],
     "poison": ["Poison", "POISON", "PSN", "PSN"],
-    "psychic": ["Psychic", "PSYCHIC", "PSYC", "PSY"],
+    "psychic": ["Psychic", "PSYCH", "PSYC", "PSY"],
     "rock": ["Rock", "ROCK", "ROCK", "RCK"],
     "steel": ["Steel", "STEEL", "STL", "STL"],
     "stellar": ["Stellar", "STELLR", "STLR", "SLR"],
@@ -236,62 +233,62 @@
   "weather": {
     "hail": {
       "label": "Hail",
-      "shortDesc": "For 5 turns (8 w/ Icy Rock), -6% HP (non-Ice, non-Ice Body/Magic Guard/Overcoat/Snow Cloak)."
+      "shortDesc": "For 5 turns (8 w/ Icy Rock), -6% HP (non-$t(pokedex:types.ice.0), non-Ice Body/Magic Guard/Overcoat/Snow Cloak)."
     },
     "harshsunshine": {
       "label": "Intense Sun",
-      "shortDesc": "Until switch-out, Fire 1.5{{times}}, Water 0{{times}} (non-Air Lock/Cloud Nine)."
+      "shortDesc": "Until switch-out, $t(pokedex:types.fire.0) 1.5{{times}}, $t(pokedex:types.water.0) 0{{times}} (non-Air Lock/Cloud Nine)."
     },
     "heavyrain": {
       "label": "Heavy Rain",
-      "shortDesc": "Until switch-out, Water 1.5{{times}}, Fire 0{{times}} (non-Air Lock/Cloud Nine)."
+      "shortDesc": "Until switch-out, $t(pokedex:types.water.0) 1.5{{times}}, $t(pokedex:types.fire.0) 0{{times}} (non-Air Lock/Cloud Nine)."
     },
     "rain": {
       "label": "Rain",
-      "shortDesc": "For 5 turns (8 w/ Damp Rock), Water 1.5{{times}}, Fire 0.5{{times}}."
+      "shortDesc": "For 5 turns (8 w/ Damp Rock), $t(pokedex:types.water.0) 1.5{{times}}, $t(pokedex:types.fire.0) 0.5{{times}}."
     },
     "sand": {
       "label": "Sand",
-      "shortDesc": "For 5 turns (8 w/ Smooth Rock), SPD 1.5{{times}} (Rock only), -6% HP (non-Ground/Rock/Steel, non-Magic Guard/Overcoat/Sand Force/Sand Rush/Sand Veil)."
+      "shortDesc": "For 5 turns (8 w/ Smooth Rock), $t(pokedex:stats.spd.1) 1.5{{times}} ($t(pokedex:types.rock.0) only), -6% $t(pokedex:stats.hp.1) (non-$t(pokedex:types.ground.0)/$t(pokedex:types.rock.0)/$t(pokedex:types.steel.0), non-Magic Guard/Overcoat/Sand Force/Sand Rush/Sand Veil)."
     },
     "snow": {
       "label": "Snow",
-      "shortDesc": "For 5 turns (8 w/ Icy Rock), DEF 1.5{{times}} (Ice only)."
+      "shortDesc": "For 5 turns (8 w/ Icy Rock), $t(pokedex:stats.def.1) 1.5{{times}} ($t(pokedex:types.ice.0) only)."
     },
     "strongwinds": {
       "label": "Strong Winds",
-      "shortDesc": "Until switch-out, no Flying weaknesses."
+      "shortDesc": "Until switch-out, no $t(pokedex:types.flying.0) weaknesses."
     },
     "sun": {
       "label": "Sun",
-      "shortDesc": "For 5 turns (8 w/ Heat Rock), Fire 1.5{{times}}, Water 0.5{{times}}."
+      "shortDesc": "For 5 turns (8 w/ Heat Rock), $t(pokedex:types.fire.0) 1.5{{times}}, $t(pokedex:types.water.0) 0.5{{times}}."
     }
   },
 
   "terrain": {
     "electric": {
       "label": "Electric",
-      "shortDesc": "For 5 turns, Electric 1.3{{times}} (grounded), can't sleep."
+      "shortDesc": "For 5 turns, $t(pokedex:types.electric.0) 1.3{{times}} (grounded), can't sleep."
     },
     "grassy": {
       "label": "Grassy",
-      "shortDesc": "For 5 turns, Grass 1.3{{times}} (grounded), Bulldoze/Earthquake/Magnitude 0.5{{times}}, +6% HP."
+      "shortDesc": "For 5 turns, $t(pokedex:types.grass.0) 1.3{{times}} (grounded), Bulldoze/Earthquake/Magnitude 0.5{{times}}, +6% $t(pokedex:stats.hp.1)."
     },
     "misty": {
       "label": "Misty",
-      "shortDesc": "For 5 turns, Dragon 0.5{{times}} (grounded), can't status."
+      "shortDesc": "For 5 turns, $t(pokedex:types.dragon.0) 0.5{{times}} (grounded), can't status."
     },
     "psychic": {
       "label": "Psychic",
-      "shortDesc": "For 5 turns, Psychic 1.3{{times}} (grounded), no priority."
+      "shortDesc": "For 5 turns, $t(pokedex:types.psychic.0) 1.3{{times}} (grounded), no priority."
     }
   },
 
   "ultimates": {
     "gmax": ["Gigantamax", "Gigantamax", "Gmax"],
     "dmax": ["Dynamax", "Dynamax", "Max"],
-    "mega": ["Mega-Evolution", "Mega-evolve", "Mega"],
+    "mega": ["Mega-Evolution", "Mega-Evolve", "Mega"],
     "tera": ["Terastallization", "Terastallize", "Tera"],
-    "z": ["Z-Power", "Z-Power up", "Z"]
+    "z": ["Z-Power", "Z-Power", "Z"]
   }
 }

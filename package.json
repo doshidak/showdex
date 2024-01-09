@@ -82,6 +82,8 @@
     "dotenv": "^16.3.1",
     "final-form": "^4.20.9",
     "i18next": "^23.7.16",
+    "i18next-browser-languagedetector": "^7.2.0",
+    "i18next-intervalplural-postprocessor": "^3.0.0",
     "lz-string": "^1.5.0",
     "qrcode.react": "^3.1.0",
     "qs": "^6.11.2",

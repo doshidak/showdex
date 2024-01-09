@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
-import { PokemonStatuses, PokemonStatusLabels } from '@showdex/consts/dex';
+import { PokemonStatuses } from '@showdex/consts/dex';
 import { useColorScheme } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { determineColorScheme } from '@showdex/utils/ui';
 import styles from './PokeStatus.module.scss';
@@ -46,10 +47,7 @@ export const PokeStatus = ({
 
   const label = (fainted && 'RIP') || override || (
     status !== '???'
-      && t(
-        `nonvolatiles.${status}.2`,
-        PokemonStatusLabels[status as Exclude<Showdown.PokemonStatus, '???' | ''>]?.[labelIndex],
-      )
+      && t(`nonvolatiles.${formatId(status)}.1`, status)
   ) || defaultLabel || '???';
 
   return (

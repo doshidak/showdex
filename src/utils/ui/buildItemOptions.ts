@@ -208,7 +208,7 @@ export const buildItemOptions = (
       options.push({
         label: translateHeader?.(`Pok${eacute}mon-Specific Items`) || `Pok${eacute}mon-Specific`,
         options: specificItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),

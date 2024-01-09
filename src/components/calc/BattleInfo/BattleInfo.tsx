@@ -160,7 +160,7 @@ export const BattleInfo = ({
                   ? Date.now() - cached < (30 * 1000)
                     ? t('battle.save.savedRecently')
                     : t('battle.save.savedAgo', {
-                      ago: formatDistanceToNow(cached, { addSuffix: true })?.replace('about ', ''),
+                      ago: formatDistanceToNow(cached)?.replace('about ', ''),
                     })
                   : t('battle.save.unsaved')
             ).trim()}

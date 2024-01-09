@@ -2,15 +2,15 @@
   "--meta": {
     "name": "calcdex",
     "version": "1.0.0",
-    "locale": "en",
-    "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-01-09T20:48:43.428Z"
+    "locale": "fr",
+    "created": "2024-01-08T19:12:10.599Z",
+    "updated": "2024-01-09T20:59:34.929Z"
   },
 
   "player": {
     "user": {
       "aria": "{{position}} Player Selector",
-      "empty": "No Players",
+      "empty": "Pas de Joueurs",
       "selectorTooltip": "Switch <strong>{{position}}</strong> Player",
       "buttonTooltip": "Open <strong>{{player}}</strong>'s Profile"
     },
@@ -36,7 +36,7 @@
 
       "level": {
         "aria": "$t(pokedex:headers.level_one) for {{pokemon}}",
-        "label": "L",
+        "label": "N",
         "hint": "???"
       },
 
@@ -68,16 +68,16 @@
         "label": "Set",
         "hint": "???",
         "none": "$t(common:labels.none)",
-        "empty": "No Sets",
+        "empty": "Pas de Sets",
         "loading": "$t(common:labels.downloading)...",
         "autoLabel": "$t(common:labels.auto)",
         "importLabel": "$t(common:labels.import)",
         "exportLabel": "$t(common:labels.export)",
-        "importTooltip": "Import PokéPaste from Clipboard",
+        "importTooltip": "Importer PokéPaste Depuis le Presse-papiers",
         "importedBadge": "$t(common:labels.imported)",
         "exportedBadge": "$t(common:labels.copied)!",
-        "malformedBadge": "Bad Syntax",
-        "mismatchedBadge": "Mismatch",
+        "malformedBadge": "Mauvaise Syntaxe",
+        "mismatchedBadge": "Décalage",
         "failedBadge": "$t(common:labels.failed)"
       },
 
@@ -89,12 +89,12 @@
         "empty": "$t(pokedex:abilities.noability_other)",
         "activeLabel": "$t(common:labels.active)",
         "resetLabel": "$t(common:labels.reset)",
-        "activeTooltip": "Deactivate <strong>{{ability}}</strong>",
-        "inactiveTooltip": "Activate <strong>{{ability}}</strong>",
-        "resetTooltip": "Reset to Revealed {{ability}}",
-        "boostedStatLabel": "Boosted $t(pokedex:headers.stat_one)",
+        "activeTooltip": "Désactiver <strong>{{ability}}</strong>",
+        "inactiveTooltip": "Activer <strong>{{ability}}</strong>",
+        "resetTooltip": "Réinitialiser à {{ability}} Révélée",
+        "boostedStatLabel": "Boostée $t(pokedex:headers.stat_one)",
         "autoBoostedStat": "$t(common:labels.auto)",
-        "autoBoostedStatLabel": "Auto-Boost Enabled"
+        "autoBoostedStatLabel": "Boost Auto Activé"
       },
 
       "nature": {
@@ -105,10 +105,10 @@
         "hint": "???",
         "legacyHint": "$t(common:labels.na)",
         "customHint": "$t(common:labels.custom)",
-        "empty": "No $t(pokedex:headers.nature_other)",
-        "spreadEmpty": "No $t(pokedex.headers:spread_other)",
-        "natureToggleTooltip": "Switch to <strong>$t(pokedex:headers.spread_other)</strong>",
-        "spreadToggleTooltip": "Switch to <strong>$t(pokedex:headers.nature_other)</strong>"
+        "empty": "Pas de $t(pokedex:headers.nature_other)",
+        "spreadEmpty": "Pas de $t(pokedex.headers:spread_other)",
+        "natureToggleTooltip": "Passer à <strong>$t(pokedex:headers.spread_other)</strong>",
+        "spreadToggleTooltip": "Passer à <strong>$t(pokedex:headers.nature_other)</strong>"
       },
 
       "item": {
@@ -119,7 +119,7 @@
         "empty": "$t(pokedex:items.noitem_other)",
         "defaultPrevEffect": "$t(common:labels.previous)",
         "resetLabel": "$t(common:labels.reset)",
-        "resetTooltip": "Reset to {{effect}} {{item}}"
+        "resetTooltip": "Réinitialiser à {{item}} {{effect}}"
       }
     },
 
@@ -128,29 +128,29 @@
       "dmg": "DMG",
       "nhko": "KO %",
       "na": "$t(common:labels.na)",
-      "immune": "IMMUNE",
+      "immune": "IMMUNISÉ",
       "copiedBadge": "$t(common:labels.copied)!",
 
       "tera": {
         "label": "$t(pokedex:ultimates.tera.2)",
-        "activeTooltip": "Revert to <strong>{{types}}</strong>",
-        "inactiveTooltip": "$t(pokedex:ultimates.tera.1) to <strong>{{teraType}}</strong>",
-        "availableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Available</strong>",
-        "unavailableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Used</strong>"
+        "activeTooltip": "Revenir au <strong>{{types}}</strong>",
+        "inactiveTooltip": "$t(pokedex:ultimates.tera.1) au <strong>{{teraType}}</strong>",
+        "availableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Disponible</strong>",
+        "unavailableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Utilisée</strong>"
       },
 
       "z": {
         "label": "$t(pokedex:ultimates.z.2)",
-        "activeTooltip": "Deactivate <strong>$t(pokedex:ultimates.z.0)</strong>",
-        "inactiveTooltip": "Activate <strong>$t(pokedex:ultimates.z.0)</strong>"
+        "activeTooltip": "Désactiver <strong>$t(pokedex:ultimates.z.0)</strong>",
+        "inactiveTooltip": "Activer <strong>$t(pokedex:ultimates.z.0)</strong>"
       },
 
       "dmax": {
         "label": "{{ultimate}}",
-        "activeTooltip": "Deactivate <strong>{{ultimate}}</strong>",
-        "inactiveTooltip": "Activate <strong>{{ultimate}}</strong>",
-        "availableTooltip": "{{ultimate}} <strong>Available</strong>",
-        "unavailableTooltip": "{{ultimate}} <strong>Used</strong>"
+        "activeTooltip": "Désactiver <strong>{{ultimate}}</strong>",
+        "inactiveTooltip": "Activer <strong>{{ultimate}}</strong>",
+        "availableTooltip": "{{ultimate}} <strong>Disponible</strong>",
+        "unavailableTooltip": "{{ultimate}} <strong>Utilisée</strong>"
       },
 
       "editor": {
@@ -159,13 +159,13 @@
         "activeTooltip": "Close the <strong>Moves Editor</strong>",
         "inactiveTooltip": "Open the <strong>Moves Editor</strong>",
         "resetLabel": "$t(common:labels.reset)",
-        "resetTooltip": "Reset <strong>{{move}}</strong> to Defaults",
+        "resetTooltip": "Réinitialiser <strong>{{move}}</strong> par Défaut",
 
         "faintCounter": {
-          "aria": "Fallen Allies Count for {{pokemon}}",
-          "label": "Fallen",
+          "aria": "Alliés KO comptent pour {{pokemon}}",
+          "label": "KO",
           "resetLabel": "$t(common:labels.reset)",
-          "resetTooltip": "Reset to <strong>{{count}} Fallen</strong>"
+          "resetTooltip": "Réinitialiser à <strong>{{count}} KO</strong>"
         },
 
         "category": {
@@ -174,20 +174,20 @@
 
         "active": {
           "label": "$t(common:labels.active)",
-          "activeTooltip": "Deactivate <strong>{{move}}</strong>",
-          "inactiveTooltip": "Activate <strong>{{move}}</strong>"
+          "activeTooltip": "Désactiver <strong>{{move}}</strong>",
+          "inactiveTooltip": "Activer <strong>{{move}}</strong>"
         },
 
         "stellar": {
           "label": "$t(pokedex:types.stellar.0)",
-          "activeTooltip": "Deactivate <strong>$t(pokedex:types.stellar.0) STAB</strong>",
-          "inactiveTooltip": "Activate <strong>$t(pokedex:types.stellar.0) STAB</strong>"
+          "activeTooltip": "Désactiver <strong>$t(pokedex:types.stellar.0) STAB</strong>",
+          "inactiveTooltip": "Activer <strong>$t(pokedex:types.stellar.0) STAB</strong>"
         },
 
         "hits": {
           "aria": "Number of {{move}} Hits Override for {{pokemon}}",
-          "label_one": "Hit",
-          "label_other": "Hits"
+          "label_one": "Coup",
+          "label_other": "Coups"
         },
 
         "bp": {
@@ -197,8 +197,8 @@
       },
 
       "criticalHit": {
-        "activeTooltip": "Hide <strong>Critical Hit</strong> Damages",
-        "inactiveTooltip": "Show <strong>Critical Hit</strong> Damages",
+        "activeTooltip": "Masquer les Dégâts des <strong>Coups Critiques</strong>",
+        "inactiveTooltip": "Afficher les Dégâts des <strong>Coups Critiques</strong>",
         "label": "Crit"
       },
 
@@ -213,21 +213,21 @@
       "visibility": {
         "activeLabel": "$(common:labels.hide)",
         "inactiveLabel": "$(common:labels.show)",
-        "activeTooltip": "Hide <strong>{{stats}}</strong>",
-        "inactiveTooltip": "Show <strong>{{stats}}</strong>"
+        "activeTooltip": "Masquer <strong>{{stats}}</strong>",
+        "inactiveTooltip": "Afficher <strong>{{stats}}</strong>"
       },
 
       "base": {
         "aria": "{{stat}} $t(pokedex:stats.base_one.0) for {{pokemon}}",
         "label": "$t(pokedex:stats.base_one.1)",
-        "resetTooltip": "Reset <strong>All Modified</strong> $t(pokedex:stats.base_other.0)"
+        "resetTooltip": "Réinitialiser <strong>Toutes</strong> $t(pokedex:stats.base_other.0) <strong>Modifiées</strong>"
       },
 
       "ivs": {
         "aria": "{{stat}} {{spread}} for {{pokemon}}",
         "label": "$t(pokedex:stats.ivs_one.1)<smol>s</smol>",
         "legacyLabel": "$t(pokedex:stats.dvs_one.1)<smol>s</smol>",
-        "missingTooltip": "There are <strong>no {{spreads}}</strong> set!"
+        "missingTooltip": "Il n'y a <strong>pas de set d'{{spreads}}</strong>!"
       },
 
       "evs": {
@@ -235,10 +235,10 @@
         "label": "$t(pokedex:stats.evs_one.1)<smol>s</smol>",
         "stat_one": "$t(pokedex:stats.evs_one.1)",
         "stat_other": "$t(pokedex:stats.evs_other.1)",
-        "validatedTooltip": "nice",
-        "missingTooltip": "There are <strong>no $t(poke.stats.evs.stat_other)</strong> set!",
-        "unallocatedTooltip": "You have <strong>{{count}} unallocated $t(poke.stats.evs.stat, { \"count\": {{count}} })</strong>.",
-        "overageTooltip": "You have <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} })</strong> over the legal limit of <strong>{{max}}</strong>."
+        "validatedTooltip": "bon",
+        "missingTooltip": "Il n'y a <strong>pas de d'$t(poke.stats.evs.stat_other)</strong>!",
+        "unallocatedTooltip": "Vous avez <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} }) non attribués</strong>.",
+        "overageTooltip": "Vous avez <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} })</strong> au-dessus de la limite légale de <strong>{{max}}</strong>."
       },
 
       "boosts": {
@@ -250,35 +250,35 @@
   "field": {
     "yours": "Yours",
     "theirs": "Theirs",
-    "field": "Field",
-    "screens": "Screens",
+    "field": "Sol",
+    "screens": "Murs",
 
     "conditions": {
-      "light": "Light",
-      "reflect": "Reflect",
-      "aurora": "Aurora",
-      "hand": "Hand",
-      "gift": "Gift",
-      "guard": "Guard",
-      "battery": "Battery",
-      "power": "Power",
-      "twind": "Twind"
+      "light": "Lumiére",
+      "reflect": "Protect",
+      "aurora": "Aurore",
+      "hand": "Main",
+      "gift": "Don",
+      "guard": "Garde",
+      "battery": "Batterie",
+      "power": "Énergie",
+      "twind": "Vent"
     },
 
     "weather": {
-      "aria": "Field Weather",
+      "aria": "Météo d'Sol",
       "label": "$t(pokedex:headers.weather)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
-      "empty": "No Weather"
+      "empty": "Pas de Météo"
     },
 
     "terrain": {
-      "aria": "Field Terrain",
+      "aria": "Champ d'Sol",
       "label": "$t(pokedex:headers.terrain)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
-      "empty": "No Terrain"
+      "empty": "Pas de Champ"
     }
   }
 }

@@ -1,17 +1,16 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { type Weather } from '@smogon/calc';
 import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
+import { times } from '@showdex/consts/core';
 import {
   PlayerSideConditionsDexMap,
   PlayerSideConditionsToggleMap,
   PlayerSideScreensToggleMap,
-  TerrainDescriptions,
   TerrainNames,
-  WeatherDescriptions,
 } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
@@ -68,19 +67,15 @@ export const FieldCalc = ({
       return null;
     }
 
-    const description = t(
-      `pokedex:weather.${formatId(option.value)}.shortDesc`,
-      WeatherDescriptions[option.value]?.shortDesc,
-    );
-
-    if (!description) {
-      return null;
-    }
-
     return (
-      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-        {description}
-      </div>
+      <Trans
+        t={t}
+        i18nKey={`pokedex:weather.${formatId(option.value)}.shortDesc`}
+        parent="div"
+        className={cx(styles.tooltipContent, styles.descTooltip)}
+        shouldUnescape
+        values={{ times }}
+      />
     );
   }, [
     settings,
@@ -92,19 +87,15 @@ export const FieldCalc = ({
       return null;
     }
 
-    const description = t(
-      `pokedex:terrain.${formatId(option.value)}.shortDesc`,
-      TerrainDescriptions[option.value]?.shortDesc,
-    );
-
-    if (!description) {
-      return null;
-    }
-
     return (
-      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-        {description}
-      </div>
+      <Trans
+        t={t}
+        i18nKey={`pokedex:terrain.${formatId(option.value)}.shortDesc`}
+        parent="div"
+        className={cx(styles.tooltipContent, styles.descTooltip)}
+        shouldUnescape
+        values={{ times }}
+      />
     );
   }, [
     settings,

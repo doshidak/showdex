@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-08T15:45:10.164Z",
-    "updated": "2024-01-08T15:53:43.334Z"
+    "updated": "2024-01-09T21:06:50.982Z"
   },
 
   "battle": {
@@ -27,7 +27,7 @@
       "unsaved": "$t(common:labels.save)",
       "saving": "$t(common:labels.saving)...",
       "savedRecently": "Now $t(common:labels.saved)",
-      "savedAgo": "$t(common:labels.saved) {{ago}}"
+      "savedAgo": "$t(common:labels.saved) {{ago}} ago"
     }
   }
 }

@@ -160,9 +160,9 @@ export const buildFormeOptions = (
     options.push({
       label: translateHeader?.(groupLabel) || groupLabel,
       options: sortedAltFormes.map((forme) => ({
-        value: translate?.(forme) || forme,
-        label: forme,
+        label: translate?.(forme) || forme,
         rightLabel: findUsagePercent(forme),
+        value: forme,
       })),
     });
 
@@ -227,9 +227,9 @@ export const buildFormeOptions = (
     options.push({
       label: translateHeader?.(tier) || tier,
       options: sortedFormes.map((name) => ({
-        value: translate?.(name) || name,
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
+        value: name,
       })),
     });
   });
@@ -240,9 +240,9 @@ export const buildFormeOptions = (
     options.push({
       label: translateHeader?.('Other') || 'Other',
       options: sortedFormes.map((name) => ({
-        value: name,
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
+        value: name,
       })),
     });
   }

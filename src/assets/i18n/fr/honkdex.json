@@ -1,0 +1,33 @@
+{
+  "--meta": {
+    "name": "honkdex",
+    "version": "1.0.0",
+    "locale": "fr",
+    "created": "2024-01-09T20:59:50.965Z",
+    "updated": "2024-01-09T21:12:55.235Z"
+  },
+
+  "battle": {
+    "gen": {
+      "aria": "Sélecteur de Génération",
+      "locked": "Changer de gén avec Pokémon dans la calc ouvrira une <strong>nouvelle</strong> $t(common:products.honkdex_one) <strong>vierge</strong>."
+    },
+
+    "name": {
+      "hint": "nommer cette $t(common:products.honk_one) pour enregistrer cette $t(common:products.honk_one)"
+    },
+
+    "format": {
+      "aria": "Sélecteur de Format de Bataille",
+      "hint": "???",
+      "empty": "Pas de Formats"
+    },
+
+    "save": {
+      "unsaved": "$t(common:labels.save)",
+      "saving": "$t(common:labels.saving)...",
+      "savedRecently": "Maintenant $t(common:labels.saved)",
+      "savedAgo": "$t(common:labels.saved) il y a {{ago}}"
+    }
+  }
+}

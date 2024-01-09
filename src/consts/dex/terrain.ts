@@ -32,6 +32,7 @@ export const TerrainNames: Terrain[] = Object.values(PseudoWeatherMap).sort();
  *
  * @note `desc` properties are commented out atm to not include them in the bundle.
  * @see https://smogon.com/dex/ss
+ * @deprecated As of v1.2.1, these are stored in translation strings in `@showdex/assets/i18n`.
  * @since 1.0.3
  */
 export const TerrainDescriptions: Record<Terrain, FieldConditionDescription> = {
