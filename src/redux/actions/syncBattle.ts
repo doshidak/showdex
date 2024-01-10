@@ -205,7 +205,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     }
 
     // update the sidesSwitched from the battle
-    battleState.switchPlayers = battle.sidesSwitched;
+    battleState.switchPlayers = battle.viewpointSwitched ?? battle.sidesSwitched;
 
     // sync the field first cause we'll need the updated values for some calculations later
     const syncedField = syncField(
