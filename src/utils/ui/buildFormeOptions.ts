@@ -95,6 +95,10 @@ export const buildFormeOptions = (
 
   // there seems to be some post-populated filtering based on special cases, so ya
   // (omitting the Gmax filtering bit at the end tho, but we're definitely laying the hammer tho)
+  // update (2024/01/09): actually fricks with the dropdown when you switch from, say, Ubers to Ubers UU, so opting to
+  // place all of them in an "Illegal" group instead
+  const bannedIds: string[] = [];
+
   const hammerTime = (
     banList: Record<string, 1>,
   ) => Object.keys(banList || {}).forEach((speciesId) => {
@@ -106,6 +110,10 @@ export const buildFormeOptions = (
 
     if (index < 0) {
       return;
+    }
+
+    if (!bannedIds.includes(speciesId)) {
+      bannedIds.push(speciesId);
     }
 
     tiers.splice(index, 1);
@@ -242,6 +250,26 @@ export const buildFormeOptions = (
       options: sortedFormes.map((name) => ({
         label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
+        value: name,
+      })),
+    });
+  }
+
+  if (bannedIds.length) {
+    const bannedFormes = bannedIds.map((id) => {
+      const dexBanned = dex.species.get(id);
+
+      if (!dexBanned?.exists) {
+        return null;
+      }
+
+      return dexBanned.name;
+    }).filter(Boolean).sort();
+
+    options.push({
+      label: translateHeader?.('Illegal Results') || 'Illegal',
+      options: bannedFormes.map((name) => ({
+        label: translate?.(name) || name,
         value: name,
       })),
     });
