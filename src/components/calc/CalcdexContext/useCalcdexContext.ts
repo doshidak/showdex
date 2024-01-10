@@ -695,7 +695,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         || !!mutated.dirtyHp
         || !!mutated.dirtyStatus
         || !!mutated.dirtyItem
-        || !!mutated.moves?.filter(Boolean).length
+        || (!!mutated.moves?.filter(Boolean).length && !mutated.revealedMoves?.length)
         || Object.values(mutated.dirtyBaseStats || {}).some((v) => (v ?? -1) > 0)
         || Object.values(mutated.evs || {}).some((v) => (v ?? -1) > 0)
         || Object.values(mutated.dirtyBoosts || {}).some((v) => !!v);
