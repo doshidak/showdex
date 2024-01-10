@@ -20,6 +20,7 @@ const mode = __DEV__ ? 'development' : 'production';
 export const buildTargets = [
   'chrome',
   'firefox',
+  'standalone',
 ];
 
 // __dirname is not available in ESModules lmao
@@ -60,6 +61,15 @@ const finalEnv = {
   PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_VERSION_SUFFIX: sanitizeEnv(process.env.PACKAGE_VERSION_SUFFIX),
 };
+
+if (!buildTargets.includes(finalEnv.BUILD_TARGET)) {
+  console.error(
+    'Received an invalid BUILD_TARGET:', finalEnv.BUILD_TARGET,
+    '\n', 'Valid build targets are:', buildTargets.join(', '),
+  );
+
+  process.exit(1);
+}
 
 if (!finalEnv.UUID_NAMESPACE || finalEnv.UUID_NAMESPACE === NIL_UUID) {
   finalEnv.UUID_NAMESPACE = uuidv4();
@@ -103,6 +113,11 @@ const entry = {
 
 // background is not used on Firefox
 if (finalEnv.BUILD_TARGET === 'firefox') {
+  delete entry.background;
+}
+
+if (finalEnv.BUILD_TARGET === 'standalone') {
+  delete entry.content;
   delete entry.background;
 }
 
@@ -442,6 +457,17 @@ const copyPatterns = [
   },
 ];
 
+if (finalEnv.BUILD_TARGET === 'standalone') {
+  const manifestIndex = copyPatterns.findIndex((p) => (
+    typeof p.to === 'string'
+      && p.to.includes('manifest.json')
+  ));
+
+  if (manifestIndex > -1) {
+    copyPatterns.splice(manifestIndex, 1);
+  }
+}
+
 const plugins = [
   new webpack.ProgressPlugin(),
   new webpack.DefinePlugin(webpackEnv),
@@ -466,7 +492,7 @@ const plugins = [
         },
       }),
 
-    (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox')
+    (finalEnv.BUILD_TARGET !== 'standalone' && (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox'))
       && new ZipPlugin({
         // spit out the file in either `build` or `dist`
         path: '..',

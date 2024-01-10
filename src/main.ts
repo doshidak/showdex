@@ -19,6 +19,20 @@ if (typeof app === 'undefined' || typeof Dex === 'undefined') {
   throw new Error('Showdex attempted to start in an unsupported website.');
 }
 
+// not sure when we'll run into this, but it's entirely possible now that standalone builds are a thing
+if (window?.__SHOWDEX_INIT) {
+  l.error(
+    'yo dawg I heard you wanted Showdex with your Showdex',
+    '\n', '__SHOWDEX_INIT', window.__SHOWDEX_INIT,
+    '\n', 'BUILD_NAME', env('build-name'),
+  );
+
+  throw new Error('Another Showdex tried to load despite one already being loaded.');
+}
+
+// basically using this as a Showdex init mutex lock lol
+window.__SHOWDEX_INIT = env('build-name', 'showdex');
+
 const store = createStore();
 
 l.debug('Hooking into the client\'s app.receive()...');
