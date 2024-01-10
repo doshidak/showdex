@@ -1,3 +1,4 @@
+import { type GenerationNum } from '@smogon/calc';
 import { getDexForFormat } from './getDexForFormat';
 
 /**
@@ -10,8 +11,11 @@ import { getDexForFormat } from './getDexForFormat';
  *
  * @since 1.0.3
  */
-export const notFullyEvolved = (species: string | Showdown.Species): boolean => {
-  const dex = getDexForFormat();
+export const notFullyEvolved = (
+  species: string | Showdown.Species,
+  format?: string | GenerationNum,
+): boolean => {
+  const dex = getDexForFormat(format);
 
   if (!species || !dex) {
     return false;

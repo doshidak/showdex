@@ -295,7 +295,7 @@ export const createSmogonPokemon = (
   );
 
   if (typeof smogonPokemon?.species?.nfe !== 'boolean') {
-    (smogonPokemon.species as Writable<Specie>).nfe = notFullyEvolved(pokemon.speciesForme);
+    (smogonPokemon.species as Writable<Specie>).nfe = notFullyEvolved(pokemon.speciesForme, format);
   }
 
   return smogonPokemon;
