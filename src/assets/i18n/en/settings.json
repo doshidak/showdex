@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-09T22:20:18.539Z"
+    "updated": "2024-01-10T04:27:35.981Z"
   },
 
   "pane": {
@@ -74,8 +74,8 @@
           "description": "Standard issue."
         },
         "fr": {
-          "name": "French (Kinda)",
-          "description": "Contains French versions of all <em>talents</em>, <em>natures</em>, <em>objets</em>, <em>capacités</em> &amp; Pokémon, sourced from Sykless's <code>pokemon-showdown-fr</code> extension!<br /><br />Also with the help of Google Translate, majority of the UI is also in French, minus the settings. (Excuse my French, I don't speak it sorry.)<br /><br /><em>bone apple teeth</em> <ndash />BOT Keith"
+          "name": "French",
+          "description": "Contains French versions of all <em>talents</em>, <em>natures</em>, <em>objets</em>, <em>capacités</em> &amp; Pokémon, sourced from Sykless's <code>pokemon-showdown-fr</code> extension!<br /><br />Also with the help of ChatGPT & Google Translate, the rest of Showdex is also in French. (Excuse my French, I don't speak it sorry.)<br /><br /><em>bone apple teeth !</em>"
         }
       }
     },
@@ -100,7 +100,7 @@
 
     "glassyTerrain": {
       "label": "I'm Feeling Glassy",
-      "tooltip": "Tastefully applies a slight background blur to all $t(common:products.showdex) panels, including $t(common:products.calcdex_other) in <strong>$t(calcdex.openAs.overlay.label)</strong> mode, if enabled.<br /><br />Note that this is a CPU-intensive graphics setting &amp; may cause unpleasant stuttering on lower-spec machines.<br /><br />Enable at your own risk!"
+      "tooltip": "Tastefully applies a slight background blur to all $t(common:products.showdex) panels, including $t(common:products.calcdex_other) in <strong>$t(calcdex.openAs.options.overlay.label)</strong> mode, if enabled.<br /><br />Note that this is a CPU-intensive graphics setting &amp; may cause unpleasant stuttering on lower-spec machines.<br /><br />Enable at your own risk!"
     },
 
     "developerMode": {
@@ -238,11 +238,11 @@
           "label_one": "{{count}} Day",
           "label_other": "{{count}} Days",
           "label_interval": "(7)[1 Week];(14)[2 Weeks];(21)[3 Weeks];(30-31)[1 Month];",
-          "tooltip": "Downloads sets &amp; reuses them for <strong>$t(calcdex.maxPresetAge.options.$count.label, { \"postProcess\": \"interval\", \"count\": {{count}} })</strong> ($t(calcdex.maxPresetAge.options.$count.label, { \"count\": {{count}} })), persisting between $t(common:products.showdown) sessions.<br /><br />Enabling this may improve $t(common:products.calcdex_one) initialization performance."
+          "tooltip": "Downloads sets &amp; reuses them for <strong>$t(calcdex.maxPresetAge.options.$count.label, { \"count\": {{count}} })</strong>, persisting between $t(common:products.showdown) sessions.<br /><br />Enabling this may improve $t(common:products.calcdex_one) initialization performance."
         },
         "0": {
           "label": "Never",
-          "tooltip": "Downloads sets once per session, but doesn't store them in-between. This means sets will be downloaded again the next time you open $(common:products.showdown).<br /><br />Selecting this option with sets already in the cache will <strong>clear</strong> the cache entirely.<br /><br />This is the default behavior prior to v1.1.6.<br />(By the way, you're on v{{version}}!)"
+          "tooltip": "Downloads sets once per session, but doesn't store them in-between. This means sets will be downloaded again the next time you open $t(common:products.showdown).<br /><br />Selecting this option with sets already in the cache will <strong>clear</strong> the cache entirely.<br /><br />This is the default behavior prior to v1.1.6.<br />(By the way, you're on v{{version}}!)"
         }
       }
     },
@@ -392,7 +392,7 @@
 
     "enableQuickEditor": {
       "label": "Quick-Edit Move Hits",
-      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>{{example}}</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
+      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
     },
 
     "showNonDamageRanges": {

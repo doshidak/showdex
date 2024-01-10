@@ -4,21 +4,21 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-09T20:59:34.929Z"
+    "updated": "2024-01-10T03:49:27.352Z"
   },
 
   "player": {
     "user": {
-      "aria": "{{position}} Player Selector",
+      "aria": "Sélecteur de Joueur du {{position}}",
       "empty": "Pas de Joueurs",
-      "selectorTooltip": "Switch <strong>{{position}}</strong> Player",
-      "buttonTooltip": "Open <strong>{{player}}</strong>'s Profile"
+      "selectorTooltip": "Changer de Joueur du <strong>{{position}}</strong>",
+      "buttonTooltip": "Ouvrir le Profil de <strong>{{player}}</strong>"
     },
 
     "autoSelect": {
       "label": "$t(common:labels.auto)",
-      "activeTooltip": "Manually Select Pokémon",
-      "inactiveTooltip": "Auto-Select Pokémon"
+      "activeTooltip": "Sélectionner Manuellement les Pokémon",
+      "inactiveTooltip": "Sélectionner Auto les Pokémon"
     },
 
     "party": {
@@ -29,29 +29,29 @@
   "poke": {
     "info": {
       "forme": {
-        "aria": "Pokémon Selector",
+        "aria": "Sélecteur de Pokémon",
         "empty": "$t(pokedex:species.nopokemon)",
-        "smogonTooltip": "Open Smogon Page for<br /><strong>{{pokemon}}</strong>"
+        "smogonTooltip": "Ouvrir Smogon Dex pour<br /><strong>{{pokemon}}</strong>"
       },
 
       "level": {
-        "aria": "$t(pokedex:headers.level_one) for {{pokemon}}",
+        "aria": "$t(pokedex:headers.level_one) pour {{pokemon}}",
         "label": "N",
         "hint": "???"
       },
 
       "types": {
-        "aria": "$t(pokedex:headers.type_other) for {{pokemon}}"
+        "aria": "$t(pokedex:headers.type_other) pour {{pokemon}}"
       },
 
       "teraType": {
-        "aria": "$t(pokedex:headers.teratype_other) for {{pokemon}}",
+        "aria": "$t(pokedex:headers.teratype_other) pour {{pokemon}}",
         "label": "$t(pokedex:headers.teratype_one)",
         "emptyLabel": "$t(pokedex:ultimates.tera.2)"
       },
 
       "status": {
-        "aria": "$t(pokedex:stats.hp.1) & Non-Volatile Status Condition for {{pokemon}}",
+        "aria": "$t(pokedex:stats.hp.1) & Statut pour {{pokemon}}",
         "unknown": "$t(pokedex:types.unknown.3)",
         "ok": "$t(pokedex:nonvolatiles.ok.2)",
         "fnt": "$t(pokedex:nonvolatiles.fnt.2)",
@@ -64,7 +64,7 @@
       },
 
       "preset": {
-        "aria": "Available Sets for {{pokemon}}",
+        "aria": "Sets Disponibles pour {{pokemon}}",
         "label": "Set",
         "hint": "???",
         "none": "$t(common:labels.none)",
@@ -82,7 +82,7 @@
       },
 
       "ability": {
-        "aria": "Available $t(pokedex:headers.ability_other) for {{pokemon}}",
+        "aria": "$t(pokedex:headers.ability_other) Disponibles pour {{pokemon}}",
         "label": "$t(pokedex:headers.ability_one)",
         "hint": "???",
         "legacyHint": "$t(common:labels.na)",
@@ -98,8 +98,8 @@
       },
 
       "nature": {
-        "aria": "Available $t(pokedex:headers.nature_other) for {{pokemon}}",
-        "spreadAria": "Available $t(pokedex:headers.spread_other) for {{pokemon}}",
+        "aria": "$t(pokedex:headers.nature_other) Disponibles pour {{pokemon}}",
+        "spreadAria": "$t(pokedex:headers.spread_other) Disponibles pour {{pokemon}}",
         "label": "$t(pokedex:headers.nature_one)",
         "spreadLabel": "$t(pokedex:headers.spread_one)",
         "hint": "???",
@@ -112,7 +112,7 @@
       },
 
       "item": {
-        "aria": "Available $t(pokedex:headers.item_other) for {{pokemon}}",
+        "aria": "$t(pokedex:headers.item_other) Disponibles pour {{pokemon}}",
         "label": "$t(pokedex:headers.item_one)",
         "hint": "$t(common:labels.none)",
         "legacyHint": "$t(common:labels.na)",
@@ -156,20 +156,20 @@
       "editor": {
         "activeLabel": "$t(common:labels.hide)",
         "inactiveLabel": "$t(common:labels.edit)",
-        "activeTooltip": "Close the <strong>Moves Editor</strong>",
-        "inactiveTooltip": "Open the <strong>Moves Editor</strong>",
+        "activeTooltip": "Fermez l'<strong>Éditeur de Capacités</strong>",
+        "inactiveTooltip": "Ouvrez l'<strong>Éditeur de Capacités</strong>",
         "resetLabel": "$t(common:labels.reset)",
         "resetTooltip": "Réinitialiser <strong>{{move}}</strong> par Défaut",
 
         "faintCounter": {
-          "aria": "Alliés KO comptent pour {{pokemon}}",
+          "aria": "Alliés KO Comptent pour {{pokemon}}",
           "label": "KO",
           "resetLabel": "$t(common:labels.reset)",
           "resetTooltip": "Réinitialiser à <strong>{{count}} KO</strong>"
         },
 
         "category": {
-          "aria": "{{move}} Stat Targeting Overrides for {{pokemon}}"
+          "aria": "Remplacements du Ciblage Stat {{move}} pour {{pokemon}}"
         },
 
         "active": {
@@ -185,13 +185,13 @@
         },
 
         "hits": {
-          "aria": "Number of {{move}} Hits Override for {{pokemon}}",
+          "aria": "Nombre de Coups {{move}} Annulés pour {{pokemon}}",
           "label_one": "Coup",
           "label_other": "Coups"
         },
 
         "bp": {
-          "aria": "{{move}} $t(pokedex:stats.bp.0) Override for {{pokemon}}",
+          "aria": "Remplacement du $t(pokedex:stats.bp.0) {{move}} pour {{pokemon}}",
           "label": "{{ultimate}}$t(pokedex:stats.bp.1)"
         }
       },
@@ -203,7 +203,7 @@
       },
 
       "slot": {
-        "aria": "Move Slot {{count}} for {{pokemon}}",
+        "aria": "Emplacement de Capacité {{count}} pour {{pokemon}}",
         "hint": "--",
         "empty": "$t(pokedex:moves.nomove_other)"
       }
@@ -211,32 +211,32 @@
 
     "stats": {
       "visibility": {
-        "activeLabel": "$(common:labels.hide)",
-        "inactiveLabel": "$(common:labels.show)",
+        "activeLabel": "$t(common:labels.hide)",
+        "inactiveLabel": "$t(common:labels.show)",
         "activeTooltip": "Masquer <strong>{{stats}}</strong>",
         "inactiveTooltip": "Afficher <strong>{{stats}}</strong>"
       },
 
       "base": {
-        "aria": "{{stat}} $t(pokedex:stats.base_one.0) for {{pokemon}}",
+        "aria": "{{stat}} $t(pokedex:stats.base_one.0) pour {{pokemon}}",
         "label": "$t(pokedex:stats.base_one.1)",
         "resetTooltip": "Réinitialiser <strong>Toutes</strong> $t(pokedex:stats.base_other.0) <strong>Modifiées</strong>"
       },
 
       "ivs": {
-        "aria": "{{stat}} {{spread}} for {{pokemon}}",
+        "aria": "{{stat}} {{spread}} pour {{pokemon}}",
         "label": "$t(pokedex:stats.ivs_one.1)<smol>s</smol>",
         "legacyLabel": "$t(pokedex:stats.dvs_one.1)<smol>s</smol>",
-        "missingTooltip": "Il n'y a <strong>pas de set d'{{spreads}}</strong>!"
+        "missingTooltip": "Il n'y a <strong>pas de set d'{{spreads}}</strong> !"
       },
 
       "evs": {
-        "aria": "{{stat}} $t(pokedex:stats.evs_one.1) for {{pokemon}}",
+        "aria": "{{stat}} $t(pokedex:stats.evs_one.1) pour {{pokemon}}",
         "label": "$t(pokedex:stats.evs_one.1)<smol>s</smol>",
         "stat_one": "$t(pokedex:stats.evs_one.1)",
         "stat_other": "$t(pokedex:stats.evs_other.1)",
         "validatedTooltip": "bon",
-        "missingTooltip": "Il n'y a <strong>pas de d'$t(poke.stats.evs.stat_other)</strong>!",
+        "missingTooltip": "Il n'y a <strong>pas de d'$t(poke.stats.evs.stat_other)</strong> !",
         "unallocatedTooltip": "Vous avez <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} }) non attribués</strong>.",
         "overageTooltip": "Vous avez <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} })</strong> au-dessus de la limite légale de <strong>{{max}}</strong>."
       },
@@ -248,9 +248,9 @@
   },
 
   "field": {
-    "yours": "Yours",
-    "theirs": "Theirs",
-    "field": "Sol",
+    "yours": "Vôtres",
+    "theirs": "Leurs",
+    "field": "$(pokedex:headers.field)",
     "screens": "Murs",
 
     "conditions": {

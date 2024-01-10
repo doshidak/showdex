@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-01-09T20:48:43.428Z"
+    "updated": "2024-01-10T02:14:38.053Z"
   },
 
   "player": {
@@ -211,8 +211,8 @@
 
     "stats": {
       "visibility": {
-        "activeLabel": "$(common:labels.hide)",
-        "inactiveLabel": "$(common:labels.show)",
+        "activeLabel": "$t(common:labels.hide)",
+        "inactiveLabel": "$t(common:labels.show)",
         "activeTooltip": "Hide <strong>{{stats}}</strong>",
         "inactiveTooltip": "Show <strong>{{stats}}</strong>"
       },

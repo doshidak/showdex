@@ -4,9 +4,13 @@
     "version": "1.0.0",
     "locale": "fr",
     "language": "French",
-    "authors": ["Tristan Pelleteuse <@Sykless>", "Google Translate"],
+    "authors": [
+      "Tristan Pelleteuse <@Sykless>",
+      "ChatGPT-4",
+      "Google Translate"
+    ],
     "created": "2024-01-08T16:46:10.432Z",
-    "updated": "2024-01-09T21:05:38.234Z",
+    "updated": "2024-01-10T02:52:21.126Z",
     "built": "<-- auto-filled; do not edit -->"
   },
 

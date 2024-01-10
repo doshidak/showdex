@@ -359,6 +359,7 @@ export const CalcdexSettingsPane = ({
               parent="div"
               className={styles.tooltipContent}
               shouldUnescape
+              values={{ year: new Date().getFullYear() }}
             />
           )}
         />
