@@ -217,6 +217,10 @@ const parsePackedTeam = (
       }
     }
 
+    if (mon[10]) {
+      pokePaste += `Level: ${mon[10]}\n`;
+    }
+
     // Check if EVs are empty
     if (mon[6] !== '') {
       const evs = mon[6].split(',');

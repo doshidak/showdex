@@ -11,6 +11,7 @@ import { clamp, env, formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   detectLegacyGen,
+  determineDefaultLevel,
   getDefaultSpreadValue,
   getDexForFormat,
   parseBattleFormat,
@@ -19,19 +20,19 @@ import { capitalize } from '@showdex/utils/humanize';
 
 // note: speciesForme should be handled last since it will test() true against any line technically
 const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> = {
-  level: /^\s*Level:\s*(\d+)$/i,
-  ability: /^\s*Ability:\s*(.+)$/i,
-  shiny: /^\s*Shiny:\s*([A-Z]+)$/i,
-  happiness: /^\s*Happiness:\s*(\d+)$/i,
+  level: /^\s*Level:\s*(\d+)\s*$/i,
+  ability: /^\s*Ability:\s*(.+)\s*$/i,
+  shiny: /^\s*Shiny:\s*([A-Z]+)\s*$/i,
+  happiness: /^\s*Happiness:\s*(\d+)\s*$/i,
   // dynamaxLevel: /^\s*Dynamax Level:\s*(\d+)$/i, // unsupported
-  gigantamax: /^\s*Gigantamax:\s*([A-Z]+)$/i,
-  teraTypes: /^\s*Tera\s*Type:\s*([A-Z]+)$/i,
-  ivs: /^\s*IVs:\s*(\d.+)$/i,
-  evs: /^\s*EVs:\s*(\d.+)$/i,
-  nature: /^\s*([A-Z]+)\s+Nature$/i,
-  moves: /^\s*-\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]])(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?$/i,
+  gigantamax: /^\s*Gigantamax:\s*([A-Z]+)\s*$/i,
+  teraTypes: /^\s*Tera\s*Type:\s*([A-Z]+)\s*$/i,
+  ivs: /^\s*IVs:\s*(\d.+)\s*$/i,
+  evs: /^\s*EVs:\s*(\d.+)\s*$/i,
+  nature: /^\s*([A-Z]+)\s+Nature\s*$/i,
+  moves: /^\s*-\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]])(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?(?:\s*[\/,]\s*([A-Z0-9\(\)\[\]\-\x20]+[A-Z0-9\(\)\[\]]))?\s*$/i,
   name: /^=+\s*(?:\[([A-Z0-9]+)\]\s*)(.+[^\s])\s*={3}$/i,
-  speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9.':\-\x20]+[A-Z\xC0-\xFF0-9.%])\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9\-\x20]+[A-Z0-9]))?$/i,
+  speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9.':\-\x20]+[A-Z\xC0-\xFF0-9.%])\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9\-\x20]+[A-Z0-9]))?\s*$/i,
 };
 
 const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
@@ -125,6 +126,7 @@ export const importPokePaste = (
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(format);
 
+  const defaultLevel = determineDefaultLevel(format);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
 
@@ -138,7 +140,7 @@ export const importPokePaste = (
     format,
 
     speciesForme: null,
-    level: 100,
+    level: defaultLevel,
     shiny: false,
 
     ivs: {
