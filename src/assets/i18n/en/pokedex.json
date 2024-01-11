@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-10T08:03:38.170Z"
+    "updated": "2024-01-11T12:53:48.091Z"
   },
 
   "abilities": {
@@ -12,14 +12,66 @@
     "noability_other": "No Abilities"
   },
 
+  "abilityAliases": {
+    "qdrive": "Quark Drive"
+  },
+
   "items": {
     "noitem_one": "No Item",
     "noitem_other": "No Items"
   },
 
+  "itemAliases": {
+    "avest": "Assault Vest",
+    "cband": "Choice Band",
+    "cscarf": "Choice Scarf",
+    "cspecs": "Choice Specs",
+    "lorb": "Life Orb",
+    "lovers": "Leftovers"
+  },
+
   "moves": {
     "nomove_one": "No Move",
     "nomove_other": "No Moves"
+  },
+
+  "moveAliases": {
+    "ajet": "Aqua Jet",
+    "bdrum": "Belly Drum",
+    "bpunch": "Bullet Punch",
+    "ccombat": "Close Combat",
+    "cmind": "Calm Mind",
+    "ddance": "Dragon Dance",
+    "dropa": "$t(pokedex:moveAliases.dmeteor)",
+    "dmeteor": "Draco Meteor",
+    "epower": "Earth Power",
+    "equake": "Earthquake",
+    "espeed": "Extreme Speed",
+    "hp": "Hidden Power",
+    "hpbug": "Hidden Power Bug",
+    "hpdark": "Hidden Power Dark",
+    "hpdragon": "Hidden Power Dragon",
+    "hpelectric": "Hidden Power Electric",
+    "hpfairy": "Hidden Power Fairy",
+    "hpfighting": "Hidden Power Fighting",
+    "hpfire": "Hidden Power Fire",
+    "hpflying": "Hidden Power Flying",
+    "hpghost": "Hidden Power Ghost",
+    "hpgrass": "Hidden Power Grass",
+    "hpground": "Hidden Power Ground",
+    "hpice": "Hidden Power Ice",
+    "hppoison": "Hidden Power Poison",
+    "hppsychic": "Hidden Power Psychic",
+    "hprock": "Hidden Power Rock",
+    "hpsteel": "Hidden Power Steel",
+    "hpwater": "Hidden Power Water",
+    "qattack": "Quick Attack",
+    "qdance": "Quiver Dance",
+    "sdance": "Swords Dance",
+    "ssmash": "Shell Smash",
+    "srock": "Stealth Rock",
+    "tspikes": "Toxic Spikes",
+    "vdance": "Victory Dance"
   },
 
   "categories": {
@@ -61,8 +113,9 @@
   },
 
   "speciesAliases": {
-    "landot": "Landorous-Therian",
-    "ttar": "Tyranitar"
+    "steveneel": "Eelektross",
+    "ttar": "Tyranitar",
+    "ttarmega": "Tyranitar-Mega"
   },
 
   "stats": {
@@ -87,6 +140,10 @@
     "spc": ["Special", "SPC"],
     "spd": ["Special Defense", "SPD"],
     "spe": ["Speed", "SPE"]
+  },
+
+  "formatAliases": {
+    "nd": "natdex"
   },
 
   "headers": {

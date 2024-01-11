@@ -6,7 +6,7 @@
     "language": "English",
     "authors": ["BOT Keith <keith@tize.io>"],
     "created": "2024-01-05T12:18:35.813Z",
-    "updated": "2024-01-10T11:03:17.663Z",
+    "updated": "2024-01-11T13:28:58.883Z",
     "built": "<-- auto-filled; do not edit -->"
   },
 
@@ -25,6 +25,25 @@
     "honkdex_other": "Honkdexes",
     "teamdex_one": "Teamdex",
     "teamdex_other": "Teamdexes"
+  },
+
+  "time": {
+    "millisecond_one": "ms",
+    "millisecond_other": "ms",
+    "second_one": "second",
+    "second_other": "seconds",
+    "minute_one": "minute",
+    "minute_other": "minutes",
+    "hour_one": "hour",
+    "hour_other": "hours",
+    "day_one": "day",
+    "day_other": "days",
+    "week_one": "week",
+    "week_other": "weeks",
+    "month_one": "month",
+    "month_other": "months",
+    "year_one": "year",
+    "year_other": "years"
   },
 
   "labels": {

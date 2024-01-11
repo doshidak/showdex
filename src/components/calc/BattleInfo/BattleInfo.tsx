@@ -4,10 +4,16 @@ import { useDebouncyFn } from 'use-debouncy';
 import cx from 'classnames';
 import { formatDistanceToNow } from 'date-fns';
 import { type GenerationNum } from '@smogon/calc';
-import { Dropdown, GenField, InlineField } from '@showdex/components/form';
+import {
+  createAliasFilter,
+  Dropdown,
+  GenField,
+  InlineField,
+} from '@showdex/components/form';
 import { ToggleButton } from '@showdex/components/ui';
 import { type CalcdexBattleState, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { buildFormatOptions, determineColorScheme } from '@showdex/utils/ui';
 import { useCalcdexContext } from '../CalcdexContext';
@@ -55,9 +61,46 @@ export const BattleInfo = ({
 
   const saved = !!cached && !saving?.[0];
 
+  // quick 'n dirty baby lessgo LOL
+  const savedAgo = React.useMemo<string>(() => {
+    if (!cached) {
+      return null;
+    }
+
+    const raw = formatDistanceToNow(cached)?.replace('about ', '');
+    const [, distGroup, unitGroup] = /([.,\d]+)?\s+([a-z]+[^s])s?$/i.exec(raw) || [];
+
+    if (!distGroup || !unitGroup) {
+      return raw;
+    }
+
+    const distValue = parseInt(distGroup, 10) || 0;
+    const distUnit = formatId(unitGroup);
+
+    if (!distValue || !distUnit) {
+      return raw;
+    }
+
+    const distUnitLabel = t(`common:time.${distUnit}`, { count: distValue });
+
+    if (!distUnitLabel) {
+      return raw;
+    }
+
+    return `${distValue} ${distUnitLabel}`;
+  }, [
+    cached,
+    t,
+  ]);
+
   const formatOptions = React.useMemo(
     () => buildFormatOptions(gen, { showAll: honkdexSettings?.showAllFormats }),
     [gen, honkdexSettings?.showAllFormats],
+  );
+
+  const formatOptionsFilter = React.useMemo(
+    () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true })),
+    [t],
   );
 
   // used for the honk name, so it doesn't lag when you type fast af
@@ -143,6 +186,7 @@ export const BattleInfo = ({
             }}
             options={formatOptions}
             noOptionsMessage={t('battle.format.empty') as React.ReactNode}
+            filterOption={formatOptionsFilter}
             clearable={false}
             disabled={operatingMode !== 'standalone'}
           />
@@ -159,9 +203,7 @@ export const BattleInfo = ({
                 : (cached || 0) > 0
                   ? Date.now() - cached < (30 * 1000)
                     ? t('battle.save.savedRecently')
-                    : t('battle.save.savedAgo', {
-                      ago: formatDistanceToNow(cached)?.replace('about ', ''),
-                    })
+                    : t('battle.save.savedAgo', { ago: savedAgo })
                   : t('battle.save.unsaved')
             ).trim()}
             absoluteHover

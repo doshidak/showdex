@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-01-10T11:45:37.196Z"
+    "updated": "2024-01-11T13:52:06.179Z"
   },
 
   "pane": {
@@ -416,11 +416,11 @@
         },
         "move": {
           "label": "$t(pokedex:headers.move_one)",
-          "tooltip": "Affiche une courte description & des stats rapides (par exemple, type, catégorie, PB) du capacité survolé dans la liste déroulante."
+          "tooltip": "Affiche une courte description & des stats rapides (par exemple, type, catégorie, PB) de la capacité survolé dans la liste déroulante."
         },
         "matchup": {
           "label": "$t(pane.sections.secondary.matchup_one)",
-          "tooltip": "Affiche une description du match du capacité depuis le calculateur de dégâts original lorsque vous survolez une plage de dégâts."
+          "tooltip": "Affiche une description du match de la capacité depuis le calculateur de dégâts original lorsque vous survolez une plage de dégâts."
         },
         "field": {
           "label": "$t(pokedex:headers.field)",
@@ -485,7 +485,7 @@
       "options": {
         "always": {
           "label": "Toujours",
-          "tooltip": "Affiche un bouton <em>$t(common:labels.edit)</em> dans le tableau des capacités du Pokémon, qui active l'éditeur de capacités.<br /><br />Vous pouvez modifier le type du capacité, la catégorie (si elle inflige des dégâts) & les $t(pokedex:stats.bp.1), y compris des $t(pokedex:stats.bp.1) séparés pour les capacités $t(pokedex:ultimates.z.2) & $t(pokedex:ultimates.dmax.2) lorsqu'activées. Les modifications sont uniques à chaque capacité de chaque Pokémon."
+          "tooltip": "Affiche un bouton <em>$t(common:labels.edit)</em> dans le tableau des capacités du Pokémon, qui active l'éditeur de capacités.<br /><br />Vous pouvez modifier le type de la capacité, la catégorie (si elle inflige des dégâts) & les $t(pokedex:stats.bp.1), y compris des $t(pokedex:stats.bp.1) séparés pour les capacités $t(pokedex:ultimates.z.2) & $t(pokedex:ultimates.dmax.2) lorsqu'activées. Les modifications sont uniques à chaque capacité de chaque Pokémon."
         },
         "meta": {
           "label": "OMs",

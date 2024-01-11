@@ -4,6 +4,7 @@ import cx from 'classnames';
 import { type AbilityName, type MoveName } from '@smogon/calc';
 import { PokeMoveOptionTooltip } from '@showdex/components/app';
 import {
+  createAliasFilter,
   Dropdown,
   MoveCategoryField,
   PokeTypeField,
@@ -100,6 +101,11 @@ export const PokeMoves = ({
     t,
     usage,
   ]);
+
+  const moveOptionsFilter = React.useMemo(
+    () => createAliasFilter(t('pokedex:moveAliases', { returnObjects: true })),
+    [t],
+  );
 
   const nationalDexFormat = !!format && [
     'nationaldex',
@@ -697,6 +703,7 @@ export const PokeMoves = ({
                 }}
                 options={moveOptions}
                 noOptionsMessage={t('poke.moves.slot.empty') as React.ReactNode}
+                filterOption={moveOptionsFilter}
                 disabled={!pokemon?.speciesForme}
               />
             </TableGridItem>

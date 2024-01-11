@@ -13,6 +13,7 @@ import {
   PokeStatusTooltip,
 } from '@showdex/components/app';
 import {
+  createAliasFilter,
   Dropdown,
   PokeStatField,
   PokeTypeField,
@@ -134,6 +135,11 @@ export const PokeInfo = ({
     usage,
   ]);
 
+  const abilityOptionsFilter = React.useMemo(
+    () => createAliasFilter(t('pokedex:abilityAliases', { returnObjects: true })),
+    [t],
+  );
+
   const showAbilityToggle = toggleableAbility(pokemon, gameType);
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
@@ -239,6 +245,11 @@ export const PokeInfo = ({
     usage,
   ]);
 
+  const itemOptionsFilter = React.useMemo(
+    () => createAliasFilter(t('pokedex:itemAliases', { returnObjects: true })),
+    [t],
+  );
+
   const showResetItem = (
     !!pokemon?.dirtyItem
       && (!!pokemon.item || !!pokemon.prevItem)
@@ -285,6 +296,14 @@ export const PokeInfo = ({
     formeUsages,
     operatingMode,
     pokemon,
+    t,
+  ]);
+
+  const formeOptionsFilter = React.useMemo(() => (
+    operatingMode === 'standalone'
+      && createAliasFilter(t('pokedex:speciesAliases', { returnObjects: true }))
+  ) || null, [
+    operatingMode,
     t,
   ]);
 
@@ -503,6 +522,7 @@ export const PokeInfo = ({
                 }}
                 options={formeOptions}
                 noOptionsMessage={t('poke.info.forme.empty') as React.ReactNode}
+                filterOption={formeOptionsFilter}
                 clearable
                 highlight={!pokemon?.speciesForme}
               />
@@ -928,6 +948,7 @@ export const PokeInfo = ({
               }}
               options={abilityOptions}
               noOptionsMessage={t('poke.info.ability.empty') as React.ReactNode}
+              filterOption={abilityOptionsFilter}
               clearable={false}
               highlight={pokemon?.abilityToggled}
               disabled={legacy || !pokemon?.speciesForme}
@@ -1086,6 +1107,7 @@ export const PokeInfo = ({
               }}
               options={itemOptions}
               noOptionsMessage={t('poke.info.item.empty') as React.ReactNode}
+              filterOption={itemOptionsFilter}
               disabled={gen === 1 || !pokemon?.speciesForme}
             />
           </div>
