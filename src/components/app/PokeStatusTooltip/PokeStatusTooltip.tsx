@@ -65,7 +65,7 @@ export const PokeStatusTooltip = ({
       ? t('nonvolatiles.ok.0')
       : t(`nonvolatiles.${formatId(status)}.0`, 'Status');
 
-  const [hoveredStatus, setHoveredStatus] = React.useState<string>(currentStatusLabel);
+  const [hoveredStatus, setHoveredStatus] = React.useState<string>(null);
   const statusLabel = t(
     `nonvolatiles.${formatId(hoveredStatus || currentStatusLabel)}.0`,
     hoveredStatus || currentStatusLabel,
