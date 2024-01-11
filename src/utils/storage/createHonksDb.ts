@@ -19,7 +19,7 @@ export const createHonksDb = (
   if (!honksName || typeof db?.createObjectStore !== 'function') {
     l.warn(
       'there is no cow level',
-      '\n', 'db.createObjectStore()', '(typeof)', typeof db?.createObjectStore,
+      '\n', 'db.createObjectStore()', '(type)', typeof db?.createObjectStore,
       '\n', 'INDEXED_DB_HONKS_STORE_NAME', honksName,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );

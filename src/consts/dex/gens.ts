@@ -67,7 +67,7 @@ export const GenLabels: GenerationLabel[] = [
     gen: 1,
     slug: 'rb',
     label: 'RBY',
-    description: 'Red/Blue/Yellow + Green (Japan)',
+    description: 'Red/Blue/Yellow',
   },
   {
     gen: 2,
@@ -110,7 +110,7 @@ export const GenLabels: GenerationLabel[] = [
     gen: 8,
     slug: 'ss',
     label: 'S/S',
-    description: 'Sword/Shield + Brilliant Diamond/Shining Pearl (BDSP) + Legends: Arceus (PLA)',
+    description: 'Sword/Shield + Brilliant Diamond/Shining Pearl (BDSP) + Legends: Arceus (LA)',
   },
   {
     gen: 9,

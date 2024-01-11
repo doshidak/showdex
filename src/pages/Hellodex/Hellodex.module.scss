@@ -418,7 +418,7 @@ button.spectateButton {
 }
 
 .linkItem {
-  &:not(:last-child) {
+  &:not(:first-child):not(:last-child) {
     @include spacing.margin($right: 24px);
 
     .verySmol & {
@@ -428,8 +428,13 @@ button.spectateButton {
 }
 
 .settingsButton {
-  width: 50px;
-  height: 45px;
+  min-width: 68px;
+  height: 44px;
+  @include spacing.margin($right: 32px);
+
+  .verySmol & {
+    @include spacing.margin($right: 24px);
+  }
 
   // bad idea, looks weird on non-Retina displays while changing color
   // .settingsIcon {
@@ -441,6 +446,7 @@ button.spectateButton {
   // }
 }
 
+/*
 .linkSeparator {
   width: 1px;
   height: 28px;
@@ -454,10 +460,11 @@ button.spectateButton {
     background-color: color.alpha(colors.$white, 0.16);
   }
 }
+*/
 
 .linkButton {
-  width: 45px;
-  height: 45px;
+  width: 44px;
+  height: 44px;
 
   .light & {
     color: color.alpha(colors.$black, 0.76);

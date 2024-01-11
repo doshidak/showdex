@@ -9,11 +9,7 @@
   grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
   column-gap: 10px;
 
-  &.veryThicc {
-    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.5fr);
-  }
-
-  &:not(.veryThicc).doubles {
+  &.doubles {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 6px;
   }
@@ -48,61 +44,57 @@
     @include spacing.margin($left: 4px);
   }
 
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 3 / 1;
     @include spacing.margin($top: 4px);
   }
 }
 
 .leftFieldInput {
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 4 / 1;
     @include spacing.margin($top: 1px);
   }
 }
 
 .weatherLabel {
-  // .veryThicc & {
-  //   @include spacing.margin($bottom: 4px);
-  // }
-
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 1 / 1;
   }
 }
 
 .weatherInput {
   align-self: flex-start;
+  max-width: 152px;
+  @include spacing.margin($x: auto);
 
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 2 / 1;
-    @include spacing.margin($top: 4px, $right: 20px, $bottom: 10px, $left: 20px);
+    @include spacing.margin($top: 4px, $bottom: 10px);
 
     .verySmol & {
-      @include spacing.margin-xy($x: 10px);
+      @include spacing.margin($x: 10px);
     }
   }
 }
 
 .terrainLabel {
-  // .veryThicc & {
-  //   @include spacing.margin($bottom: 4px);
-  // }
-
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 1 / 2;
   }
 }
 
 .terrainInput {
   align-self: flex-start;
+  max-width: 152px;
+  @include spacing.margin($x: auto);
 
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 2 / 2;
-    @include spacing.margin($top: 4px, $right: 20px, $bottom: 10px, $left: 20px);
+    @include spacing.margin($top: 4px, $bottom: 10px);
 
     .verySmol & {
-      @include spacing.margin-xy($x: 10px);
+      @include spacing.margin($x: 10px);
     }
   }
 }
@@ -114,14 +106,14 @@
     @include spacing.margin($right: 4px);
   }
 
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 3 / 2;
     @include spacing.margin($top: 4px);
   }
 }
 
 .rightFieldInput {
-  .doubles:not(.veryThicc) & {
+  .doubles & {
     grid-area: 4 / 2;
     @include spacing.margin($top: 1px);
   }

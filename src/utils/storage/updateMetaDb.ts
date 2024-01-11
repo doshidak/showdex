@@ -26,7 +26,7 @@ export const updateMetaDb = (
     return void l.warn(
       'huh',
       '\n', 'INDEXED_DB_META_STORE_NAME', metaName,
-      '\n', 'db.transaction()', '(typeof)', typeof db?.transaction,
+      '\n', 'db.transaction()', '(type)', typeof db?.transaction,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );
   }

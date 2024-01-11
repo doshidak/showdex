@@ -407,7 +407,7 @@ export const Hellodex = ({
               onPress={toggleSettingsPane}
             />
 
-            {
+            {/*
               (forumUrl || repoUrl || communityUrl).startsWith('https://') &&
               <div
                 className={cx(
@@ -415,7 +415,7 @@ export const Hellodex = ({
                   styles.linkSeparator,
                 )}
               />
-            }
+            */}
 
             {
               forumUrl?.startsWith('https://') &&

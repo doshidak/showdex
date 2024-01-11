@@ -119,13 +119,13 @@ export const HomieButton = ({
               Donated{' '}
               {
                 periodsCount > 1 &&
-                <strong>{pluralize(periodsCount, 'time:s')}{' '}</strong>
+                <>{pluralize(periodsCount, 'time:s')}{' '}</>
               }
               on
               {validPeriods.map((period) => (
                 <React.Fragment key={`${formatId(name)}:${period[0]}`}>
                   <br />
-                  {format(new Date(period[0]), 'PP')}
+                  <strong>{format(new Date(period[0]), 'PP')}</strong>
                 </React.Fragment>
               ))}
             </>

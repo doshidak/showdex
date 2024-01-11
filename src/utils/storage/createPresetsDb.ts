@@ -22,7 +22,7 @@ export const createPresetsDb = (
   if (!presetsName || typeof db?.createObjectStore !== 'function') {
     l.warn(
       'additional supply depots required',
-      '\n', 'db.createObjectStore()', '(typeof)', typeof db?.createObjectStore,
+      '\n', 'db.createObjectStore()', '(type)', typeof db?.createObjectStore,
       '\n', 'INDEXED_DB_PRESETS_STORE_NAME', presetsName,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );

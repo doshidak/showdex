@@ -24,7 +24,7 @@ export const migrateSettingsDb = (
     return void l.warn(
       '...something\'s wrong... I can feel it',
       '\n', 'INDEXED_DB_SETTINGS_STORE_NAME', settingsName,
-      '\n', 'db.transaction()', '(typeof)', typeof db?.transaction,
+      '\n', 'db.transaction()', '(type)', typeof db?.transaction,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );
   }

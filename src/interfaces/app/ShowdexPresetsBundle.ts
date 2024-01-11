@@ -2,7 +2,7 @@ import { type GenerationNum } from '@smogon/calc';
 import { type ShowdexAssetBundle } from './ShowdexAssetBundle';
 
 /**
- * Particular extended metata about a particular loadable collection of presets bundled with this particular build of Showdex.
+ * Particular extended metadata about a particular loadable collection of presets bundled with this particular build of Showdex.
  *
  * @since 1.2.1
  */

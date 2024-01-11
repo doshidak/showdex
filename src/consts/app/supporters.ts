@@ -40,6 +40,11 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
         periods: [['2023-09-25T08:47:33Z']],
       },
       {
+        name: 'Snacky98',
+        showdownUser: true,
+        periods: [['2024-01-06T03:16:26.000Z']],
+      },
+      {
         name: 'joshtheking7',
         showdownUser: true,
         periods: [['2023-05-17T22:21:31Z']],
@@ -229,6 +234,10 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
       {
         name: 'Michael K',
         periods: [['2023-09-05T09:02:03Z']],
+      },
+      {
+        name: 'Wan L',
+        periods: [['2024-01-07T14:17:20Z']],
       },
     ],
   },
