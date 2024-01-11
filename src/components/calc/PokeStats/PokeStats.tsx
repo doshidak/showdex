@@ -486,6 +486,22 @@ export const PokeStats = ({
                 shouldUnescape
                 components={{ smol: <span className={styles.small} /> }}
               />
+
+              {
+                (!format?.includes('random') && totalEvs < maxLegalEvs) &&
+                <>
+                  <br />
+                  {maxLegalEvs - totalEvs}&darr;
+                </>
+              }
+
+              {
+                !evsLegal &&
+                <>
+                  <br />
+                  {totalEvs - maxLegalEvs}&uarr;
+                </>
+              }
             </TableGridItem>
           </Tooltip>
 
