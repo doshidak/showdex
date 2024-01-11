@@ -71,6 +71,12 @@ if (!buildTargets.includes(finalEnv.BUILD_TARGET)) {
   process.exit(1);
 }
 
+finalEnv.UUID_NAMESPACE = (
+  (finalEnv.BUILD_TARGET === 'chrome' && finalEnv.UUID_CHROME_NAMESPACE)
+    || (finalEnv.BUILD_TARGET === 'firefox' && finalEnv.UUID_FIREFOX_NAMESPACE)
+    || (finalEnv.BUILD_TARGET === 'standalone' && finalEnv.UUID_STANDALONE_NAMESPACE)
+) || finalEnv.UUID_NAMESPACE;
+
 if (!finalEnv.UUID_NAMESPACE || finalEnv.UUID_NAMESPACE === NIL_UUID) {
   finalEnv.UUID_NAMESPACE = uuidv4();
 }
