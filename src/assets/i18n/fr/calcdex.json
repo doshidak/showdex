@@ -4,12 +4,21 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-10T03:49:27.352Z"
+    "updated": "2024-01-11T07:39:21.668Z"
+  },
+
+  "overlay": {
+    "control": {
+      "activeLabel": "$t(common:labels.close) $t(common:products.calcdex_one)",
+      "inactiveLabel": "$t(common:labels.open) $t(common:products.calcdex_one)"
+    }
   },
 
   "player": {
     "user": {
       "aria": "Sélecteur de Joueur du {{position}}",
+      "defaultName": "Joueur {{index}}",
+      "optionLabel": "J{{index}}",
       "empty": "Pas de Joueurs",
       "selectorTooltip": "Changer de Joueur du <strong>{{position}}</strong>",
       "buttonTooltip": "Ouvrir le Profil de <strong>{{player}}</strong>"
@@ -17,8 +26,8 @@
 
     "autoSelect": {
       "label": "$t(common:labels.auto)",
-      "activeTooltip": "Sélectionner Manuellement les Pokémon",
-      "inactiveTooltip": "Sélectionner Auto les Pokémon"
+      "activeTooltip": "Sélectionner <strong>Manuellement</strong><br />les Pokémon",
+      "inactiveTooltip": "Sélectionner <strong>Auto</strong><br />les Pokémon"
     },
 
     "party": {
@@ -135,8 +144,8 @@
         "label": "$t(pokedex:ultimates.tera.2)",
         "activeTooltip": "Revenir au <strong>{{types}}</strong>",
         "inactiveTooltip": "$t(pokedex:ultimates.tera.1) au <strong>{{teraType}}</strong>",
-        "availableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Disponible</strong>",
-        "unavailableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Utilisée</strong>"
+        "availableTooltip": "$t(pokedex:ultimates.tera.2) <strong>Disponible</strong>",
+        "unavailableTooltip": "$t(pokedex:ultimates.tera.2) <strong>Utilisée</strong>"
       },
 
       "z": {
@@ -250,7 +259,7 @@
   "field": {
     "yours": "Vôtres",
     "theirs": "Leurs",
-    "field": "$(pokedex:headers.field)",
+    "field": "$t(pokedex:headers.field)",
     "screens": "Murs",
 
     "conditions": {

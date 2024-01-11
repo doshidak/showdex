@@ -288,7 +288,9 @@ export const PokeInfo = ({
     t,
   ]);
 
-  const formeDisabled = !pokemon?.altFormes?.length;
+  // update (2024/01/10): if there's only 1, chances are it's its current forme
+  // e.g., speciesForme = 'Kyogre', altFormes = ['Kyogre']
+  const formeDisabled = (pokemon?.altFormes?.length || 0) < 2;
 
   const showNonVolatileStatus = (
     operatingMode === 'standalone'
@@ -521,8 +523,10 @@ export const PokeInfo = ({
                   labelClassName={styles.nameLabel}
                   label={(
                     nickname
-                      || t(`pokedex:species.${formatId(pokemon?.speciesForme)}`, pokemon?.speciesForme)
-                      || t('pokedex:species.missingno')
+                      || t(
+                        `pokedex:species.${formatId(pokemon?.speciesForme)}`,
+                        pokemon?.speciesForme || t('pokedex:species.missingno'),
+                      )
                   )}
                   suffix={!formeDisabled && (
                     <i
@@ -689,7 +693,7 @@ export const PokeInfo = ({
                         !pokemon?.speciesForme && styles.disabled,
                       )}
                       status={!pokemon?.speciesForme || currentStatus === 'ok' ? undefined : currentStatus}
-                      override={t(`poke.info.status.${(!!pokemon?.speciesForme && currentStatus) || 'unknown'}`)}
+                      override={currentStatus === 'ok' ? currentStatus : undefined}
                       fainted={!!pokemon?.speciesForme && !hpPercentage}
                       highlight
                       containerSize={containerSize}
@@ -848,16 +852,24 @@ export const PokeInfo = ({
                   className={styles.toggleButton}
                   label={t(`poke.info.ability.${pokemon.dirtyBoostedStat || pokemon.boostedStat ? 'b' : 'autoB'}oostedStatLabel`) as React.ReactNode}
                   override={pokemon.dirtyBoostedStat || pokemon.boostedStat ? undefined : t('poke.info.ability.autoBoostedStat') as React.ReactNode}
-                  headerSuffix={pokemon.boostedStat && pokemon.boostedStat !== pokemon.dirtyBoostedStat ? (
-                    <ToggleButton
-                      label={t('poke.info.ability.resetLabel')}
-                      absoluteHover
-                      active
-                      onPress={() => updatePokemon({
-                        dirtyBoostedStat: null,
-                      }, `${l.scope}:ToggleButton~DirtyBoostedStat:onPress()`)}
-                    />
-                  ) : null}
+                  headerSuffix={((
+                    pokemon.boostedStat
+                      && pokemon.dirtyBoostedStat
+                      && pokemon.boostedStat !== pokemon.dirtyBoostedStat
+                  )
+                    ? (
+                      <ToggleButton
+                        className={styles.toggleButton}
+                        label={t('poke.info.ability.resetLabel')}
+                        absoluteHover
+                        active
+                        onPress={() => updatePokemon({
+                          dirtyBoostedStat: null,
+                        }, `${l.scope}:ToggleButton~DirtyBoostedStat:onPress()`)}
+                      />
+                    )
+                    : null
+                  )}
                   input={{
                     name: `${l.scope}:${pokemonKey}:BoostedStat`,
                     value: pokemon.dirtyBoostedStat || pokemon.boostedStat,

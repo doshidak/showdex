@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T16:53:23.631Z",
-    "updated": "2024-01-09T20:19:20.598Z"
+    "updated": "2024-01-10T08:03:25.183Z"
   },
 
   "abilities": {
@@ -3382,6 +3382,7 @@
     "hp": ["Point de Vie", "PV"],
     "ivs_one": ["Valeur Individuelle", "IV"],
     "ivs_other": ["Valeurs Individuelles", "IVs"],
+    "pri": ["Priorité", "PRI"],
     "spa": ["Attaque Spéciale", "SPA"],
     "spc": ["Spéciale", "SPÉ"],
     "spd": ["Défense Spéciale", "SPD"],
@@ -3400,6 +3401,7 @@
     "caplc": "CAP LC",
     "capmoves": "Capacités CAP",
     "current": "$t(common:labels.current)",
+    "defense": "Défense",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
@@ -3408,7 +3410,7 @@
     "formes": "Formes",
     "hiddenability": "Talent Caché",
     "hiddenpower": "Puissance Cachée",
-    "illegalresults": "Résultats Illégaux",
+    "illegalresults": "Illégaux",
     "inherited": "Hérité",
     "item_one": "Objet",
     "item_other": "Objets",
@@ -3430,6 +3432,7 @@
     "nfesnotinahighertier": "NFEs Non Présents Dans un Tier Supérieur",
     "nu": "NU",
     "nubl": "NUBL",
+    "offense": "Attaque",
     "other": "$t(common:labels.other)",
     "ou": "OU",
     "oubytechnicality": "OU par Technicité",

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { type MoveName } from '@smogon/calc';
 import { PokeType } from '@showdex/components/app';
@@ -31,6 +32,7 @@ export const PokeMoveOptionTooltip = ({
   value,
   hidden,
 }: PokeMoveOptionTooltipProps): JSX.Element => {
+  const { t } = useTranslation('pokedex');
   const settings = useCalcdexSettings();
 
   // using label here instead of value since the move can turn into a Z or Max move
@@ -128,11 +130,11 @@ export const PokeMoveOptionTooltip = ({
         hasOverrides &&
         <div
           className={styles.properties}
-          style={{ marginBottom: 3 }}
+          style={{ marginBottom: 4 }}
         >
           <div className={styles.property}>
             <div className={styles.propertyName}>
-              Edited
+              {t('common:labels.edited')}
             </div>
           </div>
         </div>
@@ -147,16 +149,16 @@ export const PokeMoveOptionTooltip = ({
 
         <div className={styles.property}>
           <div className={styles.propertyName}>
-            {categoryLabel?.[2] || (
+            {t(`categories.${formatId(categoryLabel?.[2])}.1`, '') || (
               <>
                 <div className={styles.statLabel}>
-                  {moveOverrides.offensiveStat}
+                  {t(`stats.${formatId(moveOverrides.offensiveStat)}.1`, moveOverrides.offensiveStat)}
                 </div>
                 <div className={styles.statVsLabel}>
                   vs
                 </div>
                 <div className={styles.statLabel}>
-                  {moveOverrides.defensiveStat}
+                  {t(`stats.${formatId(moveOverrides.defensiveStat)}.1`, moveOverrides.defensiveStat)}
                 </div>
               </>
             )}
@@ -198,7 +200,7 @@ export const PokeMoveOptionTooltip = ({
               className={styles.propertyName}
               style={{ marginLeft: 4 }}
             >
-              BP
+              {t('stats.bp.1')}
             </div>
           }
         </div>
@@ -207,7 +209,7 @@ export const PokeMoveOptionTooltip = ({
           showFaintCount &&
           <div className={styles.property}>
             <div className={styles.propertyName}>
-              FNT
+              {t('nonvolatiles.fnt.1')}
             </div>
 
             <div className={styles.propertyValue}>
@@ -220,7 +222,7 @@ export const PokeMoveOptionTooltip = ({
           showAccuracy &&
           <div className={styles.property}>
             <div className={styles.propertyName}>
-              ACC
+              {t('stats.acc.1')}
             </div>
 
             <div className={styles.propertyValue}>
@@ -233,7 +235,7 @@ export const PokeMoveOptionTooltip = ({
           showPriority &&
           <div className={styles.property}>
             <div className={styles.propertyName}>
-              PRI
+              {t('stats.pri.1')}
             </div>
 
             <div className={styles.propertyValue}>

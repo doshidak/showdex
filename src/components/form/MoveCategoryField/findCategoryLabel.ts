@@ -9,9 +9,9 @@ export type MoveCategoryFieldLabel = [
 ];
 
 export const MoveCategoryFieldDefaultLabels: MoveCategoryFieldLabel[] = [
-  ['status', 'status', 'STAT'],
-  ['atk', 'def', 'PHYS'],
-  ['spa', 'spd', 'SPEC'],
+  ['status', 'status', 'status'],
+  ['atk', 'def', 'physical'],
+  ['spa', 'spd', 'special'],
 ];
 
 export const findCategoryLabel = (

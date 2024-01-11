@@ -332,7 +332,15 @@ export const PokeMoves = ({
               showTeraToggle && styles.lessSpacing,
             )}
             label={t('poke.moves.z.label')}
-            tooltip={t(`poke.moves.z.${pokemon?.useZ ? '' : 'in'}activeTooltip`) as React.ReactNode}
+            tooltip={(
+              <Trans
+                t={t}
+                i18nKey={`poke.moves.z.${pokemon?.useZ ? '' : 'in'}activeTooltip`}
+                parent="div"
+                className={styles.descTooltip}
+                shouldUnescape
+              />
+            )}
             tooltipDisabled={!settings?.showUiTooltips}
             primary
             active={pokemon?.useZ}
@@ -374,7 +382,7 @@ export const PokeMoves = ({
                   battleActive &&
                   <Trans
                     t={t}
-                    i18nKey={`poke.moves.dmax${player?.usedMax ? 'un' : ''}availableTooltip`}
+                    i18nKey={`poke.moves.dmax.${player?.usedMax ? 'un' : ''}availableTooltip`}
                     parent="div"
                     className={cx(
                       styles.ultUsage,
@@ -947,7 +955,7 @@ export const PokeMoves = ({
                         <Badge
                           ref={(ref) => { copiedRefs.current[i] = ref; }}
                           className={styles.copiedBadge}
-                          label={t('poke.moves.editor.copiedBadge')}
+                          label={t('poke.moves.copiedBadge')}
                           color="green"
                         />
                       </Button>

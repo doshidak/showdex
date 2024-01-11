@@ -6,7 +6,7 @@
     "language": "English",
     "authors": ["BOT Keith <keith@tize.io>"],
     "created": "2024-01-05T12:18:35.813Z",
-    "updated": "2024-01-08T16:01:15.974Z",
+    "updated": "2024-01-10T11:03:17.663Z",
     "built": "<-- auto-filled; do not edit -->"
   },
 
@@ -34,6 +34,7 @@
     "aka": "aka.",
     "all": "All",
     "auto": "Auto",
+    "base": "Base",
     "cache": "Cache",
     "cancel": "Cancel",
     "close": "Close",
@@ -49,6 +50,7 @@
     "download": "Download",
     "downloading": "Downloading",
     "edit": "Edit",
+    "edited": "Edited",
     "empty": "Empty",
     "enter": "Enter",
     "export": "Export",

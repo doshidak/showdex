@@ -15,9 +15,9 @@ $container: (
 $tooltip: (
   padding: 8px,
 
-  header: (
-    spacing: 4px,
-  ),
+  // header: (
+  //   spacing: 4px,
+  // ),
 
   label: (
     spacing: 4px,
@@ -58,14 +58,14 @@ button.container {
 
 .header {
   @include flex.row-center;
+  @include spacing.margin($bottom: map.get($tooltip, label, spacing));
 
-  & > *:not(:last-child) {
-    @include spacing.margin($right: map.get($tooltip, header, spacing));
-  }
+  // & > *:not(:last-child) {
+  //   @include spacing.margin($right: map.get($tooltip, header, spacing));
+  // }
 }
 
 .label {
-  @include spacing.margin($bottom: map.get($tooltip, label, spacing));
   @include font.apply(fonts.$primary, ( font-weight: map.get($tooltip, label, font-weight) ));
   font-size: map.get($tooltip, label, font-size);
   line-height: map.get($tooltip, label, line-height);

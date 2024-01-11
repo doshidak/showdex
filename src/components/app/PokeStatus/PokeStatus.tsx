@@ -47,7 +47,7 @@ export const PokeStatus = ({
 
   const label = (fainted && 'RIP') || override || (
     status !== '???'
-      && t(`nonvolatiles.${formatId(status)}.1`, status)
+      && t(`nonvolatiles.${formatId(status)}.${labelIndex + 1}`, status)
   ) || defaultLabel || '???';
 
   return (

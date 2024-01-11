@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-09T21:25:19.175Z"
+    "updated": "2024-01-10T08:03:38.170Z"
   },
 
   "abilities": {
@@ -82,6 +82,7 @@
     "hp": ["Hit Points", "HP"],
     "ivs_one": ["Individual Value", "IV"],
     "ivs_other": ["Individual Values", "IVs"],
+    "pri": ["Priority", "PRI"],
     "spa": ["Special Attack", "SPA"],
     "spc": ["Special", "SPC"],
     "spd": ["Special Defense", "SPD"],
@@ -100,6 +101,7 @@
     "caplc": "CAP LC",
     "capmoves": "CAP Moves",
     "current": "$t(common:labels.current)",
+    "defense": "Defense",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
@@ -108,7 +110,7 @@
     "formes": "Formes",
     "hiddenability": "Hidden Ability",
     "hiddenpower": "Hidden Power",
-    "illegalresults": "Illegal Results",
+    "illegalresults": "Illegal",
     "inherited": "Inherited",
     "item_one": "Item",
     "item_other": "Items",
@@ -130,6 +132,7 @@
     "nfesnotinahighertier": "NFEs Not in a Higher Tier",
     "nu": "NU",
     "nubl": "NUBL",
+    "offense": "Offense",
     "other": "$t(common:labels.other)",
     "ou": "OU",
     "oubytechnicality": "OU by Technicality",

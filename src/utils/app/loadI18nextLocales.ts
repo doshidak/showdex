@@ -1,5 +1,5 @@
 import { initReactI18next } from 'react-i18next';
-import i18n from 'i18next';
+import i18n, { type TFunction } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import intervalPlural from 'i18next-intervalplural-postprocessor';
 import { ShowdexLocaleBundles } from '@showdex/consts/app';
@@ -10,6 +10,24 @@ import {
   runtimeFetch,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+
+/**
+ * Shared reference to the initialized `i18n` instance, populated at runtime.
+ *
+ * @since 1.2.1
+ */
+export const i18nRef: Record<'value', typeof i18n> = {
+  value: null,
+};
+
+/**
+ * Shared reference to the `t` function of the initialized `i18n` instance, populated at runtime.
+ *
+ * @since 1.2.1
+ */
+export const tRef: Record<'value', TFunction> = {
+  value: null,
+};
 
 const l = logger('@showdex/utils/app/loadI18nextLocales()');
 
@@ -86,7 +104,7 @@ export const loadI18nextLocales = async (
 
   const supportedLngs = Object.keys(resources);
 
-  await i18n
+  tRef.value = await i18n
     .use(intervalPlural)
     .use(LanguageDetector)
     .use(initReactI18next)
@@ -119,11 +137,15 @@ export const loadI18nextLocales = async (
       },
     });
 
-  l.success(
-    'i18n ready!',
-    '\n', 'locales', '(init)', initLocale, '(all)', supportedLngs,
-    '\n', 'ns', ns,
-  );
+  if (__DEV__) {
+    l.success(
+      'i18n ready!',
+      '\n', 'locales', '(init)', initLocale, '(all)', supportedLngs,
+      '\n', 'ns', ns,
+    );
+  }
+
+  i18nRef.value = i18n;
 
   return i18n;
 };

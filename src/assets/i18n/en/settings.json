@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-10T04:27:35.981Z"
+    "updated": "2024-01-11T07:37:54.239Z"
   },
 
   "pane": {
@@ -75,7 +75,7 @@
         },
         "fr": {
           "name": "French",
-          "description": "Contains French versions of all <em>talents</em>, <em>natures</em>, <em>objets</em>, <em>capacités</em> &amp; Pokémon, sourced from Sykless's <code>pokemon-showdown-fr</code> extension!<br /><br />Also with the help of ChatGPT & Google Translate, the rest of Showdex is also in French. (Excuse my French, I don't speak it sorry.)<br /><br /><em>bone apple teeth !</em>"
+          "description": "Contains French versions of all <em>talents</em>, <em>natures</em>, <em>objets</em>, <em>capacités</em> &amp; Pokémon, sourced from Sykless's <code>pokemon-showdown-fr</code> extension! (All descriptions are still in English.)<br /><br />Also with the help of ChatGPT & Google Translate, the rest of Showdex is also in <em>what we hope you'd excuse</em> our \"French.\"<br /><br /><em>bone apple teeth !</em>"
         }
       }
     },

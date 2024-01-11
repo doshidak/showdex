@@ -4,12 +4,21 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-01-10T02:14:38.053Z"
+    "updated": "2024-01-10T12:25:03.392Z"
+  },
+
+  "overlay": {
+    "control": {
+      "activeLabel": "$t(common:labels.close) $t(common:products.calcdex_one)",
+      "inactiveLabel": "$t(common:labels.open) $t(common:products.calcdex_one)"
+    }
   },
 
   "player": {
     "user": {
       "aria": "{{position}} Player Selector",
+      "defaultName": "Player {{index}}",
+      "optionLabel": "P{{index}}",
       "empty": "No Players",
       "selectorTooltip": "Switch <strong>{{position}}</strong> Player",
       "buttonTooltip": "Open <strong>{{player}}</strong>'s Profile"
@@ -17,8 +26,8 @@
 
     "autoSelect": {
       "label": "$t(common:labels.auto)",
-      "activeTooltip": "Manually Select Pokémon",
-      "inactiveTooltip": "Auto-Select Pokémon"
+      "activeTooltip": "<strong>Manually</strong> Select Pokémon",
+      "inactiveTooltip": "<strong>Auto</strong>-Select Pokémon"
     },
 
     "party": {
@@ -135,8 +144,8 @@
         "label": "$t(pokedex:ultimates.tera.2)",
         "activeTooltip": "Revert to <strong>{{types}}</strong>",
         "inactiveTooltip": "$t(pokedex:ultimates.tera.1) to <strong>{{teraType}}</strong>",
-        "availableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Available</strong>",
-        "unavailableTooltip": "$t(pokedex.ultimates.tera.2) <strong>Used</strong>"
+        "availableTooltip": "$t(pokedex:ultimates.tera.2) <strong>Available</strong>",
+        "unavailableTooltip": "$t(pokedex:ultimates.tera.2) <strong>Used</strong>"
       },
 
       "z": {

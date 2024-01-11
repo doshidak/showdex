@@ -16,7 +16,7 @@ import {
   calcdexSlice,
   hellodexSlice,
 } from '@showdex/redux/store';
-import { createCalcdexRoom, getCalcdexRoomId } from '@showdex/utils/app';
+import { createCalcdexRoom, getCalcdexRoomId, tRef } from '@showdex/utils/app';
 import {
   clonePlayerSideConditions,
   detectAuthPlayerKeyFromBattle,
@@ -332,7 +332,10 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
       const { overlayVisible: visible } = state || {};
 
       const toggleButtonIcon = visible ? 'close' : 'calculator';
-      const toggleButtonLabel = `${visible ? 'Close' : 'Open'} Calcdex`;
+      const toggleButtonLabel = (
+        typeof tRef.value === 'function'
+          && tRef.value(`calcdex:overlay.control.${visible ? '' : 'in'}activeLabel`, '')
+      ) || `${visible ? 'Close' : 'Open'} Calcdex`;
 
       const $existingToggleButton = $controls.find('button[name*="toggleCalcdexOverlay"]');
       const hasExistingToggleButton = !!$existingToggleButton.length;
@@ -857,7 +860,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
         turn: Math.max(battle.turn || 0, 0),
         active: !battle.ended,
         renderMode: openAsPanel ? 'panel' : 'overlay',
-        switchPlayers: battle.sidesSwitched,
+        switchPlayers: battle.viewpointSwitched ?? battle.sidesSwitched,
 
         ...AllPlayerKeys.reduce((prev, playerKey) => {
           const player = battle[playerKey];

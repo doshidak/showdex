@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-01-10T04:27:12.223Z"
+    "updated": "2024-01-10T11:45:37.196Z"
   },
 
   "pane": {
@@ -408,7 +408,7 @@
         },
         "ability": {
           "label": "$t(pokedex:headers.ability_one)",
-          "tooltip": "Affiche une courte description de la capacité survolée dans la liste déroulante."
+          "tooltip": "Affiche une courte description de la talent survolée dans la liste déroulante."
         },
         "item": {
           "label": "$t(pokedex:headers.item_one)",
@@ -420,7 +420,7 @@
         },
         "matchup": {
           "label": "$t(pane.sections.secondary.matchup_one)",
-          "tooltip": "Affiche une description du match du capacité depuis le Calculateur de Dégâts original lorsque vous survolez une plage de dégâts."
+          "tooltip": "Affiche une description du match du capacité depuis le calculateur de dégâts original lorsque vous survolez une plage de dégâts."
         },
         "field": {
           "label": "$t(pokedex:headers.field)",
@@ -471,7 +471,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Permet uniquement de modifier les types du Pokémon dans les formats Métajeu Alternatif (OM) non standards lorsqu'on clique dessus."
+          "tooltip": "Permet uniquement de modifier les types du Pokémon dans les formats Other Metagames (OM) non standards lorsqu'on clique dessus."
         },
         "never": {
           "label": "Jamais",
@@ -507,7 +507,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Autorise uniquement les répartitions illégales de $t(pokedex:stats.ivs_other.1)/$t(pokedex:stats.evs_other.1) dans les formats Métajeu Alternatif (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.allowIllegalSpreads.options.always.label)</strong> pour en savoir plus sur les répartitions illégales."
+          "tooltip": "Autorise uniquement les répartitions illégales de $t(pokedex:stats.ivs_other.1)/$t(pokedex:stats.evs_other.1) dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.allowIllegalSpreads.options.always.label)</strong> pour en savoir plus sur les répartitions illégales."
         },
         "never": {
           "label": "Jamais",
@@ -525,7 +525,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Permet uniquement la modification des $t(pokedex:stats.base_one.0) dans les formats Métajeu Alternatif (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showBaseStats.options.always)</strong> pour en savoir plus sur la modification des $t(pokedex:stats.base_one.0)."
+          "tooltip": "Permet uniquement la modification des $t(pokedex:stats.base_one.0) dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showBaseStats.options.always)</strong> pour en savoir plus sur la modification des $t(pokedex:stats.base_one.0)."
         },
         "never": {
           "label": "Jamais",

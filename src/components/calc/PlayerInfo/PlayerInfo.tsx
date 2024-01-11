@@ -211,7 +211,15 @@ export const PlayerInfo = ({
         <ToggleButton
           className={styles.toggleButton}
           label={t('player.autoSelect.label')}
-          tooltip={t(`player.autoSelect.${autoSelect ? '' : 'in'}activeTooltip`)}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey={`player.autoSelect.${autoSelect ? '' : 'in'}activeTooltip`}
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
           tooltipDisabled={!settings?.showUiTooltips}
           absoluteHover
           active={autoSelect}

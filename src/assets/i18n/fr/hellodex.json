@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:34:00.026Z",
-    "updated": "2024-01-09T21:45:37.991Z"
+    "updated": "2024-01-10T06:49:33.445Z"
   },
 
   "header": {
@@ -38,7 +38,7 @@
     "label": "<strong>Show</strong>dex <strong>un peu</strong> <strong>d'amour</strong>",
     "footnote": {
       "default": "Si vous avez apprécié cette extension, envisagez de soutenir un développement ultérieur.",
-      "supporter": "Merci de soutenir $t(common:products.showdex)!"
+      "supporter": "Merci de soutenir $t(common:products.showdex) !"
     }
   },
 

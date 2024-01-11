@@ -114,7 +114,7 @@ export const buildMoveOptions = (
       options: zTuple.map(([name, zMove]) => ({
         label: translate?.(zMove) || zMove,
         rightLabel: findUsagePercent(name),
-        subLabel: zMove === name ? null : `${uarr} ${name}`,
+        subLabel: zMove === name ? null : `${uarr} ${translate?.(name) || name}`,
         value: name,
       })),
     });
@@ -141,7 +141,7 @@ export const buildMoveOptions = (
         return {
           label: translate?.(maxMove) || maxMove,
           rightLabel: findUsagePercent(name),
-          subLabel: maxMove === name ? null : `${uarr} ${name}`,
+          subLabel: maxMove === name ? null : `${uarr} ${translate?.(name) || name}`,
           value: name,
         };
       }),

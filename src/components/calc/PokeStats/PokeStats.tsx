@@ -568,9 +568,12 @@ export const PokeStats = ({
                     || (mod?.source === 'item' && 'items')
                     || (mod?.source === 'move' && 'moves')
                     || (mod?.source === 'status' && 'nonvolatiles')
-                    || (mod?.source === 'ultimate' && 'ultimates');
+                    || (mod?.source === 'ultimate' && 'ultimates')
+                    || null;
 
-                  const tLabel = t(`pokedex:${tSource}.${formatId(mod?.label)}`, '??? HUH');
+                  const tLabel = (!!tSource && t(`pokedex:${tSource}.${formatId(mod?.label)}`, mod?.label))
+                    || mod?.label
+                    || '??? HUH';
 
                   return (
                     <React.Fragment

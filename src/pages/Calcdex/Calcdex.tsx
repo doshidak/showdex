@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import {
@@ -34,6 +35,7 @@ export const Calcdex = ({
     settings,
   } = useCalcdexContext();
 
+  const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
   const mobile = useMobileViewport();
@@ -79,7 +81,10 @@ export const Calcdex = ({
               }
             </>
           ),
-          rightLabel: k.toUpperCase(),
+          rightLabel: t('player.user.optionLabel', {
+            index: k.replace('p', ''),
+            playerKey: k.toUpperCase(),
+          }),
           subLabel: playerTitle?.title,
           value: k,
           disabled: !playerName,
@@ -90,6 +95,7 @@ export const Calcdex = ({
     colorScheme,
     playerCount,
     state,
+    t,
   ]);
 
   const renderAsOverlay = renderMode === 'overlay';
@@ -140,7 +146,7 @@ export const Calcdex = ({
           className={styles.playerCalc}
           position="top"
           playerKey={topKey}
-          defaultName="Player 1"
+          defaultName={t('player.user.defaultName', { index: 1 })}
           playerOptions={playerOptions}
         />
 
@@ -154,7 +160,7 @@ export const Calcdex = ({
           className={styles.opponentCalc}
           position="bottom"
           playerKey={bottomKey}
-          defaultName="Player 2"
+          defaultName={t('player.user.defaultName', { index: 2 })}
           playerOptions={playerOptions}
         />
 
