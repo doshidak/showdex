@@ -12,12 +12,13 @@ import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
  * * `'import'` refers to any preset imported from the user's clipboard.
  * * `'server'` refers to any preset provided by the Showdown server, typically for the logged-in user's Pokemon.
  * * `'sheet'` refers to any preset derived from an open team sheet or the `!showteam` chat command.
- * * `'smogon'` refers to any preset downloaded from a repository of Smogon sets.
+ * * `'smogon'` refers to any preset downloaded from a live repository of Smogon sets.
+ * * `'bundle'` refers to any preset from a sets dump bundled with this build & locally accessed at runtime.
  * * `'storage'` refers to any preset derived from locally-stored Teambuilder teams & boxes.
  *   - `'storage'` refers to any preset derived from a Teambuilder team.
  *   - `'storage-box'` refers to any preset derived from a Teambuilder box.
- * * `'usage'` refers to any preset derived from Showdown usage stats.
- * * `'user'` refers to the user's manual modifications represented as a preset.
+ * * `'usage'` refers to any preset derived from downloaded Showdown usage stats.
+ * * `'user'` refers to any preset derived from the user's manual modifications.
  *
  * @since 1.0.7
  */
@@ -26,6 +27,7 @@ export type CalcdexPokemonPresetSource =
   | 'server'
   | 'sheet'
   | 'smogon'
+  | 'bundle'
   | 'storage'
   | 'storage-box'
   | 'usage'
@@ -73,12 +75,12 @@ export interface CalcdexPokemonPreset {
   /**
    * Alias of `calcdexId`, used internally by RTK Query in its internal tagging system.
    *
-   * * Wherever the `calcdexId` is set, this property will be set to the same value as well.
+   * * Wherever the `calcdexId` is set, this property should be set to the same value as well.
    * * Recommended you use `calcdexId` over this property to avoid confusion.
    *
    * @since 0.1.3
    */
-  id?: string;
+  id: string;
 
   /**
    * Source of the preset.
@@ -102,6 +104,20 @@ export interface CalcdexPokemonPreset {
    * @since 1.1.3
    */
   playerName?: string;
+
+  /**
+   * ID of the bundle that this preset is sourced from, if applicable.
+   *
+   * @since 1.2.1
+   */
+  bundleId?: string;
+
+  /**
+   * Name of the bundle that this preset is sourced from, if applicable.
+   *
+   * @since 1.2.1
+   */
+  bundleName?: string;
 
   /**
    * Name of the preset.

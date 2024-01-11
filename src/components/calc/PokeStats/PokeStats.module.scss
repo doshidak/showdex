@@ -39,6 +39,13 @@
   font-size: 8px;
 }
 
+.tooltipContent {
+  position: relative;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
 .header {
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
   @include transition.apply(color);

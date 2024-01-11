@@ -12,6 +12,7 @@ import {
   detectLegacyGen,
   determineDefaultLevel,
   getDefaultSpreadValue,
+  legalLockedFormat,
 } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt } from './detectUsageAlt';
@@ -48,6 +49,7 @@ export const applyPreset = (
     return null;
   }
 
+  const legal = legalLockedFormat(format);
   const defaultLevel = determineDefaultLevel(format);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
@@ -91,6 +93,12 @@ export const applyPreset = (
       spe: preset.evs?.spe ?? defaultEv,
     },
   };
+
+  // update (2024/01/03): shouldn't apply the level if the `pokemon` isn't being `'user'`-handled, i.e., in a battle
+  // (was causing server-sourced Pokemon to be level 100 vs. level 50 client-sourced ones in VGC LOL... oopsies)
+  if (pokemon.source !== 'user') {
+    delete output.level;
+  }
 
   const transformed = !!pokemon.transformedForme;
   const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
@@ -314,6 +322,17 @@ export const applyPreset = (
       output.abilities = abilities;
       output.baseStats = baseStats;
     }
+  }
+
+  const shouldClearDirtyAbility = legal
+    && !!output.dirtyAbility
+    && ![...sanitized.abilities, ...sanitized.transformedAbilities].includes(output.dirtyAbility);
+
+  if (shouldClearDirtyAbility) {
+    // [output.dirtyAbility] = sanitized.transformedAbilities.length
+    //   ? sanitized.transformedAbilities
+    //   : sanitized.abilities;
+    delete output.dirtyAbility;
   }
 
   if (!pokemon.ability && sanitized.abilityToggled) {

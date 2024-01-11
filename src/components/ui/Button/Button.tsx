@@ -70,6 +70,8 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
     () => ref.current,
   );
 
+  const childrenLabel = typeof children === 'string' && !!children && !label;
+
   return (
     <>
       <BaseButton
@@ -86,23 +88,23 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
         aria-label={label}
         disabled={disabled}
       >
-        {childrenFirst && children}
+        {!childrenLabel && childrenFirst && children}
 
         {prefix}
 
         {
-          (!!label && !hideLabel) &&
+          ((!!label || childrenLabel) && !hideLabel) &&
           <label
             className={cx(styles.label, labelClassName)}
             style={labelStyle}
           >
-            {label}
+            {label || childrenLabel}
           </label>
         }
 
         {suffix}
 
-        {!childrenFirst && children}
+        {!childrenLabel && !childrenFirst && children}
       </BaseButton>
 
       <Tooltip

@@ -35,6 +35,8 @@ export const buildMoveOptions = (
     usage?: CalcdexPokemonPreset;
     field?: CalcdexBattleField;
     include?: 'all' | 'hidden-power';
+    translate?: (value: MoveName) => string;
+    translateHeader?: (value: string) => string;
   },
 ): CalcdexPokemonMoveOption[] => {
   const options: CalcdexPokemonMoveOption[] = [];
@@ -47,6 +49,8 @@ export const buildMoveOptions = (
     usage,
     field,
     include,
+    translate,
+    translateHeader,
   } = config || {};
 
   const dex = getDexForFormat(format);
@@ -106,11 +110,11 @@ export const buildMoveOptions = (
       .sort(([a], [b]) => usageSorter(a, b));
 
     options.push({
-      label: 'Z',
+      label: translateHeader?.('Z Moves') || 'Z',
       options: zTuple.map(([name, zMove]) => ({
-        label: zMove,
+        label: translate?.(zMove) || zMove,
         rightLabel: findUsagePercent(name),
-        subLabel: zMove === name ? null : `${uarr} ${name}`,
+        subLabel: zMove === name ? null : `${uarr} ${translate?.(name) || name}`,
         value: name,
       })),
     });
@@ -123,7 +127,7 @@ export const buildMoveOptions = (
     const sortedMoves = [...moves].sort(usageSorter);
 
     options.push({
-      label: 'Max',
+      label: translateHeader?.('Max Moves') || 'Max',
       options: sortedMoves.map((name) => {
         const maxMove = getMaxMove(name, {
           moveType: getDynamicMoveType(pokemon, name, {
@@ -135,9 +139,9 @@ export const buildMoveOptions = (
         }) || name;
 
         return {
-          label: maxMove,
+          label: translate?.(maxMove) || maxMove,
           rightLabel: findUsagePercent(name),
-          subLabel: maxMove === name ? null : `${uarr} ${name}`,
+          subLabel: maxMove === name ? null : `${uarr} ${translate?.(name) || name}`,
           value: name,
         };
       }),
@@ -147,14 +151,15 @@ export const buildMoveOptions = (
   }
 
   if (source === 'server' && serverMoves?.length) {
+    const groupLabel = transformedForme ? 'Pre-Transform' : 'Current';
     const filteredServerMoves = serverMoves
       .filter((n) => !!n && !filterMoves.includes(n))
       .sort(usageSorter);
 
     options.push({
-      label: transformedForme ? 'Pre-Transform' : 'Current',
+      label: translateHeader?.(groupLabel) || groupLabel,
       options: filteredServerMoves.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),
@@ -169,9 +174,9 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.unshift({
-      label: 'Transformed',
+      label: translateHeader?.('Transformed') || 'Transformed',
       options: filteredTransformedMoves.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),
@@ -186,9 +191,9 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: 'Revealed',
+      label: translateHeader?.('Revealed Moves') || 'Revealed',
       options: filteredRevealedMoves.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),
@@ -206,9 +211,9 @@ export const buildMoveOptions = (
     const poolMoves = flattenAlts(unsortedPoolMoves).sort(usageSorter);
 
     options.push({
-      label: 'Pool',
+      label: translateHeader?.('Pool') || 'Pool',
       options: poolMoves.map((alt) => ({
-        label: flattenAlt(alt),
+        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
         rightLabel: findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
@@ -227,9 +232,9 @@ export const buildMoveOptions = (
 
   if (remainingUsageMoves?.length) {
     options.push({
-      label: 'Usage',
+      label: translateHeader?.('Usage') || 'Usage',
       options: remainingUsageMoves.map((alt) => ({
-        label: flattenAlt(alt),
+        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
         rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
@@ -250,9 +255,9 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: 'Learnset',
+      label: translateHeader?.('Learnset') || 'Learnset',
       options: learnsetMoves.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),
@@ -280,9 +285,9 @@ export const buildMoveOptions = (
     const hpMoves = Array.from(new Set(unsortedHpMoves)).sort(usageSorter);
 
     options.push({
-      label: 'Hidden Power',
+      label: translateHeader?.('Hidden Power') || 'Hidden Power',
       options: hpMoves.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),
@@ -305,9 +310,9 @@ export const buildMoveOptions = (
 
     // make sure this comes before the Hidden Power moves
     options.splice(insertionIndex, 0, {
-      label: 'All',
+      label: translateHeader?.('All') || 'All',
       options: otherMoves.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),

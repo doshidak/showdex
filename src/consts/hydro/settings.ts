@@ -6,6 +6,7 @@ import {
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
 import { reverseObjectKv } from '@showdex/utils/core';
+import { ShowdexPresetsBundles } from '@showdex/consts/app';
 
 /**
  * Default Showdex settings.
@@ -13,6 +14,7 @@ import { reverseObjectKv } from '@showdex/utils/core';
  * @since 1.2.0
  */
 export const DefaultShowdexSettings: ShowdexSettings = {
+  locale: null, // falling back to LanguageDetector
   colorScheme: null,
   forcedColorScheme: 'showdown',
   glassyTerrain: false,
@@ -53,6 +55,8 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     maxPresetAge: 3,
     prioritizeUsageStats: false,
     includeTeambuilder: 'always',
+    includeOtherMetaPresets: false,
+    includePresetsBundles: ShowdexPresetsBundles.map((b) => !b?.disabled && b.id).filter(Boolean),
     autoImportTeamSheets: true,
     autoExportOpponent: false,
 
@@ -128,6 +132,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
  * @since 1.0.3
  */
 export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string> = {
+  locale: 'lc',
   colorScheme: 'cs',
   forcedColorScheme: 'fc',
   glassyTerrain: 'gt',
@@ -189,6 +194,8 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   maxPresetAge: 'mpa',
   prioritizeUsageStats: 'pus',
   includeTeambuilder: 'itb',
+  includeOtherMetaPresets: 'iom',
+  includePresetsBundles: 'ipb',
   autoImportTeamSheets: 'ats',
   autoExportOpponent: 'aeo',
   defaultAutoMoves: 'dam',

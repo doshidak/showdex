@@ -47,7 +47,7 @@ export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
 
     l.error(
       message,
-      '\n', 'window.indexedDB', '(typeof)', typeof window?.indexedDB,
+      '\n', 'window.indexedDB', '(type)', typeof window?.indexedDB,
       '\n', 'INDEXED_DB_NAME', dbName, 'INDEXED_DB_VERSION', dbVersion,
     );
 
@@ -79,7 +79,7 @@ export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
     if (typeof db?.createObjectStore !== 'function') {
       return void l.warn(
         'req.onupgradeneeded()', 'Couldn\'t start the upgrade cause of a wack db object.',
-        '\n', 'db.createObjectStore()', '(typeof)', typeof db?.createObjectStore,
+        '\n', 'db.createObjectStore()', '(type)', typeof db?.createObjectStore,
         '\n', 'INDEXED_DB_NAME', dbName, 'INDEXED_DB_VERSION', dbVersion,
       );
     }
@@ -106,10 +106,12 @@ export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
     // update the metadata
     updateMetaDb(showdexedDb.value);
 
-    l.info(
-      'req.onsuccess()', 'sdb ready!',
-      '\n', 'showdexedDb', '(name)', showdexedDb.value?.name, '(v)', showdexedDb.value?.version,
-    );
+    if (__DEV__) {
+      l.info(
+        'req.onsuccess()', 'sdb ready!',
+        '\n', 'showdexedDb', '(name)', showdexedDb.value?.name, '(v)', showdexedDb.value?.version,
+      );
+    }
 
     resolve(showdexedDb.value);
   };

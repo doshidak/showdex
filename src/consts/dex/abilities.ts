@@ -124,6 +124,9 @@ export const PokemonToggleAbilities: Record<GameType, AbilityName[]> = {
  *   - *fearii-sukin* (Japanese)
  *   - *peuri-seukin* (Korean)
  * * Couldn't think of a better name, sorry.
+ * * Update (2024/01/04): Apparently these are called "ate" abilities in `@smogon/calc`'s `gen789.ts` mechanics file,
+ *   which I initially saw awhile back & was like wait Pokemon can *eat* abilities ????????
+ *   - I suppose the *Commander* ability kinda counts LOL
  *
  * @since 1.2.0
  */

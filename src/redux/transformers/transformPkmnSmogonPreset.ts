@@ -1,6 +1,6 @@
 import { type AbilityName, type GenerationNum } from '@smogon/calc';
 import { type PkmnApiSmogonPreset } from '@showdex/interfaces/api';
-import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
 import { calcPresetCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
@@ -28,6 +28,7 @@ export const transformPkmnSmogonPreset = (
   speciesForme: string,
   presetName: string,
   preset: PkmnApiSmogonPreset,
+  source: CalcdexPokemonPresetSource = 'smogon',
 ): CalcdexPokemonPreset => {
   if (!gen || !format || !speciesForme || !nonEmptyObject(preset)) {
     return null;
@@ -51,7 +52,7 @@ export const transformPkmnSmogonPreset = (
   const output: CalcdexPokemonPreset = {
     calcdexId: null, // we'll hash this after we build the object
     id: null, // will equal calcdexId, so the same applies as above
-    source: 'smogon',
+    source,
     name: presetName || 'Smogon Set', // e.g., 'Defensive Pivot'
     gen,
     format: getGenlessFormat(format), // just in case; e.g., 'ou'

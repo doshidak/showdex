@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
 import { PokeType } from '@showdex/components/app';
@@ -13,7 +14,7 @@ import {
 import { PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
-import { similarArrays } from '@showdex/utils/core';
+import { formatId, similarArrays } from '@showdex/utils/core';
 import { type ElementSizeLabel } from '@showdex/utils/hooks';
 import { percentage } from '@showdex/utils/humanize';
 import { flattenAlts, sortUsageAlts } from '@showdex/utils/presets';
@@ -76,6 +77,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
     () => containerRef.current,
   );
 
+  const { t } = useTranslation('pokedex');
   const colorScheme = useColorScheme();
 
   // keep track of whether the options tooltip is open
@@ -101,7 +103,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
         ...((inputSource as Showdown.TypeName[]) || []),
       ];
 
-      const valueIndex = updatedValue.findIndex((t) => t === value);
+      const valueIndex = updatedValue.findIndex((tp) => tp === value);
 
       if (valueIndex > -1) {
         updatedValue.splice(valueIndex, 1);
@@ -116,7 +118,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
       if (updatedValue.length) {
         // if sorting worked properly, should always be last in the array
         // (something's terribly wrong if index 0 is '???' here, probably about to have an empty array!)
-        const unknownTypeIndex = updatedValue.findIndex((t) => t === '???');
+        const unknownTypeIndex = updatedValue.findIndex((tp) => tp === '???');
 
         // update (2022/11/06): no longer sorting, so '???' at index 0 is ok
         if (unknownTypeIndex > -1) {
@@ -153,18 +155,18 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
 
   const flatTypeUsages = flattenAlts(typeUsages);
 
-  const allTypes = PokemonTypes.filter((t) => (
-    !!t
-      && t !== '???'
-      && (teraTyping || t !== 'Stellar')
+  const allTypes = PokemonTypes.filter((tp) => (
+    !!tp
+      && tp !== '???'
+      && (teraTyping || tp !== 'Stellar')
   ));
 
   const usageTypes: CalcdexPokemonUsageAlt<Showdown.TypeName>[] = (
     (!typeUsages?.length && [])
-      || allTypes.filter((t) => flatTypeUsages.includes(t))
+      || allTypes.filter((tp) => flatTypeUsages.includes(tp))
   ).map((typeName) => [
     typeName,
-    typeUsages.find((t) => t?.[0] === typeName)?.[1],
+    typeUsages.find((tp) => tp?.[0] === typeName)?.[1],
   ] as CalcdexPokemonUsageAlt<Showdown.TypeName>)
     .filter(([, usage]) => (usage || 0) > 0)
     .sort(sortUsageAlts);
@@ -285,7 +287,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
               pokemonType,
               `PokeTypeField:${input?.name || '???'}:AllTypes:Option:${pokemonType || i || '???'}`,
               {
-                override: (pokemonType === 'Stellar' && pokemonType) || null,
+                override: (pokemonType === 'Stellar' && t(`types.${formatId(pokemonType)}.0`)) || null,
                 reverseColorScheme: true,
                 spanAllColumns: pokemonType === 'Stellar',
               },

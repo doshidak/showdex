@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import { Form, FormSpy } from 'react-final-form';
 // import { useHotkeys } from 'react-hotkeys-hook';
@@ -59,6 +60,7 @@ export const SettingsPane = ({
   style,
   onRequestClose,
 }: SettingsPaneProps): JSX.Element => {
+  const { t, i18n } = useTranslation('settings');
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
   const state = useHellodexState();
@@ -308,9 +310,14 @@ export const SettingsPane = ({
     }
 
     const {
+      locale: nextLocale,
       // colorScheme: newColorScheme,
       calcdex,
     } = values;
+
+    if (nextLocale && settings?.locale !== nextLocale) {
+      void i18n.changeLanguage(nextLocale);
+    }
 
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
@@ -340,7 +347,7 @@ export const SettingsPane = ({
       style={style}
     >
       <Tooltip
-        content="Close Showdex Settings"
+        content={t('pane.header.close.tooltip')} // oh shit it's t-pane
         offset={[0, 10]}
         delay={[1000, 50]}
         trigger="mouseenter"
@@ -349,7 +356,7 @@ export const SettingsPane = ({
         <BaseButton
           className={styles.closeButton}
           display="inline"
-          aria-label="Close Showdex Settings"
+          aria-label={t('pane.header.close.tooltip')}
           onPress={onRequestClose}
         >
           <Svg
@@ -400,7 +407,7 @@ export const SettingsPane = ({
                   />
 
                   <div className={styles.title}>
-                    Settings
+                    {t('pane.header.title')}
                   </div>
                 </div>
 
@@ -411,55 +418,51 @@ export const SettingsPane = ({
                       styles.importButton,
                       !!prevSettings && styles.undoButton,
                     )}
-                    label={prevSettings ? 'Undo?' : 'Import'}
+                    label={t(`pane.header.import.${prevSettings ? 'undoLabel' : 'label'}`)}
                     tooltip={(
                       <div className={cx(styles.tooltipContent, styles.importTooltip)}>
                         <Badge
                           ref={importBadgeRef}
                           className={styles.importBadge}
-                          label="Imported"
+                          label={t('pane.header.import.importedBadge')}
                           color="blue"
                         />
 
                         <Badge
                           ref={importFailedBadgeRef}
                           className={styles.importBadge}
-                          label="Failed"
+                          label={t('pane.header.import.failedBadge')}
                           color="red"
                         />
 
-                        Import Settings from Clipboard
+                        {t('pane.header.import.tooltip')}
                       </div>
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
-                    // tooltipDisabled={!!prevSettings}
                     hoverScale={1}
                     onPress={handleSettingsImport}
                   />
 
                   <Button
-                    className={cx(
-                      styles.actionButton,
-                      styles.exportButton,
-                    )}
-                    label="Export"
+                    className={cx(styles.actionButton, styles.exportButton)}
+                    label={t('pane.header.export.label')}
                     tooltip={(
                       <div className={cx(styles.tooltipContent, styles.importTooltip)}>
                         <Badge
                           ref={exportBadgeRef}
                           className={styles.importBadge}
-                          label="Copied!"
+                          label={t('pane.header.export.exportedBadge')}
                           color="green"
                         />
 
                         <Badge
                           ref={exportFailedBadgeRef}
                           className={styles.importBadge}
-                          label="Failed"
+                          label={t('pane.header.export.failedBadge')}
                           color="red"
                         />
 
-                        Export Settings to Clipboard
+                        {t('pane.header.export.tooltip')}
                       </div>
                     )}
                     tooltipTrigger={['focus', 'mouseenter']}
@@ -470,28 +473,25 @@ export const SettingsPane = ({
                   {
                     !inBattle &&
                     <Button
-                      className={cx(
-                        styles.actionButton,
-                        styles.defaultsButton,
-                      )}
-                      label="Defaults"
+                      className={cx(styles.actionButton, styles.defaultsButton)}
+                      label={t('pane.header.defaults.label')}
                       tooltip={(
                         <div className={cx(styles.tooltipContent, styles.importTooltip)}>
                           <Badge
                             ref={defaultsBadgeRef}
                             className={styles.importBadge}
-                            label="Copied!"
+                            label={t('pane.header.defaults.exportedBadge')}
                             color="green"
                           />
 
                           <Badge
                             ref={defaultsFailedBadgeRef}
                             className={styles.importBadge}
-                            label="Failed"
+                            label={t('pane.header.defaults.failedBadge')}
                             color="red"
                           />
 
-                          Export Defaults to Clipboard
+                          {t('pane.header.defaults.tooltip')}
                         </div>
                       )}
                       tooltipTrigger={['focus', 'mouseenter']}
@@ -525,7 +525,7 @@ export const SettingsPane = ({
               <ShowdownSettingsPane />
 
               <div className={styles.notice}>
-                plz excuse the mess, this is a work in progress
+                {t('pane.footer.message')}
                 <br />
                 <span className={styles.face}>
                   (｡◕‿◕｡)

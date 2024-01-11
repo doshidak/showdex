@@ -3,7 +3,7 @@ import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@show
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { flattenAlts, selectPokemonPresets } from '@showdex/utils/presets';
+import { flattenAlts, selectPokemonPresets, sortPresetsByFormat } from '@showdex/utils/presets';
 import { CalcdexContext } from '../CalcdexContext';
 import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
@@ -86,6 +86,8 @@ export const CalcdexPokeProvider = ({
     loading: presetsLoading,
     presets: allPresets,
     usages: allUsages,
+    formatLabelMap,
+    formeUsages,
   } = battlePresets;
 
   const pokemonSheets = React.useMemo(() => selectPokemonPresets(
@@ -145,6 +147,20 @@ export const CalcdexPokeProvider = ({
     playerPokemon,
   ]);
 
+  const bundledPresets = React.useMemo(() => selectPokemonPresets(
+    allPresets,
+    playerPokemon,
+    {
+      format,
+      source: 'bundle',
+      select: 'any',
+    },
+  ), [
+    allPresets,
+    format,
+    playerPokemon,
+  ]);
+
   const pokemonPresets = React.useMemo(() => selectPokemonPresets(
     allPresets,
     playerPokemon,
@@ -165,10 +181,13 @@ export const CalcdexPokeProvider = ({
     ...(format?.includes('random') ? [] : usages),
     ...teamPresets,
     ...boxPresets,
+    ...bundledPresets,
     ...pokemonPresets,
-  ], [
+  ].sort(sortPresetsByFormat(format, formatLabelMap)), [
     boxPresets,
+    bundledPresets,
     format,
+    formatLabelMap,
     playerPokemon?.presets,
     pokemonPresets,
     pokemonSheets,
@@ -238,11 +257,15 @@ export const CalcdexPokeProvider = ({
     presets,
     usages,
     usage,
+    formatLabelMap,
+    formeUsages,
 
     matchups,
   }), [
     allUsages,
     ctx,
+    formatLabelMap,
+    formeUsages,
     matchups,
     opponent,
     opponentPokemon,

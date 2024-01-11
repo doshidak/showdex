@@ -1,12 +1,19 @@
 import * as React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDebouncyFn } from 'use-debouncy';
 import cx from 'classnames';
 import { formatDistanceToNow } from 'date-fns';
 import { type GenerationNum } from '@smogon/calc';
-import { Dropdown, GenField, InlineField } from '@showdex/components/form';
+import {
+  createAliasFilter,
+  Dropdown,
+  GenField,
+  InlineField,
+} from '@showdex/components/form';
 import { ToggleButton } from '@showdex/components/ui';
 import { type CalcdexBattleState, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { buildFormatOptions, determineColorScheme } from '@showdex/utils/ui';
 import { useCalcdexContext } from '../CalcdexContext';
@@ -25,6 +32,7 @@ export const BattleInfo = ({
   style,
   openHonkdexInstance,
 }: BattleInfoProps): JSX.Element => {
+  const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
   const reversedColorScheme = determineColorScheme(colorScheme, true);
 
@@ -53,9 +61,46 @@ export const BattleInfo = ({
 
   const saved = !!cached && !saving?.[0];
 
+  // quick 'n dirty baby lessgo LOL
+  const savedAgo = React.useMemo<string>(() => {
+    if (!cached) {
+      return null;
+    }
+
+    const raw = formatDistanceToNow(cached)?.replace('about ', '');
+    const [, distGroup, unitGroup] = /([.,\d]+)?\s+([a-z]+[^s])s?$/i.exec(raw) || [];
+
+    if (!distGroup || !unitGroup) {
+      return raw;
+    }
+
+    const distValue = parseInt(distGroup, 10) || 0;
+    const distUnit = formatId(unitGroup);
+
+    if (!distValue || !distUnit) {
+      return raw;
+    }
+
+    const distUnitLabel = t(`common:time.${distUnit}`, { count: distValue });
+
+    if (!distUnitLabel) {
+      return raw;
+    }
+
+    return `${distValue} ${distUnitLabel}`;
+  }, [
+    cached,
+    t,
+  ]);
+
   const formatOptions = React.useMemo(
     () => buildFormatOptions(gen, { showAll: honkdexSettings?.showAllFormats }),
     [gen, honkdexSettings?.showAllFormats],
+  );
+
+  const formatOptionsFilter = React.useMemo(
+    () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true })),
+    [t],
   );
 
   // used for the honk name, so it doesn't lag when you type fast af
@@ -89,7 +134,7 @@ export const BattleInfo = ({
           genLocked && styles.genLocked,
         )}
         optionLabelClassName={styles.label}
-        label="Generation Selector"
+        label={t('battle.gen.aria') as React.ReactNode}
         tooltipPrefix={genLocked ? (
           <div
             className={cx(
@@ -99,8 +144,11 @@ export const BattleInfo = ({
           >
             <div className={styles.description}>
               <i className="fa fa-exclamation-circle" />
-              Switching the gen with Pok&eacute;mon in the calc will open a <strong>new</strong>,{' '}
-              <strong>blank</strong> Honkdex.
+              <Trans
+                t={t}
+                i18nKey="battle.gen.locked"
+                shouldUnescape
+              />
             </div>
           </div>
         ) : null}
@@ -115,7 +163,7 @@ export const BattleInfo = ({
       <div className={styles.honkInfo}>
         <InlineField
           className={styles.honkName}
-          hint="name this honk to save this honk"
+          hint={t('battle.name.hint') as React.ReactNode}
           input={{
             name: `${l.scope}:${battleId}:Name`,
             value: name,
@@ -127,7 +175,7 @@ export const BattleInfo = ({
 
         <div className={styles.honkProps}>
           <Dropdown
-            aria-label="Battle Format Selector"
+            aria-label={t('battle.format.aria') as React.ReactNode}
             hint="???"
             input={{
               name: `${l.scope}:${battleId}:Format`,
@@ -137,7 +185,8 @@ export const BattleInfo = ({
               }, `${l.scope}:Dropdown~Format:input.onChange()`),
             }}
             options={formatOptions}
-            noOptionsMessage="No Formats"
+            noOptionsMessage={t('battle.format.empty') as React.ReactNode}
+            filterOption={formatOptionsFilter}
             clearable={false}
             disabled={operatingMode !== 'standalone'}
           />
@@ -150,12 +199,12 @@ export const BattleInfo = ({
             )}
             label={(
               saving?.[0]
-                ? 'Saving...'
+                ? t('battle.save.saving')
                 : (cached || 0) > 0
                   ? Date.now() - cached < (30 * 1000)
-                    ? 'Now Saved'
-                    : `Saved ${formatDistanceToNow(cached, { addSuffix: true })?.replace('about ', '')}`
-                  : 'Save'
+                    ? t('battle.save.savedRecently')
+                    : t('battle.save.savedAgo', { ago: savedAgo })
+                  : t('battle.save.unsaved')
             ).trim()}
             absoluteHover
             active={saving?.[0]}

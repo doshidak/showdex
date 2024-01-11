@@ -22,7 +22,7 @@ export const createSettingsDb = (
   if (!settingsName || typeof db?.createObjectStore !== 'function') {
     l.warn(
       'you must construct additional pylons',
-      '\n', 'db.createObjectStore()', '(typeof)', typeof db?.createObjectStore,
+      '\n', 'db.createObjectStore()', '(typeo', typeof db?.createObjectStore,
       '\n', 'INDEXED_DB_SETTINGS_STORE_NAME', settingsName,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );

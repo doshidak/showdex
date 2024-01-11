@@ -1,0 +1,33 @@
+{
+  "--meta": {
+    "name": "honkdex",
+    "version": "1.0.0",
+    "locale": "en",
+    "created": "2024-01-08T15:45:10.164Z",
+    "updated": "2024-01-09T21:06:50.982Z"
+  },
+
+  "battle": {
+    "gen": {
+      "aria": "Generation Selector",
+      "locked": "Switching the gen with Pokémon in the calc will open a <strong>new</strong>, <strong>blank</strong> $t(common:products.honkdex_one)."
+    },
+
+    "name": {
+      "hint": "name this $t(common:products.honk_one) to save this $t(common:products.honk_one)"
+    },
+
+    "format": {
+      "aria": "Battle Format Selector",
+      "hint": "???",
+      "empty": "No Formats"
+    },
+
+    "save": {
+      "unsaved": "$t(common:labels.save)",
+      "saving": "$t(common:labels.saving)...",
+      "savedRecently": "Now $t(common:labels.saved)",
+      "savedAgo": "$t(common:labels.saved) {{ago}} ago"
+    }
+  }
+}

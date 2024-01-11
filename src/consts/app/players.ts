@@ -97,6 +97,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     'plaguevonkarma',
     // 'pokepastry', // commented to apply T.1 Patron title
     'pulseks',
+    'snacky98',
     'weavileisasin',
   ],
 }, {

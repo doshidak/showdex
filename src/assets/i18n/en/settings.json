@@ -1,0 +1,600 @@
+{
+  "--meta": {
+    "name": "settings",
+    "version": "1.0.0",
+    "locale": "en",
+    "created": "2024-01-07T00:59:01.639Z",
+    "updated": "2024-01-11T07:37:54.239Z"
+  },
+
+  "pane": {
+    "header": {
+      "title": "$t(common:labels.setting_other)",
+      "import": {
+        "label": "$t(common:labels.import)",
+        "undoLabel": "$t(common:labels.undo)?",
+        "importedBadge": "$t(common:labels.imported)",
+        "failedBadge": "$t(common:labels.failed)",
+        "tooltip": "Import Settings from Clipboard"
+      },
+      "export": {
+        "label": "$t(common:labels.export)",
+        "exportedBadge": "$t(common:labels.copied)!",
+        "failedBadge": "$t(common:labels.failed)",
+        "tooltip": "Export Settings to Clipboard"
+      },
+      "defaults": {
+        "label": "$t(common:labels.default_other)",
+        "exportedBadge": "$t(common:labels.copied)!",
+        "failedBadge": "$t(common:labels.failed)",
+        "tooltip": "Export Defaults to Clipboard"
+      },
+      "close": {
+        "label": "$t(common:labels.close)",
+        "tooltip": "Close $t(common:products.showdex) Settings"
+      }
+    },
+
+    "sections": {
+      "primary": {
+        "showdex": "$t(common:products.showdex)",
+        "hellodex": "$t(common:products.hellodex_one)",
+        "calcdex": "$t(common:products.calcdex_one)",
+        "honkdex": "$t(common:products.honkdex_one)",
+        "showdown": "$t(common:products.showdown)"
+      },
+
+      "secondary": {
+        "advanced": "Advanced",
+        "behavior": "Behavior",
+        "interface": "Interface",
+        "matchup_one": "Matchup",
+        "matchup_other": "Matchups",
+        "panel": "Panel Tab",
+        "presets": "Sets",
+        "special": "Special"
+      }
+    },
+
+    "footer": {
+      "message": "plz excuse the mess, this is a work in progress"
+    }
+  },
+
+  "showdex": {
+    "locale": {
+      "label": "Language",
+      "tooltip": {
+        "author": "by {{name}}",
+        "updated": "<em>Updated {{date}}</em>"
+      },
+      "options": {
+        "en": {
+          "name": "English",
+          "description": "Standard issue."
+        },
+        "fr": {
+          "name": "French",
+          "description": "Contains French versions of all <em>talents</em>, <em>natures</em>, <em>objets</em>, <em>capacités</em> &amp; Pokémon, sourced from Sykless's <code>pokemon-showdown-fr</code> extension! (All descriptions are still in English.)<br /><br />Also with the help of ChatGPT & Google Translate, the rest of Showdex is also in <em>what we hope you'd excuse</em> our \"French.\"<br /><br /><em>bone apple teeth !</em>"
+        }
+      }
+    },
+
+    "forcedColorScheme": {
+      "label": "Color Mode",
+      "options": {
+        "showdown": {
+          "label": "$t(common:products.showdown)",
+          "tooltip": "Matches $t(common:products.showdown)'s graphics theme."
+        },
+        "light": {
+          "label": "Light",
+          "tooltip": "Forces a light mode for everything $t(common:products.showdex), regardlesss of $t(common:products.showdown)'s graphics theme."
+        },
+        "dark": {
+          "label": "Dark",
+          "tooltip": "Forces a dark mode for everything $t(common:products.showdex), regardlesss of $t(common:products.showdown)'s graphics theme."
+        }
+      }
+    },
+
+    "glassyTerrain": {
+      "label": "I'm Feeling Glassy",
+      "tooltip": "Tastefully applies a slight background blur to all $t(common:products.showdex) panels, including $t(common:products.calcdex_other) in <strong>$t(calcdex.openAs.options.overlay.label)</strong> mode, if enabled.<br /><br />Note that this is a CPU-intensive graphics setting &amp; may cause unpleasant stuttering on lower-spec machines.<br /><br />Enable at your own risk!"
+    },
+
+    "developerMode": {
+      "label": "Developer Mode",
+      "tooltip": "<em>This is a planned feature.</em><br /><em>If you're a geek, stay tuned!</em>"
+    }
+  },
+
+  "hellodex": {
+    "openOnStart": {
+      "label": "Open When $t(common:products.showdown) Starts",
+      "tooltip": "<em>This is actually a planned feature!</em><br /><em>If you're like wtf how would I access these settings again after disabling this, the answer is...</em><br /><em>Stay tuned!</em>"
+    },
+
+    "focusRoomsRoom": {
+      "label": "Show Chatrooms Panel",
+      "tooltip": "Miss the default chatrooms panel when $t(common:products.showdown) first starts? Disabling this won't auto-focus the $t(common:products.hellodex_one) tab.<br /><br />This does not affect <strong>Single Panel</strong> users."
+    },
+
+    "showBattleRecord": {
+      "label": "Show Win/Loss Counter",
+      "tooltip": "Displays a Win/Loss counter in the $t(common:products.hellodex_one) for <em>funsies</em>.<br /><br />Only records games that you've played (i.e., ignores spectating games) for the current $t(common:products.showdown) session. Resets back to 0W-0L as soon as you refresh the page."
+    },
+
+    "showDonateButton": {
+      "label": "Show Donate Button",
+      "tooltip": "Shows the donate button in the $t(common:products.hellodex_one).<br /><br />If you're seeing this, you're very special to us or you're a 1337 hax0r. Either way, feel free to turn this off."
+    }
+  },
+
+  "calcdex": {
+    "openOnStart": {
+      "label": "Open When",
+      "options": {
+        "playing": {
+          "label": "Playing",
+          "tooltip": "Only open in battles you're playing."
+        },
+        "spectating": {
+          "label": "Spectating",
+          "tooltip": "Only open in battles you're spectating."
+        },
+        "always": {
+          "label": "Both",
+          "tooltip": "Always open in all battles."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Never open under <em>any</em> circumstances."
+        }
+      }
+    },
+
+    "openAs": {
+      "label": "Open as",
+      "options": {
+        "panel": {
+          "label": "Panel Tab",
+          "tooltip": "Opens as a panel tab on the right, if space permits. Otherwise, opening the tab will fill up the screen. Syncing will occur as long as the battle's tab is open.<br /><br />Recommended for <em>Left-Right Panel</em> users."
+        },
+        "overlay": {
+          "label": "Battle Overlay",
+          "tooltip": "Opens as an overlay over the battle's chat. Initially hidden until you click on <em>Open $t(common:products.calcdex_one)</em> in the battle controls.<br /><br />Once the battle is closed, the embedded $t(common:products.calcdex_one) will be cleared from memory, at which point it cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Recommended for <em>Single Panel</em> users or those who chill in chatrooms while they play."
+        },
+        "showdown": {
+          "label": "Auto",
+          "tooltip": "Uses the <strong>$t(calcdex.openAs.options.panel.label)</strong> if your $t(common:products.showdown)'s layout uses <em>Left-Right Panels</em> &amp; the <strong>$t(calcdex.openAs.options.overlay.label)</strong> if <em>Single Panel</em>.<br /><br />Hover over these specific options to learn more."
+        }
+      }
+    },
+
+    "openOnPanel": {
+      "label": "Open Tab on",
+      "options": {
+        "left": {
+          "label": "Left Panel",
+          "tooltip": "Opens the $t(common:products.calcdex_one) panel tab on the <strong>Left</strong>, regardless of the side that the battle is configured to open on.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>."
+        },
+        "right": {
+          "label": "Right Panel",
+          "tooltip": "Opens the $t(common:products.calcdex_one) panel tab on the <strong>Right</strong>, regardless of the side that the battle is configured to open on.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>."
+        },
+        "showdown": {
+          "label": "Auto",
+          "tooltip": "Opens the $t(common:products.calcdex_one) panel tab on the <strong>Right</strong> if your battles are configured to open on the <em>left</em> in $t(common:products.showdown), or vice versa.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>."
+        }
+      }
+    },
+
+    "closeOn": {
+      "label": "Close Tab When",
+      "options": {
+        "battle-end": {
+          "label": "Battle Ends",
+          "tooltip": "Closes the $t(common:products.calcdex_one) panel tab once the battle ends.<br /><br />Unless <em>$t(calcdex.destroyOnClose.label)</em> is on, the closed tab can be reopened from the $t(common:products.hellodex_one).<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>."
+        },
+        "battle-tab": {
+          "label": "Battle Closes",
+          "tooltip": "Closes the $t(common:products.calcdex_one) panel tab when the battle is closed.<br /><br />Unless <em>$t(calcdex.destroyOnClose.label)</em> is on, the closed tab can be reopened from the $t(common:products.hellodex_one).<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Disables auto-closing of the $t(common:products.calcdex_one) panel tab based on the battle's state.<br />Instead, the $t(common:products.calcdex_one) must be manually closed every time.<br /><br />Unless <em>$t(calcdex.destroyOnClose.label)</em> is on, the closed tab can be reopened from the $t(common:products.hellodex_one).<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>."
+        }
+      }
+    },
+
+    "destroyOnClose": {
+      "label": "Close Memory After Tab Closes",
+      "tooltip": "Clears memory used by the $t(common:products.calcdex_one) after the battle closes. Once cleared, the $t(common:products.calcdex_one) cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Enabling this may improve performance on lower-spec machines.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong> as their memory is cleared as soon as their battles close."
+    },
+
+    "downloadPresets": {
+      "label": "Download Sets",
+      "options": {
+        "smogon": {
+          "label": "Smogon",
+          "tooltip": "Downloads freshly updated Smogon sets for non-Randoms formats like OU. All sets from all available formats in the gen will be downloaded.<br /><br />Disabling this may improve performance on lower-spec machines."
+        },
+        "randoms": {
+          "label": "Randoms",
+          "tooltip": "Downloads freshly updated Randoms sets for official Randoms formats, which are specialized sets from a rotating pool, with some gens featuring role-based sets. Support may be limited or nonexistent for non-official format, such as those from the Randomized Format Spotlight.<br /><br />Disabling this may <em>slightly</em> improve performance on lower-spec machines."
+        },
+        "usage": {
+          "label": "Usage",
+          "tooltip": "Downloads freshly updated $t(common:products.showdown) usage stats for standard formats &amp; pool probabilities for Randoms, which will be displayed next to abilities, items &amp; moves.<br /><br />Also in non-Randoms formats, an additional set derived from the usage stats called <em>Showdown Usage</em> will be available.<br /><br />Disabling this may <em>slightly</em> improve performance on lower-spec machines."
+        }
+      }
+    },
+
+    "maxPresetAge": {
+      "label": "Cache Sets for",
+      "options": {
+        "$count": {
+          "label_one": "{{count}} Day",
+          "label_other": "{{count}} Days",
+          "label_interval": "(7)[1 Week];(14)[2 Weeks];(21)[3 Weeks];(30-31)[1 Month];",
+          "tooltip": "Downloads sets &amp; reuses them for <strong>$t(calcdex.maxPresetAge.options.$count.label, { \"count\": {{count}} })</strong>, persisting between $t(common:products.showdown) sessions.<br /><br />Enabling this may improve $t(common:products.calcdex_one) initialization performance."
+        },
+        "0": {
+          "label": "Never",
+          "tooltip": "Downloads sets once per session, but doesn't store them in-between. This means sets will be downloaded again the next time you open $t(common:products.showdown).<br /><br />Selecting this option with sets already in the cache will <strong>clear</strong> the cache entirely.<br /><br />This is the default behavior prior to v1.1.6.<br />(By the way, you're on v{{version}}!)"
+        }
+      }
+    },
+
+    "includeTeambuilder": {
+      "label": "Include Teambuilder",
+      "options": {
+        "teams": {
+          "label": "Teams",
+          "tooltip": "Includes your locally-stored Teambuilder <strong>teams only</strong>, but not boxes. These will be available in the sets dropdowns of your &amp; your opponents' (or spectating players') Pokémon.<br /><br />Teams that start with \"Untitled\" or Pokémon with empty movesets/incomplete $t(pokedex:stats.evs_other.1) (if applicable) will be ignored."
+        },
+        "boxes": {
+          "label": "Boxes",
+          "tooltip": "Includes your locally-stored Teambuilder <strong>boxes only</strong>, but not teams. These will be available in the sets dropdowns of your &amp; your opponents' (or spectating players') Pokémon.<br /><br />Pokémon in these boxes with empty movesets/incomplete $t(pokedex:stats.evs_other.1) (if applicable) will be ignored."
+        },
+        "always": {
+          "label": "Both",
+          "tooltip": "Includes <strong>both</strong> of your locally-stored Teambuilder teams &amp; boxes. These sets will be available in the sets dropdowns of your &amp; your opponents' (or spectating players') Pokémon.<br /><br />Teams that start with \"Untitled\" or Pokémon with empty movesets/incomplete $t(pokedex:stats.evs_other.1) (if applicable) will be ignored."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Ignores sets from your locally-stored Teambuilder teams &amp; boxes."
+        }
+      }
+    },
+
+    "includePresetsBundles": {
+      "label": "Include Bundled Sets From",
+      "tooltip": {
+        "author": "by {{name}}",
+        "updated": "<em>Updated {{date}}</em>"
+      }
+    },
+
+    "includeOtherMetaPresets": {
+      "label": "Always Include Sets From OMs",
+      "tooltip": "Includes any available sets from Other Metagame (OM) formats, such as Balanced Hackmons (BH) &amp; Almost Any Ability (AAA), in legal-locked formats like OU &amp; VGC {{year}}."
+    },
+
+    "prioritizeUsageStats": {
+      "label": "Apply Usage Sets First",
+      "tooltip": "Prioritizes applying the <em>Showdown Usage</em> set, if available for the current non-Randoms format, to your opponents' (or spectating players') Pokémon.<br /><br />Otherwise, the first set of the closest matching format will be applied."
+    },
+
+    "autoImportTeamSheets": {
+      "label": "Auto-Import Team Sheets",
+      "tooltip": "Imports &amp; applies sets derived from Open Team Sheets (OTS), typical of VGC formats, or the <code>!showteam</code> $t(common:products.showdown) chat command.<br /><br />Note that OTS's may omit the spreads, i.e., $t(pokedex:stats.ivs_other.1), $t(pokedex:stats.evs_other.1) &amp; nature. In those cases, OTS's won't be converted into sets, but used as revealed info in order to allow spreads from other sets to apply."
+    },
+
+    "authPosition": {
+      "label": "My Location",
+      "options": {
+        "top": {
+          "label": "Top",
+          "tooltip": "When playing, your Pokémon will be located in the <strong>top half</strong> regardless of $t(common:products.showdown)'s assigned player order.<br /><br />Has no effect if spectating, in which case, $t(common:products.showdown)'s ordering will be used."
+        },
+        "bottom": {
+          "label": "Bottom",
+          "tooltip": "When playing, your Pokémon will be located in the <strong>bottom half</strong> regardless of $t(common:products.showdown)'s assigned player order.<br /><br />Has no effect if spectating, in which case, $t(common:products.showdown)'s ordering will be used."
+        },
+        "auto": {
+          "label": "Auto",
+          "tooltip": "Your Pokémon will be located based on $t(common:products.showdown)'s assigned player order, with <em>Player 1</strong> at the <strong>$t(calcdex.authPosition.options.top.label)</strong> &amp; <em>Player 2</strong> at the <strong>$t(calcdex.authPosition.options.bottom.label)</strong>.<br /><br />Has no effect if spectating, in which case, $t(common:products.showdown)'s ordering will be used."
+        }
+      }
+    },
+
+    "defaultAutoSelect": {
+      "label": "Auto-Swap Pokémon",
+      "options": {
+        "auth": {
+          "label": "Mine",
+          "tooltip": "Auto-swaps to your active Pokémon out on the field. Disabling this doesn't disable the auto-swapping mechanism itself, just initially toggles it off."
+        },
+        "player": {
+          "label": "Opponent",
+          "tooltip": "Auto-swaps to your opponents' (or spectating players') active Pokémon out on the field. Disabling this doesn't disable the auto-swapping mechanism itself, just initially toggles it off."
+        }
+      }
+    },
+
+    "lockAuthGenetics": {
+      "label": "Show My Pokémon's",
+      "options": {
+        "base": {
+          "label": "$t(pokedex:stats.base_one.1)",
+          "tooltip": "Always shows your Pokémon's $t(pokedex:stats.base_other.0). Disabling this will hide them until you click <em>$t(common:labels.show)</em>."
+        },
+        "iv": {
+          "label": "$t(pokedex:stats.ivs_other.1)",
+          "tooltip": "Always shows your Pokémon's $t(pokedex:stats.ivs_other.1). Applies to $t(pokedex:stats.dvs_other.1) in legacy gens as well. Disabling this will hide them until you click <em>$t(common:labels.show)</em>."
+        },
+        "ev": {
+          "label": "$t(pokedex:stats.evs_other.1)",
+          "tooltip": "Always shows your Pokémon's $t(pokedex:stats.evs_other.1). Has no effect in legacy gens, unless <em>$t(calcdex.showLegacyEvs.label)</em> is enabled. Disabling this will hide them until you click <em>$t(common:labels.show)</em>."
+        }
+      }
+    },
+
+    "lockPlayerGenetics": {
+      "label": "Show Opponent's",
+      "options": {
+        "base": {
+          "label": "$t(pokedex:stats.base_one.1)",
+          "tooltip": "Always shows your opponents' (or spectating players') Pokémon's $t(pokedex:stats.base_other.0). Disabling this will hide them until you click <em>$t(common:labels.show)</em>."
+        },
+        "iv": {
+          "label": "$t(pokedex:stats.ivs_other.1)",
+          "tooltip": "Always shows your opponents' (or spectating players') Pokémon's $t(pokedex:stats.ivs_other.1). Applies to $t(pokedex:stats.dvs_other.1) in legacy gens as well. Disabling this will hide them until you click <em>$t(common:labels.show)</em>."
+        },
+        "ev": {
+          "label": "$t(pokedex:stats.evs_other.1)",
+          "tooltip": "Always shows your opponents' (or spectating players') Pokémon's $t(pokedex:stats.evs_other.1). Has no effect in legacy gens, unless <em>$t(calcdex.showLegacyEvs.label)</em> is enabled. Disabling this will hide them until you click <em>$t(common:labels.show)</em>."
+        }
+      }
+    },
+
+    "showPlayerRatings": {
+      "label": "Show Players' Elo Ratings",
+      "tooltip": "Shows each player's Elo rating, if available, by their username."
+    },
+
+    "openSmogonPage": {
+      "label": "Link to Smogon Dex Entries",
+      "tooltip": "Opens the Pokémon's Smogon Dex Entry as a popup window when the Pokémon's icon is clicked on."
+    },
+
+    "showNicknames": {
+      "label": "Show Pokémon Nicknames",
+      "tooltip": "Shows the Pokémon's nickname, if any, instead of its forme.<br /><br />(\"but why tho?\" <ndash /><em>analogcam</em>, 2022)"
+    },
+
+    "forceNonVolatile": {
+      "label": "Always Show Pokémon Statuses",
+      "tooltip": "Always shows the Pokémon's non-volatile status (e.g., $t(pokedex:nonvolatiles.brn.2), $t(pokedex:nonvolatiles.par.2), etc.) even if it doesn't have one, in which case \"$t(pokedex:nonvolatiles.ok.2)\" is shown."
+    },
+
+    "showSpreadsFirst": {
+      "label": "Show Available Spreads First",
+      "tooltip": "Shows spreads (in place of natures) if any are available from the Pokémon's applied set or usage stats.<br /><br />When spreads are available, a toggle to switch between spreads & natures will be shown, regardless of this setting."
+    },
+
+    "defaultAutoMoves": {
+      "label": "Auto-Fill Revealed Moves",
+      "tooltip": "Fills in your opponents' (or spectating players') Pokémon's actual moves as they're revealed in the battle, replacing ones from the applied set."
+    },
+
+    "enableQuickEditor": {
+      "label": "Quick-Edit Move Hits",
+      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
+    },
+
+    "showNonDamageRanges": {
+      "label": "Show Zero Damage Ranges",
+      "tooltip": "Shows damage ranges that are <strong>$t(common:labels.na)</strong> or <strong>IMMUNE</strong>."
+    },
+
+    "showTooltips": {
+      "label": "Show Tooltips",
+      "options": {
+        "ui": {
+          "label": "$t(pane.sections.secondary.interface)",
+          "tooltip": "Shows explainer tooltips (like this one) for buttons in the UI when hovered over.<br /><br />Disable this if you're a $t(common:products.calcdex_one) pro &amp; know what everything does already."
+        },
+        "ability": {
+          "label": "$t(pokedex:headers.ability_one)",
+          "tooltip": "Shows a short description of the hovered ability in the dropdown list."
+        },
+        "item": {
+          "label": "$t(pokedex:headers.item_one)",
+          "tooltip": "Shows a short description of the hovered item in the dropdown list."
+        },
+        "move": {
+          "label": "$t(pokedex:headers.move_one)",
+          "tooltip": "Shows a short description &amp; quick stats (e.g., type, category, BP) of the hovered move in the dropdown list."
+        },
+        "matchup": {
+          "label": "$t(pane.sections.secondary.matchup_one)",
+          "tooltip": "Shows a description of the move's matchup from the original Damage Calculator when hovering over a damage range."
+        },
+        "field": {
+          "label": "$t(pokedex:headers.field)",
+          "tooltip": "Shows short descriptions when hovering over screens, weather &amp; terrain in the middle field section."
+        }
+      }
+    },
+
+    "prettifyMatchupDescription": {
+      "label": "Prettify Matchup Description",
+      "tooltip": "Makes the matchup description easier to quickly scan by applying some gentle formatting &amp; spacing."
+    },
+
+    "copyMatchupDescription": {
+      "label": "Copy Matchup When Clicked",
+      "tooltip": "Copies the <em>unprettied</em> (if enabled), <em>raw</em> matchup description to your clipboard when clicking the damage range.<br /><br />Disable this if you like to highlight what you're reading on screen."
+    },
+
+    "showMatchupDamageAmounts": {
+      "label": "Show Damage Amounts",
+      "options": {
+        "always": {
+          "label": "Always",
+          "tooltip": "Always shows possible damage amounts in the matchup tooltip."
+        },
+        "nfe": {
+          "label": "NFE",
+          "tooltip": "Shows possible damage amounts only between Not Fully Evolved (NFE) Pokémon in the matchup tooltip."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Never shows possible damage amounts in the matchup tooltip."
+        }
+      }
+    },
+
+    "formatMatchupDamageAmounts": {
+      "label": "Percentify Damage Amounts",
+      "tooltip": "Combines all damage amounts into unique amounts with percentages of occurrence.<br /><br />If there are more than 5 unique amounts, no percentages will be shown to avoid lengthy lists."
+    },
+
+    "editPokemonTypes": {
+      "label": "Edit Types",
+      "options": {
+        "always": {
+          "label": "Always",
+          "tooltip": "Allows the Pokémon's types to be edited when clicked on."
+        },
+        "meta": {
+          "label": "OMs",
+          "tooltip": "Only allows the Pokémon's types to be edited in nonstandard Other Metagame (OM) formats when clicked on."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Disables editing of the Pokémon's types."
+        }
+      }
+    },
+
+    "showMoveEditor": {
+      "label": "Edit Moves",
+      "options": {
+        "always": {
+          "label": "Always",
+          "tooltip": "Shows an <em>$t(common:labels.edit)</em> button in the Pokémon's moves table, which toggles the moves editor.<br /><br />You can edit the move's type, category (if damaging) &amp; BP, including separate BPs for Z &amp; Max moves when activated. Edits are unique to each move of each Pokémon."
+        },
+        "meta": {
+          "label": "OMs",
+          "tooltip": "Only shows an <em>$t(common:labels.edit)</em> button in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showMoveEditor.options.always.label)</strong> option to learn more about the moves editor."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "What <em>$t(common:labels.edit)</em> button?"
+        }
+      }
+    },
+
+    "allowIllegalSpreads": {
+      "label": "Allow Illegal Spreads",
+      "options": {
+        "always": {
+          "label": "Always",
+          "tooltip": "Allows illegal $t(pokedex:stats.ivs_other.1)/$t(pokedex:stats.evs_other.1) in any format.<br /><br />This does not apply to $t(pokedex:stats.dvs_other.1) in legacy gens, where a limit of <strong>15</strong> will be still enforced.<br /><br />Lowest possible value is <strong>0</strong> &amp; highest is arbitrarily set at <strong>999</strong>."
+        },
+        "meta": {
+          "label": "OMs",
+          "tooltip": "Only allows illegal $t(pokedex:stats.ivs_other.1)/$t(pokedex:stats.evs_other.1) in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.allowIllegalSpreads.options.always.label)</strong> option to learn more about illegal spreads."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Never allows illegal $t(pokedex:stats.ivs_other.1)/$t(pokedex:stats.evs_other.1) in any format.<br /><br />Lowest possible value is <strong>0</strong> &amp; highest is <strong>31</strong> for $t(pokedex:stats.ivs_other.1) &amp; <strong>252</strong> for $t(pokedex:stats.evs_other.1)."
+        }
+      }
+    },
+
+    "showBaseStats": {
+      "label": "Edit $t(pokedex:stats.base_other.0)",
+      "options": {
+        "always": {
+          "label": "Always",
+          "tooltip": "Enables $t(pokedex:stats.base_one.0) editing in the Pokémon's stats table.<br /><br />Lowest possible value is <strong>1</strong> &amp; highest is arbitrarily set at <strong>999</strong>."
+        },
+        "meta": {
+          "label": "OMs",
+          "tooltip": "Only enables $t(pokedex:stats.base_one.0) editing in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showBaseStats.options.always)</strong> option to learn more about $t(pokedex:stats.base_one.0) editing."
+        },
+        "never": {
+          "label": "Never",
+          "tooltip": "Hides the Pokémon's $t(pokedex:stats.base_other.0)."
+        }
+      }
+    },
+
+    "resetDirtyBoosts": {
+      "label": "Reset Stage Boosts on Sync",
+      "tooltip": "Resets all modified stage boosts to those reported in the battle during a battle sync. This has the same effect as clicking every blue-colored stage boost, except performed automatically.<br /><br />Recommended if you tend to forget to reset your Pokémon's stage boosts between turns.<br /><br />(Fun Fact: Stage boosts were historically the only user-modified values that persisted between syncs by design, hence this setting.)"
+    },
+
+    "showLegacyEvs": {
+      "label": "Show $t(pokedex:stats.evs_other.1) in Legacy Gens",
+      "tooltip": "Shows $t(pokedex:stats.evs_other.1) in legacy gens, allowing you to edit them for each Pokémon.<br /><br />Some sets (most notably in Randoms) may specify 0 $t(pokedex:stats.evs_other.1) for some stats, which may be helpful to be aware of.<br /><br />Though introduced in ADV (gen 3), $t(pokedex:stats.evs_other.1) technically existed in prior legacy gens, colloquially referred to as <em>stat experience</em>. Resulting damages influenced by this legacy system &amp; modern $t(pokedex:stats.evs_other.1) are more-or-less the same, due to rounding effects in the damage formulas."
+    },
+
+    "lockUsedTera": {
+      "label": "Lock Terastallization After Use",
+      "tooltip": "Locks the <em>Tera</em> toggle button in the moves table once used by a player, preventing manual toggling for all of the player's Pokémon until the battle ends.<br /><br />This may be helpful in remembering whether a player is still able to Terastallize.<br /><br />Has no effect in formats where Terastallization is unavailable or in battles that have ended."
+    },
+
+    "showAllOptions": {
+      "label": "Show Illegal Abilities & Moves",
+      "tooltip": "Allows you to select from all possible abilities &amp; moves in legal-locked formats like OU & Randoms."
+    },
+
+    "nhkoLabels": {
+      "label": "Guaranteed NHKO Labels"
+    },
+
+    "nhkoColors": {
+      "label": "NHKO Hexadecimal Colors"
+    }
+  },
+
+  "honkdex": {
+    "visuallyEnabled": {
+      "label": "Enable the Honk",
+      "tooltip": "Enables the <em>$t(common:products.honkdex_one)</em>, an out-of-battle $t(common:products.calcdex_one). You can view &amp; edit previously saved calcs (called <em>$t(common:products.honk_other)</em>) within the $t(common:products.hellodex_one).<br /><br />Disabling this will only hide the $t(common:products.honkdex_one) feature &amp; any saved $t(common:products:honk_other) will remain in your browser's storage for $t(common:products.showdown)."
+    },
+
+    "showAllFormats": {
+      "label": "Include Randoms & Customs",
+      "tooltip": "Allows Randoms &amp; Customs formats, if available for the current gen, to appear in the format dropdown list."
+    },
+
+    "alwaysEditTypes": {
+      "label": "Always Edit Types",
+      "tooltip": "Allows Pokémon types to be edited in the $t(common:products.honkdex_one), regardless of the selected format.<br /><br />Disabling this will revert to the configured <em>$t(calcdex.editPokemonTypes.label)</em> $t(common:products.calcdex_one) setting."
+    },
+
+    "alwaysEditMoves": {
+      "label": "Always Edit Moves",
+      "tooltip": "Allows access to the moves editor, regardless of the format.<br /><br />Disabling this will revert to the configured <em>$t(calcdex.showMoveEditor.label)</em> $t(common:products.calcdex_one) setting. Refer to the aforementioned setting to learn more about the moves editor."
+    },
+
+    "alwaysShowGenetics": {
+      "label": "Always Show Stats",
+      "tooltip": "Always shows the $t(pokedex:stats.base_other.0), $t(pokedex:stats.ivs_other.1) &amp; $t(pokedex:stats.evs_other.1) in the Pokémon's stats table. $t(pokedex:stats.evs_other.1) may still be hidden in legacy gens, unless the <em>$t(calcdex.showLegacyEvs.label)</em> $t(common:products.calcdex_one) setting is enabled.<br /><br />Disabling this will revert to the configured <em>$t(calcdex.showAuthGenetics.label)</em> &amp; <em>$t(calcdex.showPlayerGenetics.label)</em> $t(common:products.calcdex_one) settings."
+    }
+  },
+
+  "showdown": {
+    "autoAcceptSheets": {
+      "label": "Auto-Accept Team Sheets",
+      "tooltip": "Immediately accepts requests for Open Team Sheets (OTS), typically in VGC formats."
+    }
+  }
+}

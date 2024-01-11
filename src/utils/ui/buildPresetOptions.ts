@@ -1,10 +1,10 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
+import { getGenfulFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import { detectCompletePreset, getPresetFormes } from '@showdex/utils/presets';
-import { sortPresetGroupsByFormat } from './sortPresetGroupsByFormat';
+// import { sortPresetGroupsByFormat } from './sortPresetGroupsByFormat';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -25,6 +25,7 @@ export const buildPresetOptions = (
   presets: CalcdexPokemonPreset[],
   config?: {
     usages?: CalcdexPokemonPreset[];
+    formatLabelMap?: Record<string, string>;
   },
 ): CalcdexPokemonPresetOption[] => {
   const options: CalcdexPokemonPresetOption[] = [];
@@ -33,21 +34,13 @@ export const buildPresetOptions = (
     return options;
   }
 
-  const { usages } = config || {};
-
   const {
-    gen,
-    base: formatBase,
-    label: formatLabel,
-  } = parseBattleFormat(format);
+    usages,
+    formatLabelMap,
+  } = config || {};
 
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
-
-  // const presetsSource = [...presets].sort(sortPresetsByFormat(format));
-  const formatLabelMap: Record<string, string> = {
-    [getGenfulFormat(gen, formatBase)]: formatLabel,
-  };
 
   presets.forEach((preset) => {
     if (!detectCompletePreset(preset)) {
@@ -96,6 +89,16 @@ export const buildPresetOptions = (
       }
     }
 
+    if (preset.source === 'bundle' && preset.bundleName) {
+      if (option.subLabel) {
+        (option.subLabel as string) += ` ${bull} `;
+      } else {
+        option.subLabel = '';
+      }
+
+      (option.subLabel as string) += preset.bundleName;
+    }
+
     // attempt to find this preset's usage percentage (typically only in Gen 9 Randoms)
     const usage = preset.usage
       || usages?.find((p) => p?.source === 'usage' && p.name.includes(preset.name))?.usage
@@ -107,11 +110,7 @@ export const buildPresetOptions = (
 
     const presetFormat = getGenfulFormat(preset.gen, preset.format);
 
-    if (!formatLabelMap[presetFormat]) {
-      formatLabelMap[presetFormat] = parseBattleFormat(presetFormat).label;
-    }
-
-    const label = formatLabelMap[presetFormat];
+    const label = formatLabelMap?.[presetFormat] || preset.format;
     const group = options.find((o) => o.label === label);
 
     if (!group) {
@@ -124,7 +123,7 @@ export const buildPresetOptions = (
     group.options.push(option);
   });
 
-  options.sort(sortPresetGroupsByFormat(formatLabelMap));
+  // options.sort(sortPresetGroupsByFormat(formatLabelMap));
 
   return options;
 };

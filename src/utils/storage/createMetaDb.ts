@@ -23,7 +23,7 @@ export const createMetaDb = (
   if (!metaName || typeof db?.createObjectStore !== 'function') {
     l.warn(
       'spawn more overlords',
-      '\n', 'db.createObjectStore()', '(typeof)', typeof db?.createObjectStore,
+      '\n', 'db.createObjectStore()', '(type)', typeof db?.createObjectStore,
       '\n', 'INDEXED_DB_META_STORE_NAME', metaName,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );

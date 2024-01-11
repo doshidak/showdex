@@ -1,5 +1,6 @@
 import * as React from 'react';
 // import useSize from '@react-hook/size';
+import { Trans, useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
@@ -47,6 +48,7 @@ export const Hellodex = ({
   openHonkdexInstance,
   removeHonkdexInstances,
 }: HellodexProps): JSX.Element => {
+  const { t } = useTranslation('hellodex');
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   useHellodexSize(contentRef);
@@ -135,33 +137,46 @@ export const Hellodex = ({
 
         <div className={styles.topContent}>
           <div className={styles.banner}>
-            <div className={styles.authors}>
-              <Button
-                className={styles.authorButton}
-                labelClassName={styles.label}
-                label="BOT Keith"
-                hoverScale={1}
-                absoluteHover
-                onPress={() => openUserPopup('sumfuk')}
-              />
+            <Trans
+              t={t}
+              i18nKey="header.title"
+              parent="div"
+              className={styles.authors}
+              shouldUnescape
+              components={{
+                and: <div className={styles.ampersand} />,
+                keith: (
+                  <Button
+                    className={styles.authorButton}
+                    labelClassName={styles.label}
+                    label="BOT Keith"
+                    hoverScale={1}
+                    absoluteHover
+                    onPress={() => openUserPopup('sumfuk')}
+                  />
+                ),
+                cameron: (
+                  <Button
+                    className={styles.authorButton}
+                    labelClassName={styles.label}
+                    label="analogcam"
+                    hoverScale={1}
+                    absoluteHover
+                    onPress={() => openUserPopup('camdawgboi')}
+                  />
+                ),
+              }}
+            />
 
-              <div className={styles.ampersand}>
-                &amp;
-              </div>
+            <Trans
+              t={t}
+              i18nKey="header.subtitle"
+              parent="div"
+              className={styles.presents}
+              shouldUnescape
+            />
 
-              <Button
-                className={styles.authorButton}
-                labelClassName={styles.label}
-                label="analogcam"
-                hoverScale={1}
-                absoluteHover
-                onPress={() => openUserPopup('camdawgboi')}
-              />
-            </div>
-            <div className={styles.presents}>
-              Present
-            </div>
-
+            {/* besides BuildInfo's, this is the only other visually hardcoded "Showdex" not affected by i18n */}
             <div className={styles.extensionName}>
               Showdex
             </div>
@@ -192,63 +207,44 @@ export const Hellodex = ({
                   />
 
                   <div className={styles.emptyLabel}>
-                    {neverOpens ? (
-                      <>
-                        Calculator will never open based on your configured
-                        {' '}
-                        <Button
-                          className={styles.spectateButton}
-                          labelClassName={styles.spectateButtonLabel}
-                          label="settings"
-                          tooltip="Open Settings"
-                          hoverScale={1}
-                          absoluteHover
-                          onPress={openSettingsPane}
-                        />
-                        .
-                      </>
-                    ) : (
-                      <>
-                        Calculator will automatically open when you
-
-                        {
-                          ['always', 'playing'].includes(calcdexSettings?.openOnStart) &&
-                          <>
-                            {' '}
-                            <strong>play</strong>
-                          </>
-                        }
-
-                        {
-                          calcdexSettings?.openOnStart === 'always' &&
-                          <>
-                            {' '}or
-                          </>
-                        }
-
-                        {
-                          ['always', 'spectating'].includes(calcdexSettings?.openOnStart) &&
-                          <>
-                            {' '}
-                            <Button
-                              className={cx(
-                                styles.spectateButton,
-                                typeof app === 'undefined' && styles.disabled,
-                              )}
-                              labelClassName={styles.spectateButtonLabel}
-                              label="spectate"
-                              tooltip="View Active Battles"
-                              hoverScale={1}
-                              absoluteHover
-                              disabled={typeof app === 'undefined'}
-                              onPress={() => app.joinRoom('battles', 'battles')}
-                            />
-                          </>
-                        }
-
-                        {' '}a battle.
-                      </>
-                    )}
+                    <Trans
+                      t={t}
+                      i18nKey={'instances.empty.' + (
+                        (neverOpens && 'openNever')
+                          || (calcdexSettings?.openOnStart === 'playing' && 'openPlaying')
+                          || (calcdexSettings?.openOnStart === 'spectating' && 'openSpectating')
+                          || 'openAlways'
+                      )}
+                      shouldUnescape
+                      components={{
+                        settings: (
+                          <Button
+                            className={styles.spectateButton}
+                            labelClassName={styles.spectateButtonLabel}
+                            aria-label={t('instances.empty.settingsTooltip')}
+                            tooltip={t('instances.empty.settingsTooltip')}
+                            hoverScale={1}
+                            absoluteHover
+                            onPress={openSettingsPane}
+                          />
+                        ),
+                        spectate: (
+                          <Button
+                            className={cx(
+                              styles.spectateButton,
+                              typeof app === 'undefined' && styles.disabled,
+                            )}
+                            labelClassName={styles.spectateButtonLabel}
+                            aria-label={t('instances.empty.spectateTooltip')}
+                            tooltip={t('instances.empty.spectateTooltip')}
+                            hoverScale={1}
+                            absoluteHover
+                            disabled={typeof app === 'undefined'}
+                            onPress={() => app.joinRoom('battles', 'battles')}
+                          />
+                        ),
+                      }}
+                    />
                   </div>
 
                   {
@@ -257,27 +253,35 @@ export const Hellodex = ({
                       <div className={styles.divider}>
                         <div className={styles.dividerLine} />
                         <div className={styles.dividerLabel}>
-                          or
+                          <Trans
+                            t={t}
+                            i18nKey="instances.honkdex.orSeparator"
+                            shouldUnescape
+                          />
                         </div>
                         <div className={styles.dividerLine} />
                       </div>
 
                       <GradientButton
                         className={styles.honkButton}
-                        aria-label="Create New Honkdex"
+                        aria-label={t('instances.honkdex.newAria')}
                         hoverScale={1}
                         onPress={() => openHonkdexInstance?.()}
                       >
-                        <span>
-                          {/* Create{' '} */}
-                          <strong>New</strong>
-                        </span>
+                        <Trans
+                          t={t}
+                          i18nKey="instances.honkdex.newLabel.0"
+                          shouldUnescape
+                        />
                         <i
                           className="fa fa-car"
                           style={{ padding: '0 8px' }}
                         />
-                        <strong>Honk</strong>
-                        <span>dex</span>
+                        <Trans
+                          t={t}
+                          i18nKey="instances.honkdex.newLabel.1"
+                          shouldUnescape
+                        />
                       </GradientButton>
                     </>
                   }
@@ -290,7 +294,7 @@ export const Hellodex = ({
                       <GradientButton
                         className={cx(styles.instanceButton, styles.newHonkButton)}
                         display="block"
-                        aria-label="New Honkdex"
+                        aria-label={t('instances.honkdex.newAria')}
                         hoverScale={1}
                         onPress={() => openHonkdexInstance()}
                       >
@@ -302,8 +306,11 @@ export const Hellodex = ({
                           className="fa fa-car"
                           style={{ padding: '0 8px' }}
                         />
-                        <strong>Honk</strong>
-                        <span>dex</span>
+                        <Trans
+                          t={t}
+                          i18nKey="instances.honkdex.newLabel.1"
+                          shouldUnescape
+                        />
                       </GradientButton>
                     }
 
@@ -349,7 +356,7 @@ export const Hellodex = ({
             >
               <GradientButton
                 className={styles.donateButton}
-                aria-label="Support Showdex"
+                aria-label={t('donate.aria')}
                 onPress={openPatronagePane}
               >
                 {authTitle?.title ? (
@@ -358,14 +365,11 @@ export const Hellodex = ({
                     style={{ padding: '0 8px' }}
                   />
                 ) : (
-                  <>
-                    <strong>Show</strong>
-                    <span>dex</span>
-                    <strong style={{ margin: '0 7px' }}>
-                      Some
-                    </strong>
-                    <strong>Love</strong>
-                  </>
+                  <Trans
+                    t={t}
+                    i18nKey="donate.label"
+                    shouldUnescape
+                  />
                 )}
               </GradientButton>
 
@@ -375,14 +379,11 @@ export const Hellodex = ({
                   !!authTitle?.title && styles.withTitle,
                 )}
               >
-                {authTitle?.title ? (
-                  <>Thanks for supporting Showdex!</>
-                ) : (
-                  <>
-                    If you enjoyed this extension,
-                    please consider supporting further development.
-                  </>
-                )}
+                <Trans
+                  t={t}
+                  i18nKey={`donate.footnote.${authTitle?.title ? 'supporter' : 'default'}`}
+                  shouldUnescape
+                />
               </div>
             </div>
           }
@@ -400,13 +401,13 @@ export const Hellodex = ({
               labelClassName={styles.linkButtonLabel}
               iconAsset={settingsVisible ? 'close-circle.svg' : 'cog.svg'}
               iconDescription={settingsVisible ? 'Close Circle Icon' : 'Cog Icon'}
-              label={settingsVisible ? 'Close' : 'Settings'}
-              aria-label="Showdex Extension Settings"
-              tooltip={`${settingsVisible ? 'Close' : 'Open'} Showdex Settings`}
+              label={t(`footer.settings.${settingsVisible ? 'closeLabel' : 'openLabel'}`)}
+              aria-label={t(`footer.settings.${settingsVisible ? 'closeTooltip' : 'openTooltip'}`)}
+              tooltip={t(`footer.settings.${settingsVisible ? 'closeTooltip' : 'openTooltip'}`)}
               onPress={toggleSettingsPane}
             />
 
-            {
+            {/*
               (forumUrl || repoUrl || communityUrl).startsWith('https://') &&
               <div
                 className={cx(
@@ -414,7 +415,7 @@ export const Hellodex = ({
                   styles.linkSeparator,
                 )}
               />
-            }
+            */}
 
             {
               forumUrl?.startsWith('https://') &&
@@ -424,9 +425,9 @@ export const Hellodex = ({
                 labelClassName={styles.linkButtonLabel}
                 iconAsset="signpost.svg"
                 iconDescription="Signpost Icon"
-                label="Smogon"
-                aria-label="Showdex Thread on Smogon Forums"
-                tooltip="Discuss on Smogon Forums"
+                label={t('footer.smogon.label')}
+                aria-label={t('footer.smogon.tooltip')}
+                tooltip={t('footer.smogon.tooltip')}
                 onPress={() => window.open(forumUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -438,9 +439,9 @@ export const Hellodex = ({
                 labelClassName={styles.linkButtonLabel}
                 iconAsset="github-face.svg"
                 iconDescription="GitHub Octocat Icon"
-                label="GitHub"
-                aria-label="Showdex Source Code on GitHub"
-                tooltip="Peep the Source Code on GitHub"
+                label={t('footer.github.label')}
+                aria-label={t('footer.github.tooltip')}
+                tooltip={t('footer.github.tooltip')}
                 onPress={() => window.open(repoUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -452,9 +453,9 @@ export const Hellodex = ({
                 labelClassName={styles.linkButtonLabel}
                 iconAsset="discord.svg"
                 iconDescription="Discord Clyde Icon"
-                label="Discord"
-                aria-label="Official Showdex Discord"
-                tooltip="Join Our Discord Community!"
+                label={t('footer.discord.label')}
+                aria-label={t('footer.discord.tooltip')}
+                tooltip={t('footer.discord.tooltip')}
                 onPress={() => window.open(communityUrl, '_blank', 'noopener,noreferrer')}
               />
             }
@@ -518,7 +519,12 @@ export const Hellodex = ({
           </BaseButton>
 
           <div className={cx(styles.credits, styles.hideWhenSmol)}>
-            created with <i className="fa fa-heart" /> by
+            <Trans
+              t={t}
+              i18nKey="footer.created"
+              shouldUnescape
+              components={{ love: <i className="fa fa-heart" /> }}
+            />
             <br />
             BOT Keith &amp; analogcam
           </div>

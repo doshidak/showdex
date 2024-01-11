@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { type Duration } from 'date-fns';
-import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import {
+  usePokemonBundledPresetQuery,
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,
@@ -9,8 +10,13 @@ import {
 } from '@showdex/redux/services';
 import { useCalcdexSettings, useTeamdexPresets } from '@showdex/redux/store';
 // import { logger } from '@showdex/utils/debug';
-import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
-import { sortPresetsByFormat } from './sortPresetsByFormat';
+import {
+  detectGenFromFormat,
+  getGenfulFormat,
+  getGenlessFormat,
+  legalLockedFormat,
+  parseBattleFormat,
+} from '@showdex/utils/dex';
 
 /**
  * Options for the `useBattlePresets()` hook.
@@ -95,6 +101,30 @@ export interface CalcdexBattlePresetsHookValue {
    * @since 1.1.7
    */
   usages: CalcdexPokemonPreset[];
+
+  /**
+   * Compiled species forme usage data derived from `usages[]`.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.2.1
+   */
+  formeUsages: CalcdexPokemonUsageAlt<string>[];
+
+  /**
+   * Memoized mapping of format labels from `parseBattleFormat()`.
+   *
+   * * Used as an optimization to provide into sorters like `sortPresetsByFormat()` & `buildPresetOptions()`.
+   *
+   * @default
+   * ```ts
+   * {}
+   * ```
+   * @since 1.2.1
+   */
+  formatLabelMap: Record<string, string>;
 }
 
 // const l = logger('@showdex/utils/presets/useBattlePresets()');
@@ -119,10 +149,19 @@ export const useBattlePresets = (
   } = options || {};
 
   const {
+    base: formatBase,
+    label: formatLabel,
+  } = parseBattleFormat(format);
+
+  const legalFormat = legalLockedFormat(format);
+
+  const {
     downloadSmogonPresets,
     downloadRandomsPresets,
     downloadUsageStats,
     includeTeambuilder,
+    includeOtherMetaPresets,
+    includePresetsBundles,
     maxPresetAge,
   } = useCalcdexSettings();
 
@@ -153,10 +192,22 @@ export const useBattlePresets = (
   ]);
 
   const shouldSkipAny = disabled || !gen || !genlessFormat;
+  const shouldSkipBundles = shouldSkipAny || !includePresetsBundles?.length;
   const shouldSkipFormats = shouldSkipAny || randoms || !downloadSmogonPresets;
   const shouldSkipFormatStats = shouldSkipAny || randoms || !downloadUsageStats;
   const shouldSkipRandoms = shouldSkipAny || !randoms || !downloadRandomsPresets;
   const shouldSkipRandomsStats = shouldSkipAny || !randoms || !downloadUsageStats;
+
+  const {
+    data: bundledPresets,
+    isUninitialized: bundledPresetsPending,
+    isLoading: bundledPresetsLoading,
+  } = usePokemonBundledPresetQuery({
+    gen,
+    bundleIds: includePresetsBundles,
+  }, {
+    skip: shouldSkipBundles,
+  });
 
   const {
     data: formatPresets,
@@ -208,21 +259,56 @@ export const useBattlePresets = (
     skip: shouldSkipRandomsStats,
   });
 
-  const presets = React.useMemo<CalcdexPokemonPreset[]>(() => (
-    randoms
-      ? [...(randomsPresets || [])]
-      : [
-        ...(teambuilderPresets || []),
-        ...(formatPresets || []),
-        ...(formatStats || []),
-      ].sort(sortPresetsByFormat(genlessFormat))
-  ), [
-    genlessFormat,
+  const presets = React.useMemo<CalcdexPokemonPreset[]>(() => {
+    if (randoms) {
+      return [...(randomsPresets || [])];
+    }
+
+    const output = [
+      ...(teambuilderPresets || []),
+      ...(bundledPresets || []),
+      ...(formatPresets || []),
+      ...(formatStats || []),
+    ];
+
+    if (!legalFormat || includeOtherMetaPresets) {
+      return output;
+    }
+
+    // note: legalLockedFormat() internally removes the gen, so `p.format` being genless is all g
+    return output.filter((p) => legalLockedFormat(p.format));
+  }, [
+    bundledPresets,
     formatPresets,
     formatStats,
+    includeOtherMetaPresets,
+    legalFormat,
     randoms,
     randomsPresets,
     teambuilderPresets,
+  ]);
+
+  const formatLabelMap = React.useMemo(() => presets.reduce((prev, preset) => {
+    if (!preset?.calcdexId) {
+      return prev;
+    }
+
+    const presetFormat = getGenfulFormat(preset.gen, preset.format);
+
+    if (presetFormat && !prev[presetFormat]) {
+      prev[presetFormat] = parseBattleFormat(presetFormat).label;
+    }
+
+    return prev;
+  }, {
+    ...(!!formatBase && !!formatLabel && {
+      [getGenfulFormat(gen, formatBase)]: formatLabel,
+    }),
+  } as Record<string, string>), [
+    formatBase,
+    formatLabel,
+    gen,
+    presets,
   ]);
 
   const usages = React.useMemo<CalcdexPokemonPreset[]>(() => (
@@ -235,8 +321,19 @@ export const useBattlePresets = (
     randomsStats,
   ]);
 
+  // build the usage alts, if provided from usages[]
+  // e.g., [['Great Tusk', 0.3739], ['Kingambit', 0.3585], ['Dragapult', 0.0746], ...]
+  const formeUsages = React.useMemo<CalcdexPokemonUsageAlt<string>[]>(() => (
+    usages
+      .filter((u) => !!u?.speciesForme && !!u.formeUsage)
+      .map((u) => [u.speciesForme, u.formeUsage])
+  ), [
+    usages,
+  ]);
+
   const pending = (
     (!shouldSkipFormats && formatPresetsPending)
+      || (!shouldSkipBundles && bundledPresetsPending)
       || (!shouldSkipFormatStats && formatStatsPending)
       || (!shouldSkipRandoms && randomsPresetsPending)
       || (!shouldSkipRandomsStats && randomsStatsPending)
@@ -244,6 +341,7 @@ export const useBattlePresets = (
 
   const loading = (
     pending
+      || (!shouldSkipBundles && bundledPresetsLoading)
       || (!shouldSkipFormats && formatPresetsLoading)
       || (!shouldSkipFormatStats && formatStatsLoading)
       || (!shouldSkipRandoms && randomsPresetsLoading)
@@ -252,6 +350,7 @@ export const useBattlePresets = (
 
   const ready = (
     shouldSkipFormats
+      && shouldSkipBundles
       && shouldSkipFormatStats
       && shouldSkipRandoms
       && shouldSkipRandomsStats
@@ -265,5 +364,7 @@ export const useBattlePresets = (
     ready,
     presets,
     usages,
+    formatLabelMap,
+    formeUsages,
   };
 };

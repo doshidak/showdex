@@ -178,9 +178,11 @@ export const createSmogonPokemon = (
       spe: pokemon.evs?.spe ?? defaultEv,
     },
 
-    // update (2023/05/15): typically only used to provide the client-reported stat
-    // from Protosynthesis & Quark Drive (populated in syncPokemon() via `volatiles`)
-    boostedStat: pokemon.dirtyBoostedStat || pokemon.boostedStat,
+    // update (2023/05/15): typically only used to provide the client-reported stat from Protosynthesis & Quark Drive
+    // (populated in syncPokemon() via `volatiles`)
+    // update (2024/01/03): apparently 'auto' is an accepted value, which is ok to fallback on since this property is
+    // only exclusively used for the aformentioned abilities LOL
+    boostedStat: pokemon.dirtyBoostedStat || pokemon.boostedStat || 'auto',
 
     boosts: {
       atk: pokemon.dirtyBoosts?.atk ?? pokemon.boosts?.atk ?? 0,
@@ -293,7 +295,7 @@ export const createSmogonPokemon = (
   );
 
   if (typeof smogonPokemon?.species?.nfe !== 'boolean') {
-    (smogonPokemon.species as Writable<Specie>).nfe = notFullyEvolved(pokemon.speciesForme);
+    (smogonPokemon.species as Writable<Specie>).nfe = notFullyEvolved(pokemon.speciesForme, format);
   }
 
   return smogonPokemon;

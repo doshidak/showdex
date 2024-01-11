@@ -1,0 +1,293 @@
+{
+  "--meta": {
+    "name": "calcdex",
+    "version": "1.0.0",
+    "locale": "fr",
+    "created": "2024-01-08T19:12:10.599Z",
+    "updated": "2024-01-11T07:39:21.668Z"
+  },
+
+  "overlay": {
+    "control": {
+      "activeLabel": "$t(common:labels.close) $t(common:products.calcdex_one)",
+      "inactiveLabel": "$t(common:labels.open) $t(common:products.calcdex_one)"
+    }
+  },
+
+  "player": {
+    "user": {
+      "aria": "Sélecteur de Joueur du {{position}}",
+      "defaultName": "Joueur {{index}}",
+      "optionLabel": "J{{index}}",
+      "empty": "Pas de Joueurs",
+      "selectorTooltip": "Changer de Joueur du <strong>{{position}}</strong>",
+      "buttonTooltip": "Ouvrir le Profil de <strong>{{player}}</strong>"
+    },
+
+    "autoSelect": {
+      "label": "$t(common:labels.auto)",
+      "activeTooltip": "Sélectionner <strong>Manuellement</strong><br />les Pokémon",
+      "inactiveTooltip": "Sélectionner <strong>Auto</strong><br />les Pokémon"
+    },
+
+    "party": {
+      "aria": "Select {{pokemon}}"
+    }
+  },
+
+  "poke": {
+    "info": {
+      "forme": {
+        "aria": "Sélecteur de Pokémon",
+        "empty": "$t(pokedex:species.nopokemon)",
+        "smogonTooltip": "Ouvrir Smogon Dex pour<br /><strong>{{pokemon}}</strong>"
+      },
+
+      "level": {
+        "aria": "$t(pokedex:headers.level_one) pour {{pokemon}}",
+        "label": "N",
+        "hint": "???"
+      },
+
+      "types": {
+        "aria": "$t(pokedex:headers.type_other) pour {{pokemon}}"
+      },
+
+      "teraType": {
+        "aria": "$t(pokedex:headers.teratype_other) pour {{pokemon}}",
+        "label": "$t(pokedex:headers.teratype_one)",
+        "emptyLabel": "$t(pokedex:ultimates.tera.2)"
+      },
+
+      "status": {
+        "aria": "$t(pokedex:stats.hp.1) & Statut pour {{pokemon}}",
+        "unknown": "$t(pokedex:types.unknown.3)",
+        "ok": "$t(pokedex:nonvolatiles.ok.2)",
+        "fnt": "$t(pokedex:nonvolatiles.fnt.2)",
+        "brn": "$t(pokedex:nonvolatiles.brn.2)",
+        "frz": "$t(pokedex:nonvolatiles.frz.2)",
+        "par": "$t(pokedex:nonvolatiles.par.2)",
+        "psn": "$t(pokedex:nonvolatiles.psn.2)",
+        "slp": "$t(pokedex:nonvolatiles.slp.2)",
+        "tox": "$t(pokedex:nonvolatiles.tox.2)"
+      },
+
+      "preset": {
+        "aria": "Sets Disponibles pour {{pokemon}}",
+        "label": "Set",
+        "hint": "???",
+        "none": "$t(common:labels.none)",
+        "empty": "Pas de Sets",
+        "loading": "$t(common:labels.downloading)...",
+        "autoLabel": "$t(common:labels.auto)",
+        "importLabel": "$t(common:labels.import)",
+        "exportLabel": "$t(common:labels.export)",
+        "importTooltip": "Importer PokéPaste Depuis le Presse-papiers",
+        "importedBadge": "$t(common:labels.imported)",
+        "exportedBadge": "$t(common:labels.copied)!",
+        "malformedBadge": "Mauvaise Syntaxe",
+        "mismatchedBadge": "Décalage",
+        "failedBadge": "$t(common:labels.failed)"
+      },
+
+      "ability": {
+        "aria": "$t(pokedex:headers.ability_other) Disponibles pour {{pokemon}}",
+        "label": "$t(pokedex:headers.ability_one)",
+        "hint": "???",
+        "legacyHint": "$t(common:labels.na)",
+        "empty": "$t(pokedex:abilities.noability_other)",
+        "activeLabel": "$t(common:labels.active)",
+        "resetLabel": "$t(common:labels.reset)",
+        "activeTooltip": "Désactiver <strong>{{ability}}</strong>",
+        "inactiveTooltip": "Activer <strong>{{ability}}</strong>",
+        "resetTooltip": "Réinitialiser à {{ability}} Révélée",
+        "boostedStatLabel": "Boostée $t(pokedex:headers.stat_one)",
+        "autoBoostedStat": "$t(common:labels.auto)",
+        "autoBoostedStatLabel": "Boost Auto Activé"
+      },
+
+      "nature": {
+        "aria": "$t(pokedex:headers.nature_other) Disponibles pour {{pokemon}}",
+        "spreadAria": "$t(pokedex:headers.spread_other) Disponibles pour {{pokemon}}",
+        "label": "$t(pokedex:headers.nature_one)",
+        "spreadLabel": "$t(pokedex:headers.spread_one)",
+        "hint": "???",
+        "legacyHint": "$t(common:labels.na)",
+        "customHint": "$t(common:labels.custom)",
+        "empty": "Pas de $t(pokedex:headers.nature_other)",
+        "spreadEmpty": "Pas de $t(pokedex.headers:spread_other)",
+        "natureToggleTooltip": "Passer à <strong>$t(pokedex:headers.spread_other)</strong>",
+        "spreadToggleTooltip": "Passer à <strong>$t(pokedex:headers.nature_other)</strong>"
+      },
+
+      "item": {
+        "aria": "$t(pokedex:headers.item_other) Disponibles pour {{pokemon}}",
+        "label": "$t(pokedex:headers.item_one)",
+        "hint": "$t(common:labels.none)",
+        "legacyHint": "$t(common:labels.na)",
+        "empty": "$t(pokedex:items.noitem_other)",
+        "defaultPrevEffect": "$t(common:labels.previous)",
+        "resetLabel": "$t(common:labels.reset)",
+        "resetTooltip": "Réinitialiser à {{item}} {{effect}}"
+      }
+    },
+
+    "moves": {
+      "label": "$t(pokedex:headers.move_other)",
+      "dmg": "DMG",
+      "nhko": "KO %",
+      "na": "$t(common:labels.na)",
+      "immune": "IMMUNISÉ",
+      "copiedBadge": "$t(common:labels.copied)!",
+
+      "tera": {
+        "label": "$t(pokedex:ultimates.tera.2)",
+        "activeTooltip": "Revenir au <strong>{{types}}</strong>",
+        "inactiveTooltip": "$t(pokedex:ultimates.tera.1) au <strong>{{teraType}}</strong>",
+        "availableTooltip": "$t(pokedex:ultimates.tera.2) <strong>Disponible</strong>",
+        "unavailableTooltip": "$t(pokedex:ultimates.tera.2) <strong>Utilisée</strong>"
+      },
+
+      "z": {
+        "label": "$t(pokedex:ultimates.z.2)",
+        "activeTooltip": "Désactiver <strong>$t(pokedex:ultimates.z.0)</strong>",
+        "inactiveTooltip": "Activer <strong>$t(pokedex:ultimates.z.0)</strong>"
+      },
+
+      "dmax": {
+        "label": "{{ultimate}}",
+        "activeTooltip": "Désactiver <strong>{{ultimate}}</strong>",
+        "inactiveTooltip": "Activer <strong>{{ultimate}}</strong>",
+        "availableTooltip": "{{ultimate}} <strong>Disponible</strong>",
+        "unavailableTooltip": "{{ultimate}} <strong>Utilisée</strong>"
+      },
+
+      "editor": {
+        "activeLabel": "$t(common:labels.hide)",
+        "inactiveLabel": "$t(common:labels.edit)",
+        "activeTooltip": "Fermez l'<strong>Éditeur de Capacités</strong>",
+        "inactiveTooltip": "Ouvrez l'<strong>Éditeur de Capacités</strong>",
+        "resetLabel": "$t(common:labels.reset)",
+        "resetTooltip": "Réinitialiser <strong>{{move}}</strong> par Défaut",
+
+        "faintCounter": {
+          "aria": "Alliés KO Comptent pour {{pokemon}}",
+          "label": "KO",
+          "resetLabel": "$t(common:labels.reset)",
+          "resetTooltip": "Réinitialiser à <strong>{{count}} KO</strong>"
+        },
+
+        "category": {
+          "aria": "Remplacements du Ciblage Stat {{move}} pour {{pokemon}}"
+        },
+
+        "active": {
+          "label": "$t(common:labels.active)",
+          "activeTooltip": "Désactiver <strong>{{move}}</strong>",
+          "inactiveTooltip": "Activer <strong>{{move}}</strong>"
+        },
+
+        "stellar": {
+          "label": "$t(pokedex:types.stellar.0)",
+          "activeTooltip": "Désactiver <strong>$t(pokedex:types.stellar.0) STAB</strong>",
+          "inactiveTooltip": "Activer <strong>$t(pokedex:types.stellar.0) STAB</strong>"
+        },
+
+        "hits": {
+          "aria": "Nombre de Coups {{move}} Annulés pour {{pokemon}}",
+          "label_one": "Coup",
+          "label_other": "Coups"
+        },
+
+        "bp": {
+          "aria": "Remplacement du $t(pokedex:stats.bp.0) {{move}} pour {{pokemon}}",
+          "label": "{{ultimate}}$t(pokedex:stats.bp.1)"
+        }
+      },
+
+      "criticalHit": {
+        "activeTooltip": "Masquer les Dégâts des <strong>Coups Critiques</strong>",
+        "inactiveTooltip": "Afficher les Dégâts des <strong>Coups Critiques</strong>",
+        "label": "Crit"
+      },
+
+      "slot": {
+        "aria": "Emplacement de Capacité {{count}} pour {{pokemon}}",
+        "hint": "--",
+        "empty": "$t(pokedex:moves.nomove_other)"
+      }
+    },
+
+    "stats": {
+      "visibility": {
+        "activeLabel": "$t(common:labels.hide)",
+        "inactiveLabel": "$t(common:labels.show)",
+        "activeTooltip": "Masquer <strong>{{stats}}</strong>",
+        "inactiveTooltip": "Afficher <strong>{{stats}}</strong>"
+      },
+
+      "base": {
+        "aria": "{{stat}} $t(pokedex:stats.base_one.0) pour {{pokemon}}",
+        "label": "$t(pokedex:stats.base_one.1)",
+        "resetTooltip": "Réinitialiser <strong>Toutes</strong> $t(pokedex:stats.base_other.0) <strong>Modifiées</strong>"
+      },
+
+      "ivs": {
+        "aria": "{{stat}} {{spread}} pour {{pokemon}}",
+        "label": "$t(pokedex:stats.ivs_one.1)<smol>s</smol>",
+        "legacyLabel": "$t(pokedex:stats.dvs_one.1)<smol>s</smol>",
+        "missingTooltip": "Il n'y a <strong>pas de set d'{{spreads}}</strong> !"
+      },
+
+      "evs": {
+        "aria": "{{stat}} $t(pokedex:stats.evs_one.1) pour {{pokemon}}",
+        "label": "$t(pokedex:stats.evs_one.1)<smol>s</smol>",
+        "stat_one": "$t(pokedex:stats.evs_one.1)",
+        "stat_other": "$t(pokedex:stats.evs_other.1)",
+        "validatedTooltip": "bon",
+        "missingTooltip": "Il n'y a <strong>pas de d'$t(poke.stats.evs.stat_other)</strong> !",
+        "unallocatedTooltip": "Vous avez <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} }) non attribués</strong>.",
+        "overageTooltip": "Vous avez <strong>{{count}} $t(poke.stats.evs.stat, { \"count\": {{count}} })</strong> au-dessus de la limite légale de <strong>{{max}}</strong>."
+      },
+
+      "boosts": {
+        "label": "Stage"
+      }
+    }
+  },
+
+  "field": {
+    "yours": "Vôtres",
+    "theirs": "Leurs",
+    "field": "$t(pokedex:headers.field)",
+    "screens": "Murs",
+
+    "conditions": {
+      "light": "Lumiére",
+      "reflect": "Protect",
+      "aurora": "Aurore",
+      "hand": "Main",
+      "gift": "Don",
+      "guard": "Garde",
+      "battery": "Batterie",
+      "power": "Énergie",
+      "twind": "Vent"
+    },
+
+    "weather": {
+      "aria": "Météo d'Sol",
+      "label": "$t(pokedex:headers.weather)",
+      "hint": "$t(common:labels.none)",
+      "legacyHint": "$t(common:labels.na)",
+      "empty": "Pas de Météo"
+    },
+
+    "terrain": {
+      "aria": "Champ d'Sol",
+      "label": "$t(pokedex:headers.terrain)",
+      "hint": "$t(common:labels.none)",
+      "legacyHint": "$t(common:labels.na)",
+      "empty": "Pas de Champ"
+    }
+  }
+}

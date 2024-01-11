@@ -29,9 +29,15 @@ declare namespace Showdown {
     scene: BattleSceneStub;
 
     /**
+     * @deprecated Seems to be `viewpointSwitched` now >:((((((
      * @default false
      */
     sidesSwitched: boolean;
+
+    /**
+     * @default false
+     */
+    viewpointSwitched: boolean;
 
     stepQueue: string[];
 

@@ -33,6 +33,7 @@ import { SelectPlaceholder } from './SelectPlaceholder';
 import { SelectSingleValue } from './SelectSingleValue';
 import { SelectValueContainer } from './SelectValueContainer';
 import styles from './Dropdown.module.scss';
+import { createAliasFilter } from './createAliasFilter';
 
 export type DropdownSingleValue = string | number;
 export type DropdownMultiValue = DropdownSingleValue[];
@@ -65,6 +66,7 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   components?: SelectProps['components'];
   loadingMessage?: string;
   noOptionsMessage?: string;
+  filterOption?: SelectProps['filterOption'];
   searchable?: boolean;
   clearable?: boolean;
   clearOnEsc?: boolean;
@@ -100,6 +102,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   components,
   loadingMessage = 'Loading...',
   noOptionsMessage = 'No Options',
+  filterOption,
   searchable = true,
   clearable = true,
   clearOnEsc,
@@ -247,6 +250,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           optionTooltip={optionTooltip}
           optionTooltipProps={optionTooltipProps}
           options={options}
+          filterOption={filterOption || createAliasFilter()}
           value={valueOption}
           active={meta?.active || active}
           components={{

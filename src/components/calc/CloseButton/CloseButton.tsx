@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { type ButtonElement, type ButtonProps, Button } from '@showdex/components/ui';
 import styles from './CloseButton.module.scss';
@@ -20,33 +21,37 @@ export const CloseButton = React.forwardRef<ButtonElement, CloseButtonProps>(({
   style,
   labelClassName,
   ...props
-}: CloseButtonProps, forwardedRef) => (
-  <Button
-    ref={forwardedRef}
-    {...props}
-    className={cx(
-      styles.container,
-      className,
-    )}
-    style={style}
-    labelClassName={cx(
-      styles.label,
-      labelClassName,
-    )}
-    display="block"
-    label="Close Calcdex"
-    hoverScale={1}
-    absoluteHover
-    childrenFirst
-  >
-    <i
+}: CloseButtonProps, forwardedRef) => {
+  const { t } = useTranslation('calcdex');
+
+  return (
+    <Button
+      ref={forwardedRef}
+      {...props}
       className={cx(
-        styles.icon,
-        'fa',
-        'fa-close',
+        styles.container,
+        className,
       )}
-    />
-  </Button>
-));
+      style={style}
+      labelClassName={cx(
+        styles.label,
+        labelClassName,
+      )}
+      display="block"
+      label={t('overlay.control.activeLabel')}
+      hoverScale={1}
+      absoluteHover
+      childrenFirst
+    >
+      <i
+        className={cx(
+          styles.icon,
+          'fa',
+          'fa-close',
+        )}
+      />
+    </Button>
+  );
+});
 
 /* eslint-enable @typescript-eslint/indent */

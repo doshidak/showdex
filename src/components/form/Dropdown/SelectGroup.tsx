@@ -30,11 +30,13 @@ export const SelectGroup = <
         theme={theme}
         selectProps={selectProps}
         cx={null}
+        getClassNames={null}
         getStyles={null}
       >
         {label}
       </Heading>
     </div>
+
     {children}
   </>
 );

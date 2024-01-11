@@ -1,0 +1,100 @@
+{
+  "--meta": {
+    "name": "hellodex",
+    "version": "1.0.0",
+    "locale": "fr",
+    "created": "2024-01-08T19:34:00.026Z",
+    "updated": "2024-01-10T06:49:33.445Z"
+  },
+
+  "header": {
+    "title": "<keith /> <and>&amp;</and> <cameron />",
+    "subtitle": "présentent"
+  },
+
+  "instances": {
+    "empty": {
+      "openAlways": "Calculatrice s'ouvrira automatiquement lorsque vous <strong>jouerez</strong> ou <spectate>assisterez</spectate> à une bataille.",
+      "openPlaying": "Calculatrice s'ouvrira automatiquement lorsque vous <strong>jouerez</strong> une bataille.",
+      "openSpectating": "Calculatrice s'ouvrira automatiquement lorsque vous <strong>assisterez</strong> à une bataille.",
+      "openNever": "Calculatrice ne s'ouvrira jamais en fonction de vos <settings>paramètres</settings> configurés.",
+      "settingsTooltip": "Ouvrir les Paramètres $t(common:products.showdex)",
+      "spectateTooltip": "Afficher les Batailles Actives"
+    },
+    "honkdex": {
+      "orSeparator": "ou",
+      "newLabel": ["<strong>Nouveau</strong>", "<strong>Honk</strong>dex"],
+      "newAria": "Créer un Nouveau $t(common:products.honkdex_one)"
+    }
+  },
+
+  "battleRecord": {
+    "wins": "V",
+    "losses": "D"
+  },
+
+  "donate": {
+    "aria": "Supporter $t(common:products.showdex)",
+    "label": "<strong>Show</strong>dex <strong>un peu</strong> <strong>d'amour</strong>",
+    "footnote": {
+      "default": "Si vous avez apprécié cette extension, envisagez de soutenir un développement ultérieur.",
+      "supporter": "Merci de soutenir $t(common:products.showdex) !"
+    }
+  },
+
+  "footer": {
+    "created": "créé avec <love /> par",
+
+    "settings": {
+      "openLabel": "$t(common:labels.setting_other)",
+      "closeLabel": "$t(common:labels.close)",
+      "openTooltip": "Ouvrir les Paramètres $t(common:products.showdex)",
+      "closeTooltip": "Fermer les Paramètres $t(common:products.showdex)"
+    },
+
+    "smogon": {
+      "label": "Smogon",
+      "tooltip": "Discutez sur les Forums Smogon"
+    },
+
+    "github": {
+      "label": "GitHub",
+      "tooltip": "Afficher le Code Source sur GitHub"
+    },
+
+    "discord": {
+      "label": "Discord",
+      "tooltip": "Rejoignez Notre Communauté Discord!"
+    }
+  },
+
+  "patronage": {
+    "header": {
+      "closeTooltip": "Fermer les Informations sur les Supporters",
+      "defaultTitle": "Show<thin>dex</thin> un peu<br /><dash /> <heart /> <dash />",
+      "supporterTitle": "<thin>$t(common:products.showdex)</thin> <heart /><br /><supporter>{{name}}</supporter>"
+    },
+
+    "paypal": {
+      "name": "PayPal",
+      "description": "Tous les dons sont des contributions <em>uniques</em>, vous donnant droit aux avantages du niveau $t(patronage.patreon.name) le plus bas, à l'exclusion des avantages accordés aux contributions actives. Veuillez visiter notre $t(patronage.patreon.name) pour plus de détails sur les avantages accordés.",
+      "action": {
+        "aria": "Faites un don via $t(patronage.paypal.name)",
+        "label": "<strong>Faites un don</strong> via <strong>$t(patronage.paypal.name)</strong>"
+      }
+    },
+
+    "patreon": {
+      "name": "Patreon",
+      "description": "Tous les niveaux $t(patronage.patreon.name) sont des dons <em>mensuels</em>, vous donnant droit à des avantages supplémentaires par rapport à ceux des dons <em>ponctuels</em>. Veuillez visiter notre $t(patronage.patreon.name) pour plus de détails. Piles non incluses.",
+      "defaultAction": {
+        "aria": "Devenez Patron",
+        "label": "<strong>Devenez</strong> <strong>Patron</strong>"
+      },
+      "supporterAction": {
+        "aria": "Visitez Notre $t(patronage.patreon.name)",
+        "label": "<strong>Visitez</strong> Notre <strong>$t(patronage.patreon.name)</strong>"
+      }
+    }
+  }
+}

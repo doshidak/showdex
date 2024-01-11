@@ -1,16 +1,16 @@
 import * as React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { type Weather } from '@smogon/calc';
 import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
+import { times } from '@showdex/consts/core';
 import {
   PlayerSideConditionsDexMap,
   PlayerSideConditionsToggleMap,
   PlayerSideScreensToggleMap,
-  TerrainDescriptions,
   TerrainNames,
-  WeatherDescriptions,
 } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
@@ -35,6 +35,8 @@ export const FieldCalc = ({
   playerKey = 'p1',
   opponentKey = 'p2',
 }: FieldCalcProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
+
   const {
     state,
     settings,
@@ -65,20 +67,19 @@ export const FieldCalc = ({
       return null;
     }
 
-    const description = WeatherDescriptions[option.value]?.shortDesc;
-
-    if (!description) {
-      return null;
-    }
-
     return (
-      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-        {description}
-      </div>
+      <Trans
+        t={t}
+        i18nKey={`pokedex:weather.${formatId(option.value)}.shortDesc`}
+        parent="div"
+        className={cx(styles.tooltipContent, styles.descTooltip)}
+        shouldUnescape
+        values={{ times }}
+      />
     );
   }, [
-    // gen,
     settings,
+    t,
   ]);
 
   const terrainTooltip = React.useCallback((option: DropdownOption<CalcdexBattleField['terrain']>) => {
@@ -86,19 +87,19 @@ export const FieldCalc = ({
       return null;
     }
 
-    const description = TerrainDescriptions[option.value]?.shortDesc;
-
-    if (!description) {
-      return null;
-    }
-
     return (
-      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-        {description}
-      </div>
+      <Trans
+        t={t}
+        i18nKey={`pokedex:terrain.${formatId(option.value)}.shortDesc`}
+        parent="div"
+        className={cx(styles.tooltipContent, styles.descTooltip)}
+        shouldUnescape
+        values={{ times }}
+      />
     );
   }, [
     settings,
+    t,
   ]);
 
   const doubles = state?.gameType === 'Doubles';
@@ -133,7 +134,6 @@ export const FieldCalc = ({
         styles.container,
         doubles && styles.doubles,
         containerSize === 'xs' && styles.verySmol,
-        ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -151,8 +151,13 @@ export const FieldCalc = ({
       >
         {/* p1 screens header */}
         {authPlayerKey ? (
-          authPlayerKey === playerKey ? 'Yours' : 'Theirs'
-        ) : <>&uarr; {operatingMode === 'standalone' || doubles ? 'Field' : 'Screens'}</>}
+          t(`field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`)
+        ) : (
+          <>
+            &uarr;{' '}
+            {t(`field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`)}
+          </>
+        )}
       </TableGridItem>
       <TableGridItem
         className={cx(
@@ -162,7 +167,7 @@ export const FieldCalc = ({
         )}
         header
       >
-        Weather
+        {t('field.weather.label')}
       </TableGridItem>
       <TableGridItem
         className={cx(
@@ -172,7 +177,7 @@ export const FieldCalc = ({
         )}
         header
       >
-        Terrain
+        {t('field.terrain.label')}
       </TableGridItem>
       <TableGridItem
         className={cx(
@@ -185,8 +190,13 @@ export const FieldCalc = ({
       >
         {/* p2 screens header */}
         {authPlayerKey ? (
-          authPlayerKey === playerKey ? 'Theirs' : 'Yours'
-        ) : <>{operatingMode === 'standalone' || doubles ? 'Field' : 'Screens'} &darr;</>}
+          t(`field.${authPlayerKey === playerKey ? 'theirs' : 'yours'}`)
+        ) : (
+          <>
+            {t(`field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`)}
+            {' '}&darr;
+          </>
+        )}
       </TableGridItem>
 
       {/* p1 screens */}
@@ -221,13 +231,15 @@ export const FieldCalc = ({
             <React.Fragment key={`${l.scope}:${battleId || '???'}:${playerKey}:${label}`}>
               <ToggleButton
                 className={styles.toggleButton}
-                label={label}
+                label={t(`field.conditions.${formatId(label)}`)}
                 tooltip={effectDescription ? (
                   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
                     {
                       !!dexFieldEffect.name &&
                       <>
-                        <strong>{dexFieldEffect.name}</strong>
+                        <strong>
+                          {t(`pokedex:${dexMapping}.${formatId(dexFieldEffect.name)}`, dexFieldEffect.name)}
+                        </strong>
                         <br />
                       </>
                     }
@@ -250,8 +262,8 @@ export const FieldCalc = ({
       <TableGridItem className={styles.weatherInput}>
         <Dropdown
           style={{ textAlign: 'left' }}
-          aria-label="Field Weather"
-          hint={gen === 1 ? 'N/A' : 'None'}
+          aria-label={t('field.weather.aria') as React.ReactNode}
+          hint={t(`field.weather.${gen === 1 ? 'legacyH' : 'h'}int`) as React.ReactNode}
           optionTooltip={weatherTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
@@ -262,10 +274,10 @@ export const FieldCalc = ({
             }),
           }}
           options={getWeatherConditions(format).map((name: Weather) => ({
-            label: WeatherDescriptions[name]?.label || name,
+            label: t(`pokedex:weather.${formatId(name)}.label`, name),
             value: name,
           }))}
-          noOptionsMessage="No Weather"
+          noOptionsMessage={t('field.weather.empty') as React.ReactNode}
           highlight={!!weather}
           disabled={disabled || !battleId || gen === 1}
         />
@@ -275,8 +287,8 @@ export const FieldCalc = ({
       <TableGridItem className={styles.terrainInput}>
         <Dropdown
           style={{ textAlign: 'left' }}
-          aria-label="Field Terrain"
-          hint={gen < 6 ? 'N/A' : 'None'}
+          aria-label={t('field.terrain.aria') as React.ReactNode}
+          hint={t(`field.terrain.${gen < 6 ? 'legacyH' : 'h'}int`) as React.ReactNode}
           optionTooltip={terrainTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
           input={{
@@ -287,10 +299,10 @@ export const FieldCalc = ({
             }),
           }}
           options={TerrainNames.map((name) => ({
-            label: name,
+            label: t(`pokedex:terrain.${formatId(name)}.label`, name),
             value: name,
           }))}
-          noOptionsMessage="No Terrain"
+          noOptionsMessage={t('field.terrain.empty') as React.ReactNode}
           highlight={!!terrain}
           disabled={disabled || !battleId || gen < 6}
         />
@@ -327,13 +339,15 @@ export const FieldCalc = ({
             <React.Fragment key={`${l.scope}:${battleId || '???'}:${opponentKey}:${label}`}>
               <ToggleButton
                 className={styles.toggleButton}
-                label={label}
+                label={t(`field.conditions.${formatId(label)}`)}
                 tooltip={effectDescription ? (
                   <div className={cx(styles.tooltipContent, styles.descTooltip)}>
                     {
                       !!dexFieldEffect.name &&
                       <>
-                        <strong>{dexFieldEffect.name}</strong>
+                        <strong>
+                          {t(`pokedex:${dexMapping}.${formatId(dexFieldEffect.name)}`, dexFieldEffect.name)}
+                        </strong>
                         <br />
                       </>
                     }

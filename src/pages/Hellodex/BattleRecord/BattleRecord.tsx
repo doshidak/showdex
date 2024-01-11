@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { useBattleRecord, useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
 import styles from './BattleRecord.module.scss';
@@ -12,9 +13,9 @@ export const BattleRecord = ({
   className,
   style,
 }: BattleRecordProps): JSX.Element => {
+  const { t } = useTranslation('hellodex');
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
-
   const battleRecord = useBattleRecord();
 
   const {
@@ -42,13 +43,13 @@ export const BattleRecord = ({
           {currentWins}
         </div>
         <div className={cx(styles.recordLabel, styles.win)}>
-          W
+          {t('battleRecord.wins')}
         </div>
 
         <div className={styles.recordSeparator} />
 
         <div className={cx(styles.recordLabel, styles.loss)}>
-          L
+          {t('battleRecord.losses')}
         </div>
         <div
           className={cx(

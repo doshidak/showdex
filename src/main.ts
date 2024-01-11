@@ -1,11 +1,14 @@
 import { CalcdexBootstrapper, HellodexBootstrapper, TeamdexBootstrapper } from '@showdex/pages';
 import { calcdexSlice, createStore, showdexSlice } from '@showdex/redux/store';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { loadI18nextLocales } from '@showdex/utils/app';
+import { env, formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { openIndexedDb, readHonksDb, readSettingsDb } from '@showdex/utils/storage';
 import '@showdex/styles/global.scss';
 
 const l = logger('@showdex/main');
+
+l.debug('Starting', env('build-name', 'showdex'));
 
 if (typeof app === 'undefined' || typeof Dex === 'undefined') {
   l.error(
@@ -16,25 +19,21 @@ if (typeof app === 'undefined' || typeof Dex === 'undefined') {
   throw new Error('Showdex attempted to start in an unsupported website.');
 }
 
+// not sure when we'll run into this, but it's entirely possible now that standalone builds are a thing
+if (window?.__SHOWDEX_INIT) {
+  l.error(
+    'yo dawg I heard you wanted Showdex with your Showdex',
+    '\n', '__SHOWDEX_INIT', window.__SHOWDEX_INIT,
+    '\n', 'BUILD_NAME', env('build-name'),
+  );
+
+  throw new Error('Another Showdex tried to load despite one already being loaded.');
+}
+
+// basically using this as a Showdex init mutex lock lol
+window.__SHOWDEX_INIT = env('build-name', 'showdex');
+
 const store = createStore();
-
-// note: don't inline await, otherwise, there'll be a race condition with the login
-// (also makes the Hellodex not appear immediately when Showdown first opens)
-void (async () => {
-  const db = await openIndexedDb();
-  const settings = await readSettingsDb(db);
-
-  if (nonEmptyObject(settings)) {
-    delete settings.colorScheme;
-    store.dispatch(showdexSlice.actions.updateSettings(settings));
-  }
-
-  const honks = await readHonksDb(db);
-
-  if (nonEmptyObject(honks)) {
-    store.dispatch(calcdexSlice.actions.restore(honks));
-  }
-})();
 
 l.debug('Hooking into the client\'s app.receive()...');
 
@@ -62,6 +61,77 @@ app.receive = (data: string) => {
     CalcdexBootstrapper(store, data, roomId);
   }
 };
+
+l.debug('Hooking into the client\'s app.user.finishRename()...');
+
+const userFinishRename = app.user.finishRename.bind(app.user) as typeof app.user.finishRename;
+
+app.user.finishRename = (name, assertion) => {
+  // call the original function
+  userFinishRename(name, assertion);
+
+  // l.debug(
+  //   'app.user.finishRename()',
+  //   '\n', 'name', name,
+  //   '\n', 'assertion', assertion,
+  // );
+
+  // determine if the user logged in
+  // assertion seems to be some sha256, then the user ID, then 4?, then some timestamp,
+  // then some server url, then some sha1, then some half of a sha1 (lol), finally some super long sha hash
+  if (!name || !assertion?.includes(',')) {
+    return;
+  }
+
+  const assertions = assertion.split(',');
+  const [, userId] = assertions;
+
+  if (formatId(name) === userId) {
+    l.debug(
+      'Logged in as', name, '(probably)',
+      '\n', 'assertions', assertions,
+    );
+
+    return void store.dispatch(showdexSlice.actions.setAuthUsername(name));
+  }
+
+  // nt ^_~
+  store.dispatch(showdexSlice.actions.updateSettings({
+    glassyTerrain: false,
+    hellodex: { showDonateButton: true },
+  }));
+};
+
+// note: don't inline await, otherwise, there'll be a race condition with the login
+// (also makes the Hellodex not appear immediately when Showdown first opens)
+void (async () => {
+  const db = await openIndexedDb();
+  const settings = await readSettingsDb(db);
+
+  if (nonEmptyObject(settings)) {
+    delete settings.colorScheme;
+    store.dispatch(showdexSlice.actions.updateSettings(settings));
+  }
+
+  // note: settings.locale's default value is `null`, which will allow the i18next LanguageDetector plugin to kick in
+  const i18next = await loadI18nextLocales(settings.locale);
+
+  // only update the stored locale if not in settings & we've detected one
+  if (!settings.locale && i18next?.language) {
+    store.dispatch(showdexSlice.actions.updateSettings({
+      locale: i18next.language,
+    }));
+  }
+
+  const honks = await readHonksDb(db);
+
+  if (nonEmptyObject(honks)) {
+    store.dispatch(calcdexSlice.actions.restore(honks));
+  }
+
+  // open the Hellodex when the Showdown client starts
+  HellodexBootstrapper(store);
+})();
 
 l.debug('Initializing MutationObserver for client colorScheme changes...');
 
@@ -92,9 +162,6 @@ colorSchemeObserver.observe(document.documentElement, {
   characterData: false,
 });
 
-// open the Hellodex when the Showdown client starts
-HellodexBootstrapper(store);
-
 /**
  * @todo May require some special logic to detect when the Teambuilder room opens.
  *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
@@ -102,4 +169,4 @@ HellodexBootstrapper(store);
  */
 TeamdexBootstrapper(store);
 
-l.success('Completed main execution!');
+l.success(env('build-name', 'showdex'), 'initialized!');

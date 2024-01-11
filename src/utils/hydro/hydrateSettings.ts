@@ -181,6 +181,7 @@ export const hydrateSettings = (
           const calcdexSettings: Partial<Record<typeof hydratedCalcdexKey, ShowdexCalcdexSettings[typeof hydratedCalcdexKey]>> = settings.calcdex;
 
           calcdexSettings[hydratedCalcdexKey] = [
+            DehydratedCalcdexSettingsMap.includePresetsBundles,
             DehydratedCalcdexSettingsMap.nhkoColors,
             DehydratedCalcdexSettingsMap.nhkoLabels,
           ].includes(dehydratedCalcdexKey)

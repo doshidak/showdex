@@ -11,9 +11,11 @@
 declare namespace Showdown {
   type BattleTeambuilderTableFormatCode =
     | 'AG'
+    | 'CAP' // note: this one doesn't actually exist & is used only by Showdex to refer to the 0 index
     | 'CAP LC'
     | 'DNU' // doubles NU
     | 'DOU' // doubles OU
+    | 'DUber'
     | 'DUU'
     | 'LC'
     | 'Mythical'
@@ -289,6 +291,13 @@ declare namespace Showdown {
     };
 
     /**
+     * National Dex Doubles bans.
+     */
+    ndDoublesBans?: {
+      [speciesFormeId: string]: 1;
+    };
+
+    /**
      * ZU (Zero-Used) bans.
      *
      * * Key is the ID'd species forme of the Pokemon.
@@ -314,7 +323,7 @@ declare namespace Showdown {
      *
      * * Same as `zuBans`.
      */
-    uberUUBans?: {
+    ubersUUBans?: {
       [speciesFormeId: string]: 1;
     };
   }
@@ -377,6 +386,6 @@ declare namespace Showdown {
     | 'gen9vgc';
 
   type BattleTeambuilderTable =
-    & Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'overrideTier' | 'tiers' | 'tierSet' | 'uberUUBans' | 'zuBans'>
+    & Pick<Required<BattleTeambuilderGenTable>, 'formatSlices' | 'items' | 'learnsets' | 'monotypeBans' | 'ndDoublesBans' | 'overrideTier' | 'tiers' | 'tierSet' | 'ubersUUBans' | 'zuBans'>
     & Record<BattleTeambuilderTableFormat, BattleTeambuilderGenTable>;
 }

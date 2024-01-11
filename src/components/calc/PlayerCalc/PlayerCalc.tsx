@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { PiconButton, PokeGlance } from '@showdex/components/app';
 import { type DropdownOption } from '@showdex/components/form';
@@ -32,6 +33,7 @@ export const PlayerCalc = ({
   defaultName = '--',
   playerOptions,
 }: PlayerCalcProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 
   const {
@@ -132,7 +134,7 @@ export const PlayerCalc = ({
                   !pokemon?.speciesForme && styles.none,
                 )}
                 display="block"
-                aria-label={`Select ${friendlyPokemonName}`}
+                aria-label={t('player.party.aria', { pokemon: friendlyPokemonName })}
                 pokemon={pokemon?.speciesForme ? {
                   ...pokemon,
                   speciesForme: speciesForme?.replace(pokemon?.useMax ? '' : '-Gmax', ''),

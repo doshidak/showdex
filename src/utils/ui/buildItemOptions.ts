@@ -37,8 +37,10 @@ const findItemGroupIndices = (
   // headerName is a search string, so format it as such
   const headerId = formatId(headerName);
 
-  const determinedStartIndex = items
-    .findIndex((value) => Array.isArray(value) && formatId(value[1])?.[startsWith ? 'startsWith' : 'includes'](headerId));
+  const determinedStartIndex = items.findIndex((value) => (
+    Array.isArray(value)
+      && formatId(value[1])?.[startsWith ? 'startsWith' : 'includes'](headerId)
+  ));
 
   const startIndex = determinedStartIndex > -1
     ? determinedStartIndex + 1
@@ -70,6 +72,8 @@ export const buildItemOptions = (
   pokemon: CalcdexPokemon,
   config?: {
     usage?: CalcdexPokemonPreset;
+    translate?: (value: ItemName) => string;
+    translateHeader?: (value: string) => string;
   },
 ): CalcdexPokemonItemOption[] => {
   const gen = detectGenFromFormat(format);
@@ -80,7 +84,12 @@ export const buildItemOptions = (
   }
 
   const { altItems } = pokemon;
-  const { usage } = config || {};
+
+  const {
+    usage,
+    translate,
+    translateHeader,
+  } = config || {};
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
@@ -106,9 +115,9 @@ export const buildItemOptions = (
       : flattenAlts(altItems).sort(usageSorter);
 
     options.push({
-      label: 'Pool',
+      label: translateHeader?.('Pool') || 'Pool',
       options: poolItems.map((alt) => ({
-        label: flattenAlt(alt),
+        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
         rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
@@ -123,9 +132,9 @@ export const buildItemOptions = (
 
     if (usageItems.length) {
       options.push({
-        label: 'Usage',
+        label: translateHeader?.('Usage') || 'Usage',
         options: usageItems.map((alt) => ({
-          label: flattenAlt(alt),
+          label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
           rightLabel: percentage(alt[1], 2),
           value: flattenAlt(alt),
         })),
@@ -155,9 +164,9 @@ export const buildItemOptions = (
 
     if (popularItems.length) {
       options.push({
-        label: 'Popular',
+        label: translateHeader?.('Popular Items') || 'Popular',
         options: popularItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
@@ -176,9 +185,9 @@ export const buildItemOptions = (
 
     if (itemsItems.length) {
       options.push({
-        label: 'Items',
+        label: translateHeader?.('Items') || 'Items',
         options: itemsItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
@@ -197,9 +206,9 @@ export const buildItemOptions = (
 
     if (specificItems.length) {
       options.push({
-        label: `Pok${eacute}mon-Specific`,
+        label: translateHeader?.(`Pok${eacute}mon-Specific Items`) || `Pok${eacute}mon-Specific`,
         options: specificItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
@@ -218,9 +227,9 @@ export const buildItemOptions = (
 
     if (usuallyUselessItems.length) {
       options.push({
-        label: 'Usually Useless',
+        label: translateHeader?.('Usually Useless Items') || 'Usually Useless',
         options: usuallyUselessItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
@@ -239,9 +248,9 @@ export const buildItemOptions = (
 
     if (uselessItems.length) {
       options.push({
-        label: 'Useless',
+        label: translateHeader?.('Useless Items') || 'Useless',
         options: uselessItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
@@ -259,9 +268,9 @@ export const buildItemOptions = (
 
     if (allItems.length) {
       options.push({
-        label: 'Other',
+        label: translateHeader?.('Other') || 'Other',
         options: allItems.map((name) => ({
-          label: name,
+          label: translate?.(name) || name,
           rightLabel: findUsagePercent(name),
           value: name,
         })),
@@ -278,9 +287,9 @@ export const buildItemOptions = (
 
   if (otherItems.length) {
     options.push({
-      label: 'All',
+      label: translateHeader?.('All') || 'All',
       options: otherItems.map((name) => ({
-        label: name,
+        label: translate?.(name) || name,
         rightLabel: findUsagePercent(name),
         value: name,
       })),

@@ -111,7 +111,7 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
   }
 
   .title {
-    @include spacing.margin($top: 25px);
+    @include spacing.margin($top: 24px);
     font-weight: 600;
     font-size: 18px;
     // color: colors.$transparent;
@@ -119,9 +119,10 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
     text-indent: 3px;
     text-align: center;
     text-transform: uppercase;
+    line-height: 20px;
     // background: $gradient;
     // background-clip: text;
-    opacity: 0.65;
+    opacity: 0.64;
 
     .thin {
       font-weight: 300;
@@ -149,13 +150,13 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
 .supportMethods {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 5px;
-  row-gap: 5px;
+  column-gap: 6px;
+  row-gap: 6px;
   @include spacing.padding($bottom: 20px);
 
   .verySmol & {
     grid-template-columns: minmax(0, 1fr);
-    row-gap: 30px;
+    row-gap: 32px;
   }
 }
 
@@ -191,13 +192,14 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
     letter-spacing: 1px;
     text-indent: 1px;
     text-transform: uppercase;
-    opacity: 0.65;
+    line-height: 13px;
+    opacity: 0.64;
     user-select: none;
   }
 
   .info {
     height: 100%;
-    @include spacing.padding-all(16px);
+    @include spacing.padding($x: 22px, $y: 18px);
     border-radius: 12px;
     @include transition.apply(background-color, box-shadow);
 
@@ -239,7 +241,7 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
   }
 
   .value {
-    @include spacing.padding-all(6px);
+    @include spacing.padding($all: 8px);
     // @include font.apply(fonts.$mono);
     font-size: 12px;
     user-select: none;
@@ -251,7 +253,7 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
 
   .buttonContainer {
     @include flex.row-center;
-    @include spacing.margin($top: 25px);
+    @include spacing.margin($top: 24px);
   }
 
   .button {
@@ -264,8 +266,10 @@ $gradient: linear-gradient(75deg, #4A9AC7 5%, #F148CC 95%) 0 0 / 200% 100%;
 }
 
 .tooltipContent {
-  max-width: 175px;
+  max-width: 176px;
+  font-size: 10px;
   text-align: center;
+  line-height: 12px;
   white-space: normal;
   user-select: none;
 }

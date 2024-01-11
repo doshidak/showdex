@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { ValueField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
@@ -7,11 +8,10 @@ import { PokemonBoostNames, PokemonNatureBoosts, PokemonStatNames } from '@showd
 import { CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
 import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
-import { pluralize } from '@showdex/utils/humanize';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
 import styles from './PokeStats.module.scss';
@@ -27,6 +27,8 @@ export const PokeStats = ({
   className,
   style,
 }: PokeStatsProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
+
   const {
     state,
     settings,
@@ -171,16 +173,26 @@ export const PokeStats = ({
           !forceShowGenetics &&
           <ToggleButton
             className={styles.small}
-            label={pokemon?.showGenetics ? 'Hide' : 'Show'}
+            label={t(`poke.stats.visibility.${pokemon?.showGenetics ? '' : 'in'}activeLabel`)}
             tooltip={(
-              <div className={styles.tooltipContent}>
-                {pokemon?.showGenetics ? 'Hide' : 'Show'}{' '}
-                {[
-                  shouldShowBaseStats && (defaultShowBehavior || !lockedVisibilities.includes('base')) && 'Base',
-                  (defaultShowBehavior || !lockedVisibilities.includes('iv')) && (legacy ? 'DVs' : 'IVs'),
-                  !legacy && (defaultShowBehavior || !lockedVisibilities.includes('ev')) && 'EVs',
-                ].filter(Boolean).join('/')}
-              </div>
+              <Trans
+                t={t}
+                i18nKey={`poke.stats.visibility.${pokemon?.showGenetics ? '' : 'in'}activeTooltip`}
+                parent="div"
+                className={styles.tooltipContent}
+                values={{
+                  stats: [
+                    shouldShowBaseStats
+                      && (defaultShowBehavior || !lockedVisibilities.includes('base'))
+                      && t('pokedex:stats.base_other.1'),
+                    (defaultShowBehavior || !lockedVisibilities.includes('iv'))
+                      && t(`pokedex:stats.${legacy ? 'dvs' : 'ivs'}_other.1`),
+                    (!legacy || settings?.showLegacyEvs)
+                      && (defaultShowBehavior || !lockedVisibilities.includes('ev'))
+                      && t('pokedex:stats.evs_other.1'),
+                  ].filter(Boolean).join('/'),
+                }}
+              />
             )}
             tooltipDisabled={!settings?.showUiTooltips}
             primary
@@ -193,10 +205,6 @@ export const PokeStats = ({
       </TableGridItem>
 
       {statNames.map((stat) => {
-        if (gen === 1 && stat === 'spd') {
-          return null;
-        }
-
         const boostUp = PokemonNatureBoosts[pokemon?.nature]?.[0] === stat;
         const boostDown = PokemonNatureBoosts[pokemon?.nature]?.[1] === stat;
 
@@ -215,7 +223,7 @@ export const PokeStats = ({
           >
             {boostUp && '+'}
             {boostDown && '-'}
-            {statName}
+            {t(`pokedex:stats.${statName}.1`, statName)}
           </TableGridItem>
         );
       })}
@@ -237,8 +245,16 @@ export const PokeStats = ({
                 !hasDirtyBaseStats && styles.disabled, // intentionally keeping them separate
               )}
               labelClassName={styles.boostButtonLabel}
-              label="Base"
-              tooltip="Reset All Modified Base Stats"
+              label={t('poke.stats.base.label')}
+              tooltip={(
+                <Trans
+                  t={t}
+                  i18nKey="poke.stats.base.resetTooltip"
+                  parent="div"
+                  className={styles.tooltipContent}
+                  shouldUnescape
+                />
+              )}
               tooltipDisabled={!settings?.showUiTooltips || !hasDirtyBaseStats}
               highlight={hasDirtyBaseStats}
               hoverScale={1}
@@ -251,7 +267,8 @@ export const PokeStats = ({
           </TableGridItem>
 
           {statNames.map((stat) => {
-            const statLabel = stat.toUpperCase();
+            const statName = gen === 1 && stat === 'spa' ? 'spc' : stat;
+            const statLabel = t(`pokedex:stats.${statName}.1`, statName.toUpperCase());
 
             const baseStat = pokemon?.dirtyBaseStats?.[stat] ?? (
               pokemon?.transformedForme && stat !== 'hp'
@@ -278,7 +295,10 @@ export const PokeStats = ({
                     styles.valueFieldInput,
                     pristine && styles.dim,
                   )}
-                  label={`${statLabel} Base Stat for ${friendlyPokemonName}`}
+                  label={t('poke.stats.base.aria', {
+                    stat: statLabel,
+                    pokemon: friendlyPokemonName,
+                  }) as React.ReactNode}
                   hideLabel
                   hint={baseStat?.toString() || 1}
                   fallbackValue={1}
@@ -294,7 +314,7 @@ export const PokeStats = ({
                     value: baseStat,
                     onChange: (value: number) => updatePokemon({
                       dirtyBaseStats: { [stat]: value },
-                    }, `${l.scope}:ValueField~Base-${statLabel}:input.onChange()`),
+                    }, `${l.scope}:ValueField~Base-${statName}:input.onChange()`),
                   }}
                   disabled={disabled}
                 />
@@ -310,9 +330,14 @@ export const PokeStats = ({
         <>
           <Tooltip
             content={missingIvs ? (
-              <div className={styles.tooltipContent}>
-                There are no {legacy ? 'DV' : 'IV'}s set!
-              </div>
+              <Trans
+                t={t}
+                i18nKey="poke.stats.ivs.missingTooltip"
+                parent="div"
+                className={styles.tooltipContent}
+                shouldUnescape
+                values={{ spreads: `$t(pokedex:stats.${legacy ? 'dvs' : 'ivs'}_other.1)` }}
+              />
             ) : null}
             offset={[0, 10]}
             delay={[1000, 50]}
@@ -329,20 +354,18 @@ export const PokeStats = ({
               align="right"
               header
             >
-              {legacy ? 'DV' : 'IV'}
-              <span className={styles.small}>
-                S
-              </span>
+              <Trans
+                t={t}
+                i18nKey={`poke.stats.ivs.${legacy ? 'legacyL' : 'l'}abel`}
+                shouldUnescape
+                components={{ smol: <span className={styles.small} /> }}
+              />
             </TableGridItem>
           </Tooltip>
 
           {statNames.map((stat) => {
-            if (gen === 1 && stat === 'spd') {
-              return null;
-            }
-
             const statName = gen === 1 && stat === 'spa' ? 'spc' : stat;
-            const statLabel = statName.toUpperCase();
+            const statLabel = t(`pokedex:stats.${statName}.1`, statName.toUpperCase());
 
             const iv = pokemon?.ivs?.[stat] || 0;
             const value = legacy ? convertIvToLegacyDv(iv) : iv;
@@ -370,7 +393,11 @@ export const PokeStats = ({
                     missingIvs && styles.warning,
                   )}
                   inputStyle={missingIvs && warningColor ? { color: warningColor } : undefined}
-                  label={`${statLabel} ${legacy ? 'DV' : 'IV'} for ${friendlyPokemonName}`}
+                  label={t('poke.stats.ivs.aria', {
+                    stat: statLabel,
+                    spread: `$t(pokedex:stats.${legacy ? 'dvs' : 'ivs'}_one.1)`,
+                    pokemon: friendlyPokemonName,
+                  }) as React.ReactNode}
                   hideLabel
                   hint={value.toString() || maxValue.toString()}
                   fallbackValue={maxValue}
@@ -387,7 +414,7 @@ export const PokeStats = ({
                     onChange: (val: number) => updatePokemon({
                       // note: HP (for legacy gens) & SPD (for gen 2 only) handled in updatePokemon() of useCalcdexContext()
                       ivs: { [stat]: legacy ? convertLegacyDvToIv(val) : val },
-                    }, `${l.scope}:ValueField~Iv-${statLabel}:input.onChange()`),
+                    }, `${l.scope}:ValueField~Iv-${statName}:input.onChange()`),
                   }}
                   disabled={disabled}
                 />
@@ -405,24 +432,39 @@ export const PokeStats = ({
             content={totalEvs < maxLegalEvs || !evsLegal ? (
               <div className={styles.tooltipContent}>
                 {missingEvs ? (
-                  <>
-                    There are no EVs set!
-                  </>
+                  <Trans
+                    t={t}
+                    i18nKey="poke.stats.evs.missingTooltip"
+                    shouldUnescape
+                  />
                 ) : (!format?.includes('random') && totalEvs < maxLegalEvs) ? (
-                  <>
-                    You have{' '}
-                    <strong>{pluralize(maxLegalEvs - totalEvs, 'unallocated EV:s')}</strong>.
-                  </>
+                  <Trans
+                    t={t}
+                    i18nKey="poke.stats.evs.unallocatedTooltip"
+                    shouldUnescape
+                    values={{ count: maxLegalEvs - totalEvs }}
+                  />
                 ) : (
-                  <>
-                    You have{' '}
-                    <strong>{pluralize(totalEvs - maxLegalEvs, 'EV:s')}</strong>{' '}
-                    over the legal limit of{' '}
-                    <strong>{pluralize(maxLegalEvs, 'EV:s')}</strong>.
-                  </>
+                  <Trans
+                    t={t}
+                    i18nKey="poke.stats.evs.overageTooltip"
+                    shouldUnescape
+                    values={{
+                      count: totalEvs - maxLegalEvs,
+                      max: maxLegalEvs,
+                    }}
+                  />
                 )}
               </div>
-            ) : 'nice'}
+            ) : (
+              <Trans
+                t={t}
+                i18nKey="poke.stats.evs.validatedTooltip"
+                parent="div"
+                className={styles.tooltipContent}
+                shouldUnescape
+              />
+            )}
             offset={[0, 10]}
             delay={[1000, 50]}
             trigger="mouseenter"
@@ -438,15 +480,34 @@ export const PokeStats = ({
               align="right"
               header
             >
-              EV
-              <span className={styles.small}>
-                S
-              </span>
+              <Trans
+                t={t}
+                i18nKey="poke.stats.evs.label"
+                shouldUnescape
+                components={{ smol: <span className={styles.small} /> }}
+              />
+
+              {
+                (!format?.includes('random') && totalEvs < maxLegalEvs) &&
+                <>
+                  <br />
+                  {maxLegalEvs - totalEvs}&darr;
+                </>
+              }
+
+              {
+                !evsLegal &&
+                <>
+                  <br />
+                  {totalEvs - maxLegalEvs}&uarr;
+                </>
+              }
             </TableGridItem>
           </Tooltip>
 
           {statNames.map((stat) => {
-            const statLabel = stat.toUpperCase();
+            const statName = gen === 1 && stat === 'spa' ? 'spc' : stat;
+            const statLabel = t(`pokedex:stats.${statName}.1`, statName.toUpperCase());
             const ev = pokemon?.evs?.[stat] || 0;
 
             const pristine = !missingEvs && pristineSpreadValue('ev', ev);
@@ -469,7 +530,10 @@ export const PokeStats = ({
                     missingEvs && styles.warning,
                   )}
                   inputStyle={missingEvs && warningColor ? { color: warningColor } : undefined}
-                  label={`${statLabel} EV for ${friendlyPokemonName}`}
+                  label={t('poke.stats.evs.aria', {
+                    stat: statLabel,
+                    pokemon: friendlyPokemonName,
+                  }) as React.ReactNode}
                   hideLabel
                   hint={ev.toString() || '252'}
                   fallbackValue={0}
@@ -485,7 +549,7 @@ export const PokeStats = ({
                     value: ev,
                     onChange: (value: number) => updatePokemon({
                       evs: { [stat]: value },
-                    }, `${l.scope}:ValueField~Ev-${statLabel}:input.onChange()`),
+                    }, `${l.scope}:ValueField~Ev-${statName}:input.onChange()`),
                   }}
                   disabled={disabled}
                 />
@@ -515,27 +579,40 @@ export const PokeStats = ({
             key={`PokeStats:StatValue:${pokemonKey}:${stat}`}
             content={(
               <div className={styles.statModsTable}>
-                {mods?.map((mod) => (
-                  <React.Fragment
-                    key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
-                  >
-                    <div
-                      className={cx(
-                        styles.statModValue,
-                        styles.statValue,
-                        (mod?.modifier ?? 1) > 1 && styles.positive,
-                        (mod?.modifier ?? 1) < 1 && styles.negative,
-                      )}
+                {mods?.map((mod) => {
+                  const tSource = (mod?.source === 'ability' && 'abilities')
+                    || (mod?.source === 'item' && 'items')
+                    || (mod?.source === 'move' && 'moves')
+                    || (mod?.source === 'status' && 'nonvolatiles')
+                    || (mod?.source === 'ultimate' && 'ultimates')
+                    || null;
+
+                  const tLabel = (!!tSource && t(`pokedex:${tSource}.${formatId(mod?.label)}`, mod?.label))
+                    || mod?.label
+                    || '??? HUH';
+
+                  return (
+                    <React.Fragment
+                      key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
                     >
-                      {(mod?.modifier ?? -1) >= 0 ? (
-                        <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
-                      ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
-                    </div>
-                    <div className={styles.statModLabel}>
-                      {mod?.label || '??? HUH'}
-                    </div>
-                  </React.Fragment>
-                ))}
+                      <div
+                        className={cx(
+                          styles.statModValue,
+                          styles.statValue,
+                          (mod?.modifier ?? 1) > 1 && styles.positive,
+                          (mod?.modifier ?? 1) < 1 && styles.negative,
+                        )}
+                      >
+                        {(mod?.modifier ?? -1) >= 0 ? (
+                          <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
+                        ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
+                      </div>
+                      <div className={styles.statModLabel}>
+                        {tLabel}
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
               </div>
             )}
             offset={[0, 10]}
@@ -564,14 +641,16 @@ export const PokeStats = ({
         align="right"
         header
       >
-        Stage
+        {t('poke.stats.boosts.label')}
       </TableGridItem>
 
       {/* this is used as a spacer since HP cannot be boosted, obviously! */}
       <TableGridItem />
 
       {boostNames.map((stat) => {
-        const statLabel = stat.toUpperCase();
+        const statName = gen === 1 && stat === 'spa' ? 'spc' : stat;
+        // const statLabel = t(`pokedex:stats.${statName}.1`, statName.toUpperCase());
+
         const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
         const didDirtyBoost = typeof pokemon?.dirtyBoosts?.[stat] === 'number';
 
@@ -587,7 +666,7 @@ export const PokeStats = ({
               disabled={!pokemon?.speciesForme || boost <= -6}
               onPress={() => updatePokemon({
                 dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
-              }, `${l.scope}:Button~DirtyBoosts-${statLabel}-Minus:onPress()`)}
+              }, `${l.scope}:Button~DirtyBoosts-${statName}-Minus:onPress()`)}
             />
 
             <Button
@@ -606,7 +685,7 @@ export const PokeStats = ({
                 // resets the dirty boost, in which a re-render will re-sync w/
                 // the actual boost from the battle state
                 dirtyBoosts: { [stat]: null },
-              }, `${l.scope}:Button~DirtyBoosts-${statLabel}-Reset:onPress()`)}
+              }, `${l.scope}:Button~DirtyBoosts-${statName}-Reset:onPress()`)}
             />
 
             <Button
@@ -616,7 +695,7 @@ export const PokeStats = ({
               disabled={!pokemon?.speciesForme || boost >= 6}
               onPress={() => updatePokemon({
                 dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },
-              }, `${l.scope}:Button~DirtyBoosts-${statLabel}-Plus:onPress()`)}
+              }, `${l.scope}:Button~DirtyBoosts-${statName}-Plus:onPress()`)}
             />
           </TableGridItem>
         );

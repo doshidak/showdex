@@ -7,8 +7,8 @@ import {
   type PkmnApiSmogonRandomsPresetResponse,
   type PkmnApiSmogonRandomsStatsResponse,
 } from '@showdex/interfaces/api';
-import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { buildPresetQuery, createTagProvider } from '@showdex/redux/factories';
+import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
+import { buildBundleQuery, buildPresetQuery, createTagProvider } from '@showdex/redux/factories';
 import {
   transformFormatPresetResponse,
   transformFormatStatsResponse,
@@ -50,6 +50,25 @@ export interface PkmnApiSmogonPresetRequest {
   formatOnly?: boolean;
 
   /**
+   * `ShowdexPresetsBundle` IDs to load.
+   *
+   * * These are locally stored JSON files formatted like the output of the pkmn Format Sets API.
+   * * In order to recycle the same logic, this random property exists.
+   * * Should only be used when loading a `ShowdexPresetsBundle` & not when actually fetching from the pkmn API.
+   *
+   * @since 1.2.1
+   */
+  bundleIds?: string[];
+
+  /**
+   * Specifies the `source` of the transformed presets.
+   *
+   * @default 'smogon'
+   * @since 1.2.1
+   */
+  source?: CalcdexPokemonPresetSource;
+
+  /**
    * Maximum age of cached presets before they're considered "stale."
    *
    * * When specified, caching will be enabled.
@@ -69,6 +88,11 @@ export const presetApi = pkmnApi.injectEndpoints({
   overrideExisting: true,
 
   endpoints: (build) => ({
+    pokemonBundledPreset: build.query<CalcdexPokemonPreset[], PkmnApiSmogonPresetRequest>({
+      queryFn: buildBundleQuery(transformFormatPresetResponse),
+      providesTags: createTagProvider(PokemonReduxTagType.Preset),
+    }),
+
     pokemonFormatPreset: build.query<CalcdexPokemonPreset[], PkmnApiSmogonPresetRequest>({
       queryFn: buildPresetQuery<PkmnApiSmogonPresetResponse | PkmnApiSmogonFormatPresetResponse>(
         'smogon',
@@ -112,6 +136,7 @@ export const presetApi = pkmnApi.injectEndpoints({
 });
 
 export const {
+  usePokemonBundledPresetQuery,
   usePokemonFormatPresetQuery,
   usePokemonFormatStatsQuery,
   usePokemonRandomsPresetQuery,

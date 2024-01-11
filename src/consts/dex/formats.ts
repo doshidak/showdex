@@ -69,6 +69,7 @@ export const FormatLabels: Record<string, string> = {
   draft: 'Draft',
   dragonkingcup: 'Dragon King Cup',
   dreamworldou: 'Dream World OU',
+  firstbloodrandombattle: 'First Blood Randoms',
   flipped: 'Flipped',
   forceofthefallen: 'Force of the Fallen',
   fortemons: 'Fortemons',
@@ -234,6 +235,22 @@ export const FormatSuffixes: [test: RegExp, replacement: string][] = [
 ];
 
 /**
+ * Matchers that match Doubles formats.
+ *
+ * * This also includes any Triples since `@smogon/calc` doesn't support a `GameType` of `'Triples'`... yet o_O ?
+ * * Originally hardcoded in `detectDoublesFormat()`, now moved here in v1.2.1.
+ *
+ * @since 1.2.0
+ */
+export const DoublesFormatMatchers: RegExp[] = [
+  /doubles/,
+  /freeforall/,
+  /partnersincrime/,
+  /triples/,
+  /vgc\d{2,4}/,
+];
+
+/**
  * Dictionary of kinda-standardized format section names from Showdown's `BattleFormats` global.
  *
  * * Keys are formatted as IDs, so section names should be formatted prior before performing a lookup.
@@ -359,34 +376,32 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
 export const LegalLockedFormats: (string | RegExp)[] = [
   '1v1',
   '2v2doubles',
-  /^battlespot/i, // e.g., 'battlespotsingles', 'battlespotdoubles'
-  /^battlestadium/i, // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
-  /^bdsp/i, // e.g., 'bdspou'
+  /battlefestival/,
+  /battlespot/, // e.g., 'battlespotsingles', 'battlespotdoubles'
+  /battlestadium/, // e.g., 'battlestadiumsingles', 'battlestadiumdoublesseries13',
+  /^bdsp/, // e.g., 'bdspou'
   'computergeneratedteams',
   'doubleslc',
   'doublesou',
   'doublesubers',
   'doublesuu',
-  /draft$/i, // e.g., '6v6doublesdraft'
-  /factory/i, // e.g., 'battlefactory', 'bssfactory'
-  'lc',
-  'lcuu',
-  /^letsgo/i, // e.g., 'letsgorandombattle', 'letsgoou'
-  'monotype',
-  'nationaldex',
-  'nationaldexmonotype',
-  'nationaldexru',
-  'nationaldexuu',
+  /draft$/, // e.g., '6v6doublesdraft'
+  /factory/, // e.g., 'battlefactory', 'bssfactory'
+  /lc(?:uu)?$/,
+  /^letsgo/, // e.g., 'letsgorandombattle', 'letsgoou'
+  /monothreat/,
+  /monotype/,
+  /natdex/,
+  /nationaldex/,
   'nfe',
   'nu',
-  'ou',
-  'oublitz',
+  /ou(?:blitz)?$/,
   'pu',
   /random/i, // e.g., 'randombattle', 'unratedrandombattle', 'randombattleblitz'
   'ru',
-  'ubers',
+  /ubers(?:uu)?$/,
   'uu',
-  /^vgc/i, // e.g., 'vgc2022', 'vgc2023series1'
+  /^vgc/, // e.g., 'vgc2022', 'vgc2023series1'
   'zu',
 ];
 

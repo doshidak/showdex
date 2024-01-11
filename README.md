@@ -9,8 +9,8 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.2.0">v1.2.0</a>&nbsp;</th>
-      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome</a> · <a href="https://addons.opera.com/en/extensions/details/showdex">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.2.1">v1.2.1</a>&nbsp;</th>
+      <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome</a> · <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
       <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://discord.gg/2PXVGGCkm2">Discord</a></th>
     </tr>
   </thead>
@@ -85,7 +85,7 @@ Officially supported on [**Chrome**](https://chrome.google.com/webstore/detail/d
 > **Note**  
 > This section is a work-in-progress.
 
-This extension is written in **TypeScript**, which is essentially JavaScript on crack, using:
+This extension is written in **TypeScript**, which is essentially [JavaScript on crack](https://github.com/doshidak/showdex/blob/fb08da8ec3352c0efbb506551979e2073358783a/src/redux/factories/buildPresetQuery.ts#L98-L120), using:
 
 * **React** for the UI frontend (e.g., [Hellodex](./src/pages/Hellodex/Hellodex.tsx), [Calcdex](./src/pages/Calcdex/Calcdex.tsx)),
 * **Redux** for global state management (e.g., [Calcdex state](./src/redux/store/calcdexSlice.ts)),
@@ -119,9 +119,9 @@ This extension is written in **TypeScript**, which is essentially JavaScript on 
 ### Requirements
 
 > **Warning**
-> Due to the removal of `--experimental-specifier-resolution=node` in `node` v20, v18 is **required** (i.e., `^18.0.0`) to build this project. Use something like [`nvm`](https://github.com/nvm-sh/nvm) to install v18 alongside your current `node` installation.
+> Due to the removal of `--experimental-specifier-resolution=node` starting in `node` v19, v18 is **required** (i.e., `^18.0.0`) to build this project. Use something like [`nvm`](https://github.com/nvm-sh/nvm) to install v18 (`nvm install lts/hydrogen`) alongside your current `node` installation.
 
-* **`node`** v18.0.0+
+* **`node`** LTS Hydrogen v18
 * **`yarn`** Classic v1.22.0+
 * **`bash`** ([Windows WSL](https://docs.microsoft.com/en-us/windows/wsl/install), macOS, or Linux)
 
@@ -130,18 +130,22 @@ This extension is written in **TypeScript**, which is essentially JavaScript on 
 ## ①&nbsp;&nbsp;Setup
 
 > **Note**  
-> If your browser is already configured for extension development, you can skip this part.
+> If your browser is already configured for extension development, you can skip this part. If you're building for `'standalone'`, **don't** skip this part.
 
-You'll need to apply some slight tweaks to your browser in order to directly install extensions from your local disk.
+When building this as an extension (i.e., the `BUILD_TARGET` env is either `'chrome'` or `'firefox'`), you'll need to apply some slight tweaks to your browser in order to directly install extensions from your local disk.
 
 <details>
   <summary>
     &nbsp;<strong>Google Chrome</strong>
   </summary>
 
+  ---
+
   1. Navigate to the **Chrome extensions** page (`chrome://extensions`).
   2. Enable **Developer mode** in the top-right corner.
   3. Verify that the **Load unpacked** option is available.
+
+  ---
 </details>
 
 <details>
@@ -149,12 +153,16 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
     &nbsp;<strong>Mozilla Firefox</strong>
   </summary>
 
+  ---
+
   1. Navigate to the **Advanced Preferences** page (`about:config`).
   2. Search for the preference `xpinstall.signatures.required`.
   3. Set the preference's value to `false` (typically `true` by default).
   4. Navigate to the **Debugging** page (`about:debugging`).
   5. Select **This Firefox** on the left-hand panel.
   6. Verify that the **Temporary Extensions** section and the **Load Temporary Add-on...** option are available.
+
+  ---
 </details>
 
 <details>
@@ -173,12 +181,55 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
   ---
 </details>
 
+When building in `'standalone'` mode (for embedding Showdex into your own [`pokemon-showdown-client`](https://github.com/smogon/pokemon-showdown-client)), you'll need to mimic what the [`content`](./src/content.ts) script does in your client's [`index.html`](https://github.com/smogon/pokemon-showdown-client/blob/cd181c26946136a3118582b0176fd83c88726e33/play.pokemonshowdown.com/index.template.html) file.
+
+<details>
+  <summary>
+    &nbsp;<strong>Standalone</strong>
+  </summary>
+
+  ---
+
+  > **Note**  
+  > *Standalone* builds remove all Web Extension API dependencies so that Showdex can be directly embedded into your [`pokemon-showdown-client`](https://github.com/smogon/pokemon-showdown-client). This includes the [`manifest.json`](./src/manifest.json), which will be omitted completely during the build process. That being said, you'll be **manually** doing what the [`content`](./src/content.ts) script would do to the [`index.html`](https://github.com/smogon/pokemon-showdown-client/blob/cd181c26946136a3118582b0176fd83c88726e33/play.pokemonshowdown.com/index.template.html) file in the following steps.
+
+  > **Warning**  
+  > This is considered to be an **experimental** feature. In other words, it's untested beyond the build process as I don't have my own [`pokemon-showdown-client`](https://github.com/smogon/pokemon-showdown-client) to run this off of (surprising, I know), but in theory, it should work! Essentially Showdex only uses the Web Extension APIs to inject the transpiled [`main`](./src/main.ts) script & some Google Fonts into the client's [`index.html`](https://github.com/smogon/pokemon-showdown-client/blob/cd181c26946136a3118582b0176fd83c88726e33/play.pokemonshowdown.com/index.template.html), but other than that, everything else is good 'ol JavaScript.
+
+  1. Figure out where you'll be storing the built files by setting the `STANDALONE_RESOURCE_PROTOCOL` & `STANDALONE_RESOURCE_PREFIX` environment variables accordingly.
+  - By default, the protocol is blank & prefix is `'showdex'`, which means Showdex will expect its resources to be available in a `/showdex` path relative to your client's root domain.
+  - For instance, when it requests `'file.jpg'`, it will look for `/showdex/file.jpg`.
+  - See the comments for these environment variables for more information.
+  2. In your client's `index.html`, add the following Google Fonts used by Showdex anywhere inside the `<head>`:
+  ```html
+  <!-- the "preconnect" one below is optional, but recommended for optimizing loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap">
+  ```
+  3. Also in the `index.html`, based on where Showdex will be stored in the first step (e.g., `/showdex`, by default), add the following inside the `<body>` **after** all the `js/*` & `data/*` scripts:
+  ```html
+  <!-- example of what your index.html may contain inside the <body> -->
+  <script src="data/search-index.js" onerror="loadRemoteData(this.src)"></script>
+  <script src="data/teambuilder-tables.js" onerror="loadRemoteData(this.src)"></script>
+  <script src="js/battle-dex-search.js"></script>
+  <script src="js/search.js"></script>
+  <script src="data/aliases.js" async="async" onerror="loadRemoteData(this.src)"></script>
+
+  <!-- plop this in AFTER all of the <script> tags !! -->
+  <!-- async, async="true", or async="async" ??? doesn't matter (all truthy), so the choice is yours c: -->
+  <script src="/showdex/main.js" async="true"></script>
+  ```
+
+  ---
+</details>
+
 <br>
 
 ## ②&nbsp;&nbsp;Installation
 
 > **Note**  
-> These instructions are for building the extension from **source**.  
+> These are instructions for installing the development environment for building Showdex locally from **source**.
 
 1. `cd` into your favorite directory.
 2. `git clone git@github.com:doshidak/showdex.git`
@@ -215,7 +266,7 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
   >
   > [Patch for `@babel/plugin-transform-typescript`](./patches/@babel+plugin-transform-typescript+7.22.9.patch) adds a custom option called [`yeetEmptyImportElisions`](./babel.config.json#L7), which, during the transpilation process from TS/TSX to JS, will completely remove the `import` statement if there aren't any imported modules left after removing all `type` modules (e.g., `import { type SomeType } from 'some-package';` becomes `import {} from 'some-package';`, which will be removed if the aforementioned custom option is enabled; however, in the case of `import { type SomeType, SomeModule } from 'some-package';`, this import won't be removed as `SomeModule` remains after removing the `type`'s, i.e., `import { SomeModule } from 'some-package';`). This is to prevent *side-effects* resulting from simply importing the file, even when no exported module in that file is actually being imported. [Path for `@babel/preset-typescript`](./patches/@babel+preset-typescript+7.22.5.patch) simply passes `yeetEmptyImportElisions` to `@babel/plugin-transform-typescript`. (Also, the terrible name for the custom option was intentional to indicate that this was a custom option I put in LOL.)
   >
-  > [Patch for `@smogon/calc`](./patches/@smogon+calc+0.8.0.patch) incorporates all the changes up to the [`06c7409`](https://github.com/smogon/damage-calc/commit/69c58549bdefef9977a65c9ccaee1e101ec83b20) commit. Additionally, a custom modification interface called `ShowdexCalcMods` were added to the exported `calculate()` function, which allows the Calcdex to tap into specific parts of the damage calculation algorithm to implement moves like [*Beat Up*](https://smogon.com/dex/sv/moves/beat-up). Finally, attack & defense stat override properties were implemented in the mechanics files for older gens.
+  > [Patch for `@smogon/calc`](./patches/@smogon+calc+0.8.1.patch) incorporates all the changes up to the [`ad544eb`](https://github.com/smogon/damage-calc/commit/ad544eb560da162201d0e521644c26c838680fd2) commit. Additionally, some direct modifications such as disabling internal boosts applied to some abilities & moves like [*Pixiliate*](https://smogon.com/dev/sv/abilities/pixilate) & [*Acrobatics*](https://smogon.com/dex/sv/moves/acrobatics), for instance, since they're handled by the Calcdex, as well as implementing offensive & defensive stat overrides in older gens. Finally, a custom modification interface called `ShowdexCalcMods` was added to the exported `calculate()` function, which allows the Calcdex to tap into specific parts of the damage calculation algorithm to implement [*Beat Up*](https://smogon.com/dex/sv/moves/beat-up).
   >
   > [Patch for `simplebar`](./patches/simplebar%2B5.3.8.patch) adds typings for the untyped `scrollableNode` and `contentNode` options, which is actually [used inside `SimpleBar` class](https://github.com/Grsmto/simplebar/blob/5507296404f7e8f393ec48898a900068afaff5e5/packages/simplebar/src/simplebar.js#L179-L184), but [not typed](https://github.com/Grsmto/simplebar/blob/5507296404f7e8f393ec48898a900068afaff5e5/packages/simplebar/simplebar.d.ts#L27-L36). These two options are required if the internal `<div>`s are provided outside of `SimpleBar` (by default, it will create its own `<div>`s inside the provided container element). For use with React, we must provide these internal `<div>`s ourselves, as React doesn't like it when a vanilla JS library adds and removes DOM elements that React isn't aware of.
 
@@ -230,8 +281,11 @@ You'll need to apply some slight tweaks to your browser in order to directly ins
 > **Note**  
 > `yarn dev` is an alias of `yarn dev:chrome`.
 
+> **Warning**  
+> While developing in `'standalone'` mode is possible, I don't recommend it as you'll need to manually move the built files to your webserver every time (& they can pile up between hot-reloads!). Skip this step if you're intending on just embedding a production build of Showdex into your Showdown client.
+
 1. `cd showdex`
-2. `yarn dev:chrome` or `yarn dev:firefox`
+2. `yarn dev:chrome` or `yarn dev:firefox` or `yarn dev:standalone` (**not** recommended!)
 
 <br>
 
@@ -345,7 +399,27 @@ Built contents will be dumped into a **`build` directory** in the project root (
 > `yarn build` is an alias of `yarn build:chrome && yarn build:firefox`.
 
 1. `cd showdex`
-2. `yarn build:chrome` or `yarn build:firefox`
+2. `yarn build:chrome` or `yarn build:firefox` or `yarn build:standalone`
+
+<details>
+  <summary>
+    &nbsp;<strong>Standalone</strong>
+  </summary>
+
+  ---
+
+  1. Create the directory in your webserver that will house the built Showdex bundle & assets.
+  - This should be created relative to where your Showdown client's `index.html` is, which should be in the root of your webserver.
+  - By default, `STANDALONE_RESOURCE_PREFIX` is `'showdex'`, so this entails creating a directory called `'showdex'`, which should be accessible via `https://showdown.example.com/showdex`.
+  2. Move all of the built files in the `dist/standalone` directory to the one you just created on your webserver.
+  - Make sure you don't move the `standalone` directory itself, but rather, all of its contents.
+  - Alternatively, you can just rename `standalone` to `showdex` & move that directory to your webserver.
+  - In other words, make sure the `main.js` bundle is accessible via `https://showdown.example.com/showdex/main.js`.
+  - If it's only accessible via `https://showdown.example.com/showdex/standalone/main.js`, then you did it wrong! (That is unless you set the `STANDALONE_RESOURCE_PREFIX` to `'showdex/standalone'`.)
+  3. Start your webserver & you should *hopefully* see Showdex!
+
+  ---
+</details>
 
 <br>
 
@@ -354,7 +428,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
 Built contents will be dumped into a **`dist` directory** in the project root (will be created if it doesn't exist).
 
-There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `chrome`, `firefox`) containing all the bundled files, as well as:
+There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `chrome`, `firefox` or `standalone`) containing all the bundled files, as well as:
 
 * For **Chrome**, a packaged extension under `showdex-...chrome.zip` in `dist`, and
 * For **Firefox**, a packaged extension under `showdex-...firefox.xpi` in `dist`.
@@ -374,6 +448,8 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
   Builds for each target come with their very own bundle size pie chart, showing you exactly which modules in the bundle are too **thicc**. Particularly useful for finding modules to [chunk](https://webpack.js.org/guides/code-splitting), especially since [AMO](https://addons.mozilla.org) enforces a 5 MB size limit per file.
 
   * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
+
+  **Pro-Tip:** Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `yarn build:fast`, `yarn build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
   ---
 </details>
 
@@ -399,14 +475,14 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 > Thanks for your help in making Showdex better for everyone!
 >
-> I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of. If you're having trouble running Showdex, please make sure you first try **turning off your other extensions** before opening an issue. This will help me narrow down the problem (e.g., your ad-blocker could potentially block Showdex from downloading sets!).
+> I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of. If you're having trouble running Showdex, please make sure you first try **turning off your other extensions** before opening an issue. This will help me narrow down the problem (e.g., your ad-blocker, productivity enforcer &/or distraction minimizer could potentially block Showdex from downloading sets!).
 >
 > If possible, including the following would be **immensely** helpful!
 >
 > * **Device** (e.g., Custom PC, MacBook Pro 14" 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
 > * **OS** & **Version** (e.g., Windows 11, macOS Sonoma 14.1, Ubuntu 22.04.3 LTS, Android 12, etc.)
 > * **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
-> * **Showdex Version** (e.g., v1.2.0)
+> * **Showdex Version** (e.g., v1.2.1)
 > * **Format**, if applicable (e.g., Gen 9 VGC 2024 Regulation F Bo3)
 > * **Replay**, if applicable
 >
@@ -446,7 +522,7 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (e.g., `
 
 ## PRs
 
-**Fixed a bug? · Added something cool?**
+**Fixed a bug? · Added something cool? · [A translation, perchance?](./src/assets/i18n)**
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
 
@@ -532,6 +608,7 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
     </tr>
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael K</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Wan L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -553,38 +630,41 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Luc H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/snacky98"><strong>Snacky98</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/joshtheking7"><strong>joshtheking7</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/bongphan"><strong>Bongphan</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/bongphan"><strong>Bongphan</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pulseks"><strong>Pulse_kS</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Thilo P</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://smogon.com/forums/members/genone.306383"><strong>GenOne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://smogon.com/forums/members/genone.306383"><strong>GenOne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jacek L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/lunarvania"><strong>Lunarvania</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Peter T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sam P</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sam P</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pokepastry"><strong>PokePastry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/doublecaret"><strong>DoubleCaret</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/jesskykhemically"><strong>JesskyKhemically</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/jesskykhemically"><strong>JesskyKhemically</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/plaguevonkarma"><strong>Plague von Karma</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/mrmimikry"><strong>MrMimikry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fr1e5"><strong>FR1E5</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goldengottago"><strong>GoldenGottaGo</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
@@ -596,7 +676,7 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
 
 ## Contributors
 
-another big thank to these fine people for helping with development!
+another big thank to these fine people for **helping with development**!
 
 <table>
   <tbody>
@@ -608,7 +688,27 @@ another big thank to these fine people for helping with development!
   </tbody>
 </table>
 
-...and finally, big thank to these fine people who helped improve **Showdex**!
+now that [Showdex went mr worldwide](https://github.com/doshidak/showdex/releases/tag/v1.2.1), big thank to this fine person for **helping with translations**!
+
+<table>
+  <tbody>
+    <tr>
+      <td width="220px" align="center"><a href="https://github.com/Sykless"><strong>Sykless</strong></a> · <a href="https://github.com/Sykless/pokemon-showdown-fr">Français</a></td>
+    </tr>
+  </tbody>
+</table>
+
+also big thank to this fine person for **providing** us with dank **bundled sets**!
+
+<table>
+  <tbody>
+    <tr>
+      <td width="220px" align="center"><a href="https://github.com/nerd-of-now"><strong>nerd-of-now</strong></a> · <a href="https://github.com/nerd-of-now/NCP-VGC-Damage-Calculator">NCP VGC</a></td>
+    </tr>
+  </tbody>
+</table>
+
+...and finally, big thank to these fine people who **helped improve Showdex**!
 
 <table>
   <tbody>
@@ -649,78 +749,80 @@ another big thank to these fine people for helping with development!
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/dyrana.468669"><strong>dyrana</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/ehmcee.350174"><strong>Ehmcee</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/elitemagikarp.363909"><strong>Elitemagikarp</strong></a> · <a href="https://github.com/Elitemagikarp">GitHub</a></td>
       <td width="220px" align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0yafl"><strong>Fitah_</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/furret4ssb.518775"><strong>Furret4ssb</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/ihatepasswords.611420"><strong>IHatePasswords</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/ihatepasswords.611420"><strong>IHatePasswords</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/iodyne.567157"><strong>Iodyne</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/itr.589896"><strong>ITR</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/jmynes"><strong>jmynes</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/ketchuppainting.610401"><strong>ketchuppainting</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/kibo.552274"><strong>Kibo</strong></a></td>
       <td width="220px" align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in7624p"><strong>kirito_1707</strong></a></td>
       <td width="220px" align="center"><a href="https://twitch.tv/lazosful"><strong>Lazosful</strong></a></td>
-      <td width="220px" align="center"><a href="https://github.com/Legend-Recalls"><strong>Legend-Recalls</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://github.com/Legend-Recalls"><strong>Legend-Recalls</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/lighthouse64.322009"><strong>lighthouse64</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/machjacob.555741"><strong>MachJacob</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/madamadam-c"><strong>madamadam-c</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/mandibuladel5555.564701"><strong>Mandibuladel5555</strong></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/mandibuladel5555.564701"><strong>Mandibuladel5555</strong></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/maxouille.390049"><strong>Maxouille</strong></a> · <a href="https://github.com/Maxouille64">GitHub</a></td>
       <td width="220px" align="center"><a href="https://reddit.com/r/pokemonshowdown/comments/x5bi27/showdex_an_autoupdating_damage_calculator_built/in0zpcd"><strong>mdragon13</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/mia.425427"><strong>Mia</strong></a> · <a href="https://github.com/mia-pi-git">GitHub</a></td>
-      <td width="220px" align="center"><a href="https://github.com/MoltenGluten"><strong>MoltenGluten</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://github.com/MoltenGluten"><strong>MoltenGluten</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/mpique"><strong>mpique</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/mnittsch"><strong>mnittsch</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/nails.51373"><strong>Nails</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/orangelego21.315566"><strong>orangelego21</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/orangelego21.315566"><strong>orangelego21</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/paolode99.568718"><strong>paolode99</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/_pea_.559292"><strong>_Pea_</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/pokeblade101.254632"><strong>pokeblade101</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/pokechess.349282"><strong>PokeChess</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/pokechess.349282"><strong>PokeChess</strong></a></td>
       <td width="220px" align="center"><a href="https://pokemonshowdown.com/users/pulseks"><strong>Pulse_kS</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/runoisch.568189"><strong>Runoisch</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/ry4242.551466"><strong>ry4242</strong></a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/sabelette.583793"><strong>Sabelette</strong></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/sabelette.583793"><strong>Sabelette</strong></td>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/seasoil.541401"><strong>SeaSoil</strong></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/shiox.495116"><strong>Shiox</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/shock3600.312963"><strong>Shock3600</strong></a> · <a href="https://github.com/Shock3600">GitHub</a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/sh0shin.557719"><strong>sh0shin</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/shrikenw.628342"><strong>ShrikeNW</strong></a></td>
-    </tr>
-    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/singiamtel.382208"><strong>Singiamtel</strong></a> · <a href="https://github.com/singiamtel">GitHub</a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/sorrica.367602"><strong>Sorrica</strong></a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/surgent-james.483985"><strong>Surgent James</strong></a></td>
       <td width="220px" align="center"><a href="https://github.com/TheDebatingOne"><strong>TheDebatingOne</strong></a></td>
-    </tr>
-    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/thornxrose.601505"><strong>ThornxRose</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/throhking.94778"><strong>ThrohKing</strong></a></td>
+    </tr>
+    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/tj.331538"><strong>TJ</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/timboberino.619145"><strong>Timboberino</strong></a></td>
-    </tr>
-    <tr>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/trainerx493.121411"><strong>TrainerX493</strong></a></td>
       <td width="220px" align="center"><a href="https://pokemonshowdown.com/users/tree69420"><strong>Tree69420</strong></a> · <a href="https://github.com/Tree69420">GitHub</a></td>
-      <td width="220px" align="center"><a href="https://smogon.com/forums/members/turtlek.604739"><strong>Turtlek</strong></a></td>
-      <td width="220px" align="center"><a href="https://github.com/zooki2006"><strong>zooki2006</strong></a></td>
     </tr>
     <tr>
+      <td width="220px" align="center"><a href="https://smogon.com/forums/members/turtlek.604739"><strong>Turtlek</strong></a></td>
+      <td width="220px" align="center"><a href="https://github.com/zooki2006"><strong>zooki2006</strong></a></td>
       <td width="220px" align="center"><a href="https://smogon.com/forums/members/zuils.596051"><strong>zuils</strong></a> · <a href="https://github.com/zuils">GitHub</a></td>
     </tr>
   </tbody>

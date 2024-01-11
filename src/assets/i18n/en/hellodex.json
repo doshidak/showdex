@@ -1,0 +1,100 @@
+{
+  "--meta": {
+    "name": "hellodex",
+    "version": "1.0.0",
+    "locale": "en",
+    "created": "2024-01-05T12:29:07.229Z",
+    "updated": "2024-01-09T21:18:00.033Z"
+  },
+
+  "header": {
+    "title": "<keith /> <and>&amp;</and> <cameron />",
+    "subtitle": "present"
+  },
+
+  "instances": {
+    "empty": {
+      "openAlways": "Calculator will automatically open when you <strong>play</strong> or <spectate>spectate</spectate> a battle.",
+      "openPlaying": "Calculator will automatically open when you <strong>play</strong> a battle.",
+      "openSpectating": "Calculator will automatically open when you <spectate>spectate</spectate> a battle.",
+      "openNever": "Calculator will never open based on your configured <settings>settings</settings>.",
+      "settingsTooltip": "Open $t(common:products.showdex) Settings",
+      "spectateTooltip": "View Active Battles"
+    },
+    "honkdex": {
+      "orSeparator": "or",
+      "newLabel": ["<strong>New</strong>", "<strong>Honk</strong>dex"],
+      "newAria": "Create New $t(common:products.honkdex_one)"
+    }
+  },
+
+  "battleRecord": {
+    "wins": "W",
+    "losses": "L"
+  },
+
+  "donate": {
+    "aria": "Support $t(common:products.showdex)",
+    "label": "<strong>Show</strong>dex <strong>some</strong> <strong>love</strong>",
+    "footnote": {
+      "default": "If you enjoyed this extension, please consider supporting further development.",
+      "supporter": "Thanks for supporting $t(common:products.showdex)!"
+    }
+  },
+
+  "footer": {
+    "created": "created with <love /> by",
+
+    "settings": {
+      "openLabel": "$t(common:labels.setting_other)",
+      "closeLabel": "$t(common:labels.close)",
+      "openTooltip": "Open $t(common:products.showdex) Settings",
+      "closeTooltip": "Close $t(common:products.showdex) Settings"
+    },
+
+    "smogon": {
+      "label": "Smogon",
+      "tooltip": "Discuss on Smogon Forums"
+    },
+
+    "github": {
+      "label": "GitHub",
+      "tooltip": "Peep the Source Code on GitHub"
+    },
+
+    "discord": {
+      "label": "Discord",
+      "tooltip": "Join Our Discord Community!"
+    }
+  },
+
+  "patronage": {
+    "header": {
+      "closeTooltip": "Close Supporter Info",
+      "defaultTitle": "Show<thin>dex</thin> Some<br /><dash /> <heart /> <dash />",
+      "supporterTitle": "<thin>$t(common:products.showdex)</thin> <heart /><br /><supporter>{{name}}</supporter>"
+    },
+
+    "paypal": {
+      "name": "PayPal",
+      "description": "All donations are <em>one-time</em> contributions, entitling you to the benefits of the lowest $t(patronage.patreon.name) tier, excluding benefits awarded to active pledges. Please visit our $t(patronage.patreon.name) for specifics on awarded benefits.",
+      "action": {
+        "aria": "Donate via $t(patronage.paypal.name)",
+        "label": "<strong>Donate</strong> via <strong>$t(patronage.paypal.name)</strong>"
+      }
+    },
+
+    "patreon": {
+      "name": "Patreon",
+      "description": "All $t(patronage.patreon.name) tiers are <em>monthly</em> donations, entitling you to additional benefits to those of <em>one-time</em> donations. Please visit our $t(patronage.patreon.name) for more details. Batteries not included.",
+      "defaultAction": {
+        "aria": "Become a Patron",
+        "label": "<strong>Become</strong> a <strong>Patron</strong>"
+      },
+      "supporterAction": {
+        "aria": "Visit Our $t(patronage.patreon.name)",
+        "label": "<strong>Visit</strong> Our <strong>$t(patronage.patreon.name)</strong>"
+      }
+    }
+  }
+}

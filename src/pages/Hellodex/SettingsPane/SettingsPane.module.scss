@@ -38,6 +38,10 @@ $close-icon-size: 28px;
       background-color: color.alpha(colors.$gray-darkest, 0.8);
     }
   }
+
+  code {
+    @include font.apply(fonts.$mono);
+  }
 }
 
 .contentContainer {
@@ -343,8 +347,10 @@ $close-icon-size: 28px;
 }
 
 .tooltipContent {
-  max-width: 225px;
+  max-width: 248px;
+  font-size: 10px;
   text-align: center;
+  line-height: 12px;
   white-space: normal;
   user-select: none;
 }

@@ -18,7 +18,9 @@ import { notFullyEvolved } from './notFullyEvolved';
  *
  * @since 1.0.3
  */
-export const getGenDexForFormat = (format: string | GenerationNum): Generation => {
+export const getGenDexForFormat = (
+  format: string | GenerationNum,
+): Generation => {
   const dex = getDexForFormat(format);
 
   if (!dex) {
@@ -42,7 +44,7 @@ export const getGenDexForFormat = (format: string | GenerationNum): Generation =
       const specie = dex.species.get(id) as unknown as Specie;
 
       if (typeof specie?.nfe !== 'boolean') {
-        (specie as Writable<Specie>).nfe = notFullyEvolved(id);
+        (specie as Writable<Specie>).nfe = notFullyEvolved(id, format);
       }
 
       return specie;
