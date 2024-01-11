@@ -16,16 +16,15 @@
 
 Thanks for your help in making Showdex better for everyone!
 
-I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of.
+I'm not a stickler for how these should be formatted; just make sure you provide enough info for me to work off of. If you're having trouble running Showdex, please make sure you first try **turning off your other extensions** before opening an issue. This will help me narrow down the problem (e.g., your ad-blocker, productivity enforcer &/or distraction minimizer could potentially block Showdex from downloading sets!).
 
 If possible, including the following would be **immensely** helpful!
 
 * **Device** (e.g., Custom PC, MacBook Pro 14" 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
 * **OS** & **Version** (e.g., Windows 11, macOS Sonoma 14.1, Ubuntu 22.04.3 LTS, Android 12, etc.)
 * **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
-* **Showdex Version** (e.g., v1.2.0)
+* **Showdex Version** (e.g., v1.2.1)
 * **Format**, if applicable (e.g., Gen 9 VGC 2024 Regulation F Bo3)
-* **Replay**, if applicable
 
 If you would like to be [credited for your contribution](../README.md#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
 
@@ -40,7 +39,7 @@ If you would like to be [credited for your contribution](../README.md#contributo
 
 ## PRs
 
-**Fixed a bug? · Added something cool?**
+**Fixed a bug? · Added something cool? · [A translation, perchance?](../src/assets/i18n)**
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli)
 
