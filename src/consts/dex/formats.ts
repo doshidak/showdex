@@ -69,6 +69,7 @@ export const FormatLabels: Record<string, string> = {
   draft: 'Draft',
   dragonkingcup: 'Dragon King Cup',
   dreamworldou: 'Dream World OU',
+  firstbloodrandombattle: 'First Blood Randoms',
   flipped: 'Flipped',
   forceofthefallen: 'Force of the Fallen',
   fortemons: 'Fortemons',

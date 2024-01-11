@@ -73,6 +73,10 @@ const FormatReplacements: [test: RegExp, replace: RegExp, replacement: string][]
   // Randomized Format Spotlight as of 2023/11/14, requested by Pulse_kS
   // e.g., 'gen9partnersincrimerandombattle' -> 'gen9randomdoublesbattle'
   [/partnersincrimerandom/i, null, 'randomdoubles'],
+
+  // Randomized Format Spotlight as of 2024/01/10
+  // e.g., 'gen6firstbloodrandombattle' -> 'gen6randombattle'
+  [/firstblood/i, null, ''],
 ];
 
 // 10/10 function name
