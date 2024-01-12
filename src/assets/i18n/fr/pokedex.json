@@ -3542,42 +3542,42 @@
   "weather": {
     "hail": {
       "label": "Grêle",
-      "shortDesc": "Pendent 5 tours (8 avec $t(pokedex:items.icyrock)), -6% $t(pokedex:stats.hp.1) (non-$t(pokedex:types.ice.0), non-$t(pokedex:abilities.icebody)/$t(pokedex:abilities.magicguard)/$t(pokedex:abilities.overcoat)/$t(pokedex:abilities.snowcloak))."
+      "shortDesc": "Pendant 5 tours (8 avec $t(pokedex:items.icyrock)), -6% $t(pokedex:stats.hp.1) (non-$t(pokedex:types.ice.0), non-$t(pokedex:abilities.icebody)/$t(pokedex:abilities.magicguard)/$t(pokedex:abilities.overcoat)/$t(pokedex:abilities.snowcloak))."
     },
     "harshsunshine": {
       "label": "Soleil Intense",
-      "shortDesc": "Jusqu'à switch-out, $t(pokedex:types.fire.0) 1,5{{times}}, $t(pokedex:types.water.0) 0{{times}} (non-$t(pokedex:abilities.airlock)/$t(pokedex:abilities.cloudnine))."
+      "shortDesc": "Jusqu'au switch-out, $t(pokedex:types.fire.0) 1,5{{times}}, $t(pokedex:types.water.0) 0{{times}} (non-$t(pokedex:abilities.airlock)/$t(pokedex:abilities.cloudnine))."
     },
     "heavyrain": {
       "label": "Pluie Battante",
-      "shortDesc": "Jusqu'à switch-out, $t(pokedex:types.water.0) 1,5{{times}}, $t(pokedex:types.fire.0) 0{{times}} (non-$t(pokedex:abilities.airlock)/$t(pokedex:abilities.cloudnine))."
+      "shortDesc": "Jusqu'au switch-out, $t(pokedex:types.water.0) 1,5{{times}}, $t(pokedex:types.fire.0) 0{{times}} (non-$t(pokedex:abilities.airlock)/$t(pokedex:abilities.cloudnine))."
     },
     "rain": {
       "label": "Pluie",
-      "shortDesc": "Pendent 5 tours (8 avec $t(pokedex:items.damprock)), $t(pokedex:types.water.0) 1,5{{times}}, $t(pokedex:types.fire.0) 0,5{{times}}."
+      "shortDesc": "Pendant 5 tours (8 avec $t(pokedex:items.damprock)), $t(pokedex:types.water.0) 1,5{{times}}, $t(pokedex:types.fire.0) 0,5{{times}}."
     },
     "sand": {
       "label": "Tempête de Sable",
-      "shortDesc": "Pendent 5 tours (8 avec $t(pokedex:items.smoothrock)), $t(pokedex:stats.spd.1) 1,5{{times}} ($t(pokedex:types.rock.0) seulement), -6% $t(pokedex:stats.hp.1) (non-$t(pokedex:types.ground.0)/$t(pokedex:types.rock.0)/$t(pokedex:types.steel.0), non-$t(pokedex:abilities.magicguard)/$t(pokedex:abilities.overcoat)/$t(pokedex:abilities.sandforce)/$t(pokedex:abilities.sandrush)/$t(pokedex:abilities.sandveil))."
+      "shortDesc": "Pendant 5 tours (8 avec $t(pokedex:items.smoothrock)), $t(pokedex:stats.spd.1) 1,5{{times}} ($t(pokedex:types.rock.0) seulement), -6% $t(pokedex:stats.hp.1) (non-$t(pokedex:types.ground.0)/$t(pokedex:types.rock.0)/$t(pokedex:types.steel.0), non-$t(pokedex:abilities.magicguard)/$t(pokedex:abilities.overcoat)/$t(pokedex:abilities.sandforce)/$t(pokedex:abilities.sandrush)/$t(pokedex:abilities.sandveil))."
     },
     "snow": {
       "label": "Neige",
-      "shortDesc": "Pendent 5 tours (8 avec $t(pokedex:items.icyrock)), $t(pokedex:stats.def.1) 1,5{{times}} ($t(pokedex:types.ice.0) seulement)."
+      "shortDesc": "Pendant 5 tours (8 avec $t(pokedex:items.icyrock)), $t(pokedex:stats.def.1) 1,5{{times}} ($t(pokedex:types.ice.0) seulement)."
     },
     "strongwinds": {
       "label": "Vent Mystérieux",
-      "shortDesc": "Jusqu'à switch-out, pas de faiblesses de $t(pokedex:types.flying.0)."
+      "shortDesc": "Jusqu'au switch-out, pas de faiblesses de type $t(pokedex:types.flying.0)."
     },
     "sun": {
       "label": "Soleil",
-      "shortDesc": "Pendent 5 tours (8 avec $t(pokedex:items.heatrock)), $t(pokedex:types.fire.0) 1,5{{times}}, $t(pokedex:types.water.0) 0,5{{times}}."
+      "shortDesc": "Pendant 5 tours (8 avec $t(pokedex:items.heatrock)), $t(pokedex:types.fire.0) 1,5{{times}}, $t(pokedex:types.water.0) 0,5{{times}}."
     }
   },
 
   "terrain": {
     "electric": {
       "label": "Électrifié",
-      "shortDesc": "Pendant 5 tours, $t(pokedex:types.electric.0) 1,3{{times}} (au sol), empêche dormir."
+      "shortDesc": "Pendant 5 tours, $t(pokedex:types.electric.0) 1,3{{times}} (au sol), empêche de dormir."
     },
     "grassy": {
       "label": "Herbu",
@@ -3585,7 +3585,7 @@
     },
     "misty": {
       "label": "Brumeux",
-      "shortDesc": "Pendant 5 tours, $t(pokedex:types.dragon.0) 0,5{{times}} (au sol), empêche statut."
+      "shortDesc": "Pendant 5 tours, $t(pokedex:types.dragon.0) 0,5{{times}} (au sol), empêche les changements de statut."
     },
     "psychic": {
       "label": "Psychique",
