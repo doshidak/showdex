@@ -192,6 +192,7 @@ export const FormatLabels: Record<string, string> = {
   ubers: 'Ubers',
   ubersuu: 'Ubers UU',
   ultimatefinale: 'Ultimate Finale',
+  unknown: '???',
   uu: 'UU', // UnderUsed
   vaporemons: 'VaporeMons',
   vgc2009: 'VGC 2009', // VideoGameChampionships
