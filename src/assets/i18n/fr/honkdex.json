@@ -10,15 +10,15 @@
   "battle": {
     "gen": {
       "aria": "Sélecteur de Génération",
-      "locked": "Changer de gén avec Pokémon dans la calc ouvrira une <strong>nouvelle</strong> $t(common:products.honkdex_one) <strong>vierge</strong>."
+      "locked": "Changer de gén avec Pokémon dans la calculatrice ouvrira une <strong>nouvelle</strong> $t(common:products.honkdex_one) <strong>vierge</strong>."
     },
 
     "name": {
-      "hint": "nommer cette $t(common:products.honk_one) pour enregistrer cette $t(common:products.honk_one)"
+      "hint": "Nommer cette $t(common:products.honk_one) pour enregistrer cette $t(common:products.honk_one)"
     },
 
     "format": {
-      "aria": "Sélecteur de Format de Bataille",
+      "aria": "Sélection du Format de Bataille",
       "hint": "???",
       "empty": "Pas de Formats"
     },

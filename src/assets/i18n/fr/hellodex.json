@@ -14,10 +14,10 @@
 
   "instances": {
     "empty": {
-      "openAlways": "Calculatrice s'ouvrira automatiquement lorsque vous <strong>jouerez</strong> ou <spectate>assisterez</spectate> à une bataille.",
-      "openPlaying": "Calculatrice s'ouvrira automatiquement lorsque vous <strong>jouerez</strong> une bataille.",
-      "openSpectating": "Calculatrice s'ouvrira automatiquement lorsque vous <strong>assisterez</strong> à une bataille.",
-      "openNever": "Calculatrice ne s'ouvrira jamais en fonction de vos <settings>paramètres</settings> configurés.",
+      "openAlways": "La calculatrice s'ouvrira automatiquement lorsque vous <strong>lancerez</strong> ou <spectate>assisterez</spectate> à une bataille.",
+      "openPlaying": "La calculatrice s'ouvrira automatiquement lorsque vous <strong>lancerez</strong> une bataille.",
+      "openSpectating": "La calculatrice s'ouvrira automatiquement lorsque vous <strong>assisterez</strong> à une bataille.",
+      "openNever": "La calculatrice ne s'ouvrira jamais en fonction de vos <settings>paramètres</settings> configurés.",
       "settingsTooltip": "Ouvrir les Paramètres $t(common:products.showdex)",
       "spectateTooltip": "Afficher les Batailles Actives"
     },
@@ -37,7 +37,7 @@
     "aria": "Supporter $t(common:products.showdex)",
     "label": "<strong>Show</strong>dex <strong>un peu</strong> <strong>d'amour</strong>",
     "footnote": {
-      "default": "Si vous avez apprécié cette extension, envisagez de soutenir un développement ultérieur.",
+      "default": "Si vous avez apprécié cette extension, envisagez de soutenir les futurs développements.",
       "supporter": "Merci de soutenir $t(common:products.showdex) !"
     }
   },
