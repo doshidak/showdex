@@ -26,8 +26,8 @@
 
     "autoSelect": {
       "label": "$t(common:labels.auto)",
-      "activeTooltip": "Sélectionner <strong>Manuellement</strong><br />les Pokémon",
-      "inactiveTooltip": "Sélectionner <strong>Auto</strong><br />les Pokémon"
+      "activeTooltip": "Sélectionner <strong>Manuellement</strong><br />les Pokémons",
+      "inactiveTooltip": "Sélectionner <strong>Automatiquement</strong><br />les Pokémons"
     },
 
     "party": {
@@ -171,7 +171,7 @@
         "resetTooltip": "Réinitialiser <strong>{{move}}</strong> par Défaut",
 
         "faintCounter": {
-          "aria": "Alliés KO Comptent pour {{pokemon}}",
+          "aria": "Alliés KO Comptants pour {{pokemon}}",
           "label": "KO",
           "resetLabel": "$t(common:labels.reset)",
           "resetTooltip": "Réinitialiser à <strong>{{count}} KO</strong>"
@@ -257,15 +257,15 @@
   },
 
   "field": {
-    "yours": "Vôtres",
-    "theirs": "Leurs",
+    "yours": "Vos",
+    "theirs": "Ses",
     "field": "$t(pokedex:headers.field)",
     "screens": "Murs",
 
     "conditions": {
-      "light": "Lumiére",
-      "reflect": "Protect",
-      "aurora": "Aurore",
+      "light": "Mur Lumiére",
+      "reflect": "Reflet",
+      "aurora": "Voile Aurore",
       "hand": "Main",
       "gift": "Don",
       "guard": "Garde",
@@ -275,7 +275,7 @@
     },
 
     "weather": {
-      "aria": "Météo d'Sol",
+      "aria": "Météo",
       "label": "$t(pokedex:headers.weather)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
@@ -283,7 +283,7 @@
     },
 
     "terrain": {
-      "aria": "Champ d'Sol",
+      "aria": "Champ",
       "label": "$t(pokedex:headers.terrain)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
