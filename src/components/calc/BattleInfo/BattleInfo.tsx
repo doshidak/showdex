@@ -93,10 +93,17 @@ export const BattleInfo = ({
     t,
   ]);
 
-  const formatOptions = React.useMemo(
-    () => buildFormatOptions(gen, { showAll: honkdexSettings?.showAllFormats }),
-    [gen, honkdexSettings?.showAllFormats],
-  );
+  const formatOptions = React.useMemo(() => buildFormatOptions(
+    gen,
+    {
+      showAll: honkdexSettings?.showAllFormats,
+      translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
+    },
+  ), [
+    gen,
+    honkdexSettings?.showAllFormats,
+    t,
+  ]);
 
   const formatOptionsFilter = React.useMemo(
     () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true })),
