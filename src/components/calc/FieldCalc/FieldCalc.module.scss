@@ -122,6 +122,7 @@
 button.toggleButton {
   min-width: 60px;
   @include spacing.margin($all: 1px);
+  @include spacing.padding($x: 4px);
   font-size: 10px;
   text-transform: none;
 
