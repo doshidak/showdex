@@ -3,6 +3,7 @@ import { bull } from '@showdex/consts/core';
 import { PokemonNatureBoosts, PokemonNatures } from '@showdex/consts/dex';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
+import { detectLegacyGen } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import { dehydrateSpread } from '@showdex/utils/hydro';
 
@@ -15,18 +16,31 @@ const spreadValue = (
   omitAlt: true,
 });
 
+const labelDelimiter = ` ${bull} `;
+
 const spreadLabel = (
   spread: CalcdexPokemonPresetSpread,
   format?: string | GenerationNum,
-): string => dehydrateSpread(spread, {
-  format,
-  delimiter: '/',
-  omitAlt: true,
-  omitNature: true,
-  omitIvs: true,
-});
+  translateStat?: (value: Showdown.StatName) => string,
+): string => {
+  const nonZeroEvs = Object.entries(spread.evs)
+    .filter(([, v]) => (v || 0) > 0)
+    .sort(([, a], [, b]) => b - a) as [stat: Showdown.StatName, value: number][];
 
-const subLabelDelimiter = ` ${bull} `;
+  if (detectLegacyGen(format) || nonZeroEvs.length > 3) {
+    return dehydrateSpread(spread, {
+      format,
+      delimiter: '/',
+      omitAlt: true,
+      omitNature: true,
+      omitIvs: true,
+    });
+  }
+
+  return nonZeroEvs
+    .map(([stat, value]) => `${value} ${translateStat?.(stat) || stat}`)
+    .join(labelDelimiter);
+};
 
 // note: this is a poorly refactored function that will return a new option if the `spread` is unique, otherwise, it will
 // directly mutate `prev` & return nothing; this is so that I don't have to repeat the `existingOption` logic twice for
@@ -42,20 +56,20 @@ const processOption = (
   const existingOption = prev.find((o) => o.value === value);
 
   if (existingOption && spread.usage) {
-    const subLabelParts = [...((existingOption.subLabel as string).split?.(subLabelDelimiter) || [])];
+    const subLabelParts = [...((existingOption.subLabel as string).split?.(labelDelimiter) || [])];
     const usageLabel = percentage(spread.usage, 2);
 
     if (!subLabelParts.includes(usageLabel)) {
       subLabelParts.push(usageLabel);
     }
 
-    existingOption.subLabel = subLabelParts.join(subLabelDelimiter);
+    existingOption.subLabel = subLabelParts.join(labelDelimiter);
 
     return null;
   }
 
   const option: DropdownOption<string> = {
-    label: spreadLabel(spread, format),
+    label: spreadLabel(spread, format, translateStat),
     value,
   };
 
@@ -81,7 +95,7 @@ const processOption = (
   }
 
   if (subLabelParts.length) {
-    option.subLabel = subLabelParts.join(subLabelDelimiter);
+    option.subLabel = subLabelParts.join(labelDelimiter);
   }
 
   return option;
@@ -144,7 +158,7 @@ export const buildSpreadOptions = (
   // note: not map()'ing these due to a circular reference in the first arg
   // (i.e., whatever that thingy was called when a system depends on its previous state lol)
   presetSpreads.forEach((spread) => {
-    const processedOption = processOption(presetOptions, spread, format);
+    const processedOption = processOption(presetOptions, spread, format, translateNature, translateStat);
 
     if (!processedOption?.value) {
       return;
