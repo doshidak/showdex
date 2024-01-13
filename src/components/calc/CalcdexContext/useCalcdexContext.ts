@@ -22,6 +22,7 @@ import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {
   cloneAllPokemon,
   clonePlayer,
+  clonePokemon,
   countSideRuinAbilities,
   detectToggledAbility,
   toggleRuinAbilities,
@@ -30,6 +31,7 @@ import {
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpIv,
+  calcPokemonCalcdexId,
   calcPokemonCurrentHp,
   calcPokemonMaxHp,
   calcPokemonSpreadStats,
@@ -73,7 +75,7 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
 
   addPokemon: (
     playerKey: CalcdexPlayerKey,
-    pokemon: PickRequired<CalcdexPokemon, 'speciesForme'>,
+    pokemon: CalcdexPokemon,
     scope?: string,
   ) => void;
 
@@ -85,7 +87,13 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
 
   removePokemon: (
     playerKey: CalcdexPlayerKey,
-    pokemonOrId: PickRequired<CalcdexPokemon, 'calcdexId'> | string,
+    pokemonOrId: CalcdexPokemon | string,
+    scope?: string,
+  ) => void;
+
+  dupePokemon: (
+    playerKey: CalcdexPlayerKey,
+    pokemonOrId: CalcdexPokemon | string,
     scope?: string,
   ) => void;
 
@@ -829,6 +837,51 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     endTimer('(dispatched)');
   };
 
+  const dupePokemon: CalcdexContextConsumables['dupePokemon'] = (
+    playerKey,
+    pokemonOrId,
+    scopeFromArgs,
+  ) => {
+    // used for debugging purposes only
+    const scope = s('dupePokemon()', scopeFromArgs);
+    const endTimer = runtimer(scope, l);
+
+    if (!state?.battleId) {
+      return void endTimer('(bad state)');
+    }
+
+    const pokemonId = typeof pokemonOrId === 'string'
+      ? pokemonOrId
+      : pokemonOrId?.calcdexId;
+
+    if (!playerKey || !pokemonId || !state[playerKey]?.active) {
+      return void endTimer('(bad args)');
+    }
+
+    const pokemonIndex = state[playerKey].pokemon.findIndex((p) => p?.calcdexId === pokemonId);
+
+    if (pokemonIndex < 0) {
+      return void endTimer('(404 pokemonId)');
+    }
+
+    const payload: Partial<CalcdexPlayer> = {
+      pokemon: cloneAllPokemon(state[playerKey].pokemon),
+    };
+
+    const dupedPokemon = clonePokemon(payload.pokemon[pokemonIndex]);
+
+    dupedPokemon.playerKey = playerKey;
+    dupedPokemon.calcdexId = calcPokemonCalcdexId(dupedPokemon, playerKey);
+    dupedPokemon.ident = `${playerKey}: ${dupedPokemon.calcdexId.slice(-7)}`;
+
+    if (dupedPokemon.calcdexId === payload.pokemon[pokemonIndex].calcdexId) {
+      return void endTimer('(same calcdexId)');
+    }
+
+    addPokemon(playerKey, dupedPokemon, scope);
+    endTimer('(delegated)');
+  };
+
   const updateSide: CalcdexContextConsumables['updateSide'] = (
     playerKey,
     side,
@@ -1274,6 +1327,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     addPokemon,
     updatePokemon,
     removePokemon,
+    dupePokemon,
     updateSide,
     updateField,
     activatePokemon,
