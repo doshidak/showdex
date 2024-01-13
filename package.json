@@ -69,9 +69,9 @@
     }
   },
   "dependencies": {
-    "@dnd-kit/core": "^6.0.8",
-    "@dnd-kit/modifiers": "^6.0.1",
-    "@dnd-kit/utilities": "^3.2.1",
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/modifiers": "^7.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@react-aria/button": "^3.8.0",
     "@react-aria/switch": "^3.5.2",
     "@react-aria/textfield": "^3.10.0",
