@@ -812,7 +812,11 @@ export const PokeInfo = ({
 
           <Dropdown
             aria-label={t('poke.info.preset.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
-            hint={t(`poke.info.preset.${pokemon?.speciesForme ? 'none' : 'hint'}`) as React.ReactNode}
+            hint={(
+              presetsLoading
+                ? t('common:labels.loading')
+                : t(`poke.info.preset.${pokemon?.speciesForme ? 'none' : 'hint'}`)
+            ) as React.ReactNode}
             input={{
               name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
