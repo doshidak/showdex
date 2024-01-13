@@ -201,7 +201,7 @@ export const BattleInfo = ({
               saving?.[0]
                 ? t('battle.save.saving')
                 : (cached || 0) > 0
-                  ? Date.now() - cached < (30 * 1000)
+                  ? Date.now() - cached < (60 * 1000)
                     ? t('battle.save.savedRecently')
                     : t('battle.save.savedAgo', { ago: savedAgo })
                   : t('battle.save.unsaved')
