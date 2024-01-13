@@ -367,7 +367,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         // "toggle" on its Tera forme
         // e.g., 'Ogerpon' -> 'Ogerpon-Teal-Tera', 'Ogerpon-Wellspring' (+ Wellspring Mask) -> 'Ogerpon-Wellspring-Tera'
         mutated.speciesForme = mutated.terastallized
-          ? mutated.speciesForme === 'Ogerpon' || (mutated.dirtyItem ?? mutated.item).endsWith('Mask')
+          ? mutated.speciesForme === 'Ogerpon' || (mutated.dirtyItem ?? mutated.item)?.endsWith('Mask')
             // replacing '-Tera' here in case we're already in the Tera forme, but not Terastallized o_O
             ? `${mutated.speciesForme.replace('-Tera', '')}${mutated.speciesForme === 'Ogerpon' ? '-Teal' : ''}-Tera`
             : mutated.speciesForme // no-op
@@ -398,7 +398,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const shouldAutoBoost = !mutated.boosts?.[boostedStat] && (
         mutated.speciesForme === 'Ogerpon'
           || mutated.speciesForme.includes('-Teal')
-          || (mutated.dirtyItem ?? mutated.item).endsWith('Mask')
+          || (mutated.dirtyItem ?? mutated.item)?.endsWith('Mask')
       );
 
       if (shouldAutoBoost) {
@@ -802,7 +802,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       payload.activeIndices.splice(activeIndicesIndex, 1);
     }
 
-    if (state[playerKey].selectionIndex === pokemonIndex) {
+    if (state[playerKey].selectionIndex === payload.pokemon.length) {
       payload.selectionIndex = Math.max(payload.pokemon.length - 1, 0);
     }
 
