@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T16:53:23.631Z",
-    "updated": "2024-01-11T11:56:15.659Z"
+    "updated": "2024-01-13T02:28:22.556Z"
   },
 
   "abilities": {
@@ -3412,6 +3412,7 @@
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
     "duu": "Doubles UU",
+    "favorites": "Favoris",
     "field": "Terrain",
     "formes": "Formes",
     "hiddenability": "Talent Caché",
@@ -3502,7 +3503,7 @@
     "normal": ["Normal", "NORMAL", "NRML", "NRM"],
     "poison": ["Poison", "POISON", "PSN", "PSN"],
     "psychic": ["Psy", "PSY", "PSY", "PSY"],
-    "rock": ["Roche", "ROCHE", "RCHE", "RCH"],
+    "rock": ["Roche", "ROCHE", "ROCH", "RCH"],
     "steel": ["Acier", "ACIER", "ACIR", "ACI"],
     "stellar": ["Stellaire", "STELLR", "STLR", "SLR"],
     "unknown": ["Unknown", "???", "???", "???"],

@@ -93,10 +93,17 @@ export const BattleInfo = ({
     t,
   ]);
 
-  const formatOptions = React.useMemo(
-    () => buildFormatOptions(gen, { showAll: honkdexSettings?.showAllFormats }),
-    [gen, honkdexSettings?.showAllFormats],
-  );
+  const formatOptions = React.useMemo(() => buildFormatOptions(
+    gen,
+    {
+      showAll: honkdexSettings?.showAllFormats,
+      translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
+    },
+  ), [
+    gen,
+    honkdexSettings?.showAllFormats,
+    t,
+  ]);
 
   const formatOptionsFilter = React.useMemo(
     () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true })),
@@ -201,7 +208,7 @@ export const BattleInfo = ({
               saving?.[0]
                 ? t('battle.save.saving')
                 : (cached || 0) > 0
-                  ? Date.now() - cached < (30 * 1000)
+                  ? Date.now() - cached < (60 * 1000) || formatId(savedAgo)?.startsWith('lessthan') // fucc it
                     ? t('battle.save.savedRecently')
                     : t('battle.save.savedAgo', { ago: savedAgo })
                   : t('battle.save.unsaved')

@@ -2,7 +2,6 @@ import { NIL as NIL_UUID, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { type CalcdexPlayerKey, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
 import { env, nonEmptyObject } from '@showdex/utils/core';
-import { getDexForFormat } from '@showdex/utils/dex';
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -98,16 +97,13 @@ export const calcPokemonCalcdexId = <
   // ].filter(Boolean).join(': '),
 
   ident: [
-    playerKey || detectPlayerKeyFromPokemon(pokemon),
+    playerKey || (pokemon as CalcdexPokemon)?.playerKey || detectPlayerKeyFromPokemon(pokemon),
     uuidv4(), // random
   ].filter(Boolean).join(': '),
 
-  speciesForme: getDexForFormat()?.species.get(pokemon?.speciesForme)?.baseForme
-    || pokemon?.speciesForme,
-
+  speciesForme: pokemon?.speciesForme,
   level: String(pokemon?.level ?? 100),
   gender: pokemon?.gender || 'N', // seems like 'N'-gendered Pokemon occasionally report back with an empty string
-  // shiny: String(pokemon?.shiny), // bad idea, subject to change mid-battle
 });
 
 /* eslint-enable @typescript-eslint/indent */

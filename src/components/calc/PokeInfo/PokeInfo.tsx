@@ -209,11 +209,15 @@ export const PokeInfo = ({
     {
       format,
       usage: format?.includes('random') ? null : usage,
+      translateNature: (v) => t(`pokedex:natures.${formatId(v)}`, v),
+      translateStat: (v) => t(`pokedex:stats.${formatId(v)}.1`, v?.toUpperCase()),
+      translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
     },
   ) : []), [
     appliedPreset,
     format,
     pokemon?.speciesForme,
+    t,
     usage,
   ]);
 
@@ -808,7 +812,11 @@ export const PokeInfo = ({
 
           <Dropdown
             aria-label={t('poke.info.preset.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
-            hint={t(`poke.info.preset.${pokemon?.speciesForme ? 'none' : 'hint'}`) as React.ReactNode}
+            hint={(
+              presetsLoading
+                ? t('common:labels.loading')
+                : t(`poke.info.preset.${pokemon?.speciesForme ? 'none' : 'hint'}`)
+            ) as React.ReactNode}
             input={{
               name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,

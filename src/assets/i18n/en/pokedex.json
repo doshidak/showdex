@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-11T12:53:48.091Z"
+    "updated": "2024-01-13T02:27:54.942Z"
   },
 
   "abilities": {
@@ -163,6 +163,7 @@
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
     "duu": "Doubles UU",
+    "favorites": "Favorites",
     "field": "Field",
     "formes": "Formes",
     "hiddenability": "Hidden Ability",

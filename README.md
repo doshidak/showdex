@@ -9,7 +9,7 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.2.1">v1.2.1</a>&nbsp;</th>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.2.2">v1.2.2</a>&nbsp;</th>
       <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome</a> · <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
       <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://discord.gg/2PXVGGCkm2">Discord</a></th>
     </tr>
@@ -62,7 +62,7 @@ Officially supported on [**Chrome**](https://chrome.google.com/webstore/detail/d
     <tr>
       <th>&nbsp;<a href="#issues">Suggest a Feature</a>&nbsp;</th>
       <th>&nbsp;<a href="#issues">Report a Bug</a>&nbsp;</th>
-      <th>&nbsp;<a href="#prs">Contribute Code</a>&nbsp;</th>
+      <th>&nbsp;<a href="#--contributing">Contribute/Translate</a>&nbsp;</th>
     </tr>
   </thead>
 </table>
@@ -449,7 +449,7 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
 
   * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
 
-  **Pro-Tip:** Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `yarn build:fast`, `yarn build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
+  > **Pro-Tip:** Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `yarn build:fast`, `yarn build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
   ---
 </details>
 
@@ -482,7 +482,7 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
 > * **Device** (e.g., Custom PC, MacBook Pro 14" 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
 > * **OS** & **Version** (e.g., Windows 11, macOS Sonoma 14.1, Ubuntu 22.04.3 LTS, Android 12, etc.)
 > * **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
-> * **Showdex Version** (e.g., v1.2.1)
+> * **Showdex Version** (e.g., v1.2.2)
 > * **Format**, if applicable (e.g., Gen 9 VGC 2024 Regulation F Bo3)
 > * **Replay**, if applicable
 >
@@ -688,12 +688,13 @@ another big thank to these fine people for **helping with development**!
   </tbody>
 </table>
 
-now that [Showdex went mr worldwide](https://github.com/doshidak/showdex/releases/tag/v1.2.1), big thank to this fine person for **helping with translations**!
+now that Showdex went [mr worldwide](https://github.com/doshidak/showdex/pull/179), big thank to these fine people for **helping with translations**!
 
 <table>
   <tbody>
     <tr>
       <td width="220px" align="center"><a href="https://github.com/Sykless"><strong>Sykless</strong></a> · <a href="https://github.com/Sykless/pokemon-showdown-fr">Français</a></td>
+      <td width="220px" align="center"><a href="https://github.com/Betcheg"><strong>Betcheg</strong></a> · Français</td>
     </tr>
   </tbody>
 </table>

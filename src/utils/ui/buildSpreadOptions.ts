@@ -3,6 +3,7 @@ import { bull } from '@showdex/consts/core';
 import { PokemonNatureBoosts, PokemonNatures } from '@showdex/consts/dex';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSpread } from '@showdex/interfaces/calc';
+import { detectLegacyGen } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import { dehydrateSpread } from '@showdex/utils/hydro';
 
@@ -15,18 +16,31 @@ const spreadValue = (
   omitAlt: true,
 });
 
+const labelDelimiter = ` ${bull} `;
+
 const spreadLabel = (
   spread: CalcdexPokemonPresetSpread,
   format?: string | GenerationNum,
-): string => dehydrateSpread(spread, {
-  format,
-  delimiter: '/',
-  omitAlt: true,
-  omitNature: true,
-  omitIvs: true,
-});
+  translateStat?: (value: Showdown.StatName) => string,
+): string => {
+  const nonZeroEvs = Object.entries(spread.evs)
+    .filter(([, v]) => (v || 0) > 0)
+    .sort(([, a], [, b]) => b - a) as [stat: Showdown.StatName, value: number][];
 
-const subLabelDelimiter = ` ${bull} `;
+  if (detectLegacyGen(format) || nonZeroEvs.length > 3) {
+    return dehydrateSpread(spread, {
+      format,
+      delimiter: '/',
+      omitAlt: true,
+      omitNature: true,
+      omitIvs: true,
+    });
+  }
+
+  return nonZeroEvs
+    .map(([stat, value]) => `${value} ${translateStat?.(stat) || stat}`)
+    .join(labelDelimiter);
+};
 
 // note: this is a poorly refactored function that will return a new option if the `spread` is unique, otherwise, it will
 // directly mutate `prev` & return nothing; this is so that I don't have to repeat the `existingOption` logic twice for
@@ -35,25 +49,27 @@ const processOption = (
   prev: DropdownOption<string>[],
   spread: CalcdexPokemonPresetSpread,
   format?: string | GenerationNum,
+  translateNature?: (value: Showdown.NatureName) => string,
+  translateStat?: (value: Showdown.StatName) => string,
 ): DropdownOption<string> => {
   const value = spreadValue(spread, format);
   const existingOption = prev.find((o) => o.value === value);
 
   if (existingOption && spread.usage) {
-    const subLabelParts = [...((existingOption.subLabel as string).split?.(subLabelDelimiter) || [])];
+    const subLabelParts = [...((existingOption.subLabel as string).split?.(labelDelimiter) || [])];
     const usageLabel = percentage(spread.usage, 2);
 
     if (!subLabelParts.includes(usageLabel)) {
       subLabelParts.push(usageLabel);
     }
 
-    existingOption.subLabel = subLabelParts.join(subLabelDelimiter);
+    existingOption.subLabel = subLabelParts.join(labelDelimiter);
 
     return null;
   }
 
   const option: DropdownOption<string> = {
-    label: spreadLabel(spread, format),
+    label: spreadLabel(spread, format, translateStat),
     value,
   };
 
@@ -62,10 +78,14 @@ const processOption = (
   if (PokemonNatures.includes(spread.nature)) {
     const boosts = PokemonNatureBoosts[spread.nature];
 
+    const natureLabel = translateNature?.(spread.nature) || spread.nature;
+    const posLabel = translateStat?.(boosts[0]) || boosts[0]?.toUpperCase();
+    const negLabel = translateStat?.(boosts[1]) || boosts[1]?.toUpperCase();
+
     subLabelParts.push((
-      boosts?.length === 2
-        ? `${spread.nature} +${boosts[0].toUpperCase()} -${boosts[1].toUpperCase()}`
-        : spread.nature
+      posLabel && negLabel
+        ? `${natureLabel} +${posLabel} -${negLabel}`
+        : natureLabel
     ));
   }
 
@@ -75,7 +95,7 @@ const processOption = (
   }
 
   if (subLabelParts.length) {
-    option.subLabel = subLabelParts.join(subLabelDelimiter);
+    option.subLabel = subLabelParts.join(labelDelimiter);
   }
 
   return option;
@@ -96,11 +116,17 @@ export const buildSpreadOptions = (
   config?: {
     format?: string | GenerationNum;
     usage?: CalcdexPokemonPreset;
+    translateNature?: (value: Showdown.NatureName) => string;
+    translateStat?: (value: Showdown.StatName) => string;
+    translateHeader?: (value: string) => string;
   },
 ): DropdownOption<string>[] => {
   const {
     format,
     usage,
+    translateNature,
+    translateStat,
+    translateHeader,
   } = config || {};
 
   const options: DropdownOption<string>[] = [];
@@ -132,7 +158,7 @@ export const buildSpreadOptions = (
   // note: not map()'ing these due to a circular reference in the first arg
   // (i.e., whatever that thingy was called when a system depends on its previous state lol)
   presetSpreads.forEach((spread) => {
-    const processedOption = processOption(presetOptions, spread, format);
+    const processedOption = processOption(presetOptions, spread, format, translateNature, translateStat);
 
     if (!processedOption?.value) {
       return;
@@ -144,7 +170,7 @@ export const buildSpreadOptions = (
   usageSpreads.forEach((spread) => {
     const value = spreadValue(spread, format);
     const presetOption = presetOptions.find((o) => o.value === value);
-    const processedOption = processOption(usageOptions, spread, format);
+    const processedOption = processOption(usageOptions, spread, format, translateNature, translateStat);
 
     if (!processedOption?.value) {
       return;
@@ -162,10 +188,10 @@ export const buildSpreadOptions = (
   options.push(...(
     presetOptions.length && usageOptions.length
       ? [{
-        label: 'Pool',
+        label: translateHeader?.('Pool') || 'Pool',
         options: presetOptions,
       }, {
-        label: 'Usage',
+        label: translateHeader?.('Usage') || 'Usage',
         options: usageOptions,
       }]
       : [
