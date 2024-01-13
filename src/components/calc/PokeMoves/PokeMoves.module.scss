@@ -123,19 +123,19 @@ button.editButton {
     // to right,
     60deg,
 
-    color.alpha(colors.$black, 0.75) 26%,
+    color.alpha(colors.$black, 0.75) 25%,
 
     // #55C0EC,
-    color.shade(#63B44A, 15%) 26%,
+    color.shade(#63B44A, 15%) 25%,
     // #E96B7D,
-    color.shade(#43B9DC, 15%) 48%,
+    color.shade(#43B9DC, 15%) 49%,
 
     // #7ECADA,
     // #DBE6A7,
-    #ACD7BF 48%,
-    color.shade(#6DC5E5, 10%) 70%,
+    #ACD7BF 49%,
+    color.shade(#6DC5E5, 10%) 75%,
 
-    color.alpha(colors.$white, 0.75) 70%,
+    color.alpha(colors.$white, 0.75) 75%,
   );
 
   // position: relative;
@@ -150,7 +150,7 @@ button.editButton {
   &.available {
     color: colors.$transparent;
     background-image: $gradient;
-    background-size: 400% 100%;
+    background-size: 420% 100%;
     background-position: 0% 0%;
     background-clip: text;
   }
