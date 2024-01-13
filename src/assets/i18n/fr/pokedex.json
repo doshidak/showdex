@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T16:53:23.631Z",
-    "updated": "2024-01-12T23:40:52.071Z"
+    "updated": "2024-01-13T02:28:22.556Z"
   },
 
   "abilities": {
@@ -3412,6 +3412,7 @@
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
     "duu": "Doubles UU",
+    "favorites": "Favoris",
     "field": "Terrain",
     "formes": "Formes",
     "hiddenability": "Talent Caché",

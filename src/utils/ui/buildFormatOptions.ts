@@ -47,6 +47,7 @@ export const buildFormatOptions = (
   gen: GenerationNum,
   config?: {
     showAll?: boolean;
+    translateHeader?: (value: string) => string;
   },
 ): CalcdexBattleFormatOption[] => {
   const options: CalcdexBattleFormatOption[] = [];
@@ -55,7 +56,11 @@ export const buildFormatOptions = (
     return options;
   }
 
-  const { showAll } = config || {};
+  const {
+    showAll,
+    translateHeader,
+  } = config || {};
+
   const eligible = (f: string) => !!f && (showAll || (!f.includes('random') && !f.includes('custom')));
 
   const favoritedFormats = Object.entries(Dex?.prefs('starredformats') || {})
@@ -120,7 +125,7 @@ export const buildFormatOptions = (
 
   if (favoritedFormats.length) {
     sections.unshift({
-      label: 'Favorites',
+      label: translateHeader?.('Favorites') || 'Favorites',
       options: favoritedFormats.map((format) => {
         const { base, label } = parseBattleFormat(format);
         const value = getGenfulFormat(gen, base);
@@ -160,7 +165,7 @@ export const buildFormatOptions = (
   }
 
   const otherFormats: CalcdexBattleFormatOption = {
-    label: 'Other',
+    label: translateHeader?.('Other') || 'Other',
     options: [],
   };
 
