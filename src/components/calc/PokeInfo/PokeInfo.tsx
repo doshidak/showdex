@@ -209,11 +209,15 @@ export const PokeInfo = ({
     {
       format,
       usage: format?.includes('random') ? null : usage,
+      translateNature: (v) => t(`pokedex:natures.${formatId(v)}`, v),
+      translateStat: (v) => t(`pokedex:stats.${formatId(v)}.1`, v?.toUpperCase()),
+      translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
     },
   ) : []), [
     appliedPreset,
     format,
     pokemon?.speciesForme,
+    t,
     usage,
   ]);
 

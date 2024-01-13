@@ -35,6 +35,8 @@ const processOption = (
   prev: DropdownOption<string>[],
   spread: CalcdexPokemonPresetSpread,
   format?: string | GenerationNum,
+  translateNature?: (value: Showdown.NatureName) => string,
+  translateStat?: (value: Showdown.StatName) => string,
 ): DropdownOption<string> => {
   const value = spreadValue(spread, format);
   const existingOption = prev.find((o) => o.value === value);
@@ -62,10 +64,14 @@ const processOption = (
   if (PokemonNatures.includes(spread.nature)) {
     const boosts = PokemonNatureBoosts[spread.nature];
 
+    const natureLabel = translateNature?.(spread.nature) || spread.nature;
+    const posLabel = translateStat?.(boosts[0]) || boosts[0]?.toUpperCase();
+    const negLabel = translateStat?.(boosts[1]) || boosts[1]?.toUpperCase();
+
     subLabelParts.push((
-      boosts?.length === 2
-        ? `${spread.nature} +${boosts[0].toUpperCase()} -${boosts[1].toUpperCase()}`
-        : spread.nature
+      posLabel && negLabel
+        ? `${natureLabel} +${posLabel} -${negLabel}`
+        : natureLabel
     ));
   }
 
@@ -96,11 +102,17 @@ export const buildSpreadOptions = (
   config?: {
     format?: string | GenerationNum;
     usage?: CalcdexPokemonPreset;
+    translateNature?: (value: Showdown.NatureName) => string;
+    translateStat?: (value: Showdown.StatName) => string;
+    translateHeader?: (value: string) => string;
   },
 ): DropdownOption<string>[] => {
   const {
     format,
     usage,
+    translateNature,
+    translateStat,
+    translateHeader,
   } = config || {};
 
   const options: DropdownOption<string>[] = [];
@@ -144,7 +156,7 @@ export const buildSpreadOptions = (
   usageSpreads.forEach((spread) => {
     const value = spreadValue(spread, format);
     const presetOption = presetOptions.find((o) => o.value === value);
-    const processedOption = processOption(usageOptions, spread, format);
+    const processedOption = processOption(usageOptions, spread, format, translateNature, translateStat);
 
     if (!processedOption?.value) {
       return;
@@ -162,10 +174,10 @@ export const buildSpreadOptions = (
   options.push(...(
     presetOptions.length && usageOptions.length
       ? [{
-        label: 'Pool',
+        label: translateHeader?.('Pool') || 'Pool',
         options: presetOptions,
       }, {
-        label: 'Usage',
+        label: translateHeader?.('Usage') || 'Usage',
         options: usageOptions,
       }]
       : [
