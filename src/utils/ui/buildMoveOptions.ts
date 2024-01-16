@@ -1,7 +1,7 @@
 import { type MoveName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
-import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
@@ -31,7 +31,7 @@ export const buildMoveOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   config?: {
-    usage?: CalcdexPokemonPreset;
+    usageAlts?: CalcdexPokemonAlt<MoveName>[];
     usageFinder?: (value: MoveName) => string;
     usageSorter?: CalcdexPokemonUsageAltSorter<MoveName>;
     field?: CalcdexBattleField;
@@ -47,7 +47,7 @@ export const buildMoveOptions = (
   }
 
   const {
-    usage,
+    usageAlts,
     usageFinder: findUsagePercent,
     usageSorter,
     field,
@@ -193,8 +193,6 @@ export const buildMoveOptions = (
     filterMoves.push(...filteredRevealedMoves);
   }
 
-  const hasUsageStats = !!usage?.altMoves?.length;
-
   if (altMoves?.length) {
     const unsortedPoolMoves = altMoves
       .filter((a) => !!a && !filterMoves.includes(flattenAlt(a)));
@@ -213,13 +211,11 @@ export const buildMoveOptions = (
     filterMoves.push(...poolMoves);
   }
 
-  const remainingUsageMoves = hasUsageStats
-    ? usage.altMoves.filter((a) => (
-      !!a
-        && !!(detectUsageAlt(a) || findUsagePercent(a))
-        && !filterMoves.includes(flattenAlt(a))
-    ))
-    : null;
+  const remainingUsageMoves = usageAlts?.filter((a) => (
+    !!a
+      && !!(detectUsageAlt(a) || findUsagePercent(a))
+      && !filterMoves.includes(flattenAlt(a))
+  ));
 
   if (remainingUsageMoves?.length) {
     options.push({
