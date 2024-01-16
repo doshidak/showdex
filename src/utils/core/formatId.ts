@@ -13,8 +13,6 @@
  * * As of v1.2.1, this now replaces all diacritics with their ASCII equivalents (e.g., "é" -> "e").
  *   - Pre-v1.2.1, `formatId('Flabébé-Yellow')` would result in `'flabbyellow'` (a yellow flabby ?).
  *   - Post-v1.2.1, `formatId('Flabébé-Yellow')` now results in `'flabebeyellow'`.
- * * As of v1.2.3, the non-alphanumeric replacement regex has been replaced with the named `Diacritic` Unicode range.
- *   - Seems to be *slightly* faster than doing a not-in-range replacement that was prior pre-v1.2.3.
  *
  * @example
  * ```ts
@@ -29,5 +27,5 @@ export const formatId = (
 ) => value
   ?.toString?.()
   .normalize('NFD') // splits combined graphemes; e.g., 'Flabébé-Yellow' -> 'Flabe´be´-Yellow'
-  .toLowerCase() // e.g., -> 'flabe´be´-yellow'
-  .replace(/\p{Diacritic}/gu, ''); // e.g., -> 'flabebeyellow'
+  .replace(/[^a-zA-Z0-9]/g, '') // e.g., -> 'FlabebeYellow'
+  .toLowerCase(); // e.g., -> 'flabebeyellow'
