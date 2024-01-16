@@ -128,7 +128,7 @@ export const PokeInfo = ({
     format,
     pokemon,
     {
-      usage,
+      usageAlts: usage?.altAbilities,
       usageFinder: abilityUsageFinder,
       usageSorter: abilityUsageSorter,
       showAll: settings?.showAllOptions,
@@ -142,7 +142,7 @@ export const PokeInfo = ({
     pokemon,
     settings?.showAllOptions,
     t,
-    usage,
+    usage?.altAbilities,
   ]);
 
   const abilityOptionsFilter = React.useMemo(
@@ -248,7 +248,7 @@ export const PokeInfo = ({
     format,
     pokemon,
     {
-      usage,
+      usageAlts: usage?.altItems,
       usageFinder: itemUsageFinder,
       usageSorter: itemUsageSorter,
       translate: (v) => t(`pokedex:items.${formatId(v)}`, v),
@@ -260,7 +260,7 @@ export const PokeInfo = ({
     itemUsageSorter,
     pokemon,
     t,
-    usage,
+    usage?.altItems,
   ]);
 
   const itemOptionsFilter = React.useMemo(

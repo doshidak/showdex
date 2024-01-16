@@ -1,7 +1,7 @@
 import { type ItemName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
-import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
@@ -70,7 +70,7 @@ export const buildItemOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   config?: {
-    usage?: CalcdexPokemonPreset;
+    usageAlts?: CalcdexPokemonAlt<ItemName>[];
     usageFinder?: (value: ItemName) => string;
     usageSorter?: CalcdexPokemonUsageAltSorter<ItemName>;
     translate?: (value: ItemName) => string;
@@ -87,7 +87,7 @@ export const buildItemOptions = (
   const { altItems } = pokemon;
 
   const {
-    usage,
+    usageAlts,
     usageFinder: findUsagePercent,
     usageSorter,
     translate,
@@ -117,22 +117,22 @@ export const buildItemOptions = (
     filterItems.push(...flattenAlts(poolItems));
   }
 
-  if (detectUsageAlt(usage?.altItems?.[0])) {
-    const usageItems = (usage.altItems as CalcdexPokemonUsageAlt<ItemName>[])
-      .filter((n) => !!n?.[0] && !filterItems.includes(n[0]));
+  const usageItems = usageAlts?.filter((a) => (
+    detectUsageAlt(a)
+      && !filterItems.includes(a[0])
+  )) as CalcdexPokemonUsageAlt<ItemName>[];
 
-    if (usageItems.length) {
-      options.push({
-        label: translateHeader?.('Usage') || 'Usage',
-        options: usageItems.map((alt) => ({
-          label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-          rightLabel: percentage(alt[1], 2),
-          value: flattenAlt(alt),
-        })),
-      });
+  if (usageItems?.length) {
+    options.push({
+      label: translateHeader?.('Usage') || 'Usage',
+      options: usageItems.map((alt) => ({
+        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
+        rightLabel: percentage(alt[1], 2),
+        value: flattenAlt(alt),
+      })),
+    });
 
-      filterItems.push(...flattenAlts(usageItems));
-    }
+    filterItems.push(...flattenAlts(usageItems));
   }
 
   const formatKey = guessTableFormatKey(format);

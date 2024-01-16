@@ -1,6 +1,6 @@
 import { type AbilityName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
@@ -22,7 +22,7 @@ export const buildAbilityOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   config?: {
-    usage?: CalcdexPokemonPreset;
+    usageAlts?: CalcdexPokemonAlt<AbilityName>[];
     usageFinder?: (value: AbilityName) => string;
     usageSorter?: CalcdexPokemonUsageAltSorter<AbilityName>;
     showAll?: boolean;
@@ -42,7 +42,7 @@ export const buildAbilityOptions = (
   }
 
   const {
-    usage,
+    usageAlts,
     usageFinder: findUsagePercent,
     usageSorter,
     showAll,
@@ -123,22 +123,22 @@ export const buildAbilityOptions = (
     filterAbilities.push(...flattenAlts(poolAbilities));
   }
 
-  if (detectUsageAlt(usage?.altAbilities?.[0])) {
-    const usageAbilities = (usage.altAbilities as CalcdexPokemonUsageAlt<AbilityName>[])
-      .filter((n) => !!n?.[0] && !filterAbilities.includes(n[0]));
+  const usageAbilities = usageAlts?.filter((a) => (
+    detectUsageAlt(a)
+      && !filterAbilities.includes(a[0])
+  )) as CalcdexPokemonUsageAlt<AbilityName>[];
 
-    if (usageAbilities.length) {
-      options.push({
-        label: translateHeader?.('Usage') || 'Usage',
-        options: usageAbilities.map((alt) => ({
-          label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-          rightLabel: percentage(alt[1], 2),
-          value: flattenAlt(alt),
-        })),
-      });
+  if (usageAbilities?.length) {
+    options.push({
+      label: translateHeader?.('Usage') || 'Usage',
+      options: usageAbilities.map((alt) => ({
+        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
+        rightLabel: percentage(alt[1], 2),
+        value: flattenAlt(alt),
+      })),
+    });
 
-      filterAbilities.push(...flattenAlts(usageAbilities));
-    }
+    filterAbilities.push(...flattenAlts(usageAbilities));
   }
 
   if (abilities?.length) {

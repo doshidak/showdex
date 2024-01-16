@@ -86,7 +86,7 @@ export const PokeMoves = ({
     format,
     pokemon,
     {
-      usage,
+      usageAlts: usage?.altMoves,
       usageFinder: moveUsageFinder,
       usageSorter: moveUsageSorter,
       field,
@@ -105,7 +105,7 @@ export const PokeMoves = ({
     pokemon,
     settings?.showAllOptions,
     t,
-    usage,
+    usage?.altMoves,
   ]);
 
   const moveOptionsFilter = React.useMemo(
