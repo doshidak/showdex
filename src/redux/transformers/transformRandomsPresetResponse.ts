@@ -1,6 +1,5 @@
-import { type PkmnApiSmogonRandomsPresetResponse } from '@showdex/interfaces/api';
+import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonRandomsPresetResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';

@@ -1,3 +1,4 @@
+import { format as formatDate } from 'date-fns';
 import { type DropdownOption } from '@showdex/components/form';
 import { bull } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
@@ -97,6 +98,16 @@ export const buildPresetOptions = (
       }
 
       (option.subLabel as string) += preset.bundleName;
+    }
+
+    if (typeof preset.updated === 'number' && preset.updated) {
+      if (option.subLabel) {
+        (option.subLabel as string) += ` ${bull} `;
+      } else {
+        option.subLabel = '';
+      }
+
+      (option.subLabel as string) += formatDate(preset.updated, 'yyyy/MM/dd');
     }
 
     // attempt to find this preset's usage percentage (typically only in Gen 9 Randoms)

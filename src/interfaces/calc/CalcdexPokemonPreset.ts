@@ -236,6 +236,16 @@ export interface CalcdexPokemonPreset {
   pokeball?: string;
 
   /**
+   * Unix epoch timestamp of when this preset was last updated, in milliseconds.
+   *
+   * * Primarily used for displaying the human-readable date in the presets dropdown.
+   * * Typically populated for `'usage'`-sourced presets via the `'Last-Modified'` response header.
+   *
+   * @since 1.2.3
+   */
+  updated?: number;
+
+  /**
    * Unix epoch timestamp of when this preset was cached, in milliseconds.
    *
    * * Primarily used for determining which presets should be considered stale.
