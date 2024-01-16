@@ -17,6 +17,7 @@ import {
   legalLockedFormat,
   parseBattleFormat,
 } from '@showdex/utils/dex';
+import { type CalcdexPokemonUsageAltSorter, usageAltPercentFinder, usageAltPercentSorter } from '@showdex/utils/presets';
 
 /**
  * Options for the `useBattlePresets()` hook.
@@ -125,6 +126,24 @@ export interface CalcdexBattlePresetsHookValue {
    * @since 1.2.1
    */
   formatLabelMap: Record<string, string>;
+
+  /**
+   * Memoized forme usage percent finder.
+   *
+   * * Used as an optimization for passing into `buildFormeOptions()` in the Honkdex.
+   *
+   * @since 1.2.3
+   */
+  formeUsageFinder: (value: string) => string;
+
+  /**
+   * Memoized forme usage percent sorter.
+   *
+   * * Used as an optimization for passing into `buildFormeOptions()` in the Honkdex.
+   *
+   * @since 1.2.3
+   */
+  formeUsageSorter: CalcdexPokemonUsageAltSorter<string>;
 }
 
 // const l = logger('@showdex/utils/presets/useBattlePresets()');
@@ -331,6 +350,16 @@ export const useBattlePresets = (
     usages,
   ]);
 
+  const formeUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(formeUsages, true),
+    [formeUsages],
+  );
+
+  const formeUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(formeUsageFinder),
+    [formeUsageFinder],
+  );
+
   const pending = (
     (!shouldSkipFormats && formatPresetsPending)
       || (!shouldSkipBundles && bundledPresetsPending)
@@ -366,5 +395,7 @@ export const useBattlePresets = (
     usages,
     formatLabelMap,
     formeUsages,
+    formeUsageFinder,
+    formeUsageSorter,
   };
 };
