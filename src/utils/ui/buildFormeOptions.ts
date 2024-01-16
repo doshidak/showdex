@@ -1,6 +1,6 @@
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { type CalcdexPokemon, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
   detectDoublesFormat,
@@ -8,7 +8,13 @@ import {
   guessTableFormatKey,
   guessTableFormatSlice,
 } from '@showdex/utils/dex';
-import { type CalcdexPokemonUsageAltSorter } from '@showdex/utils/presets';
+import { percentage } from '@showdex/utils/humanize';
+import {
+  type CalcdexPokemonUsageAltSorter,
+  detectUsageAlt,
+  flattenAlt,
+  flattenAlts,
+} from '@showdex/utils/presets';
 
 export type CalcdexPokemonFormeOption = DropdownOption<string>;
 
@@ -25,6 +31,7 @@ export const buildFormeOptions = (
     speciesForme?: CalcdexPokemon['speciesForme'];
     altFormes?: CalcdexPokemon['altFormes'];
     transformedForme?: CalcdexPokemon['transformedForme'];
+    usageAlts?: CalcdexPokemonUsageAlt<string>[];
     usageFinder?: (value: string) => string;
     usageSorter?: CalcdexPokemonUsageAltSorter<string>;
     translate?: (value: string) => string;
@@ -151,6 +158,7 @@ export const buildFormeOptions = (
     speciesForme,
     altFormes,
     transformedForme,
+    usageAlts,
     usageFinder: findUsagePercent,
     usageSorter,
     translate,
@@ -173,6 +181,38 @@ export const buildFormeOptions = (
     });
 
     filterFormes.push(...altFormes);
+  }
+
+  // update (2024/01/15): better optimization might be to slap all the usages into one group instead lol
+  const formeUsages = usageAlts?.filter((a) => (
+    detectUsageAlt(a)
+      && !filterFormes.includes(a[0])
+  )).sort((
+    [, usageA],
+    [, usageB],
+  ) => {
+    if ((usageA || 0) > (usageB || 0)) {
+      return -1;
+    }
+
+    if ((usageA || 0) < (usageB || 0)) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  if (formeUsages?.length) {
+    options.push({
+      label: translateHeader?.('Usage') || 'Usage',
+      options: formeUsages.map((alt) => ({
+        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
+        rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
+        value: flattenAlt(alt),
+      })),
+    });
+
+    filterFormes.push(...flattenAlts(formeUsages));
   }
 
   const tierMap: Record<string, string[]> = {
@@ -220,7 +260,27 @@ export const buildFormeOptions = (
     filterFormes.push(formeName);
   });
 
-  Object.entries(tierMap).forEach(([
+  Object.entries(tierMap).sort((
+    [tierA],
+    [tierB],
+  ) => {
+    const matchesA = format.includes(formatId(tierA));
+    const matchesB = format.includes(formatId(tierB));
+
+    if (matchesA) {
+      if (matchesB) {
+        return 0;
+      }
+
+      return -1;
+    }
+
+    if (matchesB) {
+      return 1;
+    }
+
+    return 0;
+  }).forEach(([
     tier,
     speciesFormes,
   ]) => {
@@ -228,26 +288,26 @@ export const buildFormeOptions = (
       return;
     }
 
-    const sortedFormes = [...speciesFormes].sort(usageSorter);
+    // const sortedFormes = [...speciesFormes].sort(usageSorter);
 
     options.push({
       label: translateHeader?.(tier) || tier,
-      options: sortedFormes.map((name) => ({
+      options: speciesFormes.map((name) => ({
         label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
+        // rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
   });
 
   if (tierMap.Other.length) {
-    const sortedFormes = [...tierMap.Other].sort(usageSorter);
+    // const sortedFormes = [...tierMap.Other].sort(usageSorter);
 
     options.push({
       label: translateHeader?.('Other') || 'Other',
-      options: sortedFormes.map((name) => ({
+      options: tierMap.Other.map((name) => ({
         label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
+        // rightLabel: findUsagePercent(name),
         value: name,
       })),
     });
