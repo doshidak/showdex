@@ -57,7 +57,7 @@ const processOption = (
 
   if (existingOption && spread.usage) {
     const subLabelParts = [...((existingOption.subLabel as string).split?.(labelDelimiter) || [])];
-    const usageLabel = percentage(spread.usage, 2);
+    const usageLabel = percentage(spread.usage, spread.usage === 1 ? 0 : 2);
 
     if (!subLabelParts.includes(usageLabel)) {
       subLabelParts.push(usageLabel);
@@ -91,7 +91,7 @@ const processOption = (
 
   if (spread.usage) {
     // update (2023/11/15): might not be enough room tbh LOL
-    subLabelParts.push(percentage(spread.usage, 2));
+    subLabelParts.push(percentage(spread.usage, spread.usage === 1 ? 0 : 2));
   }
 
   if (subLabelParts.length) {

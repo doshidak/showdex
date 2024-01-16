@@ -109,7 +109,7 @@ export const buildItemOptions = (
       label: translateHeader?.('Pool') || 'Pool',
       options: poolItems.map((alt) => ({
         label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });
@@ -127,7 +127,7 @@ export const buildItemOptions = (
       label: translateHeader?.('Usage') || 'Usage',
       options: usageItems.map((alt) => ({
         label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: percentage(alt[1], 2),
+        rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
         value: flattenAlt(alt),
       })),
     });

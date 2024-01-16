@@ -45,7 +45,7 @@ export const usageAltPercentFinder = <
       return null;
     }
 
-    return String(humanize ? percentage(usage, 2) : usage);
+    return String(humanize ? percentage(usage, usage === 1 ? 0 : 2) : usage);
   };
 };
 

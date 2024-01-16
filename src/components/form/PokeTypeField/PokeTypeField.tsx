@@ -275,7 +275,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
                   )}
 
                   <div className={styles.typeOptionUsage}>
-                    {percentage(usage, 2)}
+                    {percentage(usage, usage === 1 ? 0 : 2)}
                   </div>
                 </div>
               ))}
