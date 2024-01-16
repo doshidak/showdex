@@ -1,8 +1,11 @@
 import { type MoveName } from '@smogon/calc';
 // import { PokemonNatures } from '@showdex/consts/dex';
-import { type PkmnApiSmogonFormatStatsResponse } from '@showdex/interfaces/api';
+import {
+  type PkmnApiSmogonFormatStatsResponse,
+  type PkmnApiSmogonPresetRequest,
+  type PkmnApiSmogonQueryMeta,
+} from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
@@ -21,7 +24,7 @@ import { parseUsageSpread, processUsageAlts } from '@showdex/utils/presets';
  */
 export const transformFormatStatsResponse = (
   response: PkmnApiSmogonFormatStatsResponse,
-  _meta: unknown,
+  meta: PkmnApiSmogonQueryMeta,
   args: PkmnApiSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   const { pokemon: pokemonStats } = response || {};
@@ -131,6 +134,11 @@ export const transformFormatStatsResponse = (
     // note: `ivs` don't exist here!
     preset.nature = preset.spreads[0]?.nature;
     preset.evs = { ...preset.spreads[0]?.evs };
+
+    // read from the 'Last-Modified' header, if any
+    if (meta?.resHeaders?.['last-modified']) {
+      preset.updated = new Date(meta.resHeaders['last-modified']).valueOf() || null;
+    }
 
     preset.calcdexId = calcPresetCalcdexId(preset);
     preset.id = preset.calcdexId;
