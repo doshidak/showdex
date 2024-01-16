@@ -157,6 +157,15 @@ export interface CalcdexPokemonPreset {
   format?: string;
 
   /**
+   * Optional index used for sorting presets of the same format.
+   *
+   * * Typically used for `'smogon'` presets as to preserve the ordering on the Pokemon's Smogon StrategyDex page.
+   *
+   * @since 1.2.3
+   */
+  formatIndex?: number;
+
+  /**
    * Nickname of the Pokemon.
    *
    * @example 'Smogonbirb'
