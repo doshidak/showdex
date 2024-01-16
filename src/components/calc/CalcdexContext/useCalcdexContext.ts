@@ -810,8 +810,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       payload.activeIndices.splice(activeIndicesIndex, 1);
     }
 
-    if (state[playerKey].selectionIndex === payload.pokemon.length) {
-      payload.selectionIndex = Math.max(payload.pokemon.length - 1, 0);
+    if (state[playerKey].selectionIndex > payload.pokemon.length) {
+      payload.selectionIndex = payload.pokemon.length;
     }
 
     const extendAmount = Math.abs(env.int('honkdex-player-extend-pokemon', 0));
