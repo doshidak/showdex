@@ -51,7 +51,7 @@ export const transformPresetResponse = (
       Object.entries(presets).forEach(([
         presetName,
         pkmnPreset,
-      ]) => {
+      ], formatIndex) => {
         if (!presetName || !nonEmptyObject(pkmnPreset)) {
           return;
         }
@@ -63,6 +63,7 @@ export const transformPresetResponse = (
           presetName,
           pkmnPreset,
           args.source,
+          formatIndex,
         );
 
         // shouldn't be the case, but check if the preset already exists in our output
