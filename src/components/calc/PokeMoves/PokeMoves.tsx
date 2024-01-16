@@ -940,7 +940,7 @@ export const PokeMoves = ({
 
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
-                  {(settings?.showNonDamageRanges || hasDamageRange) ? (
+                  {opponentPokemon?.speciesForme && (settings?.showNonDamageRanges || hasDamageRange) ? (
                     settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
                       <Button
                         className={cx(
