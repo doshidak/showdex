@@ -29,5 +29,7 @@ export const CalcdexContext = React.createContext<CalcdexContextValue>({
     usages: [],
     formatLabelMap: {},
     formeUsages: [],
+    formeUsageFinder: () => null,
+    formeUsageSorter: () => 0,
   },
 });

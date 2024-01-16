@@ -1,5 +1,5 @@
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
@@ -8,7 +8,7 @@ import {
   guessTableFormatKey,
   guessTableFormatSlice,
 } from '@showdex/utils/dex';
-import { usageAltPercentFinder, usageAltPercentSorter } from '@showdex/utils/presets';
+import { type CalcdexPokemonUsageAltSorter } from '@showdex/utils/presets';
 
 export type CalcdexPokemonFormeOption = DropdownOption<string>;
 
@@ -22,8 +22,11 @@ export type CalcdexPokemonFormeOption = DropdownOption<string>;
 export const buildFormeOptions = (
   format: string,
   config?: {
-    pokemon?: CalcdexPokemon;
-    formeUsages?: CalcdexPokemonUsageAlt<string>[];
+    speciesForme?: CalcdexPokemon['speciesForme'];
+    altFormes?: CalcdexPokemon['altFormes'];
+    transformedForme?: CalcdexPokemon['transformedForme'];
+    usageFinder?: (value: string) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<string>;
     translate?: (value: string) => string;
     translateHeader?: (value: string) => string;
   },
@@ -145,19 +148,14 @@ export const buildFormeOptions = (
   const dex = getDexForFormat(format);
 
   const {
-    pokemon,
-    formeUsages,
+    speciesForme,
+    altFormes,
+    transformedForme,
+    usageFinder: findUsagePercent,
+    usageSorter,
     translate,
     translateHeader,
   } = config || {};
-
-  const findUsagePercent = usageAltPercentFinder(formeUsages, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
-
-  const {
-    altFormes,
-    transformedForme,
-  } = pokemon || {};
 
   const filterFormes: string[] = [];
 
@@ -273,6 +271,24 @@ export const buildFormeOptions = (
         value: name,
       })),
     });
+  }
+
+  const currentForme = transformedForme || speciesForme;
+  const shouldAddCurrent = !!currentForme
+    && (!altFormes?.length || !altFormes.includes(currentForme))
+    && !filterFormes.includes(currentForme);
+
+  if (shouldAddCurrent) {
+    options.unshift({
+      label: translateHeader?.('Current') || 'Current',
+      options: [{
+        label: translate?.(currentForme) || currentForme,
+        rightLabel: findUsagePercent(currentForme),
+        value: currentForme,
+      }],
+    });
+
+    filterFormes.push(currentForme);
   }
 
   return options;

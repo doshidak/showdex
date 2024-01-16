@@ -57,6 +57,8 @@ export const PokeMoves = ({
     playerPokemon: pokemon,
     opponentPokemon,
     usage,
+    moveUsageFinder,
+    moveUsageSorter,
     matchups,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -85,6 +87,8 @@ export const PokeMoves = ({
     pokemon,
     {
       usage,
+      usageFinder: moveUsageFinder,
+      usageSorter: moveUsageSorter,
       field,
       include: (settings?.showAllOptions && 'all')
         || (operatingMode === 'standalone' && 'hidden-power')
@@ -95,6 +99,8 @@ export const PokeMoves = ({
   ), [
     field,
     format,
+    moveUsageFinder,
+    moveUsageSorter,
     operatingMode,
     pokemon,
     settings?.showAllOptions,

@@ -5,11 +5,10 @@ import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
+  type CalcdexPokemonUsageAltSorter,
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  usageAltPercentFinder,
-  usageAltPercentSorter,
 } from '@showdex/utils/presets';
 
 export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
@@ -24,6 +23,8 @@ export const buildAbilityOptions = (
   pokemon: CalcdexPokemon,
   config?: {
     usage?: CalcdexPokemonPreset;
+    usageFinder?: (value: AbilityName) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<AbilityName>;
     showAll?: boolean;
     translate?: (value: AbilityName) => string;
     translateHeader?: (value: string) => string;
@@ -42,6 +43,8 @@ export const buildAbilityOptions = (
 
   const {
     usage,
+    usageFinder: findUsagePercent,
+    usageSorter,
     showAll,
     translate,
     translateHeader,
@@ -61,18 +64,6 @@ export const buildAbilityOptions = (
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
-
-  // prioritize using usage stats from the current set first,
-  // then fallback to using the stats from the supplied `usage` set, if any
-  const usageAltSource = detectUsageAlt(altAbilities?.[0])
-    ? altAbilities
-    : detectUsageAlt(usage?.altAbilities?.[0])
-      ? usage.altAbilities
-      : null;
-
-  // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
   if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
@@ -132,8 +123,8 @@ export const buildAbilityOptions = (
     filterAbilities.push(...flattenAlts(poolAbilities));
   }
 
-  if (detectUsageAlt(usageAltSource?.[0])) {
-    const usageAbilities = (usageAltSource as CalcdexPokemonUsageAlt<AbilityName>[])
+  if (detectUsageAlt(usage?.altAbilities?.[0])) {
+    const usageAbilities = (usage.altAbilities as CalcdexPokemonUsageAlt<AbilityName>[])
       .filter((n) => !!n?.[0] && !filterAbilities.includes(n[0]));
 
     if (usageAbilities.length) {

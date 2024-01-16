@@ -6,11 +6,10 @@ import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
+  type CalcdexPokemonUsageAltSorter,
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  usageAltPercentFinder,
-  usageAltPercentSorter,
 } from '@showdex/utils/presets';
 
 export type CalcdexPokemonItemOption = DropdownOption<ItemName>;
@@ -72,6 +71,8 @@ export const buildItemOptions = (
   pokemon: CalcdexPokemon,
   config?: {
     usage?: CalcdexPokemonPreset;
+    usageFinder?: (value: ItemName) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<ItemName>;
     translate?: (value: ItemName) => string;
     translateHeader?: (value: string) => string;
   },
@@ -87,24 +88,14 @@ export const buildItemOptions = (
 
   const {
     usage,
+    usageFinder: findUsagePercent,
+    usageSorter,
     translate,
     translateHeader,
   } = config || {};
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
-
-  // prioritize using usage stats from the current set first,
-  // then fallback to using the stats from the supplied `usage` set, if any
-  const usageAltSource = detectUsageAlt(altItems?.[0])
-    ? altItems
-    : detectUsageAlt(usage?.altItems?.[0])
-      ? usage.altItems
-      : null;
-
-  // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   if (altItems?.length) {
     const hasUsageStats = altItems
@@ -126,8 +117,8 @@ export const buildItemOptions = (
     filterItems.push(...flattenAlts(poolItems));
   }
 
-  if (detectUsageAlt(usageAltSource?.[0])) {
-    const usageItems = (usageAltSource as CalcdexPokemonUsageAlt<ItemName>[])
+  if (detectUsageAlt(usage?.altItems?.[0])) {
+    const usageItems = (usage.altItems as CalcdexPokemonUsageAlt<ItemName>[])
       .filter((n) => !!n?.[0] && !filterItems.includes(n[0]));
 
     if (usageItems.length) {

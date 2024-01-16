@@ -3,7 +3,13 @@ import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@show
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { flattenAlts, selectPokemonPresets, sortPresetsByFormat } from '@showdex/utils/presets';
+import {
+  flattenAlts,
+  selectPokemonPresets,
+  sortPresetsByFormat,
+  usageAltPercentFinder,
+  usageAltPercentSorter,
+} from '@showdex/utils/presets';
 import { CalcdexContext } from '../CalcdexContext';
 import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
@@ -88,6 +94,8 @@ export const CalcdexPokeProvider = ({
     usages: allUsages,
     formatLabelMap,
     formeUsages,
+    formeUsageFinder,
+    formeUsageSorter,
   } = battlePresets;
 
   const pokemonSheets = React.useMemo(() => selectPokemonPresets(
@@ -219,6 +227,36 @@ export const CalcdexPokeProvider = ({
     usages,
   ]);
 
+  const abilityUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(usage?.altAbilities, true),
+    [usage?.altAbilities],
+  );
+
+  const abilityUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(abilityUsageFinder),
+    [abilityUsageFinder],
+  );
+
+  const itemUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(usage?.altItems, true),
+    [usage?.altItems],
+  );
+
+  const itemUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(itemUsageFinder),
+    [itemUsageFinder],
+  );
+
+  const moveUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(usage?.altMoves, true),
+    [usage?.altMoves],
+  );
+
+  const moveUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(moveUsageFinder),
+    [moveUsageFinder],
+  );
+
   // calculate the current matchup
   const calculateMatchup = useSmogonMatchup(
     format,
@@ -257,16 +295,32 @@ export const CalcdexPokeProvider = ({
     presets,
     usages,
     usage,
+    abilityUsageFinder,
+    abilityUsageSorter,
+    itemUsageFinder,
+    itemUsageSorter,
+    moveUsageFinder,
+    moveUsageSorter,
     formatLabelMap,
     formeUsages,
+    formeUsageFinder,
+    formeUsageSorter,
 
     matchups,
   }), [
+    abilityUsageFinder,
+    abilityUsageSorter,
     allUsages,
     ctx,
     formatLabelMap,
+    formeUsageFinder,
     formeUsages,
+    formeUsageSorter,
+    itemUsageFinder,
+    itemUsageSorter,
     matchups,
+    moveUsageFinder,
+    moveUsageSorter,
     opponent,
     opponentPokemon,
     player,

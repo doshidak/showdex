@@ -14,11 +14,10 @@ import {
 } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
+  type CalcdexPokemonUsageAltSorter,
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  usageAltPercentFinder,
-  usageAltPercentSorter,
 } from '@showdex/utils/presets';
 
 export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
@@ -33,6 +32,8 @@ export const buildMoveOptions = (
   pokemon: CalcdexPokemon,
   config?: {
     usage?: CalcdexPokemonPreset;
+    usageFinder?: (value: MoveName) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<MoveName>;
     field?: CalcdexBattleField;
     include?: 'all' | 'hidden-power';
     translate?: (value: MoveName) => string;
@@ -47,6 +48,8 @@ export const buildMoveOptions = (
 
   const {
     usage,
+    usageFinder: findUsagePercent,
+    usageSorter,
     field,
     include,
     translate,
@@ -77,18 +80,6 @@ export const buildMoveOptions = (
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
-
-  // prioritize using usage stats from the current set first,
-  // then fallback to using the stats from the supplied `usage` set, if any
-  const usageAltSource = detectUsageAlt(altMoves?.[0])
-    ? altMoves
-    : detectUsageAlt(usage?.altMoves?.[0])
-      ? usage.altMoves
-      : null;
-
-  // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
@@ -202,7 +193,7 @@ export const buildMoveOptions = (
     filterMoves.push(...filteredRevealedMoves);
   }
 
-  const hasUsageStats = !!usageAltSource?.length;
+  const hasUsageStats = !!usage?.altMoves?.length;
 
   if (altMoves?.length) {
     const unsortedPoolMoves = altMoves
@@ -223,7 +214,7 @@ export const buildMoveOptions = (
   }
 
   const remainingUsageMoves = hasUsageStats
-    ? usageAltSource.filter((a) => (
+    ? usage.altMoves.filter((a) => (
       !!a
         && !!(detectUsageAlt(a) || findUsagePercent(a))
         && !filterMoves.includes(flattenAlt(a))
