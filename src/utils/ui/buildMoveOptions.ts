@@ -222,7 +222,7 @@ export const buildMoveOptions = (
       label: translateHeader?.('Usage') || 'Usage',
       options: remainingUsageMoves.map((alt) => ({
         label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
+        rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
         value: flattenAlt(alt),
       })),
     });

@@ -105,7 +105,7 @@ export const buildPresetOptions = (
       || 0;
 
     if (usage > 0) {
-      option.rightLabel = percentage(usage, 2);
+      option.rightLabel = percentage(usage, usage === 1 ? 0 : 2);
     }
 
     const presetFormat = getGenfulFormat(preset.gen, preset.format);
