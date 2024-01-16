@@ -511,7 +511,7 @@ export const syncPokemon = (
     if (serverPokemon.item) {
       const dexItem = dex.items.get(serverPokemon.item);
 
-      if (dexItem?.name) {
+      if (dexItem?.exists && dexItem.name) {
         syncedPokemon.item = dexItem.name as ItemName;
         syncedPokemon.dirtyItem = null;
       }
