@@ -70,8 +70,8 @@ export const calcPokemonFinalStats = (
   const legacy = detectLegacyGen(gen);
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
-  const ability = id(pokemon.dirtyAbility ?? pokemon.ability);
-  const opponentAbility = id(opponentPokemon.dirtyAbility ?? opponentPokemon.ability);
+  const ability = id(pokemon.dirtyAbility || pokemon.ability);
+  const opponentAbility = id(opponentPokemon.dirtyAbility || opponentPokemon.ability);
 
   const hasTransform = 'transform' in pokemon.volatiles;
   const hasFormeChange = 'formechange' in pokemon.volatiles;
