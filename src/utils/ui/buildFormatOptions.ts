@@ -99,6 +99,11 @@ export const buildFormatOptions = (
 
       const section = standardizeSection(value, initialSections, gen);
 
+      // e.g., section = 'Randomized Metas' (we don't want that section when showAll is falsy)
+      if (!showAll && formatId(section)?.includes('random')) {
+        return prev;
+      }
+
       if (!prev.includes(section)) {
         prev.push(section);
       }
@@ -171,8 +176,12 @@ export const buildFormatOptions = (
 
   genFormats.forEach((format) => {
     const section = standardizeSection(format.section, initialSections, gen);
-    const group = (!!section && sections.find((g) => g.label === section)) || otherFormats;
 
+    if (!showAll && formatId(section)?.includes('random')) {
+      return;
+    }
+
+    const group = (!!section && sections.find((g) => g.label === section)) || otherFormats;
     const { base, label } = parseBattleFormat(format.id);
     const value = getGenfulFormat(gen, base);
 
