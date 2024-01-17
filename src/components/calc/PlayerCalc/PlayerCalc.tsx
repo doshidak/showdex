@@ -21,6 +21,7 @@ export interface PlayerCalcProps {
   playerKey?: CalcdexPlayerKey;
   defaultName?: string;
   playerOptions?: DropdownOption<CalcdexPlayerKey>[];
+  mobile?: boolean;
 }
 
 const l = logger('@showdex/components/calc/PlayerCalc');
@@ -32,6 +33,7 @@ export const PlayerCalc = ({
   playerKey = 'p1',
   defaultName = '--',
   playerOptions,
+  mobile,
 }: PlayerCalcProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
@@ -44,6 +46,7 @@ export const PlayerCalc = ({
 
   const {
     operatingMode,
+    renderMode,
     containerSize,
     format,
   } = state;
@@ -71,6 +74,7 @@ export const PlayerCalc = ({
         ['xs', 'sm'].includes(containerSize) && styles.smol,
         ['md', 'lg', 'xl'].includes(containerSize) && styles.big,
         containerSize === 'xl' && styles.veryThicc,
+        (mobile && renderMode === 'overlay') && styles.mobileOverlay,
         operatingMode === 'standalone' && styles.standalone,
         className,
       )}
@@ -85,6 +89,7 @@ export const PlayerCalc = ({
             playerKey={playerKey}
             defaultName={defaultName}
             playerOptions={playerOptions}
+            mobile={mobile}
           />
         }
 

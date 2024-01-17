@@ -22,6 +22,7 @@ export interface PlayerInfoProps {
   playerKey?: CalcdexPlayerKey;
   defaultName?: string;
   playerOptions?: DropdownOption<CalcdexPlayerKey>[];
+  mobile?: boolean;
 }
 
 const l = logger('@showdex/components/calc/PlayerInfo');
@@ -33,6 +34,7 @@ export const PlayerInfo = ({
   playerKey = 'p1',
   defaultName = '--',
   playerOptions,
+  mobile,
 }: PlayerInfoProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
@@ -47,6 +49,7 @@ export const PlayerInfo = ({
 
   const {
     containerSize,
+    renderMode,
     format,
   } = state || {};
 
@@ -121,8 +124,9 @@ export const PlayerInfo = ({
     <div
       className={cx(
         styles.container,
-        containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        containerSize === 'xs' && styles.verySmol,
+        (mobile && renderMode === 'overlay') && styles.mobileOverlay,
         className,
       )}
       style={style}
