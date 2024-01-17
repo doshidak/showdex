@@ -167,7 +167,7 @@ export const buildFormeOptions = (
 
   const filterFormes: string[] = [];
 
-  if (altFormes?.length) {
+  if ((altFormes?.length || 0) > (transformedForme ? 0 : 1)) {
     const sortedAltFormes = [...altFormes].sort(usageSorter);
     const groupLabel = (!!transformedForme && 'Transformed') || 'Formes';
 
