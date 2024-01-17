@@ -470,35 +470,32 @@ export const SettingsPane = ({
                     onPress={handleSettingsExport}
                   />
 
-                  {
-                    !inBattle &&
-                    <Button
-                      className={cx(styles.actionButton, styles.defaultsButton)}
-                      label={t('pane.header.defaults.label')}
-                      tooltip={(
-                        <div className={cx(styles.tooltipContent, styles.importTooltip)}>
-                          <Badge
-                            ref={defaultsBadgeRef}
-                            className={styles.importBadge}
-                            label={t('pane.header.defaults.exportedBadge')}
-                            color="green"
-                          />
+                  <Button
+                    className={cx(styles.actionButton, styles.defaultsButton)}
+                    label={t('pane.header.defaults.label')}
+                    tooltip={(
+                      <div className={cx(styles.tooltipContent, styles.importTooltip)}>
+                        <Badge
+                          ref={defaultsBadgeRef}
+                          className={styles.importBadge}
+                          label={t('pane.header.defaults.exportedBadge')}
+                          color="green"
+                        />
 
-                          <Badge
-                            ref={defaultsFailedBadgeRef}
-                            className={styles.importBadge}
-                            label={t('pane.header.defaults.failedBadge')}
-                            color="red"
-                          />
+                        <Badge
+                          ref={defaultsFailedBadgeRef}
+                          className={styles.importBadge}
+                          label={t('pane.header.defaults.failedBadge')}
+                          color="red"
+                        />
 
-                          {t('pane.header.defaults.tooltip')}
-                        </div>
-                      )}
-                      tooltipTrigger={['focus', 'mouseenter']}
-                      hoverScale={1}
-                      onPress={handleSettingsDefaults}
-                    />
-                  }
+                        {t('pane.header.defaults.tooltip')}
+                      </div>
+                    )}
+                    tooltipTrigger={['focus', 'mouseenter']}
+                    hoverScale={1}
+                    onPress={handleSettingsDefaults}
+                  />
 
                   <div className={styles.closePlaceholder} />
                 </div>
