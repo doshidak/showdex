@@ -15,9 +15,11 @@ export interface SelectCustomProps {
   containerStyle?: React.CSSProperties;
   filtering?: boolean;
   active?: boolean;
+  scrollState?: [scrolling: boolean, setScrolling: React.Dispatch<React.SetStateAction<boolean>>];
   // optionTooltip?: <TValue extends DropdownSingleValue = DropdownSingleValue>(option: DropdownOption<TValue>) => JSX.Element;
   optionTooltip?: (props: SelectOptionTooltipProps) => JSX.Element;
   optionTooltipProps?: SelectOptionTooltipProps;
+  optionTooltipDelay?: number;
 }
 
 export interface SelectOptionTooltipProps<
@@ -65,14 +67,14 @@ export const SelectContainer = <
   Multi extends boolean,
   Group extends GroupBase<Option>,
 >({
-  className = '',
+  className,
   isRtl,
   isMulti,
   isDisabled,
   innerProps,
   selectProps: {
-    containerClassName = '',
-    containerStyle = {},
+    containerClassName,
+    containerStyle,
   } = {},
   children,
 }: SelectContainerProps<Option, Multi, Group>): JSX.Element => (

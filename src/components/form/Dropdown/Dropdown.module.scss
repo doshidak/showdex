@@ -442,15 +442,14 @@ $group-heading-dark-background-color: colors.$gray-darker;
 .group {
   position: sticky;
   top: 0;
-  @include spacing.padding-xy($x: $group-padding-x);
 }
 
 // SelectGroupHeading
 
 .groupHeading {
   display: block;
-  @include spacing.margin-xy($x: -1px);
-  @include spacing.padding-xy($x: $group-heading-padding-x, $y: $group-heading-padding-y);
+  // @include spacing.margin($x: -1px);
+  @include spacing.padding($x: $group-heading-padding-x, $y: $group-heading-padding-y);
   @include font.apply(fonts.$primary, ( font-weight: $group-heading-font-weight ));
   font-size: $group-heading-font-size;
   letter-spacing: $group-heading-letter-spacing;
@@ -576,11 +575,11 @@ $group-heading-dark-background-color: colors.$gray-darker;
 .dropdownIndicator {
   .selectContainer:not(.active):hover &:not(:hover) {
     .light & {
-      color: color.alpha($icon-light-color-hover, 0.5);
+      color: color.alpha($icon-light-color-hover, 0.48);
     }
 
     .dark & {
-      color: color.alpha($icon-dark-color-hover, 0.5);
+      color: color.alpha($icon-dark-color-hover, 0.48);
     }
   }
 
@@ -852,7 +851,7 @@ $group-heading-dark-background-color: colors.$gray-darker;
 // SelectNotice
 
 .notice {
-  @include spacing.padding-xy($notice-padding-x, $notice-padding-y);
+  @include spacing.padding($x: $notice-padding-x, $y: $notice-padding-y);
   font-size: map.get($value, font-size);
   text-align: center;
   user-select: none;

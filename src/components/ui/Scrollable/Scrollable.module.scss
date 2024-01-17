@@ -18,6 +18,12 @@
   flex-wrap: wrap;
   align-content: flex-start;
 
+  &.dragging {
+    user-select: none;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+  }
+
   // update (2023/11/09): Showdown added custom scrollbars in battle-log.css, so while we're now reverting to using our
   // custom Scrollable component, sometimes the custom scrollbar will flash real quick if the content changes, so we'll
   // make sure anything inside here won't be shown
@@ -88,6 +94,7 @@
   .dragging & {
     user-select: none;
     pointer-events: none;
+    -webkit-touch-callout: none;
   }
 
   // &::before, &::after {
@@ -179,19 +186,19 @@
   &::before {
     content: '';
     @include position.absolute($right: 2px, $left: 2px);
-    border-radius: 15px;
+    border-radius: 16px;
     opacity: 0;
     @include transition.apply((background-color, 0.3s, linear), (opacity, 0.3s, linear));
   }
 
   // when hovered, remove all transitions from drag handle
   &.visible::before {
-    opacity: 0.45;
+    opacity: 0.4;
     // @include transition.apply((background-color, 0.3s, linear), (opacity, 0s, linear));
   }
 
   &:hover.visible::before {
-    opacity: 0.75;
+    opacity: 0.8;
   }
 
   .horizontal &::before {
