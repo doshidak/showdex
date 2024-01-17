@@ -44,7 +44,7 @@ button.usernameButton {
   @include spacing.margin($top: 2px);
   font-size: 8px;
 
-  .verySmol & {
+  .verySmol:not(.mobileOverlay) & {
     @include spacing.margin($top: 0, $left: 10px);
   }
 

@@ -172,18 +172,18 @@
   }
 }
 
-div.bottomCloseButton {
-  // @include spacing.margin($top: 13px, $bottom: 5px);
-
-  &.mobile {
-    @include spacing.margin($top: 16px, $bottom: 4px);
+div.mobileCloseButton {
+  &.top {
+    justify-content: flex-start;
+    @include spacing.margin($top: 2px, $bottom: 6px);
   }
 
-  // &:not(.mobile)::before {
-  //   @include position.absolute-xy($x: 0, $y: -3px);
-  // }
+  &.bottom {
+    @include spacing.margin($top: 16px, $bottom: 8px);
+  }
 }
 
+/*
 .playerOption {
   @include flex.row($align: center);
 
@@ -200,3 +200,4 @@ div.bottomCloseButton {
     color: inherit;
   }
 }
+*/

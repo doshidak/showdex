@@ -26,7 +26,7 @@
     align-items: center;
   }
 
-  .verySmol & {
+  .verySmol:not(.mobileOverlay) & {
     flex-direction: column;
     justify-content: center;
   }
@@ -37,7 +37,7 @@
   width: 100%;
   max-width: 33%;
 
-  .verySmol & {
+  .verySmol:not(.mobileOverlay) & {
     max-width: none;
     @include flex.row($align: center);
   }

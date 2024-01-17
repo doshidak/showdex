@@ -131,7 +131,7 @@ export const Calcdex = ({
         />
 
         {
-          renderAsOverlay &&
+          (renderAsOverlay && !mobile) &&
           <BaseButton
             className={styles.overlayCloseButton}
             display="block"
@@ -142,12 +142,24 @@ export const Calcdex = ({
           </BaseButton>
         }
 
+        {
+          (renderAsOverlay && mobile) &&
+          <CloseButton
+            className={cx(
+              styles.mobileCloseButton,
+              styles.top,
+            )}
+            onPress={onRequestOverlayClose}
+          />
+        }
+
         <PlayerCalc
           className={styles.playerCalc}
           position="top"
           playerKey={topKey}
           defaultName={t('player.user.defaultName', { index: 1 })}
           playerOptions={playerOptions}
+          mobile={mobile}
         />
 
         <FieldCalc
@@ -162,14 +174,15 @@ export const Calcdex = ({
           playerKey={bottomKey}
           defaultName={t('player.user.defaultName', { index: 2 })}
           playerOptions={playerOptions}
+          mobile={mobile}
         />
 
         {
           (renderAsOverlay && mobile) &&
           <CloseButton
             className={cx(
-              styles.bottomCloseButton,
-              styles.mobile,
+              styles.mobileCloseButton,
+              styles.bottom,
             )}
             onPress={onRequestOverlayClose}
           />
