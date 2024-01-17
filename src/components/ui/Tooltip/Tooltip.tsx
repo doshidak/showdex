@@ -33,6 +33,7 @@ export interface TooltipProps extends Omit<TooltipTippyProps, 'trigger'> {
   arrowStyle?: React.CSSProperties;
   content?: React.ReactNode;
   trigger?: TooltipTippyTrigger | TooltipTippyTrigger[];
+  derender?: boolean;
   children?: React.ReactElement;
 }
 
@@ -65,6 +66,7 @@ export const Tooltip = ({
   } = {},
   content,
   trigger,
+  derender,
   onMount,
   onHidden,
   children,
@@ -124,7 +126,10 @@ export const Tooltip = ({
       }}
       trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
       zIndex={99}
-      render={(attributes, renderContent) => (
+      render={(derender ? () => null : (
+        attributes,
+        renderContent,
+      ) => (
         <animated.div
           className={cx(
             styles.container,
@@ -150,7 +155,7 @@ export const Tooltip = ({
             style={arrowStyle}
           />
         </animated.div>
-      )}
+      ))}
       onMount={handleMount}
       onHide={handleHide}
       onHidden={handleHidden}

@@ -98,6 +98,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   tooltip,
   optionTooltip,
   optionTooltipProps,
+  optionTooltipDelay = 500,
   options,
   components,
   loadingMessage = 'Loading...',
@@ -172,7 +173,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   // keeps track of whether the user has recently entered something into the input field
   // (when an optionTooltip is present, not having this would cause stuttering while typing)
   const [filtering, setFiltering] = React.useState(false);
-  const timeoutFiltering = useDebouncy(() => setFiltering(false), 1000);
+  const timeoutFiltering = useDebouncy(() => setFiltering(false), optionTooltipDelay);
 
   React.useEffect(() => {
     if (!optionTooltip || !filtering) {
@@ -184,6 +185,22 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
     filtering,
     optionTooltip,
     timeoutFiltering,
+  ]);
+
+  // update (2024/01/16): do the same thing for the scrollState (so that tooltips don't fly off the screen LOL)
+  const scrollState = React.useState(false);
+  const timeoutScrolling = useDebouncy(() => scrollState[1](false), optionTooltipDelay);
+
+  React.useEffect(() => {
+    if (!optionTooltip || !scrollState[0]) {
+      return;
+    }
+
+    timeoutScrolling();
+  }, [
+    optionTooltip,
+    scrollState,
+    timeoutScrolling,
   ]);
 
   const hasValue = Array.isArray(valueOption) ? !!valueOption.length : !!valueOption;
@@ -247,8 +264,10 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           tabIndex={disabled ? -1 : tabIndex}
           placeholder={hint}
           filtering={filtering}
+          scrollState={scrollState}
           optionTooltip={optionTooltip}
           optionTooltipProps={optionTooltipProps}
+          optionTooltipDelay={optionTooltipDelay}
           options={options}
           filterOption={filterOption || createAliasFilter()}
           value={valueOption}

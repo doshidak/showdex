@@ -32,8 +32,10 @@ export const SelectOption = <
   // selectProps,
   selectProps: {
     filtering,
+    scrollState,
     optionTooltip: OptionTooltip,
     optionTooltipProps,
+    optionTooltipDelay,
   } = {},
   children,
 }: SelectOptionProps<Option, Multi, Group>): JSX.Element => {
@@ -51,6 +53,7 @@ export const SelectOption = <
 
   // conditionally render the Tippy, otherwise, would cause insane lag when opening
   // due to each option's Tippy content rendering (even if not visible!)
+  /*
   const [tooltipVisible, setTooltipVisible] = React.useState(false);
 
   React.useEffect(() => {
@@ -74,30 +77,33 @@ export const SelectOption = <
     optionTooltipProps?.hidden,
     tooltipVisible,
   ]);
+  */
 
   // keep track of our own focused state to emulate the Tippy's delay prop
   const [focused, setFocused] = React.useState(isFocused);
 
   // debounce focused from false -> true @ 1000 ms (i.e., 1000 in delay [1000, 0])
   useDebouncy(() => {
-    if (!isFocused) {
+    if (!isFocused || scrollState?.[0]) {
       return;
     }
 
     setFocused(true);
-  }, 1000, [
+  }, optionTooltipDelay, [
     isFocused,
+    scrollState,
   ]);
 
   // immediately update focused from true -> false (i.e., 0 in delay [1000, 0])
   React.useEffect(() => {
-    if (isFocused) {
+    if (isFocused && !scrollState?.[0]) {
       return;
     }
 
     setFocused(false);
   }, [
     isFocused,
+    scrollState,
   ]);
 
   // const tooltipContent = React.useMemo(
@@ -170,12 +176,9 @@ export const SelectOption = <
       </div>
 
       {
-        (tooltipVisible && !filtering) &&
+        !!OptionTooltip &&
         <Tooltip
           reference={containerRef}
-          // content={selectProps?.optionTooltip?.(data)}
-          // content={tooltipContent}
-          // content={() => selectProps.optionTooltip(data)}
           content={(
             <OptionTooltip
               {...optionTooltipProps}
@@ -188,9 +191,8 @@ export const SelectOption = <
           // trigger="mouseenter"
           // touch="hold"
           visible={focused}
-          // visible={isFocused && tooltipVisible}
+          derender={!data?.value || optionTooltipProps?.hidden || filtering || scrollState?.[0]}
           disabled={isDisabled}
-          onHidden={() => setTooltipVisible(false)}
         />
       }
     </>
