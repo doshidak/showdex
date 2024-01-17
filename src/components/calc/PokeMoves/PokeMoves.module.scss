@@ -8,7 +8,7 @@
 @use 'mixins/transition';
 
 .container {
-  grid-template-columns: minmax(150px, 1.25fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-columns: minmax(150px, 1.5fr) minmax(0, 1.25fr) minmax(0, 1fr);
   column-gap: 10px;
   row-gap: 3px;
   @include spacing.padding($all: 12px, $top: 8px);
@@ -123,19 +123,19 @@ button.editButton {
     // to right,
     60deg,
 
-    color.alpha(colors.$black, 0.75) 25%,
+    color.alpha(colors.$black, 0.76) 25%,
 
     // #55C0EC,
-    color.shade(#63B44A, 15%) 25%,
+    color.shade(#63B44A, 32%) 25%,
     // #E96B7D,
-    color.shade(#43B9DC, 15%) 49%,
+    color.shade(#43B9DC, 24%) 49%,
 
     // #7ECADA,
     // #DBE6A7,
     #ACD7BF 49%,
     color.shade(#6DC5E5, 10%) 75%,
 
-    color.alpha(colors.$white, 0.75) 75%,
+    color.alpha(colors.$white, 0.76) 75%,
   );
 
   // position: relative;
