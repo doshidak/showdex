@@ -116,7 +116,7 @@
 }
 
 .statValue {
-  @include transition.apply(color);
+  @include transition.apply(color, opacity);
 
   &.positive {
     color: colors.$green;
@@ -128,6 +128,11 @@
 
   &.finalStat {
     font-size: 11px;
+  }
+
+  &.empty {
+    opacity: 0.32;
+    user-select: none;
   }
 }
 
@@ -182,7 +187,11 @@
   }
 
   &.disabled {
-    opacity: 0.64; // default 0.3 opacity is too faded
+    opacity: 0.64;
+
+    &.empty {
+      opacity: 0.32;
+    }
   }
 }
 
