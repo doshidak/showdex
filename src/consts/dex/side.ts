@@ -8,6 +8,7 @@ import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
  *   - Although technically player-sided field conditions, these are purposefully separated to
  *     not show `PlayerSideConditionsMap` in Singles formats.
  *
+ * @deprecated As of v1.2.3, the labels are stored in the Calcdex i18n strings.
  * @since 1.0.3
  */
 export const PlayerSideScreensToggleMap: Record<string, keyof CalcdexPlayerSide> = {
@@ -22,6 +23,7 @@ export const PlayerSideScreensToggleMap: Record<string, keyof CalcdexPlayerSide>
  * * Key is the label of the button, value is the boolean property in `CalcdexPlayerSide`.
  * * Typically only used by `FieldCalc` for Doubles formats.
  *
+ * @deprecated As of v1.2.3, the labels are stored in the Calcdex i18n strings.
  * @since 1.0.3
  */
 export const PlayerSideConditionsToggleMap: Record<string, keyof CalcdexPlayerSide> = {
@@ -43,14 +45,18 @@ export const PlayerSideConditionsToggleMap: Record<string, keyof CalcdexPlayerSi
  *
  * @since 1.0.3
  */
-export const PlayerSideConditionsDexMap: Partial<Record<keyof CalcdexPlayerSide, 'abilities' | 'moves'>> = {
-  isLightScreen: 'moves',
-  isReflect: 'moves',
-  isAuroraVeil: 'moves',
-  isHelpingHand: 'moves',
-  isFriendGuard: 'abilities',
-  isFlowerGift: 'abilities',
-  isBattery: 'abilities',
-  isPowerSpot: 'abilities',
-  isTailwind: 'moves',
+export const PlayerSideConditionsDexMap: Partial<Record<keyof CalcdexPlayerSide | 'isGravity', [dict: 'abilities' | 'moves', id: string]>> = {
+  isLightScreen: ['moves', 'lightscreen'],
+  isReflect: ['moves', 'reflect'],
+  isAuroraVeil: ['moves', 'auroraveil'],
+  isHelpingHand: ['moves', 'helpinghand'],
+  isFriendGuard: ['abilities', 'friendguard'],
+  isFlowerGift: ['abilities', 'flowergift'],
+  isBattery: ['abilities', 'battery'],
+  isPowerSpot: ['abilities', 'powerspot'],
+  isTailwind: ['moves', 'tailwind'],
+  isSeeded: ['moves', 'leechseed'],
+  isSR: ['moves', 'stealthrock'],
+  spikes: ['moves', 'spikes'],
+  isGravity: ['moves', 'gravity'],
 };
