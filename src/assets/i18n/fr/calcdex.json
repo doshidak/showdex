@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-12T23:03:17.926Z"
+    "updated": "2024-01-17T18:00:22.963Z"
   },
 
   "overlay": {
@@ -97,7 +97,7 @@
         "legacyHint": "$t(common:labels.na)",
         "empty": "$t(pokedex:abilities.noability_other)",
         "activeLabel": "$t(common:labels.active)",
-        "resetLabel": "$t(common:labels.reset)",
+        "resetLabel": "Réinit",
         "activeTooltip": "Désactiver <strong>{{ability}}</strong>",
         "inactiveTooltip": "Activer <strong>{{ability}}</strong>",
         "resetTooltip": "Réinitialiser à {{ability}} Révélée",
@@ -127,7 +127,7 @@
         "legacyHint": "$t(common:labels.na)",
         "empty": "$t(pokedex:items.noitem_other)",
         "defaultPrevEffect": "$t(common:labels.previous)",
-        "resetLabel": "$t(common:labels.reset)",
+        "resetLabel": "Réinit",
         "resetTooltip": "Réinitialiser à {{item}} {{effect}}"
       }
     },
@@ -167,13 +167,13 @@
         "inactiveLabel": "$t(common:labels.edit)",
         "activeTooltip": "Fermez l'<strong>Éditeur de Capacités</strong>",
         "inactiveTooltip": "Ouvrez l'<strong>Éditeur de Capacités</strong>",
-        "resetLabel": "$t(common:labels.reset)",
+        "resetLabel": "Réinit",
         "resetTooltip": "Réinitialiser <strong>{{move}}</strong> par Défaut",
 
         "faintCounter": {
           "aria": "Alliés KO Comptants pour {{pokemon}}",
           "label": "KO",
-          "resetLabel": "$t(common:labels.reset)",
+          "resetLabel": "Réinit",
           "resetTooltip": "Réinitialiser à <strong>{{count}} KO</strong>"
         },
 
@@ -263,15 +263,26 @@
     "screens": "Murs",
 
     "conditions": {
-      "light": "Mur Lumiére",
+      "lightscreen": "Lumiére",
       "reflect": "Reflet",
-      "aurora": "Voile Aurore",
-      "hand": "Main",
-      "gift": "Don",
-      "guard": "Garde",
-      "battery": "Batterie",
-      "power": "Énergie",
-      "twind": "Vent"
+      "auroraveil": "Aurore",
+      "helpinghand": "Main",
+      "flowergift": "Don",
+      "friendguard": "Garde",
+      "battery": "Battrie",
+      "powerspot": "Énergie",
+      "tailwind": "Vent",
+      "leechseed": "Graine",
+      "gravity": "Gravité",
+      "stealthrock": "Pièges",
+      "spikes": "Picots"
+    },
+
+    "spikes": {
+      "aria_one": "Mettre {{count}} Couche de $t(pokedex:moves.spikes)",
+      "aria_other": "Mettre {{count}} Couches de $t(pokedex:moves.spikes)",
+      "label_one": "{{count}}<times />Picot",
+      "label_other": "{{count}}<times />Picot"
     },
 
     "weather": {

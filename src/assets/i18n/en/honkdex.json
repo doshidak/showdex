@@ -1,16 +1,18 @@
 {
   "--meta": {
     "name": "honkdex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-08T15:45:10.164Z",
-    "updated": "2024-01-09T21:06:50.982Z"
+    "updated": "2024-01-17T19:14:29.496Z"
   },
 
   "battle": {
     "gen": {
       "aria": "Generation Selector",
-      "locked": "Switching the gen with Pokémon in the calc will open a <strong>new</strong>, <strong>blank</strong> $t(common:products.honkdex_one)."
+      "optionAria": "Switch to Generation {{gen}}",
+      "locked": "Switching the gen with Pokémon in the calc will open a <strong>new</strong>, <strong>blank</strong> $t(common:products.honkdex_one).",
+      "friendlyLabel": "Gen {{gen}}"
     },
 
     "name": {

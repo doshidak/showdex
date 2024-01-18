@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
@@ -28,6 +29,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   onRequestRemove,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
+  const { t } = useTranslation('pokedex');
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
 
@@ -44,7 +46,8 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     cached,
   } = instance || {};
 
-  const { label: genLabel } = GenLabels[gen] || {};
+  const { slug: genSlug } = GenLabels[gen] || {};
+  const genLabel = (!!genSlug && t(`gens.${genSlug}.label`, '')) || null;
 
   const {
     label,
@@ -129,7 +132,11 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 
       <div className={styles.info}>
         <div className={styles.format}>
-          Gen {gen}
+          {t('honkdex:battle.gen.friendlyLabel', {
+            gen: gen || '--',
+            defaultValue: `Gen ${gen || '--'}`,
+          })}
+
           {
             !!label &&
             <>
@@ -138,6 +145,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
               <strong>{label}</strong>
             </>
           }
+
           {!!suffixes && ' '}
           {suffixes.map((s) => s[1]).join(` ${bullop} `)}
         </div>
