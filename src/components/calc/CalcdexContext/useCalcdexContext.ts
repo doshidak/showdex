@@ -28,6 +28,7 @@ import {
   toggleRuinAbilities,
   sanitizePlayerSide,
   sanitizePokemon,
+  clonePlayerSide,
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpIv,
@@ -1150,20 +1151,24 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       playerPayload.pokemon = player.pokemon;
     }
 
-    // in gen 1, field conditions (i.e., only Reflect & Light Screen) are volatiles applied to the
-    // Pokemon itself, not in the `sideConditions` of Showdown.Side, which is the case for gen 2+.
-    // regardless, we update the field here for screens in gen 1 & hazards in gen 2+.
-    playerPayload.side = sanitizePlayerSide(
-      state.gen,
-      player,
-    );
+    playerPayload.side = clonePlayerSide(player.side);
 
-    // don't sync screens here, otherwise, user's values will be overwritten when switching Pokemon
-    // (normally should only be overwritten per sync at the end of the turn, via syncBattle())
-    if (state.gen > 1) {
-      delete playerPayload.side.isReflect;
-      delete playerPayload.side.isLightScreen;
-      delete playerPayload.side.isAuroraVeil;
+    // note: in gen 1, field conditions (i.e., only Reflect & Light Screen) are volatiles applied to the Pokemon itself
+    if (state.gen === 1) {
+      const sanitized = sanitizePlayerSide(
+        state.gen,
+        player,
+      );
+
+      playerPayload.side.isReflect = sanitized.isReflect;
+      playerPayload.side.isLightScreen = sanitized.isLightScreen;
+    }
+
+    if (state.gen > 8) {
+      playerPayload.side = {
+        ...playerPayload.side,
+        ...countSideRuinAbilities(player),
+      };
     }
 
     // ;-;

@@ -2,17 +2,17 @@ import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { type Weather } from '@smogon/calc';
-import { type DropdownOption, Dropdown } from '@showdex/components/form';
+import { type DropdownOption, Dropdown, SpikesField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
 import { times } from '@showdex/consts/core';
 import {
   PlayerSideConditionsDexMap,
-  PlayerSideConditionsToggleMap,
-  PlayerSideScreensToggleMap,
+  // PlayerSideConditionsToggleMap,
+  // PlayerSideScreensToggleMap,
   TerrainNames,
 } from '@showdex/consts/dex';
-import { type CalcdexBattleField, type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPlayerKey, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -103,30 +103,150 @@ export const FieldCalc = ({
   ]);
 
   const doubles = state?.gameType === 'Doubles';
-  const natDexFormat = !['nationaldex', 'natdex'].some((f) => format?.includes(f));
+  const natdexFormat = ['nationaldex', 'natdex'].some((f) => format?.includes(f));
 
-  const sideFieldMap: typeof PlayerSideScreensToggleMap = {
-    ...PlayerSideScreensToggleMap,
-    ...(operatingMode === 'standalone' && !doubles && { Twind: PlayerSideConditionsToggleMap.Twind }),
-    ...(doubles && PlayerSideConditionsToggleMap),
-  };
+  // const sideFieldMap: typeof PlayerSideScreensToggleMap = {
+  //   ...PlayerSideScreensToggleMap,
+  //   ...(operatingMode === 'standalone' && !doubles && { Twind: PlayerSideConditionsToggleMap.Twind }),
+  //   ...(doubles && PlayerSideConditionsToggleMap),
+  // };
 
-  // update (2023/01/06): as per an executive order from camdawgboi, these toggles will be removed in
-  // Gen 9 for non-National Dex formats (though, are there any doubles National Dex formats?)
-  if (gen === 9 && doubles && natDexFormat) {
-    delete sideFieldMap.Gift;
-    delete sideFieldMap.Battery;
-    delete sideFieldMap.Power;
-  }
+  const playerToggleKeys = React.useMemo(() => {
+    const output: (keyof CalcdexPlayerSide | 'isGravity')[] = [
+      'isLightScreen',
+      'isReflect',
+      'isAuroraVeil',
+    ];
+
+    if (doubles) {
+      // update (2023/01/06): as per an executive order from analogcam, these toggles will be removed in
+      // Gen 9 for non-National Dex formats (though, are there any doubles National Dex formats?)
+      const omitDumbToggles = gen === 9 && doubles && !natdexFormat;
+
+      output.push(...[
+        'isHelpingHand',
+        !omitDumbToggles && 'isFlowerGift',
+        'isFriendGuard',
+        !omitDumbToggles && 'isBattery',
+        !omitDumbToggles && 'isPowerSpot',
+      ].filter(Boolean) as typeof output);
+    }
+
+    if (operatingMode === 'standalone' || doubles) {
+      output.push('isTailwind');
+    }
+
+    if (operatingMode === 'standalone') {
+      output.push('isGravity', 'isSeeded', 'isSR', 'spikes');
+    }
+
+    return output;
+  }, [
+    doubles,
+    gen,
+    natdexFormat,
+    operatingMode,
+  ]);
+
+  // if (gen === 9 && doubles && !natdexFormat) {
+  //   delete sideFieldMap.Gift;
+  //   delete sideFieldMap.Battery;
+  //   delete sideFieldMap.Power;
+  // }
 
   // update (2023/01/23): CalcdexPlayerSide's (formerly attached to attackerSide and defenderSide of CalcdexBattleField)
   // are now attached to each individual CalcdexPlayer under the `side` property; attackerSide and defenderSide are
   // dynamically set during instantiation of the Smogon.Field in createSmogonField()
-  const playerSide = state[playerKey]?.side; // i.e., attackingSide
-  const opponentSide = state[opponentKey]?.side; // i.e., defendingSide
+  // const playerSide = state[playerKey]?.side; // i.e., attackingSide
+  // const opponentSide = state[opponentKey]?.side; // i.e., defendingSide
 
   const disabled = !state[playerKey]?.pokemon?.length
     || !state[opponentKey]?.pokemon?.length;
+
+  const renderPlayerToggles = (
+    pkey: CalcdexPlayerKey,
+  ) => playerToggleKeys.map((sideKey) => {
+    const [dict, toggleId] = PlayerSideConditionsDexMap[sideKey] || [];
+
+    if (!dict || !toggleId) {
+      return null;
+    }
+
+    const dexToggle = dex[dict]?.get?.(toggleId);
+
+    if (!dexToggle?.exists || gen < (dexToggle.gen || 0)) {
+      return null;
+    }
+
+    const currentSide = state[pkey]?.side;
+    const active = sideKey === 'isGravity' ? field?.isGravity : !!currentSide?.[sideKey];
+
+    const desc = settings?.showFieldTooltips ? formatDexDescription(
+      (dexToggle?.shortDesc || dexToggle?.desc)
+        ?.replace("This Pokemon's allies", 'Allies'),
+    ) : null;
+
+    const tooltipContent = desc ? (
+      <div className={cx(styles.tooltipContent, styles.descTooltip)}>
+        {
+          !!dexToggle.name &&
+          <>
+            <strong>{t(`pokedex:${dict}.${toggleId}`, dexToggle.name)}</strong>
+            <br />
+          </>
+        }
+        {desc}
+      </div>
+    ) : null;
+
+    const toggleKey = `${l.scope}:${battleId || '???'}:${pkey}:${toggleId}`;
+    const toggleDisabled = disabled || !battleId || !currentSide;
+
+    if (sideKey === 'spikes') {
+      return (
+        <SpikesField
+          key={toggleKey}
+          className={styles.toggleButton}
+          headerPrefix={tooltipContent}
+          input={{
+            name: `${l.scope}:${pkey}:${sideKey}`,
+            value: currentSide?.spikes || null,
+            onChange: (value: number) => updateSide(pkey, {
+              [sideKey]: value || null,
+            }, `${l.scope}:${pkey}:SpikesField~${sideKey}:input.onChange()`),
+          }}
+          togglePrimary
+          toggleActive={active}
+          disabled={toggleDisabled}
+        />
+      );
+    }
+
+    return (
+      <ToggleButton
+        key={toggleKey}
+        className={styles.toggleButton}
+        label={t(`field.conditions.${toggleId}`)}
+        tooltip={tooltipContent}
+        primary
+        active={active}
+        disabled={toggleDisabled}
+        onPress={() => {
+          const scope = `${l.scope}:${pkey}:ToggleButton~${sideKey}:onPress()`;
+
+          if (sideKey === 'isGravity') {
+            return void updateField({
+              [sideKey]: !field?.[sideKey],
+            }, scope);
+          }
+
+          updateSide(pkey, {
+            [sideKey]: !currentSide?.[sideKey],
+          }, scope);
+        }}
+      />
+    );
+  });
 
   return (
     <TableGrid
@@ -204,58 +324,7 @@ export const FieldCalc = ({
         className={styles.leftFieldInput}
         align="left"
       >
-        {Object.entries(sideFieldMap).map(([
-          label,
-          sideKey,
-        ]) => {
-          // e.g., 'isAuroraVeil' -> 'AuroraVeil' -> formatId() -> 'auroraveil'
-          const screenMoveId = formatId(sideKey.replace('is', ''));
-          const dexMapping = PlayerSideConditionsDexMap[sideKey];
-
-          const dexFieldEffect = screenMoveId && settings?.showFieldTooltips
-            ? dex[dexMapping].get(screenMoveId)
-            : null;
-
-          const notAvailable = gen < (dexFieldEffect?.gen || 0);
-
-          if (notAvailable) {
-            return null;
-          }
-
-          const effectDescription = formatDexDescription(
-            (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
-              ?.replace("This Pokemon's allies", 'Allies'),
-          );
-
-          return (
-            <React.Fragment key={`${l.scope}:${battleId || '???'}:${playerKey}:${label}`}>
-              <ToggleButton
-                className={styles.toggleButton}
-                label={t(`field.conditions.${formatId(label)}`)}
-                tooltip={effectDescription ? (
-                  <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-                    {
-                      !!dexFieldEffect.name &&
-                      <>
-                        <strong>
-                          {t(`pokedex:${dexMapping}.${formatId(dexFieldEffect.name)}`, dexFieldEffect.name)}
-                        </strong>
-                        <br />
-                      </>
-                    }
-                    {effectDescription}
-                  </div>
-                ) : null}
-                primary
-                active={!!playerSide?.[sideKey]}
-                disabled={disabled || !battleId || !playerSide}
-                onPress={() => updateSide(playerKey, {
-                  [sideKey]: !playerSide?.[sideKey],
-                })}
-              />
-            </React.Fragment>
-          );
-        })}
+        {renderPlayerToggles(playerKey)}
       </TableGridItem>
 
       {/* weather */}
@@ -271,7 +340,7 @@ export const FieldCalc = ({
             value: weather,
             onChange: (updatedWeather: CalcdexBattleField['weather']) => updateField({
               weather: updatedWeather,
-            }),
+            }, `${l.scope}:Dropdown~Weather:input.onChange()`),
           }}
           options={getWeatherConditions(format).map((name: Weather) => ({
             label: t(`pokedex:weather.${formatId(name)}.label`, name),
@@ -296,7 +365,7 @@ export const FieldCalc = ({
             value: terrain,
             onChange: (updatedTerrain: CalcdexBattleField['terrain']) => updateField({
               terrain: updatedTerrain,
-            }),
+            }, `${l.scope}:Dropdown~Terrain:input.onChange()`),
           }}
           options={TerrainNames.map((name) => ({
             label: t(`pokedex:terrain.${formatId(name)}.label`, name),
@@ -313,59 +382,7 @@ export const FieldCalc = ({
         className={styles.rightFieldInput}
         align="right"
       >
-        {Object.entries(sideFieldMap).map(([
-          label,
-          sideKey,
-        ]) => {
-          const screenMoveId = formatId(sideKey.replace('is', ''));
-          const dexMapping = PlayerSideConditionsDexMap[sideKey];
-
-          const dexFieldEffect = screenMoveId && settings?.showFieldTooltips
-            ? dex[dexMapping].get(screenMoveId)
-            : null;
-
-          const notAvailable = gen < (dexFieldEffect?.gen || 0);
-
-          if (notAvailable) {
-            return null;
-          }
-
-          const effectDescription = formatDexDescription(
-            (dexFieldEffect?.shortDesc || dexFieldEffect?.desc)
-              ?.replace("This Pokemon's allies", 'Allies'),
-          );
-
-          return (
-            <React.Fragment key={`${l.scope}:${battleId || '???'}:${opponentKey}:${label}`}>
-              <ToggleButton
-                className={styles.toggleButton}
-                label={t(`field.conditions.${formatId(label)}`)}
-                tooltip={effectDescription ? (
-                  <div className={cx(styles.tooltipContent, styles.descTooltip)}>
-                    {
-                      !!dexFieldEffect.name &&
-                      <>
-                        <strong>
-                          {t(`pokedex:${dexMapping}.${formatId(dexFieldEffect.name)}`, dexFieldEffect.name)}
-                        </strong>
-                        <br />
-                      </>
-                    }
-                    {effectDescription}
-                  </div>
-                ) : null}
-                primary
-                active={!!opponentSide?.[sideKey]}
-                disabled={disabled || !battleId || !opponentSide}
-                onPress={() => updateSide(opponentKey, {
-                  [sideKey]: !opponentSide?.[sideKey],
-                })}
-              />
-
-              {/* {i < Object.keys(sideFieldMap).length - 1 && ' '} */}
-            </React.Fragment>
-          );
-        })}
+        {renderPlayerToggles(opponentKey)}
       </TableGridItem>
     </TableGrid>
   );
