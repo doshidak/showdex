@@ -625,6 +625,7 @@ export const PokeStats = ({
               className={cx(
                 styles.statValue,
                 styles.finalStat,
+                !finalStat && styles.empty,
                 !!boostDelta && !boostColor && styles[boostDelta], // default color
               )}
               style={boostColor ? { color: boostColor } : undefined}
@@ -672,6 +673,7 @@ export const PokeStats = ({
             <Button
               className={cx(
                 styles.boostButton,
+                !boost && styles.empty,
                 !didDirtyBoost && styles.pristine,
                 !didDirtyBoost && styles.disabled, // intentionally keeping them separate
               )}
