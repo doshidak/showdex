@@ -1,16 +1,18 @@
 {
   "--meta": {
     "name": "honkdex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-09T20:59:50.965Z",
-    "updated": "2024-01-12T23:03:17.927Z"
+    "updated": "2024-01-17T19:19:24.238Z"
   },
 
   "battle": {
     "gen": {
       "aria": "Sélecteur de Génération",
-      "locked": "Changer de gén avec Pokémon dans la calculatrice ouvrira une <strong>nouvelle</strong> $t(common:products.honkdex_one) <strong>vierge</strong>."
+      "optionAria": "Changer à la Génération {{gen}}",
+      "locked": "Changer de gén avec Pokémon dans la calculatrice ouvrira une <strong>nouvelle</strong> $t(common:products.honkdex_one) <strong>vierge</strong>.",
+      "friendlyLabel": "Gén {{gen}}"
     },
 
     "name": {

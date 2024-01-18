@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-01-10T12:25:03.392Z"
+    "updated": "2024-01-17T17:40:08.578Z"
   },
 
   "overlay": {
@@ -263,15 +263,26 @@
     "screens": "Screens",
 
     "conditions": {
-      "light": "Light",
+      "lightscreen": "Light",
       "reflect": "Reflect",
-      "aurora": "Aurora",
-      "hand": "Hand",
-      "gift": "Gift",
-      "guard": "Guard",
+      "auroraveil": "Aurora",
+      "helpinghand": "Hand",
+      "flowergift": "Gift",
+      "friendguard": "Guard",
       "battery": "Battery",
-      "power": "Power",
-      "twind": "Twind"
+      "powerspot": "Power",
+      "tailwind": "Twind",
+      "leechseed": "Seed",
+      "gravity": "Gravity",
+      "stealthrock": "Rocks",
+      "spikes": "Spikes"
+    },
+
+    "spikes": {
+      "aria_one": "Apply {{count}} Layer of Spikes",
+      "aria_other": "Apply {{count}} Layers of Spikes",
+      "label_one": "{{count}}<times />Spike",
+      "label_other": "{{count}}<times />Spike"
     },
 
     "weather": {

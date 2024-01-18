@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-13T00:12:24.261Z"
+    "updated": "2024-01-17T14:48:12.605Z"
   },
 
   "pane": {
@@ -209,7 +209,7 @@
     },
 
     "destroyOnClose": {
-      "label": "Close Memory After Tab Closes",
+      "label": "Clear Memory After Tab Closes",
       "tooltip": "Clears memory used by the $t(common:products.calcdex_one) after the battle closes. Once cleared, the $t(common:products.calcdex_one) cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Enabling this may improve performance on lower-spec machines.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong> as their memory is cleared as soon as their battles close."
     },
 

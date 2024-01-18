@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "pokedex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T16:53:23.631Z",
-    "updated": "2024-01-13T02:28:22.556Z"
+    "updated": "2024-01-17T19:10:31.077Z"
   },
 
   "abilities": {
@@ -3600,5 +3600,44 @@
     "mega": ["Méga-Évolution", "Méga-Évoluer", "Méga"],
     "tera": ["Téracristallisation", "Téracristalliser", "Téra"],
     "z": ["Force Z", "Force Z", "Z"]
+  },
+
+  "gens": {
+    "rb": {
+      "label": "RBJ",
+      "shortDesc": "Rouge/Bleu/Jaune (RBY)"
+    },
+    "gs": {
+      "label": "OAC",
+      "shortDesc": "Or/Argent/Cristal (GSC)"
+    },
+    "rs": {
+      "label": "ADV",
+      "shortDesc": "Rubis/Saphir/Émeraude (Advance) + Rouge Feu/Vert Feuille (FRLG)"
+    },
+    "dp": {
+      "label": "DPP",
+      "shortDesc": "Diamant/Perle/Platine + Or HeartGold/Argent SoulSilver (HGSS)"
+    },
+    "bw": {
+      "label": "N/B",
+      "shortDesc": "Noir/Blanc (B/W) + Noir 2/Blanc 2 (B2W2)"
+    },
+    "xy": {
+      "label": "X/Y",
+      "shortDesc": "X/Y + Rubis Oméga/Saphir Alpha (ORAS)"
+    },
+    "sm": {
+      "label": "S/L",
+      "shortDesc": "Soleil/Lune (S/M) + Ultra-Soleil/Ultra-Lune (USUM) + Let's Go, Pikachu/Évoli (LGPE)"
+    },
+    "ss": {
+      "label": "É/B",
+      "shortDesc": "Épée/Bouclier (S/S) + Diamant Étincelant/Perle Scintillante (BDSP)"
+    },
+    "sv": {
+      "label": "É/V",
+      "shortDesc": "Écarlate/Violet (S/V)"
+    }
   }
 }

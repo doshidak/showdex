@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "pokedex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-13T02:27:54.942Z"
+    "updated": "2024-01-17T19:11:45.649Z"
   },
 
   "abilities": {
@@ -351,5 +351,44 @@
     "mega": ["Mega-Evolution", "Mega-Evolve", "Mega"],
     "tera": ["Terastallization", "Terastallize", "Tera"],
     "z": ["Z-Power", "Z-Power", "Z"]
+  },
+
+  "gens": {
+    "rb": {
+      "label": "RBY",
+      "shortDesc": "Red/Blue/Yellow"
+    },
+    "gs": {
+      "label": "GSC",
+      "shortDesc": "Gold/Silver/Crystal"
+    },
+    "rs": {
+      "label": "ADV",
+      "shortDesc": "Ruby/Sapphire/Emerald (Advance) + FireRed/LeafGreen (FRLG)"
+    },
+    "dp": {
+      "label": "DPP",
+      "shortDesc": "Diamond/Pearl/Platinum + HeartGold/SoulSilver (HGSS)"
+    },
+    "bw": {
+      "label": "B/W",
+      "shortDesc": "Black/White + Black 2/White 2 (B2W2)"
+    },
+    "xy": {
+      "label": "X/Y",
+      "shortDesc": "X/Y + Omega Ruby/Alpha Sapphire (ORAS)"
+    },
+    "sm": {
+      "label": "S/M",
+      "shortDesc": "Sun/Moon + Ultra Sun/Ultra Moon (USUM) + Let's Go, Pikachu!/Eevee! (LGPE)"
+    },
+    "ss": {
+      "label": "S/S",
+      "shortDesc": "Sword/Shield + Brilliant Diamond/Shining Pearl (BDSP)"
+    },
+    "sv": {
+      "label": "S/V",
+      "shortDesc": "Scarlet/Violet"
+    }
   }
 }
