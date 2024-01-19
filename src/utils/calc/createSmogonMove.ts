@@ -131,8 +131,8 @@ export const createSmogonMove = (
   // update (2023/12/29): checking the default number of hits (if any) for cases such as Kyurem w/ Loaded Dice,
   // which should be 4 Scale Shot hits, but since `options.hits` wasn't provided, @smogon/calc uses 3 hits
   // (despite PokeMoves showing the value from getMoveOverrideDefaults(), which is dynamically set at 4 due to the item)
-  if (hitsOverride || defaultOverrides.hits) {
-    options.hits = hitsOverride || defaultOverrides.hits;
+  if (hitsOverride || defaultOverrides?.hits) {
+    options.hits = hitsOverride || defaultOverrides?.hits;
   }
 
   if (defensiveStatOverride) {
