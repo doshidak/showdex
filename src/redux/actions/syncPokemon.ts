@@ -552,6 +552,16 @@ export const syncPokemon = (
     ];
   }
 
+  // from Showdown's battle log:
+  // "In Gens 3-4, Knock Off only makes the target's item unusable; it cannot obtain a new item."
+  if (syncedPokemon.item && formatId(syncedPokemon.itemEffect) === 'knockedoff') {
+    syncedPokemon.prevItem = syncedPokemon.item;
+    syncedPokemon.prevItemEffect = syncedPokemon.itemEffect;
+    syncedPokemon.item = null;
+    syncedPokemon.itemEffect = null;
+    syncedPokemon.dirtyItem = null;
+  }
+
   // only using sanitizePokemon() to get some values back
   // (is this a good idea? idk)
   const {
