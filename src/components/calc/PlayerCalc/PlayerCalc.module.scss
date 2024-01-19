@@ -104,7 +104,7 @@
   @include transition.apply(background-color, border-color);
   pointer-events: none;
 
-  .piconButton:not(.selected):hover & {
+  .piconButton:not(.selected):not(:focus):hover & {
     .light & {
       border-color: color.alpha(colors.$black, 0.16);
     }
@@ -134,7 +134,7 @@
     }
   }
 
-  .piconButton.selected:hover & {
+  .piconButton.selected:hover &, .piconButton:focus & {
     .light &, .dark & {
       border-color: color.alpha(colors.$blue, 0.8);
     }

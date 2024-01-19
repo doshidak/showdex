@@ -18,7 +18,11 @@ export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
   onRequestRemove?: () => void;
 }
 
-export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
+export interface InstanceButtonRef extends ButtonElement {
+  queueRemoval: () => void;
+}
+
+export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButtonProps>(({
   className,
   instance,
   authName,
@@ -30,6 +34,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
   const { t } = useTranslation('pokedex');
+  const containerRef = React.useRef<ButtonElement>(null);
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
 
@@ -96,13 +101,18 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       return void setRemovalQueued(false);
     }
 
-    removalRequestTimeout.current = setTimeout(onRequestRemove, 5000);
+    removalRequestTimeout.current = setTimeout(onRequestRemove, 3000);
     setRemovalQueued(true);
   };
 
+  React.useImperativeHandle(forwardedRef, () => ({
+    ...containerRef.current,
+    queueRemoval: queueRemovalRequest,
+  }));
+
   return (
     <BaseButton
-      ref={forwardedRef}
+      ref={containerRef}
       {...props}
       className={cx(
         styles.container,
@@ -208,7 +218,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                 {
                   hasMorePlayers &&
                   <span className={styles.morePlayers}>
-                    &amp; friends
+                    &amp; {t('honkdex:battle.name.friends')}
                   </span>
                 }
               </>
