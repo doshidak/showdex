@@ -42,15 +42,32 @@ declare type DeepPartial<T> = T extends object ? {
  * ```ts
  * type Sosig = {
  *   fatness?: number;
- *   color?: number;
+ *   color: number;
  *   gain?: number;
  * };
  * type AddMoreSosig = PickRequired<Sosig, 'fatness'>;
- * // -> { fatness: number; color?: number; gain?: number; }
+ * // -> { fatness: number; color: number; gain?: number; }
  * ```
  * @since 1.0.2
  */
 declare type PickRequired<T, K extends keyof T> = Modify<T, Required<Pick<T, K>>>;
+
+/**
+ * Construct a type from `T` whose properties in `K` are optional.
+ *
+ * @example
+ * ```ts
+ * type Sosig = {
+ *   fatness: number;
+ *   color: number;
+ *   gain?: number;
+ * };
+ * type MaybeFatSosig = PickOptional<Sosig, 'fatness'>;
+ * // -> { fatness?: number; color: number; gain?: number; }
+ * ```
+ * @since 1.2.3
+ */
+declare type PickOptional<T, K extends keyof T> = Modify<T, Partial<Pick<T, K>>>;
 
 /**
  * Construct a literal type with the keys of the indexable type `T` whose types extend the literal type `K`.
