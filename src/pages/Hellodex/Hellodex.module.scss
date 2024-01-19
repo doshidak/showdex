@@ -26,13 +26,19 @@
   }
 
   &.glassy {
-    backdrop-filter: blur(4px);
+    background-color: colors.$transparent;
 
-    &.light {
+    &::before {
+      content: '';
+      @include position.absolute-fill;
+      backdrop-filter: blur(4px);
+    }
+
+    &.light::before {
       background-color: color.alpha(colors.$showdown-background-light, 0.56);
     }
 
-    &.dark {
+    &.dark::before {
       background-color: color.alpha(colors.$gray-darkest, 0.64);
     }
   }

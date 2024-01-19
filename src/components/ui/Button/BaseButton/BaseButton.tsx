@@ -47,7 +47,7 @@ export interface CommonButtonProps<
   /**
    * Optional callback to trigger when the user invokes the context menu.
    */
-  // onContextMenu?: (event: TriggerEvent) => void;
+  onContextMenu?: (event: React.MouseEvent<ButtonElement, MouseEvent>) => void;
 }
 
 /* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
@@ -87,6 +87,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
   disabled,
   children,
   onHover,
+  onContextMenu,
   ...props
 }: BaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const elementType = display === 'inline' ? 'button' : 'div';
@@ -148,6 +149,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
         className,
       )}
       style={{ ...style, scale }}
+      onContextMenu={onContextMenu}
     >
       {children}
     </Component>

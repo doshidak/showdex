@@ -1,13 +1,21 @@
 import * as React from 'react';
-// import useSize from '@react-hook/size';
 import { Trans, useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { BuildInfo } from '@showdex/components/debug';
 import { useSandwich } from '@showdex/components/layout';
-import { BaseButton, Button, Scrollable } from '@showdex/components/ui';
+import {
+  BaseButton,
+  Button,
+  ContextMenu,
+  Scrollable,
+  useContextMenu,
+} from '@showdex/components/ui';
 import {
   useAuthUsername,
+  useBattleRecord,
+  useBattleRecordReset,
+  useCalcdexDuplicator,
   useCalcdexSettings,
   useCalcdexState,
   useColorScheme,
@@ -18,12 +26,12 @@ import {
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
-import { useRoomNavigation } from '@showdex/utils/hooks';
+import { useRandomUuid, useRoomNavigation } from '@showdex/utils/hooks';
 import { openUserPopup } from '@showdex/utils/host';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
 import { GradientButton } from './GradientButton';
-import { InstanceButton } from './InstanceButton';
+import { type InstanceButtonRef, InstanceButton } from './InstanceButton';
 import { PatronagePane } from './PatronagePane';
 import { SettingsPane } from './SettingsPane';
 import { useHellodexSize } from './useHellodexSize';
@@ -50,6 +58,7 @@ export const Hellodex = ({
 }: HellodexProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const instanceRefs = React.useRef<Record<string, InstanceButtonRef>>({});
 
   useHellodexSize(contentRef);
 
@@ -76,9 +85,11 @@ export const Hellodex = ({
   ));
 
   const instancesEmpty = !instances.length;
-
-  // donate button visibility
   const showDonateButton = settings?.showDonateButton;
+
+  const battleRecord = useBattleRecord();
+  const resetBattleRecord = useBattleRecordReset();
+  const dupeInstance = useCalcdexDuplicator();
 
   // pane visibilities
   const {
@@ -95,6 +106,17 @@ export const Hellodex = ({
 
   const toggleSettingsPane = settingsVisible ? closeSettingsPane : openSettingsPane;
 
+  const {
+    show: showContextMenu,
+    // hideAll: hideContextMenus,
+    hideAfter,
+  } = useContextMenu();
+
+  const contextMenuId = useRandomUuid();
+  const calcdexMenuId = useRandomUuid();
+  const honkdexMenuId = useRandomUuid();
+  const recordMenuId = useRandomUuid();
+
   return (
     <div
       className={cx(
@@ -103,6 +125,10 @@ export const Hellodex = ({
         !!colorScheme && styles[colorScheme],
         glassyTerrain && styles.glassy,
       )}
+      onContextMenu={(e) => showContextMenu({
+        event: e,
+        id: contextMenuId,
+      })}
     >
       <BuildInfo
         position="top-right"
@@ -316,6 +342,7 @@ export const Hellodex = ({
 
                     {instances.map((instance) => (
                       <InstanceButton
+                        ref={(r) => { instanceRefs.current[instance.battleId] = r; }}
                         key={`Hellodex:InstanceButton:${instance.battleId}`}
                         className={styles.instanceButton}
                         instance={instance}
@@ -326,6 +353,15 @@ export const Hellodex = ({
                             : openCalcdexInstance
                         )?.(instance.battleId)}
                         onRequestRemove={() => removeHonkdexInstances?.(instance.battleId)}
+                        onContextMenu={(e) => {
+                          showContextMenu({
+                            id: instance.operatingMode === 'battle' ? calcdexMenuId : honkdexMenuId,
+                            event: e,
+                            props: { instanceId: instance.battleId },
+                          });
+
+                          e.stopPropagation();
+                        }}
                       />
                     ))}
 
@@ -342,6 +378,10 @@ export const Hellodex = ({
               settings?.showBattleRecord &&
               <BattleRecord
                 className={styles.battleRecord}
+                onContextMenu={(e) => {
+                  showContextMenu({ id: recordMenuId, event: e });
+                  e.stopPropagation();
+                }}
               />
             }
           </div>
@@ -530,6 +570,179 @@ export const Hellodex = ({
           </div>
         </div>
       </div>
+
+      <ContextMenu
+        id={contextMenuId}
+        itemKeyPrefix="Hellodex:ContextMenu"
+        items={[
+          {
+            key: 'new-honk',
+            entity: 'item',
+            props: {
+              label: 'New Honk',
+              icon: 'fa-car',
+              hidden: !honkdexSettings?.visuallyEnabled,
+              onPress: hideAfter(openHonkdexInstance),
+            },
+          },
+          {
+            key: 'spectate-battles',
+            entity: 'item',
+            props: {
+              label: 'Spectate Battles',
+              icon: 'sword',
+              iconStyle: { transform: 'scale(1.1)' },
+              disabled: typeof app?.joinRoom !== 'function',
+              onPress: hideAfter(() => app.joinRoom('battles', 'battles')),
+            },
+          },
+          {
+            key: 'settings-separator',
+            entity: 'separator',
+          },
+          {
+            key: 'open-settings',
+            entity: 'item',
+            props: {
+              theme: settingsVisible ? 'info' : 'default',
+              label: settingsVisible ? 'Close Settings' : 'Settings',
+              icon: settingsVisible ? 'close-circle' : 'cog',
+              iconStyle: settingsVisible ? undefined : { transform: 'scale(1.2)' },
+              onPress: hideAfter(toggleSettingsPane),
+            },
+          },
+        ]}
+      />
+
+      <ContextMenu
+        id={calcdexMenuId}
+        itemKeyPrefix="InstanceButton:Calcdex:ContextMenu"
+        items={[
+          {
+            key: 'open-calcdex',
+            entity: 'item',
+            props: {
+              label: 'Open Calcdex',
+              icon: 'external-link',
+              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              onPress: ({ props: p }) => hideAfter(() => {
+                const id = (p as Record<'instanceId', string>)?.instanceId;
+
+                if (!id) {
+                  return;
+                }
+
+                openCalcdexInstance(id);
+              })(),
+            },
+          },
+          {
+            key: 'dupe-calcdex',
+            entity: 'item',
+            props: {
+              label: 'Convert to Honk',
+              icon: 'fa-car',
+              onPress: ({ props: p }) => hideAfter(() => {
+                const id = (p as Record<'instanceId', string>)?.instanceId;
+
+                if (!id) {
+                  return;
+                }
+
+                dupeInstance(
+                  instances.find((i) => i?.battleId === id)
+                    || { battleId: id },
+                );
+              })(),
+            },
+          },
+        ]}
+      />
+
+      <ContextMenu
+        id={honkdexMenuId}
+        itemKeyPrefix="InstanceButton:Honkdex:ContextMenu"
+        items={[
+          {
+            key: 'open-honkdex',
+            entity: 'item',
+            props: {
+              label: 'Open Honk',
+              icon: 'external-link',
+              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              onPress: ({ props: p }) => hideAfter(() => {
+                const id = (p as Record<'instanceId', string>)?.instanceId;
+
+                if (!id) {
+                  return;
+                }
+
+                openHonkdexInstance(id);
+              })(),
+            },
+          },
+          {
+            key: 'dupe-honkdex',
+            entity: 'item',
+            props: {
+              label: 'Duplicate Honk',
+              icon: 'copy-plus',
+              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              onPress: ({ props: p }) => hideAfter(() => {
+                const id = (p as Record<'instanceId', string>)?.instanceId;
+
+                if (!id) {
+                  return;
+                }
+
+                dupeInstance(
+                  instances.find((i) => i?.battleId === id)
+                    || { battleId: id },
+                );
+              })(),
+            },
+          },
+          {
+            key: 'remove-separator',
+            entity: 'separator',
+          },
+          {
+            key: 'remove-honkdex',
+            entity: 'item',
+            props: {
+              theme: 'error',
+              label: 'Delete Honk',
+              icon: 'fa-times-circle',
+              onPress: ({ props: data }) => hideAfter(() => {
+                const id = (data as Record<'instanceId', string>)?.instanceId;
+
+                if (!id) {
+                  return;
+                }
+
+                instanceRefs.current[id]?.queueRemoval();
+              })(),
+            },
+          },
+        ]}
+      />
+
+      <ContextMenu
+        id={recordMenuId}
+        itemKeyPrefix="BattleRecord:ContextMenu"
+        items={[
+          {
+            key: 'reset-record',
+            entity: 'item',
+            props: {
+              label: 'Reset W/L Record',
+              icon: 'fa-refresh',
+              disabled: !battleRecord?.wins && !battleRecord?.losses,
+              onPress: hideAfter(resetBattleRecord),
+            },
+          },
+        ]}
+      />
     </div>
   );
 };

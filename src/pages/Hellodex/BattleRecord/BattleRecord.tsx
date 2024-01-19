@@ -7,11 +7,13 @@ import styles from './BattleRecord.module.scss';
 export interface BattleRecordProps {
   className?: string;
   style?: React.CSSProperties;
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 export const BattleRecord = ({
   className,
   style,
+  onContextMenu,
 }: BattleRecordProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const colorScheme = useColorScheme();
@@ -32,6 +34,7 @@ export const BattleRecord = ({
         className,
       )}
       style={style}
+      onContextMenu={onContextMenu}
     >
       <div className={styles.records}>
         <div
