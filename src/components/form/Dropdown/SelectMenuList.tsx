@@ -1,9 +1,9 @@
 import * as React from 'react';
+import { type GroupBase, type MenuListProps } from 'react-select';
 import cx from 'classnames';
 import { Scrollable } from '@showdex/components/ui';
-import type { GroupBase, MenuListProps } from 'react-select';
-import type { DropdownOption } from './Dropdown';
-import type { SelectProps } from './SelectContainer';
+import { type DropdownOption } from './Dropdown';
+import { type SelectProps } from './SelectContainer';
 import styles from './Dropdown.module.scss';
 
 export type SelectMenuListProps<

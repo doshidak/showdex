@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { type GroupBase, type OptionProps } from 'react-select';
 import useDebouncy from 'use-debouncy/lib/effect';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
-import type { GroupBase, OptionProps } from 'react-select';
-import type { DropdownOption } from './Dropdown';
-import type { SelectProps } from './SelectContainer';
+import { type DropdownOption } from './Dropdown';
+import { type SelectProps } from './SelectContainer';
 import styles from './Dropdown.module.scss';
 
 export type SelectOptionProps<
@@ -53,7 +53,6 @@ export const SelectOption = <
 
   // conditionally render the Tippy, otherwise, would cause insane lag when opening
   // due to each option's Tippy content rendering (even if not visible!)
-  /*
   const [tooltipVisible, setTooltipVisible] = React.useState(false);
 
   React.useEffect(() => {
@@ -77,7 +76,6 @@ export const SelectOption = <
     optionTooltipProps?.hidden,
     tooltipVisible,
   ]);
-  */
 
   // keep track of our own focused state to emulate the Tippy's delay prop
   const [focused, setFocused] = React.useState(isFocused);
@@ -176,7 +174,7 @@ export const SelectOption = <
       </div>
 
       {
-        !!OptionTooltip &&
+        tooltipVisible &&
         <Tooltip
           reference={containerRef}
           content={(
@@ -187,9 +185,6 @@ export const SelectOption = <
           )}
           placement="right"
           offset={[0, 10]}
-          // delay={[1000, 0]}
-          // trigger="mouseenter"
-          // touch="hold"
           visible={focused}
           derender={!data?.value || optionTooltipProps?.hidden || filtering || scrollState?.[0]}
           disabled={isDisabled}

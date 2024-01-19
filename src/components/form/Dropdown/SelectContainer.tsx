@@ -1,13 +1,13 @@
 import * as React from 'react';
 import cx from 'classnames';
-import type {
-  ContainerProps,
-  GroupBase,
-  Props,
-  SelectInstance,
+import {
+  type ContainerProps,
+  type GroupBase,
+  type Props,
+  type SelectInstance,
 } from 'react-select';
-import type { CreatableProps as SelectCreatableProps } from 'react-select/creatable';
-import type { DropdownOption, DropdownSingleValue } from './Dropdown';
+import { type CreatableProps as SelectCreatableProps } from 'react-select/creatable';
+import { type DropdownOption, type DropdownSingleValue } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
 export interface SelectCustomProps {
@@ -16,7 +16,6 @@ export interface SelectCustomProps {
   filtering?: boolean;
   active?: boolean;
   scrollState?: [scrolling: boolean, setScrolling: React.Dispatch<React.SetStateAction<boolean>>];
-  // optionTooltip?: <TValue extends DropdownSingleValue = DropdownSingleValue>(option: DropdownOption<TValue>) => JSX.Element;
   optionTooltip?: (props: SelectOptionTooltipProps) => JSX.Element;
   optionTooltipProps?: SelectOptionTooltipProps;
   optionTooltipDelay?: number;

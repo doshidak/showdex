@@ -1,20 +1,20 @@
 import * as React from 'react';
-import Select from 'react-select';
+import Select, { type SelectInstance } from 'react-select';
 import Creatable from 'react-select/creatable';
+import { type FieldInputProps, type FieldRenderProps } from 'react-final-form';
 import useDebouncy from 'use-debouncy/lib/fn';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { FieldInputProps, FieldRenderProps } from 'react-final-form';
-import type { SelectInstance } from 'react-select';
-import type {
-  CreatableComponent,
-  SelectComponent,
-  SelectCustomProps,
-  SelectProps,
-} from './SelectContainer';
+import { createAliasFilter } from './createAliasFilter';
 import { SelectClearIndicator } from './SelectClearIndicator';
-import { SelectContainer } from './SelectContainer';
+import {
+  type CreatableComponent,
+  type SelectComponent,
+  type SelectCustomProps,
+  type SelectProps,
+  SelectContainer,
+} from './SelectContainer';
 import { SelectControl } from './SelectControl';
 import { SelectDropdownIndicator } from './SelectDropdownIndicator';
 import { SelectGroup } from './SelectGroup';
@@ -33,7 +33,6 @@ import { SelectPlaceholder } from './SelectPlaceholder';
 import { SelectSingleValue } from './SelectSingleValue';
 import { SelectValueContainer } from './SelectValueContainer';
 import styles from './Dropdown.module.scss';
-import { createAliasFilter } from './createAliasFilter';
 
 export type DropdownSingleValue = string | number;
 export type DropdownMultiValue = DropdownSingleValue[];
