@@ -708,8 +708,9 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
 
       // note (2023/07/30): leave the `ident` check as is here since viewing a replay wouldn't trigger this function
       // (there are no myPokemon when viewing a replay, even if you were viewing your own battle!)
-      const prevMyPokemon = myPokemon.find((p) => p.ident === pokemon.ident && (
-        p.speciesForme === pokemon.speciesForme
+      const prevMyPokemon = myPokemon.find((p) => !!p?.ident && (
+        p.ident === pokemon.ident
+          || p.speciesForme === pokemon.speciesForme
           || p.details === pokemon.details
           // update (2023/07/27): this check breaks when p.details is 'Mewtwo' & pokemon.speciesForme is 'Mew',
           // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
@@ -722,7 +723,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
           ].filter(Boolean).join(', ')
           */
           || similarPokemon(pokemon, p, {
-            format: battleRoom.battle.id.split('-')[1],
+            format: battleRoom.battle.id.split('-').find((part) => detectGenFromFormat(part)),
             normalizeFormes: 'wildcard',
             ignoreMega: true,
           })
