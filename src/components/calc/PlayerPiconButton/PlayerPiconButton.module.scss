@@ -6,70 +6,6 @@
 @use 'mixins/transition';
 
 .container {
-  width: 100%;
-
-  &.big.standalone {
-    display: grid;
-    grid-template-columns: min-content minmax(0, 1fr);
-    grid-template-rows: max-content;
-    column-gap: 16px;
-    align-content: center;
-  }
-}
-
-.playerBar {
-  @include flex.row($justify: space-between);
-  width: 100%;
-
-  .standalone:not(.big) & {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .verySmol:not(.mobileOverlay) & {
-    flex-direction: column;
-    justify-content: center;
-  }
-}
-
-.playerInfo {
-  @include spacing.margin($top: 7px);
-  width: 100%;
-  max-width: 33%;
-
-  .verySmol:not(.mobileOverlay) & {
-    max-width: none;
-    @include flex.row($align: center);
-  }
-}
-
-.teamList {
-  // display: grid;
-  // grid-template-columns: repeat(6, min-content);
-  // grid-auto-rows: min-content;
-
-  // .big &, .smol:not(.verySmol).standalone & {
-  //   grid-template-columns: repeat(12, min-content);
-  // }
-
-  .big.standalone & {
-    // grid-template-columns: repeat(3, min-content);
-    align-self: center;
-  }
-
-  .veryThicc.standalone & {
-    // grid-template-columns: repeat(4, min-content);
-    align-self: center;
-  }
-
-  .verySmol & {
-    justify-content: center;
-    @include spacing.margin($top: 3px);
-  }
-}
-
-/*
-.piconButton {
   align-self: center;
 }
 
@@ -99,38 +35,38 @@
   @include transition.apply(background-color, border-color);
   pointer-events: none;
 
-  .piconButton:not(.selected):hover & {
-    .light & {
+  .container:not(.selected):hover & {
+    &.light {
       border-color: color.alpha(colors.$black, 0.16);
     }
 
-    .dark & {
+    &.dark {
       border-color: color.alpha(colors.$white, 0.16);
     }
   }
 
   .active & {
-    .light & {
+    &.light {
       background-color: color.alpha(color.shade(colors.$blue, 16%), 0.24);
     }
 
-    .dark & {
+    &.dark {
       background-color: color.alpha(colors.$blue, 0.24);
     }
   }
 
   .selected & {
-    .light & {
+    &.light {
       border-color: color.alpha(colors.$black, 0.32);
     }
 
-    .dark & {
+    &.dark {
       border-color: color.alpha(colors.$white, 0.32);
     }
   }
 
-  .piconButton.selected:hover & {
-    .light &, .dark & {
+  .selected:hover & {
+    &.light, &.dark {
       border-color: color.alpha(colors.$blue, 0.8);
     }
   }
@@ -146,7 +82,7 @@
   @include transition.apply(color, background-color, opacity);
   pointer-events: none;
 
-  .piconButton:hover & {
+  .container:hover & {
     opacity: 1;
   }
 
@@ -164,9 +100,4 @@
     font-size: 16px;
     line-height: 17px;
   }
-}
-*/
-
-.pokeCalc {
-  @include spacing.padding($top: 4px);
 }

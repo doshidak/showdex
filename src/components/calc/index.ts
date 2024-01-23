@@ -6,6 +6,7 @@ export * from './CloseButton';
 export * from './FieldCalc';
 export * from './PlayerCalc';
 export * from './PlayerInfo';
+export * from './PlayerPiconButton';
 export * from './PokeCalc';
 export * from './PokeInfo';
 export * from './PokeMoves';

@@ -1,13 +1,16 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
-import { PiconButton, PokeGlance } from '@showdex/components/app';
+import { PlayerPiconButton } from '@showdex/components/calc';
+import {
+  type RackGridProps,
+  DroppableGrid,
+} from '@showdex/components/layout';
 import { ContextMenu, useContextMenu } from '@showdex/components/ui';
 import { type DropdownOption } from '@showdex/components/form';
+import { PiconRackContext } from '@showdex/components/layout';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
-import { calcPokemonCurrentHp } from '@showdex/utils/calc';
-import { env } from '@showdex/utils/core';
+import { clamp, env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { CalcdexPokeProvider } from '../CalcdexPokeContext';
@@ -37,7 +40,6 @@ export const PlayerCalc = ({
   playerOptions,
   mobile,
 }: PlayerCalcProps): JSX.Element => {
-  const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 
   const {
@@ -45,6 +47,7 @@ export const PlayerCalc = ({
     settings,
     removePokemon,
     dupePokemon,
+    movePokemon,
     selectPokemon,
     activatePokemon,
   } = useCalcdexContext();
@@ -62,15 +65,14 @@ export const PlayerCalc = ({
     || null;
 
   const minPokemon = (!!minPokemonKey && env.int(minPokemonKey)) || 0;
+  const playerState = React.useMemo(() => state[playerKey] || {}, [playerKey, state]);
 
   const {
     pokemon: playerParty,
     maxPokemon,
     activeIndices: playerActives,
     selectionIndex: playerIndex,
-  } = state[playerKey] || {};
-
-  const playerPokemon = playerParty?.[playerIndex];
+  } = playerState;
 
   const {
     show: showContextMenu,
@@ -91,6 +93,69 @@ export const PlayerCalc = ({
 
   const contextPokemon = (contextPokemonIndex ?? -1) > -1
     && playerParty[contextPokemonIndex];
+
+  const rackCtx = React.useContext(PiconRackContext);
+  const itemIds = rackCtx[playerKey] || [];
+
+  const {
+    // itemKeyPrefix,
+    lastAddedId,
+    gridSpecs,
+    makeItemId,
+    extractPlayerKey,
+    extractPokemonId,
+  } = rackCtx;
+
+  const renderItem = React.useCallback<RackGridProps<React.ReactNode>['renderItem']>((
+    id,
+    sortable,
+  ) => {
+    const pkey = extractPlayerKey?.(id, true);
+    const pid = extractPokemonId?.(id) || id;
+
+    const party = state?.[pkey]?.pokemon || [];
+    const partyIndex = party?.findIndex((p) => p?.calcdexId === pid) ?? -1;
+    const targetIndex = partyIndex > -1 ? partyIndex : clamp(0, sortable?.itemIndex ?? party.length, party.length);
+
+    return (
+      <PlayerPiconButton
+        key={`PlayerCalc:PlayerPiconButton:${playerKey}:${pid}`}
+        // ref={sortable?.setActivatorNodeRef}
+        player={state?.[pkey]}
+        pokemon={partyIndex}
+        operatingMode={operatingMode}
+        format={format}
+        showNickname={settings?.showNicknames}
+        dragging={sortable?.dragging}
+        itemIndex={partyIndex < 0 ? sortable?.itemIndex : undefined} // for showing the selection over the "new" Pokemon slot
+        nativeProps={operatingMode === 'standalone' ? {
+          ...sortable?.attributes,
+          ...sortable?.listeners,
+        } : undefined}
+        onPress={() => selectPokemon(
+          playerKey,
+          targetIndex,
+          `${l.scope}:PlayerPiconButton~SelectionIndex:onPress()`,
+        )}
+        onContextMenu={operatingMode === 'standalone' && partyIndex > -1 ? (e) => {
+          showContextMenu?.({ id: piconMenuId, event: e });
+          setContextPiconId(pid);
+          e.stopPropagation();
+        } : undefined}
+      />
+    );
+  }, [
+    extractPlayerKey,
+    extractPokemonId,
+    format,
+    operatingMode,
+    playerKey,
+    piconMenuId,
+    selectPokemon,
+    settings?.showNicknames,
+    showContextMenu,
+    state,
+  ]);
 
   return (
     <div
@@ -120,7 +185,48 @@ export const PlayerCalc = ({
           />
         }
 
-        <div className={styles.teamList}>
+        <DroppableGrid
+          containerClassName={styles.teamList}
+          itemIds={itemIds}
+          itemKeyPrefix={makeItemId(playerKey, 'droppable')}
+          renderItem={renderItem}
+          editable={operatingMode === 'standalone' && !!itemIds.length}
+          lastAddedId={lastAddedId}
+          focusedId={contextPiconId}
+          gridSpecs={gridSpecs}
+        >
+          {(
+            Array(clamp(0, clamp(maxPokemon || 0, minPokemon) - itemIds.length))
+              .fill(null)
+              .map((_, i) => {
+                const itemIndex = itemIds.length + i;
+
+                return renderItem(
+                  makeItemId(playerKey, String(itemIndex)),
+                  { itemIndex },
+                );
+              })
+          )}
+        </DroppableGrid>
+
+        {/* <RackGrid
+          containerClassName={styles.teamList}
+          itemIds={itemIds}
+          itemKeyPrefix={`${playerKey}:pokemon`}
+          columns={(
+            (operatingMode === 'standalone' && containerSize === 'xs' && 12)
+              || (operatingMode === 'standalone' && ['md', 'lg'].includes(containerSize) && 3)
+              || (operatingMode === 'standalone' && containerSize === 'xl' && 4)
+              || 6
+          )}
+          minRows={1}
+          gridSize={40}
+          gridGap={0}
+          editable={operatingMode === 'standalone'}
+          renderItem={renderItem}
+        /> */}
+
+        {/* <div className={styles.teamList}>
           {Array(Math.max(maxPokemon || 0, minPokemon)).fill(null).map((_, i) => {
             const pokemon = playerParty?.[i];
 
@@ -167,7 +273,7 @@ export const PlayerCalc = ({
                 )}
                 display="block"
                 aria-label={t('player.party.aria', { pokemon: friendlyPokemonName })}
-                pokemon={pokemon?.speciesForme ? {
+                pokemon={speciesForme ? {
                   ...pokemon,
                   speciesForme: speciesForme?.replace(pokemon?.useMax ? '' : '-Gmax', ''),
                   item,
@@ -213,7 +319,7 @@ export const PlayerCalc = ({
               </PiconButton>
             );
           })}
-        </div>
+        </div> */}
       </div>
 
       <CalcdexPokeProvider playerKey={playerKey}>
@@ -244,7 +350,7 @@ export const PlayerCalc = ({
               theme: contextPokemon?.active ? 'info' : 'default',
               label: 'Active',
               icon: contextPokemon?.active ? 'ghost-boo' : 'ghost-smile',
-              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              iconStyle: { strokeWidth: 4, transform: 'scale(1.2)' },
               disabled: typeof contextPokemonIndex !== 'number',
               onPress: hideAfter(() => {
                 const indices = [...(playerActives || [])]
@@ -257,6 +363,10 @@ export const PlayerCalc = ({
                 activatePokemon(playerKey, indices.slice(-(gameType === 'Doubles' ? 2 : 1)));
               }),
             },
+          },
+          {
+            key: 'action-hr',
+            entity: 'separator',
           },
           {
             key: 'new-pokemon',
@@ -274,13 +384,27 @@ export const PlayerCalc = ({
             props: {
               label: 'Duplicate',
               icon: 'copy-plus',
-              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              iconStyle: { strokeWidth: 4, transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,
               onPress: hideAfter(() => dupePokemon(playerKey, contextPokemon)),
             },
           },
           {
-            key: 'delete-separator',
+            key: 'move-pokemon',
+            entity: 'item',
+            props: {
+              label: `Move to ${playerKey === 'p1' ? 'B' : 'A'}`,
+              icon: `fa-arrow-${playerKey === 'p1' ? 'down' : 'up'}`,
+              disabled: !contextPokemon?.calcdexId,
+              onPress: hideAfter(() => movePokemon(
+                playerKey,
+                contextPokemon,
+                playerKey === 'p1' ? 'p2' : 'p1',
+              )),
+            },
+          },
+          {
+            key: 'delete-hr',
             entity: 'separator',
           },
           {
@@ -289,13 +413,22 @@ export const PlayerCalc = ({
             props: {
               theme: 'error',
               label: 'Delete',
-              icon: 'fa-times-circle',
+              // icon: 'fa-times-circle',
+              icon: 'trash-close',
+              iconStyle: { transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,
               onPress: hideAfter(() => removePokemon(playerKey, contextPokemon)),
             },
           },
         ]}
         disabled={operatingMode === 'standalone'}
+        onVisibilityChange={(visible) => {
+          if (visible || contextPiconId) {
+            return;
+          }
+
+          setContextPiconId(null);
+        }}
       />
     </div>
   );

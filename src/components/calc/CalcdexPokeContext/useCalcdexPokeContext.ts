@@ -79,6 +79,7 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
   ) => addPlayerPokemon(
     playerKey,
     pokemon,
+    null,
     s('addPokemon()', scopeFromArgs),
   );
 

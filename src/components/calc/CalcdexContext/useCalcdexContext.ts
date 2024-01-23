@@ -22,17 +22,18 @@ import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {
   cloneAllPokemon,
   clonePlayer,
+  clonePlayerSide,
   clonePokemon,
   countSideRuinAbilities,
   detectToggledAbility,
-  toggleRuinAbilities,
+  reassignPokemon,
   sanitizePlayerSide,
   sanitizePokemon,
-  clonePlayerSide,
+  toggleRuinAbilities,
 } from '@showdex/utils/battle';
 import {
   calcLegacyHpIv,
-  calcPokemonCalcdexId,
+  calcMaxPokemon,
   calcPokemonCurrentHp,
   calcPokemonMaxHp,
   calcPokemonSpreadStats,
@@ -69,75 +70,29 @@ import { type CalcdexContextValue, CalcdexContext } from './CalcdexContext';
  * @since 1.1.7
  */
 export interface CalcdexContextConsumables extends CalcdexContextValue {
-  updateBattle: (
-    battle: DeepPartial<CalcdexBattleState>,
-    scope?: string,
-  ) => void;
-
-  addPokemon: (
-    playerKey: CalcdexPlayerKey,
-    pokemon: CalcdexPokemon,
-    scope?: string,
-  ) => void;
-
-  updatePokemon: (
-    playerKey: CalcdexPlayerKey,
-    pokemon: Partial<CalcdexPokemon>,
-    scope?: string,
-  ) => void;
-
-  removePokemon: (
-    playerKey: CalcdexPlayerKey,
-    pokemonOrId: CalcdexPokemon | string,
-    scope?: string,
-  ) => void;
-
-  dupePokemon: (
-    playerKey: CalcdexPlayerKey,
-    pokemonOrId: CalcdexPokemon | string,
-    scope?: string,
-  ) => void;
-
-  updateSide: (
-    playerKey: CalcdexPlayerKey,
-    side: Partial<CalcdexPlayerSide>,
-    scope?: string,
-  ) => void;
-
-  updateField: (
-    field: Partial<CalcdexBattleField>,
-    scope?: string,
-  ) => void;
-
-  activatePokemon: (
-    playerKey: CalcdexPlayerKey,
-    activeIndices: number[],
-    scope?: string,
-  ) => void;
-
-  selectPokemon: (
-    playerKey: CalcdexPlayerKey,
-    pokemonIndex: number,
-    scope?: string,
-  ) => void;
-
-  autoSelectPokemon: (
-    playerKey: CalcdexPlayerKey,
-    enabled: boolean,
-    scope?: string,
-  ) => void;
-
-  assignPlayer: (
-    playerKey: CalcdexPlayerKey,
-    scope?: string,
-  ) => void;
-
-  assignOpponent: (
-    playerKey: CalcdexPlayerKey,
-    scope?: string,
-  ) => void;
-
+  updateBattle: (battle: DeepPartial<CalcdexBattleState>, scope?: string) => void;
+  assignPlayer: (playerKey: CalcdexPlayerKey, scope?: string) => void;
+  assignOpponent: (playerKey: CalcdexPlayerKey, scope?: string) => void;
   saveHonk: () => void;
+
+  addPokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemon, index?: number, scope?: string) => void;
+  updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: Partial<CalcdexPokemon>, scope?: string) => void;
+  removePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, scope?: string) => void;
+  dupePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, scope?: string) => void;
+  movePokemon: (
+    sourceKey: CalcdexPlayerKey,
+    pokemonOrId: CalcdexPokemon | string,
+    destKey: CalcdexPlayerKey,
+    index?: number,
+    scope?: string,
+  ) => void;
+
+  updateSide: (playerKey: CalcdexPlayerKey, side: Partial<CalcdexPlayerSide>, scope?: string) => void;
+  updateField: (field: Partial<CalcdexBattleField>, scope?: string) => void;
+
+  activatePokemon: (playerKey: CalcdexPlayerKey, activeIndices: number[], scope?: string) => void;
+  selectPokemon: (playerKey: CalcdexPlayerKey, pokemonIndex: number, scope?: string) => void;
+  autoSelectPokemon: (playerKey: CalcdexPlayerKey, enabled: boolean, scope?: string) => void;
 }
 
 const l = logger('@showdex/components/calc/useCalcdexContext()');
@@ -222,6 +177,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   const addPokemon: CalcdexContextConsumables['addPokemon'] = (
     playerKey,
     pokemon,
+    index,
     scopeFromArgs,
   ) => {
     // used for debugging purposes only
@@ -264,7 +220,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
     newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
 
-    payload.selectionIndex = payload.pokemon.push(newPokemon) - 1;
+    payload.pokemon.splice(index ?? payload.pokemon.length, 0, newPokemon);
+    payload.selectionIndex = index ?? (payload.pokemon.length - 1);
 
     if (state.operatingMode === 'standalone') {
       payload.activeIndices = [...(state[playerKey].activeIndices || [])];
@@ -869,18 +826,131 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       pokemon: cloneAllPokemon(state[playerKey].pokemon),
     };
 
-    const dupedPokemon = clonePokemon(payload.pokemon[pokemonIndex]);
-
-    dupedPokemon.playerKey = playerKey;
-    dupedPokemon.calcdexId = calcPokemonCalcdexId(dupedPokemon, playerKey);
-    dupedPokemon.ident = `${playerKey}: ${dupedPokemon.calcdexId.slice(-7)}`;
+    const clonedPokemon = clonePokemon(payload.pokemon[pokemonIndex]);
+    const dupedPokemon = reassignPokemon(clonedPokemon, playerKey, true);
 
     if (dupedPokemon.calcdexId === payload.pokemon[pokemonIndex].calcdexId) {
       return void endTimer('(same calcdexId)');
     }
 
-    addPokemon(playerKey, dupedPokemon, scope);
+    addPokemon(playerKey, dupedPokemon, pokemonIndex + 1, scope);
     endTimer('(delegated)');
+  };
+
+  const movePokemon: CalcdexContextConsumables['movePokemon'] = (
+    sourceKey,
+    pokemonOrId,
+    destKey,
+    index,
+    scopeFromArgs,
+  ) => {
+    // used for debugging purposes only
+    const scope = s('movePokemon()', scopeFromArgs);
+    const endTimer = runtimer(scope, l);
+
+    if (!state?.battleId) {
+      return void endTimer('(bad state)');
+    }
+
+    const pokemonId = typeof pokemonOrId === 'string'
+      ? pokemonOrId
+      : pokemonOrId?.calcdexId;
+
+    const sourcePlayer = (!!sourceKey && state[sourceKey]) || {};
+    const destPlayer = (!!destKey && state[destKey]) || {};
+
+    if (!sourcePlayer.active || !destPlayer.active || !pokemonId) {
+      return void endTimer('(bad args)');
+    }
+
+    const pokemonIndex = sourcePlayer.pokemon.findIndex((p) => p?.calcdexId === pokemonId);
+
+    if (pokemonIndex < 0) {
+      return void endTimer('(404 pokemonId)');
+    }
+
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
+      [sourceKey]: { pokemon: [...(sourcePlayer.pokemon || [])] },
+      [destKey]: { pokemon: [...(destPlayer.pokemon || [])] },
+    };
+
+    const clonedPokemon = clonePokemon(playersPayload[sourceKey].pokemon[pokemonIndex]);
+    const movedPokemon = reassignPokemon(clonedPokemon, destKey, true);
+
+    if (movedPokemon.calcdexId === playersPayload[sourceKey].pokemon[pokemonIndex].calcdexId) {
+      return void endTimer('(same calcdexId)');
+    }
+
+    // note: both sourceLength & destLength below prematurely account for the length change
+    // (in order to keep the code pretty)
+    const sourceLength = playersPayload[sourceKey].pokemon.length - 1;
+
+    playersPayload[sourceKey].pokemon.splice(pokemonIndex, 1);
+    playersPayload[sourceKey].pokemon = playersPayload[sourceKey].pokemon.map((p, i) => ({ ...p, slot: i }));
+    playersPayload[sourceKey].maxPokemon = calcMaxPokemon(sourcePlayer, sourceLength);
+    playersPayload[sourceKey].selectionIndex = clamp(0, sourcePlayer.selectionIndex, sourceLength - 1);
+
+    const destLength = playersPayload[destKey].pokemon.length + 1;
+    const destIndex = clamp(0, index ?? destPlayer.selectionIndex + 1, destLength - 1);
+
+    playersPayload[destKey].pokemon.splice(destIndex, 0, movedPokemon);
+    playersPayload[destKey].pokemon = playersPayload[destKey].pokemon.map((p, i) => ({ ...p, slot: i }));
+    playersPayload[destKey].maxPokemon = calcMaxPokemon(destPlayer, destLength);
+    playersPayload[destKey].selectionIndex = destIndex;
+
+    [
+      sourceKey,
+      destKey,
+    ].filter((pkey) => (
+      playersPayload[pkey].selectionIndex !== (pkey === sourceKey ? sourcePlayer : destPlayer).selectionIndex
+    )).forEach((pkey) => {
+      const prevPlayer = pkey === sourceKey ? sourcePlayer : destPlayer;
+      const player: CalcdexPlayer = { ...prevPlayer, ...playersPayload[pkey] };
+
+      if (state.gen === 1) {
+        const sanitized = sanitizePlayerSide(state.gen, player);
+
+        playersPayload[pkey].side = {
+          ...prevPlayer.side,
+          isReflect: sanitized.isReflect,
+          isLightScreen: sanitized.isLightScreen,
+        };
+
+        return;
+      }
+
+      if (state.gen < 9) {
+        return;
+      }
+
+      if (state.gameType === 'Singles') {
+        // note: directly mutates the player.pokemon[] reference, which is playersPayload[pkey].pokemon[]
+        // (ya ya ik it's bad API design; I'll clean this up one day... LOL)
+        toggleRuinAbilities(
+          player,
+          state.gameType,
+          null,
+          playersPayload[pkey].selectionIndex,
+        );
+      }
+
+      playersPayload[pkey].side = {
+        ...prevPlayer.side,
+        ...countSideRuinAbilities(player),
+      };
+    });
+
+    if (state.operatingMode === 'standalone' && state.name) {
+      queueHonkSave();
+    }
+
+    dispatch(calcdexSlice.actions.update({
+      scope,
+      battleId: state.battleId,
+      ...playersPayload,
+    }));
+
+    endTimer('(dispatched)');
   };
 
   const updateSide: CalcdexContextConsumables['updateSide'] = (
@@ -1329,17 +1399,18 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     ...ctx,
 
     updateBattle,
+    assignPlayer,
+    assignOpponent,
+    saveHonk: queueHonkSave,
     addPokemon,
     updatePokemon,
     removePokemon,
     dupePokemon,
+    movePokemon,
     updateSide,
     updateField,
     activatePokemon,
     selectPokemon,
     autoSelectPokemon,
-    assignPlayer,
-    assignOpponent,
-    saveHonk: queueHonkSave,
   };
 };
