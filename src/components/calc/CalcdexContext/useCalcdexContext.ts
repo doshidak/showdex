@@ -27,6 +27,7 @@ import {
   countSideRuinAbilities,
   detectToggledAbility,
   reassignPokemon,
+  replaceBehemothMoves,
   sanitizePlayerSide,
   sanitizePokemon,
   toggleRuinAbilities,
@@ -435,8 +436,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         }
       }
 
-      // if the particular Pokemon is the Crowned forme of either Zacian or Zamazenta, make sure Iron Head &
-      // Behemoth Blade/Bash are being properly replaced
+      /*
       const shouldBehemoth = [
         'Zacian',
         'Zamazenta',
@@ -465,6 +465,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           mutated.moves[sourceIndex] = crowned ? bashMove : 'Iron Head' as MoveName;
         }
       }
+      */
 
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
       if (mutated.source !== 'server' && mutated.presetId) {
@@ -621,6 +622,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         terrain: state.field?.terrain,
       });
     }
+
+    // if the particular Pokemon is the Crowned forme of either Zacian or Zamazenta, make sure Iron Head &
+    // Behemoth Blade/Bash are being properly replaced (also accounting for transformed doggos)
+    mutated.moves = replaceBehemothMoves(mutated.transformedForme || mutated.speciesForme, mutated.moves);
 
     // individually spread each overridden move w/ the move's defaults, if any
     if (nonEmptyObject(pokemon.moveOverrides)) {
