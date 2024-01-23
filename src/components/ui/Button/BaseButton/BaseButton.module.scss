@@ -19,7 +19,7 @@ div.container {
   outline: none;
   user-select: none;
   cursor: pointer;
-  touch-action: none;
+  // touch-action: none;
 
   &.disabled {
     pointer-events: none;
