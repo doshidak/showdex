@@ -2,6 +2,7 @@ export * from './calcBoostedStats';
 export * from './calcCalcdexId';
 export * from './calcCalcdexNonce';
 export * from './calcHiddenPower';
+export * from './calcMaxPokemon';
 export * from './calcMoveBasePower';
 export * from './calcPokemonFinalStats';
 export * from './calcPokemonHp';
