@@ -5,6 +5,9 @@ import { CalcdexErrorBoundary, CalcdexProvider } from '@showdex/components/calc'
 import { ErrorBoundary } from '@showdex/components/debug';
 import { SandwichProvider } from '@showdex/components/layout';
 import { type RootStore } from '@showdex/redux/store';
+import { openHellodexInstance, openHonkdexInstance } from '@showdex/utils/app';
+import { HellodexRenderer } from '../Hellodex';
+import { HonkdexRenderer } from '../Honkdex';
 import { Calcdex } from './Calcdex';
 
 /**
@@ -37,9 +40,11 @@ export const CalcdexRenderer = (
       <SandwichProvider>
         <CalcdexProvider battleId={battleId}>
           <Calcdex
+            onRequestHellodex={() => openHellodexInstance(store, HellodexRenderer)}
+            onRequestHonkdex={(id) => openHonkdexInstance(store, HonkdexRenderer, id)}
             // note: if we dispatch overlayClosed to false, the battleRoom and the injected Calcdex button
             // won't properly update to reflect the closed state, so we must provide this prop
-            onRequestOverlayClose={() => battleRoom?.toggleCalcdexOverlay?.()}
+            onCloseOverlay={() => battleRoom?.toggleCalcdexOverlay?.()}
           />
         </CalcdexProvider>
       </SandwichProvider>

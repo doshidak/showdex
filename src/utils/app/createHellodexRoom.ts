@@ -1,6 +1,7 @@
 import * as ReactDOM from 'react-dom/client';
 import { type RootStore, type ShowdexSliceState } from '@showdex/redux/store';
 import { createHtmlRoom } from '@showdex/utils/host';
+import { getHellodexRoomId } from './getHellodexRoomId';
 
 /**
  * Creates an `HtmlRoom` via `createHtmlRoom()` specially made to house a `Hellodex`.
@@ -17,13 +18,15 @@ import { createHtmlRoom } from '@showdex/utils/host';
  */
 export const createHellodexRoom = (
   store?: RootStore,
+  focus?: boolean,
 ): Showdown.HtmlRoom => {
   const settings = (store?.getState()?.showdex as ShowdexSliceState)?.settings?.hellodex;
+  const shouldFocus = focus || !settings?.focusRoomsRoom;
 
-  const hellodexRoom = createHtmlRoom('view-hellodex', 'Hellodex', {
+  const hellodexRoom = createHtmlRoom(getHellodexRoomId(), 'Hellodex', {
     side: true,
     icon: Math.random() > 0.5 ? 'smile-o' : 'heart',
-    focus: !settings?.focusRoomsRoom,
+    focus: shouldFocus,
   });
 
   if (!hellodexRoom?.el) {

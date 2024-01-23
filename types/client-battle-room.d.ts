@@ -97,6 +97,7 @@ declare namespace Showdown {
     public displayAllyParty(): void;
     public updateSwitchControls(type: string): void;
     public updateTeamControls(type: string): void;
+    public updateTurnCounters(): void;
     public updateWaitControls(): void;
     public getPlayerChoicesHTML(): string;
     public sendDecision(message: string): void;
@@ -104,15 +105,21 @@ declare namespace Showdown {
     public notifyRequest(): void;
     public updateSideLocation(): void;
     public updateSide(): void;
+    public swapSideConditions(): void;
+    public changeWeather(weatherName: string, poke?: Pokemon, isUpkeep?: boolean, ability?: Effect): void;
     public addAlly(allyData?: Side): void;
 
     public joinBattle(): void;
     public setTimer(): void;
     public forfeit(): void;
+    public prematureEnd(): void;
     public saveReplay(): void;
     public openBattleOptions(): void;
     public clickReplayDownloadButton(e: Event): void;
-    public switchSides(): void;
+    // public switchSides(): void;
+    public setViewpoint(sideid: SideID): void;
+    public switchViewpoint(): void;
+    public start(): void;
     public pause(): void;
     public resume(): void;
     public instantReplay(): void;
@@ -122,6 +129,7 @@ declare namespace Showdown {
     public register(userid: string): void;
     public closeAndMainMenu(): void;
     public closeAndRematch(): void;
+    public winner(winner?: string): void;
 
     public chooseMove(pos: number, e: Event): boolean;
     public chooseMoveTarget(posString: string): void;
@@ -133,11 +141,13 @@ declare namespace Showdown {
     public endChoice(): void;
     public nextChoice(): void;
     public endTurn(): void;
+    public endLastTurn(): void;
     public undoChoice(pos: number): void;
     public clearChoice(): void;
     public leaveBattle(): void;
     public selectSwitch(): void;
     public selectMove(): void;
+    public resetTurnsSinceMoved(): void;
 
     public readReplayFile(file: File): void;
 

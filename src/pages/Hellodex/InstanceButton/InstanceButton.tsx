@@ -30,6 +30,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
   activeScale = 0.98,
   disabled,
   onPress,
+  onContextMenu,
   onRequestRemove,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
@@ -127,6 +128,13 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
       hoverScale={hoverScale}
       activeScale={activeScale}
       onPress={removalQueued ? queueRemovalRequest : onPress}
+      onContextMenu={(e) => {
+        if (removalQueued) {
+          queueRemovalRequest();
+        }
+
+        onContextMenu(e);
+      }}
     >
       {operatingMode === 'standalone' ? (
         <div className={cx(styles.icon, styles.standaloneIcon)}>
