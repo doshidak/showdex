@@ -1,0 +1,17 @@
+// @use 'mixins/aria';
+
+.container {
+  // transform-origin: top left;
+  user-select: none;
+  cursor: grabbing;
+
+  // @include aria.outline(
+  //   $offset: 4px,
+  //   $radius: 100px,
+  //   $z-index: -1,
+  // );
+
+  // &::after {
+  //   opacity: 0.88;
+  // }
+}

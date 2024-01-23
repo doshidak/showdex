@@ -14,6 +14,7 @@ export * from './detectToggledMove';
 export * from './mapStellarMoves';
 export * from './mergeRevealedMoves';
 export * from './parsePokemonDetails';
+export * from './reassignPokemon';
 export * from './ruinAbilitiesActive';
 export * from './sanitizeField';
 export * from './sanitizeMoveTrack';

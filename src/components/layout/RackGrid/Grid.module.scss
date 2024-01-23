@@ -1,0 +1,68 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/transition';
+
+$base-color: colors.$green;
+$active-color: colors.$blue;
+$invalid-color: colors.$red;
+
+$grid-border-radius: 12px;
+
+$grid-active-background-color: color.alpha($active-color, 0.08);
+$grid-highlight-background-color: color.alpha($base-color, 0.16);
+$grid-invalid-background-color: color.alpha($invalid-color, 0.06);
+
+$grid-outline-offset: 6px;
+
+$grid-active-outline-color: $active-color;
+$grid-invalid-outline-color: $invalid-color;
+// $grid-active-outline-color: $base-color;
+$grid-highlight-outline-color: $base-color;
+
+.container {
+  display: grid;
+  grid-auto-flow: row dense;
+  justify-content: center;
+  border-radius: $grid-border-radius;
+}
+
+.interactive {
+  @include transition.apply((background-color, 500ms));
+
+  @include aria.outline(
+    $offset: $grid-outline-offset,
+    $radius: $grid-border-radius,
+    $z-index: -1,
+  );
+
+  &.active {
+    background-color: $grid-active-background-color;
+
+    &::after {
+      // @include aria.outline-show($duration: 300ms);
+      border-style: dashed;
+      border-color: $grid-active-outline-color;
+      opacity: 0.76;
+    }
+  }
+
+  &.highlight {
+    background-color: $grid-highlight-background-color;
+
+    &::after {
+      border-style: solid;
+      border-color: $grid-highlight-outline-color;
+      opacity: 0.88;
+    }
+  }
+
+  &:not(.highlight).invalid {
+    // background-color: $grid-invalid-background-color;
+
+    &::after {
+      // border-style: solid;
+      border-color: $grid-invalid-outline-color;
+    }
+  }
+}
