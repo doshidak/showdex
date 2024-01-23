@@ -129,10 +129,6 @@ export const applyPreset = (
   //   delete output.dirtyAbility;
   // }
 
-  if (preset.level && preset.level !== output.level) {
-    output.level = preset.level;
-  }
-
   const didRevealTeraType = !!pokemon.teraType && pokemon.teraType !== '???';
   const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
 
