@@ -11,6 +11,7 @@ import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import {
   clonePokemon,
   mergeRevealedMoves,
+  replaceBehemothMoves,
   sanitizePokemon,
   sanitizeMoveTrack,
   sanitizeVolatiles,
@@ -544,12 +545,14 @@ export const syncPokemon = (
       && !syncedPokemon.transformedForme;
 
     if (shouldUpdateServerMoves) {
-      syncedPokemon.serverMoves = [...serverMoves];
+      // syncedPokemon.serverMoves = [...serverMoves];
+      syncedPokemon.serverMoves = replaceBehemothMoves(syncedPokemon.speciesForme, serverMoves);
     }
 
-    syncedPokemon.transformedMoves = [
-      ...(serverMoves?.length && syncedPokemon.transformedForme ? serverMoves : []),
-    ];
+    syncedPokemon.transformedMoves = replaceBehemothMoves(
+      syncedPokemon.transformedForme,
+      [...(serverMoves?.length && syncedPokemon.transformedForme ? serverMoves : [])],
+    );
   }
 
   // from Showdown's battle log:
@@ -638,6 +641,13 @@ export const syncPokemon = (
       ? [...syncedPokemon.transformedMoves]
       : mergeRevealedMoves(syncedPokemon);
   }
+
+  // covers the case where Iron Head was previously applied & doggo gets sent out, changing into the Crowned forme
+  // (otherwise basically just shallow-copies moves[], i.e., basically a no-op)
+  syncedPokemon.moves = replaceBehemothMoves(
+    syncedPokemon.transformedForme || syncedPokemon.speciesForme,
+    syncedPokemon.moves,
+  );
 
   // recalculate the spread stats
   // (calcPokemonSpredStats() will determine whether to use the transformedBaseStats or baseStats)

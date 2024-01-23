@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc';
+// import { type MoveName } from '@smogon/calc';
 // import { PokemonNatures } from '@showdex/consts/dex';
 import {
   type PkmnApiSmogonFormatStatsResponse,
@@ -6,8 +6,9 @@ import {
   type PkmnApiSmogonQueryMeta,
 } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { replaceBehemothMoves } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { formatId, nonEmptyObject } from '@showdex/utils/core';
+import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { getGenfulFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { parseUsageSpread, processUsageAlts } from '@showdex/utils/presets';
@@ -83,6 +84,7 @@ export const transformFormatStatsResponse = (
     if (altMoves.length) {
       // apparently a bug with Showdown Usage where these two Pokemon will have "Iron Head" instead of
       // "Behemoth Blade" (for Zacian-Crowned) or "Behemoth Bash" (for Zamazenta-Crowned) lol
+      /*
       if (['zaciancrowned', 'zamazentacrowned'].includes(formatId(speciesForme))) {
         const targetMove = (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName;
         const ironHeadIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ironhead');
@@ -91,8 +93,10 @@ export const transformFormatStatsResponse = (
           altMoves[ironHeadIndex][0] = targetMove;
         }
       }
+      */
 
-      preset.altMoves = altMoves;
+      // preset.altMoves = altMoves;
+      preset.altMoves = replaceBehemothMoves(speciesForme, preset.altMoves);
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.
