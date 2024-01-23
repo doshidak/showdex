@@ -22,7 +22,7 @@ import styles from './BattleInfo.module.scss';
 export interface BattleInfoProps {
   className?: string;
   style?: React.CSSProperties;
-  openHonkdexInstance?: (instanceId?: string, initState?: Partial<CalcdexBattleState>) => void;
+  onRequestHonkdex?: (instanceId?: string, initState?: Partial<CalcdexBattleState>) => void;
 }
 
 const l = logger('@showdex/components/calc/BattleInfo');
@@ -30,7 +30,7 @@ const l = logger('@showdex/components/calc/BattleInfo');
 export const BattleInfo = ({
   className,
   style,
-  openHonkdexInstance,
+  onRequestHonkdex,
 }: BattleInfoProps): JSX.Element => {
   const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
@@ -96,10 +96,12 @@ export const BattleInfo = ({
   const formatOptions = React.useMemo(() => buildFormatOptions(
     gen,
     {
+      currentFormat: format,
       showAll: honkdexSettings?.showAllFormats,
       translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
     },
   ), [
+    format,
     gen,
     honkdexSettings?.showAllFormats,
     t,
@@ -117,7 +119,7 @@ export const BattleInfo = ({
     value: GenerationNum,
   ) => {
     if (genLocked) {
-      return void openHonkdexInstance?.(null, { gen: value });
+      return void onRequestHonkdex?.(null, { gen: value });
     }
 
     updateBattle({
@@ -164,7 +166,7 @@ export const BattleInfo = ({
           value: gen,
           onChange: handleGenChange,
         }}
-        readOnly={genLocked && typeof openHonkdexInstance !== 'function'}
+        readOnly={genLocked && typeof onRequestHonkdex !== 'function'}
       />
 
       <div className={styles.honkInfo}>

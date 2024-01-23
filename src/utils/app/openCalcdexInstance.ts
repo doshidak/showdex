@@ -83,7 +83,7 @@ export const openCalcdexInstance = (
   } else {
     // at this point, we need to recreate the room
     // (we should also be in the 'panel' renderMode now)
-    const calcdexRoom = createCalcdexRoom(battleId, true, store);
+    const calcdexRoom = createCalcdexRoom(battleId, store, true);
 
     renderer(
       calcdexRoom.reactRoot,

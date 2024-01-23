@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import Svg from 'react-inlinesvg';
 import cx from 'classnames';
+import { v4 as uuidv4 } from 'uuid';
+import { MemberIcon } from '@showdex/components/app';
 import {
   CloseButton,
   FieldCalc,
@@ -11,36 +12,51 @@ import {
 } from '@showdex/components/calc';
 import { BuildInfo } from '@showdex/components/debug';
 import { type DropdownOption } from '@showdex/components/form';
-import { BaseButton, Scrollable } from '@showdex/components/ui';
+import { PiconRackProvider, PiconRackSortableContext } from '@showdex/components/layout';
+import {
+  ContextMenu,
+  BaseButton,
+  Scrollable,
+  useContextMenu,
+} from '@showdex/components/ui';
 import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
-import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
-import { findPlayerTitle } from '@showdex/utils/app';
-import { getResourceUrl } from '@showdex/utils/core';
-import { useMobileViewport } from '@showdex/utils/hooks';
+import {
+  useCalcdexDuplicator,
+  useColorScheme,
+  useGlassyTerrain,
+  useHonkdexSettings,
+} from '@showdex/redux/store';
+import { findPlayerTitle, getCalcdexRoomId } from '@showdex/utils/app';
+import { useMobileViewport, useRandomUuid } from '@showdex/utils/hooks';
+import { getBattleRoom } from '@showdex/utils/host';
 import styles from './Calcdex.module.scss';
 
 export interface CalcdexProps {
-  onRequestOverlayClose?: () => void;
+  onRequestHellodex?: () => void;
+  onRequestHonkdex?: (instanceId?: string) => void;
+  onCloseOverlay?: () => void;
 }
 
 export const Calcdex = ({
-  onRequestOverlayClose,
+  onRequestHellodex,
+  onRequestHonkdex,
+  onCloseOverlay,
 }: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useCalcdexSize(containerRef);
-
-  const {
-    state,
-    settings,
-  } = useCalcdexContext();
 
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
   const mobile = useMobileViewport();
 
+  const { state, settings } = useCalcdexContext();
+  const honkdexSettings = useHonkdexSettings();
+
   const {
+    battleId,
+    active: battleActive,
     containerSize,
     renderMode,
     playerCount,
@@ -49,6 +65,9 @@ export const Calcdex = ({
     opponentKey,
     switchPlayers,
   } = state;
+
+  const room = React.useMemo(() => getBattleRoom(battleId), [battleId]);
+  const dupeCalcdex = useCalcdexDuplicator();
 
   const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
     playerCount > 2 && AllPlayerKeys
@@ -59,7 +78,7 @@ export const Calcdex = ({
         const playerTitle = findPlayerTitle(playerName, true);
 
         const labelColor = playerTitle?.color?.[colorScheme];
-        const iconColor = playerTitle?.iconColor?.[colorScheme];
+        // const iconColor = playerTitle?.iconColor?.[colorScheme];
 
         return {
           labelClassName: styles.playerOption,
@@ -70,13 +89,25 @@ export const Calcdex = ({
                 {playerName || '--'}
               </div>
 
-              {
+              {/*
                 !!playerTitle?.icon &&
                 <Svg
                   className={styles.icon}
                   style={iconColor ? { color: iconColor } : undefined}
                   description={playerTitle.iconDescription}
                   src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                />
+              */}
+
+              {
+                !!playerTitle?.icon &&
+                <MemberIcon
+                  className={styles.icon}
+                  member={{
+                    name: playerName,
+                    showdownUser: true,
+                    periods: null,
+                  }}
                 />
               }
             </>
@@ -113,81 +144,160 @@ export const Calcdex = ({
     ? opponentKey
     : playerKey;
 
+  const contextMenuId = useRandomUuid();
+
+  const {
+    show: showContextMenu,
+    hideAfter,
+  } = useContextMenu();
+
   return (
-    <div
-      ref={containerRef}
-      className={cx(
-        'showdex-module',
-        styles.container,
-        containerSize === 'xs' && styles.verySmol,
-        !!colorScheme && styles[colorScheme],
-        renderAsOverlay && styles.overlay,
-        glassyTerrain && styles.glassy,
-      )}
-    >
-      <Scrollable className={styles.content}>
-        <BuildInfo
-          position="top-right"
-        />
-
-        {
-          (renderAsOverlay && !mobile) &&
-          <BaseButton
-            className={styles.overlayCloseButton}
-            display="block"
-            aria-label="Close Calcdex"
-            onPress={onRequestOverlayClose}
-          >
-            <i className="fa fa-close" />
-          </BaseButton>
-        }
-
-        {
-          (renderAsOverlay && mobile) &&
-          <CloseButton
-            className={cx(
-              styles.mobileCloseButton,
-              styles.top,
-            )}
-            onPress={onRequestOverlayClose}
+    <PiconRackProvider dndMuxId={battleId}>
+      <div
+        ref={containerRef}
+        className={cx(
+          'showdex-module',
+          styles.container,
+          containerSize === 'xs' && styles.verySmol,
+          !!colorScheme && styles[colorScheme],
+          renderAsOverlay && styles.overlay,
+          glassyTerrain && styles.glassy,
+        )}
+        onContextMenu={(e) => showContextMenu({
+          event: e,
+          id: contextMenuId,
+        })}
+      >
+        <Scrollable className={styles.content}>
+          <BuildInfo
+            position="top-right"
           />
-        }
 
-        <PlayerCalc
-          className={styles.playerCalc}
-          position="top"
-          playerKey={topKey}
-          defaultName={t('player.user.defaultName', { index: 1 })}
-          playerOptions={playerOptions}
-          mobile={mobile}
-        />
+          {
+            (renderAsOverlay && !mobile) &&
+            <BaseButton
+              className={styles.overlayCloseButton}
+              display="block"
+              aria-label="Close Calcdex"
+              onPress={onCloseOverlay}
+            >
+              <i className="fa fa-close" />
+            </BaseButton>
+          }
 
-        <FieldCalc
-          className={styles.fieldCalc}
-          playerKey={topKey}
-          opponentKey={bottomKey}
-        />
+          {
+            (renderAsOverlay && mobile) &&
+            <CloseButton
+              className={cx(styles.mobileCloseButton, styles.top)}
+              onPress={onCloseOverlay}
+            />
+          }
 
-        <PlayerCalc
-          className={styles.opponentCalc}
-          position="bottom"
-          playerKey={bottomKey}
-          defaultName={t('player.user.defaultName', { index: 2 })}
-          playerOptions={playerOptions}
-          mobile={mobile}
-        />
+          <PiconRackSortableContext playerKey={topKey}>
+            <PlayerCalc
+              className={styles.playerCalc}
+              position="top"
+              playerKey={topKey}
+              defaultName={t('player.user.defaultName', { index: 1 })}
+              playerOptions={playerOptions}
+              mobile={mobile}
+            />
+          </PiconRackSortableContext>
 
-        {
-          (renderAsOverlay && mobile) &&
-          <CloseButton
-            className={cx(
-              styles.mobileCloseButton,
-              styles.bottom,
-            )}
-            onPress={onRequestOverlayClose}
+          <FieldCalc
+            className={styles.fieldCalc}
+            playerKey={topKey}
+            opponentKey={bottomKey}
           />
-        }
-      </Scrollable>
-    </div>
+
+          <PiconRackSortableContext playerKey={bottomKey}>
+            <PlayerCalc
+              className={styles.opponentCalc}
+              position="bottom"
+              playerKey={bottomKey}
+              defaultName={t('player.user.defaultName', { index: 2 })}
+              playerOptions={playerOptions}
+              mobile={mobile}
+            />
+          </PiconRackSortableContext>
+
+          {
+            (renderAsOverlay && mobile) &&
+            <CloseButton
+              className={cx(styles.mobileCloseButton, styles.bottom)}
+              onPress={onCloseOverlay}
+            />
+          }
+        </Scrollable>
+      </div>
+
+      <ContextMenu
+        id={contextMenuId}
+        itemKeyPrefix={`Calcdex:${battleId}:ContextMenu`}
+        items={[
+          {
+            key: 'switch-sides',
+            entity: 'item',
+            props: {
+              label: 'Switch Players',
+              icon: 'fa-random',
+              disabled: typeof room?.switchViewpoint !== 'function'
+                || (!!authPlayerKey && battleActive), // no effect in this case
+              onPress: hideAfter(() => room.switchViewpoint()),
+            },
+          },
+          {
+            key: 'dupe-calcdex',
+            entity: 'item',
+            props: {
+              label: 'Convert to Honk',
+              icon: 'fa-car',
+              disabled: !battleId || typeof onRequestHonkdex !== 'function',
+              hidden: !honkdexSettings?.visuallyEnabled,
+              onPress: hideAfter(() => {
+                const newId = uuidv4();
+
+                dupeCalcdex({ ...state, newId });
+                onRequestHonkdex(newId);
+              }),
+            },
+          },
+          {
+            key: 'close-hr',
+            entity: 'separator',
+          },
+          {
+            key: 'open-hellodex',
+            entity: 'item',
+            props: {
+              label: 'Hellodex',
+              icon: 'fa-home',
+              disabled: typeof onRequestHellodex !== 'function',
+              onPress: hideAfter(onRequestHellodex),
+            },
+          },
+          {
+            key: 'close-calcdex',
+            entity: 'item',
+            props: {
+              theme: renderAsOverlay ? 'info' : 'error',
+              label: renderAsOverlay ? 'Close' : 'Close Tab',
+              icon: 'close-circle',
+              disabled: !battleId
+                || (renderAsOverlay && typeof onCloseOverlay !== 'function'),
+              //  || (!renderAsOverlay && typeof app?.leaveRoom !== 'function'),
+              hidden: !renderAsOverlay,
+              onPress: hideAfter(() => {
+                if (renderAsOverlay) {
+                  return void onCloseOverlay();
+                }
+
+                app.leaveRoom(getCalcdexRoomId(battleId));
+              }),
+            },
+          },
+        ]}
+      />
+    </PiconRackProvider>
   );
 };

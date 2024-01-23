@@ -22,20 +22,9 @@ export const HellodexRenderer = (
   <ReduxProvider store={store}>
     <SandwichProvider>
       <Hellodex
-        openCalcdexInstance={(battleId) => openCalcdexInstance(
-          store,
-          CalcdexRenderer,
-          battleId,
-        )}
-        openHonkdexInstance={(instanceId) => openHonkdexInstance(
-          store,
-          HonkdexRenderer,
-          instanceId,
-        )}
-        removeHonkdexInstances={(...instanceIds) => removeHonkdexInstances(
-          store,
-          instanceIds,
-        )}
+        onRequestCalcdex={(id) => openCalcdexInstance(store, CalcdexRenderer, id)}
+        onRequestHonkdex={(id) => openHonkdexInstance(store, HonkdexRenderer, id)}
+        onRemoveHonkdex={(...ids) => removeHonkdexInstances(store, ids)}
       />
     </SandwichProvider>
   </ReduxProvider>

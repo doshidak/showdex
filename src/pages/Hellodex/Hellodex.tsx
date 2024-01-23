@@ -23,6 +23,7 @@ import {
   useHellodexSettings,
   useHellodexState,
   useHonkdexSettings,
+  useUpdateSettings,
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
@@ -38,9 +39,9 @@ import { useHellodexSize } from './useHellodexSize';
 import styles from './Hellodex.module.scss';
 
 export interface HellodexProps {
-  openCalcdexInstance?: (battleId: string) => void;
-  openHonkdexInstance?: (instanceId?: string) => void;
-  removeHonkdexInstances?: (...instanceIds: string[]) => void;
+  onRequestCalcdex?: (battleId: string) => void;
+  onRequestHonkdex?: (instanceId?: string) => void;
+  onRemoveHonkdex?: (...instanceIds: string[]) => void;
 }
 
 const packageVersion = `v${env('package-version', 'X.X.X')}`;
@@ -52,9 +53,9 @@ const repoUrl = env('hellodex-repo-url');
 const communityUrl = env('hellodex-community-url');
 
 export const Hellodex = ({
-  openCalcdexInstance,
-  openHonkdexInstance,
-  removeHonkdexInstances,
+  onRequestCalcdex,
+  onRequestHonkdex,
+  onRemoveHonkdex,
 }: HellodexProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -74,6 +75,7 @@ export const Hellodex = ({
   const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
   const honkdexSettings = useHonkdexSettings();
+  const updateSettings = useUpdateSettings();
 
   const state = useHellodexState();
   const calcdexState = useCalcdexState();
@@ -292,7 +294,7 @@ export const Hellodex = ({
                         className={styles.honkButton}
                         aria-label={t('instances.honkdex.newAria')}
                         hoverScale={1}
-                        onPress={() => openHonkdexInstance?.()}
+                        onPress={() => onRequestHonkdex?.()}
                       >
                         <Trans
                           t={t}
@@ -322,7 +324,7 @@ export const Hellodex = ({
                         display="block"
                         aria-label={t('instances.honkdex.newAria')}
                         hoverScale={1}
-                        onPress={() => openHonkdexInstance()}
+                        onPress={() => onRequestHonkdex()}
                       >
                         <i
                           className="fa fa-plus"
@@ -349,10 +351,10 @@ export const Hellodex = ({
                         authName={authName}
                         onPress={() => (
                           instance.operatingMode === 'standalone'
-                            ? openHonkdexInstance
-                            : openCalcdexInstance
+                            ? onRequestHonkdex
+                            : onRequestCalcdex
                         )?.(instance.battleId)}
-                        onRequestRemove={() => removeHonkdexInstances?.(instance.battleId)}
+                        onRequestRemove={() => onRemoveHonkdex?.(instance.battleId)}
                         onContextMenu={(e) => {
                           showContextMenu({
                             id: instance.operatingMode === 'battle' ? calcdexMenuId : honkdexMenuId,
@@ -582,7 +584,7 @@ export const Hellodex = ({
               label: 'New Honk',
               icon: 'fa-car',
               hidden: !honkdexSettings?.visuallyEnabled,
-              onPress: hideAfter(openHonkdexInstance),
+              onPress: hideAfter(onRequestHonkdex),
             },
           },
           {
@@ -591,13 +593,13 @@ export const Hellodex = ({
             props: {
               label: 'Spectate Battles',
               icon: 'sword',
-              iconStyle: { transform: 'scale(1.1)' },
+              iconStyle: { transform: 'scale(1.15)' },
               disabled: typeof app?.joinRoom !== 'function',
               onPress: hideAfter(() => app.joinRoom('battles', 'battles')),
             },
           },
           {
-            key: 'settings-separator',
+            key: 'settings-hr',
             entity: 'separator',
           },
           {
@@ -605,10 +607,21 @@ export const Hellodex = ({
             entity: 'item',
             props: {
               theme: settingsVisible ? 'info' : 'default',
-              label: settingsVisible ? 'Close Settings' : 'Settings',
+              label: settingsVisible ? 'Close' : 'Settings',
               icon: settingsVisible ? 'close-circle' : 'cog',
-              iconStyle: settingsVisible ? undefined : { transform: 'scale(1.2)' },
+              iconStyle: settingsVisible ? undefined : { transform: 'scale(1.25)' },
               onPress: hideAfter(toggleSettingsPane),
+            },
+          },
+          {
+            key: 'close-patronage',
+            entity: 'item',
+            props: {
+              theme: 'info',
+              label: 'Close',
+              icon: 'close-circle',
+              hidden: !patronageVisible,
+              onPress: hideAfter(closePatronagePane),
             },
           },
         ]}
@@ -622,9 +635,9 @@ export const Hellodex = ({
             key: 'open-calcdex',
             entity: 'item',
             props: {
-              label: 'Open Calcdex',
+              label: 'Open',
               icon: 'external-link',
-              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              iconStyle: { strokeWidth: 3, transform: 'scale(1.2)' },
               onPress: ({ props: p }) => hideAfter(() => {
                 const id = (p as Record<'instanceId', string>)?.instanceId;
 
@@ -632,7 +645,7 @@ export const Hellodex = ({
                   return;
                 }
 
-                openCalcdexInstance(id);
+                onRequestCalcdex(id);
               })(),
             },
           },
@@ -642,6 +655,7 @@ export const Hellodex = ({
             props: {
               label: 'Convert to Honk',
               icon: 'fa-car',
+              hidden: !honkdexSettings?.visuallyEnabled,
               onPress: ({ props: p }) => hideAfter(() => {
                 const id = (p as Record<'instanceId', string>)?.instanceId;
 
@@ -653,6 +667,30 @@ export const Hellodex = ({
                   instances.find((i) => i?.battleId === id)
                     || { battleId: id },
                 );
+              })(),
+            },
+          },
+          {
+            key: 'close-hr',
+            entity: 'separator',
+          },
+          {
+            key: 'close-battle',
+            entity: 'item',
+            props: {
+              theme: 'error',
+              label: 'Leave Battle',
+              icon: 'door-exit',
+              iconStyle: { transform: 'scale(1.2)' },
+              disabled: typeof app?.leaveRoom !== 'function',
+              onPress: ({ props: p }) => hideAfter(() => {
+                const id = (p as Record<'instanceId', string>)?.instanceId;
+
+                if (!id || typeof app?.leaveRoom !== 'function') {
+                  return;
+                }
+
+                app.leaveRoom(id);
               })(),
             },
           },
@@ -667,9 +705,9 @@ export const Hellodex = ({
             key: 'open-honkdex',
             entity: 'item',
             props: {
-              label: 'Open Honk',
+              label: 'Open',
               icon: 'external-link',
-              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              iconStyle: { strokeWidth: 3, transform: 'scale(1.2)' },
               onPress: ({ props: p }) => hideAfter(() => {
                 const id = (p as Record<'instanceId', string>)?.instanceId;
 
@@ -677,7 +715,7 @@ export const Hellodex = ({
                   return;
                 }
 
-                openHonkdexInstance(id);
+                onRequestHonkdex(id);
               })(),
             },
           },
@@ -685,9 +723,9 @@ export const Hellodex = ({
             key: 'dupe-honkdex',
             entity: 'item',
             props: {
-              label: 'Duplicate Honk',
+              label: 'Duplicate',
               icon: 'copy-plus',
-              iconStyle: { strokeWidth: 2.5, transform: 'scale(1.2)' },
+              iconStyle: { strokeWidth: 3, transform: 'scale(1.2)' },
               onPress: ({ props: p }) => hideAfter(() => {
                 const id = (p as Record<'instanceId', string>)?.instanceId;
 
@@ -703,7 +741,7 @@ export const Hellodex = ({
             },
           },
           {
-            key: 'remove-separator',
+            key: 'remove-hr',
             entity: 'separator',
           },
           {
@@ -711,8 +749,10 @@ export const Hellodex = ({
             entity: 'item',
             props: {
               theme: 'error',
-              label: 'Delete Honk',
-              icon: 'fa-times-circle',
+              label: 'Delete',
+              // icon: 'fa-times-circle',
+              icon: 'trash-close',
+              iconStyle: { transform: 'scale(1.2)' },
               onPress: ({ props: data }) => hideAfter(() => {
                 const id = (data as Record<'instanceId', string>)?.instanceId;
 
@@ -735,10 +775,27 @@ export const Hellodex = ({
             key: 'reset-record',
             entity: 'item',
             props: {
-              label: 'Reset W/L Record',
+              label: 'Reset',
               icon: 'fa-refresh',
               disabled: !battleRecord?.wins && !battleRecord?.losses,
               onPress: hideAfter(resetBattleRecord),
+            },
+          },
+          {
+            key: 'hide-separator',
+            entity: 'separator',
+          },
+          {
+            key: 'hide-record',
+            entity: 'item',
+            props: {
+              theme: 'warning',
+              icon: 'close-circle',
+              label: 'Hide',
+              disabled: !settings?.showBattleRecord,
+              onPress: hideAfter(() => updateSettings({
+                hellodex: { showBattleRecord: false },
+              })),
             },
           },
         ]}

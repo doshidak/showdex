@@ -19,8 +19,8 @@ import { getCalcdexRoomId } from './getCalcdexRoomId';
  */
 export const createCalcdexRoom = (
   battleId: string,
-  focus?: boolean,
   store?: RootStore,
+  focus?: boolean,
 ): Showdown.HtmlRoom => {
   if (!battleId) {
     return null;

@@ -23,7 +23,7 @@ import {
   SyncBattleActionType,
 } from '@showdex/redux/actions';
 import { cloneBattleState, countActivePlayers, sanitizeField } from '@showdex/utils/battle';
-import { calcPokemonCalcdexId } from '@showdex/utils/calc';
+import { calcMaxPokemon, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { detectLegacyGen, determineDefaultLevel, parseBattleFormat } from '@showdex/utils/dex';
@@ -148,7 +148,9 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
    */
   dupe: (
     state: Draft<CalcdexSliceState>,
-    action: PayloadAction<PickRequired<Partial<CalcdexBattleState>, 'battleId'>>,
+    action: PayloadAction<PickRequired<Partial<CalcdexBattleState>, 'battleId'> & {
+      newId?: string;
+    }>,
   ) => void;
 
   /**
@@ -393,6 +395,19 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         opponentKey: opponentKey || currentState.opponentKey,
         cached: cached || currentState.cached,
       };
+
+      if (currentState.operatingMode === 'standalone') {
+        AllPlayerKeys.forEach((pkey) => {
+          if (!nonEmptyObject(action.payload[pkey])) {
+            return;
+          }
+
+          state[battleId][pkey] = {
+            ...currentState[pkey],
+            ...action.payload[pkey],
+          };
+        });
+      }
 
       // for the active state, only update if previously true and the new value is false
       // as we don't want the HellodexBattleRecord to record replays or battle re-inits
@@ -645,6 +660,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       const {
         battleId,
+        newId: newIdFromPayload,
         ...additionalProperties
       } = action.payload;
 
@@ -653,7 +669,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       }
 
       // generate a new battleId
-      const newId = uuidv4();
+      const newId = newIdFromPayload || uuidv4();
 
       state[newId] = {
         ...cloneBattleState(state[battleId]),
@@ -691,6 +707,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
               active: false,
               name: null,
               rating: -1,
+              autoSelect: false,
               maxPokemon: 0,
               pokemon: [],
               pokemonOrder: [],
@@ -711,11 +728,13 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
             active: true,
             name: playerKey === 'p1' ? 'Side A' : 'Side B',
             rating: -1,
+            autoSelect: false,
+            pokemonOrder: [],
             usedMax: false,
             usedTera: false,
           };
 
-          state[newId][playerKey].maxPokemon += env.int('honkdex-player-extend-pokemon', 1);
+          state[newId][playerKey].maxPokemon = calcMaxPokemon(state[newId][playerKey]);
         });
       }
 
@@ -807,16 +826,27 @@ export const useCalcdexDuplicator = () => {
   const dispatch = useDispatch();
 
   return (
-    instance: PickRequired<Partial<CalcdexBattleState>, 'battleId'>,
-  ) => dispatch(calcdexSlice.actions.dupe({
-    battleId: instance.battleId,
-    name: instance.operatingMode === 'battle'
-      ? [
-        instance.p1?.name,
-        !!instance.p1?.name && !!instance.p2?.name && 'vs',
-        instance.p2?.name,
-        !!instance.p3?.name && `& ${t('battle.name.friends')}`,
-      ].filter(Boolean).join(' ')
-      : t('battle.name.dupe', { name: instance.name }),
-  }));
+    instance: PickRequired<Partial<CalcdexBattleState>, 'battleId'> & {
+      newId?: string;
+    },
+  ) => {
+    if (!instance?.battleId) {
+      return;
+    }
+
+    dispatch(calcdexSlice.actions.dupe({
+      battleId: instance.battleId,
+      newId: instance.newId,
+      name: instance.operatingMode === 'battle'
+        ? [
+          instance.p1?.name,
+          !!instance.p1?.name && !!instance.p2?.name && 'vs',
+          instance.p2?.name,
+          !!instance.p3?.name && `& ${t('battle.name.friends')}`,
+        ].filter(Boolean).join(' ')
+        : instance.name
+          ? t('battle.name.dupe', { name: instance.name })
+          : null,
+    }));
+  };
 };
