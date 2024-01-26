@@ -204,6 +204,14 @@ export interface CalcdexBattleState extends Partial<Record<CalcdexPlayerKey, Cal
   containerSize?: ElementSizeLabel;
 
   /**
+   * Last recorded container width.
+   *
+   * @default 320
+   * @since 1.2.0
+   */
+  containerWidth?: number;
+
+  /**
    * Number of active players in the battle.
    *
    * * When the `operatingMode` is `'standalone'`, this will always be `2`.
