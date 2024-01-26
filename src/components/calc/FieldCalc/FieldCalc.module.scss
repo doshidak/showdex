@@ -73,9 +73,9 @@
     grid-area: 2 / 1;
     @include spacing.margin($top: 4px, $bottom: 10px);
 
-    .verySmol & {
-      @include spacing.margin($x: 10px);
-    }
+    // .verySmol & {
+    //   @include spacing.margin($x: 10px);
+    // }
   }
 }
 
@@ -95,9 +95,9 @@
     grid-area: 2 / 2;
     @include spacing.margin($top: 4px, $bottom: 10px);
 
-    .verySmol & {
-      @include spacing.margin($x: 10px);
-    }
+    // .verySmol & {
+    //   @include spacing.margin($x: 10px);
+    // }
   }
 }
 

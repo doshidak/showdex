@@ -6,12 +6,7 @@ import { type DropdownOption, Dropdown, SpikesField } from '@showdex/components/
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
 import { times } from '@showdex/consts/core';
-import {
-  PlayerSideConditionsDexMap,
-  // PlayerSideConditionsToggleMap,
-  // PlayerSideScreensToggleMap,
-  TerrainNames,
-} from '@showdex/consts/dex';
+import { PlayerSideConditionsDexMap, TerrainNames } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayerKey, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
@@ -47,7 +42,7 @@ export const FieldCalc = ({
   const {
     operatingMode,
     battleId,
-    containerSize,
+    // containerSize,
     gen,
     format,
     authPlayerKey,
@@ -207,7 +202,7 @@ export const FieldCalc = ({
         <SpikesField
           key={toggleKey}
           className={styles.toggleButton}
-          headerPrefix={tooltipContent}
+          // headerPrefix={tooltipContent}
           input={{
             name: `${l.scope}:${pkey}:${sideKey}`,
             value: currentSide?.spikes || null,
@@ -252,8 +247,8 @@ export const FieldCalc = ({
     <TableGrid
       className={cx(
         styles.container,
-        doubles && styles.doubles,
-        containerSize === 'xs' && styles.verySmol,
+        (playerToggleKeys.length > 4 || doubles) && styles.doubles,
+        // containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
         className,
       )}
