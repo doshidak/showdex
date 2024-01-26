@@ -191,6 +191,17 @@ export const clonePokemon = (
     output.dirtyBoosts = { ...output.dirtyBoosts };
   }
 
+  if (nonEmptyObject(output.autoBoostMap)) {
+    output.autoBoostMap = Object.entries(output.autoBoostMap).reduce((prev, [key, value]) => {
+      prev[key] = {
+        ...value,
+        boosts: { ...value?.boosts },
+      };
+
+      return prev;
+    }, {} as typeof output['autoBoostMap']);
+  }
+
   if (nonEmptyObject(output.baseStats)) {
     output.baseStats = { ...output.baseStats };
   }

@@ -1,4 +1,5 @@
 import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
+import { type CalcdexAutoBoostMap } from './CalcdexAutoBoostMap';
 import { type CalcdexLeanPokemon } from './CalcdexLeanPokemon';
 import { type CalcdexMoveOverride } from './CalcdexMoveOverride';
 import { type CalcdexPlayerKey } from './CalcdexPlayerKey';
@@ -646,6 +647,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *   - If that's the case, set `spc` to `spa` and remove the `spc` property.
    *   - For standardization, `boosts` of a `CalcdexPokemon` should not store `spc`.
    *
+   * @default
+   * ```ts
+   * {
+   *   hp: 0,
+   *   atk: 0,
+   *   def: 0,
+   *   spa: 0,
+   *   spd: 0,
+   *   spe: 0,
+   * }
+   * ```
    * @see `Showdown.Pokemon['boosts']` in `types/pokemon.d.ts`
    * @since 1.0.2
    */
@@ -659,18 +671,63 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    *
    * @default
    * ```ts
-   * { hp: null, atk: null, def: null, spa: null, spd: null, spe: null }
+   * {
+   *   hp: null,
+   *   atk: null,
+   *   def: null,
+   *   spa: null,
+   *   spd: null,
+   *   spe: null,
+   * }
    * ```
    * @since 0.1.0
    */
   dirtyBoosts?: Showdown.StatsTableNoHp;
 
   /**
+   * Currently applied stage boosts applied as a result of an ability's effect.
+   *
+   * * This includes stage boosts applied to both `boosts` & `dirtyBoosts`, depending on each effect's `turn` value.
+   * * If the ability is not present in this mapping, it can be assumed the effect hasn't been applied yet.
+   *   - Particularly for gen 9, an ability's effect can still remain, such as for *Intrepid Sword*, though not applied.
+   * * Should be populated during battle syncs by reading the `stepQueue[]`.
+   *
+   * @example
+   * ```ts
+   * {
+   *   Intimidate: {
+   *     boosts: { atk: 1 },
+   *     sourceKey: 'p2',
+   *     sourcePid: 'ae65f089-25f8-4fdd-85dA-64efaa0c097f',
+   *     reffect: 'Contrary',
+   *     reffectDict: 'abilities',
+   *     turn: 1,
+   *     once: false,
+   *     active: true,
+   *   },
+   * }
+   * ```
+   * @default
+   * ```ts
+   * {}
+   * ```
+   * @since 1.2.3
+   */
+  autoBoostMap?: CalcdexAutoBoostMap;
+
+  /**
    * Base stats of the Pokemon based on its species.
    *
    * @default
    * ```ts
-   * { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
+   * {
+   *   hp: 0,
+   *   atk: 0,
+   *   def: 0,
+   *   spa: 0,
+   *   spd: 0,
+   *   spe: 0,
+   * }
    * ```
    * @since 0.1.0
    */

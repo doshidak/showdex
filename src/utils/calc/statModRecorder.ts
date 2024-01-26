@@ -1,15 +1,15 @@
 import { PokemonInitialStats } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 
-export type CalcdexStatModSource =
-  | 'ability'
+export type CalcdexStatModDict =
+  | 'abilities'
   | 'boost'
-  | 'item'
+  | 'items'
   | 'field'
-  | 'modifier'
-  | 'move'
-  | 'status'
-  | 'ultimate';
+  // | 'modifier' // unused
+  | 'moves'
+  | 'nonvolatiles'
+  | 'ultimates';
 
 /**
  * Details of a single stat modifier.
@@ -28,10 +28,30 @@ export interface CalcdexStatMod {
   /**
    * Source of the stat modifier.
    *
-   * @example 'item'
+   * * Primarily used as a key in the translations dictionary.
+   *
+   * @example 'items'
    * @since 1.1.0
    */
-  source?: CalcdexStatModSource;
+  dict?: CalcdexStatModDict;
+
+  /**
+   * Reaction to the stat modifier, typically from an auto-stat mod.
+   *
+   * @example 'Contrary'
+   * @since 1.2.3
+   */
+  reffect?: string;
+
+  /**
+   * Source of the reaction to the stat modifier.
+   *
+   * * Primarily used as a key in the translation dictionary.
+   *
+   * @example 'abilities'
+   * @since 1.2.3
+   */
+  reffectDict?: CalcdexStatModDict;
 
   /**
    * Modifier value.
@@ -82,8 +102,22 @@ export interface CalcdexStatModRecorder {
   export: () => CalcdexStatModRecording;
   stats: () => Showdown.StatsTable;
   cap: (max?: number) => void;
-  apply: (stat: Showdown.StatName, modifier: number, source?: CalcdexStatModSource, label?: string) => void;
-  swap: (statA: Showdown.StatNameNoHp, statB: Showdown.StatNameNoHp, source?: CalcdexStatModSource, label?: string) => void;
+
+  apply: (
+    stat: Showdown.StatName,
+    modifier: number,
+    dict?: CalcdexStatModDict,
+    label?: string,
+    reffectDict?: CalcdexStatModDict,
+    reffectLabel?: string,
+  ) => void;
+
+  swap: (
+    statA: Showdown.StatNameNoHp,
+    statB: Showdown.StatNameNoHp,
+    dict?: CalcdexStatModDict,
+    label?: string,
+  ) => void;
 }
 
 /**
@@ -144,8 +178,10 @@ export const statModRecorder = (
   const apply: CalcdexStatModRecorder['apply'] = (
     stat,
     modifier,
-    source,
+    dict,
     label,
+    reffectDict,
+    reffect,
   ) => {
     const prev = table.stats[stat] || 0;
     const raw = prev * modifier;
@@ -153,7 +189,9 @@ export const statModRecorder = (
 
     table[stat].push({
       label: label?.trim(),
-      source,
+      dict,
+      reffect: reffect?.trim(),
+      reffectDict,
       modifier,
       prev,
       value,
@@ -171,7 +209,7 @@ export const statModRecorder = (
   const swap: CalcdexStatModRecorder['swap'] = (
     statA,
     statB,
-    source,
+    dict,
     label,
   ) => {
     const valueA = table.stats[statA];
@@ -179,7 +217,7 @@ export const statModRecorder = (
 
     table[statA].push({
       label,
-      source,
+      dict,
       modifier: null,
       swapped: [statA, statB],
       prev: valueA,
@@ -188,7 +226,7 @@ export const statModRecorder = (
 
     table[statB].push({
       label,
-      source,
+      dict,
       modifier: null,
       swapped: [statB, statA],
       prev: valueB,

@@ -15,6 +15,13 @@ export interface CalcdexPlayer extends CalcdexLeanSide {
   active?: boolean;
 
   /**
+   * Player's Elo rating.
+   *
+   * @since 0.1.0
+   */
+  rating?: string | number;
+
+  /**
    * Index of the `CalcdexPokemon` that is currently active on the field.
    *
    * @deprecated As of v1.0.4, not being used anymore in favor of `activeIndices`.
