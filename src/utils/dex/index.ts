@@ -3,6 +3,7 @@ export * from './detectDoublesFormat';
 export * from './detectGenFromFormat';
 export * from './detectGroundedness';
 export * from './detectLegacyGen';
+export * from './determineAutoBoostEffect';
 export * from './determineCriticalHit';
 export * from './determineDefaultLevel';
 export * from './determineMoveTargets';

@@ -11,6 +11,7 @@ export * from './detectPokemonIdent';
 export * from './detectSpeciesForme';
 export * from './detectToggledAbility';
 export * from './detectToggledMove';
+export * from './mapAutoBoosts';
 export * from './mapStellarMoves';
 export * from './mergeRevealedMoves';
 export * from './parsePokemonDetails';

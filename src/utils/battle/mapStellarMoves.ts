@@ -21,7 +21,7 @@ export const mapStellarMoves = (
     field?: CalcdexBattleField,
   },
 ): Partial<Record<Showdown.TypeName, MoveName>> => {
-  if (!pokemon?.speciesForme || !pokemon.playerKey || !stepQueue.length) {
+  if (!pokemon?.speciesForme || !pokemon.playerKey || !stepQueue?.length) {
     return {};
   }
 
