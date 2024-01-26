@@ -9,13 +9,18 @@
 
 .container {
   // grid-template-columns: minmax(36px, 1fr) repeat(6, minmax(48px, 1.25fr));
-  grid-template-columns: minmax(36px, min-content) repeat(6, minmax(44px, min-content));
+  // grid-template-columns: minmax(36px, min-content) repeat(6, minmax(50px, min-content));
+  grid-template-columns: repeat(7, 44px);
   column-gap: 8px;
   // row-gap: 3px;
   @include spacing.margin-xy($x: auto);
 
-  &.verySmol {
-    grid-template-columns: repeat(7, minmax(32px, 1fr));
+  // &.verySmol {
+  //   grid-template-columns: repeat(7, minmax(32px, 1fr));
+  // }
+
+  &.skinnyBoi {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 
   // &.veryThicc {
@@ -26,11 +31,16 @@
   // gen 2 has SPD, so this should only be applied for gen 1.
   &.legacySpc {
     // grid-template-columns: minmax(36px, 1fr) repeat(5, minmax(48px, 1.25fr));
-    grid-template-columns: minmax(36px, min-content) repeat(5, minmax(44px, min-content));
+    // grid-template-columns: minmax(36px, min-content) repeat(5, minmax(50px, min-content));
+    grid-template-columns: repeat(6, 44px);
 
-    &.verySmol {
-      // grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));
-      grid-template-columns: repeat(6, minmax(36px, min-content));
+    // &.verySmol {
+    //   // grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));
+    //   grid-template-columns: repeat(6, minmax(36px, min-content));
+    // }
+
+    &.skinnyBoi {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 }

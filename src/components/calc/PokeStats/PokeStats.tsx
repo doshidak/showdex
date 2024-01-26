@@ -48,6 +48,7 @@ export const PokeStats = ({
   const {
     operatingMode,
     containerSize,
+    containerWidth,
     gen,
     format,
     legacy,
@@ -167,6 +168,7 @@ export const PokeStats = ({
         gen === 1 && styles.legacySpc,
         containerSize === 'xs' && styles.verySmol,
         ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
+        containerWidth < 360 && styles.skinnyBoi,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -620,11 +622,7 @@ export const PokeStats = ({
                         ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
                       </div>
                       <div className={styles.statModLabel}>
-                        {modReffect ? (
-                          <>
-                            <s>{modLabel}</s> &rarr; {modReffect}
-                          </>
-                        ) : modLabel}
+                        {modReffect ? <>{modLabel} &rarr; {modReffect}</> : modLabel}
                       </div>
                     </React.Fragment>
                   );
