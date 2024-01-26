@@ -18,7 +18,8 @@
 }
 
 .playerBar {
-  @include flex.row($justify: space-between);
+  // @include flex.row($justify: space-between);
+  @include flex.row-between;
   width: 100%;
 
   .standalone:not(.big) & {
@@ -26,27 +27,34 @@
     align-items: center;
   }
 
-  .verySmol:not(.mobileOverlay) & {
-    flex-direction: column;
-    justify-content: center;
-  }
+  // .verySmol:not(.mobileOverlay) & {
+  //   flex-direction: column;
+  //   justify-content: center;
+  // }
 }
 
 .playerInfo {
   @include spacing.margin($top: 7px);
   width: 100%;
-  max-width: 33%;
+  // max-width: 33%;
+  flex: 1;
 
-  .verySmol:not(.mobileOverlay) & {
-    max-width: none;
-    @include flex.row($align: center);
+  .skinnyBoi & {
+    max-width: 20%;
   }
+
+  // .verySmol:not(.mobileOverlay) & {
+  //   max-width: none;
+  //   @include flex.row($align: center);
+  // }
 }
 
 .teamList {
   // display: grid;
   // grid-template-columns: repeat(6, min-content);
   // grid-auto-rows: min-content;
+  @include flex.row-end;
+  flex: 2;
 
   // .big &, .smol:not(.verySmol).standalone & {
   //   grid-template-columns: repeat(12, min-content);
@@ -62,10 +70,10 @@
     align-self: center;
   }
 
-  .verySmol & {
-    justify-content: center;
-    @include spacing.margin($top: 3px);
-  }
+  // .verySmol & {
+  //   justify-content: center;
+  //   @include spacing.margin($top: 3px);
+  // }
 }
 
 /*

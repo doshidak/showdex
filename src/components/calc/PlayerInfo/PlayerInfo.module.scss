@@ -44,9 +44,9 @@ button.usernameButton {
   @include spacing.margin($top: 2px);
   font-size: 8px;
 
-  .verySmol:not(.mobileOverlay) & {
-    @include spacing.margin($top: 0, $left: 10px);
-  }
+  // .verySmol:not(.mobileOverlay) & {
+  //   @include spacing.margin($top: 0, $left: 10px);
+  // }
 
   button.toggleButton {
     font-size: inherit;

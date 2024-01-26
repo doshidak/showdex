@@ -56,6 +56,7 @@ export const PlayerCalc = ({
     operatingMode,
     renderMode,
     containerSize,
+    containerWidth,
     format,
     gameType,
   } = state;
@@ -137,7 +138,7 @@ export const PlayerCalc = ({
           targetIndex,
           `${l.scope}:PlayerPiconButton~SelectionIndex:onPress()`,
         )}
-        onContextMenu={operatingMode === 'standalone' && partyIndex > -1 ? (e) => {
+        onContextMenu={partyIndex > -1 ? (e) => {
           showContextMenu?.({ id: piconMenuId, event: e });
           setContextPiconId(pid);
           e.stopPropagation();
@@ -166,6 +167,7 @@ export const PlayerCalc = ({
         ['xs', 'sm'].includes(containerSize) && styles.smol,
         ['md', 'lg', 'xl'].includes(containerSize) && styles.big,
         containerSize === 'xl' && styles.veryThicc,
+        containerWidth < 360 && styles.skinnyBoi,
         (mobile && renderMode === 'overlay') && styles.mobileOverlay,
         operatingMode === 'standalone' && styles.standalone,
         className,
@@ -352,6 +354,7 @@ export const PlayerCalc = ({
               icon: contextPokemon?.active ? 'ghost-boo' : 'ghost-smile',
               iconStyle: { strokeWidth: 4, transform: 'scale(1.2)' },
               disabled: typeof contextPokemonIndex !== 'number',
+              hidden: operatingMode !== 'standalone',
               onPress: hideAfter(() => {
                 const indices = [...(playerActives || [])]
                   .filter((i) => contextPokemonIndex !== i || !contextPokemon.active);
@@ -367,6 +370,9 @@ export const PlayerCalc = ({
           {
             key: 'action-hr',
             entity: 'separator',
+            props: {
+              hidden: operatingMode !== 'standalone',
+            },
           },
           {
             key: 'new-pokemon',
@@ -374,7 +380,7 @@ export const PlayerCalc = ({
             props: {
               label: 'New',
               icon: 'fa-plus',
-              hidden: !contextPokemon?.calcdexId,
+              hidden: operatingMode !== 'standalone' || !contextPokemon?.calcdexId,
               onPress: hideAfter(() => selectPokemon(playerKey, playerParty.length)),
             },
           },
@@ -386,6 +392,7 @@ export const PlayerCalc = ({
               icon: 'copy-plus',
               iconStyle: { strokeWidth: 4, transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,
+              hidden: operatingMode !== 'standalone',
               onPress: hideAfter(() => dupePokemon(playerKey, contextPokemon)),
             },
           },
@@ -396,6 +403,7 @@ export const PlayerCalc = ({
               label: `Move to ${playerKey === 'p1' ? 'B' : 'A'}`,
               icon: `fa-arrow-${playerKey === 'p1' ? 'down' : 'up'}`,
               disabled: !contextPokemon?.calcdexId,
+              hidden: operatingMode !== 'standalone',
               onPress: hideAfter(() => movePokemon(
                 playerKey,
                 contextPokemon,
@@ -406,6 +414,9 @@ export const PlayerCalc = ({
           {
             key: 'delete-hr',
             entity: 'separator',
+            props: {
+              hidden: operatingMode !== 'standalone',
+            },
           },
           {
             key: 'delete-pokemon',
@@ -417,11 +428,12 @@ export const PlayerCalc = ({
               icon: 'trash-close',
               iconStyle: { transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,
+              hidden: operatingMode !== 'standalone',
               onPress: hideAfter(() => removePokemon(playerKey, contextPokemon)),
             },
           },
         ]}
-        disabled={operatingMode === 'standalone'}
+        // disabled={operatingMode === 'standalone'}
         onVisibilityChange={(visible) => {
           if (visible || contextPiconId) {
             return;

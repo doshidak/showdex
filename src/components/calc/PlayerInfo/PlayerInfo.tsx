@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import Svg from 'react-inlinesvg';
 import cx from 'classnames';
+import { MemberIcon } from '@showdex/components/app';
 import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { formatId, getResourceUrl } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { openUserPopup } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
@@ -63,7 +63,7 @@ export const PlayerInfo = ({
   const playerId = formatId(name);
   const playerTitle = findPlayerTitle(playerId, true);
   const playerLabelColor = playerTitle?.color?.[colorScheme];
-  const playerIconColor = playerTitle?.iconColor?.[colorScheme];
+  // const playerIconColor = playerTitle?.iconColor?.[colorScheme];
 
   // only fetch the rating if the battle didn't provide it to us
   // (with a terribly-implemented delay timer to give some CPU time for drawing the UI)
@@ -199,13 +199,25 @@ export const PlayerInfo = ({
           disabled={!name}
           onPress={() => openUserPopup(name)}
         >
-          {
+          {/*
             !!playerTitle?.icon &&
             <Svg
               className={styles.usernameButtonIcon}
               style={playerIconColor ? { color: playerIconColor } : undefined}
               description={playerTitle.iconDescription}
               src={getResourceUrl(`${playerTitle.icon}.svg`)}
+            />
+          */}
+
+          {
+            !!playerTitle?.icon &&
+            <MemberIcon
+              className={styles.usernameButtonIcon}
+              member={{
+                name,
+                showdownUser: true,
+                periods: null,
+              }}
             />
           }
         </Button>
