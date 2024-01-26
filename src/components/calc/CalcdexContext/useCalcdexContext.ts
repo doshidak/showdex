@@ -1,13 +1,15 @@
 import * as React from 'react';
 import { NIL as NIL_UUID } from 'uuid';
-import { type ItemName, type MoveName } from '@smogon/calc';
+import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
 import {
+  PokemonBoostNames,
   PokemonBoosterAbilities,
   PokemonPresetFuckedBaseFormes,
   PokemonPresetFuckedBattleFormes,
   PokemonRuinAbilities,
 } from '@showdex/consts/dex';
 import {
+  type CalcdexAutoBoostEffect,
   type CalcdexBattleField,
   type CalcdexBattleState,
   type CalcdexMoveOverride,
@@ -38,6 +40,7 @@ import {
   calcPokemonCurrentHp,
   calcPokemonMaxHp,
   calcPokemonSpreadStats,
+  calcStatAutoBoosts,
   convertLegacyDvToIv,
   getLegacySpcDv,
 } from '@showdex/utils/calc';
@@ -50,6 +53,7 @@ import {
 import { logger, runtimer } from '@showdex/utils/debug';
 import {
   detectDoublesFormat,
+  determineAutoBoostEffect,
   determineDefaultLevel,
   getDexForFormat,
   getGenfulFormat,
@@ -130,6 +134,271 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     saveRequestTimeout.current = setTimeout(saveHonk, 3000);
+  };
+
+  /*
+  const applyAutoBoostEffect = (
+    playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>>,
+    sourcePokemon: CalcdexPokemon,
+  ) => {
+    if (!playersPayload || !sourcePokemon?.speciesForme) {
+      return;
+    }
+
+    const ability = sourcePokemon.dirtyAbility || sourcePokemon.ability;
+    const opponentKey = sourcePokemon.playerKey === state.playerKey ? state.opponentKey : state.playerKey;
+    const shouldTargetOpposing = ability === 'Intimidate' as AbilityName;
+    const targetKey = shouldTargetOpposing ? opponentKey : sourcePokemon.playerKey;
+    const targetPokemonIndex = shouldTargetOpposing
+      ? state[targetKey]?.selectionIndex
+      : state[targetKey]?.pokemon?.findIndex((p) => p?.calcdexId === sourcePokemon.calcdexId);
+
+    const targetPokemon = clonePokemon(state[targetKey]?.pokemon?.[targetPokemonIndex]);
+
+    if (!targetPokemon?.speciesForme) {
+      return;
+    }
+
+    const calcDirtyBoosts = () => PokemonBoostNames.reduce((prev, stat) => {
+      const autoStage = calcStatAutoBoosts(targetPokemon, stat);
+
+      if (!autoStage) {
+        return prev;
+      }
+
+      prev[stat] = (prev[stat] || 0) + autoStage;
+
+      return prev;
+    }, { ...targetPokemon.dirtyBoosts } as Showdown.StatsTableNoHp);
+
+    const packPayload = () => {
+      if (!Array.isArray(playersPayload[targetKey]?.pokemon)) {
+        playersPayload[targetKey] = {
+          ...playersPayload[targetKey],
+          pokemon: [...state[targetKey].pokemon],
+        };
+      }
+
+      playersPayload[targetKey].pokemon[targetPokemonIndex] = targetPokemon;
+    };
+
+    const activePokemon = AllPlayerKeys.flatMap((k) => (
+      state[k]?.pokemon?.filter((p) => (
+        !!p?.active
+          && p.calcdexId !== sourcePokemon.calcdexId
+      ))
+    ));
+
+    const fx = determineAutoBoostEffect(sourcePokemon, {
+      format: state.format,
+      targetPokemon,
+      activePokemon,
+      field: state.field,
+    });
+
+    if (!fx?.name || fx.name in (targetPokemon.autoBoostMap || {}) || !nonEmptyObject(fx.boosts)) {
+      if (nonEmptyObject(targetPokemon.autoBoostMap)) {
+        const removeEffects = Object.entries(targetPokemon.autoBoostMap)
+          .filter(([, f]) => !f?.name || typeof f.turn !== 'number' || f.turn < 0)
+          .map(([n]) => n);
+
+        removeEffects.forEach((name) => {
+          delete targetPokemon.autoBoostMap[name];
+        });
+
+        targetPokemon.dirtyBoosts = calcDirtyBoosts();
+        packPayload();
+      }
+
+      return;
+    }
+
+    targetPokemon.autoBoostMap = {
+      ...targetPokemon.autoBoostMap,
+      [fx.name]: fx,
+    };
+
+    targetPokemon.dirtyBoosts = calcDirtyBoosts();
+
+    // must be after, otherwise calcStatAutoBoosts() in calcDirtyBoosts() will ignore this
+    fx.active = true;
+    packPayload();
+  };
+  */
+
+  const applyAutoBoostEffects = (
+    playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>>,
+    // selectionIndices?: Partial<Record<CalcdexPlayerKey, number>>,
+  ) => {
+    if (!playersPayload) {
+      return;
+    }
+
+    const activePokemon = AllPlayerKeys.flatMap((k) => state[k]?.pokemon?.filter((p) => !!p?.active) || []);
+    const playerKeys = [state.playerKey, state.opponentKey] as CalcdexPlayerKey[];
+
+    playerKeys.forEach((playerKey) => {
+      if (!Array.isArray(playersPayload[playerKey]?.pokemon)) {
+        playersPayload[playerKey] = {
+          ...playersPayload[playerKey],
+          pokemon: cloneAllPokemon(state[playerKey]?.pokemon),
+        };
+      }
+
+      if ('selectionIndex' in playersPayload[playerKey]) {
+        return;
+      }
+
+      playersPayload[playerKey].selectionIndex = state[playerKey]?.selectionIndex;
+    });
+
+    playerKeys.forEach((playerKey) => {
+      /*
+      const selectionIndex = selectionIndices?.[playerKey]
+        ?? playersPayload[playerKey]?.selectionIndex
+        ?? state[playerKey]?.selectionIndex;
+
+      const sourcePokemon = playersPayload[playerKey]?.pokemon?.[selectionIndex]
+        || state[playerKey]?.pokemon?.[selectionIndex];
+      */
+
+      const { pokemon: sourceParty, selectionIndex } = playersPayload[playerKey];
+      const sourcePokemon = sourceParty[selectionIndex];
+
+      if (!sourcePokemon?.speciesForme) {
+        return;
+      }
+
+      const ability = sourcePokemon.dirtyAbility || sourcePokemon.ability;
+      const opponentKey = playerKey === state.playerKey ? state.opponentKey : state.playerKey;
+      const shouldTargetOpposing = ability === 'Intimidate' as AbilityName;
+      const targetKey = shouldTargetOpposing ? opponentKey : playerKey;
+
+      /*
+      const targetPokemonIndex = shouldTargetOpposing
+        ? (playersPayload[targetKey]?.selectionIndex ?? state[targetKey]?.selectionIndex)
+        : (playersPayload[targetKey]?.pokemon || state[targetKey]?.pokemon)
+          ?.findIndex((p) => p?.calcdexId === sourcePokemon.calcdexId);
+
+      let targetPokemon = playersPayload[targetKey]?.pokemon?.[targetPokemonIndex]
+        || state[targetKey]?.pokemon?.[targetPokemonIndex];
+      */
+
+      const { pokemon: targetParty, selectionIndex: targetSelectionIndex } = playersPayload[targetKey];
+      const targetPokemon = targetParty[targetSelectionIndex];
+
+      if (!targetPokemon?.speciesForme) {
+        return;
+      }
+
+      // let shouldUpdate = false;
+
+      const fx = determineAutoBoostEffect(sourcePokemon, {
+        format: state.format,
+        targetPokemon,
+        activePokemon: activePokemon.filter((p) => p.calcdexId !== sourcePokemon.calcdexId),
+        field: state.field,
+      });
+
+      // const shouldAdd = !!fx?.name && !(fx.name in (targetPokemon.autoBoostMap || {})) && nonEmptyObject(fx.boosts);
+      // const targetAbility = targetPokemon.dirtyAbility || targetPokemon.ability;
+
+      [
+        sourcePokemon.calcdexId !== targetPokemon.calcdexId && sourcePokemon,
+        targetPokemon,
+      ].filter(Boolean).forEach((pokemon) => {
+        // if (!nonEmptyObject(fx?.boosts) && !nonEmptyObject(pokemon.autoBoostMap)) {
+        //   return;
+        // }
+
+        // if (pokemon === sourcePokemon && shouldTargetOpposing && ability === targetAbility) {
+        //   return;
+        // }
+
+        if (!nonEmptyObject(pokemon.autoBoostMap)) {
+          pokemon.autoBoostMap = {};
+
+          return;
+        }
+
+        const removeEffects = Object.entries(pokemon.autoBoostMap)
+          // .filter(([, f]) => !f?.name || typeof f.turn !== 'number' || f.turn < 0)
+          .filter(([, f]) => {
+            if (!f?.name || !nonEmptyObject(f.boosts) || (typeof f.turn === 'number' && f.turn < 0)) {
+              return true;
+            }
+
+            if (!f.sourceKey || !f.sourcePid) {
+              return false;
+            }
+
+            const fxIndex = playersPayload[f.sourceKey]?.pokemon?.findIndex((p) => p?.calcdexId === f.sourcePid);
+            const selIndex = playersPayload[f.sourceKey]?.selectionIndex;
+
+            return fxIndex !== selIndex;
+          })
+          .map(([n]) => n) as (AbilityName | ItemName)[];
+
+        if (!removeEffects.length) {
+          return;
+        }
+
+        // const index = playersPayload[pokemon.playerKey].pokemon.findIndex((p) => p?.calcdexId === pokemon.calcdexId);
+        const index = playersPayload[pokemon.playerKey].pokemon.indexOf(pokemon);
+
+        if (index < 0) {
+          return;
+        }
+
+        l.debug('removeEffects for', pokemon.ident, removeEffects);
+
+        removeEffects.forEach((name) => {
+          // delete pokemon.autoBoostMap[name];
+          pokemon.autoBoostMap[name].active = false;
+          // shouldUpdate = true;
+        });
+
+        PokemonBoostNames.forEach((stat) => {
+          pokemon.dirtyBoosts[stat] = clamp(-6, pokemon.dirtyBoosts[stat], 6) || null;
+        });
+      });
+
+      // targetPokemon = playersPayload[targetKey].pokemon[targetPokemonIndex];
+
+      if (!fx?.name) {
+        return;
+      }
+
+      if (fx.name in (targetPokemon.autoBoostMap || {})) {
+        targetPokemon.autoBoostMap[fx.name].active = nonEmptyObject(fx.boosts);
+        targetPokemon.autoBoostMap[fx.name].boosts = { ...fx.boosts };
+
+        return;
+      }
+
+      fx.active = nonEmptyObject(fx.boosts);
+
+      targetPokemon.autoBoostMap = {
+        ...targetPokemon.autoBoostMap,
+        [fx.name]: fx,
+      };
+
+      /*
+      if (!shouldUpdate) {
+        return;
+      }
+
+      if (!Array.isArray(playersPayload[targetKey]?.pokemon)) {
+        playersPayload[targetKey] = {
+          ...playersPayload[targetKey],
+          // pokemon: [...state[targetKey].pokemon],
+          pokemon: cloneAllPokemon(state[targetKey].pokemon),
+        };
+      }
+
+      playersPayload[targetKey].pokemon[targetPokemonIndex] = targetPokemon;
+      */
+    });
   };
 
   const updateBattle: CalcdexContextConsumables['updateBattle'] = (
@@ -244,6 +513,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
     }
 
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
+      [playerKey]: payload,
+    };
+
+    // applyAutoBoostEffect(playersPayload, newPokemon);
+    applyAutoBoostEffects(playersPayload);
+
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
     }
@@ -251,7 +527,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
-      [playerKey]: payload,
+      ...playersPayload,
     }));
 
     endTimer('(dispatched)');
@@ -318,12 +594,51 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           dirtyBoost: number,
         ]) => {
           const boost = mutated.boosts?.[stat] || 0;
+          const autoBoost = calcStatAutoBoosts(mutated, stat) || 0;
 
-          if (dirtyBoost !== boost) {
+          if (dirtyBoost !== boost + autoBoost) {
             return;
           }
 
           mutated.dirtyBoosts[stat] = null;
+        });
+      }
+    }
+
+    if (mutating('dirtyBoosts') && nonEmptyObject(mutated.autoBoostMap)) {
+      const dirtyBoostedStats = Object.entries(mutated.dirtyBoosts || {})
+        // .filter(([, v]) => !v)
+        .map(([k]) => k) as Showdown.StatNameNoHp[];
+
+      if (dirtyBoostedStats.length) {
+        Object.entries(mutated.autoBoostMap).forEach(([
+          name,
+          effect,
+        ]: [
+          name: AbilityName | ItemName,
+          effect: CalcdexAutoBoostEffect,
+        ]) => {
+          if (typeof effect?.turn === 'number' && effect.turn > -1) {
+            return;
+          }
+
+          if (!nonEmptyObject(effect.boosts)) {
+            delete mutated.autoBoostMap[name];
+
+            return;
+          }
+
+          const boostedStats = Object.keys(effect.boosts) as Showdown.StatNameNoHp[];
+          const shouldDeactivate = dirtyBoostedStats.some((stat) => boostedStats.includes(stat));
+
+          if (!shouldDeactivate) {
+            return;
+          }
+
+          mutated.autoBoostMap[name] = {
+            ...mutated.autoBoostMap[name],
+            active: false,
+          };
         });
       }
     }
@@ -352,6 +667,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     // auto-apply/remove the Embody Aspect boost if the battle hasn't reported the boost already (or we're in standalone mode)
+    /*
     if (mutating('speciesForme', 'terastallized') && mutated.speciesForme.startsWith('Ogerpon')) {
       const boostedStat = ([
         // ['-Teal', 'spe'],
@@ -379,6 +695,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         ) || null;
       }
     }
+    */
 
     // note: using `prevPokemon` & `pokemon` over `mutated` is important here !!
     if (prevPokemon.speciesForme !== mutated.speciesForme) {
@@ -435,37 +752,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           mutated.dirtyBaseStats = {};
         }
       }
-
-      /*
-      const shouldBehemoth = [
-        'Zacian',
-        'Zamazenta',
-      ].some((f) => mutated.speciesForme.startsWith(f)) && (
-        mutated.moves.includes('Iron Head' as MoveName)
-          || mutated.moves.some((move) => move.startsWith('Behemoth'))
-      );
-
-      if (shouldBehemoth) {
-        const bash = mutated.speciesForme.startsWith('Zamazenta');
-        const crowned = mutated.speciesForme.endsWith('-Crowned');
-
-        // tried setting Iron Head while Behemoth Bash was there, so changing the forme back to Zamazenta, then back to
-        // the Crowned forme again will result in 2 Bash's !! LOL
-        // mutated.moves = mutated.moves.map((move) => (
-        //   move === 'Iron Head' as MoveName && crowned
-        //     ? (bash ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName
-        //     : move
-        // ));
-
-        const bashMove = (bash ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName;
-        const sourceMove = crowned ? 'Iron Head' as MoveName : bashMove;
-        const sourceIndex = mutated.moves.indexOf(sourceMove);
-
-        if (sourceIndex > -1) {
-          mutated.moves[sourceIndex] = crowned ? bashMove : 'Iron Head' as MoveName;
-        }
-      }
-      */
 
       // clear the currently applied preset if not a sourced from a 'server' or 'sheet'
       if (mutated.source !== 'server' && mutated.presetId) {
@@ -720,6 +1006,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       });
     }
 
+    // applyAutoBoostEffect(playersPayload, mutated);
+    applyAutoBoostEffects(playersPayload);
+
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
     }
@@ -787,6 +1076,12 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       );
     }
 
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
+      [playerKey]: payload,
+    };
+
+    applyAutoBoostEffects(playersPayload);
+
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
     }
@@ -794,7 +1089,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
-      [playerKey]: payload,
+      ...playersPayload,
     }));
 
     endTimer('(dispatched)');
@@ -945,6 +1240,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       };
     });
 
+    // applyAutoBoostEffect(playersPayload, movedPokemon);
+    applyAutoBoostEffects(playersPayload);
+
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
     }
@@ -986,10 +1284,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       queueHonkSave();
     }
 
-    dispatch(calcdexSlice.actions.updatePlayer({
-      scope,
-      battleId: state.battleId,
-
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
       [playerKey]: {
         side: {
           ...player.side,
@@ -1001,6 +1296,14 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           },
         },
       },
+    };
+
+    applyAutoBoostEffects(playersPayload);
+
+    dispatch(calcdexSlice.actions.updatePlayer({
+      scope,
+      battleId: state.battleId,
+      ...playersPayload,
     }));
 
     endTimer('(dispatched)');
@@ -1022,9 +1325,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return void endTimer('(bad args)');
     }
 
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {};
+
     if (state.gen > 8 && ('weather' in field || 'terrain' in field)) {
       const updatedField = { ...state.field, ...field };
-      const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {};
 
       AllPlayerKeys.forEach((playerKey) => {
         const playerState = state[playerKey];
@@ -1067,14 +1371,28 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           pokemon,
         };
       });
+    }
 
-      if (nonEmptyObject(playersPayload)) {
-        dispatch(calcdexSlice.actions.updatePlayer({
-          scope,
-          battleId: state.battleId,
-          ...playersPayload,
-        }));
+    /*
+    AllPlayerKeys.forEach((playerKey) => {
+      const pokemon = state[playerKey]?.pokemon?.[state[playerKey]?.selectionIndex];
+
+      if (!pokemon?.speciesForme) {
+        return;
       }
+
+      applyAutoBoostEffect(playersPayload, pokemon);
+    });
+    */
+
+    applyAutoBoostEffects(playersPayload);
+
+    if (nonEmptyObject(playersPayload)) {
+      dispatch(calcdexSlice.actions.updatePlayer({
+        scope,
+        battleId: state.battleId,
+        ...playersPayload,
+      }));
     }
 
     if (state.operatingMode === 'standalone' && state.name) {
@@ -1115,19 +1433,30 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return void endTimer('(no change)');
     }
 
-    const pokemon = cloneAllPokemon(state[playerKey].pokemon).map((p, i) => ({
-      ...p,
-      active: activeIndices.includes(i),
-    }));
+    const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
+      [playerKey]: {
+        activeIndices,
+        pokemon: cloneAllPokemon(state[playerKey].pokemon).map((p, i) => ({
+          ...p,
+          active: activeIndices.includes(i),
+        })),
+      },
+    };
+
+    /*
+    const selectedPokemon = playersPayload[playerKey].pokemon[state[playerKey].selectionIndex];
+
+    if (selectedPokemon?.speciesForme) {
+      applyAutoBoostEffect(playersPayload, selectedPokemon);
+    }
+    */
+
+    applyAutoBoostEffects(playersPayload);
 
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
       battleId: state.battleId,
-
-      [playerKey]: {
-        activeIndices,
-        pokemon,
-      },
+      ...playersPayload,
     }));
 
     if (state.operatingMode === 'standalone' && state.name) {
@@ -1288,7 +1617,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           return;
         }
 
-        if (!playersPayload[pKey]?.pokemon?.length) {
+        if (!Array.isArray(playersPayload[pKey]?.pokemon)) {
           playersPayload[pKey] = {
             ...playersPayload[pKey],
             pokemon: cloneAllPokemon(playerSource.pokemon),
@@ -1300,6 +1629,16 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         playersPayload[pKey].pokemon[index].abilityToggled = toggled;
       });
     });
+
+    /*
+    const selectedPokemon = playersPayload[playerKey].pokemon[playersPayload[playerKey].selectionIndex];
+
+    if (selectedPokemon?.speciesForme) {
+      applyAutoBoostEffect(playersPayload, selectedPokemon);
+    }
+    */
+
+    applyAutoBoostEffects(playersPayload);
 
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
