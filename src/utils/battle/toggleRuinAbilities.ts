@@ -41,8 +41,10 @@ export const toggleRuinAbilities = (
     return;
   }
 
-  const activeIds = gameType === 'Doubles' && player.activeIndices?.length
-    ? player.activeIndices.map((i) => player.pokemon[i]?.calcdexId).filter(Boolean)
+  const activeIds = gameType === 'Doubles'
+    ? player.activeIndices?.length
+      ? player.activeIndices.map((i) => player.pokemon[i]?.calcdexId).filter(Boolean)
+      : (player.pokemon?.map((p) => (p?.active && p.calcdexId) || null).filter(Boolean) || [])
     : [];
 
   // for 'Singles', toggle off each ruinPokemon's Ruin ability if activated, except for the selectedPokemon

@@ -188,6 +188,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         operatingMode,
         battleId,
         name,
+        defaultName,
         gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
         format: formatFromPayload = null,
         gameType = 'Singles',
@@ -243,6 +244,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleId,
         gen,
         name,
+        defaultName,
         format: gen && base ? `gen${gen}${base}` : null,
         subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
         gameType,
@@ -841,7 +843,8 @@ export const useCalcdexDuplicator = () => {
     dispatch(calcdexSlice.actions.dupe({
       battleId: instance.battleId,
       newId: instance.newId,
-      name: instance.operatingMode === 'battle'
+      name: null,
+      defaultName: instance.operatingMode === 'battle'
         ? [
           instance.p1?.name,
           !!instance.p1?.name && !!instance.p2?.name && 'vs',
