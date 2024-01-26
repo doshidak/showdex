@@ -100,10 +100,9 @@ export const calcBoostedStats = (
   PokemonBoostNames.forEach((stat) => {
     // const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
     const ignoreBoost = ignoreBoosts[stat] || 0;
-    // const stage = typeof dirtyBoosts?.[stat] === 'number'
-    //   ? (dirtyBoosts[stat] || 0)
-    //   : ((currentBoosts?.[stat] || 0) + autoBoost);
-    const stage = ((currentBoosts?.[stat] || 0) - ignoreBoost);
+    const stage = typeof dirtyBoosts?.[stat] === 'number'
+      ? (dirtyBoosts[stat] || 0)
+      : ((currentBoosts?.[stat] || 0) - ignoreBoost);
 
     if (!stage) {
       return;
