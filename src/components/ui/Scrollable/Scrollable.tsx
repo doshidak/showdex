@@ -76,6 +76,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   contentClassName,
   contentStyle,
   children,
+  onScroll,
   onWheel,
   ...props
 }: ScrollableProps, forwardedRef): JSX.Element => {
@@ -197,6 +198,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
               ref={scrollRef}
               className={cx(styles.contentWrapper, scrollClassName)}
               style={scrollStyle}
+              onScroll={onScroll}
               onWheel={onWheel}
             >
               <div
