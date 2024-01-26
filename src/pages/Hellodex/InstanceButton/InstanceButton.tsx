@@ -42,6 +42,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
   const {
     operatingMode,
     name,
+    defaultName,
     gen,
     format,
     subFormats,
@@ -170,7 +171,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
 
         {operatingMode === 'standalone' ? (
           <div className={styles.honkName}>
-            {name || 'untitled honk'}
+            {name || defaultName || 'untitled honk'}
           </div>
         ) : (
           <div className={styles.players}>

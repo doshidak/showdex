@@ -136,99 +136,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     saveRequestTimeout.current = setTimeout(saveHonk, 3000);
   };
 
-  /*
-  const applyAutoBoostEffect = (
-    playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>>,
-    sourcePokemon: CalcdexPokemon,
-  ) => {
-    if (!playersPayload || !sourcePokemon?.speciesForme) {
-      return;
-    }
-
-    const ability = sourcePokemon.dirtyAbility || sourcePokemon.ability;
-    const opponentKey = sourcePokemon.playerKey === state.playerKey ? state.opponentKey : state.playerKey;
-    const shouldTargetOpposing = ability === 'Intimidate' as AbilityName;
-    const targetKey = shouldTargetOpposing ? opponentKey : sourcePokemon.playerKey;
-    const targetPokemonIndex = shouldTargetOpposing
-      ? state[targetKey]?.selectionIndex
-      : state[targetKey]?.pokemon?.findIndex((p) => p?.calcdexId === sourcePokemon.calcdexId);
-
-    const targetPokemon = clonePokemon(state[targetKey]?.pokemon?.[targetPokemonIndex]);
-
-    if (!targetPokemon?.speciesForme) {
-      return;
-    }
-
-    const calcDirtyBoosts = () => PokemonBoostNames.reduce((prev, stat) => {
-      const autoStage = calcStatAutoBoosts(targetPokemon, stat);
-
-      if (!autoStage) {
-        return prev;
-      }
-
-      prev[stat] = (prev[stat] || 0) + autoStage;
-
-      return prev;
-    }, { ...targetPokemon.dirtyBoosts } as Showdown.StatsTableNoHp);
-
-    const packPayload = () => {
-      if (!Array.isArray(playersPayload[targetKey]?.pokemon)) {
-        playersPayload[targetKey] = {
-          ...playersPayload[targetKey],
-          pokemon: [...state[targetKey].pokemon],
-        };
-      }
-
-      playersPayload[targetKey].pokemon[targetPokemonIndex] = targetPokemon;
-    };
-
-    const activePokemon = AllPlayerKeys.flatMap((k) => (
-      state[k]?.pokemon?.filter((p) => (
-        !!p?.active
-          && p.calcdexId !== sourcePokemon.calcdexId
-      ))
-    ));
-
-    const fx = determineAutoBoostEffect(sourcePokemon, {
-      format: state.format,
-      targetPokemon,
-      activePokemon,
-      field: state.field,
-    });
-
-    if (!fx?.name || fx.name in (targetPokemon.autoBoostMap || {}) || !nonEmptyObject(fx.boosts)) {
-      if (nonEmptyObject(targetPokemon.autoBoostMap)) {
-        const removeEffects = Object.entries(targetPokemon.autoBoostMap)
-          .filter(([, f]) => !f?.name || typeof f.turn !== 'number' || f.turn < 0)
-          .map(([n]) => n);
-
-        removeEffects.forEach((name) => {
-          delete targetPokemon.autoBoostMap[name];
-        });
-
-        targetPokemon.dirtyBoosts = calcDirtyBoosts();
-        packPayload();
-      }
-
-      return;
-    }
-
-    targetPokemon.autoBoostMap = {
-      ...targetPokemon.autoBoostMap,
-      [fx.name]: fx,
-    };
-
-    targetPokemon.dirtyBoosts = calcDirtyBoosts();
-
-    // must be after, otherwise calcStatAutoBoosts() in calcDirtyBoosts() will ignore this
-    fx.active = true;
-    packPayload();
-  };
-  */
-
   const applyAutoBoostEffects = (
     playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>>,
-    // selectionIndices?: Partial<Record<CalcdexPlayerKey, number>>,
   ) => {
     if (!playersPayload) {
       return;
@@ -253,15 +162,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     });
 
     playerKeys.forEach((playerKey) => {
-      /*
-      const selectionIndex = selectionIndices?.[playerKey]
-        ?? playersPayload[playerKey]?.selectionIndex
-        ?? state[playerKey]?.selectionIndex;
-
-      const sourcePokemon = playersPayload[playerKey]?.pokemon?.[selectionIndex]
-        || state[playerKey]?.pokemon?.[selectionIndex];
-      */
-
       const { pokemon: sourceParty, selectionIndex } = playersPayload[playerKey];
       const sourcePokemon = sourceParty[selectionIndex];
 
@@ -274,16 +174,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const shouldTargetOpposing = ability === 'Intimidate' as AbilityName;
       const targetKey = shouldTargetOpposing ? opponentKey : playerKey;
 
-      /*
-      const targetPokemonIndex = shouldTargetOpposing
-        ? (playersPayload[targetKey]?.selectionIndex ?? state[targetKey]?.selectionIndex)
-        : (playersPayload[targetKey]?.pokemon || state[targetKey]?.pokemon)
-          ?.findIndex((p) => p?.calcdexId === sourcePokemon.calcdexId);
-
-      let targetPokemon = playersPayload[targetKey]?.pokemon?.[targetPokemonIndex]
-        || state[targetKey]?.pokemon?.[targetPokemonIndex];
-      */
-
       const { pokemon: targetParty, selectionIndex: targetSelectionIndex } = playersPayload[targetKey];
       const targetPokemon = targetParty[targetSelectionIndex];
 
@@ -291,12 +181,12 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         return;
       }
 
-      // let shouldUpdate = false;
-
       const fx = determineAutoBoostEffect(sourcePokemon, {
         format: state.format,
         targetPokemon,
-        activePokemon: activePokemon.filter((p) => p.calcdexId !== sourcePokemon.calcdexId),
+        activePokemon: state?.gameType === 'Singles'
+          ? [state[opponentKey]?.pokemon?.[state[opponentKey]?.selectionIndex]].filter(Boolean)
+          : activePokemon.filter((p) => p.calcdexId !== sourcePokemon.calcdexId),
         field: state.field,
       });
 
@@ -307,14 +197,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         sourcePokemon.calcdexId !== targetPokemon.calcdexId && sourcePokemon,
         targetPokemon,
       ].filter(Boolean).forEach((pokemon) => {
-        // if (!nonEmptyObject(fx?.boosts) && !nonEmptyObject(pokemon.autoBoostMap)) {
-        //   return;
-        // }
-
-        // if (pokemon === sourcePokemon && shouldTargetOpposing && ability === targetAbility) {
-        //   return;
-        // }
-
         if (!nonEmptyObject(pokemon.autoBoostMap)) {
           pokemon.autoBoostMap = {};
 
@@ -322,7 +204,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         }
 
         const removeEffects = Object.entries(pokemon.autoBoostMap)
-          // .filter(([, f]) => !f?.name || typeof f.turn !== 'number' || f.turn < 0)
           .filter(([, f]) => {
             if (!f?.name || !nonEmptyObject(f.boosts) || (typeof f.turn === 'number' && f.turn < 0)) {
               return true;
@@ -343,7 +224,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           return;
         }
 
-        // const index = playersPayload[pokemon.playerKey].pokemon.findIndex((p) => p?.calcdexId === pokemon.calcdexId);
         const index = playersPayload[pokemon.playerKey].pokemon.indexOf(pokemon);
 
         if (index < 0) {
@@ -353,17 +233,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         l.debug('removeEffects for', pokemon.ident, removeEffects);
 
         removeEffects.forEach((name) => {
-          // delete pokemon.autoBoostMap[name];
           pokemon.autoBoostMap[name].active = false;
-          // shouldUpdate = true;
         });
 
         PokemonBoostNames.forEach((stat) => {
           pokemon.dirtyBoosts[stat] = clamp(-6, pokemon.dirtyBoosts[stat], 6) || null;
         });
       });
-
-      // targetPokemon = playersPayload[targetKey].pokemon[targetPokemonIndex];
 
       if (!fx?.name) {
         return;
@@ -382,25 +258,35 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         ...targetPokemon.autoBoostMap,
         [fx.name]: fx,
       };
-
-      /*
-      if (!shouldUpdate) {
-        return;
-      }
-
-      if (!Array.isArray(playersPayload[targetKey]?.pokemon)) {
-        playersPayload[targetKey] = {
-          ...playersPayload[targetKey],
-          // pokemon: [...state[targetKey].pokemon],
-          pokemon: cloneAllPokemon(state[targetKey].pokemon),
-        };
-      }
-
-      playersPayload[targetKey].pokemon[targetPokemonIndex] = targetPokemon;
-      */
     });
   };
 
+  const recountRuinAbilities = (
+    playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>>,
+  ) => {
+    if ((state?.gen || 0) < 9 || !playersPayload) {
+      return;
+    }
+
+    AllPlayerKeys.forEach((playerKey) => {
+      const player = state[playerKey];
+
+      if (!player?.active || !player.pokemon?.length) {
+        return;
+      }
+
+      if (!nonEmptyObject(playersPayload[playerKey])) {
+        playersPayload[playerKey] = {};
+      }
+
+      playersPayload[playerKey].side = {
+        ...playersPayload[playerKey].side,
+        ...countSideRuinAbilities({ ...player, ...playersPayload[playerKey] }, state.gameType),
+      };
+    });
+  };
+
+  // note: don't bother memozing these; may do more harm than good! :o
   const updateBattle: CalcdexContextConsumables['updateBattle'] = (
     battle,
     scopeFromArgs,
@@ -417,7 +303,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return void endTimer('(bad args)');
     }
 
-    const payload = {
+    const payload: typeof battle = {
       ...battle,
       battleId: state.battleId,
     };
@@ -431,14 +317,47 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       payload.defaultLevel = determineDefaultLevel(payload.format) || 100;
     }
 
+    const playersPayload = AllPlayerKeys.reduce((prev, playerKey) => {
+      prev[playerKey] = { ...payload[playerKey] };
+
+      if (!payload.gameType || payload.gameType === 'Doubles') {
+        return prev;
+      }
+
+      const pokemonPayload = Array.isArray(prev[playerKey].pokemon);
+      const playerParty = (pokemonPayload ? prev[playerKey] : state[playerKey])?.pokemon;
+      const actives = playerParty?.filter((p) => p?.active);
+
+      if ((actives?.length || 0) < 2) {
+        return prev;
+      }
+
+      if (!pokemonPayload) {
+        prev[playerKey].pokemon = cloneAllPokemon(state[playerKey]?.pokemon);
+      }
+
+      const [{ calcdexId: firstActiveId }] = actives;
+      const activePokemon = prev[playerKey].pokemon.find((p) => p?.calcdexId === firstActiveId);
+
+      if (activePokemon?.calcdexId) {
+        activePokemon.active = false;
+      }
+
+      return prev;
+    }, {} as Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>>);
+
+    recountRuinAbilities(playersPayload);
+
     // only requirement to save a honk is to give it a name
-    if (state.operatingMode === 'standalone' && (state.name || payload.name)) {
+    // (note: state.defaultName is typically undefined, so essentially falls back to a falsy check)
+    if (state.operatingMode === 'standalone' && (state.name || payload.name) !== state.defaultName) {
       queueHonkSave();
     }
 
     dispatch(calcdexSlice.actions.update({
       scope,
       ...payload,
+      ...playersPayload,
     }));
 
     endTimer('(dispatched)');
@@ -517,8 +436,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       [playerKey]: payload,
     };
 
-    // applyAutoBoostEffect(playersPayload, newPokemon);
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
@@ -533,7 +452,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     endTimer('(dispatched)');
   };
 
-  // note: don't bother memozing these; may do more harm than good! :o
   const updatePokemon: CalcdexContextConsumables['updatePokemon'] = (
     playerKey,
     pokemon,
@@ -966,6 +884,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     player.pokemon[pokemonIndex] = mutated;
 
     // smart toggle Ruin abilities (gen 9), but only when abilityToggled was not explicitly updated
+    /*
     if (state.gen > 8 && mutating('abilityToggled')) {
       /*
       toggleRuinAbilities(
@@ -974,23 +893,24 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         false,
         pokemonIndex,
       );
-      */
+      *\/
 
       player.side = {
         ...player.side,
         ...countSideRuinAbilities(player),
       };
     }
+    */
 
     // because of Ruin abilities, I have to do this
     const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
       [playerKey]: {
         pokemon: player.pokemon,
-        side: player.side,
       },
     };
 
     // handle recounting Ruin abilities when something changes about the Pokemon (including for other players!)
+    /*
     if (state.gen > 8) {
       AllPlayerKeys.forEach((key) => {
         if (key === playerKey || !state[key].active) {
@@ -1005,9 +925,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         };
       });
     }
+    */
 
-    // applyAutoBoostEffect(playersPayload, mutated);
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
@@ -1081,6 +1002,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     };
 
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
@@ -1234,14 +1156,14 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         );
       }
 
-      playersPayload[pkey].side = {
-        ...prevPlayer.side,
-        ...countSideRuinAbilities(player),
-      };
+      // playersPayload[pkey].side = {
+      //   ...prevPlayer.side,
+      //   ...countSideRuinAbilities(player),
+      // };
     });
 
-    // applyAutoBoostEffect(playersPayload, movedPokemon);
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     if (state.operatingMode === 'standalone' && state.name) {
       queueHonkSave();
@@ -1299,6 +1221,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     };
 
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
@@ -1373,19 +1296,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       });
     }
 
-    /*
-    AllPlayerKeys.forEach((playerKey) => {
-      const pokemon = state[playerKey]?.pokemon?.[state[playerKey]?.selectionIndex];
-
-      if (!pokemon?.speciesForme) {
-        return;
-      }
-
-      applyAutoBoostEffect(playersPayload, pokemon);
-    });
-    */
-
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     if (nonEmptyObject(playersPayload)) {
       dispatch(calcdexSlice.actions.updatePlayer({
@@ -1452,6 +1364,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     */
 
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
@@ -1544,11 +1457,11 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     // smart toggle Ruin abilities (gen 9)
     // (note: toggleRuinAbilities() will directly mutate each CalcdexPokemon in the player's pokemon[])
-    if (state.gameType === 'Singles' && state.gen > 8) {
+    if (state.gen > 8) {
       toggleRuinAbilities(
         player,
         state.gameType,
-        false,
+        true,
         playerPayload.selectionIndex,
       );
 
@@ -1568,12 +1481,12 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       playerPayload.side.isLightScreen = sanitized.isLightScreen;
     }
 
-    if (state.gen > 8) {
-      playerPayload.side = {
-        ...playerPayload.side,
-        ...countSideRuinAbilities(player),
-      };
-    }
+    // if (state.gen > 8) {
+    //   playerPayload.side = {
+    //     ...playerPayload.side,
+    //     ...countSideRuinAbilities(player),
+    //   };
+    // }
 
     // ;-;
     const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
@@ -1630,15 +1543,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       });
     });
 
-    /*
-    const selectedPokemon = playersPayload[playerKey].pokemon[playersPayload[playerKey].selectionIndex];
-
-    if (selectedPokemon?.speciesForme) {
-      applyAutoBoostEffect(playersPayload, selectedPokemon);
-    }
-    */
-
     applyAutoBoostEffects(playersPayload);
+    recountRuinAbilities(playersPayload);
 
     dispatch(calcdexSlice.actions.updatePlayer({
       scope,
