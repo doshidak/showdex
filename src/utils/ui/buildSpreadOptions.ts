@@ -79,8 +79,8 @@ const processOption = (
     const boosts = PokemonNatureBoosts[spread.nature];
 
     const natureLabel = translateNature?.(spread.nature) || spread.nature;
-    const posLabel = translateStat?.(boosts[0]) || boosts[0]?.toUpperCase();
-    const negLabel = translateStat?.(boosts[1]) || boosts[1]?.toUpperCase();
+    const posLabel = (!!boosts?.[0] && (translateStat?.(boosts[0]) || boosts[0]?.toUpperCase())) || null;
+    const negLabel = (!!boosts?.[1] && (translateStat?.(boosts[1]) || boosts[1]?.toUpperCase())) || null;
 
     subLabelParts.push((
       posLabel && negLabel
