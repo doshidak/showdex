@@ -49,6 +49,7 @@ export const BattleInfo = ({
     operatingMode,
     battleId,
     name,
+    defaultName,
     gen,
     format,
     cached,
@@ -172,7 +173,7 @@ export const BattleInfo = ({
       <div className={styles.honkInfo}>
         <InlineField
           className={styles.honkName}
-          hint={t('battle.name.hint') as React.ReactNode}
+          hint={defaultName || t('battle.name.hint') as React.ReactNode}
           input={{
             name: `${l.scope}:${battleId}:Name`,
             value: name,
