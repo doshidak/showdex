@@ -57,7 +57,8 @@ export const SelectMenuList = <
       )}
       style={{ maxHeight }}
       {...innerProps}
-      onWheel={handleWheel}
+      // onWheel={handleWheel}
+      onScroll={handleWheel}
     >
       {children}
     </Scrollable>

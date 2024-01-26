@@ -122,11 +122,11 @@ export const Tooltip = ({
             element: arrow,
             // padding: 15,
           },
-        }],
+        }].filter(Boolean),
       }}
       trigger={Array.isArray(trigger) ? trigger.join(' ') : trigger}
       zIndex={99}
-      render={(derender ? () => null : (
+      render={(
         attributes,
         renderContent,
       ) => (
@@ -139,7 +139,7 @@ export const Tooltip = ({
           style={{
             ...style,
             ...animationStyles,
-            ...(!mounted && { display: 'none' }),
+            ...((!mounted || derender) && { display: 'none' }),
           }}
           tabIndex={-1}
           {...attributes}
@@ -155,7 +155,7 @@ export const Tooltip = ({
             style={arrowStyle}
           />
         </animated.div>
-      ))}
+      )}
       onMount={handleMount}
       onHide={handleHide}
       onHidden={handleHidden}
