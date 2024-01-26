@@ -85,7 +85,7 @@ export const PokeFormeTooltip = ({
           }}
         >
           {altFormes?.map((altForme) => {
-            if (!altForme?.startsWith(baseForme)) {
+            if (!altForme || !altForme.startsWith(baseForme) || altForme.endsWith('-Tera')) {
               return null;
             }
 

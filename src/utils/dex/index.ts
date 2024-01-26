@@ -7,6 +7,7 @@ export * from './determineAutoBoostEffect';
 export * from './determineCriticalHit';
 export * from './determineDefaultLevel';
 export * from './determineMoveTargets';
+export * from './determineSpeciesForme';
 export * from './formatDexDescription';
 export * from './getDefaultSpreadValue';
 export * from './getDexForFormat';

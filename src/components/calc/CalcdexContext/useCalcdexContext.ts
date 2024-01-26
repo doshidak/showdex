@@ -55,6 +55,7 @@ import {
   detectDoublesFormat,
   determineAutoBoostEffect,
   determineDefaultLevel,
+  determineSpeciesForme,
   getDexForFormat,
   getGenfulFormat,
   hasMegaForme,
@@ -406,6 +407,12 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       terrain: state.field.terrain,
     });
 
+    newPokemon.speciesForme = determineSpeciesForme(newPokemon, true);
+
+    if (newPokemon.transformedForme) {
+      newPokemon.transformedForme = determineSpeciesForme(newPokemon);
+    }
+
     newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
     newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
 
@@ -561,59 +568,11 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
     }
 
-    // auto-update any special formes when Terastallizing
-    if (mutating('terastallized')) {
-      if (mutated.speciesForme.startsWith('Ogerpon')) {
-        // "toggle" on its Tera forme
-        // e.g., 'Ogerpon' -> 'Ogerpon-Teal-Tera', 'Ogerpon-Wellspring' (+ Wellspring Mask) -> 'Ogerpon-Wellspring-Tera'
-        mutated.speciesForme = mutated.terastallized
-          ? mutated.speciesForme === 'Ogerpon' || (mutated.dirtyItem ?? mutated.item)?.endsWith('Mask')
-            // replacing '-Tera' here in case we're already in the Tera forme, but not Terastallized o_O
-            ? `${mutated.speciesForme.replace('-Tera', '')}${mutated.speciesForme === 'Ogerpon' ? '-Teal' : ''}-Tera`
-            : mutated.speciesForme // no-op
-          // toggle off, e.g., 'Ogerpon-Teal-Tera' -> 'Ogerpon', 'Ogerpon-Wellspring-Tera' -> 'Ogerpon-Wellspring'
-          : mutated.speciesForme.endsWith('-Tera')
-            ? mutated.speciesForme.replace(/(?:-Teal)?-Tera$/, '')
-            : mutated.speciesForme; // no-op
-      }
+    mutated.speciesForme = determineSpeciesForme(mutated, true);
 
-      // while it's entirely possible that we're dealing with the base Terapagos forme (especially in standalone mode),
-      // we're not bothering handling that since it normally becomes Terapagos-Terastal on switch-in anyways
-      if (mutated.speciesForme.startsWith('Terapagos')) {
-        mutated.speciesForme = mutated.terastallized ? 'Terapagos-Stellar' : 'Terapagos-Terastal';
-      }
+    if (mutated.transformedForme) {
+      mutated.transformedForme = determineSpeciesForme(mutated);
     }
-
-    // auto-apply/remove the Embody Aspect boost if the battle hasn't reported the boost already (or we're in standalone mode)
-    /*
-    if (mutating('speciesForme', 'terastallized') && mutated.speciesForme.startsWith('Ogerpon')) {
-      const boostedStat = ([
-        // ['-Teal', 'spe'],
-        ['-Cornerstone', 'def'],
-        ['-Hearthflame', 'atk'],
-        ['-Wellspring', 'spd'],
-      ] as [partialForme: string, stat: Showdown.StatNameNoHp][])
-        .find(([f]) => mutated.speciesForme.includes(f))
-        ?.[1] || 'spe';
-
-      const shouldAutoBoost = !mutated.boosts?.[boostedStat] && (
-        mutated.speciesForme === 'Ogerpon'
-          || mutated.speciesForme.includes('-Teal')
-          || (mutated.dirtyItem ?? mutated.item)?.endsWith('Mask')
-      );
-
-      if (shouldAutoBoost) {
-        const teraFormed = mutated.speciesForme.endsWith('-Tera');
-
-        // boosting relative to the user's dirtied boost, if any, hence why we're allowing all possible stages
-        mutated.dirtyBoosts[boostedStat] = clamp(
-          -6,
-          (mutated.dirtyBoosts[boostedStat] || 0) + (teraFormed ? 1 : -1),
-          6,
-        ) || null;
-      }
-    }
-    */
 
     // note: using `prevPokemon` & `pokemon` over `mutated` is important here !!
     if (prevPokemon.speciesForme !== mutated.speciesForme) {
