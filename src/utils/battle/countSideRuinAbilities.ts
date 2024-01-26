@@ -1,4 +1,4 @@
-import { type AbilityName } from '@smogon/calc';
+import { type AbilityName, type GameType } from '@smogon/calc';
 import { PokemonRuinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 
@@ -17,12 +17,16 @@ import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/interfaces/
  */
 export const countSideRuinAbilities = (
   player: CalcdexPlayer,
+  gameType?: GameType,
 ): Pick<CalcdexPlayerSide, 'ruinBeadsCount' | 'ruinSwordCount' | 'ruinTabletsCount' | 'ruinVesselCount'> => {
-  const { pokemon } = player || {};
+  const {
+    pokemon,
+    selectionIndex,
+  } = player || {};
 
   // count how many Pokemon have an activated Ruin ability (gen 9)
-  const activeRuin = pokemon
-    ?.map((p) => p?.abilityToggled && (p?.dirtyAbility || p?.ability))
+  const activeRuin = (gameType === 'Singles' ? [pokemon?.[selectionIndex]] : pokemon)
+    ?.map((p) => (gameType === 'Singles' || p?.abilityToggled) && (p?.dirtyAbility || p?.ability))
     .filter((a) => PokemonRuinAbilities.includes(a))
     || [];
 
