@@ -19,7 +19,6 @@ const relevantStep = (step: string) => (
 
 const boostStep = (step: string) => step?.startsWith('|-boost') || step?.startsWith('|-unboost');
 
-// const identRegex = /(p\d)[a-z]?:\s*([\w\s-]*)/i;
 const identRegex = (
   playerKey?: CalcdexPlayerKey,
   searchName?: string,
@@ -214,8 +213,6 @@ export const mapAutoBoosts = (
       });
     });
   });
-
-  console.log('@showdex', 'mapAutoBoosts()', 'output for', pokemon?.ident, output, '\n', 'chunks', chunks);
 
   return output;
 };

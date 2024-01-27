@@ -36,24 +36,6 @@ export interface CalcdexStatMod {
   dict?: CalcdexStatModDict;
 
   /**
-   * Reaction to the stat modifier, typically from an auto-stat mod.
-   *
-   * @example 'Contrary'
-   * @since 1.2.3
-   */
-  reffect?: string;
-
-  /**
-   * Source of the reaction to the stat modifier.
-   *
-   * * Primarily used as a key in the translation dictionary.
-   *
-   * @example 'abilities'
-   * @since 1.2.3
-   */
-  reffectDict?: CalcdexStatModDict;
-
-  /**
    * Modifier value.
    *
    * @example 1.5
@@ -102,22 +84,8 @@ export interface CalcdexStatModRecorder {
   export: () => CalcdexStatModRecording;
   stats: () => Showdown.StatsTable;
   cap: (max?: number) => void;
-
-  apply: (
-    stat: Showdown.StatName,
-    modifier: number,
-    dict?: CalcdexStatModDict,
-    label?: string,
-    reffectDict?: CalcdexStatModDict,
-    reffectLabel?: string,
-  ) => void;
-
-  swap: (
-    statA: Showdown.StatNameNoHp,
-    statB: Showdown.StatNameNoHp,
-    dict?: CalcdexStatModDict,
-    label?: string,
-  ) => void;
+  apply: (stat: Showdown.StatName, modifier: number, dict?: CalcdexStatModDict, label?: string) => void;
+  swap: (statA: Showdown.StatNameNoHp, statB: Showdown.StatNameNoHp, dict?: CalcdexStatModDict, label?: string) => void;
 }
 
 /**
@@ -180,8 +148,6 @@ export const statModRecorder = (
     modifier,
     dict,
     label,
-    reffectDict,
-    reffect,
   ) => {
     const prev = table.stats[stat] || 0;
     const raw = prev * modifier;
@@ -190,8 +156,6 @@ export const statModRecorder = (
     table[stat].push({
       label: label?.trim(),
       dict,
-      reffect: reffect?.trim(),
-      reffectDict,
       modifier,
       prev,
       value,

@@ -1,9 +1,9 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonBoostNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { clamp, nonEmptyObject } from '@showdex/utils/core';
+import { clamp } from '@showdex/utils/core';
 import { detectLegacyGen } from '@showdex/utils/dex';
-// import { calcStatAutoBoosts } from './calcStatAutoBoosts';
+import { calcStatAutoBoosts } from './calcStatAutoBoosts';
 import { type CalcdexStatModRecorder, statModRecorder } from './statModRecorder';
 
 /**
@@ -40,20 +40,13 @@ export const calcBoostedStats = (
 
   const {
     boosts: currentBoosts,
-    autoBoostMap,
+    // autoBoostMap,
     dirtyBoosts,
   } = pokemon;
 
+  // const ignoreBoosts: Showdown.StatsTableNoHp = {};
+
   /*
-  const boosts = PokemonBoostNames.reduce((prev, stat) => {
-    prev[stat] = (dirtyBoosts?.[stat] ?? currentBoosts?.[stat]) || 0;
-
-    return prev;
-  }, {} as Showdown.StatsTable);
-  */
-
-  const ignoreBoosts: Showdown.StatsTableNoHp = {};
-
   if (nonEmptyObject(autoBoostMap)) {
     Object.values(autoBoostMap).forEach((fx) => {
       const shouldIgnore = !nonEmptyObject(fx?.boosts)
@@ -75,6 +68,7 @@ export const calcBoostedStats = (
           return;
         }
 
+        /*
         if (typeof fx.turn === 'number') {
           if (typeof ignoreBoosts[stat] !== 'number') {
             ignoreBoosts[stat] = 0;
@@ -82,6 +76,7 @@ export const calcBoostedStats = (
 
           ignoreBoosts[stat] += stage;
         }
+        *\/
 
         record.apply(
           stat,
@@ -94,15 +89,17 @@ export const calcBoostedStats = (
       });
     });
   }
+  */
 
-  // Object.entries(boosts)
-  //   .filter(([, stage]) => !!stage)
   PokemonBoostNames.forEach((stat) => {
-    // const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
-    const ignoreBoost = ignoreBoosts[stat] || 0;
-    const stage = typeof dirtyBoosts?.[stat] === 'number'
-      ? (dirtyBoosts[stat] || 0)
-      : ((currentBoosts?.[stat] || 0) - ignoreBoost);
+    const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
+    // const ignoreBoost = ignoreBoosts[stat] || 0;
+
+    const stage = (
+      typeof dirtyBoosts?.[stat] === 'number'
+        ? dirtyBoosts[stat]
+        : ((currentBoosts?.[stat] || 0) + autoBoost)
+    ) || 0;
 
     if (!stage) {
       return;
