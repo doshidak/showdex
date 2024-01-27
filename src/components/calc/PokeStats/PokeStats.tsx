@@ -574,6 +574,10 @@ export const PokeStats = ({
         const formattedStat = formatStatBoost(finalStat) || '???';
         const mods = statMods?.[stat];
 
+        const didDirtyBoost = stat !== 'hp' && typeof pokemon?.dirtyBoosts?.[stat] === 'number';
+        const autoBoosts = Object.values(pokemon?.autoBoostMap || {})
+          .filter((fx) => stat in (fx?.boosts || {}) && fx.active);
+
         const positiveBoostColor = settings?.nhkoColors?.[0];
         const negativeBoostColor = settings?.nhkoColors?.slice(-1)[0];
 
@@ -588,23 +592,55 @@ export const PokeStats = ({
             key={`PokeStats:StatValue:${pokemonKey}:${stat}`}
             content={(
               <div className={styles.statModsTable}>
-                {mods?.map((mod) => {
-                  const modLabel = t(`pokedex:${mod.dict}.${formatId(mod?.label)}`, '')
-                    || mod?.label
-                    || '??? HUH';
+                {stat !== 'hp' && !didDirtyBoost && autoBoosts?.map((fx) => {
+                  const fxLabel = (
+                    !!fx?.name
+                      && !!fx.dict
+                      && t(`pokedex:${fx.dict}.${formatId(fx.name)}`, '')
+                  ) || fx?.name || '???';
 
-                  const modReffect = (
-                    !!mod?.reffect
-                      && !!mod?.reffectDict
-                      && t(`pokedex:${mod.reffectDict}.${formatId(mod.reffect)}`, '')
-                  ) || mod?.reffect || null;
+                  const fxReffect = (
+                    !!fx?.reffect
+                      && !!fx?.reffectDict
+                      && t(`pokedex:${fx.reffectDict}.${formatId(fx.reffect)}`, '')
+                  ) || fx?.reffect || null;
+
+                  const fxValue = fx.boosts[stat];
+
+                  return (
+                    <React.Fragment key={`PokeStats:AutoBoost:${pokemonKey}:${fxLabel}:${stat}`}>
+                      <div
+                        className={cx(
+                          styles.statModValue,
+                          styles.statValue,
+                          fxValue > 0 && !positiveBoostColor && styles.positive,
+                          fxValue < 0 && !negativeBoostColor && styles.negative,
+                        )}
+                        style={{
+                          ...(fxValue > 0 && !!positiveBoostColor && { color: positiveBoostColor }),
+                          ...(fxValue < 0 && !!negativeBoostColor && { color: negativeBoostColor }),
+                        }}
+                      >
+                        {fxValue > 0 && '+'}{fxValue}
+                      </div>
+                      <div className={styles.statModLabel}>
+                        {fxReffect ? <>{fxLabel} &rarr; {fxReffect}</> : fxLabel}
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+
+                {mods?.map((mod) => {
+                  const modLabel = (
+                    !!mod?.label
+                      && !!mod?.dict
+                      && t(`pokedex:${mod?.dict}.${formatId(mod?.label)}`, '')
+                  ) || mod?.label || '??? HUH';
 
                   const modValue = mod?.modifier ?? -1;
 
                   return (
-                    <React.Fragment
-                      key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
-                    >
+                    <React.Fragment key={`PokeStats:StatMod:${pokemonKey}:${modLabel}:${stat}`}>
                       <div
                         className={cx(
                           styles.statModValue,
@@ -622,7 +658,7 @@ export const PokeStats = ({
                         ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
                       </div>
                       <div className={styles.statModLabel}>
-                        {modReffect ? <>{modLabel} &rarr; {modReffect}</> : modLabel}
+                        {modLabel}
                       </div>
                     </React.Fragment>
                   );
