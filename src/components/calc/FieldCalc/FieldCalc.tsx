@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import cx from 'classnames';
-import { type Weather } from '@smogon/calc';
+import { type Terrain, type Weather } from '@smogon/calc';
 import { type DropdownOption, Dropdown, SpikesField } from '@showdex/components/form';
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
@@ -50,9 +50,25 @@ export const FieldCalc = ({
   } = state;
 
   const {
-    weather,
-    terrain,
+    weather: currentWeather,
+    dirtyWeather,
+    terrain: currentTerrain,
+    dirtyTerrain,
   } = field || {};
+
+  // these are like dirtyItem, where the user can still clear them (unlike dirtyAbility)
+  // (i.e., when manually "cleared," the actual value of the dirty properties is an empty string, not null/undefined)
+  const weather = (dirtyWeather ?? currentWeather) || null;
+  const terrain = (dirtyTerrain ?? currentTerrain) || null;
+
+  const showResetWeather = !!currentWeather
+    && (!!dirtyWeather || typeof dirtyWeather === 'string') // i.e., '' (to forcibly clear) as opposed to null
+    && currentWeather !== dirtyWeather;
+
+  const showResetTerrain =
+    !!currentTerrain
+      && (!!dirtyTerrain || typeof dirtyTerrain === 'string')
+      && currentTerrain !== dirtyTerrain;
 
   const colorScheme = useColorScheme();
   const dex = getDexForFormat(format);
@@ -100,12 +116,6 @@ export const FieldCalc = ({
   const doubles = state?.gameType === 'Doubles';
   const natdexFormat = ['nationaldex', 'natdex'].some((f) => format?.includes(f));
 
-  // const sideFieldMap: typeof PlayerSideScreensToggleMap = {
-  //   ...PlayerSideScreensToggleMap,
-  //   ...(operatingMode === 'standalone' && !doubles && { Twind: PlayerSideConditionsToggleMap.Twind }),
-  //   ...(doubles && PlayerSideConditionsToggleMap),
-  // };
-
   const playerToggleKeys = React.useMemo(() => {
     const output: (keyof CalcdexPlayerSide | 'isGravity')[] = [
       'isLightScreen',
@@ -142,18 +152,6 @@ export const FieldCalc = ({
     natdexFormat,
     operatingMode,
   ]);
-
-  // if (gen === 9 && doubles && !natdexFormat) {
-  //   delete sideFieldMap.Gift;
-  //   delete sideFieldMap.Battery;
-  //   delete sideFieldMap.Power;
-  // }
-
-  // update (2023/01/23): CalcdexPlayerSide's (formerly attached to attackerSide and defenderSide of CalcdexBattleField)
-  // are now attached to each individual CalcdexPlayer under the `side` property; attackerSide and defenderSide are
-  // dynamically set during instantiation of the Smogon.Field in createSmogonField()
-  // const playerSide = state[playerKey]?.side; // i.e., attackingSide
-  // const opponentSide = state[opponentKey]?.side; // i.e., defendingSide
 
   const disabled = !state[playerKey]?.pokemon?.length
     || !state[opponentKey]?.pokemon?.length;
@@ -266,33 +264,89 @@ export const FieldCalc = ({
       >
         {/* p1 screens header */}
         {authPlayerKey ? (
-          t(`field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`)
+          t(
+            `field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`,
+            authPlayerKey === playerKey ? 'Yours' : 'Theirs',
+          )
         ) : (
           <>
             &uarr;{' '}
-            {t(`field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`)}
+            {t(
+              `field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`,
+              operatingMode === 'standalone' || doubles ? 'Field' : 'Screens',
+            )}
           </>
         )}
       </TableGridItem>
       <TableGridItem
         className={cx(
           styles.label,
+          styles.dropdownLabel,
           styles.weatherLabel,
           gen === 1 && styles.legacy,
         )}
         header
       >
-        {t('field.weather.label')}
+        {t('field.weather.label', 'Weather')}
+
+        {
+          showResetWeather &&
+          <ToggleButton
+            className={styles.labelToggleButton}
+            label={t('field.weather.resetLabel', 'Reset')}
+            tooltip={(
+              <Trans
+                t={t}
+                i18nKey="field.weather.resetTooltip"
+                parent="div"
+                className={styles.tooltipContent}
+                shouldUnescape
+                values={{ weather }}
+              />
+            )}
+            tooltipDisabled={!settings?.showUiTooltips}
+            absoluteHover
+            active
+            onPress={() => updateField({
+              dirtyWeather: null,
+            }, `${l.scope}:ToggleButton~DirtyWeather:onPress()`)}
+          />
+        }
       </TableGridItem>
       <TableGridItem
         className={cx(
           styles.label,
+          styles.dropdownLabel,
           styles.terrainLabel,
           gen < 6 && styles.legacy,
         )}
         header
       >
-        {t('field.terrain.label')}
+        {t('field.terrain.label', 'Terrain')}
+
+        {
+          showResetTerrain &&
+          <ToggleButton
+            className={styles.labelToggleButton}
+            label={t('field.terrain.resetLabel', 'Reset')}
+            tooltip={(
+              <Trans
+                t={t}
+                i18nKey="field.terrain.resetTooltip"
+                parent="div"
+                className={styles.tooltipContent}
+                shouldUnescape
+                values={{ terrain }}
+              />
+            )}
+            tooltipDisabled={!settings?.showUiTooltips}
+            absoluteHover
+            active
+            onPress={() => updateField({
+              dirtyTerrain: null,
+            }, `${l.scope}:ToggleButton~DirtyTerrain:onPress()`)}
+          />
+        }
       </TableGridItem>
       <TableGridItem
         className={cx(
@@ -333,8 +387,8 @@ export const FieldCalc = ({
           input={{
             name: `FieldCalc:${battleId || '???'}:Weather:Dropdown`,
             value: weather,
-            onChange: (updatedWeather: CalcdexBattleField['weather']) => updateField({
-              weather: updatedWeather,
+            onChange: (value: Weather) => updateField({
+              dirtyWeather: value || (currentWeather ? '' as Weather : null),
             }, `${l.scope}:Dropdown~Weather:input.onChange()`),
           }}
           options={getWeatherConditions(format).map((name: Weather) => ({
@@ -358,8 +412,8 @@ export const FieldCalc = ({
           input={{
             name: `FieldCalc:${battleId || '???'}:Terrain:Dropdown`,
             value: terrain,
-            onChange: (updatedTerrain: CalcdexBattleField['terrain']) => updateField({
-              terrain: updatedTerrain,
+            onChange: (value: Terrain) => updateField({
+              dirtyTerrain: value || (currentTerrain ? '' as Terrain : null),
             }, `${l.scope}:Dropdown~Terrain:input.onChange()`),
           }}
           options={TerrainNames.map((name) => ({

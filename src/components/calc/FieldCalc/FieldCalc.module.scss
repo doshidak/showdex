@@ -1,6 +1,7 @@
 @use 'config/colors';
 @use 'config/fonts';
 @use 'functions/color';
+@use 'mixins/flex';
 @use 'mixins/font';
 @use 'mixins/spacing';
 @use 'mixins/transition';
@@ -37,6 +38,27 @@
   }
 }
 
+.dropdownLabel {
+  @include flex.row-center;
+
+  .doubles & {
+    @include spacing.margin($bottom: 0);
+
+    &.weatherLabel {
+      grid-area: 1 / 1;
+    }
+
+    &.terrainLabel {
+      grid-area: 1 / 2;
+    }
+  }
+
+  button.labelToggleButton {
+    @include spacing.margin($left: 8px);
+    font-size: 8px;
+  }
+}
+
 .leftFieldLabel {
   @include spacing.margin($left: 8px);
 
@@ -57,12 +79,12 @@
   }
 }
 
-.weatherLabel {
-  .doubles & {
-    grid-area: 1 / 1;
-    @include spacing.margin($bottom: 0);
-  }
-}
+// .weatherLabel {
+//   .doubles & {
+//     grid-area: 1 / 1;
+//     @include spacing.margin($bottom: 0);
+//   }
+// }
 
 .weatherInput {
   align-self: flex-start;
@@ -79,12 +101,12 @@
   }
 }
 
-.terrainLabel {
-  .doubles & {
-    grid-area: 1 / 2;
-    @include spacing.margin($bottom: 0);
-  }
-}
+// .terrainLabel {
+//   .doubles & {
+//     grid-area: 1 / 2;
+//     @include spacing.margin($bottom: 0);
+//   }
+// }
 
 .terrainInput {
   align-self: flex-start;

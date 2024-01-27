@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
 import {
+  type CalcdexBattleField,
   type CalcdexBattleState,
   type CalcdexOperatingMode,
   type CalcdexPlayer,
@@ -18,7 +19,7 @@ import {
 } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { getGenlessFormat } from '@showdex/utils/dex';
+import { determineTerrain, determineWeather, getGenlessFormat } from '@showdex/utils/dex';
 import {
   type CalcdexBattlePresetsHookValue,
   applyPreset,
@@ -93,6 +94,7 @@ export const useCalcdexPresets = (
 
     const randoms = state.format.includes('random');
     const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {};
+    const field: Partial<CalcdexBattleField> = {};
 
     AllPlayerKeys.forEach((playerKey) => {
       const player = state[playerKey];
@@ -102,7 +104,7 @@ export const useCalcdexPresets = (
       }
 
       const presetlessIndices = player.pokemon
-        .map((p, i) => (p.presetId ? null : i))
+        .map((p, i) => (p?.presetId ? null : i))
         .filter((v) => typeof v === 'number');
 
       if (!presetlessIndices.length) {
@@ -385,7 +387,7 @@ export const useCalcdexPresets = (
         /**
          * @todo update when more than 4 moves are supported
          */
-        if (pokemon.source !== 'server' && pokemon.revealedMoves.length === 4) {
+        if (presetPayload?.moves && pokemon?.source !== 'server' && pokemon?.revealedMoves?.length === 4) {
           delete presetPayload.moves;
         }
 
@@ -393,6 +395,21 @@ export const useCalcdexPresets = (
           ...pokemon,
           ...presetPayload,
         };
+
+        if (pokemonIndex !== player.selectionIndex) {
+          return;
+        }
+
+        const autoWeather = determineWeather(party[pokemonIndex], state.format);
+        const autoTerrain = determineTerrain(party[pokemonIndex]);
+
+        if (autoWeather) {
+          field.dirtyWeather = autoWeather;
+        }
+
+        if (autoTerrain) {
+          field.dirtyTerrain = autoTerrain;
+        }
       });
 
       playersPayload[playerKey] = {
@@ -404,10 +421,11 @@ export const useCalcdexPresets = (
       return void endTimer('(no change)');
     }
 
-    dispatch(calcdexSlice.actions.updatePlayer({
+    dispatch(calcdexSlice.actions.update({
       scope: l.scope,
       battleId: state.battleId,
       ...playersPayload,
+      field,
     }));
 
     // prevAutoNonce.current = autoNonce;

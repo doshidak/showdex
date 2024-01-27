@@ -350,6 +350,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         containerWidth,
         playerKey,
         opponentKey,
+        field,
         cached,
       } = action.payload;
 
@@ -387,7 +388,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         battleId: battleId || currentState.battleId,
         battleNonce: battleNonce || currentState.battleNonce,
-        name: name || currentState.name,
+        name: (name || currentState.name)?.trim(),
         gen: updatedGen,
         legacy,
         format: format || currentState.format,
@@ -402,17 +403,27 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         cached: cached || currentState.cached,
       };
 
-      if (currentState.operatingMode === 'standalone') {
-        AllPlayerKeys.forEach((pkey) => {
-          if (!nonEmptyObject(action.payload[pkey])) {
-            return;
-          }
+      AllPlayerKeys.forEach((pkey) => {
+        if (!nonEmptyObject(action.payload[pkey])) {
+          return;
+        }
 
-          state[battleId][pkey] = {
-            ...currentState[pkey],
-            ...action.payload[pkey],
-          };
-        });
+        state[battleId][pkey] = {
+          ...currentState[pkey],
+          ...action.payload[pkey],
+
+          side: {
+            ...currentState[pkey]?.side,
+            ...action.payload[pkey]?.side,
+          },
+        };
+      });
+
+      if (nonEmptyObject(field)) {
+        state[battleId].field = {
+          ...state[battleId].field,
+          ...field,
+        };
       }
 
       // for the active state, only update if previously true and the new value is false
@@ -742,6 +753,16 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
           state[newId][playerKey].maxPokemon = calcMaxPokemon(state[newId][playerKey]);
         });
+      }
+
+      if (state[newId].field?.weather) {
+        state[newId].field.dirtyWeather = state[newId].field.weather;
+        state[newId].field.weather = null;
+      }
+
+      if (state[newId].field?.terrain) {
+        state[newId].field.dirtyTerrain = state[newId].field.terrain;
+        state[newId].field.terrain = null;
       }
 
       endTimer('(done)');

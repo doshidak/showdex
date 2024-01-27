@@ -87,6 +87,16 @@ export const determineAutoBoostEffect = (
   const targetAbility = dirtyTargetAbility || revealedTargetAbility;
   const targetItem = dirtyTargetItem ?? revealedTargetItem;
 
+  const {
+    // weather: currentWeather,
+    // dirtyWeather,
+    terrain: currentTerrain,
+    dirtyTerrain,
+  } = field || {};
+
+  // const weather = (dirtyWeather ?? currentWeather) || null;
+  const terrain = (dirtyTerrain ?? currentTerrain) || null;
+
   switch (sourceAbility) {
     case 'Dauntless Shield': {
       output.name = sourceAbility;
@@ -330,15 +340,15 @@ export const determineAutoBoostEffect = (
     case 'Grassy Seed':
     case 'Misty Seed':
     case 'Psychic Seed': {
-      output.name = sourceItem;
-      output.dict = 'items';
+      // e.g., sourceItem = 'Electric Seed' -> itemTerrain = 'Electric'
+      const itemTerrain = sourceItem.split(' ')[0] as Terrain;
 
-      // e.g., sourceItem = 'Electric Seed' -> terrain = 'Electric'
-      const terrain = sourceItem.split(' ')[0] as Terrain;
-
-      if (field?.terrain !== terrain) {
+      if (terrain !== itemTerrain) {
         break;
       }
+
+      output.name = sourceItem;
+      output.dict = 'items';
 
       const boostedStat: Showdown.StatNameNoHp = (['Electric', 'Grassy'] as Terrain[]).includes(terrain) ? 'def' : 'spd';
       const contrary = sourceAbility === 'Contrary' as AbilityName;
