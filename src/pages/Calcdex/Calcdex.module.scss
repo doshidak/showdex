@@ -108,11 +108,10 @@
 }
 
 .fieldCalc {
-  @include spacing.margin($top: 16px);
+  max-width: 496px;
+  @include spacing.margin($x: auto, $top: 16px);
 
-  .container:not(.verySmol) & {
-    max-width: 496px;
-    @include spacing.margin($x: auto);
+  .container:not(.skinnyBoi) & {
     @include spacing.padding($x: 24px);
   }
 }

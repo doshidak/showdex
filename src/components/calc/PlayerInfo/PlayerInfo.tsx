@@ -303,11 +303,11 @@ export const PlayerInfo = ({
               {
                 !!rating &&
                 <>
-                  <span className={styles.ratingSeparator}>
+                  {/* <span className={styles.ratingSeparator}>
                     &bull;
-                  </span>
+                  </span> */}
 
-                  {rating} ELO
+                  &nbsp;{rating} ELO
                 </>
               }
             </div>

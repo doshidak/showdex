@@ -31,7 +31,7 @@ $container: (
   $side-label-radius: map.get($container, border-radius) - map.get($container, border-width);
 
   @include flex.column-center;
-  @include spacing.padding($x: 8px, $y: 2px, $left: 9px);
+  @include spacing.padding($x: 8px, $y: 2px);
   @include font.apply(fonts.$primary);
   border-radius: $side-label-radius 0 0 $side-label-radius;
   user-select: none;

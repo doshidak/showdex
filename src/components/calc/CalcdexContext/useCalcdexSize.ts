@@ -24,7 +24,12 @@ export const useCalcdexSize = (
 
   React.useEffect(() => {
     // need to check width & height so the `size` doesn't reset to 'xs' when the containerRef is unmounting
-    if (!width || !height || !size || (size === state?.containerSize && tolerance(state?.containerWidth, 50)(width))) {
+    const shouldIgnore = !width
+      || !height
+      || !size
+      || (size === state?.containerSize && tolerance(state?.containerWidth, 10)(width));
+
+    if (shouldIgnore) {
       return;
     }
 
