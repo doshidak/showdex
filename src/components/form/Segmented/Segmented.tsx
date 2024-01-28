@@ -52,6 +52,7 @@ export interface SegmentedProps<
   className?: string;
   style?: React.CSSProperties;
   fieldClassName?: string;
+  fieldStyle?: React.CSSProperties;
   labelClassName?: string;
   optionsClassName?: string;
   optionClassName?: string;
@@ -83,6 +84,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
   className,
   style,
   fieldClassName,
+  fieldStyle,
   labelClassName,
   optionsClassName,
   optionClassName,
@@ -163,6 +165,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
             disabled && styles.disabled,
             fieldClassName,
           )}
+          style={fieldStyle}
         >
           {
             !!label &&

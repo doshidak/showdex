@@ -63,12 +63,13 @@ export const PiconRackProvider = ({
 
   const columns = React.useMemo(() => (
     state?.operatingMode === 'standalone' && (
-      (state?.containerSize === 'xs' && 12)
+      // (state?.containerSize === 'xs' && 12)
+      ((state?.containerSize === 'xl' || (state?.containerWidth || 0) > 990) && 4)
         || (['md', 'lg'].includes(state?.containerSize) && 3)
-        || (state?.containerSize === 'xl' && 4)
     )
   ) || 6, [
     state?.containerSize,
+    state?.containerWidth,
     state?.operatingMode,
   ]);
 
