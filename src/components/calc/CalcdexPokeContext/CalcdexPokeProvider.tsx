@@ -98,7 +98,7 @@ export const CalcdexPokeProvider = ({
     formeUsageSorter,
   } = battlePresets;
 
-  const pokemonSheets = React.useMemo(() => selectPokemonPresets(
+  const pokemonSheets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     sheets,
     playerPokemon,
     {
@@ -106,13 +106,13 @@ export const CalcdexPokeProvider = ({
       source: 'sheet',
       select: 'any',
     },
-  ), [
+  ) : []), [
     format,
     playerPokemon,
     sheets,
   ]);
 
-  const usages = React.useMemo(() => selectPokemonPresets(
+  const usages = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allUsages,
     playerPokemon,
     {
@@ -120,14 +120,14 @@ export const CalcdexPokeProvider = ({
       source: 'usage',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allUsages,
     format,
     playerPokemon,
   ]);
 
   // note: in Randoms, teambuilder presets won't exist in allPresets[]
-  const teamPresets = React.useMemo(() => selectPokemonPresets(
+  const teamPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -135,13 +135,13 @@ export const CalcdexPokeProvider = ({
       source: 'storage',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const boxPresets = React.useMemo(() => selectPokemonPresets(
+  const boxPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -149,13 +149,13 @@ export const CalcdexPokeProvider = ({
       source: 'storage-box',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const bundledPresets = React.useMemo(() => selectPokemonPresets(
+  const bundledPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -163,13 +163,13 @@ export const CalcdexPokeProvider = ({
       source: 'bundle',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const pokemonPresets = React.useMemo(() => selectPokemonPresets(
+  const pokemonPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -177,13 +177,18 @@ export const CalcdexPokeProvider = ({
       source: 'smogon',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const presets = React.useMemo(() => [
+  const presetSorter = React.useMemo(
+    () => sortPresetsByFormat(format, formatLabelMap),
+    [format, formatLabelMap],
+  );
+
+  const presets = React.useMemo(() => (playerPokemon?.speciesForme ? [
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
     ...(format?.includes('random') ? [] : usages),
@@ -191,19 +196,25 @@ export const CalcdexPokeProvider = ({
     ...boxPresets,
     ...bundledPresets,
     ...pokemonPresets,
-  ].sort(sortPresetsByFormat(format, formatLabelMap)), [
+  ].sort(presetSorter) : []), [
     boxPresets,
     bundledPresets,
     format,
-    formatLabelMap,
+    // formatLabelMap,
     playerPokemon?.presets,
+    playerPokemon?.speciesForme,
     pokemonPresets,
     pokemonSheets,
+    presetSorter,
     teamPresets,
     usages,
   ]);
 
   const usage = React.useMemo(() => {
+    if (!usages?.length) {
+      return null;
+    }
+
     if (usages.length === 1) {
       return usages[0];
     }

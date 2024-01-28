@@ -68,6 +68,11 @@ export const useCalcdexPresets = (
     format: state?.format,
   });
 
+  const presetSorter = React.useMemo(
+    () => sortPresetsByFormat(state?.format, presets.formatLabelMap),
+    [presets.formatLabelMap, state?.format],
+  );
+
   // keep track of whether we applied Team Sheets yet (whether initially or later)
   const appliedSheets = React.useRef(false);
 
@@ -131,7 +136,7 @@ export const useCalcdexPresets = (
             select: 'any',
             filter: (p) => p.source !== 'usage',
           },
-        ).sort(sortPresetsByFormat(state.format, presets.formatLabelMap));
+        ).sort(presetSorter);
 
         const pokemonUsages = selectPokemonPresets(
           presets.usages,
@@ -404,11 +409,13 @@ export const useCalcdexPresets = (
         const autoTerrain = determineTerrain(party[pokemonIndex]);
 
         if (autoWeather) {
-          field.dirtyWeather = autoWeather;
+          field.dirtyWeather = null;
+          field.autoWeather = autoWeather;
         }
 
         if (autoTerrain) {
-          field.dirtyTerrain = autoTerrain;
+          field.dirtyTerrain = null;
+          field.autoTerrain = autoTerrain;
         }
       });
 
