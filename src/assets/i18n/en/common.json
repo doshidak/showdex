@@ -4,9 +4,9 @@
     "version": "1.0.0",
     "locale": "en",
     "language": "English",
-    "authors": ["BOT Keith <keith@tize.io>"],
+    "authors": ["Keith Choison <keith@tize.io>"],
     "created": "2024-01-05T12:18:35.813Z",
-    "updated": "2024-01-11T13:28:58.883Z",
+    "updated": "2024-01-26T18:57:41.117Z",
     "built": "<-- auto-filled; do not edit -->"
   },
 
@@ -68,6 +68,7 @@
     "delete": "Delete",
     "download": "Download",
     "downloading": "Downloading",
+    "duplicate": "Duplicate",
     "edit": "Edit",
     "edited": "Edited",
     "empty": "Empty",
@@ -87,6 +88,7 @@
     "leave": "Leave",
     "loading": "Loading",
     "na": "N/A",
+    "new": "New",
     "next": "Next",
     "none": "None",
     "ok": "OK",

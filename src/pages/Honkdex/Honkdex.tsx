@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -30,6 +31,7 @@ export const Honkdex = ({
 
   useCalcdexSize(containerRef);
 
+  const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
   const { state, saving, saveHonk } = useCalcdexContext();
@@ -114,7 +116,10 @@ export const Honkdex = ({
             entity: 'item',
             props: {
               theme: saving?.[0] ? 'info' : cached ? 'success' : 'default',
-              label: saving?.[0] ? 'Saving ...' : cached ? 'Saved' : 'Save',
+              label: t(
+                `contextMenu.${saving?.[0] ? 'saving' : cached ? 'saved' : 'save'}`,
+                saving?.[0] ? 'Saving...' : cached ? 'Saved' : 'Save',
+              ),
               icon: 'floppy',
               iconStyle: { strokeWidth: 3, transform: 'scale(1.2)' },
               disabled: !name || saving?.[0],
@@ -125,7 +130,7 @@ export const Honkdex = ({
             key: 'dupe-honkdex',
             entity: 'item',
             props: {
-              label: 'Duplicate',
+              label: t('contextMenu.dupeHonkdex', 'Duplicate'),
               icon: 'copy-plus',
               iconStyle: { strokeWidth: 3, transform: 'scale(1.2)' },
               onPress: hideAfter(() => {
@@ -144,8 +149,9 @@ export const Honkdex = ({
             key: 'open-hellodex',
             entity: 'item',
             props: {
-              label: 'Hellodex',
+              label: t('contextMenu.openHellodex', 'Hellodex'),
               icon: 'fa-home',
+              iconStyle: { transform: 'scale(1.2)' },
               disabled: typeof onRequestHellodex !== 'function',
               onPress: hideAfter(onRequestHellodex),
             },
@@ -155,7 +161,7 @@ export const Honkdex = ({
             entity: 'item',
             props: {
               theme: 'info',
-              label: 'Close',
+              label: t('contextMenu.close', 'Close'),
               icon: 'close-circle',
               disabled: !battleId || typeof app?.leaveRoom !== 'function',
               onPress: hideAfter(() => app.leaveRoom(getHonkdexRoomId(battleId))),

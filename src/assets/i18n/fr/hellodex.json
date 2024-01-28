@@ -1,10 +1,17 @@
 {
   "--meta": {
     "name": "hellodex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:34:00.026Z",
-    "updated": "2024-01-12T23:03:17.927Z"
+    "updated": "2024-01-28T01:38:11.198Z"
+  },
+
+  "contextMenu": {
+    "newHonk": "Nouveau Honk",
+    "spectate": "Assisterez à Batailles",
+    "settings": "$t(common:labels.setting_other)",
+    "close": "$t(common:labels.close)"
   },
 
   "header": {
@@ -21,14 +28,30 @@
       "settingsTooltip": "Ouvrir les Paramètres $t(common:products.showdex)",
       "spectateTooltip": "Afficher les Batailles Actives"
     },
+    "calcdex": {
+      "contextMenu": {
+        "open": "$t(common:labels.open)",
+        "convertHonk": "Convertir en Honk",
+        "closeBattle": "Quitter la Bataille"
+      }
+    },
     "honkdex": {
+      "contextMenu": {
+        "open": "$t(common:labels.open)",
+        "dupe": "$t(common:labels.duplicate)",
+        "remove": "$t(common:labels.delete)"
+      },
       "orSeparator": "ou",
       "newLabel": ["<strong>Nouveau</strong>", "<strong>Honk</strong>dex"],
-      "newAria": "Créer un Nouveau $t(common:products.honkdex_one)"
+      "newAria": "Créer un Nouveau $t(common:products.honk_one)"
     }
   },
 
   "battleRecord": {
+    "contextMenu": {
+      "reset": "$t(common:labels.reset)",
+      "hide": "$t(common:labels.hide)"
+    },
     "wins": "V",
     "losses": "D"
   },

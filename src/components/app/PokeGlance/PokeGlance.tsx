@@ -136,7 +136,7 @@ export const PokeGlance = ({
       <Badge
         ref={activeBadgeRef}
         className={styles.activeBadge}
-        label="Active"
+        label={t('common:labels.active', 'Active')}
         color="blue"
         duration={0}
       />
@@ -193,7 +193,7 @@ export const PokeGlance = ({
             {
               (!!level && level !== 100) &&
               <div className={styles.level}>
-                {t('poke.info.level.label')}{level}
+                {t('poke.info.level.label', 'L')}{level}
               </div>
             }
           </div>
@@ -202,7 +202,7 @@ export const PokeGlance = ({
             !!nickname &&
             <div className={cx(styles.detailsRow, styles.nickname)}>
               <div className={styles.aka}>
-                {t('common:labels.aka')}
+                {t('common:labels.aka', 'aka')}
               </div>
 
               <div className={styles.value}>
@@ -274,7 +274,7 @@ export const PokeGlance = ({
             !!bst &&
             <div className={styles.stat}>
               <div className={styles.statName}>
-                {t('pokedex:stats.bst_one.1')}
+                {t('pokedex:stats.bst_one.1', 'BST')}
               </div>
 
               <div className={cx(styles.statValue, styles.bst)}>

@@ -4,7 +4,16 @@
     "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-08T15:45:10.164Z",
-    "updated": "2024-01-17T19:14:29.496Z"
+    "updated": "2024-01-28T06:47:04.448Z"
+  },
+
+  "contextMenu": {
+    "save": "$t(common:labels.save)",
+    "saving": "$t(common:labels.saving)...",
+    "saved": "$t(common:labels.saved)",
+    "dupeHonkdex": "$t(common:labels.duplicate)",
+    "openHellodex": "$t(common:products.hellodex_one)",
+    "close": "$t(common:labels.close)"
   },
 
   "battle": {
@@ -16,7 +25,9 @@
     },
 
     "name": {
-      "hint": "name this $t(common:products.honk_one) to save this $t(common:products.honk_one)"
+      "hint": "name this $t(common:products.honk_one) to save this $t(common:products.honk_one)",
+      "dupe": "Copy of {{name}}",
+      "friends": "friends"
     },
 
     "format": {
@@ -31,5 +42,10 @@
       "savedRecently": "Now $t(common:labels.saved)",
       "savedAgo": "$t(common:labels.saved) {{ago}} ago"
     }
+  },
+
+  "sideControls": {
+    "activeLabel": "$t(common:labels.active)",
+    "dupeLabel": "Dupe"
   }
 }
