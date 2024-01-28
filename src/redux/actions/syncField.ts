@@ -44,14 +44,16 @@ export const syncField = (
     (newField as Record<keyof CalcdexBattleField, unknown>)[key] = value;
   });
 
+  newField.autoWeather = null;
+
   if (newField.weather) {
     newField.dirtyWeather = null;
-    newField.autoWeather = null;
   }
+
+  newField.autoTerrain = null;
 
   if (newField.terrain) {
     newField.dirtyTerrain = null;
-    newField.autoTerrain = null;
   }
 
   return newField;
