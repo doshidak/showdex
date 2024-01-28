@@ -84,6 +84,7 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   highlight?: boolean;
   loading?: boolean;
   disabled?: boolean;
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 /* eslint-disable react/prop-types */
@@ -123,6 +124,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   input,
   meta,
   disabled,
+  onContextMenu,
 }: DropdownProps, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<SelectInstance>(null);
@@ -245,6 +247,10 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           styles.container,
           !!colorScheme && styles[colorScheme],
         )}
+        onContextMenu={onContextMenu || ((e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+        })}
       >
         <Component
           ref={ref}
