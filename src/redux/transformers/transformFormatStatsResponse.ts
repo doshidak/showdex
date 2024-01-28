@@ -1,5 +1,3 @@
-// import { type MoveName } from '@smogon/calc';
-// import { PokemonNatures } from '@showdex/consts/dex';
 import {
   type PkmnApiSmogonFormatStatsResponse,
   type PkmnApiSmogonPresetRequest,
@@ -84,46 +82,13 @@ export const transformFormatStatsResponse = (
     if (altMoves.length) {
       // apparently a bug with Showdown Usage where these two Pokemon will have "Iron Head" instead of
       // "Behemoth Blade" (for Zacian-Crowned) or "Behemoth Bash" (for Zamazenta-Crowned) lol
-      /*
-      if (['zaciancrowned', 'zamazentacrowned'].includes(formatId(speciesForme))) {
-        const targetMove = (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName;
-        const ironHeadIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ironhead');
-
-        if (ironHeadIndex > -1) {
-          altMoves[ironHeadIndex][0] = targetMove;
-        }
-      }
-      */
-
-      // preset.altMoves = altMoves;
-      preset.altMoves = replaceBehemothMoves(speciesForme, preset.altMoves);
+      preset.altMoves = replaceBehemothMoves(speciesForme, altMoves);
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.
        */
       preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
     }
-
-    /*
-    const [topSpread] = processUsageAlts(spreads);
-    const [nature, evSpread] = (topSpread?.[0]?.split(':') || []) as [Showdown.NatureName, string];
-    const [hpEv, atkEv, defEv, spaEv, spdEv, speEv] = evSpread?.split('/') || [];
-
-    if (nature && PokemonNatures.includes(nature)) {
-      preset.nature = nature;
-    }
-
-    if (evSpread && evSpread.includes('/')) {
-      preset.evs = {
-        hp: parseInt(hpEv, 10) || 0,
-        atk: parseInt(atkEv, 10) || 0,
-        def: parseInt(defEv, 10) || 0,
-        spa: parseInt(spaEv, 10) || 0,
-        spd: parseInt(spdEv, 10) || 0,
-        spe: parseInt(speEv, 10) || 0,
-      };
-    }
-    */
 
     const usageSpreads = processUsageAlts(spreads);
 
