@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-28T01:34:17.463Z"
+    "updated": "2024-01-28T10:19:06.819Z"
   },
 
   "contextMenu": {
@@ -76,6 +76,8 @@
 
       "status": {
         "aria": "$t(pokedex:stats.hp.1) & Statut pour {{pokemon}}",
+        "resetHpLabel": "Réinit",
+        "resetStatusLabel": "Réinit",
         "unknown": "$t(pokedex:types.unknown.3)",
         "ok": "$t(pokedex:nonvolatiles.ok.2)",
         "fnt": "$t(pokedex:nonvolatiles.fnt.2)",
