@@ -2,15 +2,10 @@ import { type State as SmogonState, type Terrain, type Weather } from '@smogon/c
 import { type CalcdexPlayerSide } from './CalcdexPlayerSide';
 
 /**
- * Think someone at `@smogon/calc` forgot to include these additional field conditions
- * in the `State.Field` (but it exists in the `Field` class... huh).
+ * Calcdex-tracked player-wide field conditions.
  *
- * * For whatever reason, `isGravity` exists on both `State.Field` and `Field`.
- * * Checking the source code for the `Field` class (see link below),
- *   the constructor accepts these missing properties.
  * * As of v1.1.7, the `gameType` property has been moved up to the `CalcdexBattleState`.
  *
- * @see https://github.com/smogon/damage-calc/blob/master/calc/src/field.ts#L21-L26
  * @since 0.1.3
  */
 export interface CalcdexBattleField extends Omit<SmogonState.Field, 'gameType'> {
@@ -23,11 +18,25 @@ export interface CalcdexBattleField extends Omit<SmogonState.Field, 'gameType'> 
   weather?: Weather;
 
   /**
+   * Auto-determined weather.
+   *
+   * * Typically populated by `determineWeather()` from `@showdex/utils/dex`.
+   *
+   * @since 1.2.3
+   */
+  autoWeather?: Weather;
+
+  /**
    * User-modified weather.
    *
    * * Similar to `dirtyItem` in `CalcdexPokemon`, this value can be an empty string (i.e., `''`) in order to explicitly
    *   turn off the weather when there's a battle-synced `weather` already.
    *
+   * @example
+   * ```ts
+   * const field: CalcdexBattleField = { ... };
+   * const weather = (field.dirtyWeather ?? (field.autoWeather || field.weather)) || null;
+   * ```
    * @since 1.2.3
    */
   dirtyWeather?: Weather;
@@ -41,11 +50,25 @@ export interface CalcdexBattleField extends Omit<SmogonState.Field, 'gameType'> 
   terrain?: Terrain;
 
   /**
+   * Auto-determined terrain.
+   *
+   * * Typically populated by `determineTerrain()` from `@showdex/utils/dex`.
+   *
+   * @since 1.2.3
+   */
+  autoTerrain?: Terrain;
+
+  /**
    * User-modified terrain.
    *
    * * Similar to `dirtyItem` in `CalcdexPokemon`, this value can be an empty string (i.e., `''`) in order to explicitly
    *   turn off the terrain when there's a battle-synced `terrain` already.
    *
+   * @example
+   * ```ts
+   * const field: CalcdexBattleField = { ... };
+   * const terrain = (field.dirtyTerrain ?? (field.autoTerrain || field.terrain)) || null;
+   * ```
    * @since 1.2.3
    */
   dirtyTerrain?: Terrain;
