@@ -12,7 +12,7 @@ import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeC
  */
 export interface CalcdexPokeContextConsumables extends CalcdexPokeContextValue {
   addPokemon: (
-    pokemon: PickRequired<CalcdexPokemon, 'speciesForme'>,
+    pokemon: PickRequired<CalcdexPokemon, 'speciesForme'> | PickRequired<CalcdexPokemon, 'speciesForme'>[],
     scope?: string,
   ) => void;
 

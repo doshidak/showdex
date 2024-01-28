@@ -19,7 +19,7 @@ import {
 import { capitalize } from '@showdex/utils/humanize';
 
 // note: speciesForme should be handled last since it will test() true against any line technically
-const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> = {
+export const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> = {
   level: /^\s*Level:\s*(\d+)\s*$/i,
   ability: /^\s*Ability:\s*(.+)\s*$/i,
   shiny: /^\s*Shiny:\s*([A-Z]+)\s*$/i,
@@ -35,7 +35,7 @@ const PokePasteLineParsers: Partial<Record<keyof CalcdexPokemonPreset, RegExp>> 
   speciesForme: /(?:\s*\(([A-Z\xC0-\xFF0-9.':\-\x20]+[A-Z\xC0-\xFF0-9.%])\))?(?:\s*\(([MF])\))?(?:\s*@\s*([A-Z0-9\-\x20]+[A-Z0-9]))?\s*$/i,
 };
 
-const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
+export const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> = {
   hp: /(\d+)\s*HP/i,
   atk: /(\d+)\s*Atk/i,
   def: /(\d+)\s*Def/i,
