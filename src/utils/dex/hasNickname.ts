@@ -1,13 +1,16 @@
-import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { getDexForFormat } from './getDexForFormat';
+
+/* eslint-disable @typescript-eslint/indent */
 
 /**
  * Whether the passed-in `pokemon` has a nickname.
  *
  * @since 1.0.3
  */
-export const hasNickname = (
-  pokemon: DeepPartial<Showdown.Pokemon> | DeepPartial<Showdown.ServerPokemon> | DeepPartial<CalcdexPokemon> = {},
+export const hasNickname = <
+  TPokemon extends Partial<Showdown.PokemonDetails>,
+>(
+  pokemon: TPokemon,
 ): boolean => {
   if (!pokemon?.speciesForme || !pokemon.name) {
     return false;
@@ -18,6 +21,10 @@ export const hasNickname = (
 
   return !pokemon.name.endsWith('-*')
     && !pokemon.speciesForme.endsWith('-*')
-    && pokemon.name !== dexSpecies?.baseSpecies
-    && pokemon.name !== pokemon.speciesForme;
+    && dexSpecies?.exists
+    && !!dexSpecies.baseSpecies
+    && pokemon.name !== dexSpecies.baseSpecies
+    && pokemon.name !== pokemon.speciesForme.replace('-Tera', '');
 };
+
+/* eslint-enable @typescript-eslint/indent */
