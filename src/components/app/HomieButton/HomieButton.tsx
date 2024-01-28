@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import {
   format,
@@ -11,9 +10,10 @@ import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTierMember, type ShowdexSupporterTierTerm } from '@showdex/interfaces/app';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { env, formatId, getResourceUrl } from '@showdex/utils/core';
+import { env, formatId } from '@showdex/utils/core';
 import { openUserPopup } from '@showdex/utils/host';
 import { pluralize } from '@showdex/utils/humanize';
+import { MemberIcon } from '../MemberIcon';
 import styles from './HomieButton.module.scss';
 
 export interface HomieButtonProps {
@@ -49,15 +49,16 @@ export const HomieButton = ({
   const userTitle = findPlayerTitle(name, showdownUser);
   const userLabelColor = userTitle?.color?.[colorScheme];
   const userTooltipLabelColor = userTitle?.color?.[tooltipColorScheme];
-  const userIconColor = userTitle?.iconColor?.[colorScheme];
-  const userTooltipIconColor = userTitle?.iconColor?.[tooltipColorScheme];
 
   const periodsCount = periods?.length || 0;
   const validPeriods = periods?.filter?.((p) => !!p?.[0] && isValid(new Date(p[0])));
   const active = term === 'once' || validPeriods?.some((p) => !p[1]);
 
   const nameStyle: React.CSSProperties = {
-    ...(showTitles && userLabelColor ? { color: userLabelColor } : undefined),
+    ...(showTitles && userLabelColor ? {
+      color: userLabelColor,
+      textShadow: userTitle.colorGlow ? `0 0 4px ${userLabelColor}` : undefined,
+    } : undefined),
     ...(active ? undefined : { opacity: 0.56 }),
   };
 
@@ -65,13 +66,24 @@ export const HomieButton = ({
     <>
       <span>{name}</span>
 
-      {
+      {/*
         (showTitles && showdownUser && !!userTitle?.icon) &&
         <Svg
           className={styles.usernameIcon}
-          style={userIconColor ? { color: userIconColor } : undefined}
+          style={userIconColor ? {
+            color: userTitle.iconColorGlow ? '#FFFFFF' : userIconColor,
+            boxShadow: userTitle.iconColorGlow ? `0 0 3px ${userIconColor}` : undefined,
+          } : undefined}
           description={userTitle.iconDescription}
           src={getResourceUrl(`${userTitle.icon}.svg`)}
+        />
+      */}
+
+      {
+        (showTitles && showdownUser && !!userTitle?.icon) &&
+        <MemberIcon
+          className={styles.usernameIcon}
+          member={homie}
         />
       }
     </>
@@ -85,11 +97,15 @@ export const HomieButton = ({
           {
             (userTitle?.custom && !!userTitle?.icon) &&
             <>
-              <Svg
+              {/* <Svg
                 className={styles.customTitleIcon}
-                style={{ color: userTooltipIconColor || userTooltipLabelColor }}
+                style={{ color: userTitle.iconColorGlow ? '#FFFFFF' : (userTooltipIconColor || userTooltipLabelColor) }}
                 description={userTitle.iconDescription}
                 src={getResourceUrl(`${userTitle.icon}.svg`)}
+              /> */}
+              <MemberIcon
+                className={styles.customTitleIcon}
+                member={homie}
               />
               <br />
             </>
@@ -100,7 +116,10 @@ export const HomieButton = ({
             <>
               <span
                 className={styles.tooltipPlayerTitle}
-                style={userTooltipLabelColor ? { color: userTooltipLabelColor } : undefined}
+                style={userTooltipLabelColor ? {
+                  color: userTooltipLabelColor,
+                  textShadow: userTitle.colorGlow ? `0 0 4px ${userTooltipLabelColor}` : undefined,
+                } : undefined}
               >
                 {userTitle.title}
               </span>

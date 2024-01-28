@@ -152,17 +152,19 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   title: 'First Supreme Overlord',
   supporterId: 'patreon-tier-03',
   custom: true,
-  icon: 'dragon',
-  iconDescription: 'Dragon Head Icon',
+  icon: 'salamance',
+  iconDescription: 'Salamance by n0rtist',
+  colorGlow: false,
+  iconColorGlow: true,
 
   color: {
-    light: '#D5AD1C',
-    dark: '#FFC800',
+    light: '#1584D6',
+    dark: '#1584D6',
   },
 
   iconColor: {
-    light: '#FF6F00',
-    dark: '#FF6F00',
+    light: '#D84042',
+    dark: '#D84042',
   },
 
   userIds: [
