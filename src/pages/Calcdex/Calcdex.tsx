@@ -58,6 +58,7 @@ export const Calcdex = ({
     battleId,
     active: battleActive,
     containerSize,
+    containerWidth,
     renderMode,
     playerCount,
     playerKey,
@@ -159,6 +160,7 @@ export const Calcdex = ({
           'showdex-module',
           styles.container,
           containerSize === 'xs' && styles.verySmol,
+          containerWidth < 360 && styles.skinnyBoi,
           !!colorScheme && styles[colorScheme],
           renderAsOverlay && styles.overlay,
           glassyTerrain && styles.glassy,
@@ -239,7 +241,7 @@ export const Calcdex = ({
             key: 'switch-sides',
             entity: 'item',
             props: {
-              label: 'Switch Players',
+              label: t('contextMenu.switchSides', 'Switch Players'),
               icon: 'fa-random',
               disabled: typeof room?.switchViewpoint !== 'function'
                 || (!!authPlayerKey && battleActive), // no effect in this case
@@ -250,7 +252,7 @@ export const Calcdex = ({
             key: 'dupe-calcdex',
             entity: 'item',
             props: {
-              label: 'Convert to Honk',
+              label: t('contextMenu.convertHonk', 'Convert to Honk'),
               icon: 'fa-car',
               disabled: !battleId || typeof onRequestHonkdex !== 'function',
               hidden: !honkdexSettings?.visuallyEnabled,
@@ -270,8 +272,9 @@ export const Calcdex = ({
             key: 'open-hellodex',
             entity: 'item',
             props: {
-              label: 'Hellodex',
+              label: t('contextMenu.openHellodex', 'Hellodex'),
               icon: 'fa-home',
+              iconStyle: { transform: 'scale(1.2)' },
               disabled: typeof onRequestHellodex !== 'function',
               onPress: hideAfter(onRequestHellodex),
             },
@@ -281,7 +284,7 @@ export const Calcdex = ({
             entity: 'item',
             props: {
               theme: renderAsOverlay ? 'info' : 'error',
-              label: renderAsOverlay ? 'Close' : 'Close Tab',
+              label: t(`contextMenu.close${renderAsOverlay ? 'Overlay' : 'Tab'}`, 'Close'),
               icon: 'close-circle',
               disabled: !battleId
                 || (renderAsOverlay && typeof onCloseOverlay !== 'function'),

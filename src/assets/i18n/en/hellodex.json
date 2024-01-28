@@ -1,10 +1,17 @@
 {
   "--meta": {
     "name": "hellodex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-05T12:29:07.229Z",
-    "updated": "2024-01-09T21:18:00.033Z"
+    "updated": "2024-01-28T01:34:01.046Z"
+  },
+
+  "contextMenu": {
+    "newHonk": "New Honk",
+    "spectate": "Spectate Battles",
+    "settings": "$t(common:labels.setting_other)",
+    "close": "$t(common:labels.close)"
   },
 
   "header": {
@@ -21,14 +28,30 @@
       "settingsTooltip": "Open $t(common:products.showdex) Settings",
       "spectateTooltip": "View Active Battles"
     },
+    "calcdex": {
+      "contextMenu": {
+        "open": "$t(common:labels.open)",
+        "convertHonk": "Convert to Honk",
+        "closeBattle": "Leave Battle"
+      }
+    },
     "honkdex": {
+      "contextMenu": {
+        "open": "$t(common:labels.open)",
+        "dupe": "$t(common:labels.duplicate)",
+        "remove": "$t(common:labels.delete)"
+      },
       "orSeparator": "or",
       "newLabel": ["<strong>New</strong>", "<strong>Honk</strong>dex"],
-      "newAria": "Create New $t(common:products.honkdex_one)"
+      "newAria": "Create New $t(common:products.honk_one)"
     }
   },
 
   "battleRecord": {
+    "contextMenu": {
+      "reset": "$t(common:labels.reset)",
+      "hide": "$t(common:labels.hide)"
+    },
     "wins": "W",
     "losses": "L"
   },
