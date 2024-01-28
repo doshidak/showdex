@@ -90,9 +90,12 @@ export const buildItemOptions = (
     usageAlts,
     usageFinder: findUsagePercent,
     usageSorter,
-    translate,
-    translateHeader,
+    translate: translateFromConfig,
+    translateHeader: translateHeaderFromConfig,
   } = config || {};
+
+  const translate = (v: ItemName) => translateFromConfig?.(v) || v;
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
@@ -106,15 +109,19 @@ export const buildItemOptions = (
       : flattenAlts(altItems).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Pool') || 'Pool',
-      options: poolItems.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Pool'),
+      options: poolItems.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterItems.push(...flattenAlts(poolItems));
+        filterItems.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
+          value: flat,
+        };
+      }),
+    });
   }
 
   const usageItems = usageAlts?.filter((a) => (
@@ -124,15 +131,19 @@ export const buildItemOptions = (
 
   if (usageItems?.length) {
     options.push({
-      label: translateHeader?.('Usage') || 'Usage',
-      options: usageItems.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Usage'),
+      options: usageItems.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterItems.push(...flattenAlts(usageItems));
+        filterItems.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
+          value: flat,
+        };
+      }),
+    });
   }
 
   const formatKey = guessTableFormatKey(format);
@@ -155,15 +166,17 @@ export const buildItemOptions = (
 
     if (popularItems.length) {
       options.push({
-        label: translateHeader?.('Popular Items') || 'Popular',
-        options: popularItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Popular Items', 'Popular'),
+        options: popularItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...popularItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -176,15 +189,17 @@ export const buildItemOptions = (
 
     if (itemsItems.length) {
       options.push({
-        label: translateHeader?.('Items') || 'Items',
-        options: itemsItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Items'),
+        options: itemsItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...itemsItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -197,15 +212,17 @@ export const buildItemOptions = (
 
     if (specificItems.length) {
       options.push({
-        label: translateHeader?.(`Pok${eacute}mon-Specific Items`) || `Pok${eacute}mon-Specific`,
-        options: specificItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader(`Pok${eacute}mon-Specific Items`, `Pok${eacute}mon-Specific`),
+        options: specificItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...specificItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -218,15 +235,17 @@ export const buildItemOptions = (
 
     if (usuallyUselessItems.length) {
       options.push({
-        label: translateHeader?.('Usually Useless Items') || 'Usually Useless',
-        options: usuallyUselessItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Usually Useless Items', 'Usually Useless'),
+        options: usuallyUselessItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...usuallyUselessItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -239,15 +258,17 @@ export const buildItemOptions = (
 
     if (uselessItems.length) {
       options.push({
-        label: translateHeader?.('Useless Items') || 'Useless',
-        options: uselessItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Useless Items', 'Useless'),
+        options: uselessItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...uselessItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -259,16 +280,18 @@ export const buildItemOptions = (
 
     if (allItems.length) {
       options.push({
-        label: translateHeader?.('Other') || 'Other',
-        options: allItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
+        label: translateHeader('Other'),
+        options: allItems.map((name) => {
+          filterItems.push(name);
+
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
       });
     }
-
-    // return options;
   }
 
   const otherItems = Object.values(BattleItems || {})
@@ -278,9 +301,9 @@ export const buildItemOptions = (
 
   if (otherItems.length) {
     options.push({
-      label: translateHeader?.('All') || 'All',
+      label: translateHeader('All'),
       options: otherItems.map((name) => ({
-        label: translate?.(name) || name,
+        label: translate(name),
         rightLabel: findUsagePercent(name),
         value: name,
       })),

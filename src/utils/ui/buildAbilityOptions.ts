@@ -46,11 +46,12 @@ export const buildAbilityOptions = (
     usageFinder: findUsagePercent,
     usageSorter,
     showAll,
-    translate,
-    translateHeader,
+    translate: translateFromConfig,
+    translateHeader: translateHeaderFromConfig,
   } = config || {};
 
-  // const ability = pokemon.dirtyAbility ?? pokemon.ability;
+  const translate = (v: AbilityName) => translateFromConfig?.(v) || v;
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   const {
     source,
@@ -67,12 +68,12 @@ export const buildAbilityOptions = (
 
   // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
   if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
-    const groupLabel = formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited';
+    const groupLabel = baseAbility === 'Trace' as AbilityName ? 'Traced' : 'Inherited';
 
     options.push({
-      label: translateHeader?.(groupLabel) || groupLabel,
+      label: translateHeader(groupLabel),
       options: [{
-        label: translate?.(ability) || ability,
+        label: translate(ability),
         rightLabel: findUsagePercent(ability),
         value: ability,
       }],
@@ -89,38 +90,41 @@ export const buildAbilityOptions = (
     ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Transformed') || 'Transformed',
-      options: transformed.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Transformed'),
+      options: transformed.map((name) => {
+        filterAbilities.push(name);
 
-    filterAbilities.push(...transformed);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   if (altAbilities?.length) {
     const filteredPoolAbilities = altAbilities
       .filter((a) => !!a && !filterAbilities.includes(flattenAlt(a)));
 
-    const hasUsageStats = altAbilities
-      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
-
-    const poolAbilities = hasUsageStats
+    const poolAbilities = altAbilities.some((a) => detectUsageAlt(a))
       ? filteredPoolAbilities // should be sorted already (despite the name)
       : flattenAlts(filteredPoolAbilities).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Pool') || 'Pool',
-      options: poolAbilities.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Pool'),
+      options: poolAbilities.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterAbilities.push(...flattenAlts(poolAbilities));
+        filterAbilities.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
+          value: flat,
+        };
+      }),
+    });
   }
 
   const usageAbilities = usageAlts?.filter((a) => (
@@ -130,15 +134,19 @@ export const buildAbilityOptions = (
 
   if (usageAbilities?.length) {
     options.push({
-      label: translateHeader?.('Usage') || 'Usage',
-      options: usageAbilities.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Usage'),
+      options: usageAbilities.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterAbilities.push(...flattenAlts(usageAbilities));
+        filterAbilities.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
+          value: flat,
+        };
+      }),
+    });
   }
 
   if (abilities?.length) {
@@ -147,22 +155,24 @@ export const buildAbilityOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Legal') || 'Legal',
-      options: legalAbilities.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Legal'),
+      options: legalAbilities.map((name) => {
+        filterAbilities.push(name);
 
-    filterAbilities.push(...legalAbilities);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   if (ability && !filterAbilities.includes(ability)) {
     options.unshift({
-      label: translateHeader?.('Inherited') || 'Inherited',
+      label: translateHeader('Inherited'),
       options: [{
-        label: translate?.(ability) || ability,
+        label: translate(ability),
         rightLabel: findUsagePercent(ability),
         value: ability,
       }],
@@ -180,9 +190,9 @@ export const buildAbilityOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('All') || 'All',
+      label: translateHeader('All'),
       options: otherAbilities.map((name) => ({
-        label: translate?.(name) || name,
+        label: translate(name),
         rightLabel: findUsagePercent(name),
         value: name,
       })),

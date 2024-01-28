@@ -46,6 +46,7 @@ const standardizeSection = (
 export const buildFormatOptions = (
   gen: GenerationNum,
   config?: {
+    currentFormat?: string;
     showAll?: boolean;
     translateHeader?: (value: string) => string;
   },
@@ -57,10 +58,12 @@ export const buildFormatOptions = (
   }
 
   const {
+    currentFormat,
     showAll,
-    translateHeader,
+    translateHeader: translateHeaderFromConfig,
   } = config || {};
 
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
   const eligible = (f: string) => !!f && (showAll || (!f.includes('random') && !f.includes('custom')));
 
   const favoritedFormats = Object.entries(Dex?.prefs('starredformats') || {})
@@ -76,7 +79,7 @@ export const buildFormatOptions = (
 
   // note: filtering by `label`, NOT `value` !!
   // (using the latter can result in 2 BSS formats showing up in Gen 9, for both 'gen9bss' & 'gen9battlestadiumsingles')
-  const filterFormats: string[] = [];
+  const filterFormatLabels: string[] = [];
 
   const initialSections: string[] = genFormats
     .reduce((prev, format) => {
@@ -130,16 +133,16 @@ export const buildFormatOptions = (
 
   if (favoritedFormats.length) {
     sections.unshift({
-      label: translateHeader?.('Favorites') || 'Favorites',
+      label: translateHeader('Favorites'),
       options: favoritedFormats.map((format) => {
         const { base, label } = parseBattleFormat(format);
         const value = getGenfulFormat(gen, base);
 
-        if (filterFormats.includes(label)) {
+        if (filterFormatLabels.includes(label)) {
           return null;
         }
 
-        filterFormats.push(label);
+        filterFormatLabels.push(label);
 
         return {
           value,
@@ -154,7 +157,7 @@ export const buildFormatOptions = (
       const { base, label } = parseBattleFormat(format.id);
       const value = getGenfulFormat(gen, base);
 
-      if (filterFormats.includes(label)) {
+      if (filterFormatLabels.includes(label)) {
         return prev;
       }
 
@@ -163,14 +166,14 @@ export const buildFormatOptions = (
         label,
       });
 
-      filterFormats.push(label);
+      filterFormatLabels.push(label);
 
       return prev;
     }, [] as CalcdexBattleFormatOption[]);
   }
 
   const otherFormats: CalcdexBattleFormatOption = {
-    label: translateHeader?.('Other') || 'Other',
+    label: translateHeader('Other'),
     options: [],
   };
 
@@ -185,7 +188,7 @@ export const buildFormatOptions = (
     const { base, label } = parseBattleFormat(format.id);
     const value = getGenfulFormat(gen, base);
 
-    if (filterFormats.includes(label)) {
+    if (filterFormatLabels.includes(label)) {
       return;
     }
 
@@ -194,13 +197,25 @@ export const buildFormatOptions = (
       label,
     });
 
-    filterFormats.push(label);
+    filterFormatLabels.push(label);
   });
 
   options.push(
     ...sections.filter((g) => !!g.options.length),
     ...(otherFormats.options.length ? [otherFormats] : []),
   );
+
+  const { label: currentFormatLabel } = parseBattleFormat(currentFormat);
+
+  if (currentFormatLabel && !filterFormatLabels.includes(currentFormatLabel)) {
+    options.unshift({
+      label: translateHeader('Current'),
+      options: [{
+        label: currentFormatLabel,
+        value: currentFormat,
+      }],
+    });
+  }
 
   return options;
 };
