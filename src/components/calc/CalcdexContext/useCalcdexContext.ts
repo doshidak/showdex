@@ -240,7 +240,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         // l.debug('removeEffects for', pokemon.ident, removeEffects);
 
         removeEffects.forEach((name) => {
-          pokemon.autoBoostMap[name].active = false;
+          pokemon.autoBoostMap[name] = {
+            ...pokemon.autoBoostMap[name],
+            active: false,
+          };
         });
 
         PokemonBoostNames.forEach((stat) => {
