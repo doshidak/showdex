@@ -76,6 +76,8 @@
 
       "status": {
         "aria": "$t(pokedex:stats.hp.1) & Non-Volatile Status Condition for {{pokemon}}",
+        "resetHpLabel": "$t(common:labels.reset)",
+        "resetStatusLabel": "$t(common:labels.reset)",
         "unknown": "$t(pokedex:types.unknown.3)",
         "ok": "$t(pokedex:nonvolatiles.ok.2)",
         "fnt": "$t(pokedex:nonvolatiles.fnt.2)",

@@ -139,7 +139,7 @@ export const PokeStatusTooltip = ({
                   <ToggleButton
                     className={styles.hpResetButton}
                     forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
-                    label={t('common:labels.reset')}
+                    label={t('calcdex:poke.info.status.resetHpLabel', 'Reset')}
                     absoluteHover
                     active
                     onPress={() => onPokemonChange?.({
@@ -191,7 +191,7 @@ export const PokeStatusTooltip = ({
                 <ToggleButton
                   className={styles.groupResetButton}
                   forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
-                  label={t('common:labels.reset')}
+                  label={t('calcdex:poke.info.status.resetStatusLabel', 'Reset')}
                   absoluteHover
                   active
                   onPress={() => onPokemonChange?.({
