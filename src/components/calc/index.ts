@@ -11,3 +11,4 @@ export * from './PokeCalc';
 export * from './PokeInfo';
 export * from './PokeMoves';
 export * from './PokeStats';
+export * from './SideControls';
