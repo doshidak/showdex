@@ -70,6 +70,15 @@ export interface ShowdexPlayerTitle {
   color?: Partial<Record<Showdown.ColorScheme, string>>;
 
   /**
+   * Whether to apply the `color` as a glowing color.
+   *
+   * * Actual text color will be white on both light & dark modes.
+   *
+   * @since 1.2.3
+   */
+  colorGlow?: boolean;
+
+  /**
    * Player title icon color.
    *
    * * If unspecified, will fallback to using `color`.
@@ -77,6 +86,15 @@ export interface ShowdexPlayerTitle {
    * @since 1.1.5
    */
   iconColor?: Partial<Record<Showdown.ColorScheme, string>>;
+
+  /**
+   * Whether to apply the `iconColor` as a glowing color.
+   *
+   * * Actual icon color will be white on both light & dark modes.
+   *
+   * @since 1.2.3
+   */
+  iconColorGlow?: boolean;
 
   /**
    * IDs of Showdown users that are assigned to the player title.

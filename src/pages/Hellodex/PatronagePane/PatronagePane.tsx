@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
+import { MemberIcon } from '@showdex/components/app';
 import { BuildInfo } from '@showdex/components/debug';
 import {
   type BaseButtonProps,
@@ -93,13 +94,21 @@ export const PatronagePane = ({
                 ].join(', '),
               } : undefined}
             >
-              <Svg
+              {/* <Svg
                 className={styles.icon}
                 style={authTitle?.iconColor?.[colorScheme] ? {
                   color: authTitle.iconColor[colorScheme],
                 } : undefined}
                 src={getResourceUrl(`${authTitle?.icon || 'sparkle'}.svg`)}
                 description={authTitle?.iconDescription || 'Sparkle Icon'}
+              /> */}
+              <MemberIcon
+                className={styles.icon}
+                member={{
+                  name: authUser,
+                  showdownUser: true,
+                  periods: null,
+                }}
               />
             </div>
 
