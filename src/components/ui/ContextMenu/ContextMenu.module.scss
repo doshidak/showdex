@@ -1,0 +1,532 @@
+@use 'sass:list';
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$container: (
+  min-width: 168px,
+  padding-x: 0,
+  padding-y: 6px,
+  border-radius: 12px,
+  z-index: 90,
+
+  background-color: (
+    light: color.alpha(colors.$white, 0.92),
+    dark: color.alpha(colors.$gray-darker, 0.96),
+  ),
+
+  box-shadow: (
+    light: (
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 8px -2px color.alpha(colors.$gray-dark, 0.16),
+    ),
+
+    dark: (
+      0 0 1px color.alpha(colors.$white, 0.16),
+      0 0 8px -2px color.alpha(colors.$black, 0.48),
+    ),
+  ),
+);
+
+$submenu: (
+  spacing: 6px, // horizontal spacing between the menu & submenu
+  arrow: (
+    size: 16px,
+    spacing: 10px,
+    color: (
+      light: color.alpha(colors.$black, 0.32),
+      dark: color.alpha(colors.$white, 0.32),
+    ),
+  ),
+);
+
+$item: (
+  min-height: auto,
+  padding-x: 14px,
+  padding-y: 6px,
+  outline-offset: 2px,
+  outline-radius: 8px,
+  disabled-opacity: 0.32,
+
+  icon: (
+    container-size: 20px,
+    size: 16px,
+    spacing: 10px,
+  ),
+
+  label: (
+    font-weight: 500,
+    font-size: 11px,
+    letter-spacing: 0.05px,
+  ),
+);
+
+$separator: (
+  height: 1px,
+  margin-x: 0,
+  margin-y: 6px,
+  background-color: (
+    light: color.alpha(colors.$black, 0.08),
+    dark: color.alpha(colors.$white, 0.08),
+  ),
+);
+
+$themes: (
+  default: (
+    item: (
+      default: (
+        light: colors.$transparent,
+        dark: colors.$transparent,
+      ),
+
+      hover: (
+        light: color.alpha(colors.$black, 0.08),
+        dark: color.alpha(colors.$white, 0.08),
+      ),
+    ),
+
+    label: (
+      default: (
+        light: color.alpha(colors.$black, 0.8),
+        dark: color.alpha(colors.$white, 0.8),
+      ),
+
+      hover: (
+        light: colors.$black,
+        dark: colors.$white,
+      ),
+    ),
+
+    icon: (
+      default: (
+        light: color.alpha(colors.$black, 0.88),
+        dark: color.alpha(colors.$white, 0.88),
+      ),
+
+      hover: (
+        light: color.alpha(colors.$black, 0.96),
+        dark: color.alpha(colors.$white, 0.96),
+      ),
+    ),
+  ),
+
+  info: (
+    item: (
+      default: (
+        light: colors.$transparent,
+        dark: colors.$transparent,
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.08),
+        dark: color.alpha(colors.$blue, 0.08),
+      ),
+    ),
+
+    label: (
+      default: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.8),
+        dark: color.alpha(colors.$blue, 0.8),
+      ),
+
+      hover: (
+        light: color.shade(colors.$blue, 16%),
+        dark: colors.$blue,
+      ),
+    ),
+
+    icon: (
+      default: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.88),
+        dark: color.alpha(colors.$blue, 0.88),
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.96),
+        dark: color.alpha(colors.$blue, 0.96),
+      ),
+    ),
+  ),
+
+  success: (
+    item: (
+      default: (
+        light: colors.$transparent,
+        dark: colors.$transparent,
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$green, 16%), 0.08),
+        dark: color.alpha(colors.$green, 0.08),
+      ),
+    ),
+
+    label: (
+      default: (
+        light: color.alpha(color.shade(colors.$green, 16%), 0.8),
+        dark: color.alpha(colors.$green, 0.8),
+      ),
+
+      hover: (
+        light: color.shade(colors.$green, 16%),
+        dark: colors.$green,
+      ),
+    ),
+
+    icon: (
+      default: (
+        light: color.alpha(color.shade(colors.$green, 16%), 0.88),
+        dark: color.alpha(colors.$green, 0.88),
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$green, 16%), 0.96),
+        dark: color.alpha(colors.$green, 0.96),
+      ),
+    ),
+  ),
+
+  warning: (
+    item: (
+      default: (
+        light: colors.$transparent,
+        dark: colors.$transparent,
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$orange, 16%), 0.08),
+        dark: color.alpha(colors.$orange, 0.08),
+      ),
+    ),
+
+    label: (
+      default: (
+        light: color.alpha(color.shade(colors.$orange, 16%), 0.8),
+        dark: color.alpha(colors.$orange, 0.8),
+      ),
+
+      hover: (
+        light: color.shade(colors.$orange, 16%),
+        dark: colors.$orange,
+      ),
+    ),
+
+    icon: (
+      default: (
+        light: color.alpha(color.shade(colors.$orange, 16%), 0.88),
+        dark: color.alpha(colors.$orange, 0.88),
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$orange, 16%), 0.96),
+        dark: color.alpha(colors.$orange, 0.96),
+      ),
+    ),
+  ),
+
+  error: (
+    item: (
+      default: (
+        light: colors.$transparent,
+        dark: colors.$transparent,
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$red, 16%), 0.08),
+        dark: color.alpha(colors.$red, 0.08),
+      ),
+    ),
+
+    label: (
+      default: (
+        light: color.alpha(color.shade(colors.$red, 16%), 0.8),
+        dark: color.alpha(colors.$red, 0.8),
+      ),
+
+      hover: (
+        light: color.shade(colors.$red, 16%),
+        dark: colors.$red,
+      ),
+    ),
+
+    icon: (
+      default: (
+        light: color.alpha(color.shade(colors.$red, 16%), 0.88),
+        dark: color.alpha(colors.$red, 0.88),
+      ),
+
+      hover: (
+        light: color.alpha(color.shade(colors.$red, 16%), 0.96),
+        dark: color.alpha(colors.$red, 0.96),
+      ),
+    ),
+  ),
+);
+
+@mixin apply-theme {
+  @each $theme, $props in $themes {
+    $item: map.get($props, item);
+    $label: map.get($props, label);
+    $icon: map.get($props, icon);
+
+    &.theme-#{$theme} {
+      // item content
+      & > div:first-of-type {
+        .light & {
+          color: map.get($label, default, light);
+          background-color: map.get($item, default, light);
+        }
+
+        .dark & {
+          color: map.get($label, default, dark);
+          background-color: map.get($item, default, dark);
+        }
+      }
+
+      // hovered/focused item content
+      &:not(.disabled) {
+        &:hover > div:first-of-type, &:focus > div:first-of-type {
+          .light & {
+            color: map.get($label, hover, light);
+            background-color: map.get($item, hover, light);
+          }
+
+          .dark & {
+            color: map.get($label, hover, dark);
+            background-color: map.get($item, hover, dark);
+          }
+        }
+      }
+    }
+  }
+}
+
+.container {
+  @include position.fixed;
+  min-width: map.get($container, min-width);
+  @include spacing.padding($x: map.get($container, padding-x), $y: map.get($container, padding-y));
+  @include font.apply(fonts.$primary);
+  border-radius: map.get($container, border-radius);
+  opacity: 0;
+  @include transition.apply(background-color, box-shadow);
+  z-index: map.get($container, z-index);
+  user-select: none;
+
+  &.light {
+    background-color: map.get($container, background-color, light);
+    box-shadow: map.get($container, box-shadow, light);
+  }
+
+  &.dark {
+    background-color: map.get($container, background-color, dark);
+    box-shadow: map.get($container, box-shadow, dark);
+  }
+}
+
+.submenu {
+  position: relative;
+  @include flex.row-between;
+  outline: none;
+  @include transition.apply(opacity);
+
+  &.disabled {
+    opacity: map.get($item, disabled-opacity);
+    pointer-events: none;
+  }
+
+  // label div (similar to .item > div:first-of-type)
+  & > div:first-of-type {
+    position: relative;
+    @include flex.row-start;
+    width: 100%;
+    @include spacing.padding($x: map.get($item, padding-x), $y: map.get($item, padding-y));
+    outline: none;
+    white-space: nowrap;
+    @include transition.apply(color, background-color);
+
+    // container for the sub-menu item's label and icon
+    .labelContainer {
+      @include flex.row-start;
+    }
+
+    // arrow span
+    & > span:last-of-type {
+      @include spacing.margin($left: map.get($submenu, arrow, spacing));
+      width: map.get($submenu, arrow, size);
+      height: map.get($submenu, arrow, size);
+      font-size: map.get($submenu, arrow, size);
+      @include transition.apply(color);
+
+      .light & {
+        color: map.get($submenu, arrow, color, light);
+      }
+
+      .dark & {
+        color: map.get($submenu, arrow, color, dark);
+      }
+    }
+  }
+
+  // .react-contexify__submenu (should mimic .container styling)
+  & > div:nth-of-type(2) {
+    @include position.absolute($top: -(map.get($container, padding-y))); // negate padding
+    @include spacing.margin($x: map.get($submenu, spacing));
+    @include spacing.padding($x: map.get($container, padding-x), $y: map.get($container, padding-y));
+    border-radius: map.get($container, border-radius);
+    opacity: 0;
+    @include transition.apply(background-color, box-shadow, (opacity, 150ms));
+    z-index: map.get($container, z-index);
+    pointer-events: none; // will be enabled via :hover or .react-contexify__submenu--is-open
+
+    .light & {
+      background-color: map.get($container, background-color, light);
+      box-shadow: map.get($container, box-shadow, light);
+    }
+
+    .dark & {
+      background-color: map.get($container, background-color, dark);
+      box-shadow: map.get($container, box-shadow, dark);
+    }
+  }
+
+  // :focus is here so that you don't need to hit the right arrow key to show the sub-menu
+  &:hover > div:nth-of-type(2), &:focus > div:nth-of-type(2) {
+    pointer-events: initial;
+    opacity: 1;
+  }
+
+  @include apply-theme;
+}
+
+.item {
+  position: relative;
+  @include flex.row-start;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  @include transition.apply(opacity);
+
+  &.disabled {
+    opacity: map.get($item, disabled-opacity);
+    pointer-events: none;
+  }
+
+  &:not(.disabled) {
+    @include aria.outline(
+      $offset: map.get($item, outline-offset),
+      $radius: map.get($item, outline-radius),
+    );
+
+    &:active::after {
+      @include aria.outline-show;
+    }
+  }
+
+  // item content
+  & > div:first-of-type {
+    position: relative;
+    @include flex.row-start;
+    width: 100%;
+    min-height: map.get($item, min-height);
+    @include spacing.padding($x: map.get($item, padding-x), $y: map.get($item, padding-y));
+    white-space: nowrap;
+    @include transition.apply(color, background-color);
+  }
+
+  @include apply-theme;
+}
+
+.icon {
+  @include flex.row-center;
+  @include spacing.margin($right: map.get($item, icon, spacing));
+  width: map.get($item, icon, container-size);
+  height: map.get($item, icon, container-size);
+  font-size: map.get($item, icon, size);
+  pointer-events: none;
+
+  svg {
+    height: map.get($item, icon, size);
+  }
+}
+
+.label {
+  font-weight: map.get($item, label, font-weight);
+  font-size: map.get($item, label, font-size);
+  letter-spacing: map.get($item, label, letter-spacing);
+  word-spacing: normal;
+  pointer-events: none;
+}
+
+.separator {
+  width: 100%;
+  height: map.get($separator, height);
+  @include spacing.margin($x: map.get($separator, margin-x), $y: map.get($separator, margin-y));
+  pointer-events: none;
+  @include transition.apply(background-color);
+
+  .light & {
+    background-color: map.get($separator, background-color, light);
+  }
+
+  .dark & {
+    background-color: map.get($separator, background-color, dark);
+  }
+}
+
+// the .container declaration is required
+// (you can't just have a top-level :global() since it's not "pure"; needs to contain a local class or ID)
+.container {
+  &:global(.react-contexify__will-leave--disabled) {
+    pointer-events: none;
+  }
+
+  // shows .react-contexify__submenu when using keyboard navigation
+  // (note that the .submenu class is a CSS module!)
+  .submenu:global(.react-contexify__submenu--is-open) > div:nth-of-type(2) {
+    opacity: 1;
+    pointer-events: initial;
+  }
+}
+
+// contexify animations
+.container {
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale3d(0.3, 0.3, 0.3);
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  &:global(.contexify_willEnter-scale) {
+    transform-origin: top left;
+    animation: scale-in 256ms ease;
+  }
+
+  @keyframes scale-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+      transform: scale3d(0.3, 0.3, 0.3);
+    }
+  }
+
+  // without `forwards`, the menu will flash w/ full opacity right at the end
+  &:global(.contexify_willLeave-scale) {
+    transform-origin: top left;
+    animation: scale-out 128ms ease forwards;
+  }
+}

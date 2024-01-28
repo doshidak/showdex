@@ -1,0 +1,103 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  align-self: center;
+}
+
+.picon {
+  @include transition.apply(opacity, filter);
+
+  &.none {
+    transform: translateY(-4px);
+  }
+
+  .fainted & {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+}
+
+.glanceTooltip {
+  max-width: 256px;
+}
+
+.piconBackground {
+  @include position.absolute-center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid colors.$transparent;
+  border-radius: 100px;
+  @include transition.apply(background-color, border-color);
+  pointer-events: none;
+
+  .container:not(.selected):hover & {
+    &.light {
+      border-color: color.alpha(colors.$black, 0.16);
+    }
+
+    &.dark {
+      border-color: color.alpha(colors.$white, 0.16);
+    }
+  }
+
+  .active & {
+    &.light {
+      background-color: color.alpha(color.shade(colors.$blue, 16%), 0.24);
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$blue, 0.24);
+    }
+  }
+
+  .selected & {
+    &.light {
+      border-color: color.alpha(colors.$black, 0.32);
+    }
+
+    &.dark {
+      border-color: color.alpha(colors.$white, 0.32);
+    }
+  }
+
+  .selected:hover & {
+    &.light, &.dark {
+      border-color: color.alpha(colors.$blue, 0.8);
+    }
+  }
+}
+
+.piconAdd {
+  @include position.absolute-center;
+  @include flex.row-center;
+  width: 36px;
+  height: 36px;
+  border-radius: 100px;
+  opacity: 0;
+  @include transition.apply(color, background-color, opacity);
+  pointer-events: none;
+
+  .container:hover & {
+    opacity: 1;
+  }
+
+  .light & {
+    color: color.alpha(colors.$black, 0.16);
+    background-color: color.alpha(color.shade(colors.$blue, 16%), 0.08);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.16);
+    background-color: color.alpha(colors.$blue, 0.08);
+  }
+
+  i {
+    font-size: 16px;
+    line-height: 17px;
+  }
+}

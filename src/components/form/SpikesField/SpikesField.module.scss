@@ -1,0 +1,92 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$tooltip: (
+  padding: 8px,
+
+  label: (
+    spacing: 4px,
+    font-weight: 600,
+    font-size: 8px,
+    line-height: 9px,
+
+    color: (
+      default: (
+        light: color.alpha(colors.$black, 0.64),
+        dark: color.alpha(colors.$white, 0.64),
+      ),
+
+      highlight: (
+        light: color.alpha(color.shade(colors.$blue, 16%), 0.64),
+        dark: color.alpha(colors.$blue, 0.64),
+      ),
+    ),
+  ),
+
+  option: (
+    size: 28px,
+    spacing: 2px,
+    font-size: 8px,
+  ),
+);
+
+button.container {
+  &.readOnly {
+    pointer-events: none;
+  }
+}
+
+.optionsTooltip {
+  @include spacing.padding($all: map.get($tooltip, padding));
+  user-select: none;
+}
+
+.header {
+  @include flex.row-center;
+  @include spacing.margin($bottom: map.get($tooltip, label, spacing));
+}
+
+.label {
+  @include font.apply(fonts.$primary, ( font-weight: map.get($tooltip, label, font-weight) ));
+  font-size: map.get($tooltip, label, font-size);
+  line-height: map.get($tooltip, label, line-height);
+  @include transition.apply(color);
+
+  .light & {
+    color: map.get($tooltip, label, color, default, light);
+  }
+
+  .dark & {
+    color: map.get($tooltip, label, color, default, dark);
+  }
+
+  &.highlight {
+    .light & {
+      color: map.get($tooltip, label, color, highlight, light);
+    }
+
+    .dark & {
+      color: map.get($tooltip, label, color, highlight, dark);
+    }
+  }
+}
+
+.options {
+  @include flex.row-center;
+}
+
+button.optionButton {
+  width: map.get($tooltip, option, size);
+  font-size: map.get($tooltip, option, font-size);
+
+  &:not(:last-child) {
+    @include spacing.margin($right: map.get($tooltip, option, spacing));
+  }
+}

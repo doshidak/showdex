@@ -1,8 +1,9 @@
 import { HttpMethod } from '@showdex/consts/core';
+import { type RuntimeFetchMessageResponse } from '@showdex/utils/core';
 
 // note: this is only used on Chrome -- Firefox should not include this with the bundle
 
-interface BackgroundFetchMessage extends Record<string, unknown> {
+export interface BackgroundFetchMessage extends Record<string, unknown> {
   type?: string;
   url?: string;
   options?: Partial<RequestInit>;
@@ -10,7 +11,7 @@ interface BackgroundFetchMessage extends Record<string, unknown> {
 
 const handleFetchMessage = (
   message: BackgroundFetchMessage,
-  send: (payload?: unknown) => void,
+  send: (payload?: RuntimeFetchMessageResponse | Error) => void,
 ): boolean => {
   switch (message?.type) {
     case 'fetch': {
@@ -33,13 +34,24 @@ const handleFetchMessage = (
 
           // console.log('response.json()', json);
 
+          const headers: Record<string, string> = {};
+
+          for (const [headerName, headerValue] of response.headers) {
+            if (!headerName || !headerValue) {
+              continue;
+            }
+
+            headers[headerName.toLowerCase()] = headerValue;
+          }
+
           send({
             ok: response.ok,
             status: response.status,
+            headers,
             value,
           });
         } catch (error) {
-          send(error);
+          send(error as Error);
         }
       })();
 

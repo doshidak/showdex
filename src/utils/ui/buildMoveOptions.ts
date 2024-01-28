@@ -1,7 +1,7 @@
 import { type MoveName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
-import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
@@ -14,11 +14,10 @@ import {
 } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
+  type CalcdexPokemonUsageAltSorter,
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  usageAltPercentFinder,
-  usageAltPercentSorter,
 } from '@showdex/utils/presets';
 
 export type CalcdexPokemonMoveOption = DropdownOption<MoveName>;
@@ -32,7 +31,9 @@ export const buildMoveOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   config?: {
-    usage?: CalcdexPokemonPreset;
+    usageAlts?: CalcdexPokemonAlt<MoveName>[];
+    usageFinder?: (value: MoveName) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<MoveName>;
     field?: CalcdexBattleField;
     include?: 'all' | 'hidden-power';
     translate?: (value: MoveName) => string;
@@ -46,12 +47,17 @@ export const buildMoveOptions = (
   }
 
   const {
-    usage,
+    usageAlts,
+    usageFinder: findUsagePercent,
+    usageSorter,
     field,
     include,
-    translate,
-    translateHeader,
+    translate: translateFromConfig,
+    translateHeader: translateHeaderFromConfig,
   } = config || {};
+
+  const translate = (v: MoveName) => translateFromConfig?.(v) || v;
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format);
@@ -78,31 +84,15 @@ export const buildMoveOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];
 
-  // prioritize using usage stats from the current set first,
-  // then fallback to using the stats from the supplied `usage` set, if any
-  const usageAltSource = detectUsageAlt(altMoves?.[0])
-    ? altMoves
-    : detectUsageAlt(usage?.altMoves?.[0])
-      ? usage.altMoves
-      : null;
-
-  // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
-
   // since we pass useZ into createSmogonMove(), we need to keep the original move name as the value
   // (but we'll show the corresponding Z move to the user, if any)
   // (also, non-Z moves may appear under the Z-PWR group in the dropdown, but oh well)
   if (useZ && !useMax && moves?.length) {
     const zTuple = moves
-      // .filter((n) => !!n && (getZMove(n, item) || n) !== n)
       .map((n) => [
         n,
         (!!n && getZMove(n, {
-          moveType: getDynamicMoveType(pokemon, n, {
-            format,
-            field,
-          }),
+          moveType: getDynamicMoveType(pokemon, n, { format, field }),
           item,
         })) || n,
       ])
@@ -110,16 +100,18 @@ export const buildMoveOptions = (
       .sort(([a], [b]) => usageSorter(a, b));
 
     options.push({
-      label: translateHeader?.('Z Moves') || 'Z',
-      options: zTuple.map(([name, zMove]) => ({
-        label: translate?.(zMove) || zMove,
-        rightLabel: findUsagePercent(name),
-        subLabel: zMove === name ? null : `${uarr} ${translate?.(name) || name}`,
-        value: name,
-      })),
-    });
+      label: translateHeader('Z Moves', 'Z'),
+      options: zTuple.map(([name, zMove]) => {
+        filterMoves.push(name); // `name`, NOT `zMove` !!
 
-    filterMoves.push(...zTuple.map(([n]) => n));
+        return {
+          label: translate(zMove),
+          rightLabel: findUsagePercent(name),
+          subLabel: zMove === name ? null : `${uarr} ${translate(name)}`,
+          value: name,
+        };
+      }),
+    });
   }
 
   // unlike Z moves, every move becomes a Max move, hence no initial filtering
@@ -127,27 +119,24 @@ export const buildMoveOptions = (
     const sortedMoves = [...moves].sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Max Moves') || 'Max',
+      label: translateHeader('Max Moves', 'Max'),
       options: sortedMoves.map((name) => {
         const maxMove = getMaxMove(name, {
-          moveType: getDynamicMoveType(pokemon, name, {
-            format,
-            field,
-          }),
+          moveType: getDynamicMoveType(pokemon, name, { format, field }),
           speciesForme,
           ability,
         }) || name;
 
+        filterMoves.push(name);
+
         return {
-          label: translate?.(maxMove) || maxMove,
+          label: translate(maxMove),
           rightLabel: findUsagePercent(name),
-          subLabel: maxMove === name ? null : `${uarr} ${translate?.(name) || name}`,
+          subLabel: maxMove === name ? null : `${uarr} ${translate(name)}`,
           value: name,
         };
       }),
     });
-
-    filterMoves.push(...sortedMoves);
   }
 
   if (source === 'server' && serverMoves?.length) {
@@ -157,15 +146,17 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.(groupLabel) || groupLabel,
-      options: filteredServerMoves.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader(groupLabel),
+      options: filteredServerMoves.map((name) => {
+        filterMoves.push(name);
 
-    filterMoves.push(...filteredServerMoves);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   if (transformedForme && transformedMoves?.length) {
@@ -174,15 +165,17 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.unshift({
-      label: translateHeader?.('Transformed') || 'Transformed',
-      options: filteredTransformedMoves.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Transformed'),
+      options: filteredTransformedMoves.map((name) => {
+        filterMoves.push(name);
 
-    filterMoves.push(...filteredTransformedMoves);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   if (revealedMoves?.length) {
@@ -191,18 +184,18 @@ export const buildMoveOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Revealed Moves') || 'Revealed',
-      options: filteredRevealedMoves.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
+      label: translateHeader('Revealed Moves', 'Revealed'),
+      options: filteredRevealedMoves.map((name) => {
+        filterMoves.push(name);
+
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
     });
-
-    filterMoves.push(...filteredRevealedMoves);
   }
-
-  const hasUsageStats = !!usageAltSource?.length;
 
   if (altMoves?.length) {
     const unsortedPoolMoves = altMoves
@@ -211,36 +204,42 @@ export const buildMoveOptions = (
     const poolMoves = flattenAlts(unsortedPoolMoves).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Pool') || 'Pool',
-      options: poolMoves.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: findUsagePercent(alt),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Pool'),
+      options: poolMoves.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterMoves.push(...poolMoves);
+        filterMoves.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: findUsagePercent(alt),
+          value: flat,
+        };
+      }),
+    });
   }
 
-  const remainingUsageMoves = hasUsageStats
-    ? usageAltSource.filter((a) => (
-      !!a
-        && !!(detectUsageAlt(a) || findUsagePercent(a))
-        && !filterMoves.includes(flattenAlt(a))
-    ))
-    : null;
+  const remainingUsageMoves = usageAlts?.filter((a) => (
+    !!a
+      && !!(detectUsageAlt(a) || findUsagePercent(a))
+      && !filterMoves.includes(flattenAlt(a))
+  ));
 
   if (remainingUsageMoves?.length) {
     options.push({
-      label: translateHeader?.('Usage') || 'Usage',
-      options: remainingUsageMoves.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Usage'),
+      options: remainingUsageMoves.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterMoves.push(...flattenAlts(remainingUsageMoves));
+        filterMoves.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
+          value: flat,
+        };
+      }),
+    });
   }
 
   const learnset = getPokemonLearnset(format, speciesForme, showAllMoves);
@@ -250,20 +249,22 @@ export const buildMoveOptions = (
   }
 
   if (learnset.length) {
-    const learnsetMoves = Array.from(new Set(learnset))
+    const learnsetMoves = learnset
       .filter((n) => !!n && !formatId(n).startsWith('hiddenpower') && !filterMoves.includes(n))
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Learnset') || 'Learnset',
-      options: learnsetMoves.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Learnset'),
+      options: learnsetMoves.map((name) => {
+        filterMoves.push(name);
 
-    filterMoves.push(...learnsetMoves);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   // Hidden Power moves were introduced in gen 2
@@ -285,15 +286,17 @@ export const buildMoveOptions = (
     const hpMoves = Array.from(new Set(unsortedHpMoves)).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Hidden Power') || 'Hidden Power',
-      options: hpMoves.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Hidden Power'),
+      options: hpMoves.map((name) => {
+        filterMoves.push(name);
 
-    filterMoves.push(...hpMoves);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   // show all possible moves if the format is not legal-locked or no learnset is available
@@ -310,9 +313,9 @@ export const buildMoveOptions = (
 
     // make sure this comes before the Hidden Power moves
     options.splice(insertionIndex, 0, {
-      label: translateHeader?.('All') || 'All',
+      label: translateHeader('All'),
       options: otherMoves.map((name) => ({
-        label: translate?.(name) || name,
+        label: translate(name),
         rightLabel: findUsagePercent(name),
         value: name,
       })),

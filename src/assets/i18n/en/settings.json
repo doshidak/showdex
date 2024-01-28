@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-13T00:12:24.261Z"
+    "updated": "2024-01-28T05:16:41.939Z"
   },
 
   "pane": {
@@ -37,6 +37,11 @@
 
     "sections": {
       "primary": {
+        "general": "General",
+        "presets": "Sets",
+        "autoFeatures": "Auto Features",
+        "metagame": "OM & LC Support",
+        "visibility": "Show / Hide",
         "showdex": "$t(common:products.showdex)",
         "hellodex": "$t(common:products.hellodex_one)",
         "calcdex": "$t(common:products.calcdex_one)",
@@ -52,7 +57,8 @@
         "matchup_other": "Matchups",
         "panel": "Panel Tab",
         "presets": "Sets",
-        "special": "Special"
+        "special": "Special",
+        "tooltips": "Tooltips"
       }
     },
 
@@ -209,7 +215,7 @@
     },
 
     "destroyOnClose": {
-      "label": "Close Memory After Tab Closes",
+      "label": "Clear Memory After Tab Closes",
       "tooltip": "Clears memory used by the $t(common:products.calcdex_one) after the battle closes. Once cleared, the $t(common:products.calcdex_one) cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Enabling this may improve performance on lower-spec machines.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong> as their memory is cleared as soon as their battles close."
     },
 
@@ -361,7 +367,7 @@
     },
 
     "showPlayerRatings": {
-      "label": "Show Players' Elo Ratings",
+      "label": "Elo Ratings",
       "tooltip": "Shows each player's Elo rating, if available, by their username."
     },
 
@@ -371,7 +377,7 @@
     },
 
     "showNicknames": {
-      "label": "Show Pokémon Nicknames",
+      "label": "Pokémon Nicknames",
       "tooltip": "Shows the Pokémon's nickname, if any, instead of its forme.<br /><br />(\"but why tho?\" <ndash /><em>analogcam</em>, 2022)"
     },
 
@@ -396,7 +402,7 @@
     },
 
     "showNonDamageRanges": {
-      "label": "Show Zero Damage Ranges",
+      "label": "Zero Damage Ranges",
       "tooltip": "Shows damage ranges that are <strong>$t(common:labels.na)</strong> or <strong>IMMUNE</strong>."
     },
 
@@ -541,7 +547,7 @@
     },
 
     "showLegacyEvs": {
-      "label": "Show $t(pokedex:stats.evs_other.1) in Legacy Gens",
+      "label": "Legacy $t(pokedex:stats.evs_other.1)",
       "tooltip": "Shows $t(pokedex:stats.evs_other.1) in legacy gens, allowing you to edit them for each Pokémon.<br /><br />Some sets (most notably in Randoms) may specify 0 $t(pokedex:stats.evs_other.1) for some stats, which may be helpful to be aware of.<br /><br />Though introduced in ADV (gen 3), $t(pokedex:stats.evs_other.1) technically existed in prior legacy gens, colloquially referred to as <em>stat experience</em>. Resulting damages influenced by this legacy system &amp; modern $t(pokedex:stats.evs_other.1) are more-or-less the same, due to rounding effects in the damage formulas."
     },
 

@@ -30,17 +30,22 @@ export const usageAltPercentFinder = <
     return () => null;
   }
 
+  const altIds = usageAlts.map((a) => [formatId(a?.[0]), a?.[1]]) as typeof usageAlts;
+
   return (name) => {
     const nameId = formatId(name);
-    const [, usage] = nameId
-      ? usageAlts.find((a) => formatId(a?.[0]) === nameId) || []
-      : [];
+
+    if (!nameId) {
+      return null;
+    }
+
+    const [, usage] = altIds.find((a) => a?.[0] === nameId) || [];
 
     if (!usage) {
       return null;
     }
 
-    return String(humanize ? percentage(usage, 2) : usage);
+    return String(humanize ? percentage(usage, usage === 1 ? 0 : 2) : usage);
   };
 };
 

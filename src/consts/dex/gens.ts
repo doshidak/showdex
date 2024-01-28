@@ -28,9 +28,10 @@ export interface GenerationLabel {
    * * Abbreviations were sourced from the gen segemented control labels in the original Damage Calculator ("calc.ps").
    *
    * @example 'S/V'
+   * @deprecated As of v1.2.3, this is stored in the Pokedex i18n strings.
    * @since 1.2.0
    */
-  label: string;
+  label?: string;
 
   /**
    * Gen's optional description, typically a spelled out version of the abbreviations used in the `label`, if any.
@@ -40,6 +41,7 @@ export interface GenerationLabel {
    *   - Abbreviations for these versions were sourced from the "Ruins of Alph" sub-forum labels on Smogon Forums.
    *
    * @example 'Scarlet/Violet'
+   * @deprecated As of v1.2.3, this is stored in the Pokedex i18n strings.
    * @since 1.2.0
    */
   description?: string;
@@ -63,59 +65,43 @@ export const GenLabels: GenerationLabel[] = [
     description: 'MissingNo.',
   },
   {
-    // aka. 'R/G/B[/P]' ("Red/Green/Blue[/Pikachu]" in Japan)
+    // aka. 'RBY', 'R/G/B[/P]' ("Red/Green/Blue[/Pikachu]" in Japan)
     gen: 1,
     slug: 'rb',
-    label: 'RBY',
-    description: 'Red/Blue/Yellow',
   },
   {
+    // aka. 'GSC'
     gen: 2,
     slug: 'gs',
-    label: 'GSC',
-    description: 'Gold/Silver/Crystal',
   },
   {
     // aka. 'ADV' ("Advance" for Game Boy Advance, the handheld this gen was released for)
     gen: 3,
     slug: 'rs',
-    label: 'ADV',
-    description: 'Ruby/Sapphire/Emerald (Advance) + FireRed/LeafGreen (FRLG)',
   },
   {
+    // aka. 'DPP'
     gen: 4,
     slug: 'dp',
-    label: 'DPP',
-    description: 'Diamond/Pearl/Platinum + HeartGold/SoulSilver (HGSS)',
   },
   {
     gen: 5,
     slug: 'bw',
-    label: 'B/W',
-    description: 'Black/White + Black 2/White 2 (B2W2)',
   },
   {
     gen: 6,
     slug: 'xy',
-    label: 'X/Y',
-    description: 'X/Y + Omega Ruby/Alpha Sapphire (ORAS)',
   },
   {
     gen: 7,
     slug: 'sm',
-    label: 'S/M',
-    description: 'Sun/Moon + Ultra Sun/Ultra Moon (USUM) + Let\'s Go, Pikachu!/Eevee! (LGPE)',
   },
   {
     gen: 8,
     slug: 'ss',
-    label: 'S/S',
-    description: 'Sword/Shield + Brilliant Diamond/Shining Pearl (BDSP) + Legends: Arceus (LA)',
   },
   {
     gen: 9,
     slug: 'sv',
-    label: 'S/V',
-    description: 'Scarlet/Violet',
   },
 ];

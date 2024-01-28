@@ -1,6 +1,5 @@
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
-import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
+import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { transformPkmnSmogonPreset } from './transformPkmnSmogonPreset';
@@ -40,7 +39,7 @@ export const transformFormatPresetResponse = (
     Object.entries(presets).forEach(([
       presetName,
       pkmnPreset,
-    ]) => {
+    ], formatIndex) => {
       if (!presetName || !nonEmptyObject(pkmnPreset)) {
         return;
       }
@@ -52,6 +51,7 @@ export const transformFormatPresetResponse = (
         presetName,
         pkmnPreset,
         args.source,
+        formatIndex,
       );
 
       // shouldn't be the case, but check if the preset already exists in our output

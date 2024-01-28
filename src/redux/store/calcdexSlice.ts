@@ -5,6 +5,8 @@ import {
   createSlice,
   current,
 } from '@reduxjs/toolkit';
+import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
 import { type GenerationNum } from '@smogon/calc';
 import {
   type CalcdexBattleField,
@@ -20,12 +22,12 @@ import {
   syncBattle,
   SyncBattleActionType,
 } from '@showdex/redux/actions';
-import { countActivePlayers, sanitizeField } from '@showdex/utils/battle';
-import { calcPokemonCalcdexId } from '@showdex/utils/calc';
+import { cloneBattleState, countActivePlayers, sanitizeField } from '@showdex/utils/battle';
+import { calcMaxPokemon, calcPokemonCalcdexId } from '@showdex/utils/calc';
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { detectLegacyGen, determineDefaultLevel, parseBattleFormat } from '@showdex/utils/dex';
-import { useSelector } from './hooks';
+import { useDispatch, useSelector } from './hooks';
 
 /**
  * Redux action payload for updating a single `CalcdexBattleState` based on the required `battleId`.
@@ -140,6 +142,18 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
   ) => void;
 
   /**
+   * Duplicates the corresponding `battleId` in the provided partial `CalcdexBattleState`.
+   *
+   * @since 1.2.3
+   */
+  dupe: (
+    state: Draft<CalcdexSliceState>,
+    action: PayloadAction<PickRequired<Partial<CalcdexBattleState>, 'battleId'> & {
+      newId?: string;
+    }>,
+  ) => void;
+
+  /**
    * Restores the provided `CalcdexBattleState`'s into the `CalcdexSliceState`.
    *
    * @since 1.2.0
@@ -174,6 +188,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         operatingMode,
         battleId,
         name,
+        defaultName,
         gen: genFromPayload = env.int<GenerationNum>('calcdex-default-gen'),
         format: formatFromPayload = null,
         gameType = 'Singles',
@@ -184,6 +199,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         renderMode,
         overlayVisible = false,
         containerSize = 'xs',
+        containerWidth = 320,
         playerKey = null,
         authPlayerKey = null,
         opponentKey = null,
@@ -196,7 +212,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
 
-        return;
+        return void endTimer('(no battleId)');
       }
 
       if (battleId in state) {
@@ -208,7 +224,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           );
         }
 
-        return;
+        return void endTimer('(bad battleId)');
       }
 
       const {
@@ -228,6 +244,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleId,
         gen,
         name,
+        defaultName,
         format: gen && base ? `gen${gen}${base}` : null,
         subFormats: suffixes?.map((s) => s?.[0]).filter(Boolean) || [],
         gameType,
@@ -240,6 +257,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         renderMode,
         overlayVisible: renderMode === 'overlay' && overlayVisible,
         containerSize,
+        containerWidth,
 
         playerCount: 0,
         playerKey,
@@ -298,7 +316,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       state[battleId].playerCount = countActivePlayers(state[battleId]);
 
-      endTimer();
+      endTimer('(done)');
 
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
@@ -329,8 +347,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         active,
         overlayVisible,
         containerSize,
+        containerWidth,
         playerKey,
         opponentKey,
+        field,
         cached,
       } = action.payload;
 
@@ -341,7 +361,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           '\n', 'action.payload', action.payload,
         );
 
-        return;
+        return void endTimer('(no battleId)');
       }
 
       if (!(battleId in state)) {
@@ -351,7 +371,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           '\n', 'action.payload', action.payload,
         );
 
-        return;
+        return void endTimer('(bad battleId)');
       }
 
       // note: this is a pointer/reference to the object in `state`
@@ -368,7 +388,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         battleId: battleId || currentState.battleId,
         battleNonce: battleNonce || currentState.battleNonce,
-        name: name || currentState.name,
+        name: (name || currentState.name)?.trim(),
         gen: updatedGen,
         legacy,
         format: format || currentState.format,
@@ -377,10 +397,34 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         // active: typeof active === 'boolean' ? active : currentState.active,
         overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
         containerSize: containerSize || currentState.containerSize,
+        containerWidth: containerWidth || currentState.containerWidth,
         playerKey: playerKey || currentState.playerKey,
         opponentKey: opponentKey || currentState.opponentKey,
         cached: cached || currentState.cached,
       };
+
+      AllPlayerKeys.forEach((pkey) => {
+        if (!nonEmptyObject(action.payload[pkey])) {
+          return;
+        }
+
+        state[battleId][pkey] = {
+          ...currentState[pkey],
+          ...action.payload[pkey],
+
+          side: {
+            ...currentState[pkey]?.side,
+            ...action.payload[pkey]?.side,
+          },
+        };
+      });
+
+      if (nonEmptyObject(field)) {
+        state[battleId].field = {
+          ...state[battleId].field,
+          ...field,
+        };
+      }
 
       // for the active state, only update if previously true and the new value is false
       // as we don't want the HellodexBattleRecord to record replays or battle re-inits
@@ -388,7 +432,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         state[battleId].active = active;
       }
 
-      endTimer();
+      endTimer('(done)');
 
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
@@ -416,13 +460,13 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
 
-        return;
+        return void endTimer('(no battleId)');
       }
 
       if (!(battleId in state)) {
         l.error('Could not find a CalcdexBattleState with battleId', battleId);
 
-        return;
+        return void endTimer('(bad battleId)');
       }
 
       // using battleField here as both a pointer and popular reference
@@ -436,7 +480,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...field,
       };
 
-      endTimer();
+      endTimer('(done)');
 
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
@@ -461,17 +505,19 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
 
-        return;
+        return void endTimer('(no battleId)');
       }
 
       if (!(battleId in state)) {
         l.error('Could not find a CalcdexBattleState with battleId', battleId);
 
-        return;
+        return void endTimer('(bad battleId)');
       }
 
       if (AllPlayerKeys.every((k) => !Object.keys(action.payload[k] || {}).length)) {
         l.error('Found no players to update!');
+
+        return void endTimer('(no players)');
       }
 
       AllPlayerKeys.forEach((playerKey) => {
@@ -492,7 +538,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         };
       });
 
-      endTimer();
+      endTimer('(done)');
 
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
@@ -521,13 +567,13 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       if (!battleId) {
         l.error('Attempted to initialize a CalcdexBattleState with a falsy battleId.');
 
-        return;
+        return void endTimer('(no battleId)');
       }
 
       if (!(battleId in state)) {
         l.error('Could not find a CalcdexBattleState with battleId', battleId);
 
-        return;
+        return void endTimer('(bad battleId)');
       }
 
       const battleState = state[battleId];
@@ -539,7 +585,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           '\n', 'battleState', __DEV__ && current(state)[battleId],
         );
 
-        return;
+        return void endTimer('(bad playerKey)');
       }
 
       const playerState = battleState[playerKey];
@@ -561,7 +607,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
           );
         }
 
-        return;
+        return void endTimer('(bad pokemon)');
       }
 
       playerState.pokemon[pokemonStateIndex] = {
@@ -569,7 +615,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         ...pokemon,
       } as CalcdexPokemon;
 
-      endTimer();
+      endTimer('(done)');
 
       l.debug(
         'DONE', action.type, 'from', action.payload?.scope || '(anon)',
@@ -614,6 +660,112 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
         delete state[id];
       });
+
+      l.debug(
+        'DONE', action.type,
+        '\n', 'battleId (payload)', action.payload,
+        '\n', 'state', __DEV__ && current(state),
+      );
+    },
+
+    dupe: (state, action) => {
+      const endTimer = runtimer('calcdexSlice.dupe()', l);
+
+      if (!action.payload?.battleId) {
+        return void endTimer('(no battleId)');
+      }
+
+      const {
+        battleId,
+        newId: newIdFromPayload,
+        ...additionalProperties
+      } = action.payload;
+
+      if (!state[battleId]?.battleId) {
+        return void endTimer('(bad battleId)');
+      }
+
+      // generate a new battleId
+      const newId = newIdFromPayload || uuidv4();
+
+      state[newId] = {
+        ...cloneBattleState(state[battleId]),
+        ...additionalProperties,
+        battleId: newId,
+        operatingMode: 'standalone',
+        renderMode: 'panel',
+        playerKey: state[battleId].authPlayerKey || 'p1',
+        opponentKey: 'p2',
+        turn: 0,
+        rules: {},
+        switchPlayers: false,
+        cached: null, // initially not saved until manually done so by the user
+      };
+
+      if (state[newId].playerKey === 'p2') {
+        state[newId].opponentKey = 'p1';
+      }
+
+      // perform additional processing on the players if this was originally a battle
+      if (state[battleId].operatingMode === 'battle') {
+        if (state[newId].playerCount > 2) {
+          // merge p3's Pokemon w/ p1's & p4's w/ p2's
+          AllPlayerKeys.slice(-2).forEach((sourceKey) => {
+            const destKey = sourceKey === 'p3' ? 'p1' : 'p2';
+
+            if (!state[newId][sourceKey]?.pokemon?.length) {
+              return;
+            }
+
+            state[newId][destKey].pokemon.push(...state[battleId][sourceKey].pokemon);
+
+            state[newId][sourceKey] = {
+              ...state[newId][sourceKey],
+              active: false,
+              name: null,
+              rating: -1,
+              autoSelect: false,
+              maxPokemon: 0,
+              pokemon: [],
+              pokemonOrder: [],
+              side: null,
+              activeIndices: [],
+              selectionIndex: 0,
+              usedMax: false,
+              usedTera: false,
+            };
+          });
+
+          state[newId].playerCount = 2;
+        }
+
+        AllPlayerKeys.slice(0, 2).forEach((playerKey) => {
+          state[newId][playerKey] = {
+            ...state[newId][playerKey],
+            active: true,
+            name: playerKey === 'p1' ? 'Side A' : 'Side B',
+            rating: -1,
+            autoSelect: false,
+            pokemonOrder: [],
+            usedMax: false,
+            usedTera: false,
+          };
+
+          state[newId][playerKey].maxPokemon = calcMaxPokemon(state[newId][playerKey]);
+        });
+      }
+
+      if (state[newId].field?.weather) {
+        state[newId].field.dirtyWeather = state[newId].field.weather;
+        state[newId].field.weather = null;
+      }
+
+      if (state[newId].field?.terrain) {
+        state[newId].field.dirtyTerrain = state[newId].field.terrain;
+        state[newId].field.terrain = null;
+      }
+
+      endTimer('(done)');
 
       l.debug(
         'DONE', action.type,
@@ -694,4 +846,35 @@ export const useCalcdexBattleState = (
   const battleState = useSelector((state) => state?.calcdex?.[battleId]);
 
   return battleState || ({} as CalcdexBattleState);
+};
+
+export const useCalcdexDuplicator = () => {
+  const { t } = useTranslation('honkdex');
+  const dispatch = useDispatch();
+
+  return (
+    instance: PickRequired<Partial<CalcdexBattleState>, 'battleId'> & {
+      newId?: string;
+    },
+  ) => {
+    if (!instance?.battleId) {
+      return;
+    }
+
+    dispatch(calcdexSlice.actions.dupe({
+      battleId: instance.battleId,
+      newId: instance.newId,
+      name: null,
+      defaultName: instance.operatingMode === 'battle'
+        ? [
+          instance.p1?.name,
+          !!instance.p1?.name && !!instance.p2?.name && 'vs',
+          instance.p2?.name,
+          !!instance.p3?.name && `& ${t('battle.name.friends')}`,
+        ].filter(Boolean).join(' ')
+        : instance.name
+          ? t('battle.name.dupe', { name: instance.name })
+          : null,
+    }));
+  };
 };

@@ -12,6 +12,7 @@ export interface TextFieldProps extends BaseTextFieldProps {
   inputClassName?: string;
   tooltip?: React.ReactNode;
   absoluteHover?: boolean;
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(({
@@ -22,6 +23,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(({
   absoluteHover,
   input,
   disabled,
+  onContextMenu,
   ...props
 }: TextFieldProps, forwardedRef): JSX.Element => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -66,6 +68,10 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(({
           className,
         )}
         style={style}
+        onContextMenu={onContextMenu || ((e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+        })}
       >
         <BaseTextField
           inputRef={inputRef}

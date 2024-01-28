@@ -1,15 +1,15 @@
 import { PokemonInitialStats } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 
-export type CalcdexStatModSource =
-  | 'ability'
+export type CalcdexStatModDict =
+  | 'abilities'
   | 'boost'
-  | 'item'
+  | 'items'
   | 'field'
-  | 'modifier'
-  | 'move'
-  | 'status'
-  | 'ultimate';
+  // | 'modifier' // unused
+  | 'moves'
+  | 'nonvolatiles'
+  | 'ultimates';
 
 /**
  * Details of a single stat modifier.
@@ -28,10 +28,12 @@ export interface CalcdexStatMod {
   /**
    * Source of the stat modifier.
    *
-   * @example 'item'
+   * * Primarily used as a key in the translations dictionary.
+   *
+   * @example 'items'
    * @since 1.1.0
    */
-  source?: CalcdexStatModSource;
+  dict?: CalcdexStatModDict;
 
   /**
    * Modifier value.
@@ -82,8 +84,8 @@ export interface CalcdexStatModRecorder {
   export: () => CalcdexStatModRecording;
   stats: () => Showdown.StatsTable;
   cap: (max?: number) => void;
-  apply: (stat: Showdown.StatName, modifier: number, source?: CalcdexStatModSource, label?: string) => void;
-  swap: (statA: Showdown.StatNameNoHp, statB: Showdown.StatNameNoHp, source?: CalcdexStatModSource, label?: string) => void;
+  apply: (stat: Showdown.StatName, modifier: number, dict?: CalcdexStatModDict, label?: string) => void;
+  swap: (statA: Showdown.StatNameNoHp, statB: Showdown.StatNameNoHp, dict?: CalcdexStatModDict, label?: string) => void;
 }
 
 /**
@@ -144,7 +146,7 @@ export const statModRecorder = (
   const apply: CalcdexStatModRecorder['apply'] = (
     stat,
     modifier,
-    source,
+    dict,
     label,
   ) => {
     const prev = table.stats[stat] || 0;
@@ -153,7 +155,7 @@ export const statModRecorder = (
 
     table[stat].push({
       label: label?.trim(),
-      source,
+      dict,
       modifier,
       prev,
       value,
@@ -171,7 +173,7 @@ export const statModRecorder = (
   const swap: CalcdexStatModRecorder['swap'] = (
     statA,
     statB,
-    source,
+    dict,
     label,
   ) => {
     const valueA = table.stats[statA];
@@ -179,7 +181,7 @@ export const statModRecorder = (
 
     table[statA].push({
       label,
-      source,
+      dict,
       modifier: null,
       swapped: [statA, statB],
       prev: valueA,
@@ -188,7 +190,7 @@ export const statModRecorder = (
 
     table[statB].push({
       label,
-      source,
+      dict,
       modifier: null,
       swapped: [statB, statA],
       prev: valueB,

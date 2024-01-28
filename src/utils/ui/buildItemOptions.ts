@@ -1,16 +1,15 @@
 import { type ItemName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { eacute } from '@showdex/consts/core';
-import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, guessTableFormatKey } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
+  type CalcdexPokemonUsageAltSorter,
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  usageAltPercentFinder,
-  usageAltPercentSorter,
 } from '@showdex/utils/presets';
 
 export type CalcdexPokemonItemOption = DropdownOption<ItemName>;
@@ -71,7 +70,9 @@ export const buildItemOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   config?: {
-    usage?: CalcdexPokemonPreset;
+    usageAlts?: CalcdexPokemonAlt<ItemName>[];
+    usageFinder?: (value: ItemName) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<ItemName>;
     translate?: (value: ItemName) => string;
     translateHeader?: (value: string) => string;
   },
@@ -86,25 +87,18 @@ export const buildItemOptions = (
   const { altItems } = pokemon;
 
   const {
-    usage,
-    translate,
-    translateHeader,
+    usageAlts,
+    usageFinder: findUsagePercent,
+    usageSorter,
+    translate: translateFromConfig,
+    translateHeader: translateHeaderFromConfig,
   } = config || {};
+
+  const translate = (v: ItemName) => translateFromConfig?.(v) || v;
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterItems: ItemName[] = [];
-
-  // prioritize using usage stats from the current set first,
-  // then fallback to using the stats from the supplied `usage` set, if any
-  const usageAltSource = detectUsageAlt(altItems?.[0])
-    ? altItems
-    : detectUsageAlt(usage?.altItems?.[0])
-      ? usage.altItems
-      : null;
-
-  // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
 
   if (altItems?.length) {
     const hasUsageStats = altItems
@@ -115,33 +109,41 @@ export const buildItemOptions = (
       : flattenAlts(altItems).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Pool') || 'Pool',
-      options: poolItems.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Pool'),
+      options: poolItems.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterItems.push(...flattenAlts(poolItems));
+        filterItems.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
+          value: flat,
+        };
+      }),
+    });
   }
 
-  if (detectUsageAlt(usageAltSource?.[0])) {
-    const usageItems = (usageAltSource as CalcdexPokemonUsageAlt<ItemName>[])
-      .filter((n) => !!n?.[0] && !filterItems.includes(n[0]));
+  const usageItems = usageAlts?.filter((a) => (
+    detectUsageAlt(a)
+      && !filterItems.includes(a[0])
+  )) as CalcdexPokemonUsageAlt<ItemName>[];
 
-    if (usageItems.length) {
-      options.push({
-        label: translateHeader?.('Usage') || 'Usage',
-        options: usageItems.map((alt) => ({
-          label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-          rightLabel: percentage(alt[1], 2),
-          value: flattenAlt(alt),
-        })),
-      });
+  if (usageItems?.length) {
+    options.push({
+      label: translateHeader('Usage'),
+      options: usageItems.map((alt) => {
+        const flat = flattenAlt(alt);
 
-      filterItems.push(...flattenAlts(usageItems));
-    }
+        filterItems.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
+          value: flat,
+        };
+      }),
+    });
   }
 
   const formatKey = guessTableFormatKey(format);
@@ -164,15 +166,17 @@ export const buildItemOptions = (
 
     if (popularItems.length) {
       options.push({
-        label: translateHeader?.('Popular Items') || 'Popular',
-        options: popularItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Popular Items', 'Popular'),
+        options: popularItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...popularItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -185,15 +189,17 @@ export const buildItemOptions = (
 
     if (itemsItems.length) {
       options.push({
-        label: translateHeader?.('Items') || 'Items',
-        options: itemsItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Items'),
+        options: itemsItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...itemsItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -206,15 +212,17 @@ export const buildItemOptions = (
 
     if (specificItems.length) {
       options.push({
-        label: translateHeader?.(`Pok${eacute}mon-Specific Items`) || `Pok${eacute}mon-Specific`,
-        options: specificItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader(`Pok${eacute}mon-Specific Items`, `Pok${eacute}mon-Specific`),
+        options: specificItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...specificItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -227,15 +235,17 @@ export const buildItemOptions = (
 
     if (usuallyUselessItems.length) {
       options.push({
-        label: translateHeader?.('Usually Useless Items') || 'Usually Useless',
-        options: usuallyUselessItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Usually Useless Items', 'Usually Useless'),
+        options: usuallyUselessItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...usuallyUselessItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -248,15 +258,17 @@ export const buildItemOptions = (
 
     if (uselessItems.length) {
       options.push({
-        label: translateHeader?.('Useless Items') || 'Useless',
-        options: uselessItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
-      });
+        label: translateHeader('Useless Items', 'Useless'),
+        options: uselessItems.map((name) => {
+          filterItems.push(name);
 
-      filterItems.push(...uselessItems);
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
+      });
     }
   }
 
@@ -268,16 +280,18 @@ export const buildItemOptions = (
 
     if (allItems.length) {
       options.push({
-        label: translateHeader?.('Other') || 'Other',
-        options: allItems.map((name) => ({
-          label: translate?.(name) || name,
-          rightLabel: findUsagePercent(name),
-          value: name,
-        })),
+        label: translateHeader('Other'),
+        options: allItems.map((name) => {
+          filterItems.push(name);
+
+          return {
+            label: translate(name),
+            rightLabel: findUsagePercent(name),
+            value: name,
+          };
+        }),
       });
     }
-
-    // return options;
   }
 
   const otherItems = Object.values(BattleItems || {})
@@ -287,9 +301,9 @@ export const buildItemOptions = (
 
   if (otherItems.length) {
     options.push({
-      label: translateHeader?.('All') || 'All',
+      label: translateHeader('All'),
       options: otherItems.map((name) => ({
-        label: translate?.(name) || name,
+        label: translate(name),
         rightLabel: findUsagePercent(name),
         value: name,
       })),

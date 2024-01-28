@@ -1,10 +1,18 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-01-10T12:25:03.392Z"
+    "updated": "2024-01-28T10:19:16.522Z"
+  },
+
+  "contextMenu": {
+    "switchSides": "Switch Players",
+    "convertHonk": "Convert to Honk",
+    "openHellodex": "$t(common:products.hellodex_one)",
+    "closeOverlay": "$t(common:labels.close)",
+    "closeTab": "Close Tab"
   },
 
   "overlay": {
@@ -31,7 +39,14 @@
     },
 
     "party": {
-      "aria": "Select {{pokemon}}"
+      "aria": "Select {{pokemon}}",
+      "contextMenu": {
+        "activatePokemon": "$t(common:labels.active)",
+        "addPokemon": "$t(common:labels.new)",
+        "dupePokemon": "$t(common:labels.duplicate)",
+        "movePokemon": "Move to {{side}}",
+        "removePokemon": "$t(common:labels.delete)"
+      }
     }
   },
 
@@ -61,6 +76,8 @@
 
       "status": {
         "aria": "$t(pokedex:stats.hp.1) & Non-Volatile Status Condition for {{pokemon}}",
+        "resetHpLabel": "$t(common:labels.reset)",
+        "resetStatusLabel": "$t(common:labels.reset)",
         "unknown": "$t(pokedex:types.unknown.3)",
         "ok": "$t(pokedex:nonvolatiles.ok.2)",
         "fnt": "$t(pokedex:nonvolatiles.fnt.2)",
@@ -100,7 +117,7 @@
         "resetLabel": "$t(common:labels.reset)",
         "activeTooltip": "Deactivate <strong>{{ability}}</strong>",
         "inactiveTooltip": "Activate <strong>{{ability}}</strong>",
-        "resetTooltip": "Reset to Revealed {{ability}}",
+        "resetTooltip": "Reset to Revealed <strong>{{ability}}</strong>",
         "boostedStatLabel": "Boosted $t(pokedex:headers.stat_one)",
         "autoBoostedStat": "$t(common:labels.auto)",
         "autoBoostedStatLabel": "Auto-Boost Enabled"
@@ -128,7 +145,7 @@
         "empty": "$t(pokedex:items.noitem_other)",
         "defaultPrevEffect": "$t(common:labels.previous)",
         "resetLabel": "$t(common:labels.reset)",
-        "resetTooltip": "Reset to {{effect}} {{item}}"
+        "resetTooltip": "Reset to {{effect}} <strong>{{item}}</strong>"
       }
     },
 
@@ -263,15 +280,26 @@
     "screens": "Screens",
 
     "conditions": {
-      "light": "Light",
+      "lightscreen": "Light",
       "reflect": "Reflect",
-      "aurora": "Aurora",
-      "hand": "Hand",
-      "gift": "Gift",
-      "guard": "Guard",
+      "auroraveil": "Aurora",
+      "helpinghand": "Hand",
+      "flowergift": "Gift",
+      "friendguard": "Guard",
       "battery": "Battery",
-      "power": "Power",
-      "twind": "Twind"
+      "powerspot": "Power",
+      "tailwind": "Twind",
+      "leechseed": "Seed",
+      "gravity": "Gravity",
+      "stealthrock": "Rocks",
+      "spikes": "Spikes"
+    },
+
+    "spikes": {
+      "aria_one": "Apply {{count}} Layer of Spikes",
+      "aria_other": "Apply {{count}} Layers of Spikes",
+      "label_one": "{{count}}<times />Spike",
+      "label_other": "{{count}}<times />Spike"
     },
 
     "weather": {
@@ -279,7 +307,9 @@
       "label": "$t(pokedex:headers.weather)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
-      "empty": "No Weather"
+      "empty": "No Weather",
+      "resetLabel": "$t(common:labels.reset)",
+      "resetTooltip": "Reset to <strong>{{weather}}</strong>"
     },
 
     "terrain": {
@@ -287,7 +317,9 @@
       "label": "$t(pokedex:headers.terrain)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
-      "empty": "No Terrain"
+      "empty": "No Terrain",
+      "resetLabel": "$t(common:labels.reset)",
+      "resetTooltip": "Reset to <strong>{{terrain}}</strong>"
     }
   }
 }

@@ -27,6 +27,7 @@ import {
 } from '@showdex/utils/battle';
 import { calcBattleCalcdexNonce } from '@showdex/utils/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { detectGenFromFormat } from '@showdex/utils/dex';
 import { getAuthUsername, getBattleRoom, hasSinglePanel } from '@showdex/utils/host';
 import { CalcdexRenderer } from './Calcdex.renderer';
 import styles from './Calcdex.module.scss';
@@ -269,7 +270,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
     // create the calcdexRoom if it doesn't already exist (shouldn't tho)
     // update (2023/04/22): createCalcdexRoom() will also create a ReactDOM.Root under reactRoot
     if (!battle.calcdexRoom) {
-      battle.calcdexRoom = createCalcdexRoom(roomid, true, store);
+      battle.calcdexRoom = createCalcdexRoom(roomid, store, true);
     }
 
     // handle destroying the Calcdex when leaving the battleRoom
@@ -707,8 +708,9 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
 
       // note (2023/07/30): leave the `ident` check as is here since viewing a replay wouldn't trigger this function
       // (there are no myPokemon when viewing a replay, even if you were viewing your own battle!)
-      const prevMyPokemon = myPokemon.find((p) => p.ident === pokemon.ident && (
-        p.speciesForme === pokemon.speciesForme
+      const prevMyPokemon = myPokemon.find((p) => !!p?.ident && (
+        p.ident === pokemon.ident
+          || p.speciesForme === pokemon.speciesForme
           || p.details === pokemon.details
           // update (2023/07/27): this check breaks when p.details is 'Mewtwo' & pokemon.speciesForme is 'Mew',
           // resulting in the Mewtwo's calcdexId being assigned to the Mew o_O
@@ -721,7 +723,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
           ].filter(Boolean).join(', ')
           */
           || similarPokemon(pokemon, p, {
-            format: battleRoom.battle.id.split('-')[1],
+            format: battleRoom.battle.id.split('-').find((part) => detectGenFromFormat(part)),
             normalizeFormes: 'wildcard',
             ignoreMega: true,
           })
@@ -855,7 +857,8 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
         battleId: battle.id || roomid,
         battleNonce: initNonce,
         gen: battle.gen as GenerationNum,
-        format: battle.id.split('-')?.[1],
+        // format: battle.id.split('-')?.[1], // update (2024/01/22): on smogtours, it's 'battle-smogtours-gen9ou-...' lmao
+        format: battle.id.split('-').find((p) => detectGenFromFormat(p)),
         gameType: battle.gameType === 'doubles' ? 'Doubles' : 'Singles',
         turn: Math.max(battle.turn || 0, 0),
         active: !battle.ended,

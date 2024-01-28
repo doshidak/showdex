@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-01-12T23:03:17.927Z"
+    "updated": "2024-01-28T05:16:48.404Z"
   },
 
   "pane": {
@@ -37,6 +37,11 @@
 
     "sections": {
       "primary": {
+        "general": "Général",
+        "presets": "Sets",
+        "autoFeatures": "Fonctionnalités Auto",
+        "metagame": "Soutien OM & LC",
+        "visibility": "Afficher / Masquer",
         "showdex": "$t(common:products.showdex)",
         "hellodex": "$t(common:products.hellodex_one)",
         "calcdex": "$t(common:products.calcdex_one)",
@@ -52,7 +57,8 @@
         "matchup_other": "Matchs",
         "panel": "Onglet du Panneau",
         "presets": "Sets",
-        "special": "Spéciaux"
+        "special": "Spéciaux",
+        "tooltips": "Infobulles"
       }
     },
 
@@ -360,7 +366,7 @@
     },
 
     "showPlayerRatings": {
-      "label": "Afficher le Elo des Joueurs",
+      "label": "Classements Elo",
       "tooltip": "Affiche le classement Elo de chaque joueur, si disponible, à côté de leur nom d'utilisateur."
     },
 
@@ -370,7 +376,7 @@
     },
 
     "showNicknames": {
-      "label": "Afficher les Surnoms des Pokémon",
+      "label": "Surnoms des Pokémon",
       "tooltip": "Affiche le surnom du Pokémon, s'il en a un, au lieu de sa forme."
     },
 
@@ -395,7 +401,7 @@
     },
 
     "showNonDamageRanges": {
-      "label": "Afficher les Dégâts Nuls",
+      "label": "Dégâts Nuls",
       "tooltip": "Affiche les intervalles de dégâts qui sont <strong>$t(common:labels.na)</strong> ou <strong>$t(calcdex:poke.moves.immune)</strong>."
     },
 
@@ -540,7 +546,7 @@
     },
 
     "showLegacyEvs": {
-      "label": "Afficher $t(pokedex:stats.evs_other.1) dans les Anciennes Génerations",
+      "label": "$t(pokedex:stats.evs_other.1) Anciennes",
       "tooltip": "Affiche les $t(pokedex:stats.evs_other.1) dans les générations anciennes, vous permettant de les modifier pour chaque Pokémon.<br /><br />Certains sets (notamment dans Randoms) peuvent spécifier 0 $t(pokedex:stats.evs_other.1) pour certaines stats, ce qui peut être utile à savoir.<br /><br />Bien qu'introduites dans ADV (gén. 3), les $t(pokedex:stats.evs_other.1) existaient techniquement dans les générations antérieures, communément appelées <em>expérience de stats</em>. Les dommages résultants influencés par ce système ancien et les $t(pokedex:stats.evs_other.1) modernes sont plus ou moins les mêmes, en raison des effets d'arrondi dans les formules de dégâts."
     },
 

@@ -11,7 +11,7 @@
       "Google Translate"
     ],
     "created": "2024-01-08T16:46:10.432Z",
-    "updated": "2024-01-12T23:03:17.927Z",
+    "updated": "2024-01-26T18:57:52.893Z",
     "built": "<-- auto-filled; do not edit -->"
   },
 
@@ -74,6 +74,7 @@
     "delete": "Suppression",
     "download": "Télécharger",
     "downloading": "Téléchargement",
+    "duplicate": "Dupliquer",
     "edit": "Édit",
     "edited": "Édité",
     "empty": "Vide",
@@ -93,6 +94,7 @@
     "leave": "Partir",
     "loading": "Chargement",
     "na": "N/A",
+    "new": "Nouveau",
     "next": "Suivant",
     "none": "Aucun",
     "ok": "OK",

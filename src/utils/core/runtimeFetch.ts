@@ -3,21 +3,20 @@ import { logger, runtimer } from '@showdex/utils/debug';
 import { getExtensionId } from './getExtensionId';
 import { safeJsonParse } from './safeJsonParse';
 
-interface RuntimeFetchMessage {
+export interface RuntimeFetchMessage {
   type?: 'fetch';
   url: RequestInfo;
   options?: RequestInit;
 }
 
-interface RuntimeFetchMessageResponse {
+export interface RuntimeFetchMessageResponse {
   ok: boolean;
   status: number;
+  headers: Record<string, string>;
   value: string;
 }
 
-interface RuntimeFetchResponse<T = unknown> {
-  ok: boolean;
-  status: number;
+export interface RuntimeFetchResponse<T = unknown> extends Pick<RuntimeFetchMessageResponse, 'ok' | 'status' | 'headers'> {
   text: () => string;
   json: () => T;
 }
@@ -39,7 +38,10 @@ const sendFetchMessage = async <T = unknown>(
   message: RuntimeFetchMessage,
 ): Promise<RuntimeFetchResponse<T>> => {
   if (typeof chrome !== 'undefined') {
-    return new Promise<RuntimeFetchResponse<T>>((resolve, reject) => {
+    return new Promise<RuntimeFetchResponse<T>>((
+      resolve,
+      reject,
+    ) => {
       chrome.runtime.sendMessage<RuntimeFetchMessage, RuntimeFetchMessageResponse>(extensionId, {
         type: 'fetch',
         ...message,
@@ -53,24 +55,20 @@ const sendFetchMessage = async <T = unknown>(
         // );
 
         if (response instanceof Error) {
-          reject(response);
-        } else {
-          resolve({
-            ok: response.ok,
-            status: response.status,
-            text: () => response.value,
-            json: () => safeJsonParse<T>(response.value),
-          });
+          return void reject(response);
         }
+
+        resolve({
+          ok: response.ok,
+          status: response.status,
+          headers: response.headers,
+          text: () => response.value,
+          json: () => safeJsonParse<T>(response.value),
+        });
       });
     });
   }
 
-  // if (typeof browser === 'undefined') {
-  //   throw new Error('browser global is not defined!');
-  // }
-
-  // const response = <RuntimeFetchMessageResponse<T>> await browser.runtime.sendMessage(extensionId, message);
   const response = await fetch(message?.url, {
     method: HttpMethod.GET,
     ...message?.options,
@@ -90,9 +88,20 @@ const sendFetchMessage = async <T = unknown>(
   //   '\n', (response instanceof Error ? 'error' : 'response'), response,
   // );
 
+  const headers: Record<string, string> = {};
+
+  for (const [headerName, headerValue] of response.headers) {
+    if (!headerName || !headerValue) {
+      continue;
+    }
+
+    headers[headerName.toLowerCase()] = headerValue;
+  }
+
   return {
     ok: response.ok,
     status: response.status,
+    headers,
     text: () => value,
     json: () => safeJsonParse<T>(value),
   };

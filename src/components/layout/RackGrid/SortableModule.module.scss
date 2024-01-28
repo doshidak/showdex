@@ -1,0 +1,122 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+// @use 'mixins/transition';
+
+.container {
+  &.draggable {
+    // transform: translateZ(0);
+    // transform-origin: top left;
+
+    // & > * {
+    //   cursor: grab;
+    // }
+
+    // .handle {
+    //   cursor: grab;
+    // }
+
+    // &.positioning {
+    //   z-index: 2;
+    // }
+
+    &.dragging {
+      opacity: 0.8;
+
+      & > * {
+        cursor: grabbing;
+      }
+
+      // .handle {
+      //   cursor: grabbing;
+      // }
+
+      &::after {
+        // border-style: dashed;
+        opacity: 0.8;
+      }
+
+      // & > * {
+      //   filter: grayscale(1);
+      //   opacity: 0.48;
+      // }
+    }
+
+    // &.releasing {
+    //   z-index: 3;
+    // }
+
+    // &.hidden {
+    //   z-index: 0;
+    // }
+
+    // &:not(.dragging):not(.sorting) {
+    //   @include transition.apply((transform, config.$module-transition-duration));
+    // }
+
+    @include aria.outline(
+      $offset: 2px,
+      $style: dashed,
+      $radius: 100px,
+      $z-index: 0,
+    );
+
+    &:not(:active):not(.dragging) {
+      &.lastAdded:not(:focus):not(.focused):not(.selected)::after {
+        // @include aria.outline-show(
+        //   // $color: colors.$pink,
+        //   $opacity: 0.48,
+        // ) {
+        //   border-style: dotted;
+        // }
+        border-color: colors.$gray;
+        border-style: dotted;
+        opacity: 0.48;
+      }
+    }
+
+    &.selected, &:focus, &.focused {
+      z-index: 2;
+
+      &::after {
+        // @include aria.outline-show;
+        opacity: 0.88;
+      }
+    }
+  }
+
+  // &.sorting {
+  //   @include transition.apply((transform, config.$module-transition-duration));
+  // }
+}
+
+// .handle {
+//   @include position.absolute-fill;
+//   z-index: 3;
+// }
+
+// .particles {
+//   @include position.absolute-fill;
+//   opacity: 0.48;
+//   // transform: translateZ(0);
+//   pointer-events: none;
+//   z-index: 2;
+// }
+
+// .contentContainer {
+//   // warning: fucks up height measurement for dynamic (i.e., fluid) height modules
+//   // (hence why the 100% height is only applied for fixed-height modules)
+//   &.fixedHeight {
+//     height: 100%;
+//   }
+// }
+
+// .content {
+//   // @include position.absolute-fill;
+//   // width: 100%;
+//   // height: 100%;
+//   border: 1px dashed color.alpha(palette.std(red), 0.5);
+// }

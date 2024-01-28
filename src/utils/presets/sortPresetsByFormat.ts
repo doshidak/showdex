@@ -34,22 +34,6 @@ export const sortPresetsByFormat = (
   const doubles = detectDoublesFormat(format);
   const formatLabel = labelMap[format];
 
-  // e.g., formatLabel = 'VGC 2023' -> partialFormatLabel = 'vgc'
-  // const partialLabel = (l: string) => formatId(l?.replace(/\d+$/, ''));
-  // const partialFormatLabel = partialLabel(formatLabel);
-
-  // const partialMatch = (
-  //   label: string,
-  //   candidate: string,
-  // ) => (
-  //   label.startsWith(candidate)
-  //     || label.endsWith(candidate)
-  // );
-
-  // const priorityIndex = (
-  //   label: string,
-  // ) => FormatSortPriorities.findIndex((f) => partialMatch(label, formatId(f)));
-
   // update (2024/01/05):
   // e.g., formatLabel = 'VGC 2024' -> partialFormatLabel = ['vgc', '2024'];
   // formatLabel = 'Ubers UU' -> partialFormatLabel = ['ubers', 'uu']
@@ -86,7 +70,7 @@ export const sortPresetsByFormat = (
 
     if (matchesA) {
       if (matchesB) {
-        return 0;
+        return (a.formatIndex ?? -1) - (b.formatIndex ?? -1);
       }
 
       return -1;
@@ -109,9 +93,7 @@ export const sortPresetsByFormat = (
 
     if (partialIndexA > -1) {
       if (partialIndexB > -1) {
-        return partialIndexA < partialIndexB
-          ? -1
-          : partialIndexA > partialIndexB ? 1 : 0;
+        return partialIndexA - partialIndexB;
       }
 
       return -1;
@@ -142,9 +124,7 @@ export const sortPresetsByFormat = (
 
     if (priorityA > -1) {
       if (priorityB > -1) {
-        return priorityA < priorityB
-          ? -1
-          : priorityA > priorityB ? 1 : 0;
+        return priorityA - priorityB;
       }
 
       return -1;

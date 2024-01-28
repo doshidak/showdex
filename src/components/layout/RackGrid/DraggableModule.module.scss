@@ -1,0 +1,51 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/flex';
+@use 'mixins/position';
+@use 'mixins/spacing';
+
+$padding: 0;
+$border-radius: 100px;
+
+.container {
+  position: relative;
+  @include flex.row-center;
+  width: calc(100% - #{$padding * 2});
+  @include spacing.margin($all: $padding);
+  border-radius: $border-radius;
+
+  &.draggable {
+    touch-action: none; // necessary for useGesture()
+    cursor: grab;
+
+    @include aria.outline(
+      $offset: 4px,
+      $radius: $border-radius,
+      $z-index: -1,
+    );
+
+    &:hover::after {
+      @include aria.outline-hover;
+    }
+
+    &:focus::after {
+      @include aria.outline-show;
+    }
+
+    &.dragging {
+      opacity: 0.8;
+
+      &::after {
+        border-style: dashed;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.renderer {
+  &.shouldScale {
+    transform-origin: top left;
+  }
+}

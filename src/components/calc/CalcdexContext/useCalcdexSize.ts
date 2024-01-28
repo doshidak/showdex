@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
+import { tolerance } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { useElementSize } from '@showdex/utils/hooks';
 import { CalcdexContext } from './CalcdexContext';
@@ -17,13 +18,18 @@ export const useCalcdexSize = (
     height,
     size,
   } = useElementSize(containerRef, {
-    initialWidth: 400,
+    initialWidth: 320,
     initialHeight: 700,
   });
 
   React.useEffect(() => {
     // need to check width & height so the `size` doesn't reset to 'xs' when the containerRef is unmounting
-    if (!width || !height || !size || size === state?.containerSize) {
+    const shouldIgnore = !width
+      || !height
+      || !size
+      || (size === state?.containerSize && tolerance(state?.containerWidth, 10)(width));
+
+    if (shouldIgnore) {
       return;
     }
 
@@ -31,6 +37,7 @@ export const useCalcdexSize = (
       scope: l.scope,
       battleId: state.battleId,
       containerSize: size,
+      containerWidth: width,
     }));
   }, [
     dispatch,
@@ -38,6 +45,7 @@ export const useCalcdexSize = (
     size,
     state?.battleId,
     state?.containerSize,
+    state?.containerWidth,
     width,
   ]);
 };

@@ -82,6 +82,20 @@ export interface CalcdexBattleState extends Partial<Record<CalcdexPlayerKey, Cal
   name?: string;
 
   /**
+   * Auto-generated Honkdex (aka. a "honk") name.
+   *
+   * * Indicates if the honk should be saved when modified.
+   * * Typically populated when a Calcdex is converted into a honk or a honk is duplicated.
+   * * Falsy values (default) will default to the placeholder text.
+   *   - Otherwise, this value will become the placeholder text.
+   * * Only used when the `operatingMode` is `'standalone'`.
+   *
+   * @example 'Copy of My Cool OU Threat List'
+   * @since 1.2.3
+   */
+  defaultName?: string;
+
+  /**
    * Generation number.
    *
    * * Derived from `gen` of the Showdown `battle` state.
@@ -202,6 +216,14 @@ export interface CalcdexBattleState extends Partial<Record<CalcdexPlayerKey, Cal
    * @since 1.2.0
    */
   containerSize?: ElementSizeLabel;
+
+  /**
+   * Last recorded container width.
+   *
+   * @default 320
+   * @since 1.2.0
+   */
+  containerWidth?: number;
 
   /**
    * Number of active players in the battle.

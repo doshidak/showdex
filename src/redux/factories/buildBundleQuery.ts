@@ -1,8 +1,7 @@
 import { ShowdexPresetsBundles } from '@showdex/consts/app/presets';
 import { HttpMethod } from '@showdex/consts/core';
-import { type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
+import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { getResourceUrl, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 

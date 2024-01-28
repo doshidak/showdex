@@ -162,6 +162,9 @@ export const sanitizePokemon = <
       return table;
     }, {} as Showdown.StatsTableNoHp),
 
+    autoBoostMap: { ...(pokemon as Partial<CalcdexPokemon>)?.autoBoostMap },
+    transformedBaseStats: (pokemon as Partial<CalcdexPokemon>)?.transformedBaseStats || null,
+    serverStats: (pokemon as Partial<CalcdexPokemon>)?.serverStats || null,
     dirtyBaseStats: PokemonStatNames.reduce((table, stat) => {
       table[stat] = (pokemon as Partial<CalcdexPokemon>)?.dirtyBaseStats?.[stat] ?? null;
 

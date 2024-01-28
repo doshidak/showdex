@@ -1,3 +1,4 @@
+export * from './CalcdexAutoBoostMap';
 export * from './CalcdexBattleField';
 export * from './CalcdexBattleRules';
 export * from './CalcdexBattleState';

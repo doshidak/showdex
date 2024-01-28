@@ -57,6 +57,8 @@ export const PokeMoves = ({
     playerPokemon: pokemon,
     opponentPokemon,
     usage,
+    moveUsageFinder,
+    moveUsageSorter,
     matchups,
     updatePokemon,
   } = useCalcdexPokeContext();
@@ -84,7 +86,9 @@ export const PokeMoves = ({
     format,
     pokemon,
     {
-      usage,
+      usageAlts: usage?.altMoves,
+      usageFinder: moveUsageFinder,
+      usageSorter: moveUsageSorter,
       field,
       include: (settings?.showAllOptions && 'all')
         || (operatingMode === 'standalone' && 'hidden-power')
@@ -95,11 +99,13 @@ export const PokeMoves = ({
   ), [
     field,
     format,
+    moveUsageFinder,
+    moveUsageSorter,
     operatingMode,
     pokemon,
     settings?.showAllOptions,
     t,
-    usage,
+    usage?.altMoves,
   ]);
 
   const moveOptionsFilter = React.useMemo(
@@ -264,7 +270,7 @@ export const PokeMoves = ({
         header
       >
         <div className={styles.headerTitle}>
-          {t('poke.moves.label')}
+          {t('poke.moves.label', 'Moves')}
         </div>
 
         {
@@ -275,7 +281,7 @@ export const PokeMoves = ({
               styles.teraButtonLabel,
               (battleActive && !player?.usedTera && !pokemon?.terastallized) && styles.available,
             )}
-            label={t('poke.moves.tera.label')}
+            label={t('poke.moves.tera.label', 'TERA')}
             tooltip={(
               <div className={styles.descTooltip}>
                 {
@@ -337,7 +343,7 @@ export const PokeMoves = ({
               styles.ultButton,
               showTeraToggle && styles.lessSpacing,
             )}
-            label={t('poke.moves.z.label')}
+            label={t('poke.moves.z.label', 'Z')}
             tooltip={(
               <Trans
                 t={t}
@@ -369,6 +375,7 @@ export const PokeMoves = ({
             )}
             label={t('poke.moves.dmax.label', {
               ultimate: `$t(pokedex:ultimates.${pokemon?.gmaxable ? 'g' : 'd'}max.2)`,
+              defaultValue: pokemon?.gmaxable ? 'GMAX' : 'MAX',
             })}
             tooltip={(
               <div className={styles.descTooltip}>
@@ -417,7 +424,10 @@ export const PokeMoves = ({
           showEditButton &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.editButton)}
-            label={t(`poke.moves.editor.${pokemon?.showMoveOverrides ? '' : 'in'}activeLabel`)}
+            label={t(
+              `poke.moves.editor.${pokemon?.showMoveOverrides ? '' : 'in'}activeLabel`,
+              pokemon?.showMoveOverrides ? 'Hide' : 'Edit',
+            )}
             tooltip={(
               <Trans
                 t={t}
@@ -515,12 +525,12 @@ export const PokeMoves = ({
             header
           >
             <div className={styles.headerTitle}>
-              {t('poke.moves.dmg')}
+              {t('poke.moves.dmg', 'DMG')}
             </div>
 
             <ToggleButton
               className={styles.toggleButton}
-              label={t('poke.moves.criticalHit.label')}
+              label={t('poke.moves.criticalHit.label', 'CRIT')}
               tooltip={(
                 <Trans
                   t={t}
@@ -545,7 +555,7 @@ export const PokeMoves = ({
             header
           >
             <div className={styles.headerTitle}>
-              {t('poke.moves.nhko')}
+              {t('poke.moves.nhko', 'KO %')}
             </div>
           </TableGridItem>
         </>
@@ -934,7 +944,7 @@ export const PokeMoves = ({
 
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
-                  {(settings?.showNonDamageRanges || hasDamageRange) ? (
+                  {opponentPokemon?.speciesForme && (settings?.showNonDamageRanges || hasDamageRange) ? (
                     settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
                       <Button
                         className={cx(

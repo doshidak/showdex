@@ -1,0 +1,19 @@
+diff --git a/node_modules/simplebar-core/dist/index.mjs b/node_modules/simplebar-core/dist/index.mjs
+index 440d9e4..3715ac9 100644
+--- a/node_modules/simplebar-core/dist/index.mjs
++++ b/node_modules/simplebar-core/dist/index.mjs
+@@ -104,12 +104,12 @@ var getOptions$1 = function (obj) {
+ };
+ function addClasses$1(el, classes) {
+     var _a;
+-    if (!el)
++    if (!el || !classes)
+         return;
+     (_a = el.classList).add.apply(_a, classes.split(' '));
+ }
+ function removeClasses$1(el, classes) {
+-    if (!el)
++    if (!el || !classes)
+         return;
+     classes.split(' ').forEach(function (className) {
+         el.classList.remove(className);

@@ -27,5 +27,5 @@ export const formatId = (
 ) => value
   ?.toString?.()
   .normalize('NFD') // splits combined graphemes; e.g., 'Flabébé-Yellow' -> 'Flabe´be´-Yellow'
-  .toLowerCase() // e.g., -> 'flabe´be´-yellow'
-  .replace(/[^a-z0-9]/g, ''); // e.g., -> 'flabebeyellow'
+  .replace(/[^a-zA-Z0-9]/g, '') // e.g., -> 'FlabebeYellow'
+  .toLowerCase(); // e.g., -> 'flabebeyellow'

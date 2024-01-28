@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import Svg from 'react-inlinesvg';
 import cx from 'classnames';
+import { MemberIcon } from '@showdex/components/app';
 import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useUserLadderQuery } from '@showdex/redux/services';
 import { useColorScheme } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { formatId, getResourceUrl } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { openUserPopup } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
@@ -22,6 +22,7 @@ export interface PlayerInfoProps {
   playerKey?: CalcdexPlayerKey;
   defaultName?: string;
   playerOptions?: DropdownOption<CalcdexPlayerKey>[];
+  mobile?: boolean;
 }
 
 const l = logger('@showdex/components/calc/PlayerInfo');
@@ -33,6 +34,7 @@ export const PlayerInfo = ({
   playerKey = 'p1',
   defaultName = '--',
   playerOptions,
+  mobile,
 }: PlayerInfoProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
@@ -47,6 +49,7 @@ export const PlayerInfo = ({
 
   const {
     containerSize,
+    renderMode,
     format,
   } = state || {};
 
@@ -60,7 +63,7 @@ export const PlayerInfo = ({
   const playerId = formatId(name);
   const playerTitle = findPlayerTitle(playerId, true);
   const playerLabelColor = playerTitle?.color?.[colorScheme];
-  const playerIconColor = playerTitle?.iconColor?.[colorScheme];
+  // const playerIconColor = playerTitle?.iconColor?.[colorScheme];
 
   // only fetch the rating if the battle didn't provide it to us
   // (with a terribly-implemented delay timer to give some CPU time for drawing the UI)
@@ -121,8 +124,9 @@ export const PlayerInfo = ({
     <div
       className={cx(
         styles.container,
-        containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        containerSize === 'xs' && styles.verySmol,
+        (mobile && renderMode === 'overlay') && styles.mobileOverlay,
         className,
       )}
       style={style}
@@ -195,13 +199,25 @@ export const PlayerInfo = ({
           disabled={!name}
           onPress={() => openUserPopup(name)}
         >
-          {
+          {/*
             !!playerTitle?.icon &&
             <Svg
               className={styles.usernameButtonIcon}
               style={playerIconColor ? { color: playerIconColor } : undefined}
               description={playerTitle.iconDescription}
               src={getResourceUrl(`${playerTitle.icon}.svg`)}
+            />
+          */}
+
+          {
+            !!playerTitle?.icon &&
+            <MemberIcon
+              className={styles.usernameButtonIcon}
+              member={{
+                name,
+                showdownUser: true,
+                periods: null,
+              }}
             />
           }
         </Button>
@@ -287,11 +303,11 @@ export const PlayerInfo = ({
               {
                 !!rating &&
                 <>
-                  <span className={styles.ratingSeparator}>
+                  {/* <span className={styles.ratingSeparator}>
                     &bull;
-                  </span>
+                  </span> */}
 
-                  {rating} ELO
+                  &nbsp;{rating} ELO
                 </>
               }
             </div>

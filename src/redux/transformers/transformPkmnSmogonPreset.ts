@@ -29,6 +29,7 @@ export const transformPkmnSmogonPreset = (
   presetName: string,
   preset: PkmnApiSmogonPreset,
   source: CalcdexPokemonPresetSource = 'smogon',
+  formatIndex?: number,
 ): CalcdexPokemonPreset => {
   if (!gen || !format || !speciesForme || !nonEmptyObject(preset)) {
     return null;
@@ -56,6 +57,7 @@ export const transformPkmnSmogonPreset = (
     name: presetName || 'Smogon Set', // e.g., 'Defensive Pivot'
     gen,
     format: getGenlessFormat(format), // just in case; e.g., 'ou'
+    formatIndex,
     speciesForme, // do not sanitize
     ability: Array.isArray(ability) ? ability[0] : ability,
     altAbilities: Array.isArray(ability) ? ability : [ability].filter(Boolean),

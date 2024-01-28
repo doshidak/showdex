@@ -5,6 +5,7 @@ export * from './MoveCategoryField';
 export * from './PokeStatField';
 export * from './PokeTypeField';
 export * from './Segmented';
+export * from './SpikesField';
 export * from './Switch';
 export * from './TextField';
 export * from './ValueField';

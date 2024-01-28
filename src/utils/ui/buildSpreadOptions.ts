@@ -57,7 +57,7 @@ const processOption = (
 
   if (existingOption && spread.usage) {
     const subLabelParts = [...((existingOption.subLabel as string).split?.(labelDelimiter) || [])];
-    const usageLabel = percentage(spread.usage, 2);
+    const usageLabel = percentage(spread.usage, spread.usage === 1 ? 0 : 2);
 
     if (!subLabelParts.includes(usageLabel)) {
       subLabelParts.push(usageLabel);
@@ -79,8 +79,8 @@ const processOption = (
     const boosts = PokemonNatureBoosts[spread.nature];
 
     const natureLabel = translateNature?.(spread.nature) || spread.nature;
-    const posLabel = translateStat?.(boosts[0]) || boosts[0]?.toUpperCase();
-    const negLabel = translateStat?.(boosts[1]) || boosts[1]?.toUpperCase();
+    const posLabel = (!!boosts?.[0] && (translateStat?.(boosts[0]) || boosts[0]?.toUpperCase())) || null;
+    const negLabel = (!!boosts?.[1] && (translateStat?.(boosts[1]) || boosts[1]?.toUpperCase())) || null;
 
     subLabelParts.push((
       posLabel && negLabel
@@ -91,7 +91,7 @@ const processOption = (
 
   if (spread.usage) {
     // update (2023/11/15): might not be enough room tbh LOL
-    subLabelParts.push(percentage(spread.usage, 2));
+    subLabelParts.push(percentage(spread.usage, spread.usage === 1 ? 0 : 2));
   }
 
   if (subLabelParts.length) {

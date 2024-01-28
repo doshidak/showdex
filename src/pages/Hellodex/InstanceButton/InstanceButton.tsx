@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/components/ui';
@@ -17,7 +18,11 @@ export interface InstanceButtonProps extends Omit<BaseButtonProps, 'display'> {
   onRequestRemove?: () => void;
 }
 
-export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProps>(({
+export interface InstanceButtonRef extends ButtonElement {
+  queueRemoval: () => void;
+}
+
+export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButtonProps>(({
   className,
   instance,
   authName,
@@ -25,15 +30,19 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
   activeScale = 0.98,
   disabled,
   onPress,
+  onContextMenu,
   onRequestRemove,
   ...props
 }: InstanceButtonProps, forwardedRef): JSX.Element => {
+  const { t } = useTranslation('pokedex');
+  const containerRef = React.useRef<ButtonElement>(null);
   const colorScheme = useColorScheme();
   const glassyTerrain = useGlassyTerrain();
 
   const {
     operatingMode,
     name,
+    defaultName,
     gen,
     format,
     subFormats,
@@ -44,7 +53,8 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
     cached,
   } = instance || {};
 
-  const { label: genLabel } = GenLabels[gen] || {};
+  const { slug: genSlug } = GenLabels[gen] || {};
+  const genLabel = (!!genSlug && t(`gens.${genSlug}.label`, '')) || null;
 
   const {
     label,
@@ -93,13 +103,18 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       return void setRemovalQueued(false);
     }
 
-    removalRequestTimeout.current = setTimeout(onRequestRemove, 5000);
+    removalRequestTimeout.current = setTimeout(onRequestRemove, 3000);
     setRemovalQueued(true);
   };
 
+  React.useImperativeHandle(forwardedRef, () => ({
+    ...containerRef.current,
+    queueRemoval: queueRemovalRequest,
+  }));
+
   return (
     <BaseButton
-      ref={forwardedRef}
+      ref={containerRef}
       {...props}
       className={cx(
         styles.container,
@@ -114,6 +129,13 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
       hoverScale={hoverScale}
       activeScale={activeScale}
       onPress={removalQueued ? queueRemovalRequest : onPress}
+      onContextMenu={(e) => {
+        if (removalQueued) {
+          queueRemovalRequest();
+        }
+
+        onContextMenu(e);
+      }}
     >
       {operatingMode === 'standalone' ? (
         <div className={cx(styles.icon, styles.standaloneIcon)}>
@@ -129,7 +151,11 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
 
       <div className={styles.info}>
         <div className={styles.format}>
-          Gen {gen}
+          {t('honkdex:battle.gen.friendlyLabel', {
+            gen: gen || '--',
+            defaultValue: `Gen ${gen || '--'}`,
+          })}
+
           {
             !!label &&
             <>
@@ -138,13 +164,14 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
               <strong>{label}</strong>
             </>
           }
+
           {!!suffixes && ' '}
           {suffixes.map((s) => s[1]).join(` ${bullop} `)}
         </div>
 
         {operatingMode === 'standalone' ? (
           <div className={styles.honkName}>
-            {name || 'untitled honk'}
+            {name || defaultName || 'untitled honk'}
           </div>
         ) : (
           <div className={styles.players}>
@@ -200,7 +227,7 @@ export const InstanceButton = React.forwardRef<ButtonElement, InstanceButtonProp
                 {
                   hasMorePlayers &&
                   <span className={styles.morePlayers}>
-                    &amp; friends
+                    &amp; {t('honkdex:battle.name.friends')}
                   </span>
                 }
               </>

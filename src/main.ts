@@ -48,18 +48,19 @@ app.receive = (data: string) => {
   // so I was wondering why the `battle` object was never populated... hmm... LOL
   appReceive(data);
 
-  if (receivedRoom) {
-    const roomId = data.slice(1, data.indexOf('\n'));
-    // const room = app.rooms[roomId];
-
-    l.debug(
-      'receive() for', roomId,
-      '\n', data,
-    );
-
-    // call the Calcdex bootstrapper
-    CalcdexBootstrapper(store, data, roomId);
+  if (!receivedRoom) {
+    return;
   }
+
+  const roomId = data.slice(1, data.indexOf('\n'));
+
+  l.debug(
+    'receive() for', roomId,
+    '\n', data,
+  );
+
+  // call the Calcdex bootstrapper
+  CalcdexBootstrapper(store, data, roomId);
 };
 
 l.debug('Hooking into the client\'s app.user.finishRename()...');
@@ -108,18 +109,15 @@ void (async () => {
   const db = await openIndexedDb();
   const settings = await readSettingsDb(db);
 
+  // note: settings.locale's default value is `null`, which will allow the i18next LanguageDetector plugin to kick in
+  const i18next = await loadI18nextLocales(settings?.locale);
+
   if (nonEmptyObject(settings)) {
     delete settings.colorScheme;
-    store.dispatch(showdexSlice.actions.updateSettings(settings));
-  }
 
-  // note: settings.locale's default value is `null`, which will allow the i18next LanguageDetector plugin to kick in
-  const i18next = await loadI18nextLocales(settings.locale);
-
-  // only update the stored locale if not in settings & we've detected one
-  if (!settings.locale && i18next?.language) {
     store.dispatch(showdexSlice.actions.updateSettings({
-      locale: i18next.language,
+      ...settings,
+      locale: settings.locale || i18next?.language || 'en', // fucc it yolo
     }));
   }
 

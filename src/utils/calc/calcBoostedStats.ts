@@ -1,7 +1,9 @@
 import { type GenerationNum } from '@smogon/calc';
 import { PokemonBoostNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { clamp } from '@showdex/utils/core';
 import { detectLegacyGen } from '@showdex/utils/dex';
+import { calcStatAutoBoosts } from './calcStatAutoBoosts';
 import { type CalcdexStatModRecorder, statModRecorder } from './statModRecorder';
 
 /**
@@ -29,36 +31,87 @@ export const calcBoostedStats = (
     ? [1, 100 / 66, 2, 2.5, 100 / 33, 100 / 28, 4]
     : [1, 1.5, 2, 2.5, 3, 3.5, 4];
 
+  const modifier = (stage: number) => {
+    const index = clamp(0, Math.abs(stage), boostTable.length - 1);
+    const value = boostTable[index] || 1;
+
+    return stage > 0 ? value : (1 / value);
+  };
+
   const {
     boosts: currentBoosts,
+    // autoBoostMap,
     dirtyBoosts,
   } = pokemon;
 
-  const boosts = PokemonBoostNames.reduce((prev, stat) => {
-    prev[stat] = (dirtyBoosts?.[stat] ?? currentBoosts?.[stat]) || 0;
+  // const ignoreBoosts: Showdown.StatsTableNoHp = {};
 
-    return prev;
-  }, {} as Showdown.StatsTable);
+  /*
+  if (nonEmptyObject(autoBoostMap)) {
+    Object.values(autoBoostMap).forEach((fx) => {
+      const shouldIgnore = !nonEmptyObject(fx?.boosts)
+        || (typeof fx.turn === 'number' && fx.turn > -1)
+        || !fx.active;
 
-  Object.entries(boosts)
-    .filter(([, stage]) => !!stage)
-    .forEach(([
-      stat,
-      stage,
-    ]: [
-      stat: Showdown.StatName,
-      stage: number,
-    ]) => {
-      const boostValue = boostTable[Math.abs(stage)];
-      const modifier = stage > 0 ? boostValue : (1 / boostValue);
+      if (shouldIgnore) {
+        return;
+      }
 
-      record.apply(
+      Object.entries(fx.boosts).forEach(([
         stat,
-        modifier,
-        'boost',
-        `${stage > 0 ? '+' : ''}${stage} Stage`,
-      );
+        stage,
+      ]: [
+        stat: Showdown.StatNameNoHp,
+        stage: number,
+      ]) => {
+        if (!stage || typeof dirtyBoosts?.[stat] === 'number') {
+          return;
+        }
+
+        /*
+        if (typeof fx.turn === 'number') {
+          if (typeof ignoreBoosts[stat] !== 'number') {
+            ignoreBoosts[stat] = 0;
+          }
+
+          ignoreBoosts[stat] += stage;
+        }
+        *\/
+
+        record.apply(
+          stat,
+          modifier(stage),
+          fx.dict,
+          fx.name,
+          fx.reffectDict,
+          fx.reffect,
+        );
+      });
     });
+  }
+  */
+
+  PokemonBoostNames.forEach((stat) => {
+    const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
+    // const ignoreBoost = ignoreBoosts[stat] || 0;
+
+    const stage = (
+      typeof dirtyBoosts?.[stat] === 'number'
+        ? dirtyBoosts[stat]
+        : ((currentBoosts?.[stat] || 0) + autoBoost)
+    ) || 0;
+
+    if (!stage) {
+      return;
+    }
+
+    record.apply(
+      stat,
+      modifier(stage),
+      'boost',
+      `${stage > 0 ? '+' : ''}${stage} Stage`,
+    );
+  });
 
   return hasRecorder ? null : record.stats();
 };

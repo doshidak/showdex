@@ -59,7 +59,7 @@ export const PokeFormeTooltip = ({
     forme: string,
   ) => {
     // don't fire the callback if the forme is the same
-    if (currentForme === forme) {
+    if (currentForme?.replace('-Tera', '') === forme) {
       return;
     }
 
@@ -85,7 +85,7 @@ export const PokeFormeTooltip = ({
           }}
         >
           {altFormes?.map((altForme) => {
-            if (!altForme?.startsWith(baseForme)) {
+            if (!altForme || !altForme.startsWith(baseForme) || altForme.endsWith('-Tera')) {
               return null;
             }
 
@@ -95,7 +95,7 @@ export const PokeFormeTooltip = ({
               ? t('common:labels.base', tBaseForme)
               : tAltForme.replace(`${tBaseForme}-`, '');
 
-            const selected = currentForme === altForme;
+            const selected = currentForme?.replace('-Tera', '') === altForme;
 
             return (
               <BaseButton

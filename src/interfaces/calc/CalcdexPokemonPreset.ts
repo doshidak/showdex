@@ -157,6 +157,15 @@ export interface CalcdexPokemonPreset {
   format?: string;
 
   /**
+   * Optional index used for sorting presets of the same format.
+   *
+   * * Typically used for `'smogon'` presets as to preserve the ordering on the Pokemon's Smogon StrategyDex page.
+   *
+   * @since 1.2.3
+   */
+  formatIndex?: number;
+
+  /**
    * Nickname of the Pokemon.
    *
    * @example 'Smogonbirb'
@@ -225,6 +234,16 @@ export interface CalcdexPokemonPreset {
   evs?: Showdown.StatsTable;
   spreads?: CalcdexPokemonPresetSpread[];
   pokeball?: string;
+
+  /**
+   * Unix epoch timestamp of when this preset was last updated, in milliseconds.
+   *
+   * * Primarily used for displaying the human-readable date in the presets dropdown.
+   * * Typically populated for `'usage'`-sourced presets via the `'Last-Modified'` response header.
+   *
+   * @since 1.2.3
+   */
+  updated?: number;
 
   /**
    * Unix epoch timestamp of when this preset was cached, in milliseconds.

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
 import { romanize } from 'romans';
@@ -37,7 +38,7 @@ export interface GenFieldProps extends FieldRenderProps<GenerationNum, ButtonEle
 
 const options = (
   GenLabels
-    ?.filter((l) => !!l?.gen && l.slug && l.label)
+    ?.filter((l) => !!l?.gen && !!l.slug)
     .sort((a, b) => b.gen - a.gen)
 ) || [];
 
@@ -67,6 +68,7 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
     () => containerRef.current,
   );
 
+  const { t } = useTranslation('pokedex');
   const colorScheme = useColorScheme();
   const reversedColorScheme = determineColorScheme(colorScheme, true);
 
@@ -97,7 +99,8 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
   };
 
   const [hoveredDescription, setHoveredDescription] = React.useState<string>(null);
-  const currentDescription = hoveredDescription || selectedOption?.description;
+  const selectedDescription = (!!selectedOption?.slug && t(`gens.${selectedOption.slug}.shortDesc`, '')) || null;
+  const currentDescription = hoveredDescription || selectedDescription;
 
   const handleHover = (
     description: string,
@@ -136,14 +139,16 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
               const {
                 gen,
                 slug,
-                label: genLabel,
-                description,
+                // label: genLabel,
+                // description,
               } = item || {};
 
-              if (!gen || !slug || !genLabel) {
+              if (!gen || !slug) {
                 return null;
               }
 
+              const genLabel = t(`gens.${slug}.label`, slug.toUpperCase());
+              const shortDesc = t(`gens.${slug}.shortDesc`);
               const selected = gen === input?.value;
 
               return (
@@ -156,10 +161,10 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
                   )}
                   style={optionStyle}
                   display="block"
-                  aria-label={`Switch to Generation ${gen}`}
+                  aria-label={t('honkdex:battle.gen.optionAria', { gen })}
                   hoverScale={1}
                   activeScale={selected ? 0.98 : undefined}
-                  onHover={handleHover(description)}
+                  onHover={handleHover(shortDesc)}
                   onPress={() => handleChange(gen)}
                 >
                   <div className={styles.genItem}>
@@ -167,9 +172,9 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
                       className={cx(styles.subLabel, optionSubLabelClassName)}
                       style={optionSubLabelStyle}
                     >
-                      {/* Gen {gen} */}
-                      {romanize(gen)}
+                      {gen ? romanize(gen) : ' '}
                     </div>
+
                     <div
                       className={cx(styles.label, optionLabelClassName)}
                       style={optionLabelStyle}
@@ -180,8 +185,10 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
                       className={cx(styles.subLabel, optionSubLabelClassName)}
                       style={optionSubLabelStyle}
                     >
-                      {/* {romanize(gen)} */}
-                      Gen {gen}
+                      {t('honkdex:battle.gen.friendlyLabel', {
+                        gen: gen || '--',
+                        defaultValue: `Gen ${gen || '--'}`,
+                      })}
                     </div>
                   </div>
                 </BaseButton>
@@ -227,17 +234,28 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
             !selectedOption?.gen && styles.empty,
           )}
         >
-          <div className={styles.subLabel}>
-            {/* Gen {selectedOption?.gen || '--'} */}
-            {(selectedOption?.gen && romanize(selectedOption.gen)) || '---'}
-          </div>
+          {
+            !!selectedOption?.gen &&
+            <div className={styles.subLabel}>
+              {romanize(selectedOption.gen)}
+            </div>
+          }
+
           <div className={styles.label}>
-            {selectedOption?.label || '???'}
+            {selectedOption?.slug ? t(`gens.${selectedOption.slug}.label`, {
+              defaultValue: '???',
+            }) : '???'}
           </div>
-          <div className={styles.subLabel}>
-            {/* {(selectedOption?.gen && romanize(selectedOption.gen)) || '---'} */}
-            Gen {selectedOption?.gen || '--'}
-          </div>
+
+          {
+            !!selectedOption?.gen &&
+            <div className={styles.subLabel}>
+              {t('honkdex:battle.gen.friendlyLabel', {
+                gen: selectedOption.gen,
+                defaultValue: `Gen ${selectedOption.gen}`,
+              })}
+            </div>
+          }
         </div>
       </BaseButton>
     </Tooltip>

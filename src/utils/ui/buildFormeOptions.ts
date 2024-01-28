@@ -1,6 +1,6 @@
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemon, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
-import { nonEmptyObject } from '@showdex/utils/core';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
   detectDoublesFormat,
@@ -8,7 +8,8 @@ import {
   guessTableFormatKey,
   guessTableFormatSlice,
 } from '@showdex/utils/dex';
-import { usageAltPercentFinder, usageAltPercentSorter } from '@showdex/utils/presets';
+import { percentage } from '@showdex/utils/humanize';
+import { type CalcdexPokemonUsageAltSorter, detectUsageAlt, flattenAlt } from '@showdex/utils/presets';
 
 export type CalcdexPokemonFormeOption = DropdownOption<string>;
 
@@ -22,8 +23,12 @@ export type CalcdexPokemonFormeOption = DropdownOption<string>;
 export const buildFormeOptions = (
   format: string,
   config?: {
-    pokemon?: CalcdexPokemon;
-    formeUsages?: CalcdexPokemonUsageAlt<string>[];
+    speciesForme?: CalcdexPokemon['speciesForme'];
+    altFormes?: CalcdexPokemon['altFormes'];
+    transformedForme?: CalcdexPokemon['transformedForme'];
+    usageAlts?: CalcdexPokemonUsageAlt<string>[];
+    usageFinder?: (value: string) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<string>;
     translate?: (value: string) => string;
     translateHeader?: (value: string) => string;
   },
@@ -145,36 +150,74 @@ export const buildFormeOptions = (
   const dex = getDexForFormat(format);
 
   const {
-    pokemon,
-    formeUsages,
-    translate,
-    translateHeader,
-  } = config || {};
-
-  const findUsagePercent = usageAltPercentFinder(formeUsages, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
-
-  const {
+    speciesForme,
     altFormes,
     transformedForme,
-  } = pokemon || {};
+    usageAlts,
+    usageFinder: findUsagePercent,
+    usageSorter,
+    translate: translateFromConfig,
+    translateHeader: translateHeaderFromConfig,
+  } = config || {};
+
+  const translate = (v: string) => translateFromConfig?.(v) || v;
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   const filterFormes: string[] = [];
 
-  if (altFormes?.length) {
-    const sortedAltFormes = [...altFormes].sort(usageSorter);
+  if ((altFormes?.length || 0) > (transformedForme ? 0 : 1)) {
+    const sortedAltFormes = [...altFormes].sort(usageSorter).filter((f) => !!f && !f?.endsWith('-Tera'));
     const groupLabel = (!!transformedForme && 'Transformed') || 'Formes';
 
     options.push({
-      label: translateHeader?.(groupLabel) || groupLabel,
-      options: sortedAltFormes.map((forme) => ({
-        label: translate?.(forme) || forme,
-        rightLabel: findUsagePercent(forme),
-        value: forme,
-      })),
-    });
+      label: translateHeader(groupLabel),
+      options: sortedAltFormes.map((forme) => {
+        filterFormes.push(forme);
 
-    filterFormes.push(...altFormes);
+        return {
+          label: translate(forme),
+          rightLabel: findUsagePercent(forme),
+          value: forme,
+        };
+      }),
+    });
+  }
+
+  // update (2024/01/15): better optimization might be to slap all the usages into one group instead lol
+  const formeUsages = usageAlts?.filter((a) => (
+    detectUsageAlt(a)
+      && !filterFormes.includes(a[0])
+      && !a[0].endsWith('-Tera')
+  )).sort((
+    [, usageA],
+    [, usageB],
+  ) => {
+    if ((usageA || 0) > (usageB || 0)) {
+      return -1;
+    }
+
+    if ((usageA || 0) < (usageB || 0)) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  if (formeUsages?.length) {
+    options.push({
+      label: translateHeader('Usage'),
+      options: formeUsages.map((alt) => {
+        const flat = flattenAlt(alt);
+
+        filterFormes.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
+          value: flat,
+        };
+      }),
+    });
   }
 
   const tierMap: Record<string, string[]> = {
@@ -208,7 +251,7 @@ export const buildFormeOptions = (
     const dexSpecies = dex.species.get(forme);
     const { exists, name: formeName } = dexSpecies || {};
 
-    if (!exists || filterFormes.includes(formeName)) {
+    if (!exists || filterFormes.includes(formeName) || formeName.endsWith('-Tera')) {
       return;
     }
 
@@ -222,7 +265,27 @@ export const buildFormeOptions = (
     filterFormes.push(formeName);
   });
 
-  Object.entries(tierMap).forEach(([
+  Object.entries(tierMap).sort((
+    [tierA],
+    [tierB],
+  ) => {
+    const matchesA = format.includes(formatId(tierA));
+    const matchesB = format.includes(formatId(tierB));
+
+    if (matchesA) {
+      if (matchesB) {
+        return 0;
+      }
+
+      return -1;
+    }
+
+    if (matchesB) {
+      return 1;
+    }
+
+    return 0;
+  }).forEach(([
     tier,
     speciesFormes,
   ]) => {
@@ -230,26 +293,20 @@ export const buildFormeOptions = (
       return;
     }
 
-    const sortedFormes = [...speciesFormes].sort(usageSorter);
-
     options.push({
-      label: translateHeader?.(tier) || tier,
-      options: sortedFormes.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
+      label: translateHeader(tier),
+      options: speciesFormes.map((name) => ({
+        label: translate(name),
         value: name,
       })),
     });
   });
 
   if (tierMap.Other.length) {
-    const sortedFormes = [...tierMap.Other].sort(usageSorter);
-
     options.push({
-      label: translateHeader?.('Other') || 'Other',
-      options: sortedFormes.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
+      label: translateHeader('Other'),
+      options: tierMap.Other.map((name) => ({
+        label: translate(name),
         value: name,
       })),
     });
@@ -267,11 +324,27 @@ export const buildFormeOptions = (
     }).filter(Boolean).sort();
 
     options.push({
-      label: translateHeader?.('Illegal Results') || 'Illegal',
+      label: translateHeader('Illegal Results', 'Illegal'),
       options: bannedFormes.map((name) => ({
-        label: translate?.(name) || name,
+        label: translate(name),
         value: name,
       })),
+    });
+  }
+
+  const currentForme = transformedForme || speciesForme;
+  const shouldAddCurrent = !!currentForme
+    && (currentForme.endsWith('-Tera') || !altFormes?.length || !altFormes.includes(currentForme))
+    && !filterFormes.includes(currentForme);
+
+  if (shouldAddCurrent) {
+    options.unshift({
+      label: translateHeader('Current'),
+      options: [{
+        label: translate(currentForme),
+        rightLabel: findUsagePercent(currentForme),
+        value: currentForme,
+      }],
     });
   }
 

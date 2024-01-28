@@ -10,7 +10,7 @@ export type SelectInputProps<
   Option extends DropdownOption,
   Multi extends boolean,
   Group extends GroupBase<Option>,
-> = Modify<InputProps<Option, Multi, Group>, {
+> = Modify<Omit<InputProps<Option, Multi, Group>, 'dangerouslySetInnerHTML'>, {
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 

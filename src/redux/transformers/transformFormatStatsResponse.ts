@@ -1,10 +1,12 @@
-import { type MoveName } from '@smogon/calc';
-// import { PokemonNatures } from '@showdex/consts/dex';
-import { type PkmnApiSmogonFormatStatsResponse } from '@showdex/interfaces/api';
+import {
+  type PkmnApiSmogonFormatStatsResponse,
+  type PkmnApiSmogonPresetRequest,
+  type PkmnApiSmogonQueryMeta,
+} from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
+import { replaceBehemothMoves } from '@showdex/utils/battle';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
-import { formatId, nonEmptyObject } from '@showdex/utils/core';
+import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { getGenfulFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { parseUsageSpread, processUsageAlts } from '@showdex/utils/presets';
@@ -21,7 +23,7 @@ import { parseUsageSpread, processUsageAlts } from '@showdex/utils/presets';
  */
 export const transformFormatStatsResponse = (
   response: PkmnApiSmogonFormatStatsResponse,
-  _meta: unknown,
+  meta: PkmnApiSmogonQueryMeta,
   args: PkmnApiSmogonPresetRequest,
 ): CalcdexPokemonPreset[] => {
   const { pokemon: pokemonStats } = response || {};
@@ -80,43 +82,13 @@ export const transformFormatStatsResponse = (
     if (altMoves.length) {
       // apparently a bug with Showdown Usage where these two Pokemon will have "Iron Head" instead of
       // "Behemoth Blade" (for Zacian-Crowned) or "Behemoth Bash" (for Zamazenta-Crowned) lol
-      if (['zaciancrowned', 'zamazentacrowned'].includes(formatId(speciesForme))) {
-        const targetMove = (formatId(speciesForme) === 'zamazentacrowned' ? 'Behemoth Bash' : 'Behemoth Blade') as MoveName;
-        const ironHeadIndex = altMoves.findIndex((m) => formatId(m[0]) === 'ironhead');
-
-        if (ironHeadIndex > -1) {
-          altMoves[ironHeadIndex][0] = targetMove;
-        }
-      }
-
-      preset.altMoves = altMoves;
+      preset.altMoves = replaceBehemothMoves(speciesForme, altMoves);
 
       /**
        * @todo Needs to be updated once we support more than 4 moves.
        */
       preset.moves = altMoves.slice(0, 4).map((m) => m[0]);
     }
-
-    /*
-    const [topSpread] = processUsageAlts(spreads);
-    const [nature, evSpread] = (topSpread?.[0]?.split(':') || []) as [Showdown.NatureName, string];
-    const [hpEv, atkEv, defEv, spaEv, spdEv, speEv] = evSpread?.split('/') || [];
-
-    if (nature && PokemonNatures.includes(nature)) {
-      preset.nature = nature;
-    }
-
-    if (evSpread && evSpread.includes('/')) {
-      preset.evs = {
-        hp: parseInt(hpEv, 10) || 0,
-        atk: parseInt(atkEv, 10) || 0,
-        def: parseInt(defEv, 10) || 0,
-        spa: parseInt(spaEv, 10) || 0,
-        spd: parseInt(spdEv, 10) || 0,
-        spe: parseInt(speEv, 10) || 0,
-      };
-    }
-    */
 
     const usageSpreads = processUsageAlts(spreads);
 
@@ -131,6 +103,11 @@ export const transformFormatStatsResponse = (
     // note: `ivs` don't exist here!
     preset.nature = preset.spreads[0]?.nature;
     preset.evs = { ...preset.spreads[0]?.evs };
+
+    // read from the 'Last-Modified' header, if any
+    if (meta?.resHeaders?.['last-modified']) {
+      preset.updated = new Date(meta.resHeaders['last-modified']).valueOf() || null;
+    }
 
     preset.calcdexId = calcPresetCalcdexId(preset);
     preset.id = preset.calcdexId;

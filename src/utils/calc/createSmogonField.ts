@@ -21,14 +21,26 @@ export const createSmogonField = (
   // note: using structuredClone() for attackerSide & defenderSide here since we may mutate their
   // properties for hazards, so we don't want to accidentally mutate their original objects from the args!
   // update (2023/07/18): structuredClone() is slow af, so removing it from the codebase
+  // update (2024/01/27): dirtyWeather & dirtyTerrain function similarly to dirtyItem, where they'll be an empty string
+  // (vs null) when the user explicitly requested to clear them, despite them being actually on the field
   const processedField: Partial<SmogonState.Field> = {
     ...field,
     gameType,
+    weather: (field.dirtyWeather ?? field.weather) || null,
+    terrain: (field.dirtyTerrain ?? field.terrain) || null,
     // attackerSide: structuredClone(player?.side || {}),
     // defenderSide: structuredClone(opponent?.side || {}),
     attackerSide: clonePlayerSide(player?.side),
     defenderSide: clonePlayerSide(opponent?.side),
   };
+
+  if ('dirtyWeather' in processedField) {
+    delete processedField.dirtyWeather;
+  }
+
+  if ('dirtyTerrain' in processedField) {
+    delete processedField.dirtyTerrain;
+  }
 
   // check if we should remove field hazards (e.g., Spikes, Stealth Rocks) if the selected Pokemon
   // we're doing calcs for is already out on the field (i.e., if the selectionIndex is in the activeIndices)

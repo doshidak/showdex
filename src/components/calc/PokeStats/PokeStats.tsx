@@ -7,8 +7,13 @@ import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { PokemonBoostNames, PokemonNatureBoosts, PokemonStatNames } from '@showdex/consts/dex';
 import { CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
-import { calcPokemonFinalStats, convertIvToLegacyDv, convertLegacyDvToIv } from '@showdex/utils/calc';
-import { env, formatId } from '@showdex/utils/core';
+import {
+  calcPokemonFinalStats,
+  calcStatAutoBoosts,
+  convertIvToLegacyDv,
+  convertLegacyDvToIv,
+} from '@showdex/utils/calc';
+import { clamp, env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
@@ -43,6 +48,7 @@ export const PokeStats = ({
   const {
     operatingMode,
     containerSize,
+    containerWidth,
     gen,
     format,
     legacy,
@@ -162,6 +168,7 @@ export const PokeStats = ({
         gen === 1 && styles.legacySpc,
         containerSize === 'xs' && styles.verySmol,
         ['md', 'lg', 'xl'].includes(containerSize) && styles.veryThicc,
+        containerWidth < 360 && styles.skinnyBoi,
         !!colorScheme && styles[colorScheme],
         className,
       )}
@@ -567,11 +574,17 @@ export const PokeStats = ({
         const formattedStat = formatStatBoost(finalStat) || '???';
         const mods = statMods?.[stat];
 
+        const didDirtyBoost = stat !== 'hp' && typeof pokemon?.dirtyBoosts?.[stat] === 'number';
+        const autoBoosts = Object.values(pokemon?.autoBoostMap || {})
+          .filter((fx) => stat in (fx?.boosts || {}) && fx.active);
+
+        const positiveBoostColor = settings?.nhkoColors?.[0];
+        const negativeBoostColor = settings?.nhkoColors?.slice(-1)[0];
+
         const boostDelta = detectStatBoostDelta(pokemon, finalStats, stat);
         const boostColor = (
-          !!boostDelta
-            && (settings?.nhkoColors?.length || 0) > 1
-            && settings.nhkoColors[boostDelta === 'positive' ? 0 : (settings.nhkoColors.length - 1)]
+          (boostDelta === 'positive' && positiveBoostColor)
+            || (boostDelta === 'negative' && negativeBoostColor)
         ) || null;
 
         return (
@@ -579,36 +592,73 @@ export const PokeStats = ({
             key={`PokeStats:StatValue:${pokemonKey}:${stat}`}
             content={(
               <div className={styles.statModsTable}>
-                {mods?.map((mod) => {
-                  const tSource = (mod?.source === 'ability' && 'abilities')
-                    || (mod?.source === 'item' && 'items')
-                    || (mod?.source === 'move' && 'moves')
-                    || (mod?.source === 'status' && 'nonvolatiles')
-                    || (mod?.source === 'ultimate' && 'ultimates')
-                    || null;
+                {stat !== 'hp' && !didDirtyBoost && autoBoosts?.map((fx) => {
+                  const fxLabel = (
+                    !!fx?.name
+                      && !!fx.dict
+                      && t(`pokedex:${fx.dict}.${formatId(fx.name)}`, '')
+                  ) || fx?.name || '???';
 
-                  const tLabel = (!!tSource && t(`pokedex:${tSource}.${formatId(mod?.label)}`, mod?.label))
-                    || mod?.label
-                    || '??? HUH';
+                  const fxReffect = (
+                    !!fx?.reffect
+                      && !!fx?.reffectDict
+                      && t(`pokedex:${fx.reffectDict}.${formatId(fx.reffect)}`, '')
+                  ) || fx?.reffect || null;
+
+                  const fxValue = fx.boosts[stat];
 
                   return (
-                    <React.Fragment
-                      key={`PokeStats:StatMod:${pokemonKey}:${mod?.modifier || '?'}:${mod?.label || '?'}`}
-                    >
+                    <React.Fragment key={`PokeStats:AutoBoost:${pokemonKey}:${fxLabel}:${stat}`}>
                       <div
                         className={cx(
                           styles.statModValue,
                           styles.statValue,
-                          (mod?.modifier ?? 1) > 1 && styles.positive,
-                          (mod?.modifier ?? 1) < 1 && styles.negative,
+                          fxValue > 0 && !positiveBoostColor && styles.positive,
+                          fxValue < 0 && !negativeBoostColor && styles.negative,
                         )}
+                        style={{
+                          ...(fxValue > 0 && !!positiveBoostColor && { color: positiveBoostColor }),
+                          ...(fxValue < 0 && !!negativeBoostColor && { color: negativeBoostColor }),
+                        }}
                       >
-                        {(mod?.modifier ?? -1) >= 0 ? (
-                          <>{mod.modifier.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
+                        {fxValue > 0 && '+'}{fxValue}
+                      </div>
+                      <div className={styles.statModLabel}>
+                        {fxReffect ? <>{fxLabel} &rarr; {fxReffect}</> : fxLabel}
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+
+                {mods?.map((mod) => {
+                  const modLabel = (
+                    !!mod?.label
+                      && !!mod?.dict
+                      && t(`pokedex:${mod?.dict}.${formatId(mod?.label)}`, '')
+                  ) || mod?.label || '??? HUH';
+
+                  const modValue = mod?.modifier ?? -1;
+
+                  return (
+                    <React.Fragment key={`PokeStats:StatMod:${pokemonKey}:${modLabel}:${stat}`}>
+                      <div
+                        className={cx(
+                          styles.statModValue,
+                          styles.statValue,
+                          modValue > 1 && !positiveBoostColor && styles.positive,
+                          modValue < 1 && !negativeBoostColor && styles.negative,
+                        )}
+                        style={{
+                          ...(modValue > 1 && !!positiveBoostColor && { color: positiveBoostColor }),
+                          ...(modValue < 1 && !!negativeBoostColor && { color: negativeBoostColor }),
+                        }}
+                      >
+                        {modValue >= 0 ? (
+                          <>{modValue.toFixed(2).replace(/(\.[1-9]+)?\.?0*$/, '$1')}&times;</>
                         ) : (mod?.swapped?.[1]?.toUpperCase?.() || null)}
                       </div>
                       <div className={styles.statModLabel}>
-                        {tLabel}
+                        {modLabel}
                       </div>
                     </React.Fragment>
                   );
@@ -625,6 +675,7 @@ export const PokeStats = ({
               className={cx(
                 styles.statValue,
                 styles.finalStat,
+                !finalStat && styles.empty,
                 !!boostDelta && !boostColor && styles[boostDelta], // default color
               )}
               style={boostColor ? { color: boostColor } : undefined}
@@ -651,8 +702,11 @@ export const PokeStats = ({
         const statName = gen === 1 && stat === 'spa' ? 'spc' : stat;
         // const statLabel = t(`pokedex:stats.${statName}.1`, statName.toUpperCase());
 
-        const boost = pokemon?.dirtyBoosts?.[stat] ?? pokemon?.boosts?.[stat] ?? 0;
+        const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
         const didDirtyBoost = typeof pokemon?.dirtyBoosts?.[stat] === 'number';
+        const boost = didDirtyBoost
+          ? (pokemon.dirtyBoosts[stat] || 0)
+          : ((pokemon?.boosts?.[stat] || 0) + autoBoost);
 
         return (
           <TableGridItem
@@ -663,21 +717,22 @@ export const PokeStats = ({
               labelClassName={styles.boostModButtonLabel}
               label="-"
               hoverScale={1}
-              disabled={!pokemon?.speciesForme || boost <= -6}
+              disabled={!pokemon?.speciesForme || (boost <= -6)}
               onPress={() => updatePokemon({
-                dirtyBoosts: { [stat]: Math.max(boost - 1, -6) },
+                dirtyBoosts: { [stat]: clamp(-6, boost - 1, 6) },
               }, `${l.scope}:Button~DirtyBoosts-${statName}-Minus:onPress()`)}
             />
 
             <Button
               className={cx(
                 styles.boostButton,
-                !didDirtyBoost && styles.pristine,
+                (!didDirtyBoost && !autoBoost && !boost) && styles.empty,
+                (!didDirtyBoost && !autoBoost) && styles.pristine,
                 !didDirtyBoost && styles.disabled, // intentionally keeping them separate
               )}
               labelClassName={styles.boostButtonLabel}
               label={`${boost > 0 ? '+' : ''}${boost}`}
-              highlight={didDirtyBoost}
+              highlight={didDirtyBoost || !!autoBoost}
               hoverScale={1}
               absoluteHover
               disabled={!pokemon?.speciesForme || !didDirtyBoost}
@@ -692,9 +747,9 @@ export const PokeStats = ({
               labelClassName={styles.boostModButtonLabel}
               label="+"
               hoverScale={1}
-              disabled={!pokemon?.speciesForme || boost >= 6}
+              disabled={!pokemon?.speciesForme || (boost >= 6)}
               onPress={() => updatePokemon({
-                dirtyBoosts: { [stat]: Math.min(boost + 1, 6) },
+                dirtyBoosts: { [stat]: clamp(-6, boost + 1, 6) },
               }, `${l.scope}:Button~DirtyBoosts-${statName}-Plus:onPress()`)}
             />
           </TableGridItem>

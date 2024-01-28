@@ -3,7 +3,13 @@ import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@show
 import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { flattenAlts, selectPokemonPresets, sortPresetsByFormat } from '@showdex/utils/presets';
+import {
+  flattenAlts,
+  selectPokemonPresets,
+  sortPresetsByFormat,
+  usageAltPercentFinder,
+  usageAltPercentSorter,
+} from '@showdex/utils/presets';
 import { CalcdexContext } from '../CalcdexContext';
 import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
@@ -88,9 +94,11 @@ export const CalcdexPokeProvider = ({
     usages: allUsages,
     formatLabelMap,
     formeUsages,
+    formeUsageFinder,
+    formeUsageSorter,
   } = battlePresets;
 
-  const pokemonSheets = React.useMemo(() => selectPokemonPresets(
+  const pokemonSheets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     sheets,
     playerPokemon,
     {
@@ -98,13 +106,13 @@ export const CalcdexPokeProvider = ({
       source: 'sheet',
       select: 'any',
     },
-  ), [
+  ) : []), [
     format,
     playerPokemon,
     sheets,
   ]);
 
-  const usages = React.useMemo(() => selectPokemonPresets(
+  const usages = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allUsages,
     playerPokemon,
     {
@@ -112,14 +120,14 @@ export const CalcdexPokeProvider = ({
       source: 'usage',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allUsages,
     format,
     playerPokemon,
   ]);
 
   // note: in Randoms, teambuilder presets won't exist in allPresets[]
-  const teamPresets = React.useMemo(() => selectPokemonPresets(
+  const teamPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -127,13 +135,13 @@ export const CalcdexPokeProvider = ({
       source: 'storage',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const boxPresets = React.useMemo(() => selectPokemonPresets(
+  const boxPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -141,13 +149,13 @@ export const CalcdexPokeProvider = ({
       source: 'storage-box',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const bundledPresets = React.useMemo(() => selectPokemonPresets(
+  const bundledPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -155,13 +163,13 @@ export const CalcdexPokeProvider = ({
       source: 'bundle',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const pokemonPresets = React.useMemo(() => selectPokemonPresets(
+  const pokemonPresets = React.useMemo(() => (playerPokemon?.speciesForme ? selectPokemonPresets(
     allPresets,
     playerPokemon,
     {
@@ -169,13 +177,18 @@ export const CalcdexPokeProvider = ({
       source: 'smogon',
       select: 'any',
     },
-  ), [
+  ) : []), [
     allPresets,
     format,
     playerPokemon,
   ]);
 
-  const presets = React.useMemo(() => [
+  const presetSorter = React.useMemo(
+    () => sortPresetsByFormat(format, formatLabelMap),
+    [format, formatLabelMap],
+  );
+
+  const presets = React.useMemo(() => (playerPokemon?.speciesForme ? [
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
     ...(format?.includes('random') ? [] : usages),
@@ -183,19 +196,25 @@ export const CalcdexPokeProvider = ({
     ...boxPresets,
     ...bundledPresets,
     ...pokemonPresets,
-  ].sort(sortPresetsByFormat(format, formatLabelMap)), [
+  ].sort(presetSorter) : []), [
     boxPresets,
     bundledPresets,
     format,
-    formatLabelMap,
+    // formatLabelMap,
     playerPokemon?.presets,
+    playerPokemon?.speciesForme,
     pokemonPresets,
     pokemonSheets,
+    presetSorter,
     teamPresets,
     usages,
   ]);
 
   const usage = React.useMemo(() => {
+    if (!usages?.length) {
+      return null;
+    }
+
     if (usages.length === 1) {
       return usages[0];
     }
@@ -218,6 +237,36 @@ export const CalcdexPokeProvider = ({
     playerPokemon?.moves,
     usages,
   ]);
+
+  const abilityUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(usage?.altAbilities, true),
+    [usage?.altAbilities],
+  );
+
+  const abilityUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(abilityUsageFinder),
+    [abilityUsageFinder],
+  );
+
+  const itemUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(usage?.altItems, true),
+    [usage?.altItems],
+  );
+
+  const itemUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(itemUsageFinder),
+    [itemUsageFinder],
+  );
+
+  const moveUsageFinder = React.useMemo(
+    () => usageAltPercentFinder(usage?.altMoves, true),
+    [usage?.altMoves],
+  );
+
+  const moveUsageSorter = React.useMemo(
+    () => usageAltPercentSorter(moveUsageFinder),
+    [moveUsageFinder],
+  );
 
   // calculate the current matchup
   const calculateMatchup = useSmogonMatchup(
@@ -257,16 +306,32 @@ export const CalcdexPokeProvider = ({
     presets,
     usages,
     usage,
+    abilityUsageFinder,
+    abilityUsageSorter,
+    itemUsageFinder,
+    itemUsageSorter,
+    moveUsageFinder,
+    moveUsageSorter,
     formatLabelMap,
     formeUsages,
+    formeUsageFinder,
+    formeUsageSorter,
 
     matchups,
   }), [
+    abilityUsageFinder,
+    abilityUsageSorter,
     allUsages,
     ctx,
     formatLabelMap,
+    formeUsageFinder,
     formeUsages,
+    formeUsageSorter,
+    itemUsageFinder,
+    itemUsageSorter,
     matchups,
+    moveUsageFinder,
+    moveUsageSorter,
     opponent,
     opponentPokemon,
     player,

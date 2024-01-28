@@ -88,10 +88,11 @@ export interface ValueFieldProps extends BaseTextFieldProps<number> {
    * @since 1.1.6
    */
   reverseColorScheme?: boolean;
+
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 /* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
-/* eslint-disable react/prop-types */
 
 export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   className,
@@ -109,6 +110,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   reverseColorScheme,
   input,
   disabled,
+  onContextMenu,
   ...props
 }: ValueFieldProps, forwardedRef): JSX.Element => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -341,6 +343,10 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
         className,
       )}
       style={style}
+      onContextMenu={onContextMenu || ((e) => {
+        e?.preventDefault();
+        e?.stopPropagation();
+      })}
     >
       <BaseTextField
         ref={inputRef}
@@ -362,5 +368,4 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   );
 });
 
-/* eslint-enable react/prop-types */
 /* eslint-enable @typescript-eslint/indent */

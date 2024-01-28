@@ -1,6 +1,6 @@
 import { HttpMethod } from '@showdex/consts/core';
+import { type PkmnApiSmogonPresetRequest } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
-import { type PkmnApiSmogonPresetRequest } from '@showdex/redux/services';
 import { env, nonEmptyObject, runtimeFetch } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { readPresetsDb, writePresetsDb } from '@showdex/utils/storage';
@@ -107,20 +107,23 @@ const formatEndpointFormat = (
  *
  * @since 1.1.6
  */
-export const buildPresetQuery = <TResponse>(
+export const buildPresetQuery = <
+  TResponse,
+  TMeta = unknown,
+>(
   source: CalcdexPokemonPresetSource,
   path: string,
   transformer: (
     args: PkmnApiSmogonPresetRequest,
   ) => (
     data: TResponse,
-    meta: unknown,
+    meta: TMeta,
     args: PkmnApiSmogonPresetRequest,
   ) => CalcdexPokemonPreset[],
 ): (
   args: PkmnApiSmogonPresetRequest,
 ) => Promise<{
-  data: CalcdexPokemonPreset[],
+  data: CalcdexPokemonPreset[];
 }> => {
   if (!source || !path || typeof transformer !== 'function') {
     l.error(
@@ -209,7 +212,7 @@ export const buildPresetQuery = <TResponse>(
       const transform = transformer(args);
 
       if (typeof transform === 'function') {
-        output = transform(data, null, args);
+        output = transform(data, { resHeaders: response.headers } as TMeta, args);
       }
     } catch (error) {
       // use the cache if we have to lol

@@ -1,20 +1,20 @@
 import * as React from 'react';
-import Select from 'react-select';
+import Select, { type SelectInstance } from 'react-select';
 import Creatable from 'react-select/creatable';
+import { type FieldInputProps, type FieldRenderProps } from 'react-final-form';
 import useDebouncy from 'use-debouncy/lib/fn';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import type { FieldInputProps, FieldRenderProps } from 'react-final-form';
-import type { SelectInstance } from 'react-select';
-import type {
-  CreatableComponent,
-  SelectComponent,
-  SelectCustomProps,
-  SelectProps,
-} from './SelectContainer';
+import { createAliasFilter } from './createAliasFilter';
 import { SelectClearIndicator } from './SelectClearIndicator';
-import { SelectContainer } from './SelectContainer';
+import {
+  type CreatableComponent,
+  type SelectComponent,
+  type SelectCustomProps,
+  type SelectProps,
+  SelectContainer,
+} from './SelectContainer';
 import { SelectControl } from './SelectControl';
 import { SelectDropdownIndicator } from './SelectDropdownIndicator';
 import { SelectGroup } from './SelectGroup';
@@ -33,7 +33,6 @@ import { SelectPlaceholder } from './SelectPlaceholder';
 import { SelectSingleValue } from './SelectSingleValue';
 import { SelectValueContainer } from './SelectValueContainer';
 import styles from './Dropdown.module.scss';
-import { createAliasFilter } from './createAliasFilter';
 
 export type DropdownSingleValue = string | number;
 export type DropdownMultiValue = DropdownSingleValue[];
@@ -85,6 +84,7 @@ export interface DropdownProps extends FieldRenderProps<DropdownValue, HTMLInput
   highlight?: boolean;
   loading?: boolean;
   disabled?: boolean;
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 /* eslint-disable react/prop-types */
@@ -98,6 +98,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   tooltip,
   optionTooltip,
   optionTooltipProps,
+  optionTooltipDelay = 500,
   options,
   components,
   loadingMessage = 'Loading...',
@@ -123,6 +124,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   input,
   meta,
   disabled,
+  onContextMenu,
 }: DropdownProps, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<SelectInstance>(null);
@@ -172,7 +174,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   // keeps track of whether the user has recently entered something into the input field
   // (when an optionTooltip is present, not having this would cause stuttering while typing)
   const [filtering, setFiltering] = React.useState(false);
-  const timeoutFiltering = useDebouncy(() => setFiltering(false), 1000);
+  const timeoutFiltering = useDebouncy(() => setFiltering(false), optionTooltipDelay);
 
   React.useEffect(() => {
     if (!optionTooltip || !filtering) {
@@ -184,6 +186,22 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
     filtering,
     optionTooltip,
     timeoutFiltering,
+  ]);
+
+  // update (2024/01/16): do the same thing for the scrollState (so that tooltips don't fly off the screen LOL)
+  const scrollState = React.useState(false);
+  const timeoutScrolling = useDebouncy(() => scrollState[1](false), optionTooltipDelay);
+
+  React.useEffect(() => {
+    if (!optionTooltip || !scrollState[0]) {
+      return;
+    }
+
+    timeoutScrolling();
+  }, [
+    optionTooltip,
+    scrollState,
+    timeoutScrolling,
   ]);
 
   const hasValue = Array.isArray(valueOption) ? !!valueOption.length : !!valueOption;
@@ -229,6 +247,10 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           styles.container,
           !!colorScheme && styles[colorScheme],
         )}
+        onContextMenu={onContextMenu || ((e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+        })}
       >
         <Component
           ref={ref}
@@ -247,8 +269,10 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
           tabIndex={disabled ? -1 : tabIndex}
           placeholder={hint}
           filtering={filtering}
+          scrollState={scrollState}
           optionTooltip={optionTooltip}
           optionTooltipProps={optionTooltipProps}
+          optionTooltipDelay={optionTooltipDelay}
           options={options}
           filterOption={filterOption || createAliasFilter()}
           value={valueOption}

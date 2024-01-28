@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { type GroupBase, type OptionProps } from 'react-select';
 import useDebouncy from 'use-debouncy/lib/effect';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
-import type { GroupBase, OptionProps } from 'react-select';
-import type { DropdownOption } from './Dropdown';
-import type { SelectProps } from './SelectContainer';
+import { type DropdownOption } from './Dropdown';
+import { type SelectProps } from './SelectContainer';
 import styles from './Dropdown.module.scss';
 
 export type SelectOptionProps<
@@ -32,8 +32,10 @@ export const SelectOption = <
   // selectProps,
   selectProps: {
     filtering,
+    scrollState,
     optionTooltip: OptionTooltip,
     optionTooltipProps,
+    optionTooltipDelay,
   } = {},
   children,
 }: SelectOptionProps<Option, Multi, Group>): JSX.Element => {
@@ -80,24 +82,26 @@ export const SelectOption = <
 
   // debounce focused from false -> true @ 1000 ms (i.e., 1000 in delay [1000, 0])
   useDebouncy(() => {
-    if (!isFocused) {
+    if (!isFocused || scrollState?.[0]) {
       return;
     }
 
     setFocused(true);
-  }, 1000, [
+  }, optionTooltipDelay, [
     isFocused,
+    scrollState,
   ]);
 
   // immediately update focused from true -> false (i.e., 0 in delay [1000, 0])
   React.useEffect(() => {
-    if (isFocused) {
+    if (isFocused && !scrollState?.[0]) {
       return;
     }
 
     setFocused(false);
   }, [
     isFocused,
+    scrollState,
   ]);
 
   // const tooltipContent = React.useMemo(
@@ -170,12 +174,9 @@ export const SelectOption = <
       </div>
 
       {
-        (tooltipVisible && !filtering) &&
+        tooltipVisible &&
         <Tooltip
           reference={containerRef}
-          // content={selectProps?.optionTooltip?.(data)}
-          // content={tooltipContent}
-          // content={() => selectProps.optionTooltip(data)}
           content={(
             <OptionTooltip
               {...optionTooltipProps}
@@ -184,13 +185,9 @@ export const SelectOption = <
           )}
           placement="right"
           offset={[0, 10]}
-          // delay={[1000, 0]}
-          // trigger="mouseenter"
-          // touch="hold"
           visible={focused}
-          // visible={isFocused && tooltipVisible}
+          derender={!data?.value || optionTooltipProps?.hidden || filtering || scrollState?.[0]}
           disabled={isDisabled}
-          onHidden={() => setTooltipVisible(false)}
         />
       }
     </>

@@ -76,6 +76,8 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   contentClassName,
   contentStyle,
   children,
+  onScroll,
+  onWheel,
   ...props
 }: ScrollableProps, forwardedRef): JSX.Element => {
   const simpleBarRef = React.useRef<SimpleBar>(null);
@@ -86,8 +88,8 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   React.useImperativeHandle(forwardedRef, () => containerRef.current);
   // React.useImperativeHandle(scrollRefFromProps, () => scrollRef.current);
   // React.useImperativeHandle(contentRefFromProps, () => contentRef.current);
-  React.useImperativeHandle(scrollRefFromProps, () => simpleBarRef.current?.getScrollElement() as HTMLDivElement);
-  React.useImperativeHandle(contentRefFromProps, () => simpleBarRef.current?.getContentElement() as HTMLDivElement);
+  React.useImperativeHandle(scrollRefFromProps, () => scrollRef.current || simpleBarRef.current?.getScrollElement() as HTMLDivElement);
+  React.useImperativeHandle(contentRefFromProps, () => contentRef.current || simpleBarRef.current?.getContentElement() as HTMLDivElement);
 
   // update (2023/11/09): the big Z added custom scrollbars to Showdown in battle-log.css of pokemon-showdown-client,
   // which is being applied to the <body> element (plus there's apparently no ez way of "restoring" the original scrollbar
@@ -97,7 +99,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   // const shouldRenderNative = formatId(userAgent?.os?.name) === 'macos'
   //   || userAgent?.device?.type === 'mobile';
 
-  React.useEffect(() => { // eslint-disable-line react-hooks/exhaustive-deps
+  React.useEffect(() => {
     if (!containerRef.current || simpleBarRef.current) {
       return;
     }
@@ -126,6 +128,8 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
 
       // note: not a good idea to make this into a prop
       scrollbarMinSize: 40,
+      // clickOnTrack: true,
+      // autoHide: true,
     });
 
     // scrollRef.current = simpleBarRef.current.getScrollElement() as HTMLDivElement;
@@ -179,7 +183,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
         className,
       )}
       style={style}
-      data-simplebar
+      data-simplebar="init"
     >
       {/* {children} */}
 
@@ -194,6 +198,8 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
               ref={scrollRef}
               className={cx(styles.contentWrapper, scrollClassName)}
               style={scrollStyle}
+              onScroll={onScroll}
+              onWheel={onWheel}
             >
               <div
                 ref={contentRef}

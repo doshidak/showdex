@@ -1,15 +1,14 @@
 import { type AbilityName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
-import { type CalcdexPokemon, type CalcdexPokemonPreset, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
+  type CalcdexPokemonUsageAltSorter,
   detectUsageAlt,
   flattenAlt,
   flattenAlts,
-  usageAltPercentFinder,
-  usageAltPercentSorter,
 } from '@showdex/utils/presets';
 
 export type CalcdexPokemonAbilityOption = DropdownOption<AbilityName>;
@@ -23,7 +22,9 @@ export const buildAbilityOptions = (
   format: string,
   pokemon: CalcdexPokemon,
   config?: {
-    usage?: CalcdexPokemonPreset;
+    usageAlts?: CalcdexPokemonAlt<AbilityName>[];
+    usageFinder?: (value: AbilityName) => string;
+    usageSorter?: CalcdexPokemonUsageAltSorter<AbilityName>;
     showAll?: boolean;
     translate?: (value: AbilityName) => string;
     translateHeader?: (value: string) => string;
@@ -41,13 +42,16 @@ export const buildAbilityOptions = (
   }
 
   const {
-    usage,
+    usageAlts,
+    usageFinder: findUsagePercent,
+    usageSorter,
     showAll,
-    translate,
-    translateHeader,
+    translate: translateFromConfig,
+    translateHeader: translateHeaderFromConfig,
   } = config || {};
 
-  // const ability = pokemon.dirtyAbility ?? pokemon.ability;
+  const translate = (v: AbilityName) => translateFromConfig?.(v) || v;
+  const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   const {
     source,
@@ -62,26 +66,14 @@ export const buildAbilityOptions = (
   // keep track of what moves we have so far to avoid duplicate options
   const filterAbilities: AbilityName[] = [];
 
-  // prioritize using usage stats from the current set first,
-  // then fallback to using the stats from the supplied `usage` set, if any
-  const usageAltSource = detectUsageAlt(altAbilities?.[0])
-    ? altAbilities
-    : detectUsageAlt(usage?.altAbilities?.[0])
-      ? usage.altAbilities
-      : null;
-
-  // create usage percent finder (to show them in any of the option groups)
-  const findUsagePercent = usageAltPercentFinder(usageAltSource, true);
-  const usageSorter = usageAltPercentSorter(findUsagePercent);
-
   // make sure we filter out "revealed" abilities with parentheses, like "(suppressed)"
   if (!transformedForme && baseAbility && ability !== baseAbility && !/^\([\w\s]+\)$/.test(ability)) {
-    const groupLabel = formatId(baseAbility) === 'trace' ? 'Traced' : 'Inherited';
+    const groupLabel = baseAbility === 'Trace' as AbilityName ? 'Traced' : 'Inherited';
 
     options.push({
-      label: translateHeader?.(groupLabel) || groupLabel,
+      label: translateHeader(groupLabel),
       options: [{
-        label: translate?.(ability) || ability,
+        label: translate(ability),
         rightLabel: findUsagePercent(ability),
         value: ability,
       }],
@@ -98,56 +90,63 @@ export const buildAbilityOptions = (
     ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Transformed') || 'Transformed',
-      options: transformed.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Transformed'),
+      options: transformed.map((name) => {
+        filterAbilities.push(name);
 
-    filterAbilities.push(...transformed);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   if (altAbilities?.length) {
     const filteredPoolAbilities = altAbilities
       .filter((a) => !!a && !filterAbilities.includes(flattenAlt(a)));
 
-    const hasUsageStats = altAbilities
-      .some((a) => Array.isArray(a) && typeof a[1] === 'number');
-
-    const poolAbilities = hasUsageStats
+    const poolAbilities = altAbilities.some((a) => detectUsageAlt(a))
       ? filteredPoolAbilities // should be sorted already (despite the name)
       : flattenAlts(filteredPoolAbilities).sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Pool') || 'Pool',
-      options: poolAbilities.map((alt) => ({
-        label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-        rightLabel: Array.isArray(alt) ? percentage(alt[1], 2) : findUsagePercent(alt),
-        value: flattenAlt(alt),
-      })),
-    });
+      label: translateHeader('Pool'),
+      options: poolAbilities.map((alt) => {
+        const flat = flattenAlt(alt);
 
-    filterAbilities.push(...flattenAlts(poolAbilities));
+        filterAbilities.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: Array.isArray(alt) ? percentage(alt[1], alt[1] === 1 ? 0 : 2) : findUsagePercent(alt),
+          value: flat,
+        };
+      }),
+    });
   }
 
-  if (detectUsageAlt(usageAltSource?.[0])) {
-    const usageAbilities = (usageAltSource as CalcdexPokemonUsageAlt<AbilityName>[])
-      .filter((n) => !!n?.[0] && !filterAbilities.includes(n[0]));
+  const usageAbilities = usageAlts?.filter((a) => (
+    detectUsageAlt(a)
+      && !filterAbilities.includes(a[0])
+  )) as CalcdexPokemonUsageAlt<AbilityName>[];
 
-    if (usageAbilities.length) {
-      options.push({
-        label: translateHeader?.('Usage') || 'Usage',
-        options: usageAbilities.map((alt) => ({
-          label: translate?.(flattenAlt(alt)) || flattenAlt(alt),
-          rightLabel: percentage(alt[1], 2),
-          value: flattenAlt(alt),
-        })),
-      });
+  if (usageAbilities?.length) {
+    options.push({
+      label: translateHeader('Usage'),
+      options: usageAbilities.map((alt) => {
+        const flat = flattenAlt(alt);
 
-      filterAbilities.push(...flattenAlts(usageAbilities));
-    }
+        filterAbilities.push(flat);
+
+        return {
+          label: translate(flat),
+          rightLabel: percentage(alt[1], alt[1] === 1 ? 0 : 2),
+          value: flat,
+        };
+      }),
+    });
   }
 
   if (abilities?.length) {
@@ -156,22 +155,24 @@ export const buildAbilityOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('Legal') || 'Legal',
-      options: legalAbilities.map((name) => ({
-        label: translate?.(name) || name,
-        rightLabel: findUsagePercent(name),
-        value: name,
-      })),
-    });
+      label: translateHeader('Legal'),
+      options: legalAbilities.map((name) => {
+        filterAbilities.push(name);
 
-    filterAbilities.push(...legalAbilities);
+        return {
+          label: translate(name),
+          rightLabel: findUsagePercent(name),
+          value: name,
+        };
+      }),
+    });
   }
 
   if (ability && !filterAbilities.includes(ability)) {
     options.unshift({
-      label: translateHeader?.('Inherited') || 'Inherited',
+      label: translateHeader('Inherited'),
       options: [{
-        label: translate?.(ability) || ability,
+        label: translate(ability),
         rightLabel: findUsagePercent(ability),
         value: ability,
       }],
@@ -189,9 +190,9 @@ export const buildAbilityOptions = (
       .sort(usageSorter);
 
     options.push({
-      label: translateHeader?.('All') || 'All',
+      label: translateHeader('All'),
       options: otherAbilities.map((name) => ({
-        label: translate?.(name) || name,
+        label: translate(name),
         rightLabel: findUsagePercent(name),
         value: name,
       })),

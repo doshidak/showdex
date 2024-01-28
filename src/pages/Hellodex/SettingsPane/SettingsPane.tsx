@@ -33,11 +33,16 @@ import {
 import { logger } from '@showdex/utils/debug';
 import { dehydrateSettings, hydrateSettings, possiblyDehydrated } from '@showdex/utils/hydro';
 import { clearPresetsDb } from '@showdex/utils/storage';
+import { AutoFeaturesSettingsPane } from './AutoFeaturesSettingsPane';
 import { CalcdexSettingsPane } from './CalcdexSettingsPane';
-import { HellodexSettingsPane } from './HellodexSettingsPane';
+import { GeneralSettingsPane } from './GeneralSettingsPane';
+// import { HellodexSettingsPane } from './HellodexSettingsPane';
 import { HonkdexSettingsPane } from './HonkdexSettingsPane';
-import { ShowdexSettingsPane } from './ShowdexSettingsPane';
-import { ShowdownSettingsPane } from './ShowdownSettingsPane';
+import { MetagameSettingsPane } from './MetagameSettingsPane';
+import { PresetsSettingsPane } from './PresetsSettingsPane';
+// import { ShowdexSettingsPane } from './ShowdexSettingsPane';
+// import { ShowdownSettingsPane } from './ShowdownSettingsPane';
+import { VisibilitySettingsPane } from './VisibilitySettingsPane';
 import styles from './SettingsPane.module.scss';
 
 export interface SettingsPaneProps {
@@ -407,7 +412,7 @@ export const SettingsPane = ({
                   />
 
                   <div className={styles.title}>
-                    {t('pane.header.title')}
+                    {t('pane.header.title', 'Settings')}
                   </div>
                 </div>
 
@@ -424,14 +429,14 @@ export const SettingsPane = ({
                         <Badge
                           ref={importBadgeRef}
                           className={styles.importBadge}
-                          label={t('pane.header.import.importedBadge')}
+                          label={t('pane.header.import.importedBadge', 'Imported')}
                           color="blue"
                         />
 
                         <Badge
                           ref={importFailedBadgeRef}
                           className={styles.importBadge}
-                          label={t('pane.header.import.failedBadge')}
+                          label={t('pane.header.import.failedBadge', 'Failed')}
                           color="red"
                         />
 
@@ -470,41 +475,70 @@ export const SettingsPane = ({
                     onPress={handleSettingsExport}
                   />
 
-                  {
-                    !inBattle &&
-                    <Button
-                      className={cx(styles.actionButton, styles.defaultsButton)}
-                      label={t('pane.header.defaults.label')}
-                      tooltip={(
-                        <div className={cx(styles.tooltipContent, styles.importTooltip)}>
-                          <Badge
-                            ref={defaultsBadgeRef}
-                            className={styles.importBadge}
-                            label={t('pane.header.defaults.exportedBadge')}
-                            color="green"
-                          />
+                  <Button
+                    className={cx(styles.actionButton, styles.defaultsButton)}
+                    label={t('pane.header.defaults.label')}
+                    tooltip={(
+                      <div className={cx(styles.tooltipContent, styles.importTooltip)}>
+                        <Badge
+                          ref={defaultsBadgeRef}
+                          className={styles.importBadge}
+                          label={t('pane.header.defaults.exportedBadge')}
+                          color="green"
+                        />
 
-                          <Badge
-                            ref={defaultsFailedBadgeRef}
-                            className={styles.importBadge}
-                            label={t('pane.header.defaults.failedBadge')}
-                            color="red"
-                          />
+                        <Badge
+                          ref={defaultsFailedBadgeRef}
+                          className={styles.importBadge}
+                          label={t('pane.header.defaults.failedBadge')}
+                          color="red"
+                        />
 
-                          {t('pane.header.defaults.tooltip')}
-                        </div>
-                      )}
-                      tooltipTrigger={['focus', 'mouseenter']}
-                      hoverScale={1}
-                      onPress={handleSettingsDefaults}
-                    />
-                  }
+                        {t('pane.header.defaults.tooltip')}
+                      </div>
+                    )}
+                    tooltipTrigger={['focus', 'mouseenter']}
+                    hoverScale={1}
+                    onPress={handleSettingsDefaults}
+                  />
 
                   <div className={styles.closePlaceholder} />
                 </div>
               </div>
 
-              <ShowdexSettingsPane
+              <GeneralSettingsPane
+                value={values}
+                inBattle={inBattle}
+                special={!!authTitle}
+              />
+
+              <CalcdexSettingsPane
+                value={values}
+                inBattle={inBattle}
+              />
+
+              <PresetsSettingsPane
+                value={values}
+                inBattle={inBattle}
+              />
+
+              <AutoFeaturesSettingsPane
+                inBattle={inBattle}
+              />
+
+              <MetagameSettingsPane
+                value={values}
+                inBattle={inBattle}
+              />
+
+              <VisibilitySettingsPane
+                value={values}
+                inBattle={inBattle}
+              />
+
+              <HonkdexSettingsPane />
+
+              {/* <ShowdexSettingsPane
                 inBattle={inBattle}
                 special={!!authTitle}
               />
@@ -522,10 +556,10 @@ export const SettingsPane = ({
 
               <HonkdexSettingsPane />
 
-              <ShowdownSettingsPane />
+              <ShowdownSettingsPane /> */}
 
               <div className={styles.notice}>
-                {t('pane.footer.message')}
+                {t('pane.footer.message', 'if you\'re seeing this, this shit broke af fam')}
                 <br />
                 <span className={styles.face}>
                   (｡◕‿◕｡)

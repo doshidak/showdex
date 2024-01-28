@@ -1,6 +1,7 @@
 export * from './BattleGenOptionTooltip';
 export * from './HomieButton';
 export * from './ItemIcon';
+export * from './MemberIcon';
 export * from './Picon';
 export * from './PiconButton';
 export * from './PokeAbilityOptionTooltip';

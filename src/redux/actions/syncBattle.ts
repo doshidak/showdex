@@ -25,6 +25,7 @@ import {
   detectPlayerKeyFromPokemon,
   detectPokemonDetails,
   detectToggledAbility,
+  mapAutoBoosts,
   mapStellarMoves,
   mergeRevealedMoves,
   parsePokemonDetails,
@@ -1447,6 +1448,21 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // now that all players were processed, recount the number of players
     // (typically required for FFA, when players 3 & 4 need to be invited, so the playerCount never updates)
     battleState.playerCount = countActivePlayers(battleState);
+
+    // also now is the perfect time to populate each Pokemon's autoBoostMap of each player
+    AllPlayerKeys.forEach((playerKey) => {
+      if (!battleState[playerKey]?.pokemon?.length) {
+        return;
+      }
+
+      battleState[playerKey].pokemon.forEach((pokemon) => {
+        pokemon.autoBoostMap = mapAutoBoosts(pokemon, battle.stepQueue, {
+          format: battleState.format,
+          players: battleState,
+          field: battleState.field,
+        });
+      });
+    });
 
     // this is important, otherwise we can't ignore re-renders of the same battle state
     // (which may result in reaching React's maximum update depth)

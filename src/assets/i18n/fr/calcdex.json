@@ -1,10 +1,18 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-12T23:03:17.926Z"
+    "updated": "2024-01-28T10:19:06.819Z"
+  },
+
+  "contextMenu": {
+    "switchSides": "Changer de Joueur",
+    "convertHonk": "Convertir en Honk",
+    "openHellodex": "$t(common:products.hellodex_one)",
+    "closeOverlay": "$t(common:labels.close)",
+    "closeTab": "Fermer l'Onglet"
   },
 
   "overlay": {
@@ -31,7 +39,14 @@
     },
 
     "party": {
-      "aria": "Select {{pokemon}}"
+      "aria": "Sélectionner {{pokemon}}",
+      "contextMenu": {
+        "activatePokemon": "$t(common:labels.active)",
+        "addPokemon": "$t(common:labels.new)",
+        "dupePokemon": "$t(common:labels.duplicate)",
+        "movePokemon": "Passer à {{side}}",
+        "removePokemon": "$t(common:labels.delete)"
+      }
     }
   },
 
@@ -61,6 +76,8 @@
 
       "status": {
         "aria": "$t(pokedex:stats.hp.1) & Statut pour {{pokemon}}",
+        "resetHpLabel": "Réinit",
+        "resetStatusLabel": "Réinit",
         "unknown": "$t(pokedex:types.unknown.3)",
         "ok": "$t(pokedex:nonvolatiles.ok.2)",
         "fnt": "$t(pokedex:nonvolatiles.fnt.2)",
@@ -97,10 +114,10 @@
         "legacyHint": "$t(common:labels.na)",
         "empty": "$t(pokedex:abilities.noability_other)",
         "activeLabel": "$t(common:labels.active)",
-        "resetLabel": "$t(common:labels.reset)",
+        "resetLabel": "Réinit",
         "activeTooltip": "Désactiver <strong>{{ability}}</strong>",
         "inactiveTooltip": "Activer <strong>{{ability}}</strong>",
-        "resetTooltip": "Réinitialiser à {{ability}} Révélée",
+        "resetTooltip": "Réinitialiser à <strong>{{ability}}</strong> Révélée",
         "boostedStatLabel": "Boostée $t(pokedex:headers.stat_one)",
         "autoBoostedStat": "$t(common:labels.auto)",
         "autoBoostedStatLabel": "Boost Auto Activé"
@@ -127,8 +144,8 @@
         "legacyHint": "$t(common:labels.na)",
         "empty": "$t(pokedex:items.noitem_other)",
         "defaultPrevEffect": "$t(common:labels.previous)",
-        "resetLabel": "$t(common:labels.reset)",
-        "resetTooltip": "Réinitialiser à {{item}} {{effect}}"
+        "resetLabel": "Réinit",
+        "resetTooltip": "Réinitialiser à <strong>{{item}}</strong> {{effect}}"
       }
     },
 
@@ -167,13 +184,13 @@
         "inactiveLabel": "$t(common:labels.edit)",
         "activeTooltip": "Fermez l'<strong>Éditeur de Capacités</strong>",
         "inactiveTooltip": "Ouvrez l'<strong>Éditeur de Capacités</strong>",
-        "resetLabel": "$t(common:labels.reset)",
+        "resetLabel": "Réinit",
         "resetTooltip": "Réinitialiser <strong>{{move}}</strong> par Défaut",
 
         "faintCounter": {
           "aria": "Alliés KO Comptants pour {{pokemon}}",
           "label": "KO",
-          "resetLabel": "$t(common:labels.reset)",
+          "resetLabel": "Réinit",
           "resetTooltip": "Réinitialiser à <strong>{{count}} KO</strong>"
         },
 
@@ -263,15 +280,26 @@
     "screens": "Murs",
 
     "conditions": {
-      "light": "Mur Lumiére",
+      "lightscreen": "Lumiére",
       "reflect": "Reflet",
-      "aurora": "Voile Aurore",
-      "hand": "Main",
-      "gift": "Don",
-      "guard": "Garde",
-      "battery": "Batterie",
-      "power": "Énergie",
-      "twind": "Vent"
+      "auroraveil": "Aurore",
+      "helpinghand": "Main",
+      "flowergift": "Don",
+      "friendguard": "Garde",
+      "battery": "Battrie",
+      "powerspot": "Énergie",
+      "tailwind": "Vent",
+      "leechseed": "Graine",
+      "gravity": "Gravité",
+      "stealthrock": "Pièges",
+      "spikes": "Picots"
+    },
+
+    "spikes": {
+      "aria_one": "Mettre {{count}} Couche de $t(pokedex:moves.spikes)",
+      "aria_other": "Mettre {{count}} Couches de $t(pokedex:moves.spikes)",
+      "label_one": "{{count}}<times />Picot",
+      "label_other": "{{count}}<times />Picot"
     },
 
     "weather": {
@@ -279,7 +307,9 @@
       "label": "$t(pokedex:headers.weather)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
-      "empty": "Pas de Météo"
+      "empty": "Pas de Météo",
+      "resetLabel": "Réinit",
+      "resetTooltip": "Réinitialiser à <strong>{{weather}}</strong>"
     },
 
     "terrain": {
@@ -287,7 +317,9 @@
       "label": "$t(pokedex:headers.terrain)",
       "hint": "$t(common:labels.none)",
       "legacyHint": "$t(common:labels.na)",
-      "empty": "Pas de Champ"
+      "empty": "Pas de Champ",
+      "resetLabel": "Réinit",
+      "resetTooltip": "Réinitialiser à <strong>{{terrain}}</strong>"
     }
   }
 }

@@ -25,6 +25,7 @@ export interface CommonButtonProps<
    * `'inline'` renders `<button>`, `'block'` renders `<div>`.
    *
    * @default 'inline'
+   * @since 0.1.0
    */
   display?: 'inline' | 'block';
 
@@ -34,6 +35,7 @@ export interface CommonButtonProps<
    * * Set the value to `-1` to disable button focusing.
    *
    * @default 0
+   * @since 0.1.0
    */
   tabIndex?: number;
 
@@ -41,13 +43,16 @@ export interface CommonButtonProps<
    * Whether the button is disabled.
    *
    * @default false
+   * @since 0.1.0
    */
   disabled?: boolean;
 
   /**
    * Optional callback to trigger when the user invokes the context menu.
+   *
+   * @since 1.2.3
    */
-  // onContextMenu?: (event: TriggerEvent) => void;
+  onContextMenu?: (event: React.MouseEvent<ButtonElement>) => void;
 }
 
 /* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
@@ -66,10 +71,16 @@ export interface BaseButtonProps<
 export type SpringConfig = Record<string, unknown>;
 export type SpringProps = Record<string, unknown>;
 
-const springConfig: SpringConfig = {
+export const BaseButtonSpringConfig: SpringConfig = {
   mass: 1,
   tension: 200,
   friction: 8,
+};
+
+export const BaseButtonScaleConfig: Record<'init' | 'hover' | 'active', number> = {
+  init: 1,
+  hover: 1.025,
+  active: 0.95,
 };
 
 /* eslint-disable react/prop-types -- this rule is hard tripping rn */
@@ -81,12 +92,13 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
   style,
   display = 'inline',
   tabIndex = 0,
-  initScale = 1,
-  hoverScale = 1.025,
-  activeScale = 0.95,
+  initScale = BaseButtonScaleConfig.init,
+  hoverScale = BaseButtonScaleConfig.hover,
+  activeScale = BaseButtonScaleConfig.active,
   disabled,
   children,
   onHover,
+  onContextMenu,
   ...props
 }: BaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const elementType = display === 'inline' ? 'button' : 'div';
@@ -106,7 +118,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
 
   const [{ scale }, springApi] = useSpring(() => ({
     scale: initScale,
-    config: springConfig,
+    config: BaseButtonSpringConfig,
   }));
 
   useGesture({
@@ -148,6 +160,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
         className,
       )}
       style={{ ...style, scale }}
+      onContextMenu={onContextMenu}
     >
       {children}
     </Component>
