@@ -55,7 +55,7 @@ import {
   detectDoublesFormat,
   determineAutoBoostEffect,
   determineDefaultLevel,
-  determineNonVolatile,
+  // determineNonVolatile,
   determineSpeciesForme,
   determineTerrain,
   determineWeather,
@@ -84,7 +84,7 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
   assignOpponent: (playerKey: CalcdexPlayerKey, scope?: string) => void;
   saveHonk: () => void;
 
-  addPokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemon, index?: number, scope?: string) => void;
+  addPokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemon | CalcdexPokemon[], index?: number, scope?: string) => void;
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: Partial<CalcdexPokemon>, scope?: string) => void;
   removePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, scope?: string) => void;
   dupePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, scope?: string) => void;
@@ -406,7 +406,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return void endTimer('(bad state)');
     }
 
-    if (!playerKey || !pokemon?.speciesForme) {
+    const batch = (Array.isArray(pokemon) ? pokemon : [pokemon]).filter((p) => !!p?.speciesForme);
+
+    if (!playerKey || !batch.length) {
       return void endTimer('(bad args)');
     }
 
@@ -418,42 +420,51 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       pokemon: cloneAllPokemon(state[playerKey].pokemon),
     };
 
-    const newPokemon = sanitizePokemon({
-      ...pokemon,
-
-      playerKey,
-      source: 'user',
-      level: pokemon?.level || state.defaultLevel,
-      hp: 100, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
-      maxhp: 100,
-    }, state.format);
-
-    newPokemon.speciesForme = determineSpeciesForme(newPokemon, true);
-
-    if (newPokemon.transformedForme) {
-      newPokemon.transformedForme = determineSpeciesForme(newPokemon);
-    }
-
-    newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
-    newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
-
     const field: Partial<CalcdexBattleField> = {};
 
-    determineFieldConditions(newPokemon, field);
+    batch.forEach((currentPokemon, i) => {
+      const newPokemon = sanitizePokemon({
+        ...currentPokemon,
 
-    // no need to provide activeIndices[] & selectionIndex to detectToggledAbility() since it will just read `active`
-    const currentField: CalcdexBattleField = { ...state.field, ...field };
-    const weather = (currentField.dirtyWeather ?? (currentField.autoWeather || currentField.weather)) || null;
-    const terrain = (currentField.dirtyTerrain ?? (currentField.autoTerrain || currentField.terrain)) || null;
+        playerKey,
+        source: 'user',
+        level: currentPokemon?.level || state.defaultLevel,
+        hp: 100, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
+        maxhp: 100,
+      }, state.format);
 
-    newPokemon.abilityToggled = detectToggledAbility(newPokemon, {
-      gameType: state.gameType,
-      weather,
-      terrain,
+      newPokemon.speciesForme = determineSpeciesForme(newPokemon, true);
+
+      if (newPokemon.transformedForme) {
+        newPokemon.transformedForme = determineSpeciesForme(newPokemon);
+      }
+
+      newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
+      newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
+
+      determineFieldConditions(newPokemon, field);
+
+      // no need to provide activeIndices[] & selectionIndex to detectToggledAbility() since it will just read `active`
+      const currentField: CalcdexBattleField = { ...state.field, ...field };
+      const weather = (currentField.dirtyWeather ?? (currentField.autoWeather || currentField.weather)) || null;
+      const terrain = (currentField.dirtyTerrain ?? (currentField.autoTerrain || currentField.terrain)) || null;
+
+      newPokemon.abilityToggled = detectToggledAbility(newPokemon, {
+        gameType: state.gameType,
+        weather,
+        terrain,
+      });
+
+      const insertionIndex = typeof index === 'number' && index > -1
+        ? (index + i)
+        : payload.pokemon.length;
+
+      payload.pokemon.splice(insertionIndex, 0, newPokemon);
     });
 
-    payload.pokemon.splice(index ?? payload.pokemon.length, 0, newPokemon);
-    payload.selectionIndex = index ?? (payload.pokemon.length - 1);
+    payload.selectionIndex = typeof index === 'number' && index > -1
+      ? (index + clamp(0, batch.length - 1))
+      : (payload.pokemon.length - 1);
 
     if (state.operatingMode === 'standalone') {
       payload.activeIndices = [...(state[playerKey].activeIndices || [])];
@@ -761,11 +772,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }
     }
 
-    mutated.dirtyStatus = determineNonVolatile(mutated);
-
     if (mutating('dirtyStatus') && (mutated.status || 'ok') === mutated.dirtyStatus) {
       mutated.dirtyStatus = null;
     }
+
+    // if (!mutating('dirtyStatus')) {
+    //   mutated.dirtyStatus = determineNonVolatile(mutated);
+    // }
 
     if (mutating('dirtyFaintCounter') && mutated.dirtyFaintCounter === mutated.faintCounter) {
       mutated.dirtyFaintCounter = null;

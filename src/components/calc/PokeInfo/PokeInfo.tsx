@@ -48,6 +48,7 @@ import {
   exportPokePaste,
   flattenAlt,
   flattenAlts,
+  importMultiPokePastes,
   importPokePaste,
 } from '@showdex/utils/presets';
 import {
@@ -383,24 +384,10 @@ export const PokeInfo = ({
 
     try {
       const data = await readClipboardText();
-      const preset = importPokePaste(data, format);
 
-      const speciesMismatch = ![
-        pokemon?.speciesForme,
-        ...(pokemon?.altFormes || []),
-      ].filter(Boolean).includes(preset?.speciesForme);
-
-      const importFailed = !preset?.calcdexId || (operatingMode === 'battle' && speciesMismatch);
-
-      if (importFailed) {
-        setImportFailedReason(t(`poke.info.preset.${preset?.calcdexId ? 'mismatched' : 'malformed'}Badge`));
-        importFailedBadgeRef.current?.show();
-
-        return;
-      }
-
-      if (operatingMode === 'standalone' && speciesMismatch) {
-        addPokemon({
+      if (operatingMode === 'standalone') {
+        const importedPresets = importMultiPokePastes(data, format);
+        const importedPokemon = importedPresets.map((preset) => ({
           speciesForme: preset.speciesForme,
           level: preset.level,
           dirtyTeraType: flattenAlt(preset.teraTypes?.[0]),
@@ -412,9 +399,37 @@ export const PokeInfo = ({
           moves: preset.moves,
           presetId: preset.calcdexId,
           presets: [preset],
-        }, `${l.scope}:handlePokePasteImport()`);
+        }));
+
+        if (!importedPokemon.length) {
+          setImportFailedReason(t('poke.info.preset.malformedBadge', 'Bad Syntax'));
+          importFailedBadgeRef.current?.show();
+
+          return;
+        }
+
+        addPokemon(importedPokemon, `${l.scope}:handlePokePasteImport()`);
 
         return void importBadgeRef.current?.show();
+      }
+
+      const preset = importPokePaste(data, format);
+
+      const speciesMismatch = ![
+        pokemon?.speciesForme,
+        ...(pokemon?.altFormes || []),
+      ].filter(Boolean).includes(preset?.speciesForme);
+
+      const importFailed = !preset?.calcdexId || (operatingMode === 'battle' && speciesMismatch);
+
+      if (importFailed) {
+        setImportFailedReason(t(
+          `poke.info.preset.${preset?.calcdexId ? 'mismatched' : 'malformed'}Badge`,
+          preset?.calcdexId ? 'Mismatch' : 'Bad Syntax',
+        ));
+        importFailedBadgeRef.current?.show();
+
+        return;
       }
 
       const currentPresets = [...pokemon.presets];

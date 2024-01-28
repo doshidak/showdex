@@ -10,6 +10,7 @@ export * from './getPresetFormes';
 export * from './getTeambuilderPresets';
 export * from './getTeamSheetPresets';
 export * from './guessTeambuilderPreset';
+export * from './importMultiPokePastes';
 export * from './importPokePaste';
 export * from './parseUsageSpread';
 export * from './processUsageAlts';
