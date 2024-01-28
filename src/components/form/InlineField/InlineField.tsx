@@ -9,9 +9,11 @@ import styles from './InlineField.module.scss';
 export interface InlineFieldProps extends FieldRenderProps<string, HTMLSpanElement> {
   className?: string;
   style?: React.CSSProperties;
+  tabIndex?: number,
   label?: string;
   hint?: string;
   disabled?: boolean;
+  onContextMenu?: (event: React.MouseEvent<HTMLSpanElement>) => void;
 }
 
 /**
@@ -36,11 +38,13 @@ export interface InlineFieldProps extends FieldRenderProps<string, HTMLSpanEleme
 export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>(({
   className,
   style,
+  tabIndex = 0,
   label,
   hint,
   input,
   meta,
   disabled,
+  onContextMenu,
 }: InlineFieldProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
   const containerRef = React.useRef<HTMLSpanElement>(null);
@@ -156,6 +160,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
         className,
       )}
       style={style}
+      tabIndex={disabled ? -1 : tabIndex}
       aria-label={label}
       contentEditable={!disabled}
       suppressContentEditableWarning
@@ -163,6 +168,10 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
       onInput={(e) => input?.onChange(e?.currentTarget?.innerText)}
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onContextMenu={onContextMenu || ((e) => {
+        e?.preventDefault();
+        e?.stopPropagation();
+      })}
     >
       {initialValue.current}
     </span>
