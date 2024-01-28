@@ -89,13 +89,15 @@ export const determineAutoBoostEffect = (
 
   const {
     // weather: currentWeather,
+    // autoWeather,
     // dirtyWeather,
     terrain: currentTerrain,
+    autoTerrain,
     dirtyTerrain,
   } = field || {};
 
-  // const weather = (dirtyWeather ?? currentWeather) || null;
-  const terrain = (dirtyTerrain ?? currentTerrain) || null;
+  // const weather = (dirtyWeather ?? (autoWeather || currentWeather)) || null;
+  const terrain = (dirtyTerrain ?? (autoTerrain || currentTerrain)) || null;
 
   switch (sourceAbility) {
     case 'Dauntless Shield': {

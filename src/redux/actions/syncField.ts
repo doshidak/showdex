@@ -46,10 +46,12 @@ export const syncField = (
 
   if (newField.weather) {
     newField.dirtyWeather = null;
+    newField.autoWeather = null;
   }
 
   if (newField.terrain) {
     newField.dirtyTerrain = null;
+    newField.autoTerrain = null;
   }
 
   return newField;

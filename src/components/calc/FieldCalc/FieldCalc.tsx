@@ -51,15 +51,17 @@ export const FieldCalc = ({
 
   const {
     weather: currentWeather,
+    autoWeather,
     dirtyWeather,
     terrain: currentTerrain,
+    autoTerrain,
     dirtyTerrain,
   } = field || {};
 
   // these are like dirtyItem, where the user can still clear them (unlike dirtyAbility)
   // (i.e., when manually "cleared," the actual value of the dirty properties is an empty string, not null/undefined)
-  const weather = (dirtyWeather ?? currentWeather) || null;
-  const terrain = (dirtyTerrain ?? currentTerrain) || null;
+  const weather = (dirtyWeather ?? (autoWeather || currentWeather)) || null;
+  const terrain = (dirtyTerrain ?? (autoTerrain || currentTerrain)) || null;
 
   const showResetWeather = !!currentWeather
     && (!!dirtyWeather || typeof dirtyWeather === 'string') // i.e., '' (to forcibly clear) as opposed to null
@@ -388,7 +390,7 @@ export const FieldCalc = ({
             name: `FieldCalc:${battleId || '???'}:Weather:Dropdown`,
             value: weather,
             onChange: (value: Weather) => updateField({
-              dirtyWeather: value || (currentWeather ? '' as Weather : null),
+              dirtyWeather: value || (autoWeather || currentWeather ? '' as Weather : null),
             }, `${l.scope}:Dropdown~Weather:input.onChange()`),
           }}
           options={getWeatherConditions(format).map((name: Weather) => ({
@@ -413,7 +415,7 @@ export const FieldCalc = ({
             name: `FieldCalc:${battleId || '???'}:Terrain:Dropdown`,
             value: terrain,
             onChange: (value: Terrain) => updateField({
-              dirtyTerrain: value || (currentTerrain ? '' as Terrain : null),
+              dirtyTerrain: value || (autoTerrain || currentTerrain ? '' as Terrain : null),
             }, `${l.scope}:Dropdown~Terrain:input.onChange()`),
           }}
           options={TerrainNames.map((name) => ({
