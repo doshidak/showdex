@@ -109,6 +109,7 @@ export const PatronagePane = ({
                   showdownUser: true,
                   periods: null,
                 }}
+                defaultSrc="sparkle"
               />
             </div>
 

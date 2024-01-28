@@ -14,6 +14,7 @@ export interface MemberIconProps {
   iconClassName?: string;
   iconStyle?: React.CSSProperties;
   member: ShowdexSupporterTierMember;
+  defaultSrc?: string;
   reverseColorScheme?: boolean;
 }
 
@@ -23,6 +24,7 @@ export const MemberIcon = ({
   iconClassName,
   iconStyle,
   member,
+  defaultSrc,
   reverseColorScheme,
 }: MemberIconProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
@@ -36,7 +38,12 @@ export const MemberIcon = ({
   const memberTitle = findPlayerTitle(name, showdownUser);
 
   if (!memberTitle?.icon) {
-    return null;
+    return defaultSrc ? (
+      <Svg
+        className={cx(styles.icon, iconClassName)}
+        src={getResourceUrl(`${defaultSrc}.svg`)}
+      />
+    ) : null;
   }
 
   const color = memberTitle.color?.[colorScheme];
