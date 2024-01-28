@@ -190,7 +190,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         format: state.format,
         targetPokemon,
         activePokemon: state?.gameType === 'Singles'
-          ? [state[opponentKey]?.pokemon?.[state[opponentKey]?.selectionIndex]].filter(Boolean)
+          ? [playersPayload[opponentKey]?.pokemon?.[playersPayload[opponentKey]?.selectionIndex]].filter(Boolean)
           : activePokemon.filter((p) => p.calcdexId !== sourcePokemon.calcdexId),
         field: { ...state.field, ...field },
       });
