@@ -88,6 +88,7 @@ export const FormatLabels: Record<string, string> = {
   kitakamiprologue: 'Kitakami Prologue',
   lc: 'LC', // LittleCup
   lcuu: 'LC UU',
+  letsgodoublesou: 'LGPE Doubles OU',
   letsgoou: 'LGPE OU', // LetsGoPikachuEevee
   letsgorandombattle: 'LGPE Randoms',
   linked: 'Linked',
@@ -180,6 +181,7 @@ export const FormatLabels: Record<string, string> = {
   superstaffbros4: 'SSB4',
   tagteamsingles: 'Tag Team Singles',
   teradonation: 'Tera Donation',
+  terapreviewdraft: 'Tera Draft',
   terapreviewnatdexdraft: 'NatDex Tera Draft',
   terapreviewpaldeadexdraft: 'Paldea Tera Draft',
   thecardgame: 'Card Game',
