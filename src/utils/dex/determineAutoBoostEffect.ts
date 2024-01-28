@@ -5,10 +5,10 @@ import {
   type Terrain,
 } from '@smogon/calc';
 import { type CalcdexAutoBoostEffect, type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { logger } from '@showdex/utils/debug';
+// import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat } from './detectGenFromFormat';
 
-const l = logger('@showdex/utils/dex/determineAutoBoostEffect()');
+// const l = logger('@showdex/utils/dex/determineAutoBoostEffect()');
 
 /**
  * Determines the `boosts` for a `CalcdexAutoBoostEffect`.
@@ -121,7 +121,9 @@ export const determineAutoBoostEffect = (
       // in gen 4 only, Pokemon behind a sub aren't considered in the averages (fails if ALL pokemon are sub'd up)
       const eligible = activePokemon?.filter((p) => (
         !!p?.speciesForme
-          && p.active
+          // && p.active
+          && (p.baseStats?.def || 0) > 0
+          && (p.baseStats?.spd || 0) > 0
           && (gen !== 4 || !('substitute' in (p.volatiles || {})))
       )) || [];
 
@@ -134,9 +136,11 @@ export const determineAutoBoostEffect = (
       // const defStat: Showdown.StatNameNoHp = field?.isWonderRoom ? 'spd' : 'def';
       // const spdStat: Showdown.StatNameNoHp = field?.isWonderRoom ? 'def' : 'spd';
 
-      const avgDef = Math.floor(eligible.reduce((prev, p) => prev + (p.baseStats?.def || 0), 0) / eligible.length);
-      const avgSpd = Math.floor(eligible.reduce((prev, p) => prev + (p.baseStats?.spd || 0), 0) / eligible.length);
+      const avgDef = Math.floor(eligible.reduce((prev, p) => prev + (p.dirtyBaseStats?.def || p.baseStats.def), 0) / eligible.length);
+      const avgSpd = Math.floor(eligible.reduce((prev, p) => prev + (p.dirtyBaseStats?.spd || p.baseStats.spd), 0) / eligible.length);
       const boostedStat: Showdown.StatNameNoHp = avgDef < avgSpd ? 'atk' : 'spa';
+
+      // l.debug('eligible', eligible, '\n', 'avgDef', avgDef, 'avgSpd', avgSpd, 'boostedStat', boostedStat);
 
       output.boosts[boostedStat] = 1;
 
@@ -370,7 +374,7 @@ export const determineAutoBoostEffect = (
     }
   }
 
-  l.debug('output for', sourcePokemon?.ident, '->', targetPokemon?.ident, '\n', output);
+  // l.debug('output for', sourcePokemon?.ident, '->', targetPokemon?.ident, '\n', output);
 
   return output;
 };
