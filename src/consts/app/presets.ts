@@ -17,7 +17,7 @@ export const ShowdexPresetsBundles: ShowdexPresetsBundle[] = [
     format: 'vgc2024',
     description: 'Curated VGC sets from the Nimbasa City Post VGC Damage Calculator, as of January 2024.',
     created: '2024-01-04T09:38:33Z',
-    updated: '2024-01-04T09:38:33Z',
+    updated: '2024-01-19T23:51:01.355Z',
     disabled: false,
   },
 ];
