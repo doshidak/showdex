@@ -86,7 +86,7 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
 
   addPokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemon | CalcdexPokemon[], index?: number, scope?: string) => void;
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: Partial<CalcdexPokemon>, scope?: string) => void;
-  removePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, scope?: string) => void;
+  removePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, reselectLast?: boolean, scope?: string) => void;
   dupePokemon: (playerKey: CalcdexPlayerKey, pokemonOrId: CalcdexPokemon | string, scope?: string) => void;
   movePokemon: (
     sourceKey: CalcdexPlayerKey,
@@ -890,6 +890,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
   const removePokemon: CalcdexContextConsumables['removePokemon'] = (
     playerKey,
     pokemonOrId,
+    reselectLast,
     scopeFromArgs,
   ) => {
     // used for debugging purposes only
@@ -939,8 +940,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       payload.activeIndices.splice(activeIndicesIndex, 1);
     }
 
-    if (state[playerKey].selectionIndex > payload.pokemon.length) {
-      payload.selectionIndex = payload.pokemon.length;
+    if (state[playerKey].selectionIndex > payload.pokemon.length - 1) {
+      payload.selectionIndex = payload.pokemon.length - (reselectLast ? 1 : 0);
     }
 
     const extendAmount = Math.abs(env.int('honkdex-player-extend-pokemon', 0));

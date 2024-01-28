@@ -23,6 +23,7 @@ export interface CalcdexPokeContextConsumables extends CalcdexPokeContextValue {
 
   removePokemon: (
     pokemonOrId: PickRequired<CalcdexPokemon, 'calcdexId'> | string,
+    reselectLast?: boolean,
     scope?: string,
   ) => void;
 
@@ -97,10 +98,12 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
 
   const removePokemon: CalcdexPokeContextConsumables['removePokemon'] = (
     pokemonOrId,
+    reselectLast,
     scopeFromArgs,
   ) => removePlayerPokemon(
     playerKey,
     pokemonOrId,
+    reselectLast,
     s('removePokemon()', scopeFromArgs),
   );
 

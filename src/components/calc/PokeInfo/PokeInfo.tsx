@@ -556,7 +556,7 @@ export const PokeInfo = ({
                     }
 
                     if (!value) {
-                      return void removePokemon(pokemon.calcdexId, s);
+                      return void removePokemon(pokemon.calcdexId, false, s);
                     }
 
                     updatePokemon({ speciesForme: value }, s);

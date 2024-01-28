@@ -1,10 +1,8 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
 import { PlayerPiconButton } from '@showdex/components/calc';
-import {
-  type RackGridProps,
-  DroppableGrid,
-} from '@showdex/components/layout';
+import { type RackGridProps, DroppableGrid } from '@showdex/components/layout';
 import { ContextMenu, useContextMenu } from '@showdex/components/ui';
 import { type DropdownOption } from '@showdex/components/form';
 import { PiconRackContext } from '@showdex/components/layout';
@@ -17,6 +15,7 @@ import { CalcdexPokeProvider } from '../CalcdexPokeContext';
 import { useCalcdexContext } from '../CalcdexContext';
 import { PlayerInfo } from '../PlayerInfo';
 import { PokeCalc } from '../PokeCalc';
+import { SideControls } from '../SideControls';
 import styles from './PlayerCalc.module.scss';
 
 export interface PlayerCalcProps {
@@ -40,6 +39,7 @@ export const PlayerCalc = ({
   playerOptions,
   mobile,
 }: PlayerCalcProps): JSX.Element => {
+  const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 
   const {
@@ -72,7 +72,7 @@ export const PlayerCalc = ({
     pokemon: playerParty,
     maxPokemon,
     activeIndices: playerActives,
-    selectionIndex: playerIndex,
+    // selectionIndex: playerIndex,
   } = playerState;
 
   const {
@@ -138,7 +138,7 @@ export const PlayerCalc = ({
           targetIndex,
           `${l.scope}:PlayerPiconButton~SelectionIndex:onPress()`,
         )}
-        onContextMenu={partyIndex > -1 ? (e) => {
+        onContextMenu={operatingMode === 'standalone' && partyIndex > -1 ? (e) => {
           showContextMenu?.({ id: piconMenuId, event: e });
           setContextPiconId(pid);
           e.stopPropagation();
@@ -166,7 +166,7 @@ export const PlayerCalc = ({
         containerSize === 'xs' && styles.verySmol,
         ['xs', 'sm'].includes(containerSize) && styles.smol,
         ['md', 'lg', 'xl'].includes(containerSize) && styles.big,
-        containerSize === 'xl' && styles.veryThicc,
+        (containerSize === 'xl' || containerWidth > 990) && styles.veryThicc,
         containerWidth < 360 && styles.skinnyBoi,
         (mobile && renderMode === 'overlay') && styles.mobileOverlay,
         operatingMode === 'standalone' && styles.standalone,
@@ -184,6 +184,14 @@ export const PlayerCalc = ({
             defaultName={defaultName}
             playerOptions={playerOptions}
             mobile={mobile}
+          />
+        }
+
+        {
+          operatingMode === 'standalone' &&
+          <SideControls
+            className={styles.sideControls}
+            playerKey={playerKey}
           />
         }
 
@@ -210,118 +218,6 @@ export const PlayerCalc = ({
               })
           )}
         </DroppableGrid>
-
-        {/* <RackGrid
-          containerClassName={styles.teamList}
-          itemIds={itemIds}
-          itemKeyPrefix={`${playerKey}:pokemon`}
-          columns={(
-            (operatingMode === 'standalone' && containerSize === 'xs' && 12)
-              || (operatingMode === 'standalone' && ['md', 'lg'].includes(containerSize) && 3)
-              || (operatingMode === 'standalone' && containerSize === 'xl' && 4)
-              || 6
-          )}
-          minRows={1}
-          gridSize={40}
-          gridGap={0}
-          editable={operatingMode === 'standalone'}
-          renderItem={renderItem}
-        /> */}
-
-        {/* <div className={styles.teamList}>
-          {Array(Math.max(maxPokemon || 0, minPokemon)).fill(null).map((_, i) => {
-            const pokemon = playerParty?.[i];
-
-            const pokemonKey = pokemon?.calcdexId
-              || pokemon?.ident
-              || pokemon?.searchid
-              || pokemon?.details
-              || pokemon?.name
-              || pokemon?.speciesForme
-              || String(i);
-
-            const friendlyPokemonName = pokemon?.speciesForme
-              || pokemon?.name
-              || pokemonKey;
-
-            const speciesForme = pokemon?.speciesForme; // don't show transformedForme here, as requested by camdawgboi
-            const hp = calcPokemonCurrentHp(pokemon);
-            const item = pokemon?.dirtyItem ?? pokemon?.item;
-
-            const pokemonSelected = (
-              operatingMode === 'standalone'
-                && (playerIndex ?? -1) > -1
-                && i === playerIndex
-            ) || (
-              !!pokemon?.calcdexId
-                && !!playerPokemon?.calcdexId
-                && playerPokemon.calcdexId === pokemon.calcdexId
-            );
-
-            const disabled = operatingMode === 'battle' && !pokemon?.speciesForme;
-
-            return (
-              <PiconButton
-                key={`PlayerCalc:Picon:${playerKey}:${pokemonKey}`}
-                className={cx(
-                  styles.piconButton,
-                  pokemon?.active && styles.active,
-                  pokemonSelected && styles.selected,
-                  !hp && styles.fainted,
-                )}
-                piconClassName={cx(
-                  styles.picon,
-                  !pokemon?.speciesForme && styles.none,
-                )}
-                display="block"
-                aria-label={t('player.party.aria', { pokemon: friendlyPokemonName })}
-                pokemon={speciesForme ? {
-                  ...pokemon,
-                  speciesForme: speciesForme?.replace(pokemon?.useMax ? '' : '-Gmax', ''),
-                  item,
-                } : 'pokeball-none'}
-                tooltip={pokemon?.speciesForme ? (
-                  <PokeGlance
-                    className={styles.glanceTooltip}
-                    pokemon={pokemon}
-                    format={format}
-                    showNickname={settings?.showNicknames}
-                    showAbility={operatingMode === 'standalone' || pokemon?.abilityToggled}
-                    showItem
-                    showStatus
-                    reverseColorScheme
-                  />
-                ) : undefined}
-                tooltipPlacement="top"
-                tooltipOffset={[0, -4]}
-                disabled={disabled}
-                onPress={() => selectPokemon(
-                  playerKey,
-                  i,
-                  `${l.scope}:PiconButton~SelectionIndex:onPress()`,
-                )}
-                onContextMenu={(e) => {
-                  if (operatingMode !== 'standalone' || !pokemon?.calcdexId) {
-                    return;
-                  }
-
-                  showContextMenu?.({ id: piconMenuId, event: e });
-                  setContextPiconId(pokemon.calcdexId);
-                  e.stopPropagation();
-                }}
-              >
-                <div className={styles.piconBackground} />
-
-                {
-                  (operatingMode === 'standalone' && !pokemon?.speciesForme) &&
-                  <div className={styles.piconAdd}>
-                    <i className="fa fa-plus" />
-                  </div>
-                }
-              </PiconButton>
-            );
-          })}
-        </div> */}
       </div>
 
       <CalcdexPokeProvider playerKey={playerKey}>
@@ -334,23 +230,23 @@ export const PlayerCalc = ({
         id={piconMenuId}
         itemKeyPrefix="PlayerCalc:Picon:ContextMenu"
         items={[
-          {
-            key: 'select-pokemon',
-            entity: 'item',
-            props: {
-              label: 'Select',
-              icon: 'fa-mouse-pointer',
-              hidden: contextPokemon?.calcdexId === playerParty?.[playerIndex]?.calcdexId,
-              disabled: typeof contextPokemonIndex !== 'number',
-              onPress: hideAfter(() => selectPokemon(playerKey, contextPokemonIndex)),
-            },
-          },
+          // {
+          //   key: 'select-pokemon',
+          //   entity: 'item',
+          //   props: {
+          //     label: 'Select',
+          //     icon: 'fa-mouse-pointer',
+          //     hidden: contextPokemon?.calcdexId === playerParty?.[playerIndex]?.calcdexId,
+          //     disabled: typeof contextPokemonIndex !== 'number',
+          //     onPress: hideAfter(() => selectPokemon(playerKey, contextPokemonIndex)),
+          //   },
+          // },
           {
             key: 'active-pokemon',
             entity: 'item',
             props: {
               theme: contextPokemon?.active ? 'info' : 'default',
-              label: 'Active',
+              label: t('player.party.contextMenu.activatePokemon', 'Active'),
               icon: contextPokemon?.active ? 'ghost-boo' : 'ghost-smile',
               iconStyle: { strokeWidth: 4, transform: 'scale(1.2)' },
               disabled: typeof contextPokemonIndex !== 'number',
@@ -378,7 +274,7 @@ export const PlayerCalc = ({
             key: 'new-pokemon',
             entity: 'item',
             props: {
-              label: 'New',
+              label: t('player.party.contextMenu.addPokemon', 'New'),
               icon: 'fa-plus',
               hidden: operatingMode !== 'standalone' || !contextPokemon?.calcdexId,
               onPress: hideAfter(() => selectPokemon(playerKey, playerParty.length)),
@@ -388,7 +284,7 @@ export const PlayerCalc = ({
             key: 'dupe-pokemon',
             entity: 'item',
             props: {
-              label: 'Duplicate',
+              label: t('player.party.contextMenu.dupePokemon', 'Duplicate'),
               icon: 'copy-plus',
               iconStyle: { strokeWidth: 4, transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,
@@ -400,7 +296,10 @@ export const PlayerCalc = ({
             key: 'move-pokemon',
             entity: 'item',
             props: {
-              label: `Move to ${playerKey === 'p1' ? 'B' : 'A'}`,
+              label: t('player.party.contextMenu.movePokemon', {
+                side: playerKey === 'p1' ? 'B' : 'A',
+                defaultValue: `Move to ${playerKey === 'p1' ? 'B' : 'A'}`,
+              }),
               icon: `fa-arrow-${playerKey === 'p1' ? 'down' : 'up'}`,
               disabled: !contextPokemon?.calcdexId,
               hidden: operatingMode !== 'standalone',
@@ -423,17 +322,17 @@ export const PlayerCalc = ({
             entity: 'item',
             props: {
               theme: 'error',
-              label: 'Delete',
+              label: t('player.party.contextMenu.removePokemon', 'Delete'),
               // icon: 'fa-times-circle',
               icon: 'trash-close',
               iconStyle: { transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,
               hidden: operatingMode !== 'standalone',
-              onPress: hideAfter(() => removePokemon(playerKey, contextPokemon)),
+              onPress: hideAfter(() => removePokemon(playerKey, contextPokemon, true)),
             },
           },
         ]}
-        // disabled={operatingMode === 'standalone'}
+        disabled={operatingMode === 'standalone'}
         onVisibilityChange={(visible) => {
           if (visible || contextPiconId) {
             return;
