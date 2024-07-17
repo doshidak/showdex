@@ -395,7 +395,11 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gameType: gameType || currentState.gameType,
         defaultLevel: defaultLevel || currentState.defaultLevel,
         // active: typeof active === 'boolean' ? active : currentState.active,
-        overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
+        overlayVisible: currentState.renderMode === 'overlay' && (
+          typeof overlayVisible === 'boolean'
+            ? overlayVisible
+            : currentState.overlayVisible
+        ),
         containerSize: containerSize || currentState.containerSize,
         containerWidth: containerWidth || currentState.containerWidth,
         playerKey: playerKey || currentState.playerKey,
