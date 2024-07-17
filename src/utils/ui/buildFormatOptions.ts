@@ -1,4 +1,4 @@
-import { type GenerationNum } from '@smogon/calc';
+import { type GameType, type GenerationNum } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { FormatSectionLabels, GenLabels } from '@showdex/consts/dex';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
@@ -13,7 +13,6 @@ const prioritySection = (
 const standardizeSection = (
   section: string,
   all?: string[],
-  gen?: GenerationNum,
 ): string => {
   const sectionId = formatId(section);
 
@@ -25,14 +24,12 @@ const standardizeSection = (
     return FormatSectionLabels[sectionId];
   }
 
-  if (sectionId === 'pastgenerations') {
-    return all?.find((s) => formatId(s).includes('singles'))
-      || `${GenLabels[gen]?.label || ''} Singles`.trim();
+  if (['pastgenerations', 'pastgensou'].includes(sectionId)) {
+    return all?.find((s) => formatId(s).includes('singles')) || 'Singles';
   }
 
   if (sectionId === 'pastgensdoublesou') {
-    return all?.find((s) => formatId(s).includes('doubles'))
-      || `${GenLabels[gen]?.label || ''} Doubles`.trim();
+    return all?.find((s) => formatId(s).includes('doubles')) || 'Doubles';
   }
 
   return section;
@@ -48,7 +45,7 @@ export const buildFormatOptions = (
   config?: {
     currentFormat?: string;
     showAll?: boolean;
-    translateHeader?: (value: string) => string;
+    translateHeader?: (value: string, dict?: Record<string, string>) => string;
   },
 ): CalcdexBattleFormatOption[] => {
   const options: CalcdexBattleFormatOption[] = [];
@@ -64,7 +61,14 @@ export const buildFormatOptions = (
   } = config || {};
 
   const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
-  const eligible = (f: string) => !!f && (showAll || (!f.includes('random') && !f.includes('custom')));
+  const translateGenHeader = (t: GameType) => translateHeaderFromConfig?.(`gen${t.toLowerCase()}`, { gen: GenLabels[gen]?.slug });
+
+  // update (2024/07/16): apparently there's a 'donotuse' pet mod format LOL -- probably named that way for a good reason?
+  const eligible = (f: string) => !!f && (showAll || (
+    !f.includes('random')
+      && !f.includes('custom')
+      && !f.includes('donotuse')
+  ));
 
   const favoritedFormats = Object.entries(Dex?.prefs('starredformats') || {})
     .filter(([format, faved]) => eligible(format) && detectGenFromFormat(format) === gen && faved)
@@ -96,18 +100,9 @@ export const buildFormatOptions = (
 
   const sections: CalcdexBattleFormatOption[] = initialSections
     .reduce((prev, value) => {
-      if (!value) {
-        return prev;
-      }
+      const section = standardizeSection(value, initialSections);
 
-      const section = standardizeSection(value, initialSections, gen);
-
-      // e.g., section = 'Randomized Metas' (we don't want that section when showAll is falsy)
-      if (!showAll && formatId(section)?.includes('random')) {
-        return prev;
-      }
-
-      if (!prev.includes(section)) {
+      if (section && !prev.includes(section)) {
         prev.push(section);
       }
 
@@ -133,7 +128,7 @@ export const buildFormatOptions = (
 
   if (favoritedFormats.length) {
     sections.unshift({
-      label: translateHeader('Favorites'),
+      label: 'Favorites',
       options: favoritedFormats.map((format) => {
         const { base, label } = parseBattleFormat(format);
         const value = getGenfulFormat(gen, base);
@@ -173,17 +168,12 @@ export const buildFormatOptions = (
   }
 
   const otherFormats: CalcdexBattleFormatOption = {
-    label: translateHeader('Other'),
+    label: 'Other',
     options: [],
   };
 
   genFormats.forEach((format) => {
-    const section = standardizeSection(format.section, initialSections, gen);
-
-    if (!showAll && formatId(section)?.includes('random')) {
-      return;
-    }
-
+    const section = standardizeSection(format.section, initialSections);
     const group = (!!section && sections.find((g) => g.label === section)) || otherFormats;
     const { base, label } = parseBattleFormat(format.id);
     const value = getGenfulFormat(gen, base);
@@ -209,7 +199,7 @@ export const buildFormatOptions = (
 
   if (currentFormatLabel && !filterFormatLabels.includes(currentFormatLabel)) {
     options.unshift({
-      label: translateHeader('Current'),
+      label: 'Current',
       options: [{
         label: currentFormatLabel,
         value: currentFormat,
@@ -217,5 +207,11 @@ export const buildFormatOptions = (
     });
   }
 
-  return options;
+  return options.map((o) => ({
+    ...o,
+    label: (
+      ((o.label as string).endsWith('Singles') || (o.label as string).endsWith('Doubles'))
+        && translateGenHeader((o.label as string).endsWith('Singles') ? 'Singles' : 'Doubles')
+    ) || translateHeader((o.label as string)),
+  }));
 };

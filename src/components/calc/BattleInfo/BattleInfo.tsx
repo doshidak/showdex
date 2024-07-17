@@ -99,7 +99,7 @@ export const BattleInfo = ({
     {
       currentFormat: format,
       showAll: honkdexSettings?.showAllFormats,
-      translateHeader: (v) => t(`pokedex:headers.${formatId(v)}`, v),
+      translateHeader: (v, d) => t(`pokedex:headers.${formatId(v)}`, { ...d, defaultValue: v }),
     },
   ), [
     format,

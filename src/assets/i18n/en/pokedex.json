@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "pokedex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-17T19:11:45.649Z"
+    "updated": "2024-07-17T04:53:49.411Z"
   },
 
   "abilities": {
@@ -166,6 +166,8 @@
     "favorites": "Favorites",
     "field": "Field",
     "formes": "Formes",
+    "gendoubles": "$t(pokedex:gens.{{gen}}.label) Doubles",
+    "gensingles": "$t(pokedex:gens.{{gen}}.label) Singles",
     "hiddenability": "Hidden Ability",
     "hiddenpower": "Hidden Power",
     "illegalresults": "Illegal",
