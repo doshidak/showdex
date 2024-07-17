@@ -63,8 +63,10 @@
         "<-- auto-filled; do not edit -->"
       ],
       "resources": [
+        "3d-bold.svg",
         "9k-plus.svg",
         "bug.svg",
+        "catching-pokemon.svg",
         "clipboard-heart.svg",
         "close-circle.svg",
         "cog.svg",

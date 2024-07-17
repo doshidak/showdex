@@ -94,10 +94,14 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     'momalaharris',
     'mrmimikry',
     'pastgenoufan',
+    'pinachi',
     'plaguevonkarma',
     // 'pokepastry', // commented to apply T.1 Patron title
     'pulseks',
     'snacky98',
+    'sylvee1',
+    'sylvthesizer',
+    'texascloverleaf',
     'weavileisasin',
   ],
 }, {
@@ -114,8 +118,13 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
 
   userIds: [
     ['bruhmomentmaker', 'First Blaziken Patron'],
+    'buyuuh',
+    'furrykrisp',
+    'janaval',
     'nexyralt',
     'pokepastry',
+    'qizwn',
+    'radiantshackles',
     'thenexyr',
   ],
 }, {
@@ -203,7 +212,7 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
     'pbc88',
   ],
 }, {
-  title: 'Supreme Overlord Patron', /** @todo when `title` is received by patron */
+  title: 'Supreme Overlord Patron',
   supporterId: 'patreon-tier-03',
   custom: true,
   icon: '9k-plus',
@@ -217,5 +226,39 @@ export const ShowdexPlayerTitles: ShowdexPlayerTitle[] = [{
   userIds: [
     'ahokgotit',
     'nashketchumai',
+  ],
+}, {
+  title: 'Make it Rain',
+  supporterId: 'patreon-tier-03',
+  custom: true,
+  icon: 'catching-pokemon',
+  iconDescription: 'Catching Pokémon Icon',
+
+  color: {
+    light: '#F57F17',
+    dark: '#FFB300',
+  },
+
+  userIds: [
+    'advsnuts',
+    'braeh',
+    'jordankmemes',
+    'notmspaint',
+    'twentyenty',
+  ],
+}, {
+  title: 'Supreme Overlord Patron',
+  supporterId: 'patreon-tier-03',
+  custom: true,
+  icon: '3d-bold',
+  iconDescription: '3D Bold Icon',
+
+  color: {
+    light: '#F57F17',
+    dark: '#FFB300',
+  },
+
+  userIds: [
+    'picachuleboss',
   ],
 }];

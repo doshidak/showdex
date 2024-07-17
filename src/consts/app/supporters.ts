@@ -13,6 +13,11 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
 
     members: [
       {
+        name: 'Texas Cloverleaf',
+        showdownUser: true,
+        periods: [['2024-05-28T03:08:45Z']],
+      },
+      {
         name: 'CPL593H',
         showdownUser: true,
         periods: [['2023-09-14T03:46:43Z']],
@@ -42,7 +47,15 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
       {
         name: 'Snacky98',
         showdownUser: true,
-        periods: [['2024-01-06T03:16:26.000Z']],
+        periods: [['2024-01-06T03:16:26Z']],
+      },
+      {
+        name: 'Wesley L',
+        periods: [['2024-02-16T06:07:27Z']],
+      },
+      {
+        name: 'James G',
+        periods: [['2024-02-25T07:05:46Z']],
       },
       {
         name: 'joshtheking7',
@@ -68,6 +81,19 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
         periods: [['2023-10-30T11:01:05Z']],
       },
       {
+        name: 'Emile L',
+        periods: [['2024-03-04T23:05:34Z']],
+      },
+      {
+        name: 'Nima R',
+        periods: [['2024-04-28T00:58:23Z']],
+      },
+      {
+        name: 'Pinachi',
+        showdownUser: true,
+        periods: [['2024-04-29T22:35:11Z']],
+      },
+      {
         name: 'GenOne',
         showdownUser: true,
         periods: [['2023-03-18T20:56:43Z']],
@@ -75,6 +101,10 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
       {
         name: 'Jacek L',
         periods: [['2023-11-23T01:56:38Z']],
+      },
+      {
+        name: 'Rodrigo S',
+        periods: [['2024-06-18T16:58:35Z']],
       },
       {
         name: 'Lunarvania',
@@ -123,9 +153,31 @@ export const ShowdexDonorTiers: ShowdexSupporterTier[] = [
         periods: [['2023-08-09T06:00:54Z']],
       },
       {
+        name: 'Ethan D',
+        periods: [['2024-04-08T17:50:48Z']],
+      },
+      {
+        name: 'Jonas H',
+        periods: [['2024-05-17T08:48:28Z']],
+      },
+      {
+        name: 'Itamar M',
+        periods: [['2024-05-27T21:57:18Z']],
+      },
+      {
+        name: 'sylvthesizer',
+        showdownUser: true,
+        periods: [['2024-06-08T13:35:42Z']],
+      },
+      {
         name: 'momalaharris',
         showdownUser: true,
         periods: [['2022-12-23T18:48:45Z']],
+      },
+      {
+        name: 'Sylvee1',
+        showdownUser: true,
+        periods: [['2024-03-13T02:33:20Z']],
       },
       {
         name: 'FR1E5',
@@ -168,12 +220,22 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
       {
         name: 'Ah Ok Got It',
         showdownUser: true,
-        periods: [['2023-10-28T16:57:56Z']],
+        periods: [['2023-10-28T16:57:56Z', '2024-04-28T16:57:56Z']],
+      },
+      {
+        name: 'ADVs Nuts',
+        showdownUser: true,
+        periods: [['2024-05-10T15:52:01Z']],
       },
       {
         name: 'Swift Mochi',
         showdownUser: true,
         periods: [['2023-04-10T16:17:09Z', '2023-06-10T16:17:09Z']],
+      },
+      {
+        name: 'Picachuleboss',
+        showdownUser: true,
+        periods: [['2024-07-05T21:56:50Z']],
       },
       {
         name: 'Zzodz',
@@ -228,7 +290,8 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
         periods: [['2023-08-04T03:41:08Z']],
       },
       {
-        name: 'Kristen G',
+        name: 'FurryKrisp',
+        showdownUser: true,
         periods: [['2023-10-29T10:46:04Z']],
       },
       {
@@ -238,6 +301,30 @@ export const ShowdexPatronTiers: ShowdexSupporterTier[] = [
       {
         name: 'Wan L',
         periods: [['2024-01-07T14:17:20Z']],
+      },
+      {
+        name: 'RadiantShackles',
+        showdownUser: true,
+        periods: [['2024-03-04T00:44:33Z']],
+      },
+      {
+        name: 'Trent L',
+        periods: [['2024-04-02T05:23:10Z']],
+      },
+      {
+        name: 'qizwn',
+        showdownUser: true,
+        periods: [['2024-02-26T02:19:41Z', '2024-04-26T00:19:41Z']],
+      },
+      {
+        name: 'buyuuh',
+        showdownUser: true,
+        periods: [['2024-04-28T10:56:44Z', '2024-05-28T10:56:44Z']],
+      },
+      {
+        name: 'Janaval',
+        showdownUser: true,
+        periods: [['2024-06-26T09:50:40Z']],
       },
     ],
   },

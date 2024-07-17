@@ -66,19 +66,6 @@ export const HomieButton = ({
     <>
       <span>{name}</span>
 
-      {/*
-        (showTitles && showdownUser && !!userTitle?.icon) &&
-        <Svg
-          className={styles.usernameIcon}
-          style={userIconColor ? {
-            color: userTitle.iconColorGlow ? '#FFFFFF' : userIconColor,
-            boxShadow: userTitle.iconColorGlow ? `0 0 3px ${userIconColor}` : undefined,
-          } : undefined}
-          description={userTitle.iconDescription}
-          src={getResourceUrl(`${userTitle.icon}.svg`)}
-        />
-      */}
-
       {
         (showTitles && showdownUser && !!userTitle?.icon) &&
         <MemberIcon
@@ -97,12 +84,6 @@ export const HomieButton = ({
           {
             (userTitle?.custom && !!userTitle?.icon) &&
             <>
-              {/* <Svg
-                className={styles.customTitleIcon}
-                style={{ color: userTitle.iconColorGlow ? '#FFFFFF' : (userTooltipIconColor || userTooltipLabelColor) }}
-                description={userTitle.iconDescription}
-                src={getResourceUrl(`${userTitle.icon}.svg`)}
-              /> */}
               <MemberIcon
                 className={styles.customTitleIcon}
                 member={homie}
@@ -197,18 +178,6 @@ export const HomieButton = ({
                   duration.hours = 0;
                 }
 
-                /*
-                if (duration.days > 3) {
-                  duration.weeks++;
-                  duration.days = 0;
-                }
-
-                if (duration.weeks > 2) {
-                  duration.months++;
-                  duration.weeks = 0;
-                }
-                */
-
                 if (duration.days > 15) {
                   duration.months++;
                   duration.days = 0;
@@ -220,21 +189,11 @@ export const HomieButton = ({
                   duration.months = Math.max(duration.months - 12, 0);
                 }
 
-                /*
-                const formatted = formatDistance(startDate, endDate || buildDate)
-                  .replace(/1(?=\x20)/, 'a')
-                  .replace('about', '');
-
-                if (formatted.includes('day')) {
-                  return null;
-                }
-                */
-
                 const formatted = formatDuration(duration, {
                   format: ['years', 'months'],
                   zero: false,
                   delimiter: ' & ',
-                }).replace(/1(?=\x20)/, 'a');
+                }).replace(/(?:^|\x20)1(?=\x20)/, 'a');
 
                 if (!formatted) {
                   return null;
