@@ -701,7 +701,7 @@ export const PokeInfo = ({
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel={t('poke.info.teraType.emptyLabel', 'TERA') as React.ReactNode}
                 teraTyping
-                containerSize={(
+                containerSize={containerWidth < 360 || (
                   pokemon?.dirtyTypes?.length
                     || pokemon?.types?.length
                     || 0
