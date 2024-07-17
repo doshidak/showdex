@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-01-28T05:16:48.404Z"
+    "updated": "2024-07-17T06:08:08.843Z"
   },
 
   "pane": {
@@ -167,7 +167,7 @@
           "tooltip": "S'ouvre comme un onglet de panneau à droite, si l'espace le permet. Sinon, l'ouverture de l'onglet remplira l'écran. La synchronisation se produira tant que l'onglet de la bataille est ouvert.<br /><br />Recommandé pour les utilisateurs de <em>Panneaux Gauche-Droite</em>."
         },
         "overlay": {
-          "label": "Superposition de Bataille",
+          "label": "Superposition de Chat",
           "tooltip": "S'ouvre comme une superposition sur le chat de la bataille. Initialement caché jusqu'à ce que vous cliquiez sur <em>Ouvrir $t(common:products.calcdex_one)</em> dans les commandes de la bataille.<br /><br />Une fois la bataille fermée, le $t(common:products.calcdex_one) intégré sera effacé de la mémoire, à ce moment il ne pourra pas être rouvert depuis le $t(common:products.hellodex_one).<br /><br />Recommandé pour les utilisateurs de <em>Panneau Unique</em> ou ceux qui se détendent dans les salons de discussion pendant qu'ils jouent."
         },
         "showdown": {

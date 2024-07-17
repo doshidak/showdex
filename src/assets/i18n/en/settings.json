@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-28T05:16:41.939Z"
+    "updated": "2024-07-17T06:07:28.118Z"
   },
 
   "pane": {
@@ -168,7 +168,7 @@
           "tooltip": "Opens as a panel tab on the right, if space permits. Otherwise, opening the tab will fill up the screen. Syncing will occur as long as the battle's tab is open.<br /><br />Recommended for <em>Left-Right Panel</em> users."
         },
         "overlay": {
-          "label": "Battle Overlay",
+          "label": "Chat Overlay",
           "tooltip": "Opens as an overlay over the battle's chat. Initially hidden until you click on <em>Open $t(common:products.calcdex_one)</em> in the battle controls.<br /><br />Once the battle is closed, the embedded $t(common:products.calcdex_one) will be cleared from memory, at which point it cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Recommended for <em>Single Panel</em> users or those who chill in chatrooms while they play."
         },
         "showdown": {
