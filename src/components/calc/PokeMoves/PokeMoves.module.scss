@@ -269,7 +269,6 @@ button.damageButton {
   grid-area: span 1 / span 2;
   @include flex.row-between;
   align-self: center;
-  @include spacing.margin($right: 6px);
 
   &.editorHeader {
     @include flex.row-between;

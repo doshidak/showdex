@@ -22,7 +22,7 @@ import { PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useColorScheme, useGlassyTerrain, useHonkdexSettings } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
-import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
+import { calcMoveHitBasePowers, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
   clamp,
   formatId,
@@ -577,7 +577,6 @@ export const PokeMoves = ({
           koColor,
         } = matchups[i] || {};
 
-        // const moveName = calcMove?.name;
         const moveName = pokemon?.moves?.[i] || calcMove?.name;
         const moveToggled = detectToggledMove(pokemon, moveName);
 
@@ -585,6 +584,7 @@ export const PokeMoves = ({
         // (could make it not return null, but too lazy atm lol)
         const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) };
         const moveOverrides = { ...moveDefaults, ...pokemon?.moveOverrides?.[moveName] };
+        const hitBasePowers = moveDefaults.hits > 1 ? calcMoveHitBasePowers(format, moveName, moveOverrides) : [];
         const damagingMove = ['Physical', 'Special'].includes(moveOverrides.category);
 
         const hasOverrides = pokemon?.showMoveOverrides
@@ -605,7 +605,8 @@ export const PokeMoves = ({
           && !!moveDefaults.hits
           && !!moveDefaults.minHits
           && !!moveDefaults.maxHits;
-          // && (moveDefaults.hits !== moveDefaults.minHits || moveDefaults.hits !== moveDefaults.maxHits);
+
+        const showHitBpFields = showHitsField && !!hitBasePowers.length;
 
         const basePowerKey: keyof CalcdexMoveOverride = (pokemon?.useZ && 'zBasePower')
           || (pokemon?.useMax && 'maxBasePower')
@@ -835,42 +836,86 @@ export const PokeMoves = ({
                     </div>
                   }
 
-                  {
-                    damagingMove &&
-                    <div className={styles.moveProperty}>
-                      <ValueField
-                        className={styles.valueField}
-                        label={t('poke.moves.editor.bp.aria', {
-                          move: moveName,
-                          pokemon: friendlyPokemonName,
-                        }) as React.ReactNode}
-                        hideLabel
-                        hint={moveOverrides[basePowerKey]?.toString() || 0}
-                        fallbackValue={fallbackBasePower}
-                        min={0}
-                        max={999} // hmm...
-                        step={1}
-                        shiftStep={10}
-                        clearOnFocus
-                        absoluteHover
-                        input={{
-                          name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:BasePower`,
-                          value: moveOverrides[basePowerKey],
-                          onChange: (value: number) => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { [basePowerKey]: clamp(0, value, 999) },
-                            },
-                          }, `${l.scope}:ValueField~BasePower:input.onChange()`),
-                        }}
-                      />
+                  <div className={styles.moveProperty}>
+                    {damagingMove ? showHitBpFields ? (
+                      <>
+                        {hitBasePowers.map((defaultHitBp, j) => (
+                          <ValueField
+                            key={`${l.scope}:${pokemonKey}:MoveRow:Moves:${i}:HitBasePowers:${j}`}
+                            className={styles.valueField}
+                            label={t('poke.moves.editor.bp.hitAria', {
+                              move: moveName,
+                              hit: j + 1,
+                              hits: moveOverrides.hits,
+                              pokemon: friendlyPokemonName,
+                            }) as React.ReactNode}
+                            hideLabel
+                            hint={(moveOverrides.hitBasePowers[j] ?? defaultHitBp ?? fallbackBasePower).toString()}
+                            fallbackValue={defaultHitBp ?? fallbackBasePower}
+                            min={0}
+                            max={999}
+                            step={1}
+                            shiftStep={10}
+                            clearOnFocus
+                            absoluteHover
+                            input={{
+                              name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:HitBasePowers:${j}`,
+                              value: moveOverrides.hitBasePowers[j] ?? defaultHitBp,
+                              onChange: (value: number) => updatePokemon({
+                                moveOverrides: {
+                                  [moveName]: {
+                                    hitBasePowers: Array.from({ length: moveOverrides.hits }, (_k, k) => (
+                                      k === j
+                                        ? clamp(0, value, 999)
+                                        : (moveOverrides.hitBasePowers[k] ?? defaultHitBp ?? fallbackBasePower)
+                                    )),
+                                  },
+                                },
+                              }, `${l.scope}:ValueField~HitBasePowers[${j}]:input.onChange()`),
+                            }}
+                          />
+                        ))}
 
-                      <div className={styles.propertyName}>
-                        {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2')} `}
-                        {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2')} `}
-                        {t('poke.moves.editor.bp.label')}
-                      </div>
-                    </div>
-                  }
+                        <div className={styles.propertyName}>
+                          {t('poke.moves.editor.bp.label')}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <ValueField
+                          className={styles.valueField}
+                          label={t('poke.moves.editor.bp.aria', {
+                            move: moveName,
+                            pokemon: friendlyPokemonName,
+                          }) as React.ReactNode}
+                          hideLabel
+                          hint={moveOverrides[basePowerKey]?.toString() || 0}
+                          fallbackValue={fallbackBasePower}
+                          min={0}
+                          max={999} // hmm...
+                          step={1}
+                          shiftStep={10}
+                          clearOnFocus
+                          absoluteHover
+                          input={{
+                            name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:BasePower`,
+                            value: moveOverrides[basePowerKey],
+                            onChange: (value: number) => updatePokemon({
+                              moveOverrides: {
+                                [moveName]: { [basePowerKey]: clamp(0, value, 999) },
+                              },
+                            }, `${l.scope}:ValueField~BasePower:input.onChange()`),
+                          }}
+                        />
+
+                        <div className={styles.propertyName}>
+                          {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2')} `}
+                          {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2')} `}
+                          {t('poke.moves.editor.bp.label')}
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className={styles.editorRight}>

@@ -167,7 +167,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     });
 
     playerKeys.forEach((playerKey) => {
-      const { pokemon: sourceParty, selectionIndex } = playersPayload[playerKey];
+      const { pokemon: sourceParty, selectionIndex, side: sourceSide } = playersPayload[playerKey];
       const sourcePokemon = sourceParty[selectionIndex];
 
       if (!sourcePokemon?.speciesForme) {
@@ -192,6 +192,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         activePokemon: state?.gameType === 'Singles'
           ? [playersPayload[opponentKey]?.pokemon?.[playersPayload[opponentKey]?.selectionIndex]].filter(Boolean)
           : activePokemon.filter((p) => p.calcdexId !== sourcePokemon.calcdexId),
+        sourceSide,
         field: { ...state.field, ...field },
       });
 
