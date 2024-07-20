@@ -636,32 +636,15 @@ export const PokeMoves = ({
                 {
                   !!description?.defender &&
                   <>
-                    {
-                      !!description.attacker &&
-                      <>
-                        <br />
-                        vs
-                        <br />
-                      </>
-                    }
+                    {!!description.attacker && <><br />vs<br /></>}
                     {description.defender}
                   </>
                 }
                 {(!!description?.damageRange || !!description?.koChance) && ':'}
-                {
-                  !!description?.damageRange &&
-                  <>
-                    <br />
-                    {description.damageRange}
-                  </>
-                }
-                {
-                  !!description?.koChance &&
-                  <>
-                    <br />
-                    {description.koChance}
-                  </>
-                }
+                {!!description?.damageRange && <><br />{description.damageRange}</>}
+                {!!description?.recoil && <><br />{description.recoil}</>}
+                {!!description?.recovery && <><br />{description.recovery}</>}
+                {!!description?.koChance && <><br />{description.koChance}</>}
               </>
             ) : description.raw}
 

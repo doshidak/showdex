@@ -1,4 +1,5 @@
 import { type AbilityName, type MoveName, Move as SmogonMove } from '@smogon/calc';
+import { MOVES } from '@smogon/calc/dist/data/moves';
 import { type CalcdexBattleField, type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
 import {
@@ -73,6 +74,15 @@ export const createSmogonMove = (
 
   const defaultOverrides = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field);
   const overrides: SmogonMoveOverrides = { ...determineMoveTargets(format, pokemon, moveName) };
+
+  // update (2024/07/20): need access to drain[] for result.recovery(), but the Showdown dex doesn't have it :c
+  // (tho Showdown's & Smogon's dexes both provide recoil[] in the same format: [numerator: number, denominator: number] to form the damage ratio)
+  // fortunately for us, we're already bundling all move data that comes with @smogon/calc, so why not make use of it? LOL
+  const smogonMoveData = MOVES[gen][moveName];
+
+  if (Array.isArray(smogonMoveData?.drain)) {
+    overrides.drain = [...smogonMoveData.drain];
+  }
 
   // check if the user specified any overrides for this move
   const calcdexOverrides: CalcdexMoveOverride = { ...defaultOverrides, ...moveOverrides?.[moveName] };

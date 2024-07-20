@@ -53,8 +53,10 @@ export interface CalcdexMatchupResult {
    *   attacker: '252 ATK Weavile Knock Off (97.5 BP)',
    *   defender: '252 HP / 0 DEF Heatran',
    *   damageRange: '144-169 (37.3 - 43.7%)',
+   *   recoil: null,
+   *   recovery: null,
    *   koChance: 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes',
-   * }
+   * } as CalcdexMatchupParsedDescription
    * ```
    * @since 1.0.1
    */
@@ -173,6 +175,7 @@ export const calcSmogonMatchup = (
     matchup.koChance = formatMatchupNhko(result, settings?.nhkoLabels);
     matchup.koColor = getMatchupNhkoColor(result, settings?.nhkoColors);
 
+    /*
     l.debug(
       'Calculated damage for', playerMove, 'from', playerPokemon.speciesForme, 'against', opponentPokemon.speciesForme,
       '\n', 'gameType', gameType, 'gen', dex.num,
@@ -183,6 +186,7 @@ export const calcSmogonMatchup = (
       '\n', 'result', result,
       '\n', 'showdexMods', showdexMods,
     );
+    */
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
     // which is separate from 'N/A' damage (e.g., status moves).
