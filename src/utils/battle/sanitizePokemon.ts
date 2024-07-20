@@ -62,6 +62,7 @@ export const sanitizePokemon = <
 
     speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
     altFormes: (pokemon as Partial<CalcdexPokemon>)?.altFormes || [],
+    cosmeticForme: (pokemon as Partial<CalcdexPokemon>)?.cosmeticForme || null,
     transformedForme: (
       transformed
         ? typeof (pokemon as Partial<Showdown.Pokemon>).volatiles.transform[1] === 'object'
@@ -69,6 +70,7 @@ export const sanitizePokemon = <
           : (pokemon as Partial<Showdown.Pokemon>).volatiles.transform[1]
         : null
     ) || null,
+    transformedCosmeticForme: (pokemon as Partial<CalcdexPokemon>)?.transformedCosmeticForme || null,
 
     level: pokemon?.level || 0,
     transformedLevel: (pokemon as Partial<CalcdexPokemon>)?.transformedLevel || null,
@@ -240,6 +242,19 @@ export const sanitizePokemon = <
   const baseSpeciesForme = species?.baseSpecies;
   const baseSpecies = baseSpeciesForme ? dex.species.get(baseSpeciesForme) : null;
 
+  // update (2024/07/19): apparently when Minior, a particular mon w/ many cosmetic formes & 1 other Minior-Meteor forme
+  // (which prevents it from being on the fucked formes list), transforms into one of its cosmetic formes, you can't switch
+  // to the Minior-Meteor forme (like you can when it's just the base Minior forme) LOL
+  sanitizedPokemon.cosmeticForme = baseSpecies?.cosmeticFormes?.includes(sanitizedPokemon.speciesForme)
+    ? sanitizedPokemon.speciesForme
+    // e.g., (prev) speciesForme = 'Minior', cosmeticForme = 'Minior-Green'
+    // -> (next) speciesForme = 'Minior-Meteor', cosmeticForme = 'Minior-Green'
+    : (sanitizedPokemon.cosmeticForme || null);
+
+  if (baseSpeciesForme && sanitizedPokemon.speciesForme === sanitizedPokemon.cosmeticForme) {
+    sanitizedPokemon.speciesForme = baseSpeciesForme;
+  }
+
   // grab the baseStats of the transformed Pokemon, if applicable
   const transformedSpecies = sanitizedPokemon.transformedForme
     ? dex.species.get(sanitizedPokemon.transformedForme)
@@ -247,6 +262,15 @@ export const sanitizePokemon = <
 
   const transformedBaseForme = transformedSpecies?.baseSpecies;
   const transformedBaseSpecies = transformedBaseForme ? dex.species.get(transformedBaseForme) : null;
+
+  // update (2024/07/19): ...& of course, once more for transformations! y0y
+  sanitizedPokemon.transformedCosmeticForme = transformedBaseSpecies?.cosmeticFormes?.includes(sanitizedPokemon.transformedForme)
+    ? sanitizedPokemon.transformedForme
+    : (sanitizedPokemon.transformedCosmeticForme || null);
+
+  if (transformedBaseForme && sanitizedPokemon.transformedForme && sanitizedPokemon.transformedForme === sanitizedPokemon.transformedCosmeticForme) {
+    sanitizedPokemon.transformedForme = transformedBaseForme;
+  }
 
   // check if this Pokemon can Dynamax
   sanitizedPokemon.dmaxable = !species.cannotDynamax;

@@ -95,6 +95,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   gmaxable?: boolean;
 
   /**
+   * Cosmetic forme of the Pokemon.
+   *
+   * * Has no use in calculations; purely used cosmetically in rendered `Picons`.
+   *
+   * @example
+   * ```ts
+   * 'Minior-Green'
+   * ```
+   * @default null
+   * @since 1.2.4
+   */
+  cosmeticForme?: string;
+
+  /**
    * Alternative formes of the Pokemon.
    *
    * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
@@ -140,6 +154,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.3
    */
   transformedForme?: string;
+
+  /**
+   * Transformed `cosmeticForme`, if applicable.
+   *
+   * * Has no use in calculations; purely used cosmetically in rendered `Picons`.
+   *
+   * @example
+   * ```ts
+   * 'Minior-Violet'
+   * ```
+   * @default null
+   * @since 1.2.4
+   */
+  transformedCosmeticForme?: string;
 
   /**
    * Current types of the Pokemon.

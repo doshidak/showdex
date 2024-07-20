@@ -510,9 +510,11 @@ export const PokeInfo = ({
               ...(!pokemon?.speciesForme && { opacity: 0.32 }),
             }}
             pokemon={{
-              ...pokemon,
+              // ...pokemon,
               speciesForme: (
-                pokemon?.transformedForme
+                pokemon?.transformedCosmeticForme
+                  || pokemon?.transformedForme
+                  || pokemon?.cosmeticForme
                   || pokemon?.speciesForme
               )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
               item: itemName,
