@@ -217,8 +217,6 @@ export const useCalcdexPresets = (
           }
 
           // "old reliable"
-          // note: ServerPokemon info may be of the transformed Pokemon's moves, not the pre-transformed ones!!
-          // (hence the `pokemon.transformedMoves` check)
           if (!preset?.calcdexId && !pokemon.transformedForme) {
             const guessedSpread = state.legacy
               ? guessServerLegacySpread(state.format, pokemon)
@@ -347,7 +345,13 @@ export const useCalcdexPresets = (
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
         // (also more the case in 'standalone' mode, reset some fields in case they were from a prior Pokemon w/ a preset)
         if (!preset?.calcdexId) {
-          pokemon.level = state.defaultLevel;
+          // update (2024/07/19): apparently some peeps were experiencing level discrepancies still, so I'm guessing this
+          // might be the culprit since it looks like I added this part for the Honkdex & probs forgot about 'battle' modes LOL
+          // pokemon.level = state.defaultLevel;
+          if (!pokemon.level && state.defaultLevel) {
+            pokemon.level = state.defaultLevel;
+          }
+
           pokemon.nature = state.legacy ? 'Hardy' : 'Adamant';
           pokemon.ivs = populateStatsTable({}, { spread: 'iv', format: state.format });
           pokemon.evs = populateStatsTable({}, { spread: 'ev', format: state.format });
