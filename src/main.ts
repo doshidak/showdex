@@ -35,6 +35,58 @@ window.__SHOWDEX_INIT = env('build-name', 'showdex');
 
 const store = createStore();
 
+l.debug('Hooking into the client\'s app.user.finishRename()...');
+
+const userFinishRename = app.user.finishRename.bind(app.user) as typeof app.user.finishRename;
+
+app.user.finishRename = (name, assertion) => {
+  // call the original function
+  userFinishRename(name, assertion);
+
+  /*
+  l.debug(
+    'app.user.finishRename()', 'name', name,
+    '\n', 'assertion', assertion,
+  );
+  */
+
+  // determine if the user logged in
+  // assertion seems to be some sha256, then the user ID, then 4?, then some timestamp,
+  // then some server url, then some sha1, then some half of a sha1 (lol), finally some super long sha hash
+  if (!name || !assertion?.includes(',')) {
+    return;
+  }
+
+  const assertions = assertion.split(',');
+  const [, userId] = assertions;
+
+  if (formatId(name) === userId) {
+    l.debug(
+      'app.user.finishRename()', 'Logged in as', name, '(probably)',
+      '\n', 'assertions', assertions,
+    );
+
+    return void store.dispatch(showdexSlice.actions.setAuthUsername(name));
+  }
+
+  // nt ^_~
+  store.dispatch(showdexSlice.actions.updateSettings({
+    glassyTerrain: false,
+    hellodex: { showDonateButton: true },
+  }));
+};
+
+// we're off to the *races* with this one huehuehuehue
+const calcdexBootState: {
+  // when false (default), data from app.receive() will be pushed to the recvBuf[];
+  // once pre-init async stuff is done, the recvBuf[] is processed & flushed first, then ok is set to true
+  ok: boolean;
+  recvBuf: [roomId: string, data: string][];
+} = {
+  ok: false,
+  recvBuf: [],
+};
+
 l.debug('Hooking into the client\'s app.receive()...');
 
 // make a binded copy of the original app.recieve()
@@ -59,48 +111,12 @@ app.receive = (data: string) => {
     '\n', data,
   );
 
+  if (!calcdexBootState.ok) {
+    return void calcdexBootState.recvBuf.push([roomId, data]);
+  }
+
   // call the Calcdex bootstrapper
   CalcdexBootstrapper(store, data, roomId);
-};
-
-l.debug('Hooking into the client\'s app.user.finishRename()...');
-
-const userFinishRename = app.user.finishRename.bind(app.user) as typeof app.user.finishRename;
-
-app.user.finishRename = (name, assertion) => {
-  // call the original function
-  userFinishRename(name, assertion);
-
-  // l.debug(
-  //   'app.user.finishRename()',
-  //   '\n', 'name', name,
-  //   '\n', 'assertion', assertion,
-  // );
-
-  // determine if the user logged in
-  // assertion seems to be some sha256, then the user ID, then 4?, then some timestamp,
-  // then some server url, then some sha1, then some half of a sha1 (lol), finally some super long sha hash
-  if (!name || !assertion?.includes(',')) {
-    return;
-  }
-
-  const assertions = assertion.split(',');
-  const [, userId] = assertions;
-
-  if (formatId(name) === userId) {
-    l.debug(
-      'Logged in as', name, '(probably)',
-      '\n', 'assertions', assertions,
-    );
-
-    return void store.dispatch(showdexSlice.actions.setAuthUsername(name));
-  }
-
-  // nt ^_~
-  store.dispatch(showdexSlice.actions.updateSettings({
-    glassyTerrain: false,
-    hellodex: { showDonateButton: true },
-  }));
 };
 
 // note: don't inline await, otherwise, there'll be a race condition with the login
@@ -129,6 +145,18 @@ void (async () => {
 
   // open the Hellodex when the Showdown client starts
   HellodexBootstrapper(store);
+
+  /**
+   * @todo May require some special logic to detect when the Teambuilder room opens.
+   *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
+   *   i.e., doesn't render anything, this implementation is fine.
+   */
+  TeamdexBootstrapper(store);
+
+  // process any buffered Calcdex data first before releasing the shitty 'ok' mutex lock
+  calcdexBootState.recvBuf.forEach(([roomId, data]) => void CalcdexBootstrapper(store, data, roomId));
+  calcdexBootState.recvBuf = null; // clear for garbaj collection since the calcdexBootState obj will remain in memory
+  calcdexBootState.ok = true;
 })();
 
 l.debug('Initializing MutationObserver for client colorScheme changes...');
@@ -159,12 +187,5 @@ colorSchemeObserver.observe(document.documentElement, {
   childList: false,
   characterData: false,
 });
-
-/**
- * @todo May require some special logic to detect when the Teambuilder room opens.
- *   For now, since this only hooks into some Teambuilder functions to update its internal `presets`,
- *   i.e., doesn't render anything, this implementation is fine.
- */
-TeamdexBootstrapper(store);
 
 l.success(env('build-name', 'showdex'), 'initialized!');
