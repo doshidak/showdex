@@ -1,7 +1,7 @@
 import { CalcdexBootstrapper, HellodexBootstrapper, TeamdexBootstrapper } from '@showdex/pages';
 import { calcdexSlice, createStore, showdexSlice } from '@showdex/redux/store';
 import { loadI18nextLocales } from '@showdex/utils/app';
-import { env, formatId, nonEmptyObject } from '@showdex/utils/core';
+import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { openIndexedDb, readHonksDb, readSettingsDb } from '@showdex/utils/storage';
 import '@showdex/styles/global.scss';
@@ -35,6 +35,7 @@ window.__SHOWDEX_INIT = env('build-name', 'showdex');
 
 const store = createStore();
 
+/*
 l.debug('Hooking into the client\'s app.user.finishRename()...');
 
 const userFinishRename = app.user.finishRename.bind(app.user) as typeof app.user.finishRename;
@@ -48,7 +49,7 @@ app.user.finishRename = (name, assertion) => {
     'app.user.finishRename()', 'name', name,
     '\n', 'assertion', assertion,
   );
-  */
+  *\/
 
   // determine if the user logged in
   // assertion seems to be some sha256, then the user ID, then 4?, then some timestamp,
@@ -75,16 +76,17 @@ app.user.finishRename = (name, assertion) => {
     hellodex: { showDonateButton: true },
   }));
 };
+*/
 
 // we're off to the *races* with this one huehuehuehue
-const calcdexBootState: {
-  // when false (default), data from app.receive() will be pushed to the recvBuf[];
-  // once pre-init async stuff is done, the recvBuf[] is processed & flushed first, then ok is set to true
+const bootdexMutex: {
+  // when false (default), BattleRoom data from app.receive() will be pushed to the battleBuf[];
+  // once pre-init async stuff is done, the battleBuf[] is processed & flushed first, then ok is set to true
   ok: boolean;
-  recvBuf: [roomId: string, data: string][];
+  battleBuf: [roomId: string, data: string][];
 } = {
   ok: false,
-  recvBuf: [],
+  battleBuf: [],
 };
 
 l.debug('Hooking into the client\'s app.receive()...');
@@ -93,30 +95,57 @@ l.debug('Hooking into the client\'s app.receive()...');
 const appReceive = app.receive.bind(app) as typeof app.receive;
 
 app.receive = (data: string) => {
-  const receivedRoom = data?.startsWith?.('>');
-
   // call the original function
   // update (2023/02/04): my dumb ass was calling the bootstrapper() BEFORE this,
   // so I was wondering why the `battle` object was never populated... hmm... LOL
   appReceive(data);
 
-  if (!receivedRoom) {
+  if (typeof data !== 'string' || !data?.length) {
     return;
   }
 
-  const roomId = data.slice(1, data.indexOf('\n'));
+  // update (2024/07/21): prior to v1.2.4, the auth username was intercepted via app.user.finishRename(), but sometimes
+  // the server will emit a guest user first (e.g., '|updateuser| Guest 2545835|0|mira|\n...'), which when the actual
+  // registered user is emitted later (like in the example below), finishRename() doesn't fire again for some reason,
+  // so we'll just intercept it right from the source! c: (idk why I didn't do this before LOL)
+  // e.g., data = '|updateuser| showdex_testee|1|mira|\n{"blockChallenges":false,"blockPMs":false,...'
+  if (data.startsWith('|updateuser|')) {
+    const [
+      , // i.e., ''
+      , // i.e., 'updateuser'
+      username, // e.g., ' showdex_testee'
+      namedCode, // '0' = not registered; '1' = registered
+    ] = data.split('|');
 
-  l.debug(
-    'receive() for', roomId,
-    '\n', data,
-  );
+    l.debug(
+      'app.receive()', 'Logged in as', namedCode === '1' ? 'registered' : 'guest',
+      'user', username?.trim() || '???', '(probably)',
+      '\n', data,
+    );
 
-  if (!calcdexBootState.ok) {
-    return void calcdexBootState.recvBuf.push([roomId, data]);
+    if (!username || namedCode !== '1') {
+      return;
+    }
+
+    return void store.dispatch(showdexSlice.actions.setAuthUsername(username.trim()));
   }
 
-  // call the Calcdex bootstrapper
-  CalcdexBootstrapper(store, data, roomId);
+  // e.g., data = '>battle-gen9randombattle-1234567890\n|init|battle|\n|title|P1 vs. P2\n|inactive|Battle timer is ON...'
+  if (data.startsWith('>battle-')) {
+    const roomId = data.slice(1, data.indexOf('\n'));
+
+    l.debug(
+      'app.receive()', 'data for BattleRoom', roomId,
+      '\n', data,
+    );
+
+    if (!bootdexMutex.ok) {
+      return void bootdexMutex.battleBuf.push([roomId, data]);
+    }
+
+    // call the Calcdex bootstrapper
+    return void CalcdexBootstrapper(store, data, roomId);
+  }
 };
 
 // note: don't inline await, otherwise, there'll be a race condition with the login
@@ -154,9 +183,9 @@ void (async () => {
   TeamdexBootstrapper(store);
 
   // process any buffered Calcdex data first before releasing the shitty 'ok' mutex lock
-  calcdexBootState.recvBuf.forEach(([roomId, data]) => void CalcdexBootstrapper(store, data, roomId));
-  calcdexBootState.recvBuf = null; // clear for garbaj collection since the calcdexBootState obj will remain in memory
-  calcdexBootState.ok = true;
+  bootdexMutex.battleBuf.forEach(([roomId, data]) => void CalcdexBootstrapper(store, data, roomId));
+  bootdexMutex.battleBuf = null; // clear for garbaj collection since the bootdexMutex obj will remain in memory
+  bootdexMutex.ok = true;
 })();
 
 l.debug('Initializing MutationObserver for client colorScheme changes...');
