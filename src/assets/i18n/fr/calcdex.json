@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-07-21T12:46:45.161Z"
+    "updated": "2024-07-21T13:55:01.946Z"
   },
 
   "contextMenu": {
@@ -237,7 +237,7 @@
       },
 
       "failureReasons": {
-        "rbyRecovery": "En raison d'un bug dans la gén 1, les mouvements de récupération échoueront si le reste de la division des HP perdus par 256 est de 255."
+        "rbyRecovery": "En raison d'un bug dans la gén 1, les capacités de récupération échoueront si le reste de la division des $t(pokedex:stats.hp.1) perdus par 256 est de 255."
       }
     },
 

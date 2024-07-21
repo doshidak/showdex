@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-07-21T12:45:19.737Z"
+    "updated": "2024-07-21T13:59:18.345Z"
   },
 
   "contextMenu": {
@@ -237,7 +237,7 @@
       },
 
       "failureReasons": {
-        "rbyRecovery": "Due to a glitch in gen 1, recovery moves will fail if the remainder after dividing the HP lost by 256 is 255."
+        "rbyRecovery": "Due to a glitch in gen 1, recovery moves will fail if the remainder of dividing the $t(pokedex:stats.hp.1) lost by 256 is 255."
       }
     },
 
