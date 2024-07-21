@@ -563,11 +563,6 @@ export const PokeMoves = ({
 
       {/* (actual) moves */}
       {Array(matchups.length).fill(null).map((_, i) => {
-        // const moveName = pokemon?.moves?.[i];
-        // const move = moveName ? dex?.moves.get(moveName) : null;
-        // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
-        // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
-
         const {
           defender,
           move: calcMove,
@@ -628,23 +623,27 @@ export const PokeMoves = ({
           && settings?.showMatchupTooltip
           && !!description?.raw;
 
-        const matchupTooltip = showMatchupTooltip ? (
+        const matchupTooltip = description?.failureKey ? (
           <div className={styles.descTooltip}>
-            {settings?.prettifyMatchupDescription ? (
+            {t(`poke.moves.failureReasons.${description.failureKey}`)}
+          </div>
+        ) : showMatchupTooltip ? (
+          <div className={styles.descTooltip}>
+            {settings?.prettifyMatchupDescription && description?.attacker ? (
               <>
-                {description?.attacker}
+                {description.attacker}
                 {
-                  !!description?.defender &&
+                  !!description.defender &&
                   <>
                     {!!description.attacker && <><br />vs<br /></>}
                     {description.defender}
                   </>
                 }
-                {(!!description?.damageRange || !!description?.koChance) && ':'}
-                {!!description?.damageRange && <><br />{description.damageRange}</>}
-                {!!description?.recoil && <><br />{description.recoil}</>}
-                {!!description?.recovery && <><br />{description.recovery}</>}
-                {!!description?.koChance && <><br />{description.koChance}</>}
+                {!!description.damageRange && ':'}
+                {!!description.damageRange && <><br />{description.damageRange}</>}
+                {!!description.recoil && <><br />{description.recoil}</>}
+                {!!description.recovery && <><br />{description.recovery}</>}
+                {!!description.koChance && <><br />{description.koChance}</>}
               </>
             ) : description.raw}
 
@@ -665,13 +664,12 @@ export const PokeMoves = ({
 
         // checking if a damaging move has non-0 BP (would be 'N/A' for status moves)
         // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
-        const parsedDamageRange = moveName
-          ? damageRange
-            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???')
-          : null;
+        const parsedDamageRange = (!moveName && null)
+          || damageRange
+          || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???');
 
-        const hasDamageRange = !!parsedDamageRange
-          && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange);
+        const hasDamageRange = !!description?.failureKey
+          || (!!parsedDamageRange && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange));
 
         return (
           <React.Fragment key={`${l.scope}:${pokemonKey}:MoveRow:Moves:${i}`}>
@@ -973,7 +971,7 @@ export const PokeMoves = ({
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
                   {opponentPokemon?.speciesForme && (settings?.showNonDamageRanges || hasDamageRange) ? (
-                    settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
+                    !description?.failureKey && settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
                       <Button
                         className={cx(
                           styles.damageButton,
@@ -1017,11 +1015,12 @@ export const PokeMoves = ({
                           className={cx(
                             styles.damageButtonLabel,
                             styles.noCopy,
-                            !hasDamageRange && styles.noDamage,
+                            (!hasDamageRange || !!description?.failureKey) && styles.noDamage,
                           )}
                         >
                           {(
-                            (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune'))
+                            (!!description?.failureKey && t('poke.moves.failure'))
+                              || (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune'))
                               || (parsedDamageRange === 'N/A' && t('poke.moves.na'))
                               || parsedDamageRange
                           )}

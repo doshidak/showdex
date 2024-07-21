@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-28T10:19:06.819Z"
+    "updated": "2024-07-21T12:46:45.161Z"
   },
 
   "contextMenu": {
@@ -155,6 +155,7 @@
       "nhko": "KO %",
       "na": "$t(common:labels.na)",
       "immune": "IMMUNISÉ",
+      "failure": "ÉCHEC",
       "copiedBadge": "$t(common:labels.copied)!",
 
       "tera": {
@@ -218,6 +219,7 @@
 
         "bp": {
           "aria": "Remplacement du $t(pokedex:stats.bp.0) {{move}} pour {{pokemon}}",
+          "hitAria": "Remplacement du $t(pokedex:stats.bp.0) {{move}} pour le coup {{hit}} sur {{hits}} pour {{pokemon}}",
           "label": "{{ultimate}}$t(pokedex:stats.bp.1)"
         }
       },
@@ -232,6 +234,10 @@
         "aria": "Emplacement de Capacité {{count}} pour {{pokemon}}",
         "hint": "--",
         "empty": "$t(pokedex:moves.nomove_other)"
+      },
+
+      "failureReasons": {
+        "rbyRecovery": "En raison d'un bug dans la gén 1, les mouvements de récupération échoueront si le reste de la division des HP perdus par 256 est de 255."
       }
     },
 

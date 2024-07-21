@@ -105,6 +105,26 @@ export interface CalcdexMatchupParsedDescription {
    * @since 1.0.2
    */
   koChance?: string;
+
+  /**
+   * Translation lookup key for a reason explaining why using the move will fail, if applicable.
+   *
+   * * Typically used for gen 1, where there exists a plethora of battle glitches.
+   *   - Not all of them are currently implemented, but new ones should update this value.
+   * * These aren't provided by `@smogon/calc`, but currently being populated in the `parseMatchupDescription()` utility.
+   * * Key should be prefixed with `'calcdex:poke.moves.failureReasons.'` when performing an i18next `t()` lookup.
+   *
+   * @example
+   * ```ts
+   * 'rbyRecovery'
+   *
+   * // t('calcdex:poke.moves.failureReasons.rbyRecovery')
+   * // -> (en) 'Due to a glitch in gen 1, recovery moves will fail if the remainder of dividing the HP lost by 256 is 255.'
+   * ```
+   * @default null
+   * @since 1.2.4
+   */
+  failureKey?: string;
 }
 
 const l = logger('@showdex/utils/calc/parseMatchupDescription()');
@@ -129,6 +149,7 @@ const l = logger('@showdex/utils/calc/parseMatchupDescription()');
  *   recoil: null,
  *   recovery: null,
  *   koChance: 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes',
+ *   failureKey: null,
  * } as CalcdexMatchupParsedDescription
  * ```
  * @since 1.0.2
@@ -145,6 +166,7 @@ export const parseMatchupDescription = (
     recovery: null,
     recoil: null,
     koChance: null,
+    failureKey: null,
   };
 
   if (typeof result?.desc !== 'function') {
@@ -204,6 +226,16 @@ export const parseMatchupDescription = (
 
   if (output.koChance) {
     output.koChance = output.koChance.replace(/(?<=\s+)and(?=\s+)/, '&');
+  }
+
+  // update (2024/07/21): patron priority request
+  // see: https://bulbapedia.bulbagarden.net/wiki/List_of_battle_glitches_in_Generation_I#HP_recovery_move_failure
+  const recoveryFailure = result.gen.num === 1
+    && result.move.named('Recover', 'Rest', 'Soft-Boiled')
+    && !((result.attacker.maxHP() - result.attacker.curHP() + 1) % 256);
+
+  if (recoveryFailure) {
+    output.failureKey = 'rbyRecovery';
   }
 
   return output;
