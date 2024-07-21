@@ -664,9 +664,9 @@ export const PokeMoves = ({
 
         // checking if a damaging move has non-0 BP (would be 'N/A' for status moves)
         // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
-        const parsedDamageRange = (!moveName && null)
-          || damageRange
-          || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???');
+        const parsedDamageRange = moveName
+          ? damageRange || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???')
+          : null;
 
         const hasDamageRange = !!description?.failureKey
           || (!!parsedDamageRange && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange));
@@ -735,7 +735,7 @@ export const PokeMoves = ({
                     PokemonToggleMoves.includes(moveName) &&
                     <ToggleButton
                       className={styles.editorButton}
-                      label={t('poke.moves.editor.active.label')}
+                      label={t('poke.moves.editor.active.label', 'Active')}
                       tooltip={(
                         <Trans
                           t={t}
@@ -756,7 +756,7 @@ export const PokeMoves = ({
                     showStellarToggle &&
                     <ToggleButton
                       className={styles.editorButton}
-                      label={t('poke.moves.editor.stellar.label')}
+                      label={t('poke.moves.editor.stellar.label', 'Stellar')}
                       tooltip={(
                         <Trans
                           t={t}
@@ -812,7 +812,7 @@ export const PokeMoves = ({
                       />
 
                       <div className={styles.propertyName}>
-                        {t('poke.moves.editor.hits.label', { count: moveOverrides.hits })}
+                        {t('poke.moves.editor.hits.label', { count: moveOverrides.hits, defaultValue: 'Hits' })}
                       </div>
                     </div>
                   }
@@ -858,7 +858,7 @@ export const PokeMoves = ({
                         ))}
 
                         <div className={styles.propertyName}>
-                          {t('poke.moves.editor.bp.label')}
+                          {t('poke.moves.editor.bp.label', 'BP')}
                         </div>
                       </>
                     ) : (
@@ -890,9 +890,9 @@ export const PokeMoves = ({
                         />
 
                         <div className={styles.propertyName}>
-                          {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2')} `}
-                          {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2')} `}
-                          {t('poke.moves.editor.bp.label')}
+                          {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2', 'Z')} `}
+                          {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2', 'Max')} `}
+                          {t('poke.moves.editor.bp.label', 'BP')}
                         </div>
                       </>
                     ) : null}
@@ -903,7 +903,7 @@ export const PokeMoves = ({
                   <ToggleButton
                     className={styles.editorButton}
                     style={hasOverrides ? undefined : { opacity: 0 }}
-                    label={t('poke.moves.editor.resetLabel')}
+                    label={t('poke.moves.editor.resetLabel', 'Reset')}
                     tooltip={(
                       <Trans
                         t={t}
@@ -971,7 +971,7 @@ export const PokeMoves = ({
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
                   {opponentPokemon?.speciesForme && (settings?.showNonDamageRanges || hasDamageRange) ? (
-                    !description?.failureKey && settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
+                    !description?.failureKey && hasDamageRange && settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
                       <Button
                         className={cx(
                           styles.damageButton,
@@ -998,7 +998,7 @@ export const PokeMoves = ({
                         <Badge
                           ref={(ref) => { copiedRefs.current[i] = ref; }}
                           className={styles.copiedBadge}
-                          label={t('poke.moves.copiedBadge')}
+                          label={t('poke.moves.copiedBadge', 'Copied!')}
                           color="green"
                         />
                       </Button>
@@ -1019,9 +1019,9 @@ export const PokeMoves = ({
                           )}
                         >
                           {(
-                            (!!description?.failureKey && t('poke.moves.failure'))
-                              || (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune'))
-                              || (parsedDamageRange === 'N/A' && t('poke.moves.na'))
+                            (!!description?.failureKey && t('poke.moves.failure', 'FAILURE'))
+                              || (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune', 'IMMUNE'))
+                              || (parsedDamageRange === 'N/A' && t('poke.moves.na', 'N/A'))
                               || parsedDamageRange
                           )}
                         </div>
