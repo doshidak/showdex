@@ -50,7 +50,7 @@ export const syncPokemon = (
     clientPokemon,
     serverPokemon,
     autoMoves,
-  } = config || {};
+  } = { ...config };
 
   const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(format);
@@ -326,7 +326,7 @@ export const syncPokemon = (
         syncedPokemon.transformedMoves = transformedMoves;
 
         if (autoMoves) {
-          syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
+          syncedPokemon.moves = mergeRevealedMoves(syncedPokemon, { format });
         }
 
         break;
@@ -657,7 +657,7 @@ export const syncPokemon = (
   if (syncedPokemon.transformedMoves?.length) {
     syncedPokemon.moves = syncedPokemon.source === 'server'
       ? [...syncedPokemon.transformedMoves]
-      : mergeRevealedMoves(syncedPokemon);
+      : mergeRevealedMoves(syncedPokemon, { format });
   }
 
   // covers the case where Iron Head was previously applied & doggo gets sent out, changing into the Crowned forme

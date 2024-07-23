@@ -1,4 +1,4 @@
-import { type MoveName } from '@smogon/calc';
+import { type GenerationNum, type MoveName } from '@smogon/calc';
 import { PokemonPivotMoves } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { dedupeArray } from '@showdex/utils/core';
@@ -6,44 +6,47 @@ import { getDexForFormat } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 
 /**
- * Intelligently uses hardcoded intelligence to merge the `pokemon`'s currently set `moves`
- * with its `revealedMoves` or its `transformedMoves`.
+ * Intelligently uses hardcoded intelligence to merge the `pokemon`'s currently set `moves[]` with its `revealedMoves[]`
+ * or if available, its `transformedMoves[]`.
  *
  * * Actually not that intelligent.
+ * * As of v1.2.4, this will now avoid replacing any of the `pokemon`'s `guaranteedMoves[]`, if any.
+ *   - Note that this won't have any effect when `transformedMoves[]` is used as the revealed moves source.
  *
  * @since 1.0.4
  */
 export const mergeRevealedMoves = (
   pokemon: Partial<CalcdexPokemon>,
+  config?: {
+    format?: string | GenerationNum;
+  },
 ): MoveName[] => {
+  const { format } = { ...config };
+  const dex = getDexForFormat(format);
+
   const {
     types,
     moves,
     altMoves,
+    guaranteedMoves,
     revealedMoves,
     transformedMoves,
   } = pokemon || {};
 
-  const revealedSource = transformedMoves?.length
-    ? transformedMoves
-    : revealedMoves;
+  const revealedSource = transformedMoves?.length ? transformedMoves : [
+    ...(revealedMoves || []),
+    ...(guaranteedMoves || []),
+  ];
 
-  if (!moves?.length) {
+  if (!moves?.length || !revealedSource.length) {
     return revealedSource?.length ? revealedSource : [];
   }
 
-  const dex = getDexForFormat();
-
-  if (!dex || !revealedSource?.length) {
-    return moves;
-  }
-
-  // first, find the non-revealed moves in `moves`
+  // first, find the non-revealed moves in `moves[]`
   const nonRevealedMoves = moves
     .filter((m) => !revealedSource.includes(m))
     .map((m) => dex.moves.get(m));
 
-  // don't do anything if there are no more non-revealed moves
   if (!nonRevealedMoves.length) {
     /**
      * @todo Needs to be updated once we support more than 4 moves.
@@ -90,9 +93,7 @@ export const mergeRevealedMoves = (
   }
 
   // this will be our final return value
-  const output: MoveName[] = [
-    ...moves,
-  ];
+  const output: MoveName[] = [...moves];
 
   for (const revealedMoveName of revealedMoveNames) {
     // attempt a dex lookup of the current revealedMoveName
@@ -164,14 +165,18 @@ export const mergeRevealedMoves = (
     // at this point, pick the next move cause fuck it lol
     const [{ name: nextMoveName }] = nonRevealedMoves;
 
-    if (nextMoveName) {
-      const moveIndex = output.findIndex((m) => m === nextMoveName);
-
-      if (moveIndex > -1) {
-        output[moveIndex] = revealedMoveName;
-        nonRevealedMoves.splice(0, 1);
-      }
+    if (!nextMoveName) {
+      continue;
     }
+
+    const moveIndex = output.findIndex((m) => m === nextMoveName);
+
+    if (moveIndex < 0) {
+      continue;
+    }
+
+    output[moveIndex] = revealedMoveName;
+    nonRevealedMoves.splice(0, 1);
   }
 
   return output;

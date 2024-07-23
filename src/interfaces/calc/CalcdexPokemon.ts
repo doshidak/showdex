@@ -527,7 +527,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   transformedMoves?: MoveName[];
 
   /**
-   * Alternative moves from the currently applied `preset`.
+   * Alternative moves from the currently applied `presetId`.
    *
    * * Should be rendered within the moves dropdown, similar to the moves in the properties of `moveState`.
    * * For instance, there may be more than 4 moves from a random preset.
@@ -541,6 +541,25 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   altMoves?: CalcdexPokemonAlt<MoveName>[];
+
+  /**
+   * Guaranteed moves from a relevant `'usage'`-sourced preset.
+   *
+   * * Only 100% guaranteed, no lie, no fibbing, no cap, fr fr, ong moves are allowed to be in this list.
+   *   - i.e., In the `CalcdexPokemonUsageAlt<MoveName>` tuple, the second `percent` element should be *exactly* `1`.
+   *   - Where would you find such moves? Well, in Randoms, of course!
+   *   - (Though this isn't limited to strictly Randoms & applies to any `'usage'`-sourced move that meets the above condition.)
+   * * Primarily used by `mergeRevealedMoves()` to avoid replacing these moves.
+   * * Populated by the auto-presetter in `useCalcdexPresets()` from `@showdex/components/calc/CalcdexContext`.
+   * * Note that this isn't necessarily sourced from the currently applied `presetId`.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.2.4
+   */
+  guaranteedMoves?: MoveName[];
 
   /**
    * Last move used by the Pokemon.

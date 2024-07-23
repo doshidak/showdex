@@ -49,20 +49,20 @@ export const sanitizePokemon = <
   const transformed = !!(pokemon as Partial<Showdown.Pokemon>)?.volatiles?.transform?.[1];
 
   const sanitizedPokemon: CalcdexPokemon = {
-    calcdexId: (pokemon as Partial<CalcdexPokemon>)?.calcdexId || null,
-    source: (pokemon as Partial<CalcdexPokemon>)?.source || null,
-    playerKey: (pokemon as Partial<CalcdexPokemon>)?.playerKey || detectPlayerKeyFromPokemon(pokemon),
+    calcdexId: (pokemon as CalcdexPokemon)?.calcdexId || null,
+    source: (pokemon as CalcdexPokemon)?.source || null,
+    playerKey: (pokemon as CalcdexPokemon)?.playerKey || detectPlayerKeyFromPokemon(pokemon),
 
     slot: (pokemon as Partial<Showdown.Pokemon>)?.slot ?? null, // could be 0, so don't use logical OR here
     ident: detectPokemonIdent(pokemon),
-    name: pokemon?.name,
+    name: pokemon?.name || null,
     details: pokemon?.details || null,
     searchid: pokemon?.searchid || null,
-    active: (pokemon as Partial<CalcdexPokemon>)?.active || false,
+    active: (pokemon as CalcdexPokemon)?.active || false,
 
-    speciesForme: detectSpeciesForme(pokemon)?.replace('-*', ''),
-    altFormes: (pokemon as Partial<CalcdexPokemon>)?.altFormes || [],
-    cosmeticForme: (pokemon as Partial<CalcdexPokemon>)?.cosmeticForme || null,
+    speciesForme: detectSpeciesForme(pokemon)?.replace('-*', '') || null,
+    altFormes: (pokemon as CalcdexPokemon)?.altFormes || [],
+    cosmeticForme: (pokemon as CalcdexPokemon)?.cosmeticForme || null,
     transformedForme: (
       transformed
         ? typeof (pokemon as Partial<Showdown.Pokemon>).volatiles.transform[1] === 'object'
@@ -70,46 +70,46 @@ export const sanitizePokemon = <
           : (pokemon as Partial<Showdown.Pokemon>).volatiles.transform[1]
         : null
     ) || null,
-    transformedCosmeticForme: (pokemon as Partial<CalcdexPokemon>)?.transformedCosmeticForme || null,
+    transformedCosmeticForme: (pokemon as CalcdexPokemon)?.transformedCosmeticForme || null,
 
     level: pokemon?.level || 0,
-    transformedLevel: (pokemon as Partial<CalcdexPokemon>)?.transformedLevel || null,
+    transformedLevel: (pokemon as CalcdexPokemon)?.transformedLevel || null,
     gender: pokemon?.gender || 'N',
     shiny: pokemon?.shiny || false,
 
-    dmaxable: (gen > 7 && (pokemon as Partial<CalcdexPokemon>)?.dmaxable) || false,
-    gmaxable: (gen > 7 && (pokemon as Partial<CalcdexPokemon>)?.gmaxable) || false,
+    dmaxable: (gen > 7 && (pokemon as CalcdexPokemon)?.dmaxable) || false,
+    gmaxable: (gen > 7 && (pokemon as CalcdexPokemon)?.gmaxable) || false,
 
     types: (
       typeChanged
         ? (pokemon as Partial<Showdown.Pokemon>).volatiles.typechange[1].split('/')
-        : (pokemon as Partial<CalcdexPokemon>)?.types
+        : (pokemon as CalcdexPokemon)?.types
     ) as Showdown.TypeName[] || [],
 
-    dirtyTypes: (pokemon as Partial<CalcdexPokemon>)?.dirtyTypes || [],
+    dirtyTypes: (pokemon as CalcdexPokemon)?.dirtyTypes || [],
 
     teraType: (
       typeof (pokemon as Partial<Showdown.Pokemon>)?.terastallized === 'string'
         && (pokemon as Partial<Showdown.Pokemon>).terastallized
     )
-      || (pokemon as Partial<CalcdexPokemon>)?.teraType
+      || (pokemon as CalcdexPokemon)?.teraType
       || null,
 
-    dirtyTeraType: (pokemon as Partial<CalcdexPokemon>)?.dirtyTeraType || null,
-    altTeraTypes: (pokemon as Partial<CalcdexPokemon>)?.altTeraTypes || [],
+    dirtyTeraType: (pokemon as CalcdexPokemon)?.dirtyTeraType || null,
+    altTeraTypes: (pokemon as CalcdexPokemon)?.altTeraTypes || [],
 
     hp: (pokemon as Partial<Showdown.Pokemon>)?.hp ?? 100,
-    dirtyHp: (pokemon as Partial<CalcdexPokemon>)?.dirtyHp ?? null, // note: 0 = fainted, so null is when the user resets back to `hp`
+    dirtyHp: (pokemon as CalcdexPokemon)?.dirtyHp ?? null, // note: 0 = fainted, so null is when the user resets back to `hp`
     maxhp: (pokemon as Partial<Showdown.Pokemon>)?.maxhp || 100,
     fainted: !(pokemon as Partial<Showdown.Pokemon>)?.hp,
 
     baseAbility: (pokemon as Partial<Showdown.Pokemon>)?.baseAbility?.replace(/no\s?ability/i, '') as AbilityName,
-    ability: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.ability) || null,
-    dirtyAbility: (pokemon as Partial<CalcdexPokemon>)?.dirtyAbility || null,
-    abilityToggled: (pokemon as Partial<CalcdexPokemon>)?.abilityToggled || false,
-    abilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.abilities) || [],
-    altAbilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.altAbilities) || [],
-    transformedAbilities: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.transformedAbilities) || [],
+    ability: (!legacy && (pokemon as CalcdexPokemon)?.ability) || null,
+    dirtyAbility: (pokemon as CalcdexPokemon)?.dirtyAbility || null,
+    abilityToggled: (pokemon as CalcdexPokemon)?.abilityToggled || false,
+    abilities: (!legacy && (pokemon as CalcdexPokemon)?.abilities) || [],
+    altAbilities: (!legacy && (pokemon as CalcdexPokemon)?.altAbilities) || [],
+    transformedAbilities: (!legacy && (pokemon as CalcdexPokemon)?.transformedAbilities) || [],
 
     item: (
       gen > 1
@@ -120,26 +120,26 @@ export const sanitizePokemon = <
         )?.name as ItemName
     ) || null,
 
-    dirtyItem: (pokemon as Partial<CalcdexPokemon>)?.dirtyItem || null,
-    altItems: (gen > 1 && (pokemon as Partial<CalcdexPokemon>)?.altItems) || [],
+    dirtyItem: (pokemon as CalcdexPokemon)?.dirtyItem || null,
+    altItems: (gen > 1 && (pokemon as CalcdexPokemon)?.altItems) || [],
     itemEffect: (pokemon as Partial<Showdown.Pokemon>)?.itemEffect || null,
     prevItem: (pokemon as Partial<Showdown.Pokemon>)?.prevItem as ItemName || null,
     prevItemEffect: (pokemon as Partial<Showdown.Pokemon>)?.prevItemEffect || null,
 
-    nature: (!legacy && ((pokemon as Partial<CalcdexPokemon>)?.nature || PokemonNatures.slice(-1)[0])) || null,
-    ivs: populateStatsTable((pokemon as Partial<CalcdexPokemon>)?.ivs, { spread: 'iv', format }),
-    evs: populateStatsTable((pokemon as Partial<CalcdexPokemon>)?.evs, { spread: 'ev', format }),
+    nature: (!legacy && ((pokemon as CalcdexPokemon)?.nature || PokemonNatures.slice(-1)[0])) || null,
+    ivs: populateStatsTable((pokemon as CalcdexPokemon)?.ivs, { spread: 'iv', format }),
+    evs: populateStatsTable((pokemon as CalcdexPokemon)?.evs, { spread: 'ev', format }),
 
-    showPresetSpreads: (pokemon as Partial<CalcdexPokemon>)?.showPresetSpreads || false,
+    showPresetSpreads: (pokemon as CalcdexPokemon)?.showPresetSpreads || false,
 
     // update (2022/11/14): defaultShowGenetics setting is now deprecated in favor of lockGeneticsVisibility,
     // so this should be its new default, false (was previously true)
-    showGenetics: (pokemon as Partial<CalcdexPokemon>)?.showGenetics || false,
+    showGenetics: (pokemon as CalcdexPokemon)?.showGenetics || false,
 
     // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
     // (populated in syncPokemon() & used in createSmogonPokemon())
-    boostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
-    dirtyBoostedStat: (pokemon as Partial<CalcdexPokemon>)?.boostedStat || null,
+    boostedStat: (pokemon as CalcdexPokemon)?.boostedStat || null,
+    dirtyBoostedStat: (pokemon as CalcdexPokemon)?.boostedStat || null,
 
     boosts: PokemonBoostNames.reduce((table, stat) => {
       const boosts = (pokemon as Partial<Showdown.Pokemon>)?.boosts;
@@ -155,7 +155,7 @@ export const sanitizePokemon = <
     }, {} as Showdown.StatsTableNoHp),
 
     dirtyBoosts: PokemonBoostNames.reduce((table, stat) => {
-      table[stat] = (pokemon as Partial<CalcdexPokemon>)?.dirtyBoosts?.[stat] ?? null;
+      table[stat] = (pokemon as CalcdexPokemon)?.dirtyBoosts?.[stat] ?? null;
 
       if (typeof table[stat] === 'number') {
         table[stat] = clamp(-6, table[stat] || 0, 6);
@@ -164,11 +164,11 @@ export const sanitizePokemon = <
       return table;
     }, {} as Showdown.StatsTableNoHp),
 
-    autoBoostMap: { ...(pokemon as Partial<CalcdexPokemon>)?.autoBoostMap },
-    transformedBaseStats: (pokemon as Partial<CalcdexPokemon>)?.transformedBaseStats || null,
-    serverStats: (pokemon as Partial<CalcdexPokemon>)?.serverStats || null,
+    autoBoostMap: { ...(pokemon as CalcdexPokemon)?.autoBoostMap },
+    transformedBaseStats: (pokemon as CalcdexPokemon)?.transformedBaseStats || null,
+    serverStats: (pokemon as CalcdexPokemon)?.serverStats || null,
     dirtyBaseStats: PokemonStatNames.reduce((table, stat) => {
-      table[stat] = (pokemon as Partial<CalcdexPokemon>)?.dirtyBaseStats?.[stat] ?? null;
+      table[stat] = (pokemon as CalcdexPokemon)?.dirtyBaseStats?.[stat] ?? null;
 
       return table;
     }, {} as Showdown.StatsTable),
@@ -177,52 +177,53 @@ export const sanitizePokemon = <
       !!(pokemon as Partial<Showdown.Pokemon>)?.hp
         && (pokemon as Partial<Showdown.Pokemon>)?.status
     ) || null,
-    dirtyStatus: (pokemon as Partial<CalcdexPokemon>)?.dirtyStatus || null,
+    dirtyStatus: (pokemon as CalcdexPokemon)?.dirtyStatus || null,
     turnstatuses: (pokemon as Partial<Showdown.Pokemon>)?.turnstatuses,
 
-    chainMove: (pokemon as Partial<CalcdexPokemon>)?.chainMove || null,
-    chainCounter: (pokemon as Partial<CalcdexPokemon>)?.chainCounter || 0,
+    chainMove: (pokemon as CalcdexPokemon)?.chainMove || null,
+    chainCounter: (pokemon as CalcdexPokemon)?.chainCounter || 0,
 
-    sleepCounter: (pokemon as Partial<CalcdexPokemon>)?.sleepCounter
+    sleepCounter: (pokemon as CalcdexPokemon)?.sleepCounter
       || (pokemon as Partial<Showdown.Pokemon>)?.statusData?.sleepTurns
       || 0,
 
-    toxicCounter: (pokemon as Partial<CalcdexPokemon>)?.toxicCounter
+    toxicCounter: (pokemon as CalcdexPokemon)?.toxicCounter
       || (pokemon as Partial<Showdown.Pokemon>)?.statusData?.toxicTurns
       || 0,
 
-    hitCounter: (pokemon as Partial<CalcdexPokemon>)?.hitCounter
+    hitCounter: (pokemon as CalcdexPokemon)?.hitCounter
       || (pokemon as Partial<Showdown.Pokemon>)?.timesAttacked
       || 0,
 
-    faintCounter: (pokemon as Partial<CalcdexPokemon>)?.faintCounter || 0,
-    dirtyFaintCounter: (pokemon as Partial<CalcdexPokemon>)?.dirtyFaintCounter || null,
+    faintCounter: (pokemon as CalcdexPokemon)?.faintCounter || 0,
+    dirtyFaintCounter: (pokemon as CalcdexPokemon)?.dirtyFaintCounter || null,
 
-    useZ: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.useZ) || false,
-    useMax: (!legacy && (pokemon as Partial<CalcdexPokemon>)?.useMax) || false,
+    useZ: (!legacy && (pokemon as CalcdexPokemon)?.useZ) || false,
+    useMax: (!legacy && (pokemon as CalcdexPokemon)?.useMax) || false,
 
     terastallized: !legacy
-      && typeof (pokemon as Partial<CalcdexPokemon>)?.terastallized === 'boolean'
-      && (pokemon as Partial<CalcdexPokemon>).terastallized,
+      && typeof (pokemon as CalcdexPokemon)?.terastallized === 'boolean'
+      && (pokemon as CalcdexPokemon).terastallized,
 
-    criticalHit: (pokemon as Partial<CalcdexPokemon>)?.criticalHit || false,
+    criticalHit: (pokemon as CalcdexPokemon)?.criticalHit || false,
 
-    lastMove: (pokemon as Partial<CalcdexPokemon>)?.lastMove || null,
-    moves: [...((pokemon as Partial<CalcdexPokemon>)?.moves || [])],
-    serverMoves: (pokemon as Partial<CalcdexPokemon>)?.serverMoves || [],
-    transformedMoves: (pokemon as Partial<CalcdexPokemon>)?.transformedMoves || [],
-    altMoves: (pokemon as Partial<CalcdexPokemon>)?.altMoves || [],
-    stellarMoveMap: { ...(pokemon as Partial<CalcdexPokemon>)?.stellarMoveMap },
-    moveOverrides: { ...(pokemon as Partial<CalcdexPokemon>)?.moveOverrides },
-    showMoveOverrides: (pokemon as Partial<CalcdexPokemon>)?.showMoveOverrides || false,
+    lastMove: (pokemon as CalcdexPokemon)?.lastMove || null,
+    moves: [...((pokemon as CalcdexPokemon)?.moves || [])],
+    serverMoves: (pokemon as CalcdexPokemon)?.serverMoves || [],
+    transformedMoves: (pokemon as CalcdexPokemon)?.transformedMoves || [],
+    altMoves: (pokemon as CalcdexPokemon)?.altMoves || [],
+    guaranteedMoves: (pokemon as CalcdexPokemon)?.guaranteedMoves || [],
+    stellarMoveMap: { ...(pokemon as CalcdexPokemon)?.stellarMoveMap },
+    moveOverrides: { ...(pokemon as CalcdexPokemon)?.moveOverrides },
+    showMoveOverrides: (pokemon as CalcdexPokemon)?.showMoveOverrides || false,
 
     // returns moveTrack and revealedMoves (guaranteed to be empty arrays, at the very least)
     ...sanitizeMoveTrack(pokemon, format),
 
-    presetId: (pokemon as Partial<CalcdexPokemon>)?.presetId || null,
-    presetSource: (pokemon as Partial<CalcdexPokemon>)?.presetSource || null,
-    presets: (pokemon as Partial<CalcdexPokemon>)?.presets || [],
-    autoPreset: (pokemon as Partial<CalcdexPokemon>)?.autoPreset || true,
+    presetId: (pokemon as CalcdexPokemon)?.presetId || null,
+    presetSource: (pokemon as CalcdexPokemon)?.presetSource || null,
+    presets: (pokemon as CalcdexPokemon)?.presets || [],
+    autoPreset: (pokemon as CalcdexPokemon)?.autoPreset || true,
 
     // only deep-copy non-object volatiles
     // (particularly Ditto's 'transform' volatile, which references an existing Pokemon object as its value)

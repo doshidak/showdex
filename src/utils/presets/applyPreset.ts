@@ -73,6 +73,7 @@ export const applyPreset = (
     dirtyItem: preset.item,
     altMoves: [],
     moves: preset.moves,
+    guaranteedMoves: [],
 
     ivs: {
       hp: preset?.ivs?.hp ?? defaultIv,
@@ -228,6 +229,8 @@ export const applyPreset = (
           output.moves = sortedMoves.slice(0, 4);
         }
       }
+
+      output.guaranteedMoves = flattenAlts(usage.altMoves.filter(([, p]) => p === 1));
     }
   }
 
@@ -330,7 +333,7 @@ export const applyPreset = (
      */
     output.moves = transformed && pokemon.transformedMoves.length === 4
       ? [...pokemon.transformedMoves] // preserves the order
-      : mergeRevealedMoves({ ...pokemon, ...output });
+      : mergeRevealedMoves({ ...pokemon, ...output }, { format });
   }
 
   // in legacy gens, make sure SPA & SPD always equal (for SPC)
