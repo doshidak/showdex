@@ -1,7 +1,7 @@
 import { type AbilityName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { type CalcdexPokemon, type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
-import { formatId } from '@showdex/utils/core';
+import { dedupeArray, formatId } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, legalLockedFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
 import {
@@ -83,11 +83,11 @@ export const buildAbilityOptions = (
   }
 
   if (transformedForme) {
-    const transformed = Array.from(new Set([
+    const transformed = dedupeArray([
       // filter out "revealed" abilities with parentheses, like "(suppressed)"
       source === 'server' && !/^\([\w\s]+\)$/.test(ability) && ability,
       ...transformedAbilities,
-    ])).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
+    ]).filter((n) => !!n && !filterAbilities.includes(n)).sort(usageSorter);
 
     options.push({
       label: translateHeader('Transformed'),

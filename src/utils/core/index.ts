@@ -1,6 +1,7 @@
 export * from './clamp';
 export * from './clipboard';
 export * from './createShowdexEvent';
+export * from './dedupeArray';
 export * from './diffArrays';
 export * from './dispatchShowdexEvent';
 export * from './formatId';

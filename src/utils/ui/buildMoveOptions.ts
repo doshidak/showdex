@@ -2,7 +2,7 @@ import { type MoveName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
 import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
-import { formatId } from '@showdex/utils/core';
+import { dedupeArray, formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   getDexForFormat,
@@ -283,7 +283,7 @@ export const buildMoveOptions = (
       .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
 
     // using a Set makes sure we have no duplicate entries in the array
-    const hpMoves = Array.from(new Set(unsortedHpMoves)).sort(usageSorter);
+    const hpMoves = dedupeArray(unsortedHpMoves).sort(usageSorter);
 
     options.push({
       label: translateHeader('Hidden Power'),

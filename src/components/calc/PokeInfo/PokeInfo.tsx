@@ -36,7 +36,12 @@ import {
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
 import { calcPokemonHpPercentage } from '@showdex/utils/calc';
-import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
+import {
+  dedupeArray,
+  formatId,
+  readClipboardText,
+  writeClipboardText,
+} from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
@@ -399,70 +404,6 @@ export const PokeInfo = ({
 
       setImportedCount(count);
       importBadgeRef.current?.show();
-
-      /*
-      if (operatingMode === 'standalone') {
-        const importedPresets = importMultiPokePastes(data, format);
-        const importedPokemon = importedPresets.map((preset) => ({
-          speciesForme: preset.speciesForme,
-          level: preset.level,
-          dirtyTeraType: flattenAlt(preset.teraTypes?.[0]),
-          dirtyAbility: preset.ability,
-          dirtyItem: preset.item,
-          nature: preset.nature,
-          ivs: populateStatsTable(preset.ivs, { spread: 'iv', format }),
-          evs: populateStatsTable(preset.evs, { spread: 'ev', format }),
-          moves: preset.moves,
-          presetId: preset.calcdexId,
-          presets: [preset],
-        }));
-
-        if (!importedPokemon.length) {
-          setImportFailedReason(t('poke.info.preset.malformedBadge', 'Bad Syntax'));
-          importFailedBadgeRef.current?.show();
-
-          return;
-        }
-
-        addPokemon(importedPokemon, `${l.scope}:handlePokePasteImport()`);
-
-        return void importBadgeRef.current?.show();
-      }
-
-      const preset = importPokePaste(data, format);
-
-      const speciesMismatch = ![
-        pokemon?.speciesForme,
-        ...(pokemon?.altFormes || []),
-      ].filter(Boolean).includes(preset?.speciesForme);
-
-      const importFailed = !preset?.calcdexId || (operatingMode === 'battle' && speciesMismatch);
-
-      if (importFailed) {
-        setImportFailedReason(t(
-          `poke.info.preset.${preset?.calcdexId ? 'mismatched' : 'malformed'}Badge`,
-          preset?.calcdexId ? 'Mismatch' : 'Bad Syntax',
-        ));
-        importFailedBadgeRef.current?.show();
-
-        return;
-      }
-
-      const currentPresets = [...pokemon.presets];
-      const existingImportIndex = currentPresets.findIndex((p) => p.source === 'import');
-
-      if (existingImportIndex > -1) {
-        currentPresets.splice(existingImportIndex, 1, preset);
-      } else {
-        currentPresets.push(preset);
-      }
-
-      applyPreset(preset, {
-        presets: currentPresets,
-      }, `${l.scope}:handlePokePasteImport()`);
-
-      importBadgeRef.current?.show();
-      */
     } catch (error) {
       /*
       if (__DEV__) {
@@ -730,10 +671,10 @@ export const PokeInfo = ({
                     || 0
                 ) !== 1 ? containerSize : null}
                 highlight={pokemon?.terastallized}
-                highlightTypes={Array.from(new Set([
+                highlightTypes={dedupeArray([
                   ...flattenAlts(pokemon?.altTeraTypes),
                   pokemon?.teraType,
-                ])).filter(Boolean)}
+                ]).filter(Boolean)}
                 revealedTypes={[pokemon?.teraType].filter(Boolean)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}

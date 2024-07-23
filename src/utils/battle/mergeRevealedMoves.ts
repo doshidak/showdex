@@ -1,6 +1,7 @@
 import { type MoveName } from '@smogon/calc';
 import { PokemonPivotMoves } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { dedupeArray } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 
@@ -48,7 +49,7 @@ export const mergeRevealedMoves = (
      * @todo Needs to be updated once we support more than 4 moves.
      */
     if (moves.length < 4) {
-      return Array.from(new Set([...moves, ...revealedSource])).slice(0, 4);
+      return dedupeArray([...moves, ...revealedSource]).slice(0, 4);
     }
 
     return moves;
