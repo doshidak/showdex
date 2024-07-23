@@ -236,6 +236,16 @@ export interface CalcdexPokemonPreset {
   pokeball?: string;
 
   /**
+   * Unix epoch timestamp of when this preset was imported, in milliseconds.
+   *
+   * * Primarily used for displaying the human-readable date & time in the presets dropdown.
+   * * Typically populated by `importPokePaste()` (& by extension, `importMultiPokePaste()`).
+   *
+   * @since 1.2.4
+   */
+  imported?: number;
+
+  /**
    * Unix epoch timestamp of when this preset was last updated, in milliseconds.
    *
    * * Primarily used for displaying the human-readable date in the presets dropdown.
