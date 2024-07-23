@@ -170,6 +170,7 @@ export const mapAutoBoosts = (
         format,
         targetPokemon: pokemon,
         activePokemon,
+        sourceSide: players?.[sourceKey]?.side,
         field,
       });
 
