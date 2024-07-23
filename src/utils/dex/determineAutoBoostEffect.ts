@@ -61,6 +61,7 @@ export const determineAutoBoostEffect = (
   const {
     calcdexId: sourcePid,
     playerKey: sourceKey,
+    active: sourceActive,
     speciesForme: sourceSpeciesForme,
     transformedForme: sourceTransformedForme,
     terastallized: sourceTerastallized,
@@ -208,6 +209,10 @@ export const determineAutoBoostEffect = (
 
     // source (e.g., Landorous-Therian) & target Pokemon should be different here typically
     case 'Intimidate': {
+      if (sourceActive) {
+        break;
+      }
+
       output.name = sourceAbility;
       output.dict = 'abilities';
       output.boosts.atk = -1;
@@ -227,16 +232,13 @@ export const determineAutoBoostEffect = (
         'White Smoke',
         'Hyper Cutter',
         'Full Metal Body',
-      ] as AbilityName[];
-
-      if (gen > 7) {
-        blockers.push(...([
+        ...(gen > 7 ? [
           'Inner Focus',
           'Own Tempo',
           'Oblivious',
           'Scrappy',
-        ] as AbilityName[]));
-      }
+        ] : []),
+      ] as AbilityName[];
 
       if (blockers.includes(targetAbility)) {
         output.boosts.atk = 0;

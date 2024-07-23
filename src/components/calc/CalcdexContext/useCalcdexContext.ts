@@ -212,9 +212,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         field: { ...state.field, ...field },
       });
 
-      // const shouldAdd = !!fx?.name && !(fx.name in (targetPokemon.autoBoostMap || {})) && nonEmptyObject(fx.boosts);
-      // const targetAbility = targetPokemon.dirtyAbility || targetPokemon.ability;
-
       [
         sourcePokemon.calcdexId !== targetPokemon.calcdexId && sourcePokemon,
         targetPokemon,
@@ -225,26 +222,95 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           return;
         }
 
-        const removeEffects = (Object.entries(pokemon.autoBoostMap) as Entries<typeof pokemon.autoBoostMap>)
-          .filter(([, f]) => {
-            // note: always resetting 'items' as a shitty way of dealing with Seed items for now lol
-            if (!f?.name || f.dict === 'items' || !nonEmptyObject(f.boosts) || (typeof f.turn === 'number' && f.turn < 0)) {
-              return true;
+        // const debugPreEffects = Object.keys(pokemon.autoBoostMap); // used for debugging purposes only
+
+        // warning: don't include alt props (e.g., altAbilities[]) since they're (potentially) populated by a preset for
+        // the previous Pokemon if the speciesForme was changed
+        // (also, we don't care about dupes here; e.g., abilities = ['Dauntless Shield', 'Dauntless Shield'] is ok for our purposes)
+        const abilities = [pokemon.dirtyAbility, pokemon.ability, ...(pokemon.abilities || [])].filter(Boolean);
+        const items = [pokemon.dirtyItem, pokemon.item, pokemon.prevItem].filter(Boolean);
+
+        // update (2024/07/23): as opposed to "soft"-removing by setting `active` to false (which is what deactivateEffects[] does),
+        // this will hard-remove (via `delete`) any effects NOT received by another Pokémon (e.g., Intimidate), discernable
+        // from whether sourceKey & sourcePid are both populated; this is to make sure (esp. in the Honkdex) when you switch
+        // from, say, Zamazenta w/ Dauntless Shield (receiving a +1 DEF auto-boost), to Arceus w/ Multitype, the Dauntless
+        // Shield auto-boost doesn't incorrectly persist after switching to Arceus
+        const removeEffects = (Object.entries(pokemon.autoBoostMap) as Entries<typeof pokemon.autoBoostMap>).map(([n, f]) => {
+          if (!f?.name || !f.dict) {
+            return n;
+          }
+
+          // allow effects from other Pokemon (such as an opposing Landorous-Therian's Intimidate ability) to remain
+          if (f.sourceKey && f.sourcePid) {
+            return null;
+          }
+
+          switch (f.dict) {
+            case 'abilities': {
+              if (!abilities.includes(f.name as AbilityName)) {
+                return n;
+              }
+
+              break;
             }
 
-            if (!f.sourceKey || !f.sourcePid) {
-              return false;
+            case 'items': {
+              if (!items.includes(f.name as ItemName)) {
+                return n;
+              }
+
+              break;
             }
 
-            // & this is the shitty way of dealing with abilities like Intimidate that target opposing Pokemon
-            const fxIndex = playersPayload[f.sourceKey]?.pokemon?.findIndex((p) => p?.calcdexId === f.sourcePid);
-            const selIndex = playersPayload[f.sourceKey]?.selectionIndex;
+            // note: allowing 'moves' to pass thru; although at the time of writing this, don't think this is being used LOL
+            // case 'moves': break;
 
-            return fxIndex !== selIndex;
-          })
-          .map(([n]) => n) as (AbilityName | ItemName)[];
+            default: {
+              break;
+            }
+          }
 
-        if (!removeEffects.length) {
+          // default case is to leave it alone & let deactivateEffects[] decide
+          return null;
+        }).filter(Boolean) as (AbilityName | ItemName)[];
+
+        if (removeEffects.length) {
+          removeEffects.forEach((name) => {
+            delete pokemon.autoBoostMap[name];
+          });
+        }
+
+        const deactivateEffects = (Object.entries(pokemon.autoBoostMap) as Entries<typeof pokemon.autoBoostMap>).map(([n, f]) => {
+          // note: always resetting 'items' as a shitty way of dealing with Seed items for now lol
+          if (!f?.name || f.dict === 'items' || !nonEmptyObject(f.boosts) || (typeof f.turn === 'number' && f.turn < 0)) {
+            return n;
+          }
+
+          // at this point, we're now *only* handling effects from other Pokemon (unlike the similar guard statement above)
+          if (!f.sourceKey || !f.sourcePid) {
+            return null;
+          }
+
+          // & this is the shitty way of dealing with abilities like Intimidate that target opposing Pokemon
+          const fxIndex = playersPayload[f.sourceKey]?.pokemon?.findIndex((p) => p?.calcdexId === f.sourcePid);
+          const selIndex = playersPayload[f.sourceKey]?.selectionIndex;
+
+          return fxIndex !== selIndex ? n : null;
+        }).filter(Boolean) as (AbilityName | ItemName)[];
+
+        /*
+        l.debug(
+          'applyAutoBoostEffects()', 'for', playerKey, pokemon.speciesForme,
+          '\n', 'effects', '(pre)', debugPreEffects, '(post)', Object.keys(pokemon.autoBoostMap),
+          '\n', 'abilities[]', abilities,
+          '\n', 'items[]', items,
+          '\n', 'autoBoostMap', '(post-remove)', pokemon.autoBoostMap,
+          '\n', 'remove[]', removeEffects,
+          '\n', 'deactivate[]', deactivateEffects,
+        );
+        */
+
+        if (!deactivateEffects.length) {
           return;
         }
 
@@ -254,9 +320,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           return;
         }
 
-        // l.debug('removeEffects for', pokemon.ident, removeEffects);
+        // l.debug('deactivateEffects for', pokemon.ident, deactivateEffects);
 
-        removeEffects.forEach((name) => {
+        deactivateEffects.forEach((name) => {
           pokemon.autoBoostMap[name] = {
             ...pokemon.autoBoostMap[name],
             active: false,
@@ -272,7 +338,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         return;
       }
 
-      if (fx.name in (targetPokemon.autoBoostMap || {})) {
+      if (fx.name in { ...targetPokemon.autoBoostMap }) {
         targetPokemon.autoBoostMap[fx.name].active = nonEmptyObject(fx.boosts);
         targetPokemon.autoBoostMap[fx.name].boosts = { ...fx.boosts };
 
@@ -457,6 +523,16 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           mutated.presetId = null;
           mutated.presetSource = null;
         }
+      }
+
+      // make sure any presets added to the Pokemon still apply to the updated speciesForme
+      if (mutated.presets?.length) {
+        const presetFormes = getPresetFormes(mutated.speciesForme, {
+          format: state.format,
+          source: 'sheet', // include otherFormes[] (normally omitted when not 'server' / 'sheet')
+        });
+
+        mutated.presets = mutated.presets.filter((p) => !!p?.speciesForme && presetFormes.includes(p.speciesForme));
       }
     }
 
