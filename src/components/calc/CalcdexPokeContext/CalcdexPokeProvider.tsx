@@ -4,7 +4,7 @@ import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
-  flattenAlts,
+  findMatchingUsage,
   selectPokemonPresets,
   sortPresetsByFormat,
   usageAltPercentFinder,
@@ -210,33 +210,10 @@ export const CalcdexPokeProvider = ({
     usages,
   ]);
 
-  const usage = React.useMemo(() => {
-    if (!usages?.length) {
-      return null;
-    }
-
-    if (usages.length === 1) {
-      return usages[0];
-    }
-
-    const moves = playerPokemon?.altMoves?.length
-      ? flattenAlts(playerPokemon.altMoves)
-      : playerPokemon?.moves;
-
-    if (!moves?.length) {
-      return usages[0];
-    }
-
-    return usages.find((u) => {
-      const movePool = flattenAlts(u.altMoves);
-
-      return moves.every((move) => movePool.includes(move));
-    });
-  }, [
-    playerPokemon?.altMoves,
-    playerPokemon?.moves,
-    usages,
-  ]);
+  const usage = React.useMemo(
+    () => findMatchingUsage(usages, playerPokemon),
+    [playerPokemon, usages],
+  );
 
   const abilityUsageFinder = React.useMemo(
     () => usageAltPercentFinder(usage?.altAbilities, true),

@@ -22,7 +22,7 @@ const maybeSpeciesForme = (
 export const importMultiPokePastes = (
   pokePastes: string,
   format?: string,
-  name = 'Import',
+  name?: string,
   source: CalcdexPokemonPresetSource = 'import',
 ): CalcdexPokemonPreset[] => {
   const output: CalcdexPokemonPreset[] = [];

@@ -35,7 +35,7 @@ import {
 } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
-import { calcPokemonHpPercentage, populateStatsTable } from '@showdex/utils/calc';
+import { calcPokemonHpPercentage } from '@showdex/utils/calc';
 import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
@@ -46,10 +46,8 @@ import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {
   detectUsageAlt,
   exportPokePaste,
-  flattenAlt,
   flattenAlts,
   importMultiPokePastes,
-  importPokePaste,
 } from '@showdex/utils/presets';
 import {
   buildAbilityOptions,
@@ -92,9 +90,10 @@ export const PokeInfo = ({
     formeUsageFinder,
     formeUsageSorter,
     addPokemon,
+    importPresets,
+    applyPreset,
     updatePokemon,
     removePokemon,
-    applyPreset,
   } = useCalcdexPokeContext();
 
   const {
@@ -115,12 +114,7 @@ export const PokeInfo = ({
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
-
-  const nickname = (
-    hasNickname(pokemon)
-      && settings?.showNicknames
-      && pokemon.name
-  ) || null;
+  const nickname = (hasNickname(pokemon) && settings?.showNicknames && pokemon.name) || null;
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
@@ -152,7 +146,7 @@ export const PokeInfo = ({
     [t],
   );
 
-  const showAbilityToggle = toggleableAbility(pokemon, gameType);
+  const showAbilityToggle = React.useMemo(() => toggleableAbility(pokemon, gameType), [gameType, pokemon]);
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = React.useMemo(() => (
@@ -374,17 +368,39 @@ export const PokeInfo = ({
   ]);
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
+  const [importedCount, setImportedCount] = React.useState(0);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
   const [importFailedReason, setImportFailedReason] = React.useState('Failed');
 
   const handlePokePasteImport = () => void (async () => {
-    if (typeof updatePokemon !== 'function') {
+    if (typeof importPresets !== 'function') {
       return;
     }
 
     try {
       const data = await readClipboardText();
+      const imported = importMultiPokePastes(data, format, null);
 
+      if (!imported.length) {
+        setImportFailedReason(t('poke.info.preset.malformedBadge', 'Bad Syntax'));
+        importFailedBadgeRef.current?.show();
+
+        return;
+      }
+
+      const count = importPresets(imported, null, `${l.scope}:handlePokePasteImport()`);
+
+      if (!count) {
+        setImportFailedReason(t('poke.info.preset.mismatchedBadge', 'Mismatch'));
+        importFailedBadgeRef.current?.show();
+
+        return;
+      }
+
+      setImportedCount(count);
+      importBadgeRef.current?.show();
+
+      /*
       if (operatingMode === 'standalone') {
         const importedPresets = importMultiPokePastes(data, format);
         const importedPokemon = importedPresets.map((preset) => ({
@@ -446,14 +462,17 @@ export const PokeInfo = ({
       }, `${l.scope}:handlePokePasteImport()`);
 
       importBadgeRef.current?.show();
+      */
     } catch (error) {
-      // if (__DEV__) {
-      //   l.error(
-      //     'Failed to import the set for', pokemon.speciesForme, 'from clipboard:',
-      //     '\n', error,
-      //     '\n', '(You will only see this error on development.)',
-      //   );
-      // }
+      /*
+      if (__DEV__) {
+        l.error(
+          'Failed to import the set for', pokemon?.ident || pokemon?.speciesForme || '???', 'from clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+      */
 
       setImportFailedReason(t('poke.info.preset.failedBadge'));
       importFailedBadgeRef.current?.show();
@@ -478,13 +497,15 @@ export const PokeInfo = ({
 
       exportBadgeRef.current?.show();
     } catch (error) {
-      // if (__DEV__) {
-      //   l.error(
-      //     'Failed to export the set for', pokemon.speciesForme, 'to clipboard:',
-      //     '\n', error,
-      //     '\n', '(You will only see this error on development.)',
-      //   );
-      // }
+      /*
+      if (__DEV__) {
+        l.error(
+          'Failed to export the set for', pokemon?.ident || pokemon?.speciesForme || '???', 'to clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+      */
 
       exportFailedBadgeRef.current?.show();
     }
@@ -807,7 +828,10 @@ export const PokeInfo = ({
                   <Badge
                     ref={importBadgeRef}
                     className={cx(styles.importBadge, styles.floating)}
-                    label={t('poke.info.preset.importedBadge', 'Imported')}
+                    label={t(`poke.info.preset.imported${importedCount > 1 ? 'Multi' : ''}Badge`, {
+                      count: importedCount,
+                      defaultValue: 'Imported',
+                    })}
                     color="blue"
                   />
 
@@ -835,7 +859,7 @@ export const PokeInfo = ({
                   <Badge
                     ref={exportBadgeRef}
                     className={styles.importBadge}
-                    label={t('poke.info.preset.exportedBadge', 'Exported')}
+                    label={t('poke.info.preset.exportedBadge', 'Copied!')}
                     color="green"
                   />
 

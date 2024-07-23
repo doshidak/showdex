@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-07-17T04:53:49.411Z"
+    "updated": "2024-07-22T01:23:55.411Z"
   },
 
   "abilities": {
@@ -113,6 +113,7 @@
   },
 
   "speciesAliases": {
+    "neck": "Raging Bolt",
     "steveneel": "Eelektross",
     "ttar": "Tyranitar",
     "ttarmega": "Tyranitar-Mega"

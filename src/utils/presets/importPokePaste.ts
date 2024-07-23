@@ -6,13 +6,12 @@ import {
 } from '@smogon/calc';
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@showdex/interfaces/calc';
-import { calcPresetCalcdexId } from '@showdex/utils/calc';
+import { calcPresetCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   detectLegacyGen,
   determineDefaultLevel,
-  getDefaultSpreadValue,
   getDexForFormat,
   parseBattleFormat,
 } from '@showdex/utils/dex';
@@ -47,7 +46,7 @@ export const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> 
 /**
  * Imports the passed-in `pokePaste` into a `CalcdexPokemonPreset`.
  *
- * * Does not validate the actual values besides performing a `dex` lookup for the `name`.
+ * * Does not validate the actual values besides performing a `dex` lookup for the properly formatted `name`'s.
  *   - i.e., It's entirely possible that imported sets may have illegal abilities, IVs/EVs, etc.
  * * Supports up to 3 moves per move line.
  *   - e.g., `'- Volt Switch / Surf / Volt Tackle'` is an acceptable move line.
@@ -108,6 +107,7 @@ export const PokePasteSpreadParsers: Partial<Record<Showdown.StatName, RegExp>> 
  *     'Flamethrower',
  *   ],
  *   altMoves: [],
+ *   imported: 1721609804332,
  * } as CalcdexPokemonPreset
  * ```
  * @since 1.0.7
@@ -125,10 +125,7 @@ export const importPokePaste = (
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
   const legacy = detectLegacyGen(format);
-
   const defaultLevel = determineDefaultLevel(format);
-  const defaultIv = getDefaultSpreadValue('iv', format);
-  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // this will be our final return value
   const preset: CalcdexPokemonPreset = {
@@ -138,33 +135,15 @@ export const importPokePaste = (
     name,
     gen,
     format,
-
     speciesForme: null,
     level: defaultLevel,
     shiny: false,
-
-    ivs: {
-      hp: defaultIv,
-      atk: defaultIv,
-      def: defaultIv,
-      spa: defaultIv,
-      spd: defaultIv,
-      spe: defaultIv,
-    },
-
-    evs: {
-      hp: defaultEv,
-      atk: defaultEv,
-      def: defaultEv,
-      spa: defaultEv,
-      spd: defaultEv,
-      spe: defaultEv,
-    },
-
     nature: 'Hardy',
-
+    ivs: populateStatsTable(null, { spread: 'iv', format }),
+    evs: populateStatsTable(null, { spread: 'ev', format }),
     moves: [],
     altMoves: [],
+    imported: null,
   };
 
   // first, split the pokePaste by newlines for easier line-by-line processing
@@ -543,6 +522,7 @@ export const importPokePaste = (
 
   preset.calcdexId = calcPresetCalcdexId(preset);
   preset.id = preset.calcdexId;
+  preset.imported = Date.now();
 
   return preset;
 };

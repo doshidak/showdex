@@ -74,13 +74,18 @@ export const buildPresetOptions = (
       }
     }
 
-    if (currentForme && hasDifferentFormes) {
-      if (option.subLabel) {
-        (option.subLabel as string) += ` ${bull} `;
-      } else {
+    const bullSubLabel = () => {
+      if (!option.subLabel) {
         option.subLabel = '';
+
+        return;
       }
 
+      (option.subLabel as string) += ` ${bull} `;
+    };
+
+    if (currentForme && hasDifferentFormes) {
+      bullSubLabel();
       (option.subLabel as string) += preset.speciesForme;
 
       if (pokemon.transformedForme) {
@@ -91,22 +96,17 @@ export const buildPresetOptions = (
     }
 
     if (preset.source === 'bundle' && preset.bundleName) {
-      if (option.subLabel) {
-        (option.subLabel as string) += ` ${bull} `;
-      } else {
-        option.subLabel = '';
-      }
-
+      bullSubLabel();
       (option.subLabel as string) += preset.bundleName;
     }
 
-    if (typeof preset.updated === 'number' && preset.updated) {
-      if (option.subLabel) {
-        (option.subLabel as string) += ` ${bull} `;
-      } else {
-        option.subLabel = '';
-      }
+    if (typeof preset.imported === 'number' && preset.imported) {
+      bullSubLabel();
+      (option.subLabel as string) += formatDate(preset.imported, 'yyyy/MM/dd KK:mm:ss a');
+    }
 
+    if (typeof preset.updated === 'number' && preset.updated) {
+      bullSubLabel();
       (option.subLabel as string) += formatDate(preset.updated, 'yyyy/MM/dd');
     }
 
@@ -125,10 +125,7 @@ export const buildPresetOptions = (
     const group = options.find((o) => o.label === label);
 
     if (!group) {
-      return void options.push({
-        label,
-        options: [option],
-      });
+      return void options.push({ label, options: [option] });
     }
 
     group.options.push(option);

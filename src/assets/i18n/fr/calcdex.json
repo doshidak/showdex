@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-07-21T13:55:01.946Z"
+    "updated": "2024-07-21T18:36:56.397Z"
   },
 
   "contextMenu": {
@@ -101,7 +101,9 @@
         "exportLabel": "$t(common:labels.export)",
         "importTooltip": "Importer PokéPaste Depuis le Presse-papiers",
         "importedBadge": "$t(common:labels.imported)",
-        "exportedBadge": "$t(common:labels.copied)!",
+        "importedMultiBadge": "$t(common:labels.imported) {{count}}",
+        "exportedBadge": "$t(common:labels.copied) !",
+        "exportedMutliBadge": "$t(common:labels.copied) {{count}} !",
         "malformedBadge": "Mauvaise Syntaxe",
         "mismatchedBadge": "Décalage",
         "failedBadge": "$t(common:labels.failed)"

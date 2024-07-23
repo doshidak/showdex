@@ -113,21 +113,12 @@ export const applyPreset = (
   const completePreset = detectCompletePreset(preset);
 
   // update to the speciesForme (& update relevant info) if different
-  // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
-  //   || (!transformed && pokemon.speciesForme !== preset.speciesForme);
   const shouldUpdateSpecies = currentForme !== preset.speciesForme
-    // && !hasMegaForme(currentForme);
     && !speciesFormes.includes(currentForme);
 
   if (shouldUpdateSpecies) {
     output[formeKey] = preset.speciesForme;
   }
-
-  // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
-  // if the preset was for its non-Mega forme (since they could have different abilities)
-  // if (hasMegaForme(pokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
-  //   delete output.dirtyAbility;
-  // }
 
   const didRevealTeraType = !!pokemon.teraType && pokemon.teraType !== '???';
   const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
@@ -293,10 +284,7 @@ export const applyPreset = (
     }
   }
 
-  const sanitized = sanitizePokemon({
-    ...pokemon,
-    ...output,
-  }, format);
+  const sanitized = sanitizePokemon({ ...pokemon, ...output }, format);
 
   if (currentForme !== output[formeKey]) {
     const {
@@ -325,9 +313,6 @@ export const applyPreset = (
     && ![...sanitized.abilities, ...sanitized.transformedAbilities].includes(output.dirtyAbility);
 
   if (shouldClearDirtyAbility) {
-    // [output.dirtyAbility] = sanitized.transformedAbilities.length
-    //   ? sanitized.transformedAbilities
-    //   : sanitized.abilities;
     delete output.dirtyAbility;
   }
 
