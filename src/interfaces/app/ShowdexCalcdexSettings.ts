@@ -489,6 +489,14 @@ export interface ShowdexCalcdexSettings {
   showUiTooltips: boolean;
 
   /**
+   * Whether to show the preset tooltip.
+   *
+   * @default true
+   * @since 1.2.4
+   */
+  showPresetTooltip: boolean;
+
+  /**
    * Whether to show the ability tooltip.
    *
    * @default true

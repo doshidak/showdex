@@ -180,7 +180,7 @@ $close-icon-size: 28px;
 }
 
 .settingsGroup {
-  @include spacing.margin($all: 12px);
+  @include spacing.margin($y: 12px);
   @include spacing.padding($x: 12px, $top: 20px, $bottom: 24px);
   border-radius: 12px;
   @include transition.apply(background-color, box-shadow);

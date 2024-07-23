@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-17T06:08:08.843Z"
+    "updated": "2024-07-23T13:00:54.684Z"
   },
 
   "pane": {
@@ -411,6 +411,10 @@
         "ui": {
           "label": "$t(pane.sections.secondary.interface)",
           "tooltip": "Affiche des infobulles explicatives (comme celle-ci) pour les boutons de l'interface utilisateur lorsqu'ils sont survolés.<br /><br />Désactivez ceci si vous êtes un pro de $t(common:products.calcdex_one) et que vous savez déjà à quoi tout sert."
+        },
+        "preset": {
+          "label": "$t(calcdex:poke.info.preset.label)",
+          "tooltip": "Affiche le PokéPaste du set survolé dans la liste déroulante."
         },
         "ability": {
           "label": "$t(pokedex:headers.ability_one)",

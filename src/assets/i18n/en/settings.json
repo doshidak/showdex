@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-07-17T06:07:28.118Z"
+    "updated": "2024-07-23T12:56:06.501Z"
   },
 
   "pane": {
@@ -412,6 +412,10 @@
         "ui": {
           "label": "$t(pane.sections.secondary.interface)",
           "tooltip": "Shows explainer tooltips (like this one) for buttons in the UI when hovered over.<br /><br />Disable this if you're a $t(common:products.calcdex_one) pro &amp; know what everything does already."
+        },
+        "preset": {
+          "label": "$t(calcdex:poke.info.preset.label)",
+          "tooltip": "Shows the PokéPaste of the hovered set in the dropdown list."
         },
         "ability": {
           "label": "$t(pokedex:headers.ability_one)",

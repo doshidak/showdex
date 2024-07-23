@@ -1,3 +1,4 @@
+import { type GenerationNum } from '@smogon/calc';
 import { PokemonPokePasteStatMap } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
@@ -98,8 +99,8 @@ const exportStatsTable = (
  * @since 1.0.3
  */
 export const exportPokePaste = (
-  pokemon: DeepPartial<CalcdexPokemon>,
-  format?: string,
+  pokemon: Omit<Partial<CalcdexPokemon>, 'source'>,
+  format?: string | GenerationNum,
 ): string => {
   if (!pokemon?.speciesForme) {
     return null;

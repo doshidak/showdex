@@ -10,6 +10,7 @@ export * from './PokeGlance';
 export * from './PokeHpBar';
 export * from './PokeItemOptionTooltip';
 export * from './PokeMoveOptionTooltip';
+export * from './PokePresetOptionTooltip';
 export * from './PokeStatus';
 export * from './PokeStatusTooltip';
 export * from './PokeType';

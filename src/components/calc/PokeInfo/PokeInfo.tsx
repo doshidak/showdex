@@ -9,6 +9,7 @@ import {
   PokeGlanceOptionTooltip,
   PokeHpBar,
   PokeItemOptionTooltip,
+  PokePresetOptionTooltip,
   PokeStatus,
   PokeStatusTooltip,
 } from '@showdex/components/app';
@@ -429,12 +430,16 @@ export const PokeInfo = ({
   );
 
   const handlePokePasteExport = () => void (async () => {
-    if (!pokePaste) {
+    // note: using `gen` instead of `format` (just for what's actually copied to the user's clipboard) to not omit the EVs
+    // in Randoms, where they're all (usually) 85, but the PokePaste will omit them when passing the full `format`
+    const fullPaste = exportPokePaste(pokemon, gen);
+
+    if (!fullPaste) {
       return;
     }
 
     try {
-      await writeClipboardText(pokePaste);
+      await writeClipboardText(fullPaste);
 
       exportBadgeRef.current?.show();
     } catch (error) {
@@ -472,7 +477,6 @@ export const PokeInfo = ({
               ...(!pokemon?.speciesForme && { opacity: 0.32 }),
             }}
             pokemon={{
-              // ...pokemon,
               speciesForme: (
                 pokemon?.transformedCosmeticForme
                   || pokemon?.transformedForme
@@ -825,6 +829,12 @@ export const PokeInfo = ({
                   pokemon?.speciesForme ? 'None' : '???',
                 )
             ) as React.ReactNode}
+            optionTooltip={PokePresetOptionTooltip}
+            optionTooltipProps={{
+              format,
+              presets,
+              hidden: !settings?.showPresetTooltip,
+            }}
             input={{
               name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
