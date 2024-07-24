@@ -24,6 +24,14 @@ div.container {
       0 0 1px color.alpha(colors.$black, 0.32),
       0 0 4px color.alpha(colors.$gray-darker, 0.16),
     );
+
+    &.mina {
+      background-color: #FDF2F6;
+      box-shadow: (
+        0 0 1px color.alpha(#770629, 0.32),
+        0 0 4px color.alpha(#D76D8E, 0.16),
+      );
+    }
   }
 
   &.dark {
@@ -32,6 +40,10 @@ div.container {
       0 0 1px color.alpha(colors.$white, 0.32),
       0 0 4px color.alpha(colors.$black, 0.32),
     );
+
+    &.mina {
+      background-color: #3A232D;
+    }
   }
 
   &.glassy {
@@ -39,10 +51,18 @@ div.container {
 
     &.light {
       background-color: color.alpha(colors.$white, 0.56);
+
+      &.mina {
+        background-color: color.alpha(#FDF2F6, 0.56);
+      }
     }
 
     &.dark {
       background-color: color.alpha(colors.$gray-darker, 0.64);
+
+      &.mina {
+        background-color: color.alpha(#3A232D, 0.64);
+      }
     }
   }
 
@@ -65,6 +85,10 @@ div.container {
       &::after {
         @include aria.outline-hover;
       }
+    }
+
+    &.light.mina::before {
+      background-color: color.alpha(#770629, 0.06);
     }
 
     &.dark {

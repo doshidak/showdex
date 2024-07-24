@@ -17,6 +17,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
   locale: null, // falling back to LanguageDetector
   colorScheme: null,
   forcedColorScheme: 'showdown',
+  colorTheme: 'sic',
   glassyTerrain: false,
   developerMode: __DEV__,
 
@@ -136,6 +137,7 @@ export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string>
   locale: 'lc',
   colorScheme: 'cs',
   forcedColorScheme: 'fc',
+  colorTheme: 'ct',
   glassyTerrain: 'gt',
   developerMode: 'dm',
   hellodex: 'hd',

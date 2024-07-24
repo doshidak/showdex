@@ -17,6 +17,7 @@ import { type ShowdexSettings } from '@showdex/interfaces/app';
 import {
   useAuthUsername,
   useColorScheme,
+  useColorTheme,
   useGlassyTerrain,
   useHellodexState,
   useShowdexSettings,
@@ -36,12 +37,9 @@ import { clearPresetsDb } from '@showdex/utils/storage';
 import { AutoFeaturesSettingsPane } from './AutoFeaturesSettingsPane';
 import { CalcdexSettingsPane } from './CalcdexSettingsPane';
 import { GeneralSettingsPane } from './GeneralSettingsPane';
-// import { HellodexSettingsPane } from './HellodexSettingsPane';
 import { HonkdexSettingsPane } from './HonkdexSettingsPane';
 import { MetagameSettingsPane } from './MetagameSettingsPane';
 import { PresetsSettingsPane } from './PresetsSettingsPane';
-// import { ShowdexSettingsPane } from './ShowdexSettingsPane';
-// import { ShowdownSettingsPane } from './ShowdownSettingsPane';
 import { VisibilitySettingsPane } from './VisibilitySettingsPane';
 import styles from './SettingsPane.module.scss';
 
@@ -67,6 +65,7 @@ export const SettingsPane = ({
 }: SettingsPaneProps): JSX.Element => {
   const { t, i18n } = useTranslation('settings');
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const state = useHellodexState();
   const inBattle = ['xs', 'sm'].includes(state.containerSize);
@@ -257,66 +256,15 @@ export const SettingsPane = ({
   ]);
   */
 
-  // const [presetCacheSize, setPresetCacheSize] = React.useState(0);
-  // const [maxCacheSize, setMaxCacheSize] = React.useState(0);
-  // const presetCacheTimeout = React.useRef<NodeJS.Timeout>(null);
-
-  /*
-  // only updates the state when the size actually changes
-  const updatePresetCacheSize = () => void (async () => {
-    if (typeof navigator?.storage?.estimate !== 'function') {
-      return;
-    }
-
-    // const size = getPresetCacheSize();
-    const estimates = await navigator.storage.estimate();
-
-    // doesn't appear to be a way to easily measure the size of just Showdex's IndexedDB,
-    // but at the time of writing (2023/12/28), next to Permutive's 2 object stores w/ 4 total entries,
-    // safe to say majority of the size is from our object stores lmao
-    const {
-      quota,
-      usage,
-      // usageDetails: { indexedDB }, // not typed for some reason, but appears on Chrome
-    } = estimates || {};
-
-    if ((usage || 0) !== presetCacheSize) {
-      setPresetCacheSize(usage);
-    }
-
-    if ((quota || 0) !== maxCacheSize) {
-      setMaxCacheSize(quota);
-    }
-  })();
-  */
-
-  // check the estimated preset cache size on mount only
-  /*
-  React.useEffect(() => {
-    // if (presetCacheTimeout.current) {
-    //   return;
-    // }
-
-    // presetCacheTimeout.current = setTimeout(updatePresetCacheSize, 30000);
-    updatePresetCacheSize();
-
-    // return () => {
-    //   if (presetCacheTimeout.current) {
-    //     clearTimeout(presetCacheTimeout.current);
-    //     presetCacheTimeout.current = null;
-    //   }
-    // };
-  });
-  */
-
-  const handleSettingsChange = (values: DeepPartial<ShowdexSettings>) => {
+  const handleSettingsChange = (
+    values: DeepPartial<ShowdexSettings>,
+  ) => {
     if (!nonEmptyObject(values)) {
       return;
     }
 
     const {
       locale: nextLocale,
-      // colorScheme: newColorScheme,
       calcdex,
     } = values;
 
@@ -327,13 +275,6 @@ export const SettingsPane = ({
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
     if (calcdex?.maxPresetAge === 0) {
-      // void (async () => {
-      //   // purgeLocalStorageItem('local-storage-deprecated-preset-cache-key');
-      //   await clearPresetsDb();
-      //   // updatePresetCacheSize();
-      //   setPresetCacheSize(0); // kekw
-      // })();
-
       void clearPresetsDb();
     }
 
@@ -346,6 +287,7 @@ export const SettingsPane = ({
         styles.container,
         inBattle && styles.inBattle,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
         className,
       )}

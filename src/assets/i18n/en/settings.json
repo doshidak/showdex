@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "settings",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-07-23T12:56:06.501Z"
+    "updated": "2024-07-24T01:56:50.162Z"
   },
 
   "pane": {
@@ -100,6 +100,20 @@
         "dark": {
           "label": "Dark",
           "tooltip": "Forces a dark mode for everything $t(common:products.showdex), regardlesss of $t(common:products.showdown)'s graphics theme."
+        }
+      }
+    },
+
+    "colorTheme": {
+      "label": "Color Theme",
+      "options": {
+        "sic": {
+          "label": "SIC",
+          "tooltip": "The <strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor theme."
+        },
+        "mina": {
+          "label": "Mina",
+          "tooltip": "\"where is my showdex???????<br />...also make it pink\" <ndash /><em>meanie</em>, 2023"
         }
       }
     },

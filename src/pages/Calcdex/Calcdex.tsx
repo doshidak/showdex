@@ -23,6 +23,7 @@ import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@show
 import {
   useCalcdexDuplicator,
   useColorScheme,
+  useColorTheme,
   useGlassyTerrain,
   useHonkdexSettings,
 } from '@showdex/redux/store';
@@ -48,6 +49,7 @@ export const Calcdex = ({
 
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const mobile = useMobileViewport();
 
@@ -72,14 +74,11 @@ export const Calcdex = ({
 
   const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
     playerCount > 2 && AllPlayerKeys
-      // .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
       .filter((k) => state[k]?.active)
       .map((k) => {
         const { name: playerName } = state[k];
         const playerTitle = findPlayerTitle(playerName, true);
-
         const labelColor = playerTitle?.color?.[colorScheme];
-        // const iconColor = playerTitle?.iconColor?.[colorScheme];
 
         return {
           labelClassName: styles.playerOption,
@@ -89,16 +88,6 @@ export const Calcdex = ({
               <div className={styles.label}>
                 {playerName || '--'}
               </div>
-
-              {/*
-                !!playerTitle?.icon &&
-                <Svg
-                  className={styles.icon}
-                  style={iconColor ? { color: iconColor } : undefined}
-                  description={playerTitle.iconDescription}
-                  src={getResourceUrl(`${playerTitle.icon}.svg`)}
-                />
-              */}
 
               {
                 !!playerTitle?.icon &&
@@ -123,7 +112,6 @@ export const Calcdex = ({
         };
       })
   ) || null, [
-    // authPlayerKey,
     colorScheme,
     playerCount,
     state,
@@ -159,11 +147,13 @@ export const Calcdex = ({
         className={cx(
           'showdex-module',
           styles.container,
+          !!colorScheme && styles[colorScheme],
+          !!colorTheme && styles[colorTheme],
+          glassyTerrain && styles.glassy,
+          mobile && styles.mobile,
           containerSize === 'xs' && styles.verySmol,
           containerWidth < 360 && styles.skinnyBoi,
-          !!colorScheme && styles[colorScheme],
           renderAsOverlay && styles.overlay,
-          glassyTerrain && styles.glassy,
         )}
         onContextMenu={(e) => showContextMenu({
           event: e,

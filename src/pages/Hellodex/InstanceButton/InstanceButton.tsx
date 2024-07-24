@@ -6,7 +6,7 @@ import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/c
 import { bullop } from '@showdex/consts/core';
 import { GenLabels } from '@showdex/consts/dex';
 import { type CalcdexBattleState } from '@showdex/interfaces/calc';
-import { useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
+import { useColorScheme, useColorTheme, useGlassyTerrain } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { parseBattleFormat } from '@showdex/utils/dex';
@@ -37,6 +37,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
   const { t } = useTranslation('pokedex');
   const containerRef = React.useRef<ButtonElement>(null);
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
 
   const {
@@ -119,6 +120,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
         active && styles.active,
         (!!name && !!cached) && styles.saved,

@@ -14,6 +14,7 @@ import { ShowdexDonorTiers, ShowdexPatronTiers } from '@showdex/consts/app';
 import {
   useAuthUsername,
   useColorScheme,
+  useColorTheme,
   useGlassyTerrain,
   useHellodexState,
 } from '@showdex/redux/store';
@@ -40,6 +41,7 @@ export const PatronagePane = ({
   const { t } = useTranslation('hellodex');
   const state = useHellodexState();
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
 
   const authUser = useAuthUsername();
@@ -50,6 +52,7 @@ export const PatronagePane = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
         ['xs', 'sm'].includes(state.containerSize) && styles.verySmol,
         className,

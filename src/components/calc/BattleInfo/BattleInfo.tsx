@@ -12,7 +12,7 @@ import {
 } from '@showdex/components/form';
 import { ToggleButton } from '@showdex/components/ui';
 import { type CalcdexBattleState, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
-import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
+import { useColorScheme, useColorTheme, useHonkdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { buildFormatOptions, determineColorScheme } from '@showdex/utils/ui';
@@ -35,6 +35,7 @@ export const BattleInfo = ({
   const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
   const reversedColorScheme = determineColorScheme(colorScheme, true);
+  const colorTheme = useColorTheme();
 
   const {
     state,
@@ -133,6 +134,7 @@ export const BattleInfo = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         className,
       )}
       style={style}

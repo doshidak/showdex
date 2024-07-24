@@ -19,6 +19,7 @@ import {
   useCalcdexSettings,
   useCalcdexState,
   useColorScheme,
+  useColorTheme,
   useGlassyTerrain,
   useHellodexSettings,
   useHellodexState,
@@ -70,7 +71,9 @@ export const Hellodex = ({
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
   useRoomNavigation();
 
+  const rand = React.useRef(Math.random());
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const settings = useHellodexSettings();
   const calcdexSettings = useCalcdexSettings();
@@ -125,6 +128,7 @@ export const Hellodex = ({
         'showdex-module',
         styles.container,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
       )}
       onContextMenu={(e) => showContextMenu({
@@ -140,7 +144,8 @@ export const Hellodex = ({
         ref={contentRef}
         className={cx(
           styles.content,
-          ['xs', 'sm'].includes(state.containerSize) && styles.verySmol,
+          ['xs', 'sm'].includes(state.containerSize) && styles.smol,
+          state.containerSize === 'xs' && styles.verySmol,
         )}
       >
         {
@@ -157,11 +162,23 @@ export const Hellodex = ({
           />
         }
 
-        <Svg
-          className={styles.showdexIcon}
-          description="Showdex Icon"
-          src={getResourceUrl('showdex.svg')}
-        />
+        {colorTheme === 'mina' ? (
+          <Svg
+            className={cx(
+              styles.showdexIcon,
+              styles.minarexIcon,
+              rand.current > 0.5 && styles.shady,
+            )}
+            description="Minarex Icon"
+            src={getResourceUrl('minarex.svg')}
+          />
+        ) : (
+          <Svg
+            className={styles.showdexIcon}
+            description="Showdex Icon"
+            src={getResourceUrl('showdex.svg')}
+          />
+        )}
 
         <div className={styles.topContent}>
           <div className={styles.banner}>

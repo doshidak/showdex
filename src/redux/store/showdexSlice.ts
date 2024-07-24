@@ -237,18 +237,14 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
  *
  * @since 1.1.3
  */
-export const useAuthUsername = () => useSelector(
-  (state) => state?.showdex?.authUsername,
-);
+export const useAuthUsername = () => useSelector((s) => s?.showdex?.authUsername);
 
 /**
  * Convenient hook to access the `ShowdexSettings` state.
  *
  * @since 1.0.3
  */
-export const useShowdexSettings = () => useSelector(
-  (state) => state?.showdex?.settings,
-);
+export const useShowdexSettings = () => useSelector((s) => s?.showdex?.settings);
 
 /**
  * Convenient hook to access the current color scheme from the `ShowdexSettings` state.
@@ -269,49 +265,48 @@ export const useColorScheme = () => useSelector((state) => {
 });
 
 /**
+ * Convenient hook to access the `colorTheme` graphics setting value from the `ShowdexSettings` state.
+ *
+ * * This is not to be confused with `useColorScheme()`, which specifies `'light'` or `'dark'` modes.
+ *
+ * @since 1.2.4
+ */
+export const useColorTheme = () => useSelector((s) => s?.showdex?.settings?.colorTheme);
+
+/**
  * Convenient hook to access the `grassyTerrain` graphics setting value from the `ShowdexSettings` state.
  *
  * @since 1.2.0
  */
-export const useGlassyTerrain = () => useSelector(
-  (state) => state?.showdex?.settings?.glassyTerrain,
-);
+export const useGlassyTerrain = () => useSelector((s) => s?.showdex?.settings?.glassyTerrain);
 
 /**
  * Convenient hook to access the `ShowdexHellodexSettings` from the `ShowdexSettings` state.
  *
  * @since 1.0.3
  */
-export const useHellodexSettings = () => useSelector(
-  (state) => state?.showdex?.settings?.hellodex,
-);
+export const useHellodexSettings = () => useSelector((s) => s?.showdex?.settings?.hellodex);
 
 /**
  * Convenient hook to access the `ShowdexCalcdexSettings` from the `ShowdexSettings` state.
  *
  * @since 1.0.3
  */
-export const useCalcdexSettings = () => useSelector(
-  (state) => state?.showdex?.settings?.calcdex,
-);
+export const useCalcdexSettings = () => useSelector((s) => s?.showdex?.settings?.calcdex);
 
 /**
  * Convenient hook to access the `ShowdexHonkdexSettings` from the `ShowdexSettings` state.
  *
  * @since 1.2.0
  */
-export const useHonkdexSettings = () => useSelector(
-  (state) => state?.showdex?.settings?.honkdex,
-);
+export const useHonkdexSettings = () => useSelector((s) => s?.showdex?.settings?.honkdex);
 
 /**
  * Convenient hook to access the `ShowdexShowdownSettings` from the `ShowdexSettings` state.
  *
  * @since 1.1.7
  */
-export const useShowdexShowdownSettings = () => useSelector(
-  (state) => state?.showdex?.settings?.showdown,
-);
+export const useShowdexShowdownSettings = () => useSelector((s) => s?.showdex?.settings?.showdown);
 
 /**
  * Convenient hook to update the `ShowdexSettings` by dispatching the `updateSettings` action.

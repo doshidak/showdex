@@ -20,7 +20,12 @@ import {
 } from '@showdex/components/ui';
 import { PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { useColorScheme, useGlassyTerrain, useHonkdexSettings } from '@showdex/redux/store';
+import {
+  useColorScheme,
+  useColorTheme,
+  useGlassyTerrain,
+  useHonkdexSettings,
+} from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { calcMoveHitBasePowers, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
@@ -75,6 +80,7 @@ export const PokeMoves = ({
 
   const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const randomUuid = useRandomUuid();
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
@@ -256,9 +262,10 @@ export const PokeMoves = ({
     <TableGrid
       className={cx(
         styles.container,
-        containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
+        containerSize === 'xs' && styles.verySmol,
         className,
       )}
       style={style}

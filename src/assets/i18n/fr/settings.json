@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-23T13:00:54.684Z"
+    "updated": "2024-07-24T01:59:27.704Z"
   },
 
   "pane": {
@@ -99,6 +99,20 @@
         "dark": {
           "label": "Sombre",
           "tooltip": "Force un mode sombre pour tout $t(common:products.showdex), indépendamment du style graphique de $t(common:products.showdown)."
+        }
+      }
+    },
+
+    "colorTheme": {
+      "label": "Thème de Couleur",
+      "options": {
+        "sic": {
+          "label": "SIC",
+          "tooltip": "Le thème de couleur standard (<strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor)."
+        },
+        "mina": {
+          "label": "Mina",
+          "tooltip": "\"où est mon showdex???????<br />...fais-le aussi rose\" <ndash /><em>meanie</em>, 2023"
         }
       }
     },

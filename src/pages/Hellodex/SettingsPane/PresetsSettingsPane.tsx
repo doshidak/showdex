@@ -178,16 +178,7 @@ export const PresetsSettingsPane = ({
                     />
                   </>
                 }
-
-                {
-                  !!bundle.description &&
-                  <>
-                    <br />
-                    <br />
-                    {bundle.description}
-                  </>
-                }
-
+                {!!bundle.desc && <><br /><br />{bundle.desc}</>}
                 {
                   !!bundle.updated &&
                   <>
