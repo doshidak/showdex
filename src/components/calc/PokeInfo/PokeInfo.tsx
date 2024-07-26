@@ -394,7 +394,12 @@ export const PokeInfo = ({
         return;
       }
 
-      const count = importPresets(imported, null, `${l.scope}:handlePokePasteImport()`);
+      const count = importPresets(
+        imported,
+        null, // additional mutation map (not needed here)
+        operatingMode === 'standalone', // alwaysAdd
+        `${l.scope}:handlePokePasteImport()`,
+      );
 
       if (!count) {
         setImportFailedReason(t('poke.info.preset.mismatchedBadge', 'Mismatch'));

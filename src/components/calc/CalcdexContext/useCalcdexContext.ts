@@ -95,8 +95,9 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
   addPokemon: (playerKey: CalcdexPlayerKey, pokemon: CalcdexPokemon | CalcdexPokemon[], index?: number, scope?: string) => void;
   importPresets: (
     playerKey: CalcdexPlayerKey,
-    presets: CalcdexPokemonPreset[], // 'standalone' -> always addPokemon(); 'battle' -> only apply to player's pokemon[]
+    presets: CalcdexPokemonPreset[], // alwaysAdd = true -> always addPokemon(); otherwise, only apply to player's pokemon[]
     additionalMutations?: Record<string, Partial<CalcdexPokemon>>, // key = preset's calcdexId
+    alwaysAdd?: boolean,
     scope?: string,
   ) => number; // returns # of successfully imported presets
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: Partial<CalcdexPokemon>, scope?: string) => void;
@@ -911,6 +912,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     playerKey,
     presets,
     additionalMutations,
+    alwaysAdd,
     scopeFromArgs,
   ) => {
     // used for debugging purposes only
@@ -972,7 +974,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       return 0;
     }
 
-    if (state.operatingMode === 'standalone') {
+    if (alwaysAdd) {
       const importPayload: Partial<CalcdexPokemon>[] = validPresets.map((preset) => ({
         speciesForme: preset.speciesForme,
         level: preset.level,
