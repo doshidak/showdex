@@ -127,6 +127,22 @@ export interface CalcdexMatchupParsedDescription {
   failureKey?: string;
 }
 
+const trimSecondaryRange = (
+  desc: string,
+): string => {
+  if (!desc?.includes(' - ') || !desc.includes('% ')) {
+    return desc;
+  }
+
+  const [min, max] = desc.slice(0, desc.indexOf('% ')).split(' - ').map(parseFloat);
+
+  if (min !== max) {
+    return desc;
+  }
+
+  return desc.slice(desc.indexOf(' - ') + 3);
+};
+
 const l = logger('@showdex/utils/calc/parseMatchupDescription()');
 
 /**
@@ -163,8 +179,8 @@ export const parseMatchupDescription = (
     defender: null,
     damageRange: null,
     damageAmounts: null,
-    recovery: null,
     recoil: null,
+    recovery: null,
     koChance: null,
     failureKey: null,
   };
@@ -191,6 +207,15 @@ export const parseMatchupDescription = (
 
   if (!output.raw) {
     return output;
+  }
+
+  // e.g., '50.1 - 50.1% recoil damage' -> '50.1% recoil damage'
+  if (output.recoil) {
+    output.recoil = trimSecondaryRange(output.recoil);
+  }
+
+  if (output.recovery) {
+    output.recovery = trimSecondaryRange(output.recovery);
   }
 
   let formatted = output.raw;

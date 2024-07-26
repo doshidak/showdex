@@ -285,6 +285,10 @@ button.damageButton {
   }
 }
 
+.boldDesc {
+  font-weight: 600;
+}
+
 .editorItem {
   grid-area: span 1 / span 2;
   @include flex.row-between;

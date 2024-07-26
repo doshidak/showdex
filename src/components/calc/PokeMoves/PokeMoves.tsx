@@ -258,6 +258,9 @@ export const PokeMoves = ({
     })();
   };
 
+  const recoveryColor = settings?.nhkoColors?.[0];
+  const recoilColor = settings?.nhkoColors?.slice(-1)[0];
+
   return (
     <TableGrid
       className={cx(
@@ -571,13 +574,14 @@ export const PokeMoves = ({
       {/* (actual) moves */}
       {Array(matchups.length).fill(null).map((_, i) => {
         const {
+          attacker,
           defender,
           move: calcMove,
           description,
           damageRange,
           koChance,
           koColor,
-        } = matchups[i] || {};
+        } = { ...matchups[i] };
 
         const moveName = pokemon?.moves?.[i] || calcMove?.name;
         const moveToggled = detectToggledMove(pokemon, moveName);
@@ -630,27 +634,102 @@ export const PokeMoves = ({
           && settings?.showMatchupTooltip
           && !!description?.raw;
 
+        const attackerDescParts = showMatchupTooltip && settings?.prettifyMatchupDescription
+          ? description?.attacker && attacker?.species?.name
+            ? description.attacker.split(attacker.species.name)
+            : [description?.attacker].filter(Boolean)
+          : null;
+
+        const defenderDescParts = showMatchupTooltip && settings?.prettifyMatchupDescription
+          ? description?.defender && defender?.species?.name
+            // note: extra space is to have length 2 if it ends with the defender species ... LOL
+            ? `${description.defender} `.split(defender.species.name)
+            : [description?.defender].filter(Boolean)
+          : null;
+
         const matchupTooltip = description?.failureKey ? (
           <div className={styles.descTooltip}>
             {t(`poke.moves.failureReasons.${description.failureKey}`)}
           </div>
         ) : showMatchupTooltip ? (
           <div className={styles.descTooltip}>
-            {settings?.prettifyMatchupDescription && description?.attacker ? (
+            {settings?.prettifyMatchupDescription && attackerDescParts?.[0] ? (
               <>
-                {description.attacker}
+                {attackerDescParts[0].trim()}
                 {
-                  !!description.defender &&
+                  !!attackerDescParts[1] &&
                   <>
-                    {!!description.attacker && <><br />vs<br /></>}
-                    {description.defender}
+                    <span className={styles.boldDesc}>
+                      {' '}{attacker.species.name}{' '}
+                    </span>
+                    {attackerDescParts[1].trim()}
                   </>
                 }
-                {!!description.damageRange && ':'}
-                {!!description.damageRange && <><br />{description.damageRange}</>}
-                {!!description.recoil && <><br />{description.recoil}</>}
-                {!!description.recovery && <><br />{description.recovery}</>}
-                {!!description.koChance && <><br />{description.koChance}</>}
+
+                {
+                  !!description.recoil &&
+                  <>
+                    <br />
+                    <span style={recoilColor ? { color: recoilColor } : undefined}>
+                      {description.recoil}
+                    </span>
+                  </>
+                }
+
+                {
+                  !!description.recovery &&
+                  <>
+                    <br />
+                    <span style={recoveryColor ? { color: recoveryColor } : undefined}>
+                      {description.recovery}
+                    </span>
+                  </>
+                }
+
+                {
+                  !!defenderDescParts?.[0] &&
+                  <>
+                    <br />vs<br />
+                    {defenderDescParts[0].trim()}
+                    {
+                      !!defenderDescParts[1] &&
+                      <>
+                        <span className={styles.boldDesc}>
+                          {' '}{defender.species.name}
+                          {!!defenderDescParts[1].trim() && ' '}
+                        </span>
+                        {defenderDescParts[1].trim()}
+                      </>
+                    }
+                  </>
+                }
+
+                {!!description.damageRange && <>:<br />{description.damageRange}</>}
+
+                {
+                  !!description.koChance &&
+                  <>
+                    <br />
+                    {description.koChance.includes('HKO') ? (
+                      <>
+                        <span
+                          className={styles.boldDesc}
+                          style={koColor ? { color: koColor } : undefined}
+                        >
+                          {description.koChance.slice(0, description.koChance.indexOf('HKO') + 3).trim()}
+                        </span>
+
+                        {
+                          !description.koChance.endsWith('HKO') &&
+                          <>
+                            <br />
+                            <span>{description.koChance.slice(description.koChance.indexOf('HKO') + 3).trim()}</span>
+                          </>
+                        }
+                      </>
+                    ) : description.koChance}
+                  </>
+                }
               </>
             ) : description.raw}
 
