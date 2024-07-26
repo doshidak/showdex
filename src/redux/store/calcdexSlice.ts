@@ -698,17 +698,20 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleId: newId,
         operatingMode: 'standalone',
         renderMode: 'panel',
-        playerKey: state[battleId].authPlayerKey || 'p1',
-        opponentKey: 'p2',
+        // playerKey: state[battleId].authPlayerKey || 'p1',
+        // opponentKey: 'p2',
         turn: 0,
         rules: {},
         switchPlayers: false,
         cached: null, // initially not saved until manually done so by the user
       };
 
+      // update (2024/07/23): leaving the player keys as-is within the data layer; just fixed it visually in SideControls
+      /*
       if (state[newId].playerKey === 'p2') {
         state[newId].opponentKey = 'p1';
       }
+      */
 
       // perform additional processing on the players if this was originally a battle
       if (state[battleId].operatingMode === 'battle') {
@@ -865,20 +868,26 @@ export const useCalcdexDuplicator = () => {
       return;
     }
 
+    let defaultName = (!!instance.name && t('battle.name.dupe', { name: instance.name })) || null;
+
+    if (instance.operatingMode === 'battle') {
+      // note: since we're just building the title here, there's really no need to make sure if the user specified they're
+      // a bottom type of user (in the settings), that they also need to come after the 'vs' in the title too ... right? LOL
+      const playerKey = instance.authPlayerKey || 'p1';
+      const opponentKey = playerKey === 'p1' ? 'p2' : 'p1';
+      const withTheCrew = !!(instance.p3?.name || instance.p4?.name);
+
+      defaultName = [
+        [instance[playerKey]?.name, instance[opponentKey]?.name].filter(Boolean).join(' vs '),
+        withTheCrew && t('battle.name.friends'),
+      ].filter(Boolean).join(' ');
+    }
+
     dispatch(calcdexSlice.actions.dupe({
       battleId: instance.battleId,
       newId: instance.newId,
       name: null,
-      defaultName: instance.operatingMode === 'battle'
-        ? [
-          instance.p1?.name,
-          !!instance.p1?.name && !!instance.p2?.name && 'vs',
-          instance.p2?.name,
-          !!instance.p3?.name && `& ${t('battle.name.friends')}`,
-        ].filter(Boolean).join(' ')
-        : instance.name
-          ? t('battle.name.dupe', { name: instance.name })
-          : null,
+      defaultName,
     }));
   };
 };

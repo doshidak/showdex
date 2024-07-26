@@ -59,6 +59,7 @@ export const PlayerCalc = ({
     containerWidth,
     format,
     gameType,
+    authPlayerKey,
   } = state;
 
   const minPokemonKey = (operatingMode === 'battle' && 'calcdex-player-min-pokemon')
@@ -123,7 +124,7 @@ export const PlayerCalc = ({
         key={`PlayerCalc:PlayerPiconButton:${playerKey}:${pid}`}
         // ref={sortable?.setActivatorNodeRef}
         player={state?.[pkey]}
-        pokemon={partyIndex}
+        pokemon={party[partyIndex]}
         operatingMode={operatingMode}
         format={format}
         showNickname={settings?.showNicknames}
@@ -192,6 +193,7 @@ export const PlayerCalc = ({
           <SideControls
             className={styles.sideControls}
             playerKey={playerKey}
+            topPlayerKey={settings?.authPosition === 'top' && authPlayerKey ? authPlayerKey : 'p1'}
           />
         }
 
