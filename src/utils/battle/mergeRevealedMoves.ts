@@ -33,13 +33,13 @@ export const mergeRevealedMoves = (
     transformedMoves,
   } = pokemon || {};
 
-  const revealedSource = transformedMoves?.length ? transformedMoves : [
+  const revealedSource = transformedMoves?.length ? transformedMoves : dedupeArray([
     ...(revealedMoves || []),
     ...(guaranteedMoves || []),
-  ];
+  ]);
 
   if (!moves?.length || !revealedSource.length) {
-    return revealedSource?.length ? revealedSource : [];
+    return (revealedSource?.length && revealedSource) || moves || [];
   }
 
   // first, find the non-revealed moves in `moves[]`
