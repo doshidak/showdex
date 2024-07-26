@@ -174,6 +174,11 @@ export const mapAutoBoosts = (
         field,
       });
 
+      // update (2024/07/24): saw this strangely happen once so just in case o_O
+      if (!output[sourceEffect].name) {
+        output[sourceEffect].name = sourceEffect;
+      }
+
       output[sourceEffect].dict = effectDict;
       output[sourceEffect].active = pokemon.active;
 
