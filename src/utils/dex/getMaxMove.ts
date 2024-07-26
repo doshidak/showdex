@@ -19,6 +19,7 @@ export const getMaxMove = (
   config?: {
     moveType?: Showdown.TypeName;
     speciesForme?: string;
+    altFormes?: string[];
     allowGmax?: boolean;
     ability?: AbilityName;
   },
@@ -42,9 +43,10 @@ export const getMaxMove = (
   const {
     moveType: configMoveType,
     speciesForme,
+    altFormes,
     allowGmax,
     ability: abilityName,
-  } = config || {};
+  } = { ...config };
 
   const moveType = configMoveType || dexMoveType;
 
@@ -66,7 +68,7 @@ export const getMaxMove = (
   // check for G-max moves
   const gmaxMove = (
     !!speciesForme
-      && (allowGmax || speciesForme.includes('-Gmax'))
+      && (allowGmax || speciesForme.includes('-Gmax') || altFormes?.some((f) => f?.includes('-Gmax')))
       && PokemonGmaxMoves[moveType]?.[speciesForme.replace('-Gmax', '')]
   ) || null;
 

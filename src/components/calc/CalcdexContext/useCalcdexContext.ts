@@ -43,6 +43,7 @@ import {
   calcPokemonSpreadStats,
   calcStatAutoBoosts,
   convertLegacyDvToIv,
+  getDynamaxHpModifier,
   getLegacySpcDv,
   populateStatsTable,
 } from '@showdex/utils/calc';
@@ -627,6 +628,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     // update (2023/07/28): now allowing HP & non-volatile statuses to be edited
     if (mutating('dirtyHp')) {
+      if (typeof mutated.dirtyHp === 'number') { // since null = clear it & use hp instead
+        mutated.dirtyHp /= getDynamaxHpModifier(mutated);
+      }
+
       const maxHp = calcPokemonMaxHp(mutated);
       const currentHp = calcPokemonCurrentHp(mutated, true);
       const dirtyHp = calcPokemonCurrentHp(mutated);

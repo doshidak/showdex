@@ -38,7 +38,6 @@ export const sanitizePokemon = <
 >(
   pokemon?: TPokemon,
   format?: string | GenerationNum,
-  // showAllFormes?: boolean,
 ): CalcdexPokemon => {
   const dex = getDexForFormat(format);
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
@@ -286,15 +285,13 @@ export const sanitizePokemon = <
       transformedBaseForme,
       ...transformedBaseSpecies.otherFormes,
     ]
-    : baseSpecies?.otherFormes?.length && (
-      baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
-        || baseSpeciesForme === sanitizedPokemon.speciesForme
-    )
-      ? [
-        baseSpeciesForme,
-        ...baseSpecies.otherFormes,
-      ]
-      : [];
+    : [
+      baseSpeciesForme,
+      ...(baseSpecies?.otherFormes?.length && (
+        baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
+          || baseSpeciesForme === sanitizedPokemon.speciesForme
+      ) ? baseSpecies.otherFormes : []),
+    ];
 
   // if this Pokemon can G-max, add the appropriate formes
   if (sanitizedPokemon.dmaxable && species.canGigantamax) {
@@ -320,6 +317,12 @@ export const sanitizePokemon = <
         sanitizedPokemon.speciesForme,
         `${sanitizedPokemon.speciesForme}-Gmax`,
       ];
+  }
+
+  // update (2024/07/26): so apparently we could already be Gmax'd, so altFormes[] would only include its baseSpeciesForme
+  // (this would prevent the PokeInfo forme switcher from appearing, kinda like that Minior thing I fixed earlier in this v1.2.4 patch LOL)
+  if (sanitizedPokemon.speciesForme.includes('-Gmax') && !sanitizedPokemon.altFormes.includes(sanitizedPokemon.speciesForme)) {
+    sanitizedPokemon.altFormes.push(sanitizedPokemon.speciesForme);
   }
 
   // update (2023/12/29): if we have any altFormes[], verify that they exist in the gen so that Slowbro-Mega or
