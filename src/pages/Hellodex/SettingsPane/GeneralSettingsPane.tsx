@@ -49,7 +49,7 @@ export const GeneralSettingsPane = ({
           )}
           label={t('showdex.locale.label') as React.ReactNode}
           labelPosition={inBattle ? 'top' : 'left'}
-          options={ShowdexLocaleBundles?.filter((b) => !!b?.id && b.tag === 'locale').map((bundle) => ({
+          options={ShowdexLocaleBundles?.filter((b) => !!b?.id && b.ntt === 'locale').map((bundle) => ({
             label: bundle.label || bundle.name,
             tooltip: (
               <div className={styles.tooltipContent}>

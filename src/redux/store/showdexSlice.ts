@@ -6,11 +6,14 @@ import {
   current,
 } from '@reduxjs/toolkit';
 import { DefaultShowdexSettings } from '@showdex/consts/hydro';
+import { type BakedexApiBunsPayload } from '@showdex/interfaces/api';
 import {
   type ShowdexCalcdexSettings,
   type ShowdexHellodexSettings,
+  type ShowdexPlayerTitle,
   type ShowdexSettings,
   type ShowdexSettingsGroup,
+  type ShowdexSupporterTier,
   ShowdexSettingsGroups,
 } from '@showdex/interfaces/app';
 import { nonEmptyObject } from '@showdex/utils/core';
@@ -20,19 +23,54 @@ import { writeSettingsDb } from '@showdex/utils/storage';
 import { useDispatch, useSelector } from './hooks';
 
 /**
+ * In-memory storage of some Showdex asset bundles as received from the Bakedex API & cached in the IndexedDB bundles store.
+ *
+ * * These props are populated by the `bakeBakedexBundles()` utility from `@showdex/utils/app`.
+ *   - This will fetch the latest bundles from the Bakedex API & dispatch them into Redux.
+ *   - As a fallback, the pre-bundled versions will load instead if fetching fails for whatever reason.
+ *   - (Opted to not perform these operations through RTK Query cause that'd needlessly complicate things!)
+ *
+ * @see https://github.com/doshidak/bakedex
+ * @see https://bake.dex.tize.io
+ * @since 1.2.4
+ */
+export interface ShowdexSliceBundles {
+  /**
+   * Bundle catalog from the Bakedex API.
+   *
+   * @since 1.2.4
+   */
+  buns: BakedexApiBunsPayload;
+
+  /**
+   * Showdex player titles.
+   *
+   * @since 1.2.4
+   */
+  titles: ShowdexPlayerTitle[];
+
+  /**
+   * Showdex supporter tiers.
+   *
+   * @since 1.2.4
+   */
+  tiers: ShowdexSupporterTier[];
+}
+
+/**
  * Primary state for the entire extension.
  *
  * @since 1.0.2
  */
 export interface ShowdexSliceState {
   /**
-   * Name of the currently authenticated user.
+   * Name of the currently authenticated Showdown user.
    *
    * * Note that this is populated inside the Hellodex bootstrapper, which loads as soon as Showdown starts.
    *
    * @since 1.1.3
    */
-  authUsername?: string;
+  authUsername: string;
 
   /**
    * Showdex settings.
@@ -40,6 +78,13 @@ export interface ShowdexSliceState {
    * @since 1.0.2
    */
   settings: ShowdexSettings;
+
+  /**
+   * Showdex asset bundles from the Bakedex API.
+   *
+   * @since 1.2.4
+   */
+  bundles: ShowdexSliceBundles;
 }
 
 /**
@@ -98,6 +143,16 @@ export interface ShowdexSliceReducers extends SliceCaseReducers<ShowdexSliceStat
     state: Draft<ShowdexSliceState>,
     action: PayloadAction<null>,
   ) => void;
+
+  /**
+   * Sets any specified `ShowdexSliceBundles`.
+   *
+   * @since 1.2.4
+   */
+  updateBundles: (
+    state: Draft<ShowdexSliceState>,
+    action: PayloadAction<Partial<ShowdexSliceBundles>>,
+  ) => void;
 }
 
 const l = logger('@showdex/redux/store/showdexSlice');
@@ -110,6 +165,11 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
     settings: {
       ...DefaultShowdexSettings,
       colorScheme: getColorScheme(),
+    },
+    bundles: {
+      buns: null,
+      titles: [],
+      tiers: [],
     },
   },
 
@@ -229,6 +289,18 @@ export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers,
         '\n', 'state', __DEV__ && current(state),
       );
     },
+
+    updateBundles: (state, action) => {
+      state.bundles = {
+        ...state.bundles,
+        ...action.payload,
+      };
+
+      l.debug(
+        'DONE', action.type,
+        '\n', 'state', __DEV__ && current(state),
+      );
+    },
   },
 });
 
@@ -316,9 +388,9 @@ export const useShowdexShowdownSettings = () => useSelector((s) => s?.showdex?.s
 export const useUpdateSettings = () => {
   const dispatch = useDispatch();
 
-  return (settings: DeepPartial<ShowdexSettings>) => dispatch(
-    showdexSlice.actions.updateSettings(settings),
-  );
+  return (
+    settings: DeepPartial<ShowdexSettings>,
+  ): void => void dispatch(showdexSlice.actions.updateSettings(settings));
 };
 
 /**
@@ -329,7 +401,25 @@ export const useUpdateSettings = () => {
 export const useRestoreDefaults = () => {
   const dispatch = useDispatch();
 
-  return () => dispatch(
-    showdexSlice.actions.restoreDefaults(null),
-  );
+  return (): void => void dispatch(showdexSlice.actions.restoreDefaults(null));
+};
+
+/**
+ * Convenient hook to access the `ShowdexSliceBundles`.
+ *
+ * @since 1.2.4
+ */
+export const useShowdexBundles = () => useSelector((s) => s?.showdex?.bundles);
+
+/**
+ * Convenient hook to update the `ShowdexSliceBundles`.
+ *
+ * @since 1.2.4
+ */
+export const useUpdateBundles = () => {
+  const dispatch = useDispatch();
+
+  return (
+    bundles: Partial<ShowdexSliceBundles>,
+  ): void => void dispatch(showdexSlice.actions.updateBundles(bundles));
 };

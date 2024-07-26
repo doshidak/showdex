@@ -30,6 +30,12 @@ export const createSettingsDb = (
     return null;
   }
 
+  if (db.objectStoreNames.contains(settingsName)) {
+    l.silly(settingsName, 'object store already exists');
+
+    return null;
+  }
+
   const store = db.createObjectStore(settingsName);
 
   l.verbose(

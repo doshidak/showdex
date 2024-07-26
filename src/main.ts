@@ -1,6 +1,6 @@
 import { CalcdexBootstrapper, HellodexBootstrapper, TeamdexBootstrapper } from '@showdex/pages';
 import { calcdexSlice, createStore, showdexSlice } from '@showdex/redux/store';
-import { loadI18nextLocales } from '@showdex/utils/app';
+import { bakeBakedexBundles, loadI18nextLocales } from '@showdex/utils/app';
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { openIndexedDb, readHonksDb, readSettingsDb } from '@showdex/utils/storage';
@@ -34,49 +34,6 @@ if (window?.__SHOWDEX_INIT) {
 window.__SHOWDEX_INIT = env('build-name', 'showdex');
 
 const store = createStore();
-
-/*
-l.debug('Hooking into the client\'s app.user.finishRename()...');
-
-const userFinishRename = app.user.finishRename.bind(app.user) as typeof app.user.finishRename;
-
-app.user.finishRename = (name, assertion) => {
-  // call the original function
-  userFinishRename(name, assertion);
-
-  /*
-  l.debug(
-    'app.user.finishRename()', 'name', name,
-    '\n', 'assertion', assertion,
-  );
-  *\/
-
-  // determine if the user logged in
-  // assertion seems to be some sha256, then the user ID, then 4?, then some timestamp,
-  // then some server url, then some sha1, then some half of a sha1 (lol), finally some super long sha hash
-  if (!name || !assertion?.includes(',')) {
-    return;
-  }
-
-  const assertions = assertion.split(',');
-  const [, userId] = assertions;
-
-  if (formatId(name) === userId) {
-    l.debug(
-      'app.user.finishRename()', 'Logged in as', name, '(probably)',
-      '\n', 'assertions', assertions,
-    );
-
-    return void store.dispatch(showdexSlice.actions.setAuthUsername(name));
-  }
-
-  // nt ^_~
-  store.dispatch(showdexSlice.actions.updateSettings({
-    glassyTerrain: false,
-    hellodex: { showDonateButton: true },
-  }));
-};
-*/
 
 // we're off to the *races* with this one huehuehuehue
 const bootdexMutex: {
@@ -153,6 +110,8 @@ app.receive = (data: string) => {
 void (async () => {
   const db = await openIndexedDb();
   const settings = await readSettingsDb(db);
+
+  void bakeBakedexBundles({ db, store });
 
   // note: settings.locale's default value is `null`, which will allow the i18next LanguageDetector plugin to kick in
   const i18next = await loadI18nextLocales(settings?.locale);

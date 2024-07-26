@@ -26,6 +26,7 @@ import {
   useColorTheme,
   useGlassyTerrain,
   useHonkdexSettings,
+  useShowdexBundles,
 } from '@showdex/redux/store';
 import { findPlayerTitle, getCalcdexRoomId } from '@showdex/utils/app';
 import { useMobileViewport, useRandomUuid } from '@showdex/utils/hooks';
@@ -51,6 +52,7 @@ export const Calcdex = ({
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
+  const bundles = useShowdexBundles();
   const mobile = useMobileViewport();
 
   const { state, settings } = useCalcdexContext();
@@ -77,7 +79,7 @@ export const Calcdex = ({
       .filter((k) => state[k]?.active)
       .map((k) => {
         const { name: playerName } = state[k];
-        const playerTitle = findPlayerTitle(playerName, true);
+        const playerTitle = findPlayerTitle(playerName, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers });
         const labelColor = playerTitle?.color?.[colorScheme];
 
         return {
@@ -112,6 +114,8 @@ export const Calcdex = ({
         };
       })
   ) || null, [
+    bundles.tiers,
+    bundles.titles,
     colorScheme,
     playerCount,
     state,

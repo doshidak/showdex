@@ -4,9 +4,8 @@ import { Field } from 'react-final-form';
 import cx from 'classnames';
 import { format } from 'date-fns';
 import { Segmented, Switch } from '@showdex/components/form';
-import { ShowdexPresetsBundles } from '@showdex/consts/app';
 import { GenLabels } from '@showdex/consts/dex';
-import { type ShowdexCalcdexSettings, type ShowdexSettings } from '@showdex/interfaces/app';
+import { type ShowdexCalcdexSettings, type ShowdexPresetsBundle, type ShowdexSettings } from '@showdex/interfaces/app';
 import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 import styles from './SettingsPane.module.scss';
 
@@ -14,6 +13,7 @@ export interface PresetsSettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
   value?: ShowdexSettings;
+  presets?: ShowdexPresetsBundle[];
   inBattle?: boolean;
 }
 
@@ -26,6 +26,7 @@ export const PresetsSettingsPane = ({
   className,
   style,
   value,
+  presets,
   inBattle,
 }: PresetsSettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
@@ -158,7 +159,7 @@ export const PresetsSettingsPane = ({
           )}
           label={t('calcdex.includePresetsBundles.label') as React.ReactNode}
           labelPosition={inBattle ? 'top' : 'left'}
-          options={ShowdexPresetsBundles?.filter((b) => !!b?.id && b.tag === 'presets').map((bundle) => ({
+          options={presets?.filter((b) => !!b?.id && b.ntt === 'presets').map((bundle) => ({
             label: bundle.label || bundle.name,
             tooltip: bundle.gen && bundle.format ? (
               <div className={styles.tooltipContent}>

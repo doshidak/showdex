@@ -1,5 +1,4 @@
-import { ShowdexPlayerTitles, ShowdexSupporterTiers } from '@showdex/consts/app';
-import { type ShowdexPlayerTitle } from '@showdex/interfaces/app';
+import { type ShowdexPlayerTitle, type ShowdexSupporterTier } from '@showdex/interfaces/app';
 import { formatId } from '@showdex/utils/core';
 
 /**
@@ -18,19 +17,24 @@ import { formatId } from '@showdex/utils/core';
  */
 export const findPlayerTitle = (
   name: string,
-  showdownUser?: boolean,
+  config: {
+    showdownUser?: boolean;
+    titles: ShowdexPlayerTitle[];
+    tiers: ShowdexSupporterTier[];
+  },
 ): ShowdexPlayerTitle => {
+  const { showdownUser, titles, tiers } = { ...config };
   const userId = showdownUser ? formatId(name) : name;
 
   if (!userId) {
     return null;
   }
 
-  const matchedTitle = ShowdexPlayerTitles.find((t) => (
+  const matchedTitle = (titles || []).find((t) => (
     showdownUser
       ? t.userIds.map((id) => (Array.isArray(id) ? id[0] : id))
       : t.supporterId
-        ? ShowdexSupporterTiers
+        ? (tiers || [])
           .find((s) => !!s?.id && s.id === t.supporterId)
           ?.members
           ?.filter((m) => !!m?.name && !m.showdownUser)

@@ -6,7 +6,7 @@ import { type DropdownOption, Dropdown } from '@showdex/components/form';
 import { Button, ToggleButton, Tooltip } from '@showdex/components/ui';
 import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { useUserLadderQuery } from '@showdex/redux/services';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useShowdexBundles } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
@@ -38,6 +38,7 @@ export const PlayerInfo = ({
 }: PlayerInfoProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
+  const bundles = useShowdexBundles();
 
   const {
     state,
@@ -49,9 +50,10 @@ export const PlayerInfo = ({
 
   const {
     containerSize,
+    containerWidth,
     renderMode,
     format,
-  } = state || {};
+  } = state;
 
   const {
     name,
@@ -60,8 +62,12 @@ export const PlayerInfo = ({
     pokemon: playerParty,
   } = state[playerKey] || {};
 
-  const playerId = formatId(name);
-  const playerTitle = findPlayerTitle(playerId, true);
+  const playerId = React.useMemo(() => formatId(name), [name]);
+  const playerTitle = React.useMemo(
+    () => findPlayerTitle(playerId, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers }),
+    [bundles.titles, bundles.tiers, playerId],
+  );
+
   const playerLabelColor = playerTitle?.color?.[colorScheme];
   // const playerIconColor = playerTitle?.iconColor?.[colorScheme];
 
@@ -199,16 +205,6 @@ export const PlayerInfo = ({
           disabled={!name}
           onPress={() => openUserPopup(name)}
         >
-          {/*
-            !!playerTitle?.icon &&
-            <Svg
-              className={styles.usernameButtonIcon}
-              style={playerIconColor ? { color: playerIconColor } : undefined}
-              description={playerTitle.iconDescription}
-              src={getResourceUrl(`${playerTitle.icon}.svg`)}
-            />
-          */}
-
           {
             !!playerTitle?.icon &&
             <MemberIcon
@@ -307,7 +303,7 @@ export const PlayerInfo = ({
                     &bull;
                   </span> */}
 
-                  &nbsp;{rating} ELO
+                  &nbsp;{rating}{containerWidth > 320 && ' ELO'}
                 </>
               }
             </div>

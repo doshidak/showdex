@@ -312,9 +312,9 @@ const copyPatterns = [
     ].some((name) => path.includes(name)),
   },
 
-  // bundle any presets
+  // pre-bundle Bakedex bundles (in case the Bakedex API is down or something o_O)
   {
-    from: 'src/assets/presets/*.json',
+    from: 'src/assets/bundles/*.json',
     to: (data) => {
       const { absoluteFilename } = data;
       const basename = absoluteFilename.split('/').pop();

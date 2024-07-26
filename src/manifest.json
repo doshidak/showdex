@@ -26,7 +26,8 @@
 
   "host_permissions": [
     "https://play.pokemonshowdown.com/*",
-    "https://pkmn.github.io/*"
+    "https://pkmn.github.io/*",
+    "https://bake.dex.tize.io/*"
   ],
 
   "externally_connectable": {

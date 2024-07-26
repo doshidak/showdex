@@ -24,6 +24,7 @@ import {
   useHellodexSettings,
   useHellodexState,
   useHonkdexSettings,
+  useShowdexBundles,
   useUpdateSettings,
 } from '@showdex/redux/store';
 import { findPlayerTitle, getCalcdexRoomId } from '@showdex/utils/app';
@@ -64,9 +65,6 @@ export const Hellodex = ({
 
   useHellodexSize(contentRef);
 
-  const authName = useAuthUsername();
-  const authTitle = findPlayerTitle(authName, true);
-
   // globally listen for left/right key presses to mimic native keyboard navigation behaviors
   // (only needs to be loaded once and seems to persist even after closing the Hellodex tab)
   useRoomNavigation();
@@ -79,6 +77,13 @@ export const Hellodex = ({
   const calcdexSettings = useCalcdexSettings();
   const honkdexSettings = useHonkdexSettings();
   const updateSettings = useUpdateSettings();
+  const bundles = useShowdexBundles();
+
+  const authName = useAuthUsername();
+  const authTitle = React.useMemo(
+    () => findPlayerTitle(authName, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers }),
+    [authName, bundles.tiers, bundles.titles],
+  );
 
   const state = useHellodexState();
   const calcdexState = useCalcdexState();
@@ -118,6 +123,7 @@ export const Hellodex = ({
   } = useContextMenu();
 
   const contextMenuId = useRandomUuid();
+  const paneMenuId = useRandomUuid();
   const calcdexMenuId = useRandomUuid();
   const honkdexMenuId = useRandomUuid();
   const recordMenuId = useRandomUuid();
@@ -133,7 +139,7 @@ export const Hellodex = ({
       )}
       onContextMenu={(e) => showContextMenu({
         event: e,
-        id: contextMenuId,
+        id: patronageVisible || settingsVisible ? paneMenuId : contextMenuId,
       })}
     >
       <BuildInfo
@@ -623,25 +629,28 @@ export const Hellodex = ({
             key: 'open-settings',
             entity: 'item',
             props: {
-              theme: settingsVisible ? 'info' : 'default',
-              label: t(
-                `contextMenu.${settingsVisible ? 'close' : 'settings'}`,
-                settingsVisible ? 'Close' : 'Settings',
-              ),
-              icon: settingsVisible ? 'close-circle' : 'cog',
-              iconStyle: settingsVisible ? undefined : { transform: 'scale(1.25)' },
+              theme: 'default',
+              label: t('contextMenu.settings', 'Settings'),
+              icon: 'cog',
+              iconStyle: { transform: 'scale(1.25)' },
               onPress: hideAfter(toggleSettingsPane),
             },
           },
+        ]}
+      />
+
+      <ContextMenu
+        id={paneMenuId}
+        itemKeyPrefix="Hellodex:ContextMenu:Pane"
+        items={[
           {
-            key: 'close-patronage',
+            key: 'close-pane',
             entity: 'item',
             props: {
               theme: 'info',
               label: t('contextMenu.close', 'Close'),
               icon: 'close-circle',
-              hidden: !patronageVisible,
-              onPress: hideAfter(closePatronagePane),
+              onPress: hideAfter(settingsVisible ? closeSettingsPane : closePatronagePane),
             },
           },
         ]}

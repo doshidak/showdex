@@ -6,7 +6,12 @@ import { type BaseButtonProps, type ButtonElement, BaseButton } from '@showdex/c
 import { bullop } from '@showdex/consts/core';
 import { GenLabels } from '@showdex/consts/dex';
 import { type CalcdexBattleState } from '@showdex/interfaces/calc';
-import { useColorScheme, useColorTheme, useGlassyTerrain } from '@showdex/redux/store';
+import {
+  useColorScheme,
+  useColorTheme,
+  useGlassyTerrain,
+  useShowdexBundles,
+} from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { parseBattleFormat } from '@showdex/utils/dex';
@@ -39,6 +44,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
+  const bundles = useShowdexBundles();
 
   const {
     operatingMode,
@@ -80,10 +86,19 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
     ? opponentNameFromProps
     : playerName;
 
-  const playerTitle = findPlayerTitle(playerName, true);
+  const playerTitle = React.useMemo(
+    () => findPlayerTitle(playerName, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers }),
+    [bundles.tiers, bundles.titles, playerName],
+  );
+
   const playerLabelColor = playerTitle?.color?.[colorScheme];
   const playerIconColor = playerTitle?.iconColor?.[colorScheme];
-  const opponentTitle = findPlayerTitle(opponentName, true);
+
+  const opponentTitle = React.useMemo(
+    () => findPlayerTitle(opponentName, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers }),
+    [bundles.tiers, bundles.titles, opponentName],
+  );
+
   const opponentLabelColor = opponentTitle?.color?.[colorScheme];
   const opponentIconColor = opponentTitle?.iconColor?.[colorScheme];
 

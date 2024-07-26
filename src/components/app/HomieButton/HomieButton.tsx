@@ -8,7 +8,7 @@ import {
 } from 'date-fns';
 import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTierMember, type ShowdexSupporterTierTerm } from '@showdex/interfaces/app';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useShowdexBundles } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, formatId } from '@showdex/utils/core';
 import { openUserPopup } from '@showdex/utils/host';
@@ -40,13 +40,14 @@ export const HomieButton = ({
   const colorScheme = colorSchemeFromProps || colorSchemeFromStore;
   const tooltipColorScheme: Showdown.ColorScheme = colorScheme === 'light' ? 'dark' : 'light';
 
-  const {
-    name,
-    showdownUser,
-    periods,
-  } = homie || {};
+  const bundles = useShowdexBundles();
+  const { name, showdownUser, periods } = { ...homie };
 
-  const userTitle = findPlayerTitle(name, showdownUser);
+  const userTitle = React.useMemo(
+    () => findPlayerTitle(name, { showdownUser, titles: bundles.titles, tiers: bundles.tiers }),
+    [bundles.titles, bundles.tiers, name, showdownUser],
+  );
+
   const userLabelColor = userTitle?.color?.[colorScheme];
   const userTooltipLabelColor = userTitle?.color?.[tooltipColorScheme];
 

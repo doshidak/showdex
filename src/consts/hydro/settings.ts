@@ -6,7 +6,6 @@ import {
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
 import { reverseObjectKv } from '@showdex/utils/core';
-import { ShowdexPresetsBundles } from '@showdex/consts/app';
 
 /**
  * Default Showdex settings.
@@ -57,7 +56,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     prioritizeUsageStats: false,
     includeTeambuilder: 'always',
     includeOtherMetaPresets: false,
-    includePresetsBundles: ShowdexPresetsBundles.map((b) => !b?.disabled && b.id).filter(Boolean),
+    includePresetsBundles: [],
     autoImportTeamSheets: true,
     autoExportOpponent: false,
 

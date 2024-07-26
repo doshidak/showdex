@@ -1,8 +1,8 @@
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 
-const metaName = env('indexed-db-meta-store-name');
-const l = logger('@showdex/utils/storage/createMetaDb()');
+const bundlesName = env('indexed-db-bundles-store-name');
+const l = logger('@showdex/utils/storage/createBundlesDb()');
 
 /**
  * Creates the meta object store in the provided IndexedDB `db`.
@@ -15,29 +15,29 @@ const l = logger('@showdex/utils/storage/createMetaDb()');
  *   - May be used for other things tho.
  * * For use within the `onupgradeneeded()` callback.
  *
- * @since 1.2.0
+ * @since 1.2.4
  */
-export const createMetaDb = (
+export const createBundlesDb = (
   db: IDBDatabase,
 ): IDBObjectStore => {
-  if (!metaName || typeof db?.createObjectStore !== 'function') {
+  if (!bundlesName || typeof db?.createObjectStore !== 'function') {
     l.warn(
-      'spawn more overlords',
+      'you require more minerals',
       '\n', 'db.createObjectStore()', '(type)', typeof db?.createObjectStore,
-      '\n', 'INDEXED_DB_META_STORE_NAME', metaName,
+      '\n', 'INDEXED_DB_BUNDLES_STORE_NAME', bundlesName,
       '\n', 'db', '(name)', db?.name, '(v)', db?.version,
     );
 
     return null;
   }
 
-  if (db.objectStoreNames.contains(metaName)) {
-    l.silly(metaName, 'object store already exists');
+  if (db.objectStoreNames.contains(bundlesName)) {
+    l.silly(bundlesName, 'object store already exists');
 
     return null;
   }
 
-  const store = db.createObjectStore(metaName);
+  const store = db.createObjectStore(bundlesName);
 
   l.verbose(
     'Created object store:', store?.name,

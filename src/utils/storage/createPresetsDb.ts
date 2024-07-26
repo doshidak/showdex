@@ -30,6 +30,12 @@ export const createPresetsDb = (
     return null;
   }
 
+  if (db.objectStoreNames.contains(presetsName)) {
+    l.silly(presetsName, 'object store already exists');
+
+    return null;
+  }
+
   const store = db.createObjectStore(presetsName, {
     keyPath: 'calcdexId',
   });

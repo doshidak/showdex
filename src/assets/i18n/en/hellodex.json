@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "hellodex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-05T12:29:07.229Z",
-    "updated": "2024-01-28T01:34:01.046Z"
+    "updated": "2024-07-24T17:13:46.115Z"
   },
 
   "contextMenu": {
@@ -100,7 +100,7 @@
 
     "paypal": {
       "name": "PayPal",
-      "description": "All donations are <em>one-time</em> contributions, entitling you to the benefits of the lowest $t(patronage.patreon.name) tier, excluding benefits awarded to active pledges. Please visit our $t(patronage.patreon.name) for specifics on awarded benefits.",
+      "description": "All donations are <em>one-time</em> contributions, entitling you to the benefits of the lowest $t(patronage.patreon.name) tier, excluding benefits awarded to active pledges. Please visit our $t(patronage.patreon.name) for specifics on awarded benefits. <em>Updated {{date}}.</em>",
       "action": {
         "aria": "Donate via $t(patronage.paypal.name)",
         "label": "<strong>Donate</strong> via <strong>$t(patronage.paypal.name)</strong>"
@@ -109,7 +109,7 @@
 
     "patreon": {
       "name": "Patreon",
-      "description": "All $t(patronage.patreon.name) tiers are <em>monthly</em> donations, entitling you to additional benefits to those of <em>one-time</em> donations. Please visit our $t(patronage.patreon.name) for more details. Batteries not included.",
+      "description": "All $t(patronage.patreon.name) tiers are <em>monthly</em> donations, entitling you to additional benefits to those of <em>one-time</em> donations. Please visit our $t(patronage.patreon.name) for more details. Batteries not included. <em>Updated {{date}}.</em>",
       "defaultAction": {
         "aria": "Become a Patron",
         "label": "<strong>Become</strong> a <strong>Patron</strong>"

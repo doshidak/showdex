@@ -20,6 +20,7 @@ import {
   useColorTheme,
   useGlassyTerrain,
   useHellodexState,
+  useShowdexBundles,
   useShowdexSettings,
   useUpdateSettings,
 } from '@showdex/redux/store';
@@ -67,12 +68,17 @@ export const SettingsPane = ({
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
+  const bundles = useShowdexBundles();
   const state = useHellodexState();
   const inBattle = ['xs', 'sm'].includes(state.containerSize);
 
   const authUsername = useAuthUsername();
-  const authTitle = React.useMemo(() => findPlayerTitle(authUsername, true), [authUsername]);
+  const authTitle = React.useMemo(
+    () => findPlayerTitle(authUsername, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers }),
+    [authUsername, bundles.tiers, bundles.titles],
+  );
 
+  const bundledPresets = React.useMemo(() => Object.values({ ...bundles?.buns?.presets }), [bundles?.buns?.presets]);
   const settings = useShowdexSettings();
   const updateSettings = useUpdateSettings();
 
@@ -461,6 +467,7 @@ export const SettingsPane = ({
 
               <PresetsSettingsPane
                 value={values}
+                presets={bundledPresets}
                 inBattle={inBattle}
               />
 
@@ -479,26 +486,6 @@ export const SettingsPane = ({
               />
 
               <HonkdexSettingsPane />
-
-              {/* <ShowdexSettingsPane
-                inBattle={inBattle}
-                special={!!authTitle}
-              />
-
-              <HellodexSettingsPane
-                special={!!authTitle}
-              />
-
-              <CalcdexSettingsPane
-                value={values?.calcdex}
-                // presetCacheSize={presetCacheSize}
-                // maxCacheSize={maxCacheSize}
-                inBattle={inBattle}
-              />
-
-              <HonkdexSettingsPane />
-
-              <ShowdownSettingsPane /> */}
 
               <div className={styles.notice}>
                 {t('pane.footer.message', 'if you\'re seeing this, this shit broke af fam')}

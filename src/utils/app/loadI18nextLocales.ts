@@ -61,12 +61,12 @@ export const loadI18nextLocales = async (
   for (const bundle of ShowdexLocaleBundles) {
     const {
       id,
+      ntt,
       ext,
-      tag,
       locale,
     } = bundle || {};
 
-    if (!id || tag !== 'locale' || !locale) {
+    if (!id || ntt !== 'locale' || !locale) {
       continue;
     }
 

@@ -9,6 +9,7 @@ export * from './getEnv';
 export * from './getExtensionId';
 export * from './getExtensionProtocol';
 export * from './getResourceUrl';
+export * from './joinUris';
 export * from './nonEmptyObject';
 export * from './reverseObjectKv';
 export * from './runtimeFetch';
