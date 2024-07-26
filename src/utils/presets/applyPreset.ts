@@ -64,7 +64,7 @@ export const applyPreset = (
 
     // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
     // the new preset (don't want alts from a previous set to persist if none are defined)
-    level: preset.level || defaultLevel || pokemon.level,
+    level: pokemon.level || preset.level || defaultLevel,
     altTeraTypes: [],
     altAbilities: [],
     dirtyAbility: preset.ability,
