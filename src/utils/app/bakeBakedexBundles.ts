@@ -116,19 +116,18 @@ export const bakeBakedexBundles = async (
         continue;
       }
 
-      // not storing presets[] in Redux btw
-      if (nspBun.ntt === 'presets') {
-        continue;
+      // 'presets' aren't being *directly* loaded into Redux btw (i.e., the ShowdexSliceState)
+      // (instead, they're loaded into the RTK Query API endpoint slice via buildBundleQuery() from @showdex/redux/factories)
+      if (nspBun.ntt !== 'presets') {
+        (statePayload as Record<typeof nspBun.ntt, unknown[]>)[nspBun.ntt] = [
+          ...(statePayload[nspBun.ntt] || []),
+          ...(Array.isArray(cached[nsp][nspBun.id]) ? (cached[nsp][nspBun.id] as unknown[]).map((item) => ({
+            ...(item as Record<string, unknown>),
+            __bunId: nspBun.id,
+            __updated: cachedDate,
+          })) : []),
+        ];
       }
-
-      (statePayload as Record<typeof nspBun.ntt, unknown[]>)[nspBun.ntt] = [
-        ...(statePayload[nspBun.ntt] || []),
-        ...(Array.isArray(cached[nsp][nspBun.id]) ? (cached[nsp][nspBun.id] as unknown[]).map((item) => ({
-          ...(item as Record<string, unknown>),
-          __bunId: nspBun.id,
-          __updated: cachedDate,
-        })) : []),
-      ];
 
       statePayload.buns = {
         ...statePayload.buns,
