@@ -10,7 +10,8 @@ const l = logger('@showdex/main');
 
 l.debug('Starting', env('build-name', 'showdex'));
 
-if (typeof app === 'undefined' || typeof Dex === 'undefined') {
+// note: checking `Dex` instead of `window.Dex` to verify `window` is a global (i.e., making sure we're probably in a web env)
+if (typeof window?.app === 'undefined' || typeof Dex === 'undefined') {
   l.error(
     'main may have executed too fast or',
     'we\'re not in Showdown anymore...',
@@ -20,7 +21,7 @@ if (typeof app === 'undefined' || typeof Dex === 'undefined') {
 }
 
 // not sure when we'll run into this, but it's entirely possible now that standalone builds are a thing
-if (window?.__SHOWDEX_INIT) {
+if (window.__SHOWDEX_INIT) {
   l.error(
     'yo dawg I heard you wanted Showdex with your Showdex',
     '\n', '__SHOWDEX_INIT', window.__SHOWDEX_INIT,
