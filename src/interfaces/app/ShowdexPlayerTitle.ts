@@ -109,4 +109,26 @@ export interface ShowdexPlayerTitle {
    * @since 1.1.1
    */
   userIds: (string | [userId: string, title: string])[];
+
+  /**
+   * Associated `id` of this title's parent `ShowdexAssetBundle`.
+   *
+   * * Not actually part of the API's response but populated post-`runtimeFetch()`, rather.
+   * * Populated in the `bakeBakedexBundles()` utility from `@showdex/utils/app`.
+   *
+   * @since 1.2.4
+   */
+  __bunId?: string;
+
+  /**
+   * Unix epoch timestamp of when this title was last updated.
+   *
+   * * Not actually part of the API's response but populated post-`runtimeFetch()`, rather.
+   * * Derived from this title's parent `ShowdexAssetBundle`'s `updated` value.
+   *   - (Also opting to leave this as a `number` so that you can easily `sort()` based on this prop if need be.)
+   * * Populated in the `bakeBakedexBundles()` utility from `@showdex/utils/app`.
+   *
+   * @since 1.2.4
+   */
+  __updated?: number;
 }

@@ -123,7 +123,11 @@ export const bakeBakedexBundles = async (
 
       (statePayload as Record<typeof nspBun.ntt, unknown[]>)[nspBun.ntt] = [
         ...(statePayload[nspBun.ntt] || []),
-        ...(Array.isArray(cached[nsp][nspBun.id]) ? cached[nsp][nspBun.id] as unknown[] : []),
+        ...(Array.isArray(cached[nsp][nspBun.id]) ? (cached[nsp][nspBun.id] as unknown[]).map((item) => ({
+          ...(item as Record<string, unknown>),
+          __bunId: nspBun.id,
+          __updated: cachedDate,
+        })) : []),
       ];
 
       statePayload.buns = {
@@ -195,13 +199,17 @@ export const bakeBakedexBundles = async (
           // ggwp
           (statePayload as Record<typeof ntt, unknown[]>)[ntt] = [
             ...(statePayload[ntt] || []),
-            ...payload,
+            ...payload.map((item) => ({
+              ...(item as Record<string, unknown>),
+              __bunId: id,
+              __updated: new Date(nspBun.updated).valueOf(),
+            })),
           ];
         }
 
         writePayload.buns = {
           ...writePayload.buns,
-          [nsp]: { ...writePayload.buns?.[nsp], [id]: { ...latestBunNsps[nsp][id] } },
+          [nsp]: { ...writePayload.buns?.[nsp], [id]: { ...nspBun } },
         };
       }
     }
@@ -219,7 +227,7 @@ export const bakeBakedexBundles = async (
   l.debug(
     'Updated', hasWrites ? 'no' : 'some', 'new bundles',
     '\n', 'buns', '(cached)', buns, '\n', '(latest)', latestBunNsps,
-    '\n', 'staleBunIds', staleBunIds,
+    '\n', 'staleBunIds[]', staleBunIds,
     '\n', 'writePayload', writePayload,
     '\n', 'statePayload', statePayload,
   );

@@ -20,7 +20,7 @@ import {
   useShowdexBundles,
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { env, formatId, getResourceUrl } from '@showdex/utils/core';
+import { env, getResourceUrl } from '@showdex/utils/core';
 import { GradientButton } from '../GradientButton';
 import { PatronageTierRenderer } from './PatronageTierRenderer';
 import styles from './PatronagePane.module.scss';
@@ -49,15 +49,17 @@ export const PatronagePane = ({
 
   const authUser = useAuthUsername();
   const authTitle = React.useMemo(
-    () => findPlayerTitle(authUser, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers }),
-    [authUser, bundles.tiers, bundles.titles],
+    () => findPlayerTitle(authUser, { showdownUser: true, titles: bundles?.titles, tiers: bundles?.tiers }),
+    [authUser, bundles?.tiers, bundles?.titles],
   );
 
+  const donorTiers = React.useMemo(() => (bundles?.tiers || []).filter((s) => s?.term === 'once'), [bundles?.tiers]);
   const renderedDonors = React.useMemo(
-    () => (bundles.tiers || []).filter((i) => i?.term === 'once').map(PatronageTierRenderer('DonorTier', colorScheme)),
-    [bundles.tiers, colorScheme],
+    () => donorTiers.map(PatronageTierRenderer('DonorTier', { colorScheme })),
+    [colorScheme, donorTiers],
   );
 
+  /*
   const donorBuns = React.useMemo(
     () => Object.values({ ...bundles?.buns?.supporters }).find((s) => formatId(s?.name)?.includes('donors')),
     [bundles.buns?.supporters],
@@ -67,12 +69,22 @@ export const PatronagePane = ({
     () => format(new Date(donorBuns.updated || donorBuns.created || buildDateMs), 'PP'),
     [donorBuns.created, donorBuns.updated],
   );
+  */
 
+  const lastDonorUpdate = React.useMemo(() => format(new Date(
+    donorTiers.sort((a, b) => (a.__updated || 0) - (b.__updated || 0)).pop()?.__updated
+      || buildDateMs,
+  ), 'PP'), [
+    donorTiers,
+  ]);
+
+  const patronTiers = React.useMemo(() => (bundles?.tiers || []).filter((i) => i?.term === 'monthly'), [bundles?.tiers]);
   const renderedPatrons = React.useMemo(
-    () => (bundles.tiers || []).filter((i) => i?.term === 'monthly').map(PatronageTierRenderer('PatronTier', colorScheme, true)),
-    [bundles.tiers, colorScheme],
+    () => patronTiers.map(PatronageTierRenderer('PatronTier', { colorScheme, showTitles: true })),
+    [colorScheme, patronTiers],
   );
 
+  /*
   const patronBuns = React.useMemo(
     () => Object.values({ ...bundles?.buns?.supporters }).find((s) => formatId(s?.name)?.includes('patrons')),
     [bundles.buns?.supporters],
@@ -82,6 +94,14 @@ export const PatronagePane = ({
     () => format(new Date(patronBuns.updated || patronBuns.created || buildDateMs), 'PP'),
     [patronBuns.created, patronBuns.updated],
   );
+  */
+
+  const lastPatronUpdate = React.useMemo(() => format(new Date(
+    patronTiers.sort((a, b) => (a.__updated || 0) - (b.__updated || 0)).pop()?.__updated
+      || buildDateMs,
+  ), 'PP'), [
+    patronTiers,
+  ]);
 
   return (
     <div

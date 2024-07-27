@@ -10,9 +10,10 @@ import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTierMember, type ShowdexSupporterTierTerm } from '@showdex/interfaces/app';
 import { useColorScheme, useShowdexBundles } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { env, formatId } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 import { openUserPopup } from '@showdex/utils/host';
 import { pluralize } from '@showdex/utils/humanize';
+import { determineColorScheme } from '@showdex/utils/ui';
 import { MemberIcon } from '../MemberIcon';
 import styles from './HomieButton.module.scss';
 
@@ -23,10 +24,11 @@ export interface HomieButtonProps {
   homie: ShowdexSupporterTierMember;
   term?: ShowdexSupporterTierTerm;
   showTitles?: boolean;
+  updated?: number;
 }
 
-const buildDateMs = parseInt(env('build-date'), 16) || null;
-const buildDate = isValid(buildDateMs) ? new Date(buildDateMs) : null;
+// const buildDateMs = parseInt(env('build-date'), 16) || null;
+// const buildDate = isValid(buildDateMs) ? new Date(buildDateMs) : null;
 
 export const HomieButton = ({
   className,
@@ -35,10 +37,11 @@ export const HomieButton = ({
   homie,
   term = 'once',
   showTitles,
+  updated,
 }: HomieButtonProps): JSX.Element => {
   const colorSchemeFromStore = useColorScheme();
   const colorScheme = colorSchemeFromProps || colorSchemeFromStore;
-  const tooltipColorScheme: Showdown.ColorScheme = colorScheme === 'light' ? 'dark' : 'light';
+  const tooltipColorScheme = determineColorScheme(colorScheme, true);
 
   const bundles = useShowdexBundles();
   const { name, showdownUser, periods } = { ...homie };
@@ -52,8 +55,8 @@ export const HomieButton = ({
   const userTooltipLabelColor = userTitle?.color?.[tooltipColorScheme];
 
   const periodsCount = periods?.length || 0;
-  const validPeriods = periods?.filter?.((p) => !!p?.[0] && isValid(new Date(p[0])));
-  const active = term === 'once' || validPeriods?.some((p) => !p[1]);
+  const validPeriods = React.useMemo(() => (periods || []).filter?.((p) => !!p?.[0] && isValid(new Date(p[0]))), [periods]);
+  const active = React.useMemo(() => term === 'once' || validPeriods.some((p) => !p[1]), [term, validPeriods]);
 
   const nameStyle: React.CSSProperties = {
     ...(showTitles && userLabelColor ? {
@@ -141,7 +144,7 @@ export const HomieButton = ({
 
                   const periodDuration = intervalToDuration({
                     start: new Date(startDate),
-                    end: new Date(endDate || buildDate),
+                    end: new Date(endDate || updated),
                   });
 
                   Object.keys(prev).forEach((unit) => {
