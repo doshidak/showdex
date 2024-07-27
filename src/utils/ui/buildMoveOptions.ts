@@ -54,7 +54,7 @@ export const buildMoveOptions = (
     include,
     translate: translateFromConfig,
     translateHeader: translateHeaderFromConfig,
-  } = config || {};
+  } = { ...config };
 
   const translate = (v: MoveName) => translateFromConfig?.(v) || v;
   const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
@@ -71,6 +71,7 @@ export const buildMoveOptions = (
     source,
     speciesForme,
     transformedForme,
+    altFormes,
     moves,
     serverMoves,
     transformedMoves,
@@ -124,6 +125,7 @@ export const buildMoveOptions = (
         const maxMove = getMaxMove(name, {
           moveType: getDynamicMoveType(pokemon, name, { format, field }),
           speciesForme,
+          altFormes,
           ability,
         }) || name;
 
