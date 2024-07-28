@@ -229,9 +229,15 @@ export const calcMoveBasePower = (
     basePowerMods.push(2);
   }
 
+  // update (2024/07/28): disabling this to let the calc handle it cause it figgity fricks w/ Black Glasses
+  // (e.g., move = 'Kowtow Cleave' w/ a faintCounter = 2 -> basePower = 122 [correct], but we actually get 147 [incorrect])
+  // only caveat is the BP field in the moves editor won't live update like it did before, which was pretty much the sickest feature imo,
+  // but it's static values or incorrect calcs... hmm (also obligatory '/s' demarcation)
+  /*
   if (ability === 'Supreme Overlord' as AbilityName && faintCounter > 0) {
     basePowerMods.push(1 + (0.1 * faintCounter));
   }
+  */
 
   if (opponentPokemon?.lastMove === 'Glaive Rush' as MoveName) {
     basePowerMods.push(2);
