@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { format } from 'date-fns';
-import { MemberIcon } from '@showdex/components/app';
+import { GradientButton, MemberIcon } from '@showdex/components/app';
 import { BuildInfo } from '@showdex/components/debug';
 import {
   type BaseButtonProps,
@@ -21,7 +21,6 @@ import {
 } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { env, getResourceUrl } from '@showdex/utils/core';
-import { GradientButton } from '../GradientButton';
 import { PatronageTierRenderer } from './PatronageTierRenderer';
 import styles from './PatronagePane.module.scss';
 

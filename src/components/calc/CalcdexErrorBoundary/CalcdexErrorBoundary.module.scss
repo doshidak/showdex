@@ -78,8 +78,8 @@
 
   .versus {
     display: inline-block;
-    @include spacing.padding-xy($x: 0.3em);
-    opacity: 0.75;
+    @include spacing.padding($x: 0.3em);
+    opacity: 0.72;
   }
 }
 
@@ -98,30 +98,30 @@
   font-size: 9px;
   border-radius: 10px;
   box-shadow: (
-    0 0 1px color.alpha(colors.$red, 0.5),
-    0 0 10px color.alpha(colors.$red, 0.3),
+    0 0 1px color.alpha(colors.$red, 0.56),
+    0 0 12px color.alpha(colors.$red, 0.4),
   );
   overflow-y: hidden;
 
   &.reportContents {
-    @include spacing.margin-xy($y: 15px);
+    @include spacing.margin($y: 16px);
   }
 }
 
 .errorStack {
-  @include spacing.padding-xy($x: 12px, $y: 10px);
+  @include spacing.padding($x: 12px, $y: 10px);
   white-space: pre;
 }
 
 .dehydratedState {
-  @include spacing.padding-xy($x: 12px, $y: 10px);
+  @include spacing.padding($x: 12px, $y: 10px);
   word-break: break-all;
   overflow: hidden;
 }
 
-.qrDescription {
-  @include spacing.margin($top: 15px);
-  @include spacing.padding-xy($x: 10px);
+.description {
+  @include spacing.margin($top: 16px);
+  @include spacing.padding($x: 12px);
   @include font.apply(fonts.$primary);
   text-align: justify;
   user-select: none;
@@ -136,10 +136,20 @@
   }
 }
 
-.qrCodeContainer {
+.downloadContainer {
   @include flex.row-center;
-  @include spacing.margin($top: 20px);
-  min-height: 325px;
+  @include spacing.margin($y: 24px);
+  // min-height: 325px;
+}
+
+.downloadButton {
+  font-weight: 500;
+
+  span.verbLabel {
+    display: inline-block;
+    @include spacing.margin($right: 0.6em);
+    font-weight: 700;
+  }
 }
 
 button.showButton {

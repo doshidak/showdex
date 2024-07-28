@@ -1,4 +1,5 @@
 export * from './BattleGenOptionTooltip';
+export * from './GradientButton';
 export * from './HomieButton';
 export * from './ItemIcon';
 export * from './MemberIcon';

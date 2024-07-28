@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
+import { GradientButton } from '@showdex/components/app';
 import { BuildInfo } from '@showdex/components/debug';
 import { useSandwich } from '@showdex/components/layout';
 import {
@@ -33,7 +34,6 @@ import { useRandomUuid, useRoomNavigation } from '@showdex/utils/hooks';
 import { openUserPopup } from '@showdex/utils/host';
 import { BattleRecord } from './BattleRecord';
 import { FooterButton } from './FooterButton';
-import { GradientButton } from './GradientButton';
 import { type InstanceButtonRef, InstanceButton } from './InstanceButton';
 import { PatronagePane } from './PatronagePane';
 import { SettingsPane } from './SettingsPane';
