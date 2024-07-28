@@ -125,6 +125,22 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
 const l = logger('@showdex/components/calc/useCalcdexContext()');
 const s = (local: string, via?: string): string => `${l.scope}:${local}${via ? ` via ${via}` : ''}`;
 
+/**
+ * not just a `CalcdexContext` consumer, but implements a bunch of core functions used by a bunch of different components,
+ * so this hook's name is misleading af lmao
+ *
+ * * this basically contains all the logic for a given Calcdex so the button does something when you click it
+ *   - this logic is then used by sub `CalcdexPokeContext`'s & sub-sequently the `useCalcdexPokeContext()` hook,
+ *     which more or less also has the same misleading name as this LOL
+ *   - also used by other hooks with slightly less misleading names like `useCalcdexPresets()`, which actually contains
+ *     the logic for the auto-presetter & `battle.stepQueue[]` OTS (Open Team Sheets) detector LOL
+ *   - hence why I call these *core* functions
+ *   - (they weren't initially, but ended up being that way as shit built up cuz *c'est la vie* ¯\\\_(ツ)_/¯)
+ * * I'ma clean this shiz up dw
+ *
+ * @todo note to self: refactor me plz (like all of the context shit)
+ * @since 1.1.7
+ */
 export const useCalcdexContext = (): CalcdexContextConsumables => {
   const ctx = React.useContext(CalcdexContext);
   const dispatch = useDispatch();
@@ -367,14 +383,23 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     const autoWeather = determineWeather(pokemon, state.format);
     const autoTerrain = determineTerrain(pokemon);
 
+    // update (2024/07/28): keeping user-specified overrides in-tact except when an empty string (i.e., `''`),
+    // which indicates the user cleared their override so we should be good to nullify it to fallback to the auto value
     if (autoWeather) {
-      field.dirtyWeather = null;
       field.autoWeather = autoWeather;
+
+      // also intentionally accessing the one from the state, not the passed-in field arg
+      if (state.field.dirtyWeather === '' as typeof field.dirtyWeather) {
+        field.dirtyWeather = null;
+      }
     }
 
     if (autoTerrain) {
-      field.dirtyTerrain = null;
       field.autoTerrain = autoTerrain;
+
+      if (state.field.dirtyTerrain === '' as typeof field.dirtyTerrain) {
+        field.dirtyTerrain = null;
+      }
     }
   };
 
@@ -860,6 +885,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         weather,
         terrain,
       });
+
+      if (state.operatingMode === 'standalone') {
+        newPokemon.autoPreset = false;
+      }
 
       const insertionIndex = typeof index === 'number' && index > -1
         ? (index + i)

@@ -457,6 +457,10 @@ export const useCalcdexPresets = (
           ),
         };
 
+        if (state.operatingMode === 'standalone') {
+          presetPayload.autoPreset = false;
+        }
+
         /**
          * @todo update when more than 4 moves are supported
          */
@@ -470,17 +474,28 @@ export const useCalcdexPresets = (
           return;
         }
 
+        /**
+         * @todo this matches `applyAutoFieldConditions()` from `useCalcdexContext()` so refactor me plz
+         */
         const autoWeather = determineWeather(party[pokemonIndex], state.format);
         const autoTerrain = determineTerrain(party[pokemonIndex]);
 
+        // update (2024/07/28): as mentioned in the aforementioned local helper function in the aforementioned hook,
+        // we'll keep any user-specified weather & terrain in-tact (except when an empty string, i.e., `''` -- manually cleared)
         if (autoWeather) {
-          field.dirtyWeather = null;
           field.autoWeather = autoWeather;
+
+          if (state.field.dirtyWeather === '' as typeof field.dirtyWeather) {
+            field.dirtyWeather = null;
+          }
         }
 
         if (autoTerrain) {
-          field.dirtyTerrain = null;
           field.autoTerrain = autoTerrain;
+
+          if (state.field.dirtyTerrain === '' as typeof field.dirtyTerrain) {
+            field.dirtyTerrain = null;
+          }
         }
       });
 
