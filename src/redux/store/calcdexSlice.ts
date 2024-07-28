@@ -724,7 +724,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
               return;
             }
 
-            state[newId][destKey].pokemon.push(...state[battleId][sourceKey].pokemon);
+            state[newId][destKey].pokemon.push(...state[battleId][sourceKey].pokemon.map((p) => ({
+              ...p,
+              autoPreset: false,
+            })));
 
             state[newId][sourceKey] = {
               ...state[newId][sourceKey],

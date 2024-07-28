@@ -223,7 +223,7 @@ export const sanitizePokemon = <
     presetSource: (pokemon as CalcdexPokemon)?.presetSource || null,
     usageId: (pokemon as CalcdexPokemon)?.usageId || null,
     presets: (pokemon as CalcdexPokemon)?.presets || [],
-    autoPreset: (pokemon as CalcdexPokemon)?.autoPreset || true,
+    autoPreset: (pokemon as CalcdexPokemon)?.autoPreset ?? true,
 
     // only deep-copy non-object volatiles
     // (particularly Ditto's 'transform' volatile, which references an existing Pokemon object as its value)
