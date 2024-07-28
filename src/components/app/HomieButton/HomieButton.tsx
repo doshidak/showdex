@@ -27,9 +27,6 @@ export interface HomieButtonProps {
   updated?: number;
 }
 
-// const buildDateMs = parseInt(env('build-date'), 16) || null;
-// const buildDate = isValid(buildDateMs) ? new Date(buildDateMs) : null;
-
 export const HomieButton = ({
   className,
   style,

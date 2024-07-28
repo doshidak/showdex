@@ -59,18 +59,6 @@ export const PatronagePane = ({
     [colorScheme, donorTiers],
   );
 
-  /*
-  const donorBuns = React.useMemo(
-    () => Object.values({ ...bundles?.buns?.supporters }).find((s) => formatId(s?.name)?.includes('donors')),
-    [bundles.buns?.supporters],
-  );
-
-  const lastDonorUpdate = React.useMemo(
-    () => format(new Date(donorBuns.updated || donorBuns.created || buildDateMs), 'PP'),
-    [donorBuns.created, donorBuns.updated],
-  );
-  */
-
   const lastDonorUpdate = React.useMemo(() => format(new Date(
     donorTiers.sort((a, b) => (a.__updated || 0) - (b.__updated || 0)).pop()?.__updated
       || buildDateMs,
@@ -83,18 +71,6 @@ export const PatronagePane = ({
     () => patronTiers.map(PatronageTierRenderer('PatronTier', { colorScheme, showTitles: true })),
     [colorScheme, patronTiers],
   );
-
-  /*
-  const patronBuns = React.useMemo(
-    () => Object.values({ ...bundles?.buns?.supporters }).find((s) => formatId(s?.name)?.includes('patrons')),
-    [bundles.buns?.supporters],
-  );
-
-  const lastPatronUpdate = React.useMemo(
-    () => format(new Date(patronBuns.updated || patronBuns.created || buildDateMs), 'PP'),
-    [patronBuns.created, patronBuns.updated],
-  );
-  */
 
   const lastPatronUpdate = React.useMemo(() => format(new Date(
     patronTiers.sort((a, b) => (a.__updated || 0) - (b.__updated || 0)).pop()?.__updated
