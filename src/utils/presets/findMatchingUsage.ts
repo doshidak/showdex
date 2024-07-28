@@ -14,7 +14,7 @@ import { flattenAlts } from './flattenAlts';
  */
 export const findMatchingUsage = (
   usages: CalcdexPokemonPreset[],
-  pokemon: CalcdexPokemon,
+  pokemon: Pick<CalcdexPokemon, 'altMoves' | 'moves' | 'speciesForme'>,
 ): CalcdexPokemonPreset => {
   if (!usages?.length || !pokemon?.speciesForme) {
     return null;

@@ -4,8 +4,7 @@ import { bull } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { getGenfulFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import { detectCompletePreset, getPresetFormes } from '@showdex/utils/presets';
-// import { sortPresetGroupsByFormat } from './sortPresetGroupsByFormat';
+import { detectCompletePreset, getPresetFormes, sortPresetsByUsage } from '@showdex/utils/presets';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -14,7 +13,7 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
 /**
  * Builds the value for the `options` prop of the presets `Dropdown` component in `PokeInfo`.
  *
- * * As of v1.1.7, you can provide the optional `pokemon` argument to append the preset's `speciesForme`
+ * * As of v1.1.7, you can provide the ~~optional~~ `pokemon` argument to append the preset's `speciesForme`
  *   to the option's `subLabel` if it doesn't match the `speciesForme` of the provided `pokemon`.
  *   - This is useful for distinguishing presets of differing `speciesForme`'s, or even `transformedForme`'s.
  *
@@ -29,25 +28,22 @@ export const buildPresetOptions = (
     formatLabelMap?: Record<string, string>;
   },
 ): CalcdexPokemonPresetOption[] => {
+  const { usages, formatLabelMap } = { ...config };
   const options: CalcdexPokemonPresetOption[] = [];
 
   if (!format || !pokemon?.speciesForme || !presets?.length) {
     return options;
   }
 
-  const {
-    usages,
-    formatLabelMap,
-  } = config || {};
-
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
+  const completePresets = presets.filter(detectCompletePreset);
 
-  presets.forEach((preset) => {
-    if (!detectCompletePreset(preset)) {
-      return;
-    }
+  if (usages?.length > 1) {
+    completePresets.sort(sortPresetsByUsage(usages));
+  }
 
+  completePresets.forEach((preset) => {
     const option: CalcdexPokemonPresetOption = {
       label: preset.name,
       value: preset.calcdexId,

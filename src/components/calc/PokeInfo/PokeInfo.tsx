@@ -353,10 +353,18 @@ export const PokeInfo = ({
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
     : null;
 
-  const editableTypes = (operatingMode === 'standalone' && honkdexSettings?.alwaysEditTypes)
-    || settings?.editPokemonTypes === 'always'
-    || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
+  const editableTypes = React.useMemo(() => (
+    (operatingMode === 'standalone' && honkdexSettings?.alwaysEditTypes)
+      || settings?.editPokemonTypes === 'always'
+      || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format))
+  ), [
+    format,
+    honkdexSettings?.alwaysEditTypes,
+    operatingMode,
+    settings?.editPokemonTypes,
+  ]);
 
+  const [presetFieldFocused, setPresetFieldFocused] = React.useState(false);
   const presetOptions = React.useMemo(() => buildPresetOptions(
     format,
     pokemon,
@@ -752,11 +760,11 @@ export const PokeInfo = ({
                     className={styles.toggleButton}
                     label={t('poke.info.preset.autoLabel', 'Auto')}
                     absoluteHover
-                    // active={pokemon?.autoPreset}
-                    disabled /** @todo remove after implementing auto-presets */
-                    onPress={() => updatePokemon({
-                      autoPreset: !pokemon?.autoPreset,
-                    }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
+                    active={pokemon?.autoPreset}
+                    disabled
+                    // onPress={() => updatePokemon({
+                    //   autoPreset: !pokemon?.autoPreset,
+                    // }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
                   />
                 }
               </div>
@@ -802,6 +810,7 @@ export const PokeInfo = ({
                     </div>
                   ) : null}
                   tooltipPlacement="bottom"
+                  tooltipDisabled={presetFieldFocused}
                   absoluteHover
                   disabled={!pokePaste}
                   onPress={handlePokePasteExport}
@@ -843,6 +852,8 @@ export const PokeInfo = ({
             input={{
               name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
+              onFocus: () => setPresetFieldFocused(true),
+              onBlur: () => setPresetFieldFocused(false),
               onChange: (id: string) => applyPreset(
                 id,
                 null,

@@ -196,10 +196,6 @@ export const getPresetFormes = (
     }
   }
 
-  // remove duplicate formes with this one simple trick (programmers hate him)
-  // update (2023/10/16): fucc it yolo, save some frames
-  // const nonDupesOutput = Array.from(new Set(output.filter(Boolean)));
-
   if (formatAsId) {
     return output.map((f) => formatId(f)).filter(Boolean);
   }

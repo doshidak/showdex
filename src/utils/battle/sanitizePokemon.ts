@@ -211,7 +211,7 @@ export const sanitizePokemon = <
     serverMoves: (pokemon as CalcdexPokemon)?.serverMoves || [],
     transformedMoves: (pokemon as CalcdexPokemon)?.transformedMoves || [],
     altMoves: (pokemon as CalcdexPokemon)?.altMoves || [],
-    guaranteedMoves: (pokemon as CalcdexPokemon)?.guaranteedMoves || [],
+    usageMoves: (pokemon as CalcdexPokemon)?.usageMoves || [],
     stellarMoveMap: { ...(pokemon as CalcdexPokemon)?.stellarMoveMap },
     moveOverrides: { ...(pokemon as CalcdexPokemon)?.moveOverrides },
     showMoveOverrides: (pokemon as CalcdexPokemon)?.showMoveOverrides || false,
@@ -221,6 +221,7 @@ export const sanitizePokemon = <
 
     presetId: (pokemon as CalcdexPokemon)?.presetId || null,
     presetSource: (pokemon as CalcdexPokemon)?.presetSource || null,
+    usageId: (pokemon as CalcdexPokemon)?.usageId || null,
     presets: (pokemon as CalcdexPokemon)?.presets || [],
     autoPreset: (pokemon as CalcdexPokemon)?.autoPreset || true,
 

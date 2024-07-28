@@ -3,7 +3,7 @@ import { type CalcdexAutoBoostMap } from './CalcdexAutoBoostMap';
 import { type CalcdexLeanPokemon } from './CalcdexLeanPokemon';
 import { type CalcdexMoveOverride } from './CalcdexMoveOverride';
 import { type CalcdexPlayerKey } from './CalcdexPlayerKey';
-import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
+import { type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from './CalcdexPokemonAlt';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from './CalcdexPokemonPreset';
 
 /**
@@ -543,15 +543,12 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   altMoves?: CalcdexPokemonAlt<MoveName>[];
 
   /**
-   * Guaranteed moves from a relevant `'usage'`-sourced preset.
+   * Usage `altMoves[]` from a relevant `'usage'`-sourced preset.
    *
-   * * Only 100% guaranteed, no lie, no fibbing, no cap, fr fr, ong moves are allowed to be in this list.
-   *   - i.e., In the `CalcdexPokemonUsageAlt<MoveName>` tuple, the second `percent` element should be *exactly* `1`.
-   *   - Where would you find such moves? Well, in Randoms, of course!
-   *   - (Though this isn't limited to strictly Randoms & applies to any `'usage'`-sourced move that meets the above condition.)
-   * * Primarily used by `mergeRevealedMoves()` to avoid replacing these moves.
-   * * Populated by the auto-presetter in `useCalcdexPresets()` from `@showdex/components/calc/CalcdexContext`.
+   * * Primarily used by `mergeRevealedMoves()` to avoid replacing 100% guaranteed moves (typically in role-based Randoms).
+   * * Populated from the `config.usage` preset provided to the `applyPreset()` utility from `@showdex/utils/presets`.
    * * Note that this isn't necessarily sourced from the currently applied `presetId`.
+   *   - Refer to the `usageId` to find the `'usage'`-sourced preset that this was originally derived from.
    *
    * @default
    * ```ts
@@ -559,7 +556,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * ```
    * @since 1.2.4
    */
-  guaranteedMoves?: MoveName[];
+  usageMoves?: CalcdexPokemonUsageAlt<MoveName>[];
 
   /**
    * Last move used by the Pokemon.
@@ -985,6 +982,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyFaintCounter?: number;
 
   /**
+   * ID of the `'usage'`-sourced preset that the usage props (e.g., `usageMoves[]`) are derived from.
+   *
+   * * ID refers to the `calcdexId` of the preset.
+   * * Populated from the `config.usage` preset provided to the `applyPreset()` utility from `@showdex/utils/presets`.
+   *
+   * @default null
+   * @since 1.2.4
+   */
+  usageId?: string;
+
+  /**
    * ID of the preset that's currently applied to the Pokemon.
    *
    * * ID refers to the `calcdexId` of the preset.
@@ -1010,13 +1018,12 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   presetSource?: CalcdexPokemonPresetSource;
 
   /**
-   * Available presets (i.e., sets) for the Pokemon.
+   * Available unique presets (i.e., sets) for the Pokemon.
    *
    * * These are typically presets derived from the battle, not downloaded from an external repository.
    *   - You'll find presets sourced from the `'server'`, `'storage'`/`'storage-box'` (from the Teambuilder),
    *     `'import'` (imported PokePastes), and `'sheets'` (open team sheets or `!showteam`).
-   * * As such, this is uniquely populated for each battle, if presets from any of the aforementioned sources
-   *   are available.
+   * * As such, this is uniquely populated for each battle, if presets from any of the aforementioned sources are available.
    *
    * @default
    * ```ts
@@ -1027,7 +1034,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   presets?: CalcdexPokemonPreset[];
 
   /**
-   * Whether the preset should automatically update based on revealed moves (i.e., `moveState.revealed`).
+   * Whether the preset should automatically update based on revealed information (e.g., `revealedMoves[]`).
    *
    * @default true
    * @since 0.1.0

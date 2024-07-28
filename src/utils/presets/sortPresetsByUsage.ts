@@ -16,12 +16,12 @@ export const sortPresetsByUsage = (
   usages: CalcdexPokemonPreset[],
 ): Parameters<Array<CalcdexPokemonPreset>['sort']>[0] => {
   if ((usages?.length || 0) < 2) {
-    return () => 0;
+    return (a, b) => (b?.usage || 0) - (a?.usage || 0);
   }
 
   return (a, b) => {
-    const usageA = usages.find((p) => p?.source === 'usage' && p.name.includes(a.name))?.usage || 0;
-    const usageB = usages.find((p) => p?.source === 'usage' && p.name.includes(b.name))?.usage || 0;
+    const usageA = a?.usage || usages.find((p) => p?.source === 'usage' && p.name.includes(a.name))?.usage || 0;
+    const usageB = b?.usage || usages.find((p) => p?.source === 'usage' && p.name.includes(b.name))?.usage || 0;
 
     if (usageA > usageB) {
       return -1;

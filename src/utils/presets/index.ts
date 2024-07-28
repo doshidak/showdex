@@ -8,6 +8,7 @@ export * from './flattenAlts';
 export * from './getPresetFormes';
 export * from './getTeambuilderPresets';
 export * from './getTeamSheetPresets';
+export * from './guessMatchingPresets';
 export * from './guessTeambuilderPreset';
 export * from './importMultiPokePastes';
 export * from './importPokePaste';
