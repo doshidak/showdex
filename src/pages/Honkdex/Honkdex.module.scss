@@ -51,7 +51,7 @@
       background-color: color.alpha(colors.$showdown-background-light, 0.56);
     }
 
-    &.mina::before {
+    &.light.mina::before {
       background-color: color.alpha(#F5DAE3, 0.64);
     }
 
@@ -59,7 +59,7 @@
       background-color: color.alpha(colors.$gray-darkest, 0.8);
     }
 
-    &.mina::before {
+    &.dark.mina::before {
       background-color: color.alpha(#2D0D1C, 0.8);
     }
   }
