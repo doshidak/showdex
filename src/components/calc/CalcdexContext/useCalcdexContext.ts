@@ -356,7 +356,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     });
   };
 
-  const determineFieldConditions = (
+  const applyAutoFieldConditions = (
     pokemon: CalcdexPokemon,
     field: Partial<CalcdexBattleField>,
   ) => {
@@ -699,7 +699,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     }
 
     if (nonEmptyObject(field)) {
-      determineFieldConditions(mutated, field);
+      applyAutoFieldConditions(mutated, field);
     }
 
     // recheck for toggleable abilities if changed
@@ -848,7 +848,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       newPokemon.ident = `${playerKey}: ${newPokemon.calcdexId.slice(-7)}`;
       newPokemon.spreadStats = calcPokemonSpreadStats(state.format, newPokemon);
 
-      determineFieldConditions(newPokemon, field);
+      applyAutoFieldConditions(newPokemon, field);
 
       // no need to provide activeIndices[] & selectionIndex to detectToggledAbility() since it will just read `active`
       const currentField: CalcdexBattleField = { ...state.field, ...field };
@@ -1055,12 +1055,13 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         pokemon,
         {
           format: state.format,
+          formatOnly: true,
           source: 'usage',
           select: 'any',
         },
-      ), pokemon);
+      ), preset); // note: intentionally passing `preset`, not `pokemon` !!
 
-      const presetPayload = applyPreset(state.format, pokemon, preset, usage);
+      const presetPayload = applyPreset(pokemon, preset, { format: state.format, usage });
 
       /**
        * @todo update when more than 4 moves are supported
@@ -1217,7 +1218,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     const field: Partial<CalcdexBattleField> = {};
 
-    determineFieldConditions(payload.pokemon[pokemonIndex], field);
+    applyAutoFieldConditions(payload.pokemon[pokemonIndex], field);
 
     if (field.autoWeather === state.field?.autoWeather) {
       field.autoWeather = null;
@@ -1603,14 +1604,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       },
     };
 
-    /*
-    const selectedPokemon = playersPayload[playerKey].pokemon[state[playerKey].selectionIndex];
-
-    if (selectedPokemon?.speciesForme) {
-      applyAutoBoostEffect(playersPayload, selectedPokemon);
-    }
-    */
-
     applyAutoBoostEffects(playersPayload);
     recountRuinAbilities(playersPayload);
 
@@ -1734,32 +1727,45 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       [playerKey]: playerPayload,
     };
 
+    // now we do a thing for auto-toggling Stakeout lmao
+    // hmm... I feel kinda disgusted after writing this bit lol
+    const pkeys = [state.playerKey, state.opponentKey].filter((pkey) => {
+      const playerSource = pkey === playerKey ? playerPayload : state[pkey];
+
+      return (state.operatingMode !== 'battle' || playerSource?.active) && !!playerSource.pokemon?.length;
+    });
+
+    // warning: removing the initial null field auto-* values below will prevent them from auto-clearing!
+    // (just a note to myself, really lolol)
     const field: Partial<CalcdexBattleField> = {
       autoWeather: null,
       autoTerrain: null,
     };
 
-    // now we do a thing for auto-toggling Stakeout lmao
-    // hmm... I feel kinda disgusted after writing this bit lol
-    const pkeys = [state.playerKey, state.opponentKey];
+    // update (2024/07/26): field conditions should be determined first for both sides' selections, otherwise, the 'Sun'
+    // autoWeather brought up by, say, Koraidon's Oricalcum Pulse will be set to null when the 'Electric' autoTerrain is
+    // brought up by, say, Miraidon's Hadron Engine ... LOL
+    pkeys.forEach((pkey) => {
+      const playerSource = pkey === playerKey ? playerPayload : state[pkey];
+      const pokemon = playerSource?.pokemon?.[playerSource?.selectionIndex];
+
+      applyAutoFieldConditions(pokemon, field);
+    });
+
+    if (!pkeys.length) {
+      delete field.autoWeather;
+      delete field.autoTerrain;
+    }
+
+    const nextField: CalcdexBattleField = { ...state.field, ...field };
+    const weather = (nextField.dirtyWeather ?? (nextField.autoWeather || nextField.weather)) || null;
+    const terrain = (nextField.dirtyTerrain ?? (nextField.autoTerrain || nextField.terrain)) || null;
 
     (pkeys[0] === playerKey ? pkeys : pkeys.reverse()).forEach((pkey) => {
       const playerSource = pkey === playerKey ? playerPayload : state[pkey];
-
-      if ((state.operatingMode === 'battle' && !playerSource?.active) || !playerSource.pokemon?.length) {
-        return;
-      }
-
       const opponentKey = pkey === state.playerKey ? state.opponentKey : state.playerKey;
       const opponent = opponentKey === playerKey ? playerPayload : state[opponentKey];
-      const opponentSelectionIndex = opponentKey === playerKey ? playerPayload.selectionIndex : opponent?.selectionIndex;
-      const opponentPokemon = opponent?.pokemon?.[opponentSelectionIndex];
-
-      determineFieldConditions(opponentPokemon, field);
-
-      const currentField: CalcdexBattleField = { ...state.field, ...field };
-      const weather = (currentField.dirtyWeather ?? (currentField.autoWeather || currentField.weather)) || null;
-      const terrain = (currentField.dirtyTerrain ?? (currentField.autoTerrain || currentField.terrain)) || null;
+      const opponentPokemon = opponent?.pokemon?.[opponent?.selectionIndex];
 
       playerSource.pokemon.forEach((pokemon, i) => {
         // update (2023/11/13): though detectToggledAbility() handles Ruin abilities, we don't want that here!
@@ -1772,7 +1778,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         const toggled = detectToggledAbility(pokemon, {
           gameType: state.gameType,
           opponentPokemon,
-          selectionIndex: pkey === playerKey ? playerPayload.selectionIndex : opponentSelectionIndex,
+          selectionIndex: pkey === playerKey ? playerPayload.selectionIndex : opponent?.selectionIndex,
           weather,
           terrain,
         });
@@ -1788,9 +1794,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
           };
         }
 
-        const index = pokemon.slot ?? i;
-
-        playersPayload[pkey].pokemon[index].abilityToggled = toggled;
+        playersPayload[pkey].pokemon[pokemon.slot ?? i].abilityToggled = toggled;
       });
     });
 
@@ -1799,11 +1803,11 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     // shitty way of removing any battle-reported field conditions that may remain
     if (state.operatingMode === 'standalone') {
-      if (state.field?.weather) {
+      if (nextField.weather) {
         field.weather = null;
       }
 
-      if (state.field?.terrain) {
+      if (nextField.terrain) {
         field.terrain = null;
       }
     }
