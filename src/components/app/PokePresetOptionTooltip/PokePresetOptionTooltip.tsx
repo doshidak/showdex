@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { type SelectOptionTooltipProps } from '@showdex/components/form';
-import { exportPokePaste } from '@showdex/utils/presets';
+import { exportPokePaste, flattenAlt } from '@showdex/utils/presets';
 import styles from './PokePresetOptionTooltip.module.scss';
 
 export interface PokePresetOptionTooltipProps extends SelectOptionTooltipProps<string> {
@@ -20,8 +20,19 @@ export const PokePresetOptionTooltip = ({
   value,
   hidden,
 }: PokePresetOptionTooltipProps): JSX.Element => {
-  const preset = React.useMemo(() => (presets || []).find((p) => p?.calcdexId === value), [presets, value]);
-  const pokePaste = React.useMemo(() => exportPokePaste({ ...preset, name: null }, format), [format, preset]);
+  const preset = React.useMemo(
+    () => (presets || []).find((p) => p?.calcdexId === value),
+    [presets, value],
+  );
+
+  const pokePaste = React.useMemo(() => exportPokePaste({
+    ...preset,
+    name: preset?.nickname,
+    teraType: flattenAlt(preset?.teraTypes?.[0]),
+  }, format), [
+    format,
+    preset,
+  ]);
 
   if (!pokePaste || hidden) {
     return null;
