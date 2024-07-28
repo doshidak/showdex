@@ -888,6 +888,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
       if (state.operatingMode === 'standalone') {
         newPokemon.autoPreset = false;
+        newPokemon.autoPresetId = null; // ignored in 'standalone' mode, so just in case lol
       }
 
       const insertionIndex = typeof index === 'number' && index > -1

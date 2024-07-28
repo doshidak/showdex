@@ -2,6 +2,7 @@ export * from './appliedPreset';
 export * from './applyPreset';
 export * from './detectCompletePreset';
 export * from './detectUsageAlt';
+export * from './exportMultiPokePastes';
 export * from './exportPokePaste';
 export * from './findMatchingUsage';
 export * from './flattenAlts';

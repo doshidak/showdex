@@ -51,6 +51,7 @@ import { capitalize } from '@showdex/utils/humanize';
 import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {
   detectUsageAlt,
+  exportMultiPokePaste,
   exportPokePaste,
   flattenAlts,
   importMultiPokePastes,
@@ -110,6 +111,7 @@ export const PokeInfo = ({
     format,
     subFormats,
     legacy,
+    active: battleActive,
     gameType,
     defaultLevel,
   } = state;
@@ -382,8 +384,8 @@ export const PokeInfo = ({
   ]);
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
-  const [importedCount, setImportedCount] = React.useState(0);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
+  const [importedCount, setImportedCount] = React.useState(0);
   const [importFailedReason, setImportFailedReason] = React.useState('Failed');
 
   const handlePokePasteImport = () => void (async () => {
@@ -436,6 +438,7 @@ export const PokeInfo = ({
 
   const exportBadgeRef = React.useRef<BadgeInstance>(null);
   const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
+  const [exportedCount, setExportedCount] = React.useState(0);
 
   const pokePaste = React.useMemo(
     () => exportPokePaste(pokemon, format),
@@ -454,6 +457,7 @@ export const PokeInfo = ({
     try {
       await writeClipboardText(fullPaste);
 
+      setExportedCount(1);
       exportBadgeRef.current?.show();
     } catch (error) {
       /*
@@ -466,6 +470,25 @@ export const PokeInfo = ({
       }
       */
 
+      exportFailedBadgeRef.current?.show();
+    }
+  })();
+
+  const handleMultiPokePasteExport = () => void (async () => {
+    if ((operatingMode === 'battle' && battleActive) || !player?.pokemon?.length) {
+      return;
+    }
+
+    const delimiter = '\n\n' as const;
+    const paste = exportMultiPokePaste(player.pokemon, { format, delimiter });
+    const count = paste?.split(delimiter).length || 0;
+
+    try {
+      await writeClipboardText(paste);
+
+      setExportedCount(count);
+      exportBadgeRef.current?.show();
+    } catch (error) {
       exportFailedBadgeRef.current?.show();
     }
   })();
@@ -758,20 +781,28 @@ export const PokeInfo = ({
                   operatingMode === 'battle' &&
                   <ToggleButton
                     className={styles.toggleButton}
+                    style={pokemon?.autoPresetId && settings?.nhkoColors?.[0] ? {
+                      color: settings.nhkoColors[0],
+                    } : undefined}
                     label={t('poke.info.preset.autoLabel', 'Auto')}
                     absoluteHover
-                    active={pokemon?.autoPreset}
-                    disabled
+                    active={pokemon?.autoPreset || !!pokemon?.autoPresetId}
+                    disabled={pokemon?.autoPreset || !pokemon?.autoPresetId}
                     // onPress={() => updatePokemon({
                     //   autoPreset: !pokemon?.autoPreset,
                     // }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
+                    onPress={() => applyPreset(
+                      pokemon?.autoPresetId,
+                      null, // additionalMutations (not needed here)
+                      `${l.scope}:ToggleButton~AutoPreset:onPress()`,
+                    )}
                   />
                 }
               </div>
 
               <div className={cx(styles.presetHeaderPart, styles.presetHeaderRight)}>
                 <ToggleButton
-                  className={cx(styles.toggleButton, styles.importButton)}
+                  className={cx(styles.toggleButton, styles.presetHeaderAction)}
                   label={t('poke.info.preset.importLabel', 'Import')}
                   tooltip={t('poke.info.preset.importTooltip')}
                   tooltipPlacement="bottom"
@@ -801,24 +832,40 @@ export const PokeInfo = ({
                   />
                 </ToggleButton>
 
-                <ToggleButton
-                  className={cx(styles.toggleButton, styles.importButton)}
-                  label={t('poke.info.preset.exportLabel', 'Export')}
-                  tooltip={pokePaste ? (
-                    <div className={styles.pokePasteTooltip}>
-                      {pokePaste}
-                    </div>
-                  ) : null}
-                  tooltipPlacement="bottom"
-                  tooltipDisabled={presetFieldFocused}
-                  absoluteHover
-                  disabled={!pokePaste}
-                  onPress={handlePokePasteExport}
-                >
+                <div className={styles.presetHeaderAction}>
+                  <ToggleButton
+                    className={styles.toggleButton}
+                    label={t('poke.info.preset.exportLabel', 'Export')}
+                    tooltip={pokePaste ? (
+                      <div className={styles.pokePasteTooltip}>
+                        {pokePaste}
+                      </div>
+                    ) : null}
+                    tooltipPlacement="bottom"
+                    tooltipDisabled={presetFieldFocused}
+                    absoluteHover
+                    disabled={!pokePaste}
+                    onPress={handlePokePasteExport}
+                  />
+
+                  {
+                    ((operatingMode === 'standalone' || !battleActive) && (player?.pokemon?.length || 0) > 1) &&
+                    <ToggleButton
+                      className={cx(styles.toggleButton, styles.exportMultiButton)}
+                      label={t('poke.info.preset.exportMultiLabel', 'All')}
+                      tooltip={t('poke.info.preset.exportMultiTooltip', { count: player.pokemon.length })}
+                      tooltipDisabled={!settings?.showUiTooltips}
+                      onPress={handleMultiPokePasteExport}
+                    />
+                  }
+
                   <Badge
                     ref={exportBadgeRef}
                     className={styles.importBadge}
-                    label={t('poke.info.preset.exportedBadge', 'Copied!')}
+                    label={t(`poke.info.preset.exported${exportedCount > 1 ? 'Multi' : ''}Badge`, {
+                      count: exportedCount,
+                      defaultValue: 'Copied!',
+                    })}
                     color="green"
                   />
 
@@ -828,7 +875,7 @@ export const PokeInfo = ({
                     label={t('poke.info.preset.failedBadge', 'Failed')}
                     color="red"
                   />
-                </ToggleButton>
+                </div>
               </div>
             </div>
           </div>
@@ -881,7 +928,7 @@ export const PokeInfo = ({
                 styles.dropdownLabel,
               )}
             >
-              {t('poke.info.ability.label')}
+              {t('poke.info.ability.label', 'Ability')}
 
               {
                 showAbilityToggle &&
@@ -1040,7 +1087,6 @@ export const PokeInfo = ({
               aria-label={t(`poke.info.nature.${showPresetSpreads ? 'spreadA' : 'a'}ria`, {
                 pokemon: friendlyPokemonName,
               }) as React.ReactNode}
-              // hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               hint={(
                 (legacy && t('poke.info.nature.legacyHint'))
                   || (showPresetSpreads && (currentSpread || t('poke.info.nature.customHint')))

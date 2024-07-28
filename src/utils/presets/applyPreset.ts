@@ -359,6 +359,7 @@ export const applyPreset = (
 
     if (revealingPreset) {
       output.autoPreset = false;
+      output.autoPresetId = preset.calcdexId;
     }
 
     return output;

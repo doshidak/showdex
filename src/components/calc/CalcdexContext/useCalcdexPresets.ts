@@ -46,7 +46,7 @@ const playerAutoNonce = (
     .map((p) => [
       p.calcdexId,
       operatingMode === 'standalone' && p.speciesForme,
-      p.autoPreset ? [p.ability || '?', p.item || '?', p.revealedMoves?.length || 0].join(',') : p.presetId,
+      p.autoPreset ? [p.ability || '?', p.item || '?', ...(p.revealedMoves || [])].join(',') : p.presetId,
     ].filter(Boolean).join('~'))
     .join(':')
 );
@@ -80,18 +80,18 @@ export const useCalcdexPresets = (
   // keep track of whether we applied Team Sheets yet (whether initially or later)
   const appliedSheets = React.useRef(false);
 
-  const p1Nonce = React.useMemo(() => playerAutoNonce(state?.p1, state?.operatingMode), [state?.p1, state?.operatingMode]);
-  const p2Nonce = React.useMemo(() => playerAutoNonce(state?.p2, state?.operatingMode), [state?.p2, state?.operatingMode]);
-  const p3Nonce = React.useMemo(() => playerAutoNonce(state?.p3, state?.operatingMode), [state?.p3, state?.operatingMode]);
-  const p4Nonce = React.useMemo(() => playerAutoNonce(state?.p4, state?.operatingMode), [state?.p4, state?.operatingMode]);
+  const p1AutoNonce = React.useMemo(() => playerAutoNonce(state?.p1, state?.operatingMode), [state?.operatingMode, state?.p1]);
+  const p2AutoNonce = React.useMemo(() => playerAutoNonce(state?.p2, state?.operatingMode), [state?.operatingMode, state?.p2]);
+  const p3AutoNonce = React.useMemo(() => playerAutoNonce(state?.p3, state?.operatingMode), [state?.operatingMode, state?.p3]);
+  const p4AutoNonce = React.useMemo(() => playerAutoNonce(state?.p4, state?.operatingMode), [state?.operatingMode, state?.p4]);
 
   /*
   l.debug(
     'playerAutoNonce()',
-    '\n', 'p1', p1Nonce,
-    '\n', 'p2', p2Nonce,
-    '\n', 'p3', p3Nonce,
-    '\n', 'p4', p4Nonce,
+    '\n', 'p1', p1AutoNonce,
+    '\n', 'p2', p2AutoNonce,
+    '\n', 'p3', p3AutoNonce,
+    '\n', 'p4', p4AutoNonce,
   );
   */
 
@@ -336,13 +336,17 @@ export const useCalcdexPresets = (
           );
 
           if (formatPresets.length) {
-            const matchedPresets = guessMatchingPresets(formatPresets, pokemon, { format: state.format });
+            const matchedPresets = guessMatchingPresets(formatPresets, pokemon, {
+              format: state.format,
+              usages: pokemonUsages,
+            });
 
             [preset] = matchedPresets;
 
             if (preset?.calcdexId) {
               // note: turning autoPreset off when there's only 1 matched result (i.e., it's a pretty confident match)
               pokemon.autoPreset = matchedPresets.length !== 1;
+              pokemon.autoPresetId = (!pokemon.autoPreset && preset.calcdexId) || null;
             }
           }
 
@@ -373,12 +377,16 @@ export const useCalcdexPresets = (
             );
 
             if (allFormatPresets.length) {
-              const matchedPresets = guessMatchingPresets(allFormatPresets, pokemon, { format: state.format });
+              const matchedPresets = guessMatchingPresets(allFormatPresets, pokemon, {
+                format: state.format,
+                usages: pokemonUsages,
+              });
 
               [preset] = matchedPresets;
 
               if (preset?.calcdexId) {
                 pokemon.autoPreset = matchedPresets.length !== 1;
+                pokemon.autoPresetId = (!pokemon.autoPreset && preset.calcdexId) || null;
               }
             }
 
@@ -390,11 +398,12 @@ export const useCalcdexPresets = (
 
         // no smogon presets are available at this point, so apply the usage if we have it
         // (encountered many cases where Pokemon only have usage w/ no pokemonPresets[], particularly in Gen 9 National Dex)
-        if (!preset?.calcdexId && usage?.calcdexId) {
+        if (!randoms && !preset?.calcdexId && usage?.calcdexId) {
           preset = usage;
 
           if (preset?.calcdexId) {
             pokemon.autoPreset = false;
+            pokemon.autoPresetId = preset.calcdexId;
           }
         }
 
@@ -424,9 +433,10 @@ export const useCalcdexPresets = (
 
           pokemon.showGenetics = true;
           pokemon.autoPreset = false;
+          pokemon.autoPresetId = null;
 
           l.debug(
-            'Failed to find a preset for', pokemon.speciesForme, 'of player', playerKey,
+            'Failed to find a preset for', pokemon.ident || pokemon.speciesForme, 'of player', playerKey,
             '\n', 'pokemon', pokemon,
             '\n', 'preset', preset,
             '\n', 'presets', presets,
@@ -440,8 +450,6 @@ export const useCalcdexPresets = (
         // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
         // (normally only an issue in Gen 9 Randoms with their role system, which has multiple usage presets)
         if (pokemonUsages.length > 1) {
-          // const nameId = formatId(preset.name);
-          // const roleUsage = pokemonUsages.find((p) => nameId.includes(formatId(p.name)));
           const roleUsage = findMatchingUsage(pokemonUsages, preset);
 
           if (roleUsage?.calcdexId) {
@@ -452,19 +460,20 @@ export const useCalcdexPresets = (
         const presetPayload = {
           ...(
             pokemon.presetId !== preset.calcdexId
-              && (!usage?.calcdexId || pokemon.usageId !== usage.calcdexId)
+              // && (!usage?.calcdexId || pokemon.usageId !== usage.calcdexId)
               && applyPreset(pokemon, preset, { format: state.format, usage })
           ),
         };
 
         if (state.operatingMode === 'standalone') {
           presetPayload.autoPreset = false;
+          presetPayload.autoPresetId = null; // ignored in 'standalone' mode, but just for completeness lol c:
         }
 
         /**
          * @todo update when more than 4 moves are supported
          */
-        if (presetPayload?.moves && pokemon?.source !== 'server' && pokemon?.revealedMoves?.length === 4) {
+        if ('moves' in presetPayload && pokemon.source !== 'server' && pokemon.revealedMoves?.length === 4) {
           delete presetPayload.moves;
         }
 
@@ -517,10 +526,10 @@ export const useCalcdexPresets = (
 
     endTimer('(dispatched)');
   }, [
-    p1Nonce,
-    p2Nonce,
-    p3Nonce,
-    p4Nonce,
+    p1AutoNonce,
+    p2AutoNonce,
+    p3AutoNonce,
+    p4AutoNonce,
     presets.ready,
     state?.battleId,
     state?.format,

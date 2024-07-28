@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-07-21T18:36:06.115Z"
+    "updated": "2024-07-28T16:28:16.193Z"
   },
 
   "contextMenu": {
@@ -99,11 +99,14 @@
         "autoLabel": "$t(common:labels.auto)",
         "importLabel": "$t(common:labels.import)",
         "exportLabel": "$t(common:labels.export)",
+        "exportMultiLabel": "$t(common:labels.all)",
         "importTooltip": "Import PokéPaste from Clipboard",
         "importedBadge": "$t(common:labels.imported)",
         "importedMultiBadge": "$t(common:labels.imported) {{count}}",
+        "exportMultiTooltip_one": "$t(common:labels.export) {{count}} set",
+        "exportMultiTooltip_other": "$t(common:label.export) {{count}} sets",
         "exportedBadge": "$t(common:labels.copied)!",
-        "exportedMutliBadge": "$t(common:labels.copied) {{count}}!",
+        "exportedMultiBadge": "$t(common:labels.copied) {{count}}",
         "malformedBadge": "Bad Syntax",
         "mismatchedBadge": "Mismatch",
         "failedBadge": "$t(common:labels.failed)"

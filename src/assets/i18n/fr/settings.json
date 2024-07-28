@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-28T14:06:14.206Z"
+    "updated": "2024-07-28T20:02:53.990Z"
   },
 
   "pane": {
@@ -108,7 +108,7 @@
       "options": {
         "sic": {
           "label": "SIC",
-          "tooltip": "Le thème de couleur standard (\"<strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor\")."
+          "tooltip": "Le thème de couleur standard<br />(\"<strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor\")."
         },
         "mina": {
           "label": "Mina",

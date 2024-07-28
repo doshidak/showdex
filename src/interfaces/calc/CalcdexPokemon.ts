@@ -1040,4 +1040,14 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   autoPreset?: boolean;
+
+  /**
+   * ID of the matched preset was found from the set of presets to be the most reflective of the revealed info.
+   *
+   * * Primarily used to "reset" the preset to the matched preset in `PokeInfo` once found.
+   *
+   * @default null
+   * @since 1.2.4
+   */
+  autoPresetId?: string;
 }
