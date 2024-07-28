@@ -586,6 +586,18 @@ export interface ShowdexCalcdexSettings {
   showFieldTooltips: boolean;
 
   /**
+   * Whether to always show additional field conditions for `'battle'`-mode Calcdexes.
+   *
+   * * This enables the same field controls available to `'standalone'`-mode Calcdexes (aka. Honkdexes).
+   *   - Also made to be opt-in as to not present new users with a "*Calcdex 747-400 Field Management Computer*" looking interface LOL.
+   *   - In the likely event you don't know what I'm talking about, google "B747-400 FMC".
+   *
+   * @default false
+   * @since 1.2.4
+   */
+  expandFieldControls: boolean;
+
+  /**
    * Colors for the NHKO values, up to 4HKO.
    *
    * * Any value after 4HKO will use the last defined color in the array.

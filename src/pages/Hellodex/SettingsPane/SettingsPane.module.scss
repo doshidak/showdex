@@ -71,7 +71,7 @@ $close-icon-size: 28px;
 
 .header {
   @include flex.row-between;
-  @include spacing.padding($x: 12px, $y: 6px);
+  @include spacing.padding($x: 12px, $top: 4px, $bottom: 6px);
   @include transition.apply(padding);
   user-select: none;
 
@@ -128,6 +128,10 @@ $close-icon-size: 28px;
         @include spacing.margin($right: 8px);
       }
 
+      .inBattle &:not(:last-of-type) {
+        @include spacing.margin($right: 2px);
+      }
+
       &:last-of-type {
         @include spacing.margin($right: 16px);
       }
@@ -147,6 +151,10 @@ $close-icon-size: 28px;
 
     .defaultsButton {
       @include spacing.margin($right: 16px);
+
+      .inBattle & {
+        @include spacing.margin($right: 8px);
+      }
     }
   }
 }

@@ -389,6 +389,22 @@ export const CalcdexSettingsPane = ({
             />
           )}
         />
+
+        <Field<ShowdexCalcdexSettings['expandFieldControls']>
+          name="calcdex.expandFieldControls"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('calcdex.expandFieldControls.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="calcdex.expandFieldControls.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
       </div>
     </div>
   );

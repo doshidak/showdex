@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-07-24T01:56:50.162Z"
+    "updated": "2024-07-28T14:06:29.300Z"
   },
 
   "pane": {
@@ -113,7 +113,7 @@
         },
         "mina": {
           "label": "Mina",
-          "tooltip": "\"where is my showdex???????<br />...also make it pink\" <ndash /><em>meanie</em>, 2023"
+          "tooltip": "\"where is my showdex???????<br />...also make it pink\" <ndash /><em>meanie</em>, 2023<br />ಠ╭╮ಠ"
         }
       }
     },
@@ -577,6 +577,11 @@
     "showAllOptions": {
       "label": "Show Illegal Abilities & Moves",
       "tooltip": "Allows you to select from all possible abilities &amp; moves in legal-locked formats like OU & Randoms."
+    },
+
+    "expandFieldControls": {
+      "label": "Show All Field Controls",
+      "tooltip": "Shows additional field controls, such as <em>Stealth Rock</em> & <em>Spikes</em>, normally hidden for in-battle $t(common:products.calcdex_other)."
     },
 
     "nhkoLabels": {

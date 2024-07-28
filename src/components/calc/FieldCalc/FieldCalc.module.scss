@@ -10,7 +10,7 @@
   grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
   column-gap: 10px;
 
-  &.doubles {
+  &.expanded {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 6px;
   }
@@ -41,7 +41,7 @@
 .dropdownLabel {
   @include flex.row-center;
 
-  .doubles & {
+  .expanded & {
     @include spacing.margin($bottom: 0);
 
     &.weatherLabel {
@@ -66,21 +66,21 @@
     @include spacing.margin($left: 4px);
   }
 
-  .doubles & {
+  .expanded & {
     grid-area: 3 / 1;
-    @include spacing.margin($top: 4px, $left: 10px);
+    @include spacing.margin($top: 4px, $bottom: 1px, $left: 10px);
   }
 }
 
 .leftFieldInput {
-  .doubles & {
+  .expanded & {
     grid-area: 4 / 1;
     @include spacing.margin($top: 1px);
   }
 }
 
 // .weatherLabel {
-//   .doubles & {
+//   .expanded & {
 //     grid-area: 1 / 1;
 //     @include spacing.margin($bottom: 0);
 //   }
@@ -91,7 +91,7 @@
   max-width: 152px;
   @include spacing.margin($x: auto);
 
-  .doubles & {
+  .expanded & {
     grid-area: 2 / 1;
     @include spacing.margin($top: 4px, $bottom: 10px);
 
@@ -102,7 +102,7 @@
 }
 
 // .terrainLabel {
-//   .doubles & {
+//   .expanded & {
 //     grid-area: 1 / 2;
 //     @include spacing.margin($bottom: 0);
 //   }
@@ -113,7 +113,7 @@
   max-width: 152px;
   @include spacing.margin($x: auto);
 
-  .doubles & {
+  .expanded & {
     grid-area: 2 / 2;
     @include spacing.margin($top: 4px, $bottom: 10px);
 
@@ -130,14 +130,14 @@
     @include spacing.margin($right: 4px);
   }
 
-  .doubles & {
+  .expanded & {
     grid-area: 3 / 2;
-    @include spacing.margin($top: 4px, $right: 10px);
+    @include spacing.margin($top: 4px, $right: 10px, $bottom: 1px);
   }
 }
 
 .rightFieldInput {
-  .doubles & {
+  .expanded & {
     grid-area: 4 / 2;
     @include spacing.margin($top: 1px);
   }
@@ -150,7 +150,7 @@ button.toggleButton {
   font-size: 10px;
   text-transform: none;
 
-  .doubles & {
+  .expanded & {
     min-width: 58px;
   }
 }

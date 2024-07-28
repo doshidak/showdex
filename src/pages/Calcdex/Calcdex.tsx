@@ -201,7 +201,10 @@ export const Calcdex = ({
           </PiconRackSortableContext>
 
           <FieldCalc
-            className={styles.fieldCalc}
+            className={cx(
+              styles.fieldCalc,
+              (settings?.expandFieldControls || state?.gameType === 'Doubles') && styles.expanded,
+            )}
             playerKey={topKey}
             opponentKey={bottomKey}
           />

@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "settings",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-24T01:59:27.704Z"
+    "updated": "2024-07-28T14:06:14.206Z"
   },
 
   "pane": {
@@ -108,11 +108,11 @@
       "options": {
         "sic": {
           "label": "SIC",
-          "tooltip": "Le thème de couleur standard (<strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor)."
+          "tooltip": "Le thème de couleur standard (\"<strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor\")."
         },
         "mina": {
           "label": "Mina",
-          "tooltip": "\"où est mon showdex???????<br />...fais-le aussi rose\" <ndash /><em>meanie</em>, 2023"
+          "tooltip": "\"où est mon showdex???????<br />...fais-le aussi rose\" <ndash /><em>meanie</em>, 2023<br />ಠ╭╮ಠ"
         }
       }
     },
@@ -578,6 +578,11 @@
       "tooltip": "Vous permet de sélectionner parmi tous les talents & capacités possibles dans des formats verrouillés légalement comme OU & Randoms."
     },
 
+    "expandFieldControls": {
+      "label": "Afficher tous les Contrôles de Terrain",
+      "tooltip": "Affiche des contrôles de terrain supplémentaires, tels que <em>$t(pokedex:moves.stealthrock)</em> & <em>$t(pokedex:moves.spikes)</em>, normalement cachés pour les $t(common:products.calcdex_other) en cours de bataille."
+    },
+
     "nhkoLabels": {
       "label": "Étiquettes Garanties de NHKO"
     },
@@ -590,7 +595,7 @@
   "honkdex": {
     "visuallyEnabled": {
       "label": "Activer le Honk",
-      "tooltip": "Active le <em>$t(common:products.honkdex_one)</em>, un $t(common:products.calcdex_one) hors combat. Vous pouvez voir & modifier les calculs précédemment sauvegardés (appelés <em>$t(common:products.honk_other)</em>) dans le $t(common:products.hellodex_one).<br /><br />La désactivation de cette fonctionnalité ne fera que cacher la fonctionnalité $t(common:products.honkdex_one) & tous les $t(common:products.honk_other) sauvegardés resteront dans le stockage de votre navigateur pour $t(common:products.showdown)."
+      "tooltip": "Active le <em>$t(common:products.honkdex_one)</em>, un $t(common:products.calcdex_one) hors bataille. Vous pouvez voir & modifier les calculs précédemment sauvegardés (appelés <em>$t(common:products.honk_other)</em>) dans le $t(common:products.hellodex_one).<br /><br />La désactivation de cette fonctionnalité ne fera que cacher la fonctionnalité $t(common:products.honkdex_one) & tous les $t(common:products.honk_other) sauvegardés resteront dans le stockage de votre navigateur pour $t(common:products.showdown)."
     },
 
     "showAllFormats": {

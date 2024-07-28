@@ -1021,9 +1021,10 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         moves: preset.moves,
         presetId: preset.calcdexId,
         presets: [preset],
+        autoPreset: false,
       }));
 
-      addPokemon(playerKey, importPayload, state[playerKey].selectionIndex + 1, scope);
+      addPokemon(playerKey, importPayload, null, scope);
       endTimer('(delegated)');
 
       return importPayload.length;

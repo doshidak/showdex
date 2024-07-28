@@ -142,6 +142,10 @@
   max-width: 496px;
   @include spacing.margin($x: auto, $top: 16px);
 
+  &.expanded {
+    max-width: 680px;
+  }
+
   .container:not(.skinnyBoi) & {
     @include spacing.padding($x: 24px);
   }

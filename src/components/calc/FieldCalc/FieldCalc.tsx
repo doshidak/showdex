@@ -67,8 +67,7 @@ export const FieldCalc = ({
     && (!!dirtyWeather || typeof dirtyWeather === 'string') // i.e., '' (to forcibly clear) as opposed to null
     && currentWeather !== dirtyWeather;
 
-  const showResetTerrain =
-    !!currentTerrain
+  const showResetTerrain = !!currentTerrain
       && (!!dirtyTerrain || typeof dirtyTerrain === 'string')
       && currentTerrain !== dirtyTerrain;
 
@@ -117,6 +116,7 @@ export const FieldCalc = ({
 
   const doubles = state?.gameType === 'Doubles';
   const natdexFormat = ['nationaldex', 'natdex'].some((f) => format?.includes(f));
+  const expandedFieldControls = settings?.expandFieldControls || operatingMode === 'standalone';
 
   const playerToggleKeys = React.useMemo(() => {
     const output: (keyof CalcdexPlayerSide | 'isGravity')[] = [
@@ -139,20 +139,20 @@ export const FieldCalc = ({
       ].filter(Boolean) as typeof output);
     }
 
-    if (operatingMode === 'standalone' || doubles) {
-      output.push('isTailwind');
-    }
+    if (expandedFieldControls) {
+      if (doubles) {
+        output.push('isTailwind');
+      }
 
-    if (operatingMode === 'standalone') {
       output.push('isGravity', 'isSeeded', 'isSR', 'spikes');
     }
 
     return output;
   }, [
     doubles,
+    expandedFieldControls,
     gen,
     natdexFormat,
-    operatingMode,
   ]);
 
   const disabled = !state[playerKey]?.pokemon?.length
@@ -247,7 +247,7 @@ export const FieldCalc = ({
     <TableGrid
       className={cx(
         styles.container,
-        (playerToggleKeys.length > 4 || doubles) && styles.doubles,
+        (playerToggleKeys.length > 4 || expandedFieldControls || doubles) && styles.expanded,
         // containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
         className,
@@ -274,8 +274,8 @@ export const FieldCalc = ({
           <>
             &uarr;{' '}
             {t(
-              `field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`,
-              operatingMode === 'standalone' || doubles ? 'Field' : 'Screens',
+              `field.${expandedFieldControls || doubles ? 'field' : 'screens'}`,
+              expandedFieldControls || doubles ? 'Field' : 'Screens',
             )}
           </>
         )}
@@ -364,7 +364,7 @@ export const FieldCalc = ({
           t(`field.${authPlayerKey === playerKey ? 'theirs' : 'yours'}`)
         ) : (
           <>
-            {t(`field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`)}
+            {t(`field.${expandedFieldControls || doubles ? 'field' : 'screens'}`)}
             {' '}&darr;
           </>
         )}

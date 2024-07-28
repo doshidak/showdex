@@ -97,6 +97,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     formatMatchupDamageAmounts: true,
     copyMatchupDescription: true,
     showFieldTooltips: true,
+    expandFieldControls: false,
 
     nhkoColors: [
       '#4CAF50',
@@ -222,6 +223,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   formatMatchupDamageAmounts: 'fda',
   copyMatchupDescription: 'cmd',
   showFieldTooltips: 'sft',
+  expandFieldControls: 'fmc',
   nhkoColors: 'ncl',
   nhkoLabels: 'nlb',
 };
