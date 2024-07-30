@@ -15,6 +15,7 @@ export interface PresetsSettingsPaneProps {
   value?: ShowdexSettings;
   presets?: ShowdexPresetsBundle[];
   inBattle?: boolean;
+  clearing?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export const PresetsSettingsPane = ({
   value,
   presets,
   inBattle,
+  clearing,
 }: PresetsSettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
 
@@ -102,7 +104,7 @@ export const PresetsSettingsPane = ({
             ),
             value: count,
           }))}
-          disabled={(
+          disabled={clearing || (
             !value?.calcdex?.downloadSmogonPresets
               && !value?.calcdex?.downloadRandomsPresets
               && !value?.calcdex?.downloadUsageStats

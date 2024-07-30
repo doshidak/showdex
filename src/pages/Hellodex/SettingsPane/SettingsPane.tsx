@@ -262,6 +262,8 @@ export const SettingsPane = ({
   ]);
   */
 
+  const [presetsClearing, setPresetsClearing] = React.useState(false);
+
   const handleSettingsChange = (
     values: DeepPartial<ShowdexSettings>,
   ) => {
@@ -281,7 +283,11 @@ export const SettingsPane = ({
     // clear the cache if the user intentionally set preset caching to "never" (i.e., `0` days)
     // intentionally checking 0 as to ignore null & undefined values
     if (calcdex?.maxPresetAge === 0) {
-      void clearPresetsDb();
+      void (async () => {
+        setPresetsClearing(true);
+        await clearPresetsDb();
+        setPresetsClearing(false);
+      })();
     }
 
     updateSettings(values);
@@ -469,6 +475,7 @@ export const SettingsPane = ({
                 value={values}
                 presets={bundledPresets}
                 inBattle={inBattle}
+                clearing={presetsClearing}
               />
 
               <AutoFeaturesSettingsPane
