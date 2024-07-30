@@ -37,11 +37,24 @@ export const buildPresetOptions = (
 
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
-  const completePresets = presets.filter(detectCompletePreset);
 
-  if (usages?.length > 1) {
-    completePresets.sort(sortPresetsByUsage(usages));
+  // update (2024/07/30): chunking the presets[] this way to make sure ones like 'Yours' appear at the top
+  const revealingPresets: CalcdexPokemonPreset[] = [];
+  const otherPresets: CalcdexPokemonPreset[] = [];
+
+  presets.forEach((preset) => {
+    if (!detectCompletePreset(preset)) {
+      return;
+    }
+
+    (['server', 'sheet'].includes(preset.source) ? revealingPresets : otherPresets).push(preset);
+  });
+
+  if (usages?.length > 1 && otherPresets.length) {
+    otherPresets.sort(sortPresetsByUsage(usages));
   }
+
+  const completePresets = [...revealingPresets, ...otherPresets];
 
   completePresets.forEach((preset) => {
     const option: CalcdexPokemonPresetOption = {

@@ -137,11 +137,13 @@ export const useCalcdexPresets = (
 
       const party = cloneAllPokemon(player.pokemon);
 
-      // l.debug(
-      //   '(Auto-Preset)', 'player', playerKey,
-      //   '\n', 'processing indices', presetlessIndices,
-      //   '\n', 'filtered', presetlessIndices.map((i) => party[i]),
-      // );
+      /*
+      l.debug(
+        '(Auto-Preset)', 'player', playerKey,
+        '\n', 'processing indices', presetlessIndices,
+        '\n', 'filtered', presetlessIndices.map((i) => party[i]),
+      );
+      */
 
       presetlessIndices.forEach((pokemonIndex) => {
         const pokemon = party[pokemonIndex];
@@ -331,17 +333,31 @@ export const useCalcdexPresets = (
             {
               format: state.format,
               formatOnly: true,
+              source: randoms ? 'smogon' : null,
               select: 'one',
             },
           );
 
           if (formatPresets.length) {
-            const matchedPresets = guessMatchingPresets(formatPresets, pokemon, {
-              format: state.format,
-              usages: pokemonUsages,
-            });
+            // for Randoms, if there's only 1 role, that's probably it, no? LOL
+            const matchedPresets = randoms && formatPresets.length === 1
+              ? formatPresets
+              : guessMatchingPresets(formatPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                usages: pokemonUsages,
+              });
 
             [preset] = matchedPresets;
+
+            l.debug(
+              '(Auto-Preset)', 'player', playerKey, 'pokemon', pokemon.ident || pokemon.speciesForme,
+              '\n', 'preset', preset,
+              '\n', 'matchedPresets[]', matchedPresets,
+              '\n', 'formatPresets[]', formatPresets,
+              '\n', 'pokemonUsages[]', pokemonUsages,
+              '\n', 'pokemon', pokemon,
+            );
 
             if (preset?.calcdexId) {
               // note: turning autoPreset off when there's only 1 matched result (i.e., it's a pretty confident match)
@@ -379,10 +395,20 @@ export const useCalcdexPresets = (
             if (allFormatPresets.length) {
               const matchedPresets = guessMatchingPresets(allFormatPresets, pokemon, {
                 format: state.format,
+                formatOnly: true,
                 usages: pokemonUsages,
               });
 
               [preset] = matchedPresets;
+
+              l.debug(
+                '(Auto-Preset)', 'player', playerKey, 'pokemon', pokemon.ident || pokemon.speciesForme,
+                '\n', 'preset', preset,
+                '\n', 'matchedPresets[]', matchedPresets,
+                '\n', 'allFormatPresets[]', allFormatPresets,
+                '\n', 'pokemonUsages[]', pokemonUsages,
+                '\n', 'pokemon', pokemon,
+              );
 
               if (preset?.calcdexId) {
                 pokemon.autoPreset = matchedPresets.length !== 1;

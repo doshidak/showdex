@@ -191,12 +191,14 @@ export const CalcdexPokeProvider = ({
   const presets = React.useMemo(() => (playerPokemon?.speciesForme ? [
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
-    ...(format?.includes('random') ? [] : usages),
-    ...teamPresets,
-    ...boxPresets,
-    ...bundledPresets,
-    ...pokemonPresets,
-  ].sort(presetSorter) : []), [
+    ...[
+      ...(format?.includes('random') ? [] : usages),
+      ...teamPresets,
+      ...boxPresets,
+      ...bundledPresets,
+      ...pokemonPresets,
+    ].sort(presetSorter),
+  ] : []), [
     boxPresets,
     bundledPresets,
     format,

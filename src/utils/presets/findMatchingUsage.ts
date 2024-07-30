@@ -1,4 +1,5 @@
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { replaceBehemothMoves } from '@showdex/utils/battle';
 import { flattenAlts } from './flattenAlts';
 
 /**
@@ -24,15 +25,25 @@ export const findMatchingUsage = (
     return usages[0];
   }
 
-  const moves = pokemon.altMoves?.length ? flattenAlts(pokemon.altMoves) : pokemon.moves;
+  const moves = replaceBehemothMoves(
+    pokemon.speciesForme,
+    pokemon.altMoves?.length ? flattenAlts(pokemon.altMoves) : pokemon.moves,
+  );
 
   return moves?.length ? usages.find((usage) => {
     if (!usage?.calcdexId || usage.source !== 'usage' || !usage.altMoves.length) {
       return false;
     }
 
-    const pool = flattenAlts(usage.altMoves);
+    const pool = replaceBehemothMoves(usage.speciesForme, flattenAlts(usage.altMoves));
 
-    return moves.every((m) => pool.includes(m));
+    // update (2024/07/30): in Randoms only, we should make sure the usage's altMoves[] has the same length as moves[] !!
+    // ran into this funny little Gen 9 Randoms preset for Toxicroak:
+    // moves (from the "Setup Sweeper" preset) = ['Close Combat', 'Earthquake', 'Gunk Shot', 'Sucker Punch', 'Swords Dance'],
+    // usage[0].altMoves = [['Close Combat', 1], ['Gunk Shot', 1], ['Knock Off', 1], ['Sucker Punch', 0.3579], ['Swords Dance', 0.3478], ['Earthquake', 0.2944]]
+    // usage[1].altMoves = [['Close Combat', 1], ['Gunk Shot', 1], ['Swords Dance', 1], ['Earthquake', 0.6912], ['Sucker Punch', 0.3088]]
+    // (usage[1] is actually the correct one, but usage[0] also matches, so it gets selected & incorrectly shows 'Knock Off' in the dropdown LOL)
+    return moves.every((m) => pool.includes(m))
+      && (!usage.format?.includes('random') || !pokemon.altMoves?.length || pool.length === moves.length);
   }) : usages[0];
 };
