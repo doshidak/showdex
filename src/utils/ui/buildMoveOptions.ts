@@ -301,6 +301,18 @@ export const buildMoveOptions = (
     });
   }
 
+  // it's everyday bro v_v
+  options.push({
+    label: translateHeader('Daily'),
+    options: [{
+      label: translate('Struggle' as MoveName),
+      rightLabel: findUsagePercent('Struggle' as MoveName),
+      value: 'Struggle' as MoveName,
+    }],
+  });
+
+  filterMoves.push('Struggle' as MoveName);
+
   // show all possible moves if the format is not legal-locked or no learnset is available
   if (showAllMoves || !learnset.length) {
     const otherMoves = Object.keys(BattleMovedex || {})
