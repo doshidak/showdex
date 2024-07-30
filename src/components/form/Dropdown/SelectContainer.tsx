@@ -14,6 +14,7 @@ export interface SelectCustomProps {
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
   filtering?: boolean;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   active?: boolean;
   scrollState?: [scrolling: boolean, setScrolling: React.Dispatch<React.SetStateAction<boolean>>];
   optionTooltip?: (props: SelectOptionTooltipProps) => JSX.Element;

@@ -567,6 +567,7 @@ export const PokeInfo = ({
                     updatePokemon({ speciesForme: value }, s);
                   },
                 }}
+                inputMode="text"
                 options={formeOptions}
                 noOptionsMessage={t('poke.info.forme.empty', 'No Pokémon') as React.ReactNode}
                 filterOption={formeOptionsFilter}
@@ -788,7 +789,7 @@ export const PokeInfo = ({
                     label={t('poke.info.preset.autoLabel', 'Auto')}
                     absoluteHover
                     active={pokemon?.autoPreset || !!pokemon?.autoPresetId}
-                    disabled={presetsLoading}
+                    disabled={!pokemon?.speciesForme || presetsLoading}
                     onPress={pokemon?.autoPresetId ? () => applyPreset(
                       pokemon?.autoPresetId,
                       null, // additionalMutations (not needed here)
