@@ -124,6 +124,8 @@ export const calcBattleCalcdexNonce = (
     gen: battle?.gen?.toString(),
     tier: battle?.tier,
     gameType: battle?.gameType,
+    paused: String(!!battle?.paused),
+    ended: String(!!battle?.ended),
     myPokemon: battle?.myPokemon?.length ? calcCalcdexId(
       battle.myPokemon.map((p) => calcPokemonCalcdexNonce(p as unknown as CalcdexPokemon)).join(';') || 'empty',
     ) : null,

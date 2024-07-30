@@ -112,6 +112,7 @@ export const PokeInfo = ({
     subFormats,
     legacy,
     active: battleActive,
+    paused: battlePaused,
     gameType,
     defaultLevel,
   } = state;
@@ -778,7 +779,7 @@ export const PokeInfo = ({
                 {t('poke.info.preset.label', 'Set')}
 
                 {
-                  operatingMode === 'battle' &&
+                  (operatingMode === 'battle' && !battlePaused) &&
                   <ToggleButton
                     className={styles.toggleButton}
                     style={pokemon?.autoPresetId && settings?.nhkoColors?.[0] ? {
@@ -787,15 +788,14 @@ export const PokeInfo = ({
                     label={t('poke.info.preset.autoLabel', 'Auto')}
                     absoluteHover
                     active={pokemon?.autoPreset || !!pokemon?.autoPresetId}
-                    disabled={pokemon?.autoPreset || !pokemon?.autoPresetId}
-                    // onPress={() => updatePokemon({
-                    //   autoPreset: !pokemon?.autoPreset,
-                    // }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
-                    onPress={() => applyPreset(
+                    disabled={presetsLoading}
+                    onPress={pokemon?.autoPresetId ? () => applyPreset(
                       pokemon?.autoPresetId,
                       null, // additionalMutations (not needed here)
                       `${l.scope}:ToggleButton~AutoPreset:onPress()`,
-                    )}
+                    ) : () => updatePokemon({
+                      autoPreset: !pokemon?.autoPreset,
+                    }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
                   />
                 }
               </div>
@@ -809,7 +809,8 @@ export const PokeInfo = ({
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
                   disabled={(
-                    (operatingMode === 'battle' && !pokemon?.speciesForme)
+                    presetsLoading
+                      || (operatingMode === 'battle' && !pokemon?.speciesForme)
                       || typeof updatePokemon !== 'function'
                   )}
                   onPress={handlePokePasteImport}
@@ -849,7 +850,7 @@ export const PokeInfo = ({
                   />
 
                   {
-                    ((operatingMode === 'standalone' || !battleActive) && (player?.pokemon?.length || 0) > 1) &&
+                    ((operatingMode === 'standalone' || battlePaused) && (player?.pokemon?.length || 0) > 1) &&
                     <ToggleButton
                       className={cx(styles.toggleButton, styles.exportMultiButton)}
                       label={t('poke.info.preset.exportMultiLabel', 'All')}

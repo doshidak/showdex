@@ -941,6 +941,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
         battleId: battle.id || roomid,
         battleNonce: battle.nonce,
         active: false,
+        paused: true,
       }));
 
       updateBattleRecord(store, battle);
