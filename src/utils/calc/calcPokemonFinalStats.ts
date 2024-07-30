@@ -120,26 +120,24 @@ export const calcPokemonFinalStats = (
     : pokemon.status;
 
   if (status) {
-    if (!legacy && ['guts', 'quickfeet'].includes(ability)) {
-      // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
-      if (ability === 'guts') {
-        record.apply('atk', 1.5, 'abilities', 'Guts');
-      }
+    // 50% ATK reduction when burned (all gens... probably)
+    if (status === 'brn' && (legacy || ability !== 'guts')) {
+      record.apply('atk', 0.5, 'nonvolatiles', 'Burn');
+    }
 
-      // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)
-      if (ability === 'quickfeet') {
-        record.apply('spe', 1.5, 'abilities', 'Quick Feet');
-      }
-    } else {
-      // 50% ATK reduction when burned (all gens... probably)
-      if (status === 'brn') {
-        record.apply('atk', 0.5, 'nonvolatiles', 'Burn');
-      }
+    // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
+    if (!legacy && ability === 'guts') {
+      record.apply('atk', 1.5, 'abilities', 'Guts');
+    }
 
-      // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
-      if (status === 'par') {
-        record.apply('spe', gen < 7 ? 0.25 : 0.5, 'nonvolatiles', 'Paralysis');
-      }
+    // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
+    if (status === 'par' && (legacy || ability !== 'quickfeet')) {
+      record.apply('spe', gen < 7 ? 0.25 : 0.5, 'nonvolatiles', 'Paralysis');
+    }
+
+    // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)
+    if (!legacy && ability === 'quickfeet') {
+      record.apply('spe', 1.5, 'abilities', 'Quick Feet');
     }
   }
 
