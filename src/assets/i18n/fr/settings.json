@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-28T20:02:53.990Z"
+    "updated": "2024-07-30T19:57:32.955Z"
   },
 
   "pane": {
@@ -410,8 +410,8 @@
     },
 
     "enableQuickEditor": {
-      "label": "Édition Rapide du Nombre de Coups",
-      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, telles que <em>$(pokedex:moves.iciclespear)</em>.<br /><br />Si <em>$t(calcdex.showMoveEditor.label)</em> est activé, vous pourrez également modifier cela dans l'éditeur de capacités."
+      "label": "Modifier Rapidement les Effets de Capacité",
+      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, tels que <em>$t(pokedex:moves.iciclespear)</em>, & d'activer l'activation de <em>$t(pokedex:moves.powertrick)</em>.<br /><br />Si <em>$t(calcdex.showMoveEditor.label)</em> est activé, vous pourrez également modifier cela dans l'éditeur de capacités."
     },
 
     "showNonDamageRanges": {
@@ -549,7 +549,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Permet uniquement la modification des $t(pokedex:stats.base_one.0) dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showBaseStats.options.always)</strong> pour en savoir plus sur la modification des $t(pokedex:stats.base_one.0)."
+          "tooltip": "Permet uniquement la modification des $t(pokedex:stats.base_one.0) dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showBaseStats.options.always.label)</strong> pour en savoir plus sur la modification des $t(pokedex:stats.base_one.0)."
         },
         "never": {
           "label": "Jamais",

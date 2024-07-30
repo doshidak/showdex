@@ -329,7 +329,7 @@ button.damageButton {
 
 button.editorButton {
   font-size: 8px;
-  line-height: 9px;
+  // line-height: 9px;
   @include transition.apply(color, background-color, box-shadow, opacity);
 
   &.readOnly {

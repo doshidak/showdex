@@ -1011,6 +1011,30 @@ export const PokeMoves = ({
                   />
                 </div>
               </TableGridItem>
+            ) : settings?.enableQuickEditor && PokemonToggleMoves.includes(moveName) && !hasDamageRange ? (
+              <>
+                <TableGridItem className={styles.quickEditor}>
+                  <ToggleButton
+                    className={styles.editorButton}
+                    label={t('poke.moves.editor.active.label', 'Active')}
+                    tooltip={(
+                      <Trans
+                        t={t}
+                        i18nKey={`poke.moves.editor.active.${moveToggled ? '' : 'in'}activeTooltip`}
+                        parent="div"
+                        className={styles.descTooltip}
+                        shouldUnescape
+                        values={{ move: moveName }}
+                      />
+                    )}
+                    tooltipDisabled={!settings?.showUiTooltips}
+                    active={moveToggled}
+                    onPress={() => handleMoveToggle(moveName)}
+                  />
+                </TableGridItem>
+
+                <TableGridItem />
+              </>
             ) : (
               <>
                 <TableGridItem className={styles.quickEditor}>

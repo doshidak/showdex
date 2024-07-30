@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-07-28T14:06:29.300Z"
+    "updated": "2024-07-30T19:55:04.980Z"
   },
 
   "pane": {
@@ -411,8 +411,8 @@
     },
 
     "enableQuickEditor": {
-      "label": "Quick-Edit Move Hits",
-      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
+      "label": "Quick-Edit Move Effects",
+      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>, &amp; toggle the activation of <em>Power Trick</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
     },
 
     "showNonDamageRanges": {
@@ -550,7 +550,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Only enables $t(pokedex:stats.base_one.0) editing in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showBaseStats.options.always)</strong> option to learn more about $t(pokedex:stats.base_one.0) editing."
+          "tooltip": "Only enables $t(pokedex:stats.base_one.0) editing in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showBaseStats.options.always.label)</strong> option to learn more about $t(pokedex:stats.base_one.0) editing."
         },
         "never": {
           "label": "Never",

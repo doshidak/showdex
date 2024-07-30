@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-07-22T01:23:55.411Z"
+    "updated": "2024-07-30T20:51:27.093Z"
   },
 
   "abilities": {
@@ -159,6 +159,7 @@
     "caplc": "CAP LC",
     "capmoves": "CAP Moves",
     "current": "$t(common:labels.current)",
+    "daily": "Daily",
     "defense": "Defense",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",

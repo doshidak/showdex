@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T16:53:23.631Z",
-    "updated": "2024-07-17T05:51:55.264Z"
+    "updated": "2024-07-30T20:05:27.693Z"
   },
 
   "abilities": {
@@ -3408,6 +3408,7 @@
     "capmoves": "Capacités CAP",
     "challengeableoms": "OMs Contestables",
     "current": "$t(common:labels.current)",
+    "daily": "Quotidienne",
     "defense": "Défense",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",
