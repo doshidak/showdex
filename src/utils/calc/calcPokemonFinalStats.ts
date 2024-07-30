@@ -321,7 +321,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply weather effects
-  const weather = id(field.dirtyWeather || field.autoWeather || field.weather);
+  const weather = id(field.dirtyWeather ?? (field.autoWeather || field.weather));
 
   const ignoreWeather = [
     ability,
@@ -413,7 +413,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply terrain effects
-  const terrain = id(field.dirtyTerrain || field.autoTerrain || field.terrain);
+  const terrain = id(field.dirtyTerrain ?? (field.autoTerrain || field.terrain));
 
   // 50% DEF boost if ability is "Grass Pelt" w/ terrain of the grassy nature
   if (ability === 'grasspelt' && terrain === 'grassy') {
