@@ -429,7 +429,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       if (nonEmptyObject(field)) {
         state[battleId].field = {
-          ...state[battleId].field,
+          ...currentState.field,
           ...field,
         };
       }
@@ -438,6 +438,11 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       // as we don't want the HellodexBattleRecord to record replays or battle re-inits
       if (currentState.active && typeof active === 'boolean' && !active) {
         state[battleId].active = active;
+      }
+
+      if (currentState.operatingMode === 'standalone') {
+        state[battleId].active = false;
+        state[battleId].paused = false;
       }
 
       endTimer('(done)');
@@ -702,6 +707,8 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleId: newId,
         operatingMode: 'standalone',
         renderMode: 'panel',
+        active: false,
+        paused: false,
         // playerKey: state[battleId].authPlayerKey || 'p1',
         // opponentKey: 'p2',
         turn: 0,
