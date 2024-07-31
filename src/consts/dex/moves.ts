@@ -146,7 +146,9 @@ export const PokemonDmaxAbilityMoves: Record<AbilityName, MoveName> = {
  */
 export const PokemonGmaxMoves: Record<Showdown.TypeName, Record<string, MoveName>> = {
   // '???': null,
-  // Bug: null,
+  Bug: {
+    Butterfree: 'G-Max Befuddle', // update (2024/07/26): hello from v1.2.4! LOL
+  },
   Dark: {
     Grimmsnarl: 'G-Max Snooze',
     Urshifu: 'G-Max One Blow',

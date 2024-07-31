@@ -9,6 +9,7 @@ import {
   PokeGlanceOptionTooltip,
   PokeHpBar,
   PokeItemOptionTooltip,
+  PokePresetOptionTooltip,
   PokeStatus,
   PokeStatusTooltip,
 } from '@showdex/components/app';
@@ -35,8 +36,13 @@ import {
 } from '@showdex/consts/dex';
 import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme, useHonkdexSettings } from '@showdex/redux/store';
-import { calcPokemonHpPercentage, populateStatsTable } from '@showdex/utils/calc';
-import { formatId, readClipboardText, writeClipboardText } from '@showdex/utils/core';
+import { calcPokemonHpPercentage } from '@showdex/utils/calc';
+import {
+  dedupeArray,
+  formatId,
+  readClipboardText,
+  writeClipboardText,
+} from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
@@ -45,11 +51,10 @@ import { capitalize } from '@showdex/utils/humanize';
 import { dehydrateSpread, hydrateSpread } from '@showdex/utils/hydro';
 import {
   detectUsageAlt,
+  exportMultiPokePaste,
   exportPokePaste,
-  flattenAlt,
   flattenAlts,
   importMultiPokePastes,
-  importPokePaste,
 } from '@showdex/utils/presets';
 import {
   buildAbilityOptions,
@@ -92,9 +97,10 @@ export const PokeInfo = ({
     formeUsageFinder,
     formeUsageSorter,
     addPokemon,
+    importPresets,
+    applyPreset,
     updatePokemon,
     removePokemon,
-    applyPreset,
   } = useCalcdexPokeContext();
 
   const {
@@ -105,6 +111,8 @@ export const PokeInfo = ({
     format,
     subFormats,
     legacy,
+    active: battleActive,
+    paused: battlePaused,
     gameType,
     defaultLevel,
   } = state;
@@ -115,12 +123,7 @@ export const PokeInfo = ({
 
   const pokemonKey = pokemon?.calcdexId || pokemon?.name || randomUuid || '???';
   const friendlyPokemonName = pokemon?.speciesForme || pokemon?.name || pokemonKey;
-
-  const nickname = (
-    hasNickname(pokemon)
-      && settings?.showNicknames
-      && pokemon.name
-  ) || null;
+  const nickname = (hasNickname(pokemon) && settings?.showNicknames && pokemon.name) || null;
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
   const abilityName = pokemon?.dirtyAbility ?? pokemon?.ability;
@@ -152,7 +155,7 @@ export const PokeInfo = ({
     [t],
   );
 
-  const showAbilityToggle = toggleableAbility(pokemon, gameType);
+  const showAbilityToggle = React.useMemo(() => toggleableAbility(pokemon, gameType), [gameType, pokemon]);
 
   // ability toggle would only be disabled for inactive Pokemon w/ Ruin abilities (gen 9) in Doubles
   const disableAbilityToggle = React.useMemo(() => (
@@ -353,10 +356,18 @@ export const PokeInfo = ({
     ? (pokemon.dirtyStatus ?? (pokemon.status || 'ok')) // status is typically `''` if none
     : null;
 
-  const editableTypes = (operatingMode === 'standalone' && honkdexSettings?.alwaysEditTypes)
-    || settings?.editPokemonTypes === 'always'
-    || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format));
+  const editableTypes = React.useMemo(() => (
+    (operatingMode === 'standalone' && honkdexSettings?.alwaysEditTypes)
+      || settings?.editPokemonTypes === 'always'
+      || (settings?.editPokemonTypes === 'meta' && !legalLockedFormat(format))
+  ), [
+    format,
+    honkdexSettings?.alwaysEditTypes,
+    operatingMode,
+    settings?.editPokemonTypes,
+  ]);
 
+  const [presetFieldFocused, setPresetFieldFocused] = React.useState(false);
   const presetOptions = React.useMemo(() => buildPresetOptions(
     format,
     pokemon,
@@ -375,85 +386,51 @@ export const PokeInfo = ({
 
   const importBadgeRef = React.useRef<BadgeInstance>(null);
   const importFailedBadgeRef = React.useRef<BadgeInstance>(null);
+  const [importedCount, setImportedCount] = React.useState(0);
   const [importFailedReason, setImportFailedReason] = React.useState('Failed');
 
   const handlePokePasteImport = () => void (async () => {
-    if (typeof updatePokemon !== 'function') {
+    if (typeof importPresets !== 'function') {
       return;
     }
 
     try {
       const data = await readClipboardText();
+      const imported = importMultiPokePastes(data, format, null);
 
-      if (operatingMode === 'standalone') {
-        const importedPresets = importMultiPokePastes(data, format);
-        const importedPokemon = importedPresets.map((preset) => ({
-          speciesForme: preset.speciesForme,
-          level: preset.level,
-          dirtyTeraType: flattenAlt(preset.teraTypes?.[0]),
-          dirtyAbility: preset.ability,
-          dirtyItem: preset.item,
-          nature: preset.nature,
-          ivs: populateStatsTable(preset.ivs, { spread: 'iv', format }),
-          evs: populateStatsTable(preset.evs, { spread: 'ev', format }),
-          moves: preset.moves,
-          presetId: preset.calcdexId,
-          presets: [preset],
-        }));
-
-        if (!importedPokemon.length) {
-          setImportFailedReason(t('poke.info.preset.malformedBadge', 'Bad Syntax'));
-          importFailedBadgeRef.current?.show();
-
-          return;
-        }
-
-        addPokemon(importedPokemon, `${l.scope}:handlePokePasteImport()`);
-
-        return void importBadgeRef.current?.show();
-      }
-
-      const preset = importPokePaste(data, format);
-
-      const speciesMismatch = ![
-        pokemon?.speciesForme,
-        ...(pokemon?.altFormes || []),
-      ].filter(Boolean).includes(preset?.speciesForme);
-
-      const importFailed = !preset?.calcdexId || (operatingMode === 'battle' && speciesMismatch);
-
-      if (importFailed) {
-        setImportFailedReason(t(
-          `poke.info.preset.${preset?.calcdexId ? 'mismatched' : 'malformed'}Badge`,
-          preset?.calcdexId ? 'Mismatch' : 'Bad Syntax',
-        ));
+      if (!imported.length) {
+        setImportFailedReason(t('poke.info.preset.malformedBadge', 'Bad Syntax'));
         importFailedBadgeRef.current?.show();
 
         return;
       }
 
-      const currentPresets = [...pokemon.presets];
-      const existingImportIndex = currentPresets.findIndex((p) => p.source === 'import');
+      const count = importPresets(
+        imported,
+        null, // additional mutation map (not needed here)
+        operatingMode === 'standalone', // alwaysAdd
+        `${l.scope}:handlePokePasteImport()`,
+      );
 
-      if (existingImportIndex > -1) {
-        currentPresets.splice(existingImportIndex, 1, preset);
-      } else {
-        currentPresets.push(preset);
+      if (!count) {
+        setImportFailedReason(t('poke.info.preset.mismatchedBadge', 'Mismatch'));
+        importFailedBadgeRef.current?.show();
+
+        return;
       }
 
-      applyPreset(preset, {
-        presets: currentPresets,
-      }, `${l.scope}:handlePokePasteImport()`);
-
+      setImportedCount(count);
       importBadgeRef.current?.show();
     } catch (error) {
-      // if (__DEV__) {
-      //   l.error(
-      //     'Failed to import the set for', pokemon.speciesForme, 'from clipboard:',
-      //     '\n', error,
-      //     '\n', '(You will only see this error on development.)',
-      //   );
-      // }
+      /*
+      if (__DEV__) {
+        l.error(
+          'Failed to import the set for', pokemon?.ident || pokemon?.speciesForme || '???', 'from clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+      */
 
       setImportFailedReason(t('poke.info.preset.failedBadge'));
       importFailedBadgeRef.current?.show();
@@ -462,6 +439,7 @@ export const PokeInfo = ({
 
   const exportBadgeRef = React.useRef<BadgeInstance>(null);
   const exportFailedBadgeRef = React.useRef<BadgeInstance>(null);
+  const [exportedCount, setExportedCount] = React.useState(0);
 
   const pokePaste = React.useMemo(
     () => exportPokePaste(pokemon, format),
@@ -469,23 +447,49 @@ export const PokeInfo = ({
   );
 
   const handlePokePasteExport = () => void (async () => {
-    if (!pokePaste) {
+    // note: using `gen` instead of `format` (just for what's actually copied to the user's clipboard) to not omit the EVs
+    // in Randoms, where they're all (usually) 85, but the PokePaste will omit them when passing the full `format`
+    const fullPaste = exportPokePaste(pokemon, gen);
+
+    if (!fullPaste) {
       return;
     }
 
     try {
-      await writeClipboardText(pokePaste);
+      await writeClipboardText(fullPaste);
 
+      setExportedCount(1);
       exportBadgeRef.current?.show();
     } catch (error) {
-      // if (__DEV__) {
-      //   l.error(
-      //     'Failed to export the set for', pokemon.speciesForme, 'to clipboard:',
-      //     '\n', error,
-      //     '\n', '(You will only see this error on development.)',
-      //   );
-      // }
+      /*
+      if (__DEV__) {
+        l.error(
+          'Failed to export the set for', pokemon?.ident || pokemon?.speciesForme || '???', 'to clipboard:',
+          '\n', error,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
+      */
 
+      exportFailedBadgeRef.current?.show();
+    }
+  })();
+
+  const handleMultiPokePasteExport = () => void (async () => {
+    if ((operatingMode === 'battle' && battleActive) || !player?.pokemon?.length) {
+      return;
+    }
+
+    const delimiter = '\n\n' as const;
+    const paste = exportMultiPokePaste(player.pokemon, { format, delimiter });
+    const count = paste?.split(delimiter).length || 0;
+
+    try {
+      await writeClipboardText(paste);
+
+      setExportedCount(count);
+      exportBadgeRef.current?.show();
+    } catch (error) {
       exportFailedBadgeRef.current?.show();
     }
   })();
@@ -510,9 +514,10 @@ export const PokeInfo = ({
               ...(!pokemon?.speciesForme && { opacity: 0.32 }),
             }}
             pokemon={{
-              ...pokemon,
               speciesForme: (
-                pokemon?.transformedForme
+                pokemon?.transformedCosmeticForme
+                  || pokemon?.transformedForme
+                  || pokemon?.cosmeticForme
                   || pokemon?.speciesForme
               )?.replace(pokemon?.useMax ? '' : '-Gmax', ''), // replace('', '') does nothing btw
               item: itemName,
@@ -562,6 +567,7 @@ export const PokeInfo = ({
                     updatePokemon({ speciesForme: value }, s);
                   },
                 }}
+                inputMode="text"
                 options={formeOptions}
                 noOptionsMessage={t('poke.info.forme.empty', 'No Pokémon') as React.ReactNode}
                 filterOption={formeOptionsFilter}
@@ -701,16 +707,16 @@ export const PokeInfo = ({
                 tooltipPlacement="bottom-start"
                 defaultTypeLabel={t('poke.info.teraType.emptyLabel', 'TERA') as React.ReactNode}
                 teraTyping
-                containerSize={(
+                containerSize={containerWidth < 360 || (
                   pokemon?.dirtyTypes?.length
                     || pokemon?.types?.length
                     || 0
                 ) !== 1 ? containerSize : null}
                 highlight={pokemon?.terastallized}
-                highlightTypes={Array.from(new Set([
+                highlightTypes={dedupeArray([
                   ...flattenAlts(pokemon?.altTeraTypes),
                   pokemon?.teraType,
-                ])).filter(Boolean)}
+                ]).filter(Boolean)}
                 revealedTypes={[pokemon?.teraType].filter(Boolean)}
                 typeUsages={pokemon?.altTeraTypes?.filter(detectUsageAlt)}
                 disabled={!pokemon?.speciesForme}
@@ -774,14 +780,21 @@ export const PokeInfo = ({
                 {t('poke.info.preset.label', 'Set')}
 
                 {
-                  operatingMode === 'battle' &&
+                  (operatingMode === 'battle' && !battlePaused) &&
                   <ToggleButton
                     className={styles.toggleButton}
+                    style={pokemon?.autoPresetId && settings?.nhkoColors?.[0] ? {
+                      color: settings.nhkoColors[0],
+                    } : undefined}
                     label={t('poke.info.preset.autoLabel', 'Auto')}
                     absoluteHover
-                    // active={pokemon?.autoPreset}
-                    disabled /** @todo remove after implementing auto-presets */
-                    onPress={() => updatePokemon({
+                    active={pokemon?.autoPreset || !!pokemon?.autoPresetId}
+                    disabled={!pokemon?.speciesForme || presetsLoading}
+                    onPress={pokemon?.autoPresetId ? () => applyPreset(
+                      pokemon?.autoPresetId,
+                      null, // additionalMutations (not needed here)
+                      `${l.scope}:ToggleButton~AutoPreset:onPress()`,
+                    ) : () => updatePokemon({
                       autoPreset: !pokemon?.autoPreset,
                     }, `${l.scope}:ToggleButton~AutoPreset:onPress()`)}
                   />
@@ -790,14 +803,15 @@ export const PokeInfo = ({
 
               <div className={cx(styles.presetHeaderPart, styles.presetHeaderRight)}>
                 <ToggleButton
-                  className={cx(styles.toggleButton, styles.importButton)}
+                  className={cx(styles.toggleButton, styles.presetHeaderAction)}
                   label={t('poke.info.preset.importLabel', 'Import')}
                   tooltip={t('poke.info.preset.importTooltip')}
                   tooltipPlacement="bottom"
                   tooltipDisabled={!settings?.showUiTooltips}
                   absoluteHover
                   disabled={(
-                    (operatingMode === 'battle' && !pokemon?.speciesForme)
+                    presetsLoading
+                      || (operatingMode !== 'standalone' && !pokemon?.speciesForme)
                       || typeof updatePokemon !== 'function'
                   )}
                   onPress={handlePokePasteImport}
@@ -805,7 +819,10 @@ export const PokeInfo = ({
                   <Badge
                     ref={importBadgeRef}
                     className={cx(styles.importBadge, styles.floating)}
-                    label={t('poke.info.preset.importedBadge', 'Imported')}
+                    label={t(`poke.info.preset.imported${importedCount > 1 ? 'Multi' : ''}Badge`, {
+                      count: importedCount,
+                      defaultValue: 'Imported',
+                    })}
                     color="blue"
                   />
 
@@ -817,23 +834,40 @@ export const PokeInfo = ({
                   />
                 </ToggleButton>
 
-                <ToggleButton
-                  className={cx(styles.toggleButton, styles.importButton)}
-                  label={t('poke.info.preset.exportLabel', 'Export')}
-                  tooltip={pokePaste ? (
-                    <div className={styles.pokePasteTooltip}>
-                      {pokePaste}
-                    </div>
-                  ) : null}
-                  tooltipPlacement="bottom"
-                  absoluteHover
-                  disabled={!pokePaste}
-                  onPress={handlePokePasteExport}
-                >
+                <div className={styles.presetHeaderAction}>
+                  <ToggleButton
+                    className={styles.toggleButton}
+                    label={t('poke.info.preset.exportLabel', 'Export')}
+                    tooltip={pokePaste ? (
+                      <div className={styles.pokePasteTooltip}>
+                        {pokePaste}
+                      </div>
+                    ) : null}
+                    tooltipPlacement="bottom"
+                    tooltipDisabled={presetFieldFocused}
+                    absoluteHover
+                    disabled={!pokePaste}
+                    onPress={handlePokePasteExport}
+                  />
+
+                  {
+                    ((operatingMode === 'standalone' || battlePaused) && (player?.pokemon?.length || 0) > 1) &&
+                    <ToggleButton
+                      className={cx(styles.toggleButton, styles.exportMultiButton)}
+                      label={t('poke.info.preset.exportMultiLabel', 'All')}
+                      tooltip={t('poke.info.preset.exportMultiTooltip', { count: player.pokemon.length })}
+                      tooltipDisabled={!settings?.showUiTooltips}
+                      onPress={handleMultiPokePasteExport}
+                    />
+                  }
+
                   <Badge
                     ref={exportBadgeRef}
                     className={styles.importBadge}
-                    label={t('poke.info.preset.exportedBadge', 'Exported')}
+                    label={t(`poke.info.preset.exported${exportedCount > 1 ? 'Multi' : ''}Badge`, {
+                      count: exportedCount,
+                      defaultValue: 'Copied!',
+                    })}
                     color="green"
                   />
 
@@ -843,7 +877,7 @@ export const PokeInfo = ({
                     label={t('poke.info.preset.failedBadge', 'Failed')}
                     color="red"
                   />
-                </ToggleButton>
+                </div>
               </div>
             </div>
           </div>
@@ -858,9 +892,17 @@ export const PokeInfo = ({
                   pokemon?.speciesForme ? 'None' : '???',
                 )
             ) as React.ReactNode}
+            optionTooltip={PokePresetOptionTooltip}
+            optionTooltipProps={{
+              format,
+              presets,
+              hidden: !settings?.showPresetTooltip,
+            }}
             input={{
               name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
+              onFocus: () => setPresetFieldFocused(true),
+              onBlur: () => setPresetFieldFocused(false),
               onChange: (id: string) => applyPreset(
                 id,
                 null,
@@ -888,7 +930,7 @@ export const PokeInfo = ({
                 styles.dropdownLabel,
               )}
             >
-              {t('poke.info.ability.label')}
+              {t('poke.info.ability.label', 'Ability')}
 
               {
                 showAbilityToggle &&
@@ -1047,7 +1089,6 @@ export const PokeInfo = ({
               aria-label={t(`poke.info.nature.${showPresetSpreads ? 'spreadA' : 'a'}ria`, {
                 pokemon: friendlyPokemonName,
               }) as React.ReactNode}
-              // hint={legacy ? 'N/A' : (showPresetSpreads ? (currentSpread || 'Custom') : '???')}
               hint={(
                 (legacy && t('poke.info.nature.legacyHint'))
                   || (showPresetSpreads && (currentSpread || t('poke.info.nature.customHint')))

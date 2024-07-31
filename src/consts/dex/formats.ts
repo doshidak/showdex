@@ -18,6 +18,7 @@ export const FormatLabels: Record<string, string> = {
   almostanyability: 'AAA',
   alternatium: 'Alternatium',
   anythinggoes: 'AG',
+  babyrandombattle: 'Baby Randoms',
   balancedhackmons: 'BH',
   battlefactory: 'B-Factory',
   battlefestival: 'B-Fest',
@@ -50,6 +51,8 @@ export const FormatLabels: Record<string, string> = {
   cap: 'CAP', // CreateAPokemon (no cap, always factual)
   cap1v1: 'CAP 1v1',
   caplc: 'CAP LC',
+  caprandombattle: 'CAP Randoms',
+  categoryswap: 'Category Swap',
   challengecup: 'Challenge Cup',
   challengecup1v1: 'Challenge Cup 1v1',
   challengecup2v2: 'Challenge Cup 2v2',
@@ -69,9 +72,11 @@ export const FormatLabels: Record<string, string> = {
   draft: 'Draft',
   dragonkingcup: 'Dragon King Cup',
   dreamworldou: 'Dream World OU',
+  ferventimpersonation: 'Fervent Impersonation',
   firstbloodrandombattle: 'First Blood Randoms',
   flipped: 'Flipped',
   forceofthefallen: 'Force of the Fallen',
+  foresighters: 'Foresighters',
   fortemons: 'Fortemons',
   franticfusions: 'Frantic Fusions',
   freeforall: 'FFA',
@@ -127,12 +132,14 @@ export const FormatLabels: Record<string, string> = {
   natdexlcdraft: 'NatDex LC Draft',
   nationaldex: 'NatDex',
   nationaldexag: 'NatDex AG',
-  nationaldexdoubles: 'NatDex Doubles',
   nationaldexbh: 'NatDex BH',
+  nationaldexdoubles: 'NatDex Doubles',
+  nationaldexlc: 'NatDex LC',
   nationaldexlegacy: 'NatDex Legacy',
   nationaldexmonotype: 'NatDex Monotype',
   nationaldexru: 'NatDex RU',
   nationaldexubers: 'NatDex Ubers',
+  nationaldexubersuu: 'NatDex Ubers UU',
   nationaldexuu: 'NatDex UU',
   natureswap: 'Nature Swap',
   nextou: 'Next OU',
@@ -179,6 +186,7 @@ export const FormatLabels: Record<string, string> = {
   stabmonsmixandmega: 'STABmons Mix & Mega',
   stadiumou: 'Stadium OU',
   superstaffbros4: 'SSB4',
+  superstaffbrosultimate: 'SSB Ultimate', // not to be confused w/ the one that has Final Destination LOL
   tagteamsingles: 'Tag Team Singles',
   teradonation: 'Tera Donation',
   terapreviewdraft: 'Tera Draft',
@@ -191,6 +199,7 @@ export const FormatLabels: Record<string, string> = {
   trademarked: 'Trademarked',
   trickmagic: 'Trick Magic',
   triplescustomgame: 'Triples Customs',
+  typesplit: 'Type Split',
   ubers: 'Ubers',
   ubersuu: 'Ubers UU',
   ultimatefinale: 'Ultimate Finale',
@@ -260,15 +269,19 @@ export const DoublesFormatMatchers: RegExp[] = [
  * * Not an exhasutive list & only includes those that must be matched entirely.
  * * Partial matched section names like `'Past Generations'` & `'Past Gens Doubles OU'` should be handled separately.
  * * This is primarily used by `buildFormatOptions()` for building out the dropdown group option labels.
+ *   - These should remain untranslated (i.e., in English) since they're used to standardize Showdown's own labels to
+ *     reduce the number of dropdown sections, so exact `string` comparisons are made during de-duping.
+ *   - Within the aforementioned function, translation is done at the very last step prior to returning the output.
  *
  * @since 1.2.0
  */
 export const FormatSectionLabels: Record<string, string> = {
   nationaldex: 'NatDex',
+  nationaldexothertiers: 'NatDex',
   omofthemonth: 'Featured OMs',
   othermetagames: 'OMs',
   randomizedformatspotlight: 'Featured Randoms',
-  randomizedmetas: 'OM Randoms',
+  randomizedmetas: 'Randomized OMs',
   roaspotlight: 'Featured RoA', // Ruins of Alph (aka. old gens)
   unofficialmetagames: 'UMs',
 };

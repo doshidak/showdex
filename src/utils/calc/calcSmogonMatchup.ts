@@ -3,6 +3,7 @@ import {
   type Move as SmogonMove,
   type MoveName,
   type Pokemon as SmogonPokemon,
+  type ShowdexCalcMods,
   calculate,
 } from '@smogon/calc';
 import { type ShowdexCalcdexSettings } from '@showdex/interfaces/app';
@@ -52,8 +53,10 @@ export interface CalcdexMatchupResult {
    *   attacker: '252 ATK Weavile Knock Off (97.5 BP)',
    *   defender: '252 HP / 0 DEF Heatran',
    *   damageRange: '144-169 (37.3 - 43.7%)',
+   *   recoil: null,
+   *   recovery: null,
    *   koChance: 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes',
-   * }
+   * } as CalcdexMatchupParsedDescription
    * ```
    * @since 1.0.1
    */
@@ -138,14 +141,15 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
+  const showdexMods: ShowdexCalcMods = {};
   const smogonField = createSmogonField(format, gameType, field, player, opponent, allPlayers);
 
   matchup.attacker = createSmogonPokemon(format, gameType, playerPokemon, playerMove, opponentPokemon);
-  matchup.move = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon, field);
+  [matchup.move, { hitBasePowers: showdexMods.hitBasePowers }] = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon, field);
   matchup.defender = createSmogonPokemon(format, gameType, opponentPokemon, null, playerPokemon);
 
   // pretty much only used for Beat Up lmao
-  const strikes = determineMoveStrikes(
+  showdexMods.strikes = determineMoveStrikes(
     format,
     playerMove,
     playerPokemon,
@@ -163,7 +167,7 @@ export const calcSmogonMatchup = (
       matchup.defender,
       matchup.move,
       smogonField,
-      { strikes },
+      showdexMods,
     );
 
     matchup.description = parseMatchupDescription(result);
@@ -171,16 +175,18 @@ export const calcSmogonMatchup = (
     matchup.koChance = formatMatchupNhko(result, settings?.nhkoLabels);
     matchup.koColor = getMatchupNhkoColor(result, settings?.nhkoColors);
 
-    // l.debug(
-    //   'Calculated damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
-    //   '\n', 'gameType', gameType, 'gen', dex.num,
-    //   '\n', 'playerPokemon', playerPokemon.name || '???', playerPokemon,
-    //   '\n', 'opponentPokemon', opponentPokemon.name || '???', opponentPokemon,
-    //   '\n', 'field', field,
-    //   '\n', 'matchup', matchup,
-    //   '\n', 'result', result,
-    //   '\n', 'strikes', strikes,
-    // );
+    /*
+    l.debug(
+      'Calculated damage for', playerMove, 'from', playerPokemon.speciesForme, 'against', opponentPokemon.speciesForme,
+      '\n', 'gameType', gameType, 'gen', dex.num,
+      '\n', 'playerPokemon', playerPokemon.speciesForme || '???', playerPokemon,
+      '\n', 'opponentPokemon', opponentPokemon.speciesForme || '???', opponentPokemon,
+      '\n', 'field', field,
+      '\n', 'matchup', matchup,
+      '\n', 'result', result,
+      '\n', 'showdexMods', showdexMods,
+    );
+    */
   } catch (error) {
     // ignore 'damage[damage.length - 1] === 0' (i.e., no damage) errors,
     // which is separate from 'N/A' damage (e.g., status moves).
@@ -188,10 +194,10 @@ export const calcSmogonMatchup = (
     // like using Earthquake against a Lando-T, which is immune due to its Flying type.
     if (__DEV__ && !(error as Error)?.message?.includes('=== 0')) {
       l.error(
-        'Exception while calculating the damage for', playerMove, 'from', playerPokemon.name, 'against', opponentPokemon.name,
+        'Exception while calculating the damage for', playerMove, 'from', playerPokemon.speciesForme, 'against', opponentPokemon.speciesForme,
         '\n', 'gameType', gameType, 'gen', dex.num,
-        '\n', 'playerPokemon', playerPokemon.name || playerPokemon.speciesForme || '???', playerPokemon,
-        '\n', 'opponentPokemon', opponentPokemon.name || opponentPokemon.speciesForme || '???', opponentPokemon,
+        '\n', 'playerPokemon', playerPokemon.speciesForme || '???', playerPokemon,
+        '\n', 'opponentPokemon', opponentPokemon.speciesForme || '???', opponentPokemon,
         '\n', 'playerMove', playerMove,
         '\n', 'player', player,
         '\n', 'opponent', opponent,

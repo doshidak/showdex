@@ -17,9 +17,19 @@ $container: (
     light: color.alpha(colors.$white, 0.88),
     dark: color.alpha(colors.$black, 0.76),
 
+    mina: (
+      light: color.alpha(#FAEAEF, 0.94),
+      dark: color.alpha(#270917, 0.76),
+    ),
+
     glassy: (
       light: color.alpha(colors.$white, 0.32),
       dark: color.alpha(colors.$black, 0.24),
+
+      mina: (
+        light: color.alpha(#FAEAEF, 0.32),
+        dark: color.alpha(#270917, 0.24),
+      ),
     ),
   ),
 
@@ -32,6 +42,13 @@ $container: (
     dark: (
       0 0 1px color.alpha(colors.$white, 0.32),
       0 0 4px color.alpha(colors.$black, 0.48),
+    ),
+
+    mina: (
+      light: (
+        0 0 1px color.alpha(#770629, 0.32),
+        0 0 4px color.alpha(#D76D8E, 0.16),
+      ),
     ),
   ),
 );
@@ -84,11 +101,20 @@ $record-label: (
   &.light {
     background-color: map.get($container, background-color, light);
     box-shadow: map.get($container, box-shadow, light);
+
+    &.mina {
+      background-color: map.get($container, background-color, mina, light);
+      box-shadow: map.get($container, box-shadow, mina, light);
+    }
   }
 
   &.dark {
     background-color: map.get($container, background-color, dark);
     box-shadow: map.get($container, box-shadow, dark);
+
+    &.mina {
+      background-color: map.get($container, background-color, mina, dark);
+    }
   }
 
   &.glassy {
@@ -96,10 +122,18 @@ $record-label: (
 
     &.light {
       background-color: map.get($container, background-color, glassy, light);
+
+      &.mina {
+        background-color: map.get($container, background-color, glassy, mina, light);
+      }
     }
 
     &.dark {
       background-color: map.get($container, background-color, glassy, dark);
+
+      &.mina {
+        background-color: map.get($container, background-color, glassy, mina, dark);
+      }
     }
   }
 }

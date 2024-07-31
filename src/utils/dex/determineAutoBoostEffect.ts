@@ -4,7 +4,12 @@ import {
   type ItemName,
   type Terrain,
 } from '@smogon/calc';
-import { type CalcdexAutoBoostEffect, type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import {
+  type CalcdexAutoBoostEffect,
+  type CalcdexBattleField,
+  type CalcdexPlayerSide,
+  type CalcdexPokemon,
+} from '@showdex/interfaces/calc';
 // import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat } from './detectGenFromFormat';
 
@@ -15,7 +20,7 @@ import { detectGenFromFormat } from './detectGenFromFormat';
  *
  * * `sourcePokemon` is not always necessarily the `config.targetPokemon`.
  *   - e.g., *Intimidate* from a *Landorous-Therian* (source) to a *Zacian-Crowned* (target).
- * * `config.activePokemon` should include ALL active Pokemon for ALL players.
+ * * `config.activePokemon[]` should include ALL active Pokemon for ALL players.
  *   - This is specifically used to determine the boosts for the *Download* ability.
  *   - This array should include the `config.targetPokemon` if active, but should NOT include the `sourcePokemon`.
  * * Doesn't consider the `sourcePokemon`'s previous `autoBoostMap` but rather rebuilds it from scratch.
@@ -32,6 +37,7 @@ export const determineAutoBoostEffect = (
     format?: string | GenerationNum;
     targetPokemon?: CalcdexPokemon;
     activePokemon?: CalcdexPokemon[];
+    sourceSide?: CalcdexPlayerSide;
     field?: CalcdexBattleField;
   },
 ): CalcdexAutoBoostEffect => {
@@ -55,6 +61,7 @@ export const determineAutoBoostEffect = (
   const {
     calcdexId: sourcePid,
     playerKey: sourceKey,
+    active: sourceActive,
     speciesForme: sourceSpeciesForme,
     transformedForme: sourceTransformedForme,
     terastallized: sourceTerastallized,
@@ -72,6 +79,7 @@ export const determineAutoBoostEffect = (
     format,
     targetPokemon,
     activePokemon,
+    sourceSide,
     field,
   } = config || {};
 
@@ -201,6 +209,10 @@ export const determineAutoBoostEffect = (
 
     // source (e.g., Landorous-Therian) & target Pokemon should be different here typically
     case 'Intimidate': {
+      if (sourceActive) {
+        break;
+      }
+
       output.name = sourceAbility;
       output.dict = 'abilities';
       output.boosts.atk = -1;
@@ -220,16 +232,13 @@ export const determineAutoBoostEffect = (
         'White Smoke',
         'Hyper Cutter',
         'Full Metal Body',
-      ] as AbilityName[];
-
-      if (gen > 7) {
-        blockers.push(...([
+        ...(gen > 7 ? [
           'Inner Focus',
           'Own Tempo',
           'Oblivious',
           'Scrappy',
-        ] as AbilityName[]));
-      }
+        ] : []),
+      ] as AbilityName[];
 
       if (blockers.includes(targetAbility)) {
         output.boosts.atk = 0;
@@ -266,6 +275,19 @@ export const determineAutoBoostEffect = (
     }
 
     case 'Intrepid Sword': {
+      output.name = sourceAbility;
+      output.dict = 'abilities';
+      output.boosts.atk = 1;
+      output.once = gen > 8;
+
+      break;
+    }
+
+    case 'Wind Rider': {
+      if (!sourceSide?.isTailwind) {
+        break;
+      }
+
       output.name = sourceAbility;
       output.dict = 'abilities';
       output.boosts.atk = 1;

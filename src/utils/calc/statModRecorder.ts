@@ -1,3 +1,4 @@
+import { chainMods, OF32, pokeRound } from '@smogon/calc/dist/mechanics/util';
 import { PokemonInitialStats } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 
@@ -20,7 +21,10 @@ export interface CalcdexStatMod {
   /**
    * Reason for the stat modifier, which will be displayed to the user.
    *
-   * @example 'Choice Specs'
+   * @example
+   * ```ts
+   * 'Choice Specs'
+   * ```
    * @since 1.1.0
    */
   label?: string;
@@ -30,7 +34,10 @@ export interface CalcdexStatMod {
    *
    * * Primarily used as a key in the translations dictionary.
    *
-   * @example 'items'
+   * @example
+   * ```ts
+   * 'items'
+   * ```
    * @since 1.1.0
    */
   dict?: CalcdexStatModDict;
@@ -119,7 +126,7 @@ export const statModRecorder = (
 
     stats: {
       ...PokemonInitialStats,
-      ...pokemon?.baseStats,
+      ...pokemon.baseStats,
       ...(hasTransform && pokemon?.transformedBaseStats),
       ...serverStats,
 
@@ -129,18 +136,29 @@ export const statModRecorder = (
   };
 
   const buildStats: CalcdexStatModRecorder['stats'] = () => {
-    // const speedMods = table.spe.map((mod) => mod.value);
-    // const speedMod = speedMods.reduce((acc, mod) => acc * mod, 1);
-    // const speedValue = table.stats.spe * speedMod;
-    const {
-      spe: speedValue,
-      ...otherStats
-    } = table.stats;
+    // update (2024/07/30): who knew speed was this precise
+    const { spe: speedValue, ...otherStats } = table.stats;
+    const speedMods = [...table.spe];
+    const { spe: initialSpeed } = pokemon.spreadStats;
 
+    const parIndex = speedMods.findIndex((m) => m?.dict === 'nonvolatiles' && m.label === 'Paralysis');
+    const parMod = parIndex > -1 ? speedMods.splice(parIndex, 1)[0] : null;
+    const speedModValues = speedMods.map((m) => Math.floor((m?.modifier || 1) * 4096)).filter(Boolean);
+
+    let spe = OF32(pokeRound((initialSpeed * chainMods(speedModValues, 410, 131172)) / 4096));
+
+    if (parMod?.modifier) {
+      spe = Math.floor(OF32(spe * (parMod.modifier * 100)) / 100);
+    }
+
+    /*
     return {
       ...otherStats,
       spe: speedValue % 1 > 0.5 ? Math.ceil(speedValue) : Math.floor(speedValue),
     };
+    */
+
+    return { ...otherStats, spe };
   };
 
   const apply: CalcdexStatModRecorder['apply'] = (

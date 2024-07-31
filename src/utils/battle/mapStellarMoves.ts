@@ -1,4 +1,5 @@
 import { type GenerationNum, type MoveName } from '@smogon/calc';
+import escape from 'regexp.escape';
 import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { getDexForFormat, getDynamicMoveType } from '@showdex/utils/dex';
 import { chunkStepQueueTurns } from './chunkStepQueueTurns';
@@ -40,7 +41,7 @@ export const mapStellarMoves = (
   const smolForme = speciesForme.replace(/-.+$/, '');
 
   // e.g., smolForme = 'Thundurus', playerKey = 'p1' -> /\|p1[a-z]?:\s?Thundurus/i
-  const identRegex = new RegExp(`\\|${playerKey}[a-z]?:\\s?${smolForme}`, 'i');
+  const identRegex = new RegExp(`\\|${playerKey}[a-z]?:\\s?${escape(smolForme)}`, 'i');
 
   // look for the turn (also conveniently the index in `chunks[]`) that the `pokemon` Terastallized into Stellar type
   const chunks = chunkStepQueueTurns(stepQueue);

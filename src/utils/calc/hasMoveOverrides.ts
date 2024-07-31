@@ -26,14 +26,18 @@ export const hasMoveOverrides = (
     return false;
   }
 
-  const defaults = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) || {};
-  const current = pokemon.moveOverrides[moveName] || {};
+  const defaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) };
+  const current = { ...pokemon.moveOverrides[moveName] };
 
   // only compare overrides that currently exist, otherwise, this will frequently return true
   // just because a particular property wasn't overwritten
-  return Object.entries(defaults).some(([key, value]) => (
+  return (Object.entries(defaults) as Entries<typeof defaults>).some(([key, value]) => (
     key in current
       && typeof current[key] === typeof value
-      && current[key] !== value
+      && (
+        Array.isArray(current[key])
+          ? (current[key] as unknown[]).some((v, i) => v !== value[i])
+          : current[key] !== value
+      )
   ));
 };

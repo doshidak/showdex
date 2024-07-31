@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import cx from 'classnames';
-import { useBattleRecord, useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
+import {
+  useBattleRecord,
+  useColorScheme,
+  useColorTheme,
+  useGlassyTerrain,
+} from '@showdex/redux/store';
 import styles from './BattleRecord.module.scss';
 
 export interface BattleRecordProps {
@@ -17,6 +22,7 @@ export const BattleRecord = ({
 }: BattleRecordProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const battleRecord = useBattleRecord();
 
@@ -30,6 +36,7 @@ export const BattleRecord = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
         className,
       )}

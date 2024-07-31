@@ -1,14 +1,15 @@
 export * from './appliedPreset';
 export * from './applyPreset';
-// export * from './cachePresets';
 export * from './detectCompletePreset';
 export * from './detectUsageAlt';
+export * from './exportMultiPokePastes';
 export * from './exportPokePaste';
+export * from './findMatchingUsage';
 export * from './flattenAlts';
-// export * from './getCachedPresets';
 export * from './getPresetFormes';
 export * from './getTeambuilderPresets';
 export * from './getTeamSheetPresets';
+export * from './guessMatchingPresets';
 export * from './guessTeambuilderPreset';
 export * from './importMultiPokePastes';
 export * from './importPokePaste';

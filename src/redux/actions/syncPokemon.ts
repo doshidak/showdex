@@ -50,7 +50,7 @@ export const syncPokemon = (
     clientPokemon,
     serverPokemon,
     autoMoves,
-  } = config || {};
+  } = { ...config };
 
   const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(format);
@@ -95,13 +95,14 @@ export const syncPokemon = (
       return;
     }
 
+    // note: `return` to not set the `value` & go next, `break` to stop processing & move onto the `value` diff check to set it
     switch (key) {
       case 'speciesForme': {
         // e.g., 'Urshifu-*' -> 'Urshifu' (to fix forme switching, which is prevented due to the wildcard forme)
         value = (value as string).replace('-*', '');
 
         // retain any switched Gmax formes if it still equals its forme in-battle with the Gmax suffix removed
-        // (e.g., syncedPokemon.speciesForme = 'Cinderace-Gmax' and value = 'Cinderace' would equal)
+        // (e.g., syncedPokemon.speciesForme = 'Cinderace-Gmax' & value = 'Cinderace' would equal)
         if (formatId(syncedPokemon.speciesForme.replace('-Gmax', '')) === formatId(value)) {
           return;
         }
@@ -110,9 +111,16 @@ export const syncPokemon = (
           return;
         }
 
-        // if the speciesForme changed, update the types and possible abilities
+        // if the speciesForme changed, update the types & possible abilities
         // (could change due to mega-evolutions or gigantamaxing, for instance)
         const updatedSpecies = dex.species.get(value);
+
+        if (updatedSpecies?.cosmeticFormes?.includes(value)) {
+          syncedPokemon.cosmeticForme = value;
+          value = updatedSpecies?.baseSpecies || value;
+
+          break;
+        }
 
         syncedPokemon.types = [
           ...(updatedSpecies?.types || syncedPokemon.types || []),
@@ -318,7 +326,7 @@ export const syncPokemon = (
         syncedPokemon.transformedMoves = transformedMoves;
 
         if (autoMoves) {
-          syncedPokemon.moves = mergeRevealedMoves(syncedPokemon);
+          syncedPokemon.moves = mergeRevealedMoves(syncedPokemon, { format });
         }
 
         break;
@@ -388,19 +396,22 @@ export const syncPokemon = (
         syncedPokemon.transformedLevel = transformedPokemon?.level || null;
 
         // check for (untransformed) forme changes
-        const formeChange = (
-          'formechange' in volatiles
-            && volatiles.formechange?.[1]
-        ) || null;
+        const formeChange = ('formechange' in volatiles && volatiles.formechange?.[1]) || null;
+        const dexForme = formeChange ? dex.species.get(formeChange) : null;
+        const cosmeticFormeChange = !!formeChange && !!dexForme?.baseSpecies && dexForme.cosmeticFormes?.includes(formeChange);
 
         if (!transformedForme && formeChange) {
           syncedPokemon.speciesForme = formeChange;
+          syncedPokemon.cosmeticForme = null;
 
-          // update the Pokemon's types to match its new forme types
-          const formeTypes = dex.species.get(formeChange)?.types;
+          if (cosmeticFormeChange) {
+            syncedPokemon.speciesForme = dexForme.baseSpecies;
+            syncedPokemon.cosmeticForme = formeChange;
+          }
 
-          if (formeTypes?.length) {
-            syncedPokemon.types = [...formeTypes];
+          // update the Pokemon's types to match its new forme's types
+          if (dexForme?.types?.length) {
+            syncedPokemon.types = [...dexForme.types];
           }
         }
 
@@ -411,6 +422,12 @@ export const syncPokemon = (
         // (i.e., Ditto's transformedForme will be Necrozma-Ultra, which is incorrect)
         if (transformedPokemon && formeChange) {
           syncedPokemon.transformedForme = formeChange;
+          syncedPokemon.transformedCosmeticForme = null;
+
+          if (cosmeticFormeChange) {
+            syncedPokemon.transformedForme = dexForme.baseSpecies;
+            syncedPokemon.transformedCosmeticForme = formeChange;
+          }
         }
 
         // check for Protosynthesis & Quark Drive boosted stats
@@ -545,7 +562,6 @@ export const syncPokemon = (
       && !syncedPokemon.transformedForme;
 
     if (shouldUpdateServerMoves) {
-      // syncedPokemon.serverMoves = [...serverMoves];
       syncedPokemon.serverMoves = replaceBehemothMoves(syncedPokemon.speciesForme, serverMoves);
     }
 
@@ -574,13 +590,15 @@ export const syncPokemon = (
     dirtyAbility,
     abilities,
     transformedAbilities,
-    // abilityToggled, // update (2022/12/09): recalculating this w/ the `field` arg below for gen 9 support
     baseStats,
     transformedBaseStats,
-  } = sanitizePokemon(
-    syncedPokemon,
-    format,
-  );
+    ...resanitizedPokemon
+  } = sanitizePokemon(syncedPokemon, format);
+
+  ({
+    cosmeticForme: syncedPokemon.cosmeticForme,
+    transformedCosmeticForme: syncedPokemon.transformedCosmeticForme,
+  } = resanitizedPokemon);
 
   // clear the dirtyTypes (only if it's populated) if sanitizePokemon() cleared them
   if (syncedPokemon.dirtyTypes.length && !dirtyTypes.length) {
@@ -639,7 +657,7 @@ export const syncPokemon = (
   if (syncedPokemon.transformedMoves?.length) {
     syncedPokemon.moves = syncedPokemon.source === 'server'
       ? [...syncedPokemon.transformedMoves]
-      : mergeRevealedMoves(syncedPokemon);
+      : mergeRevealedMoves(syncedPokemon, { format });
   }
 
   // covers the case where Iron Head was previously applied & doggo gets sent out, changing into the Crowned forme

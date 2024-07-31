@@ -12,7 +12,10 @@ export interface ShowdexSettings {
   /**
    * Language locale that Showdex should appear in.
    *
-   * @default 'en'
+   * @default
+   * ```ts
+   * 'en'
+   * ```
    * @since 1.2.1
    */
   locale: string;
@@ -20,7 +23,10 @@ export interface ShowdexSettings {
   /**
    * Current color scheme.
    *
-   * @default 'light'
+   * @default
+   * ```ts
+   * 'light'
+   * ```
    * @since 1.0.2
    */
   colorScheme: Showdown.ColorScheme;
@@ -30,10 +36,24 @@ export interface ShowdexSettings {
    *
    * * Set this to `'showdown'` (default) to use the color scheme set in Showdown.
    *
-   * @default 'showdown'
+   * @default
+   * ```
+   * 'showdown'
+   * ```
    * @since 1.0.3
    */
   forcedColorScheme: 'showdown' | Showdown.ColorScheme;
+
+  /**
+   * Optional color theme to apply on top of the color scheme.
+   *
+   * * As of v1.2.4, there exists no theming engine for Showdex, so all values are haphazardly hardcoded c:
+   *   - There are plans for such an engine in the future, so just like the many other things on the queue, stay tuned!
+   * * Falsy values will default to the `'sic'` theme, i.e., the **S**tandard **I**ssue **C**olor theme.
+   *
+   * @since 1.2.4
+   */
+  colorTheme: 'sic' | 'mina';
 
   /**
    * Tastefully blurs the background of all Showdex panels.

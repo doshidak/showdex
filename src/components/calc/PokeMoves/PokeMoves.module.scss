@@ -25,6 +25,14 @@
       0 0 1px color.alpha(colors.$black, 0.16),
       0 0 16px color.alpha(colors.$gray-dark, 0.16),
     );
+
+    &.mina {
+      background-color: color.alpha(#FFF7FA, 0.64);
+      box-shadow: (
+        0 0 1px color.alpha(#770629, 0.32),
+        0 0 16px color.alpha(#9F1641, 0.16),
+      );
+    }
   }
 
   &.dark {
@@ -33,6 +41,10 @@
       0 0 1px color.alpha(colors.$white, 0.32),
       0 0 16px color.alpha(colors.$black, 0.48),
     );
+
+    &.mina {
+      background-color: color.alpha(#100206, 0.48);
+    }
   }
 
   &.glassy {
@@ -40,10 +52,18 @@
 
     &.light {
       background-color: color.alpha(colors.$white, 0.24);
+
+      &.mina {
+        background-color: color.alpha(#FFF7FA, 0.4);
+      }
     }
 
     &.dark {
       background-color: color.alpha(colors.$black, 0.24);
+
+      &.mina {
+        background-color: color.alpha(#100206, 0.24);
+      }
     }
   }
 }
@@ -265,11 +285,14 @@ button.damageButton {
   }
 }
 
+.boldDesc {
+  font-weight: 600;
+}
+
 .editorItem {
   grid-area: span 1 / span 2;
   @include flex.row-between;
   align-self: center;
-  @include spacing.margin($right: 6px);
 
   &.editorHeader {
     @include flex.row-between;
@@ -306,7 +329,7 @@ button.damageButton {
 
 button.editorButton {
   font-size: 8px;
-  line-height: 9px;
+  // line-height: 9px;
   @include transition.apply(color, background-color, box-shadow, opacity);
 
   &.readOnly {

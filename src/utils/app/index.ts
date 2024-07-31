@@ -1,3 +1,4 @@
+export * from './bakeBakedexBundles';
 export * from './createCalcdexRoom';
 export * from './createHellodexRoom';
 export * from './createHonkdexRoom';

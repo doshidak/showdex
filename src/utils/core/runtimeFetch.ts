@@ -1,5 +1,6 @@
 import { HttpMethod } from '@showdex/consts/core';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { env } from './getEnv';
 import { getExtensionId } from './getExtensionId';
 import { safeJsonParse } from './safeJsonParse';
 
@@ -37,7 +38,7 @@ const sendFetchMessage = async <T = unknown>(
   extensionId: string,
   message: RuntimeFetchMessage,
 ): Promise<RuntimeFetchResponse<T>> => {
-  if (typeof chrome !== 'undefined') {
+  if (env('build-target') !== 'standalone' && typeof chrome !== 'undefined') {
     return new Promise<RuntimeFetchResponse<T>>((
       resolve,
       reject,

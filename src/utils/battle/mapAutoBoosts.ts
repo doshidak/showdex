@@ -1,4 +1,5 @@
 import { type AbilityName, type GenerationNum, type ItemName } from '@smogon/calc';
+import escape from 'regexp.escape';
 import { PokemonBoostNames } from '@showdex/consts/dex';
 import {
   type CalcdexAutoBoostEffect,
@@ -22,7 +23,7 @@ const boostStep = (step: string) => step?.startsWith('|-boost') || step?.startsW
 const identRegex = (
   playerKey?: CalcdexPlayerKey,
   searchName?: string,
-) => new RegExp(`(${playerKey || 'p\\d'})[a-z]?:\\s*(${searchName || ''}[\\w\\s-]*)`, 'i');
+) => new RegExp(`(${playerKey || 'p\\d'})[a-z]?:\\s*(${escape(searchName || '')}[\\w\\s-]*)`, 'i');
 
 /**
  * Creates a mapping of the `pokemon`'s applied auto-boost effects from the provided `stepQueue[]`.
@@ -170,8 +171,14 @@ export const mapAutoBoosts = (
         format,
         targetPokemon: pokemon,
         activePokemon,
+        sourceSide: players?.[sourceKey]?.side,
         field,
       });
+
+      // update (2024/07/24): saw this strangely happen once so just in case o_O
+      if (!output[sourceEffect].name) {
+        output[sourceEffect].name = sourceEffect;
+      }
 
       output[sourceEffect].dict = effectDict;
       output[sourceEffect].active = pokemon.active;

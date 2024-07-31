@@ -8,10 +8,15 @@ import {
 import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
-import { detectGenFromFormat, detectGroundedness, getDexForFormat } from '@showdex/utils/dex';
+import {
+  detectGenFromFormat,
+  detectGroundedness,
+  detectLegacyGen,
+  getDexForFormat,
+} from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
 import { type SmogonMoveOverrides } from './createSmogonMove';
-import { shouldBoostTeraStab } from './shouldBoostTeraStab';
+// import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Calculates the base power of the provided `moveName` based on conditions of the `pokemon`.
@@ -129,12 +134,18 @@ export const calcMoveBasePower = (
   }
 
   // perform the same BP math hacks that @smogon/calc does for Triple Axel & Triple Kick
+  // update (2024/07/17): as of @smogon/calc v0.10.0, there exists a new `hits` feature, which we make use of by passing
+  // our special `hitBasePowers[]` calc mod to the calculate() function, so there's no need for this really
+  /*
   if (move === 'Triple Axel' as MoveName) {
     basePower = moveHits === 2 ? 30 : moveHits === 3 ? 40 : 20;
   }
+  */
 
-  if (move === 'Triple Kick' as MoveName) {
-    basePower = moveHits === 2 ? 15 : moveHits === 3 ? 30 : 10;
+  // update (2024/07/18): ...except for Triple Kick in gen 2, where we'll continue to use the hack from before
+  // (note: calcMoveHitBasePowers() will return an empty array in this very specific instance)
+  if (move === 'Triple Kick' as MoveName && detectLegacyGen(gen)) {
+    basePower = moveHits === 2 ? 15 : moveHits === 3 ? 20 : 10;
   }
 
   if (move === 'Rage Fist' as MoveName && hitCounter > 0) {
@@ -218,9 +229,15 @@ export const calcMoveBasePower = (
     basePowerMods.push(2);
   }
 
+  // update (2024/07/28): disabling this to let the calc handle it cause it figgity fricks w/ Black Glasses
+  // (e.g., move = 'Kowtow Cleave' w/ a faintCounter = 2 -> basePower = 122 [correct], but we actually get 147 [incorrect])
+  // only caveat is the BP field in the moves editor won't live update like it did before, which was pretty much the sickest feature imo,
+  // but it's static values or incorrect calcs... hmm (also obligatory '/s' demarcation)
+  /*
   if (ability === 'Supreme Overlord' as AbilityName && faintCounter > 0) {
     basePowerMods.push(1 + (0.1 * faintCounter));
   }
+  */
 
   if (opponentPokemon?.lastMove === 'Glaive Rush' as MoveName) {
     basePowerMods.push(2);
@@ -234,9 +251,12 @@ export const calcMoveBasePower = (
   // leaving this logic here to show the boosted BP in the move's tooltip;
   // also, this mechanic comes AFTER any boosts from Rage Fist/Last Respects
   // (verified from the Showdown server source code)
+  // update (2024/07/19): disabling this per request & letting @smogon/calc handle it
+  /*
   if (shouldBoostTeraStab(format, pokemon, move, basePower)) {
     basePower = 60;
   }
+  */
 
   return basePower;
 };

@@ -81,13 +81,14 @@ export const VisibilitySettingsPane = ({
           {t('pane.sections.secondary.tooltips', 'Tooltips')}
         </div>
 
-        <Field<ShowdexCalcdexSettings, HTMLDivElement, ('ui' | 'field' | 'ability' | 'item' | 'move' | 'matchup')[]>
+        <Field<ShowdexCalcdexSettings, HTMLDivElement, ('ui' | 'field' | 'preset' | 'ability' | 'item' | 'move' | 'matchup')[]>
           name="calcdex"
           component={Segmented}
           className={cx(styles.field, !inBattle && styles.singleColumn)}
           fieldStyle={inBattle ? { flexDirection: 'column' } : undefined}
           options={[
             'ui',
+            'preset',
             'ability',
             'item',
             'move',
@@ -105,7 +106,7 @@ export const VisibilitySettingsPane = ({
               />
             ),
             value: option,
-            break: option === 'matchup' && inBattle,
+            break: option === 'move' && inBattle,
           }))}
           multi
           unique
@@ -113,6 +114,7 @@ export const VisibilitySettingsPane = ({
             ...value?.calcdex,
             showUiTooltips: !!v?.includes('ui'),
             showFieldTooltips: !!v?.includes('field'),
+            showPresetTooltip: !!v?.includes('preset'),
             showAbilityTooltip: !!v?.includes('ability'),
             showItemTooltip: !!v?.includes('item'),
             showMoveTooltip: !!v?.includes('move'),
@@ -121,11 +123,12 @@ export const VisibilitySettingsPane = ({
           format={(v) => ([
             v?.showUiTooltips && 'ui',
             v?.showFieldTooltips && 'field',
+            v?.showPresetTooltip && 'preset',
             v?.showAbilityTooltip && 'ability',
             v?.showItemTooltip && 'item',
             v?.showMoveTooltip && 'move',
             v?.showMatchupTooltip && 'matchup',
-          ].filter(Boolean) as ('ui' | 'field' | 'ability' | 'item' | 'move' | 'matchup')[])}
+          ].filter(Boolean) as ('ui' | 'field' | 'preset' | 'ability' | 'item' | 'move' | 'matchup')[])}
         />
       </div>
     </div>

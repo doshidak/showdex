@@ -4,7 +4,7 @@ import { useSmogonMatchup } from '@showdex/utils/calc';
 import { upsizeArray } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
-  flattenAlts,
+  findMatchingUsage,
   selectPokemonPresets,
   sortPresetsByFormat,
   usageAltPercentFinder,
@@ -188,15 +188,18 @@ export const CalcdexPokeProvider = ({
     [format, formatLabelMap],
   );
 
+  /*
   const presets = React.useMemo(() => (playerPokemon?.speciesForme ? [
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
-    ...(format?.includes('random') ? [] : usages),
-    ...teamPresets,
-    ...boxPresets,
-    ...bundledPresets,
-    ...pokemonPresets,
-  ].sort(presetSorter) : []), [
+    ...[
+      ...(format?.includes('random') ? [] : usages),
+      ...teamPresets,
+      ...boxPresets,
+      ...bundledPresets,
+      ...pokemonPresets,
+    ].sort(presetSorter),
+  ] : []), [
     boxPresets,
     bundledPresets,
     format,
@@ -209,34 +212,75 @@ export const CalcdexPokeProvider = ({
     teamPresets,
     usages,
   ]);
+  */
 
-  const usage = React.useMemo(() => {
-    if (!usages?.length) {
-      return null;
+  const presets = React.useMemo(() => {
+    if (!playerPokemon?.speciesForme) {
+      return [];
     }
 
-    if (usages.length === 1) {
-      return usages[0];
+    const output = [...(playerPokemon?.presets || []), ...pokemonSheets];
+    const smogonPresets = [...bundledPresets, ...pokemonPresets];
+
+    if (format?.includes('random')) {
+      output.push(...smogonPresets);
+      output.sort(presetSorter);
+
+      return output;
     }
 
-    const moves = playerPokemon?.altMoves?.length
-      ? flattenAlts(playerPokemon.altMoves)
-      : playerPokemon?.moves;
+    const teambuilderPresets = [...teamPresets, ...boxPresets];
 
-    if (!moves?.length) {
-      return usages[0];
+    /**
+     * @todo these are out of order af, so you actually don't get the orderings you'd expect below; probably because of
+     * the presetSorter() -- but tbh, might be better to just rewrite the preset logic to sort in format "buckets" first,
+     * then sort the buckets themselves, i.e., don't do both at the same time cause who cares about efficiency if it
+     * doesn't even display properly LOL
+     */
+    switch (settings?.prioritizePresetSource) {
+      case 'storage': {
+        output.push(...teambuilderPresets, ...smogonPresets, ...usages);
+
+        break;
+      }
+
+      case 'usage': {
+        output.push(...usages, ...smogonPresets, ...teambuilderPresets);
+
+        break;
+      }
+
+      case 'smogon':
+      default: {
+        // for instance, you'd expect smogon -> usages -> teambuilder, but what you actually get is: usages -> teambuilder -> smogon
+        // ...actually, you get'd this for any of the prioritizePresetSource values LOL
+        output.push(...smogonPresets, ...usages, ...teambuilderPresets);
+
+        break;
+      }
     }
 
-    return usages.find((u) => {
-      const movePool = flattenAlts(u.altMoves);
+    output.sort(presetSorter);
 
-      return moves.every((move) => movePool.includes(move));
-    });
+    return output;
   }, [
-    playerPokemon?.altMoves,
-    playerPokemon?.moves,
+    boxPresets,
+    bundledPresets,
+    format,
+    playerPokemon?.presets,
+    playerPokemon?.speciesForme,
+    pokemonPresets,
+    pokemonSheets,
+    presetSorter,
+    settings?.prioritizePresetSource,
+    teamPresets,
     usages,
   ]);
+
+  const usage = React.useMemo(
+    () => findMatchingUsage(usages, playerPokemon),
+    [playerPokemon, usages],
+  );
 
   const abilityUsageFinder = React.useMemo(
     () => usageAltPercentFinder(usage?.altAbilities, true),

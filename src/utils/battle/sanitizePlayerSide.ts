@@ -44,7 +44,7 @@ export const sanitizePlayerSide = (
 
   // obtain the "active" Pokemon by using the selectionIndex to properly apply the screens in
   // gen 1 (since they're directly applied to the Pokemon as a volatile), otherwise don't bother
-  const currentPokemon = gen === 1 && playerPokemon?.length && selectionIndex > -1
+  const currentPokemon = playerPokemon?.length && selectionIndex > -1
     ? playerPokemon[selectionIndex]
     : null;
 
@@ -103,17 +103,17 @@ export const sanitizePlayerSide = (
     isSwitching: currentPokemon?.active ? 'out' : 'in',
   };
 
-  // l.debug(
-  //   'Sanitized CalcdexPlayerSide for', player?.sideid || 'p?', player?.name || '???',
-  //   '\n', 'gen', gen, 'activeIndices', activeIndices, 'selectionIndex', selectionIndex,
-  //   '\n', 'player', player,
-  //   '\n', 'sideConditionNames', sideConditionNames,
-  //   ...(gen === 1 ? [
-  //     '\n', 'currentPokemon', currentPokemon,
-  //     '\n', 'volatileNames', volatileNames,
-  //   ] : []),
-  //   '\n', 'output', output,
-  // );
+  /*
+  l.debug(
+    'Sanitized CalcdexPlayerSide for', player?.sideid || 'p?', player?.name || '???',
+    '\n', 'gen', gen, 'selectionIndex', selectionIndex,
+    '\n', 'player', player,
+    '\n', 'sideConditionNames', sideConditionNames,
+    '\n', 'currentPokemon', currentPokemon,
+    '\n', 'volatileNames', volatileNames,
+    '\n', 'output', output,
+  );
+  */
 
   return output;
 };

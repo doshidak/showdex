@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "pokedex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-05T11:35:50.967Z",
-    "updated": "2024-01-17T19:11:45.649Z"
+    "updated": "2024-07-30T20:51:27.093Z"
   },
 
   "abilities": {
@@ -113,6 +113,7 @@
   },
 
   "speciesAliases": {
+    "neck": "Raging Bolt",
     "steveneel": "Eelektross",
     "ttar": "Tyranitar",
     "ttarmega": "Tyranitar-Mega"
@@ -158,6 +159,7 @@
     "caplc": "CAP LC",
     "capmoves": "CAP Moves",
     "current": "$t(common:labels.current)",
+    "daily": "Daily",
     "defense": "Defense",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",
@@ -166,6 +168,8 @@
     "favorites": "Favorites",
     "field": "Field",
     "formes": "Formes",
+    "gendoubles": "$t(pokedex:gens.{{gen}}.label) Doubles",
+    "gensingles": "$t(pokedex:gens.{{gen}}.label) Singles",
     "hiddenability": "Hidden Ability",
     "hiddenpower": "Hidden Power",
     "illegalresults": "Illegal",

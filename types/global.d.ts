@@ -45,6 +45,22 @@ declare const BattleTeambuilderTable: Showdown.BattleTeambuilderTable;
 declare class BattleStatGuesser extends Showdown.BattleStatGuesser {}
 declare const UserPopup: Showdown.UserPopup;
 
+// only defining these for typing the window.app & window.Dex guards in main.ts (& also for the __SHOWDEX_INIT mutex lock)
+// (also in hindsight, could've just defined it like this since we're using the DOM tsconfig lib but doesn't matter tbh)
+declare interface Window extends Window {
+  app: typeof app;
+  Config: typeof Config;
+  Dex: typeof Dex;
+  BattleAbilities: typeof BattleAbilities;
+  BattleFormats: typeof BattleFormats;
+  BattleItems: typeof BattleItems;
+  BattleMovedex: typeof BattleMovedex;
+  BattleTeambuilderTable: typeof BattleTeambuilderTable;
+  BattleStatGuesser: BattleStatGuesser;
+  UserPopup: typeof UserPopup;
+  __SHOWDEX_INIT?: string;
+}
+
 /**
  * Showdown's custom `Storage` object.
  *

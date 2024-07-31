@@ -1,11 +1,24 @@
 /**
+ * All possible Showdex asset bundle entities.
+ *
+ * * How did this come *after* `ShowdexAssetBundleEntity` you may never ask ?
+ *   - It was a string literal before!
+ *
+ * @since 1.2.4
+ */
+export const ShowdexAssetBundleEntities = [
+  'locale',
+  'presets',
+  'tiers',
+  'titles',
+] as const;
+
+/**
  * Describes what the bundled asset is.
  *
  * @since 1.2.1
  */
-export type ShowdexAssetBundleTag =
-  | 'locale'
-  | 'presets';
+export type ShowdexAssetBundleEntity = typeof ShowdexAssetBundleEntities[number];
 
 /**
  * Particular metadata about a particular loadable asset bundled with this particular build of Showdex.
@@ -18,7 +31,10 @@ export interface ShowdexAssetBundle {
    *
    * * Also should correspond to the file name.
    *
-   * @example '05fa0b37-3873-45cc-afd2-ee37cda5d48b'
+   * @example
+   * ```ts
+   * '05fa0b37-3873-45cc-afd2-ee37cda5d48b'
+   * ```
    * @since 1.2.1
    */
   id: string;
@@ -29,23 +45,32 @@ export interface ShowdexAssetBundle {
    * * Don't include the leading period.
    * * Falsy values will treat the file as extensionless.
    *
-   * @example 'json'
+   * @example
+   * ```ts
+   * 'json'
+   * ```
    * @since 1.2.1
    */
   ext?: string;
 
   /**
-   * Bundle's tag.
+   * Bundle's tag / entity / type.
    *
-   * @example 'presets'
+   * @example
+   * ```ts
+   * 'presets'
+   * ```
    * @since 1.2.1
    */
-  tag: ShowdexAssetBundleTag;
+  ntt: ShowdexAssetBundleEntity;
 
   /**
    * Bundle's human-readable name.
    *
-   * @example 'leaked secret gen10 threats'
+   * @example
+   * ```ts
+   * 'leaked secret gen10 threats'
+   * ```
    * @since 1.2.1
    */
   name: string;
@@ -53,7 +78,10 @@ export interface ShowdexAssetBundle {
   /**
    * Optional label to display in UIs (particularly settings) over the `name`.
    *
-   * @example 'CAP'
+   * @example
+   * ```ts
+   * 'CAP'
+   * ```
    * @since 1.2.1
    */
   label?: string;
@@ -61,7 +89,10 @@ export interface ShowdexAssetBundle {
   /**
    * Bundle's author.
    *
-   * @example 'Keith Choison <keith@tize.io>'
+   * @example
+   * ```ts
+   * 'Keith Choison <keith@tize.io>'
+   * ```
    * @since 1.2.1
    */
   author?: string;
@@ -69,15 +100,21 @@ export interface ShowdexAssetBundle {
   /**
    * Bundle's optional description.
    *
-   * @description 'im cap fr pls dont sue me'
+   * @example
+   * ```ts
+   * 'im cap fr pls dont sue me'
+   * ```
    * @since 1.2.1
    */
-  description?: string;
+  desc?: string;
 
   /**
    * ISO 8601 timestamp of when this bundle was first introduced.
    *
-   * @example '2024-01-04T11:27:19.228Z'
+   * @example
+   * ```ts
+   * '2024-01-04T11:27:19.228Z'
+   * ```
    * @since 1.2.1
    */
   created: string;

@@ -43,8 +43,10 @@ export const FieldCalc = ({
     operatingMode,
     battleId,
     // containerSize,
+    containerWidth,
     gen,
     format,
+    legacy,
     authPlayerKey,
     field,
   } = state;
@@ -67,8 +69,7 @@ export const FieldCalc = ({
     && (!!dirtyWeather || typeof dirtyWeather === 'string') // i.e., '' (to forcibly clear) as opposed to null
     && currentWeather !== dirtyWeather;
 
-  const showResetTerrain =
-    !!currentTerrain
+  const showResetTerrain = !!currentTerrain
       && (!!dirtyTerrain || typeof dirtyTerrain === 'string')
       && currentTerrain !== dirtyTerrain;
 
@@ -117,6 +118,7 @@ export const FieldCalc = ({
 
   const doubles = state?.gameType === 'Doubles';
   const natdexFormat = ['nationaldex', 'natdex'].some((f) => format?.includes(f));
+  const expandedFieldControls = !legacy && (settings?.expandFieldControls || operatingMode === 'standalone');
 
   const playerToggleKeys = React.useMemo(() => {
     const output: (keyof CalcdexPlayerSide | 'isGravity')[] = [
@@ -139,20 +141,20 @@ export const FieldCalc = ({
       ].filter(Boolean) as typeof output);
     }
 
-    if (operatingMode === 'standalone' || doubles) {
-      output.push('isTailwind');
-    }
+    if (expandedFieldControls) {
+      if (doubles) {
+        output.push('isTailwind');
+      }
 
-    if (operatingMode === 'standalone') {
       output.push('isGravity', 'isSeeded', 'isSR', 'spikes');
     }
 
     return output;
   }, [
     doubles,
+    expandedFieldControls,
     gen,
     natdexFormat,
-    operatingMode,
   ]);
 
   const disabled = !state[playerKey]?.pokemon?.length
@@ -247,9 +249,10 @@ export const FieldCalc = ({
     <TableGrid
       className={cx(
         styles.container,
-        (playerToggleKeys.length > 4 || doubles) && styles.doubles,
-        // containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        // containerSize === 'xs' && styles.verySmol,
+        containerWidth < 380 && styles.skinnyBoi,
+        (playerToggleKeys.length > 4 || expandedFieldControls || doubles) && styles.expanded,
         className,
       )}
       style={style}
@@ -265,18 +268,18 @@ export const FieldCalc = ({
         header
       >
         {/* p1 screens header */}
-        {authPlayerKey ? (
-          t(
-            `field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`,
-            authPlayerKey === playerKey ? 'Yours' : 'Theirs',
-          )
+        {expandedFieldControls || doubles ? (
+          <>
+            &uarr;{' '}
+            {t('field.field', 'Field')}
+          </>
+        ) : authPlayerKey ? t(
+          `field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`,
+          authPlayerKey === playerKey ? 'Yours' : 'Theirs',
         ) : (
           <>
             &uarr;{' '}
-            {t(
-              `field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`,
-              operatingMode === 'standalone' || doubles ? 'Field' : 'Screens',
-            )}
+            {t('field.screens', 'Screens')}
           </>
         )}
       </TableGridItem>
@@ -360,12 +363,18 @@ export const FieldCalc = ({
         header
       >
         {/* p2 screens header */}
-        {authPlayerKey ? (
-          t(`field.${authPlayerKey === playerKey ? 'theirs' : 'yours'}`)
+        {expandedFieldControls || doubles ? (
+          <>
+            &darr;{' '}
+            {t('field.field', 'Field')}
+          </>
+        ) : authPlayerKey ? t(
+          `field.${authPlayerKey === playerKey ? 'theirs' : 'yours'}`,
+          authPlayerKey === playerKey ? 'Theirs' : 'Yours',
         ) : (
           <>
-            {t(`field.${operatingMode === 'standalone' || doubles ? 'field' : 'screens'}`)}
-            {' '}&darr;
+            &darr;{' '}
+            {t('field.screens', 'Screens')}
           </>
         )}
       </TableGridItem>

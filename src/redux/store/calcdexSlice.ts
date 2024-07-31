@@ -196,6 +196,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         rules = {},
         turn = 0,
         active = false,
+        paused = false,
         renderMode,
         overlayVisible = false,
         containerSize = 'xs',
@@ -253,6 +254,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         rules,
         turn,
         active,
+        paused,
 
         renderMode,
         overlayVisible: renderMode === 'overlay' && overlayVisible,
@@ -345,6 +347,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gameType,
         defaultLevel,
         active,
+        paused,
         overlayVisible,
         containerSize,
         containerWidth,
@@ -395,7 +398,12 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         gameType: gameType || currentState.gameType,
         defaultLevel: defaultLevel || currentState.defaultLevel,
         // active: typeof active === 'boolean' ? active : currentState.active,
-        overlayVisible: currentState.renderMode === 'overlay' && overlayVisible,
+        paused: typeof paused === 'boolean' ? paused : currentState.paused,
+        overlayVisible: currentState.renderMode === 'overlay' && (
+          typeof overlayVisible === 'boolean'
+            ? overlayVisible
+            : currentState.overlayVisible
+        ),
         containerSize: containerSize || currentState.containerSize,
         containerWidth: containerWidth || currentState.containerWidth,
         playerKey: playerKey || currentState.playerKey,
@@ -421,7 +429,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
 
       if (nonEmptyObject(field)) {
         state[battleId].field = {
-          ...state[battleId].field,
+          ...currentState.field,
           ...field,
         };
       }
@@ -430,6 +438,11 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       // as we don't want the HellodexBattleRecord to record replays or battle re-inits
       if (currentState.active && typeof active === 'boolean' && !active) {
         state[battleId].active = active;
+      }
+
+      if (currentState.operatingMode === 'standalone') {
+        state[battleId].active = false;
+        state[battleId].paused = false;
       }
 
       endTimer('(done)');
@@ -694,17 +707,22 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         battleId: newId,
         operatingMode: 'standalone',
         renderMode: 'panel',
-        playerKey: state[battleId].authPlayerKey || 'p1',
-        opponentKey: 'p2',
+        active: false,
+        paused: false,
+        // playerKey: state[battleId].authPlayerKey || 'p1',
+        // opponentKey: 'p2',
         turn: 0,
         rules: {},
         switchPlayers: false,
         cached: null, // initially not saved until manually done so by the user
       };
 
+      // update (2024/07/23): leaving the player keys as-is within the data layer; just fixed it visually in SideControls
+      /*
       if (state[newId].playerKey === 'p2') {
         state[newId].opponentKey = 'p1';
       }
+      */
 
       // perform additional processing on the players if this was originally a battle
       if (state[battleId].operatingMode === 'battle') {
@@ -717,7 +735,10 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
               return;
             }
 
-            state[newId][destKey].pokemon.push(...state[battleId][sourceKey].pokemon);
+            state[newId][destKey].pokemon.push(...state[battleId][sourceKey].pokemon.map((p) => ({
+              ...p,
+              autoPreset: false,
+            })));
 
             state[newId][sourceKey] = {
               ...state[newId][sourceKey],
@@ -861,20 +882,26 @@ export const useCalcdexDuplicator = () => {
       return;
     }
 
+    let defaultName = (!!instance.name && t('battle.name.dupe', { name: instance.name })) || null;
+
+    if (instance.operatingMode === 'battle') {
+      // note: since we're just building the title here, there's really no need to make sure if the user specified they're
+      // a bottom type of user (in the settings), that they also need to come after the 'vs' in the title too ... right? LOL
+      const playerKey = instance.authPlayerKey || 'p1';
+      const opponentKey = playerKey === 'p1' ? 'p2' : 'p1';
+      const withTheCrew = !!(instance.p3?.name || instance.p4?.name);
+
+      defaultName = [
+        [instance[playerKey]?.name, instance[opponentKey]?.name].filter(Boolean).join(' vs '),
+        withTheCrew && t('battle.name.friends'),
+      ].filter(Boolean).join(' ');
+    }
+
     dispatch(calcdexSlice.actions.dupe({
       battleId: instance.battleId,
       newId: instance.newId,
       name: null,
-      defaultName: instance.operatingMode === 'battle'
-        ? [
-          instance.p1?.name,
-          !!instance.p1?.name && !!instance.p2?.name && 'vs',
-          instance.p2?.name,
-          !!instance.p3?.name && `& ${t('battle.name.friends')}`,
-        ].filter(Boolean).join(' ')
-        : instance.name
-          ? t('battle.name.dupe', { name: instance.name })
-          : null,
+      defaultName,
     }));
   };
 };

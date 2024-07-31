@@ -4,8 +4,7 @@ import { bull } from '@showdex/consts/core';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { getGenfulFormat } from '@showdex/utils/dex';
 import { percentage } from '@showdex/utils/humanize';
-import { detectCompletePreset, getPresetFormes } from '@showdex/utils/presets';
-// import { sortPresetGroupsByFormat } from './sortPresetGroupsByFormat';
+import { detectCompletePreset, getPresetFormes, sortPresetsByUsage } from '@showdex/utils/presets';
 
 export type CalcdexPokemonPresetOption = DropdownOption<string>;
 
@@ -14,7 +13,7 @@ const SubLabelRegex = /([^()]+)\x20+(?:\+\x20+(\w[\w\x20]*)|\((\w.*)\))$/i;
 /**
  * Builds the value for the `options` prop of the presets `Dropdown` component in `PokeInfo`.
  *
- * * As of v1.1.7, you can provide the optional `pokemon` argument to append the preset's `speciesForme`
+ * * As of v1.1.7, you can provide the ~~optional~~ `pokemon` argument to append the preset's `speciesForme`
  *   to the option's `subLabel` if it doesn't match the `speciesForme` of the provided `pokemon`.
  *   - This is useful for distinguishing presets of differing `speciesForme`'s, or even `transformedForme`'s.
  *
@@ -29,25 +28,35 @@ export const buildPresetOptions = (
     formatLabelMap?: Record<string, string>;
   },
 ): CalcdexPokemonPresetOption[] => {
+  const { usages, formatLabelMap } = { ...config };
   const options: CalcdexPokemonPresetOption[] = [];
 
   if (!format || !pokemon?.speciesForme || !presets?.length) {
     return options;
   }
 
-  const {
-    usages,
-    formatLabelMap,
-  } = config || {};
-
   const currentForme = pokemon.transformedForme || pokemon.speciesForme;
   const hasDifferentFormes = [...presets, ...(usages || [])].some((p) => p?.speciesForme !== currentForme);
+
+  // update (2024/07/30): chunking the presets[] this way to make sure ones like 'Yours' appear at the top
+  const revealingPresets: CalcdexPokemonPreset[] = [];
+  const otherPresets: CalcdexPokemonPreset[] = [];
 
   presets.forEach((preset) => {
     if (!detectCompletePreset(preset)) {
       return;
     }
 
+    (['server', 'sheet'].includes(preset.source) ? revealingPresets : otherPresets).push(preset);
+  });
+
+  if (usages?.length > 1 && otherPresets.length) {
+    otherPresets.sort(sortPresetsByUsage(usages));
+  }
+
+  const completePresets = [...revealingPresets, ...otherPresets];
+
+  completePresets.forEach((preset) => {
     const option: CalcdexPokemonPresetOption = {
       label: preset.name,
       value: preset.calcdexId,
@@ -74,13 +83,18 @@ export const buildPresetOptions = (
       }
     }
 
-    if (currentForme && hasDifferentFormes) {
-      if (option.subLabel) {
-        (option.subLabel as string) += ` ${bull} `;
-      } else {
+    const bullSubLabel = () => {
+      if (!option.subLabel) {
         option.subLabel = '';
+
+        return;
       }
 
+      (option.subLabel as string) += ` ${bull} `;
+    };
+
+    if (currentForme && hasDifferentFormes) {
+      bullSubLabel();
       (option.subLabel as string) += preset.speciesForme;
 
       if (pokemon.transformedForme) {
@@ -91,22 +105,17 @@ export const buildPresetOptions = (
     }
 
     if (preset.source === 'bundle' && preset.bundleName) {
-      if (option.subLabel) {
-        (option.subLabel as string) += ` ${bull} `;
-      } else {
-        option.subLabel = '';
-      }
-
+      bullSubLabel();
       (option.subLabel as string) += preset.bundleName;
     }
 
-    if (typeof preset.updated === 'number' && preset.updated) {
-      if (option.subLabel) {
-        (option.subLabel as string) += ` ${bull} `;
-      } else {
-        option.subLabel = '';
-      }
+    if (typeof preset.imported === 'number' && preset.imported) {
+      bullSubLabel();
+      (option.subLabel as string) += formatDate(preset.imported, 'yyyy/MM/dd KK:mm:ss a');
+    }
 
+    if (typeof preset.updated === 'number' && preset.updated) {
+      bullSubLabel();
       (option.subLabel as string) += formatDate(preset.updated, 'yyyy/MM/dd');
     }
 
@@ -125,10 +134,7 @@ export const buildPresetOptions = (
     const group = options.find((o) => o.label === label);
 
     if (!group) {
-      return void options.push({
-        label,
-        options: [option],
-      });
+      return void options.push({ label, options: [option] });
     }
 
     group.options.push(option);

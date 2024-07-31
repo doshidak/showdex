@@ -98,6 +98,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       nonce: battleNonce,
       gen,
       turn,
+      paused,
       ended,
       myPokemon,
       speciesClause,
@@ -117,11 +118,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // & therefore most be eradicated from the codebase effective immediately >:(
     // const battleState: CalcdexBattleState = structuredClone(state[battleId]);
     const battleState = cloneBattleState(state[battleId]);
-
-    // l.debug(
-    //   '\n', 'pre-copied battleState', state[battleId],
-    //   '\n', 'deep-copied battleState', battleState,
-    // );
 
     if (battleState.battleNonce && battleState.battleNonce === battleNonce) {
       if (__DEV__) {
@@ -149,6 +145,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // as to avoid updating the HellodexBattleRecord from replays and battle re-inits)
     if (battleState.active && typeof ended === 'boolean' && ended) {
       battleState.active = !ended;
+    }
+
+    if (typeof paused === 'boolean' || typeof ended === 'boolean') {
+      battleState.paused = paused || ended;
     }
 
     // check if the user hit the replay button
@@ -231,15 +231,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       battleState.field = syncedField;
     }
 
-    // determine if we should include Teambuilder presets
-    // (should be already pre-converted in the teamdexSlice)
-    // const teambuilderPresets = (
-    //   !!settings?.includeTeambuilder
-    //     && settings.includeTeambuilder !== 'never'
-    //     && !battleState.format.includes('random')
-    //     && rootState?.teamdex?.presets?.filter((p) => p?.gen === battleState.gen)
-    // ) || [];
-
     // determine if we should look for team sheets
     const sheetStepQueues = (
       !!settings?.autoImportTeamSheets
@@ -251,9 +242,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         ))
     ) || [];
 
-    const sheetsNonce = sheetStepQueues.length
-      ? calcCalcdexId(sheetStepQueues.join(';'))
-      : null;
+    const sheetsNonce = (!!sheetStepQueues.length && calcCalcdexId(sheetStepQueues.join(';'))) || null;
 
     // l.debug(
     //   '\n', 'sheetsNonce', sheetsNonce,
@@ -391,9 +380,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       // determine if `myPokemon` belongs to the current player
-      const isMyPokemonSide = !!battleState.playerKey
-        && playerKey === battleState.playerKey;
-
+      const isMyPokemonSide = !!battleState.playerKey && playerKey === battleState.playerKey;
       const hasMyPokemon = !!myPokemon?.length;
 
       // if we're in an active battle and the logged-in user is also a player,
@@ -647,23 +634,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // but the teambuilderPresets & serverStats guessing routines have been moved to useAutoPresets()
         const syncedPokemon = syncPokemon(basePokemon, {
           format: battleState.format,
-          // gameType: battleState.gameType,
           clientPokemon,
           serverPokemon,
           weather: syncedField.weather,
           terrain: syncedField.terrain,
-          // state: battleState,
-          // teambuilderPresets,
-
           autoMoves: (!isMyPokemonSide || !hasMyPokemon)
             // update (2023/02/03): defaultAutoMoves.auth is always false since we'd normally have myPokemon,
             // but in cases of old replays, myPokemon won't be available, so we'd want to respect the user's setting
             // using the playerKey instead of 'auth'
             && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey && hasMyPokemon ? 'auth' : playerKey],
-
-          // for Randoms, if downloads are enabled, we'll want to wait for the React.useEffect() hook that auto-applies
-          // the preset to look for the matching role preset from the serverMoves[] & serverStats
-          // disableGuessing: battleState.format.includes('random') && settings?.downloadRandomsPresets,
         });
 
         // update (2023/10/18): not really using `slot` at all, so yolo ?
@@ -673,63 +652,6 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         if (!syncedPokemon.playerKey || syncedPokemon.playerKey !== playerKey) {
           syncedPokemon.playerKey = playerKey;
         }
-
-        // attach Teambuilder presets for the specific Pokemon, if available
-        // (this should only happen once per battle)
-        /*
-        const shouldAddTeambuilder = !!teambuilderPresets.length
-          && !syncedPokemon.presets.some((p) => ['storage', 'storage-box'].includes(p.source));
-
-        if (shouldAddTeambuilder) {
-          // const matchedPresets = teambuilderPresets.filter((p) => (
-          //   formes.includes(p.speciesForme) && (
-          //     settings.includeTeambuilder === 'always'
-          //       || (settings.includeTeambuilder === 'teams' && p.source === 'storage')
-          //       || (settings.includeTeambuilder === 'boxes' && p.source === 'storage-box')
-          //       || syncedPokemon.presetId === p.calcdexId
-          //   )
-          // ));
-
-          // update: (2023/11/15): since the guessing is now done in useCalcdexPresets(), we can't include guessed
-          // matches from omitted Teambuilder presets (depending on the user's setting) as the guessing happens *after*
-          // the Teambuilder presets are added !! (in other words, oh well rip)
-          const matchedPresets = [
-            ...(settings.includeTeambuilder !== 'boxes' ? selectPokemonPresets(
-              teambuilderPresets,
-              syncedPokemon,
-              {
-                format: battleState.format,
-                source: 'storage',
-                // ignoreSource: true,
-                // include the matched Teambuilder team if includeTeambuilder is 'boxes'
-                // filter: (p) => (
-                //   settings.includeTeambuilder !== 'boxes'
-                //     || p.calcdexId === syncedPokemon.presetId
-                // ),
-              },
-            ) : []),
-
-            ...(settings.includeTeambuilder !== 'teams' ? selectPokemonPresets(
-              teambuilderPresets,
-              syncedPokemon,
-              {
-                format: battleState.format,
-                source: 'storage-box',
-                // ignoreSource: true,
-                // include the matched Teambuilder box if includeTeambuilder is 'teams'
-                // filter: (p) => (
-                //   settings.includeTeambuilder !== 'teams'
-                //     || p.calcdexId === syncedPokemon.presetId
-                // ),
-              },
-            ) : []),
-          ];
-
-          if (matchedPresets.length) {
-            syncedPokemon.presets.push(...matchedPresets);
-          }
-        }
-        */
 
         // if the Pokemon is transformed, see which one it's transformed as
         if (syncedPokemon.transformedForme && clientPokemon?.volatiles?.transform?.length) {
@@ -759,17 +681,11 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
             );
 
             if (syncedPokemon.ability) {
-              // targetPokemonState.ability = syncedPokemon.ability;
               mutations.ability = syncedPokemon.ability;
             }
 
             if (syncedPokemon.transformedMoves.length) {
-              // targetPokemonState.revealedMoves = [...syncedPokemon.transformedMoves];
               mutations.revealedMoves = [...syncedPokemon.transformedMoves];
-
-              // if (!targetPokemonState.moves?.length) {
-              //   targetPokemonState.moves = [...syncedPokemon.transformedMoves];
-              // }
             }
           }
 

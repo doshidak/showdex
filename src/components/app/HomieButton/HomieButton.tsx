@@ -8,11 +8,12 @@ import {
 } from 'date-fns';
 import { Button, Tooltip } from '@showdex/components/ui';
 import { type ShowdexSupporterTierMember, type ShowdexSupporterTierTerm } from '@showdex/interfaces/app';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useShowdexBundles } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
-import { env, formatId } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 import { openUserPopup } from '@showdex/utils/host';
 import { pluralize } from '@showdex/utils/humanize';
+import { determineColorScheme } from '@showdex/utils/ui';
 import { MemberIcon } from '../MemberIcon';
 import styles from './HomieButton.module.scss';
 
@@ -23,10 +24,8 @@ export interface HomieButtonProps {
   homie: ShowdexSupporterTierMember;
   term?: ShowdexSupporterTierTerm;
   showTitles?: boolean;
+  updated?: number;
 }
-
-const buildDateMs = parseInt(env('build-date'), 16) || null;
-const buildDate = isValid(buildDateMs) ? new Date(buildDateMs) : null;
 
 export const HomieButton = ({
   className,
@@ -35,24 +34,26 @@ export const HomieButton = ({
   homie,
   term = 'once',
   showTitles,
+  updated,
 }: HomieButtonProps): JSX.Element => {
   const colorSchemeFromStore = useColorScheme();
   const colorScheme = colorSchemeFromProps || colorSchemeFromStore;
-  const tooltipColorScheme: Showdown.ColorScheme = colorScheme === 'light' ? 'dark' : 'light';
+  const tooltipColorScheme = determineColorScheme(colorScheme, true);
 
-  const {
-    name,
-    showdownUser,
-    periods,
-  } = homie || {};
+  const bundles = useShowdexBundles();
+  const { name, showdownUser, periods } = { ...homie };
 
-  const userTitle = findPlayerTitle(name, showdownUser);
+  const userTitle = React.useMemo(
+    () => findPlayerTitle(name, { showdownUser, titles: bundles.titles, tiers: bundles.tiers }),
+    [bundles.titles, bundles.tiers, name, showdownUser],
+  );
+
   const userLabelColor = userTitle?.color?.[colorScheme];
   const userTooltipLabelColor = userTitle?.color?.[tooltipColorScheme];
 
   const periodsCount = periods?.length || 0;
-  const validPeriods = periods?.filter?.((p) => !!p?.[0] && isValid(new Date(p[0])));
-  const active = term === 'once' || validPeriods?.some((p) => !p[1]);
+  const validPeriods = React.useMemo(() => (periods || []).filter?.((p) => !!p?.[0] && isValid(new Date(p[0]))), [periods]);
+  const active = React.useMemo(() => term === 'once' || validPeriods.some((p) => !p[1]), [term, validPeriods]);
 
   const nameStyle: React.CSSProperties = {
     ...(showTitles && userLabelColor ? {
@@ -68,14 +69,9 @@ export const HomieButton = ({
 
       {/*
         (showTitles && showdownUser && !!userTitle?.icon) &&
-        <Svg
+        <MemberIcon
           className={styles.usernameIcon}
-          style={userIconColor ? {
-            color: userTitle.iconColorGlow ? '#FFFFFF' : userIconColor,
-            boxShadow: userTitle.iconColorGlow ? `0 0 3px ${userIconColor}` : undefined,
-          } : undefined}
-          description={userTitle.iconDescription}
-          src={getResourceUrl(`${userTitle.icon}.svg`)}
+          member={homie}
         />
       */}
 
@@ -97,12 +93,6 @@ export const HomieButton = ({
           {
             (userTitle?.custom && !!userTitle?.icon) &&
             <>
-              {/* <Svg
-                className={styles.customTitleIcon}
-                style={{ color: userTitle.iconColorGlow ? '#FFFFFF' : (userTooltipIconColor || userTooltipLabelColor) }}
-                description={userTitle.iconDescription}
-                src={getResourceUrl(`${userTitle.icon}.svg`)}
-              /> */}
               <MemberIcon
                 className={styles.customTitleIcon}
                 member={homie}
@@ -159,7 +149,7 @@ export const HomieButton = ({
 
                   const periodDuration = intervalToDuration({
                     start: new Date(startDate),
-                    end: new Date(endDate || buildDate),
+                    end: new Date(endDate || updated),
                   });
 
                   Object.keys(prev).forEach((unit) => {
@@ -197,18 +187,6 @@ export const HomieButton = ({
                   duration.hours = 0;
                 }
 
-                /*
-                if (duration.days > 3) {
-                  duration.weeks++;
-                  duration.days = 0;
-                }
-
-                if (duration.weeks > 2) {
-                  duration.months++;
-                  duration.weeks = 0;
-                }
-                */
-
                 if (duration.days > 15) {
                   duration.months++;
                   duration.days = 0;
@@ -220,21 +198,11 @@ export const HomieButton = ({
                   duration.months = Math.max(duration.months - 12, 0);
                 }
 
-                /*
-                const formatted = formatDistance(startDate, endDate || buildDate)
-                  .replace(/1(?=\x20)/, 'a')
-                  .replace('about', '');
-
-                if (formatted.includes('day')) {
-                  return null;
-                }
-                */
-
                 const formatted = formatDuration(duration, {
                   format: ['years', 'months'],
                   zero: false,
                   delimiter: ' & ',
-                }).replace(/1(?=\x20)/, 'a');
+                }).replace(/(?:^|\x20)1(?=\x20)/, 'a');
 
                 if (!formatted) {
                   return null;

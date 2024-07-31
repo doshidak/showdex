@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "hellodex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T19:34:00.026Z",
-    "updated": "2024-01-28T01:38:11.198Z"
+    "updated": "2024-07-25T17:14:33.391Z"
   },
 
   "contextMenu": {
@@ -100,7 +100,7 @@
 
     "paypal": {
       "name": "PayPal",
-      "description": "Tous les dons sont des contributions <em>uniques</em>, vous donnant droit aux avantages du niveau $t(patronage.patreon.name) le plus bas, à l'exclusion des avantages accordés aux contributions actives. Veuillez visiter notre $t(patronage.patreon.name) pour plus de détails sur les avantages accordés.",
+      "description": "Tous les dons sont des contributions <em>uniques</em>, vous donnant droit aux avantages du niveau $t(patronage.patreon.name) le plus bas, à l'exclusion des avantages accordés aux contributions actives. Veuillez visiter notre $t(patronage.patreon.name) pour plus de détails sur les avantages accordés. <em>Mis à jour le {{date}}.</em>",
       "action": {
         "aria": "Faites un don via $t(patronage.paypal.name)",
         "label": "<strong>Faites un don</strong> via <strong>$t(patronage.paypal.name)</strong>"
@@ -109,7 +109,7 @@
 
     "patreon": {
       "name": "Patreon",
-      "description": "Tous les niveaux $t(patronage.patreon.name) sont des dons <em>mensuels</em>, vous donnant droit à des avantages supplémentaires par rapport à ceux des dons <em>ponctuels</em>. Veuillez visiter notre $t(patronage.patreon.name) pour plus de détails. Piles non incluses.",
+      "description": "Tous les niveaux $t(patronage.patreon.name) sont des dons <em>mensuels</em>, vous donnant droit à des avantages supplémentaires par rapport à ceux des dons <em>ponctuels</em>. Veuillez visiter notre $t(patronage.patreon.name) pour plus de détails. Piles non incluses. <em>Mis à jour le {{date}}.</em>",
       "defaultAction": {
         "aria": "Devenez Patron",
         "label": "<strong>Devenez</strong> <strong>Patron</strong>"

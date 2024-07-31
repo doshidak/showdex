@@ -13,7 +13,12 @@ import { BuildInfo } from '@showdex/components/debug';
 import { PiconRackProvider, PiconRackSortableContext } from '@showdex/components/layout';
 import { ContextMenu, Scrollable, useContextMenu } from '@showdex/components/ui';
 import { type CalcdexBattleState } from '@showdex/interfaces/calc';
-import { useCalcdexDuplicator, useColorScheme, useGlassyTerrain } from '@showdex/redux/store';
+import {
+  useCalcdexDuplicator,
+  useColorScheme,
+  useColorTheme,
+  useGlassyTerrain,
+} from '@showdex/redux/store';
 import { getHonkdexRoomId } from '@showdex/utils/app';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import styles from './Honkdex.module.scss';
@@ -33,6 +38,7 @@ export const Honkdex = ({
 
   const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const { state, saving, saveHonk } = useCalcdexContext();
   const dupeCalcdex = useCalcdexDuplicator();
@@ -64,6 +70,7 @@ export const Honkdex = ({
           'showdex-module',
           styles.container,
           !!colorScheme && styles[colorScheme],
+          !!colorTheme && styles[colorTheme],
           glassyTerrain && styles.glassy,
         )}
         onContextMenu={(e) => showContextMenu({

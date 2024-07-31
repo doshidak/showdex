@@ -1,5 +1,6 @@
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { createBundlesDb } from './createBundlesDb';
 import { createHonksDb } from './createHonksDb';
 import { createMetaDb } from './createMetaDb';
 import { createPresetsDb } from './createPresetsDb';
@@ -36,6 +37,7 @@ const l = logger('@showdex/utils/storage/openIndexedDb()');
  * * In addition to being returned, the opened `IDBDatabase` object will be stored in `indexedDb`.
  * * This should be run during Showdex's initialization, such as in the `main.ts` script.
  *
+ * @todo Note to self: These need a big ass refactor; all these db's are becoming a copy & paste bonanza LOL
  * @since 1.2.0
  */
 export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
@@ -84,6 +86,7 @@ export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
       );
     }
 
+    createBundlesDb(db);
     createMetaDb(db);
     createSettingsDb(db);
     createPresetsDb(db);
@@ -107,7 +110,7 @@ export const openIndexedDb = (): Promise<IDBDatabase> => new Promise((
     updateMetaDb(showdexedDb.value);
 
     if (__DEV__) {
-      l.info(
+      l.success(
         'req.onsuccess()', 'sdb ready!',
         '\n', 'showdexedDb', '(name)', showdexedDb.value?.name, '(v)', showdexedDb.value?.version,
       );

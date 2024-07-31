@@ -1,5 +1,6 @@
 import { type AbilityName, type MoveName, Move as SmogonMove } from '@smogon/calc';
-import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { MOVES } from '@smogon/calc/dist/data/moves';
+import { type CalcdexBattleField, type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
@@ -29,7 +30,7 @@ export const createSmogonMove = (
   moveName: MoveName,
   opponentPokemon: CalcdexPokemon,
   field?: CalcdexBattleField,
-): SmogonMove => {
+): [move: SmogonMove, overrides: CalcdexMoveOverride] => {
   // using the Dex global for the gen arg of SmogonMove seems to work here lol
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
@@ -74,7 +75,17 @@ export const createSmogonMove = (
   const defaultOverrides = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field);
   const overrides: SmogonMoveOverrides = { ...determineMoveTargets(format, pokemon, moveName) };
 
+  // update (2024/07/20): need access to drain[] for result.recovery(), but the Showdown dex doesn't have it :c
+  // (tho Showdown's & Smogon's dexes both provide recoil[] in the same format: [numerator: number, denominator: number] to form the damage ratio)
+  // fortunately for us, we're already bundling all move data that comes with @smogon/calc, so why not make use of it? LOL
+  const smogonMoveData = MOVES[gen][moveName];
+
+  if (Array.isArray(smogonMoveData?.drain)) {
+    overrides.drain = [...smogonMoveData.drain];
+  }
+
   // check if the user specified any overrides for this move
+  const calcdexOverrides: CalcdexMoveOverride = { ...defaultOverrides, ...moveOverrides?.[moveName] };
   const {
     type: typeOverride,
     category: categoryOverride,
@@ -86,7 +97,7 @@ export const createSmogonMove = (
     stellar: stellarOverride,
     defensiveStat: defensiveStatOverride,
     offensiveStat: offensiveStatOverride,
-  } = moveOverrides?.[moveName] || {};
+  } = calcdexOverrides;
 
   // pretty much only used for Beat Up (which is typeless in gens 2-4)
   const forceTypeless = moveName === 'Beat Up' as MoveName && gen < 5;
@@ -128,11 +139,18 @@ export const createSmogonMove = (
     options.isCrit = criticalHitOverride;
   }
 
-  // update (2023/12/29): checking the default number of hits (if any) for cases such as Kyurem w/ Loaded Dice,
-  // which should be 4 Scale Shot hits, but since `options.hits` wasn't provided, @smogon/calc uses 3 hits
-  // (despite PokeMoves showing the value from getMoveOverrideDefaults(), which is dynamically set at 4 due to the item)
-  if (hitsOverride || defaultOverrides?.hits) {
-    options.hits = hitsOverride || defaultOverrides?.hits;
+  if (hitsOverride) {
+    options.hits = hitsOverride;
+
+    if (!Array.isArray(calcdexOverrides.hitBasePowers)) {
+      calcdexOverrides.hitBasePowers = [...(defaultOverrides.hitBasePowers || [])];
+    }
+
+    calcdexOverrides.hitBasePowers = calcdexOverrides.hitBasePowers.slice(0, clamp(0, options.hits));
+
+    if (calcdexOverrides.hitBasePowers.length) {
+      delete overrides.basePower;
+    }
   }
 
   if (defensiveStatOverride) {
@@ -192,5 +210,5 @@ export const createSmogonMove = (
     return clonedMove;
   };
 
-  return smogonMove;
+  return [smogonMove, calcdexOverrides];
 };

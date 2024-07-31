@@ -26,7 +26,8 @@
 
   "host_permissions": [
     "https://play.pokemonshowdown.com/*",
-    "https://pkmn.github.io/*"
+    "https://pkmn.github.io/*",
+    "https://bake.dex.tize.io/*"
   ],
 
   "externally_connectable": {
@@ -63,8 +64,10 @@
         "<-- auto-filled; do not edit -->"
       ],
       "resources": [
+        "3d-bold.svg",
         "9k-plus.svg",
         "bug.svg",
+        "catching-pokemon.svg",
         "clipboard-heart.svg",
         "close-circle.svg",
         "cog.svg",
@@ -86,6 +89,7 @@
         "github-face.svg",
         "info-circle.svg",
         "main.js",
+        "minarex.svg",
         "mouse.svg",
         "rabbit.svg",
         "remove-circle.svg",

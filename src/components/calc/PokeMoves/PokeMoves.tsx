@@ -20,9 +20,14 @@ import {
 } from '@showdex/components/ui';
 import { PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import { useColorScheme, useGlassyTerrain, useHonkdexSettings } from '@showdex/redux/store';
+import {
+  useColorScheme,
+  useColorTheme,
+  useGlassyTerrain,
+  useHonkdexSettings,
+} from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
-import { getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
+import { calcMoveHitBasePowers, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
   clamp,
   formatId,
@@ -75,6 +80,7 @@ export const PokeMoves = ({
 
   const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
   const randomUuid = useRandomUuid();
   const copiedRefs = React.useRef<BadgeInstance[]>([]);
@@ -252,13 +258,17 @@ export const PokeMoves = ({
     })();
   };
 
+  const recoveryColor = settings?.nhkoColors?.[0];
+  const recoilColor = settings?.nhkoColors?.slice(-1)[0];
+
   return (
     <TableGrid
       className={cx(
         styles.container,
-        containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        !!colorTheme && styles[colorTheme],
         glassyTerrain && styles.glassy,
+        containerSize === 'xs' && styles.verySmol,
         className,
       )}
       style={style}
@@ -563,21 +573,16 @@ export const PokeMoves = ({
 
       {/* (actual) moves */}
       {Array(matchups.length).fill(null).map((_, i) => {
-        // const moveName = pokemon?.moves?.[i];
-        // const move = moveName ? dex?.moves.get(moveName) : null;
-        // const maxPp = move?.noPPBoosts ? (move?.pp || 0) : Math.floor((move?.pp || 0) * (8 / 5));
-        // const remainingPp = Math.max(maxPp - (ppUsed || maxPp), 0);
-
         const {
+          attacker,
           defender,
           move: calcMove,
           description,
           damageRange,
           koChance,
           koColor,
-        } = matchups[i] || {};
+        } = { ...matchups[i] };
 
-        // const moveName = calcMove?.name;
         const moveName = pokemon?.moves?.[i] || calcMove?.name;
         const moveToggled = detectToggledMove(pokemon, moveName);
 
@@ -585,6 +590,7 @@ export const PokeMoves = ({
         // (could make it not return null, but too lazy atm lol)
         const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) };
         const moveOverrides = { ...moveDefaults, ...pokemon?.moveOverrides?.[moveName] };
+        const hitBasePowers = moveDefaults.hits > 1 ? calcMoveHitBasePowers(format, moveName, moveOverrides) : [];
         const damagingMove = ['Physical', 'Special'].includes(moveOverrides.category);
 
         const hasOverrides = pokemon?.showMoveOverrides
@@ -605,7 +611,8 @@ export const PokeMoves = ({
           && !!moveDefaults.hits
           && !!moveDefaults.minHits
           && !!moveDefaults.maxHits;
-          // && (moveDefaults.hits !== moveDefaults.minHits || moveDefaults.hits !== moveDefaults.maxHits);
+
+        const showHitBpFields = showHitsField && !!hitBasePowers.length;
 
         const basePowerKey: keyof CalcdexMoveOverride = (pokemon?.useZ && 'zBasePower')
           || (pokemon?.useMax && 'maxBasePower')
@@ -627,38 +634,100 @@ export const PokeMoves = ({
           && settings?.showMatchupTooltip
           && !!description?.raw;
 
-        const matchupTooltip = showMatchupTooltip ? (
+        const attackerDescParts = showMatchupTooltip && settings?.prettifyMatchupDescription
+          ? description?.attacker && attacker?.species?.name
+            ? description.attacker.split(attacker.species.name)
+            : [description?.attacker].filter(Boolean)
+          : null;
+
+        const defenderDescParts = showMatchupTooltip && settings?.prettifyMatchupDescription
+          ? description?.defender && defender?.species?.name
+            // note: extra space is to have length 2 if it ends with the defender species ... LOL
+            ? `${description.defender} `.split(defender.species.name)
+            : [description?.defender].filter(Boolean)
+          : null;
+
+        const matchupTooltip = description?.failureKey ? (
           <div className={styles.descTooltip}>
-            {settings?.prettifyMatchupDescription ? (
+            {t(`poke.moves.failureReasons.${description.failureKey}`)}
+          </div>
+        ) : showMatchupTooltip ? (
+          <div className={styles.descTooltip}>
+            {settings?.prettifyMatchupDescription && attackerDescParts?.[0] ? (
               <>
-                {description?.attacker}
+                {attackerDescParts[0].trim()}
                 {
-                  !!description?.defender &&
+                  !!attackerDescParts[1] &&
                   <>
+                    <span className={styles.boldDesc}>
+                      {' '}{attacker.species.name}{' '}
+                    </span>
+                    {attackerDescParts[1].trim()}
+                  </>
+                }
+
+                {
+                  !!description.recoil &&
+                  <>
+                    <br />
+                    <span style={recoilColor ? { color: recoilColor } : undefined}>
+                      {description.recoil}
+                    </span>
+                  </>
+                }
+
+                {
+                  !!description.recovery &&
+                  <>
+                    <br />
+                    <span style={recoveryColor ? { color: recoveryColor } : undefined}>
+                      {description.recovery}
+                    </span>
+                  </>
+                }
+
+                {
+                  !!defenderDescParts?.[0] &&
+                  <>
+                    <br />vs<br />
+                    {defenderDescParts[0].trim()}
                     {
-                      !!description.attacker &&
+                      !!defenderDescParts[1] &&
                       <>
-                        <br />
-                        vs
-                        <br />
+                        <span className={styles.boldDesc}>
+                          {' '}{defender.species.name}
+                          {!!defenderDescParts[1].trim() && ' '}
+                        </span>
+                        {defenderDescParts[1].trim()}
                       </>
                     }
-                    {description.defender}
                   </>
                 }
-                {(!!description?.damageRange || !!description?.koChance) && ':'}
+
+                {!!description.damageRange && <>:<br />{description.damageRange}</>}
+
                 {
-                  !!description?.damageRange &&
+                  !!description.koChance &&
                   <>
                     <br />
-                    {description.damageRange}
-                  </>
-                }
-                {
-                  !!description?.koChance &&
-                  <>
-                    <br />
-                    {description.koChance}
+                    {description.koChance.includes('HKO') ? (
+                      <>
+                        <span
+                          className={styles.boldDesc}
+                          style={koColor ? { color: koColor } : undefined}
+                        >
+                          {description.koChance.slice(0, description.koChance.indexOf('HKO') + 3).trim()}
+                        </span>
+
+                        {
+                          !description.koChance.endsWith('HKO') &&
+                          <>
+                            <br />
+                            <span>{description.koChance.slice(description.koChance.indexOf('HKO') + 3).trim()}</span>
+                          </>
+                        }
+                      </>
+                    ) : description.koChance}
                   </>
                 }
               </>
@@ -682,12 +751,11 @@ export const PokeMoves = ({
         // checking if a damaging move has non-0 BP (would be 'N/A' for status moves)
         // e.g., move dex reports 0 BP for Mirror Coat, a Special move ('IMMUNE' wouldn't be correct here)
         const parsedDamageRange = moveName
-          ? damageRange
-            || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???')
+          ? damageRange || (moveOverrides[basePowerKey] || fallbackBasePower ? 'IMMUNE' : '???')
           : null;
 
-        const hasDamageRange = !!parsedDamageRange
-          && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange);
+        const hasDamageRange = !!description?.failureKey
+          || (!!parsedDamageRange && !['IMMUNE', 'N/A', '???'].includes(parsedDamageRange));
 
         return (
           <React.Fragment key={`${l.scope}:${pokemonKey}:MoveRow:Moves:${i}`}>
@@ -753,7 +821,7 @@ export const PokeMoves = ({
                     PokemonToggleMoves.includes(moveName) &&
                     <ToggleButton
                       className={styles.editorButton}
-                      label={t('poke.moves.editor.active.label')}
+                      label={t('poke.moves.editor.active.label', 'Active')}
                       tooltip={(
                         <Trans
                           t={t}
@@ -774,7 +842,7 @@ export const PokeMoves = ({
                     showStellarToggle &&
                     <ToggleButton
                       className={styles.editorButton}
-                      label={t('poke.moves.editor.stellar.label')}
+                      label={t('poke.moves.editor.stellar.label', 'Stellar')}
                       tooltip={(
                         <Trans
                           t={t}
@@ -830,54 +898,98 @@ export const PokeMoves = ({
                       />
 
                       <div className={styles.propertyName}>
-                        {t('poke.moves.editor.hits.label', { count: moveOverrides.hits })}
+                        {t('poke.moves.editor.hits.label', { count: moveOverrides.hits, defaultValue: 'Hits' })}
                       </div>
                     </div>
                   }
 
-                  {
-                    damagingMove &&
-                    <div className={styles.moveProperty}>
-                      <ValueField
-                        className={styles.valueField}
-                        label={t('poke.moves.editor.bp.aria', {
-                          move: moveName,
-                          pokemon: friendlyPokemonName,
-                        }) as React.ReactNode}
-                        hideLabel
-                        hint={moveOverrides[basePowerKey]?.toString() || 0}
-                        fallbackValue={fallbackBasePower}
-                        min={0}
-                        max={999} // hmm...
-                        step={1}
-                        shiftStep={10}
-                        clearOnFocus
-                        absoluteHover
-                        input={{
-                          name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:BasePower`,
-                          value: moveOverrides[basePowerKey],
-                          onChange: (value: number) => updatePokemon({
-                            moveOverrides: {
-                              [moveName]: { [basePowerKey]: clamp(0, value, 999) },
-                            },
-                          }, `${l.scope}:ValueField~BasePower:input.onChange()`),
-                        }}
-                      />
+                  <div className={styles.moveProperty}>
+                    {damagingMove ? showHitBpFields ? (
+                      <>
+                        {hitBasePowers.map((defaultHitBp, j) => (
+                          <ValueField
+                            key={`${l.scope}:${pokemonKey}:MoveRow:Moves:${i}:HitBasePowers:${j}`}
+                            className={styles.valueField}
+                            label={t('poke.moves.editor.bp.hitAria', {
+                              move: moveName,
+                              hit: j + 1,
+                              hits: moveOverrides.hits,
+                              pokemon: friendlyPokemonName,
+                            }) as React.ReactNode}
+                            hideLabel
+                            hint={(moveOverrides.hitBasePowers[j] ?? defaultHitBp ?? fallbackBasePower).toString()}
+                            fallbackValue={defaultHitBp ?? fallbackBasePower}
+                            min={0}
+                            max={999}
+                            step={1}
+                            shiftStep={10}
+                            clearOnFocus
+                            absoluteHover
+                            input={{
+                              name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:HitBasePowers:${j}`,
+                              value: moveOverrides.hitBasePowers[j] ?? defaultHitBp,
+                              onChange: (value: number) => updatePokemon({
+                                moveOverrides: {
+                                  [moveName]: {
+                                    hitBasePowers: Array.from({ length: moveOverrides.hits }, (_k, k) => (
+                                      k === j
+                                        ? clamp(0, value, 999)
+                                        : (moveOverrides.hitBasePowers[k] ?? defaultHitBp ?? fallbackBasePower)
+                                    )),
+                                  },
+                                },
+                              }, `${l.scope}:ValueField~HitBasePowers[${j}]:input.onChange()`),
+                            }}
+                          />
+                        ))}
 
-                      <div className={styles.propertyName}>
-                        {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2')} `}
-                        {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2')} `}
-                        {t('poke.moves.editor.bp.label')}
-                      </div>
-                    </div>
-                  }
+                        <div className={styles.propertyName}>
+                          {t('poke.moves.editor.bp.label', 'BP')}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <ValueField
+                          className={styles.valueField}
+                          label={t('poke.moves.editor.bp.aria', {
+                            move: moveName,
+                            pokemon: friendlyPokemonName,
+                          }) as React.ReactNode}
+                          hideLabel
+                          hint={moveOverrides[basePowerKey]?.toString() || 0}
+                          fallbackValue={fallbackBasePower}
+                          min={0}
+                          max={999} // hmm...
+                          step={1}
+                          shiftStep={10}
+                          clearOnFocus
+                          absoluteHover
+                          input={{
+                            name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:BasePower`,
+                            value: moveOverrides[basePowerKey],
+                            onChange: (value: number) => updatePokemon({
+                              moveOverrides: {
+                                [moveName]: { [basePowerKey]: clamp(0, value, 999) },
+                              },
+                            }, `${l.scope}:ValueField~BasePower:input.onChange()`),
+                          }}
+                        />
+
+                        <div className={styles.propertyName}>
+                          {pokemon?.useZ && !pokemon?.useMax && `${t('pokedex:ultimates.z.2', 'Z')} `}
+                          {pokemon?.useMax && `${t('pokedex:ultimates.dmax.2', 'Max')} `}
+                          {t('poke.moves.editor.bp.label', 'BP')}
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className={styles.editorRight}>
                   <ToggleButton
                     className={styles.editorButton}
                     style={hasOverrides ? undefined : { opacity: 0 }}
-                    label={t('poke.moves.editor.resetLabel')}
+                    label={t('poke.moves.editor.resetLabel', 'Reset')}
                     tooltip={(
                       <Trans
                         t={t}
@@ -899,6 +1011,30 @@ export const PokeMoves = ({
                   />
                 </div>
               </TableGridItem>
+            ) : settings?.enableQuickEditor && PokemonToggleMoves.includes(moveName) && !hasDamageRange ? (
+              <>
+                <TableGridItem className={styles.quickEditor}>
+                  <ToggleButton
+                    className={styles.editorButton}
+                    label={t('poke.moves.editor.active.label', 'Active')}
+                    tooltip={(
+                      <Trans
+                        t={t}
+                        i18nKey={`poke.moves.editor.active.${moveToggled ? '' : 'in'}activeTooltip`}
+                        parent="div"
+                        className={styles.descTooltip}
+                        shouldUnescape
+                        values={{ move: moveName }}
+                      />
+                    )}
+                    tooltipDisabled={!settings?.showUiTooltips}
+                    active={moveToggled}
+                    onPress={() => handleMoveToggle(moveName)}
+                  />
+                </TableGridItem>
+
+                <TableGridItem />
+              </>
             ) : (
               <>
                 <TableGridItem className={styles.quickEditor}>
@@ -945,7 +1081,7 @@ export const PokeMoves = ({
                   {/* [XXX.X% &ndash;] XXX.X% */}
                   {/* (note: '0 - 0%' damageRange will be reported as 'N/A') */}
                   {opponentPokemon?.speciesForme && (settings?.showNonDamageRanges || hasDamageRange) ? (
-                    settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
+                    !description?.failureKey && hasDamageRange && settings?.showMatchupTooltip && settings.copyMatchupDescription ? (
                       <Button
                         className={cx(
                           styles.damageButton,
@@ -972,7 +1108,7 @@ export const PokeMoves = ({
                         <Badge
                           ref={(ref) => { copiedRefs.current[i] = ref; }}
                           className={styles.copiedBadge}
-                          label={t('poke.moves.copiedBadge')}
+                          label={t('poke.moves.copiedBadge', 'Copied!')}
                           color="green"
                         />
                       </Button>
@@ -989,12 +1125,13 @@ export const PokeMoves = ({
                           className={cx(
                             styles.damageButtonLabel,
                             styles.noCopy,
-                            !hasDamageRange && styles.noDamage,
+                            (!hasDamageRange || !!description?.failureKey) && styles.noDamage,
                           )}
                         >
                           {(
-                            (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune'))
-                              || (parsedDamageRange === 'N/A' && t('poke.moves.na'))
+                            (!!description?.failureKey && t('poke.moves.failure', 'FAILURE'))
+                              || (parsedDamageRange === 'IMMUNE' && t('poke.moves.immune', 'IMMUNE'))
+                              || (parsedDamageRange === 'N/A' && t('poke.moves.na', 'N/A'))
                               || parsedDamageRange
                           )}
                         </div>

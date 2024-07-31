@@ -59,6 +59,7 @@ export const PlayerCalc = ({
     containerWidth,
     format,
     gameType,
+    authPlayerKey,
   } = state;
 
   const minPokemonKey = (operatingMode === 'battle' && 'calcdex-player-min-pokemon')
@@ -123,7 +124,7 @@ export const PlayerCalc = ({
         key={`PlayerCalc:PlayerPiconButton:${playerKey}:${pid}`}
         // ref={sortable?.setActivatorNodeRef}
         player={state?.[pkey]}
-        pokemon={partyIndex}
+        pokemon={party[partyIndex]}
         operatingMode={operatingMode}
         format={format}
         showNickname={settings?.showNicknames}
@@ -163,11 +164,11 @@ export const PlayerCalc = ({
       className={cx(
         styles.container,
         !!colorScheme && styles[colorScheme],
+        containerWidth < 380 && styles.skinnyBoi,
         containerSize === 'xs' && styles.verySmol,
         ['xs', 'sm'].includes(containerSize) && styles.smol,
         ['md', 'lg', 'xl'].includes(containerSize) && styles.big,
         (containerSize === 'xl' || containerWidth > 990) && styles.veryThicc,
-        containerWidth < 360 && styles.skinnyBoi,
         (mobile && renderMode === 'overlay') && styles.mobileOverlay,
         operatingMode === 'standalone' && styles.standalone,
         className,
@@ -175,7 +176,7 @@ export const PlayerCalc = ({
       style={style}
     >
       <div className={styles.playerBar}>
-        {
+        {/* {
           operatingMode === 'battle' &&
           <PlayerInfo
             className={styles.playerInfo}
@@ -192,8 +193,26 @@ export const PlayerCalc = ({
           <SideControls
             className={styles.sideControls}
             playerKey={playerKey}
+            topPlayerKey={settings?.authPosition === 'top' && authPlayerKey ? authPlayerKey : 'p1'}
           />
-        }
+        } */}
+
+        {operatingMode === 'standalone' ? (
+          <SideControls
+            className={styles.sideControls}
+            playerKey={playerKey}
+            topPlayerKey={settings?.authPosition === 'top' && authPlayerKey ? authPlayerKey : 'p1'}
+          />
+        ) : (
+          <PlayerInfo
+            className={styles.playerInfo}
+            position={position}
+            playerKey={playerKey}
+            defaultName={defaultName}
+            playerOptions={playerOptions}
+            mobile={mobile}
+          />
+        )}
 
         <DroppableGrid
           containerClassName={styles.teamList}
@@ -230,17 +249,6 @@ export const PlayerCalc = ({
         id={piconMenuId}
         itemKeyPrefix="PlayerCalc:Picon:ContextMenu"
         items={[
-          // {
-          //   key: 'select-pokemon',
-          //   entity: 'item',
-          //   props: {
-          //     label: 'Select',
-          //     icon: 'fa-mouse-pointer',
-          //     hidden: contextPokemon?.calcdexId === playerParty?.[playerIndex]?.calcdexId,
-          //     disabled: typeof contextPokemonIndex !== 'number',
-          //     onPress: hideAfter(() => selectPokemon(playerKey, contextPokemonIndex)),
-          //   },
-          // },
           {
             key: 'active-pokemon',
             entity: 'item',
@@ -323,7 +331,6 @@ export const PlayerCalc = ({
             props: {
               theme: 'error',
               label: t('player.party.contextMenu.removePokemon', 'Delete'),
-              // icon: 'fa-times-circle',
               icon: 'trash-close',
               iconStyle: { transform: 'scale(1.2)' },
               disabled: !contextPokemon?.calcdexId,

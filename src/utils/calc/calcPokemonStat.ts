@@ -61,12 +61,18 @@ export const calcPokemonStat = (
       return base;
     }
 
+    /*
     return supportsAvs
       ? tr(tr(2 * base + actualIv + 100) * (actualLevel / 100) + 10) + actualEv
       : tr(tr(2 * base + actualIv + tr(actualEv / 4) + 100) * (actualLevel / 100) + 10);
+    */
+    return supportsAvs
+      ? tr((2 * base + actualIv + 100) * (actualLevel / 100) + 10) + actualEv
+      : tr(((2 * base + actualIv + tr(actualEv / 4)) * actualLevel) / 100) + actualLevel + 10;
   }
 
-  const value = tr(tr(2 * base + actualIv + tr(actualEv / 4)) * (actualLevel / 100) + 5);
+  // const value = tr(tr(2 * base + actualIv + tr(actualEv / 4)) * (actualLevel / 100) + 5);
+  const value = tr(((2 * base + actualIv + tr(actualEv / 4)) * actualLevel) / 100) + 5;
 
   if (!legacy && nature && nature in PokemonNatureBoosts) {
     const [

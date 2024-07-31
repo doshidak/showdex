@@ -4,6 +4,7 @@ export * from './calcCalcdexNonce';
 export * from './calcHiddenPower';
 export * from './calcMaxPokemon';
 export * from './calcMoveBasePower';
+export * from './calcMoveHitBasePowers';
 export * from './calcPokemonFinalStats';
 export * from './calcPokemonHp';
 export * from './calcPokemonSpreadStats';

@@ -268,7 +268,7 @@ button.nameButton {
 .presetContainer {
   flex: 1;
   min-width: 140px;
-  @include spacing.margin($left: 1em);
+  @include spacing.margin($left: 8px);
 
   .verySmol & {
     flex: 0.75;
@@ -300,8 +300,15 @@ button.nameButton {
   user-select: none;
 }
 
-.importButton {
+.presetHeaderAction {
+  position: relative;
+  @include flex.row-start;
+  height: 12px;
   z-index: 3;
+}
+
+button.toggleButton.exportMultiButton {
+  @include spacing.margin($left: 1px);
 }
 
 .importBadge {

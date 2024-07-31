@@ -210,15 +210,13 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
     return endTimer('(bad battle)');
   }
 
-  const {
-    calcdexInit,
-    // subscription,
-    // prevSubscription,
-    // subscriptionDirty,
-  } = battle;
-
   // don't process this battle if we've already added (or forcibly prevented) the filth
-  if (calcdexInit) {
+  if (battle.calcdexInit) {
+    // force a battle sync if we've received some data, but the active battle is just idling
+    if (battle.calcdexStateInit && battle.atQueueEnd) {
+      battle.subscription('atqueueend');
+    }
+
     return endTimer('(already filthy)');
   }
 
@@ -943,6 +941,7 @@ export const CalcdexBootstrapper: ShowdexBootstrapper = (
         battleId: battle.id || roomid,
         battleNonce: battle.nonce,
         active: false,
+        paused: true,
       }));
 
       updateBattleRecord(store, battle);

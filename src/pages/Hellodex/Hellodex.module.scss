@@ -18,11 +18,20 @@
   &.light {
     color: colors.$black;
     background-color: color.alpha(colors.$showdown-background-light, 0.8);
+
+    &.mina {
+      background-color: color.alpha(#F5DAE3, 0.72);
+    }
   }
 
   &.dark {
     color: colors.$white;
     background-color: color.alpha(colors.$gray-darkest, 0.8);
+
+    &.mina {
+      // background-color: color.alpha(#2D0D1C, 0.64);
+      background-color: color.alpha(#3A242E, 0.64);
+    }
   }
 
   &.glassy {
@@ -38,8 +47,24 @@
       background-color: color.alpha(colors.$showdown-background-light, 0.56);
     }
 
+    &.light.mina {
+      background-color: colors.$transparent;
+
+      &::before {
+        background-color: color.alpha(#F5DAE3, 0.56);
+      }
+    }
+
     &.dark::before {
       background-color: color.alpha(colors.$gray-darkest, 0.64);
+    }
+
+    &.dark.mina {
+      background-color: colors.$transparent;
+
+      &::before {
+        background-color: color.alpha(#2D0D1C, 0.72);
+      }
     }
   }
 }
@@ -52,13 +77,13 @@
   z-index: 1;
 }
 
-.verySmol .hideWhenSmol {
+.smol .hideWhenSmol {
   display: none;
 }
 
 .showdexIcon {
-  @include position.absolute-anchor($x: 50%, $y: -5em, $y-prop: bottom);
-  width: 22em;
+  @include position.absolute-anchor($x: 50%, $y: -60px, $y-prop: bottom);
+  width: 264px;
   @include transition.apply(opacity);
   pointer-events: none;
 
@@ -68,6 +93,36 @@
 
   .dark & {
     opacity: 0.84;
+  }
+}
+
+@keyframes minarex-animation {
+  0% {
+    transform: translate(-50%, 0);
+  }
+
+  100% {
+    transform: translate(-50%, 8px);
+  }
+}
+
+.minarexIcon {
+  @include position.absolute($right: -94px, $bottom: -12px, $left: unset);
+  width: 296px;
+  animation: minarex-animation 4s ease-in infinite alternate;
+  @include transition.apply(left, right, opacity);
+
+  &:not(.shady) :global(#sunglasses) {
+    display: none;
+  }
+
+  .smol & {
+    @include position.absolute($right: unset, $left: 74%);
+  }
+
+  .verySmol & {
+    @include position.absolute($left: 64%);
+    width: 248px;
   }
 }
 
@@ -126,7 +181,7 @@
   color: colors.$transparent;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  text-shadow: 0 0 15px color.alpha(colors.$black, 0.3);
+  text-shadow: 0 0 16px color.alpha(colors.$black, 0.32);
   background: linear-gradient(65deg, #4A9AC7 1%, #F148CC 99%) 0 0 / 100% 100%;
   background-clip: text;
   @include transition.apply(
@@ -141,6 +196,19 @@
     letter-spacing: 0.5em;
     background-position: 50% 0;
     background-size: 200% 100%;
+  }
+
+  .mina & {
+    background: linear-gradient(65deg, #E94489 2%, #F8C8C5 98%) 0 0 / 100% 100%;
+    background-clip: text;
+  }
+
+  .light.mina & {
+    text-shadow: 0 0 16px color.alpha(#FF3A78, 0.32);
+  }
+
+  .dark.mina & {
+    text-shadow: 0 0 16px color.alpha(#9F1641, 0.32);
   }
 }
 
@@ -164,6 +232,7 @@
 .instancesContent {
   position: relative;
   width: 100%;
+  min-height: 324px;
   height: 32vh;
   @include spacing.margin($y: 24px);
   border-radius: 16px;
@@ -202,12 +271,25 @@
     );
   }
 
+  .light.mina & {
+    background-color: color.alpha(#FFEDF3, 0.64);
+    box-shadow: (
+      0 0 1px color.alpha(#770629, 0.32),
+      0 0 16px color.alpha(#9F1641, 0.16),
+    );
+  }
+
   .dark & {
     background-color: color.alpha(colors.$black, 0.48);
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.32),
       0 0 16px color.alpha(colors.$black, 0.48),
     );
+  }
+
+  .dark.mina & {
+    // background-color: color.alpha(#2A151F, 0.64);
+    background-color: color.alpha(#734158, 0.48);
   }
 
   .glassy & {
@@ -218,8 +300,16 @@
     background-color: color.alpha(colors.$white, 0.24);
   }
 
+  .glassy.light.mina & {
+    background-color: color.alpha(#FFEDF3, 0.24);
+  }
+
   .glassy.dark & {
     background-color: color.alpha(colors.$black, 0.16);
+  }
+
+  .glassy.dark.mina & {
+    background-color: color.alpha(#734158, 0.16);
   }
 }
 
@@ -242,7 +332,7 @@
   width: 100%;
   height: 100%;
 
-  .verySmol & {
+  .smol & {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -264,7 +354,7 @@ div.newHonkButton {
   grid-area: span 1 / span 3;
   height: 20px;
 
-  .verySmol & {
+  .smol & {
     grid-area: span 1 / span 1;
   }
 }
@@ -388,7 +478,7 @@ button.spectateButton {
   @include transition.apply(background-color, border-top-color);
   z-index: 1;
 
-  .verySmol & {
+  .smol & {
     justify-content: center;
   }
 
@@ -397,9 +487,17 @@ button.spectateButton {
     border-top-color: color.alpha(colors.$white, 0.16);
   }
 
+  .light.mina & {
+    background-color: color.alpha(#FDF2F6, 0.76);
+  }
+
   .dark & {
     background-color: color.alpha(colors.$black, 0.72);
     border-top-color: color.alpha(colors.$gray-darkest, 0.16);
+  }
+
+  .dark.mina & {
+    background-color: color.alpha(#7E405D, 0.32);
   }
 
   .glassy {
@@ -410,8 +508,16 @@ button.spectateButton {
     background-color: color.alpha(colors.$white, 0.48);
   }
 
+  .glassy.light.mina & {
+    background-color: color.alpha(#FDF2F6, 0.48);
+  }
+
   .glassy.dark & {
     background-color: color.alpha(colors.$black, 0.48);
+  }
+
+  .glassy.dark.mina & {
+    background-color: color.alpha(#7E405D, 0.24);
   }
 }
 
@@ -427,7 +533,7 @@ button.spectateButton {
   &:not(:first-child):not(:last-child) {
     @include spacing.margin($right: 24px);
 
-    .verySmol & {
+    .smol & {
       @include spacing.margin($right: 16px);
     }
   }
@@ -438,7 +544,7 @@ button.spectateButton {
   height: 44px;
   @include spacing.margin($right: 32px);
 
-  .verySmol & {
+  .smol & {
     @include spacing.margin($right: 24px);
   }
 

@@ -2,7 +2,7 @@ import { type MoveName } from '@smogon/calc';
 import { type DropdownOption } from '@showdex/components/form';
 import { uarr } from '@showdex/consts/core';
 import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
-import { formatId } from '@showdex/utils/core';
+import { dedupeArray, formatId } from '@showdex/utils/core';
 import {
   detectGenFromFormat,
   getDexForFormat,
@@ -54,7 +54,7 @@ export const buildMoveOptions = (
     include,
     translate: translateFromConfig,
     translateHeader: translateHeaderFromConfig,
-  } = config || {};
+  } = { ...config };
 
   const translate = (v: MoveName) => translateFromConfig?.(v) || v;
   const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
@@ -71,6 +71,7 @@ export const buildMoveOptions = (
     source,
     speciesForme,
     transformedForme,
+    altFormes,
     moves,
     serverMoves,
     transformedMoves,
@@ -124,6 +125,7 @@ export const buildMoveOptions = (
         const maxMove = getMaxMove(name, {
           moveType: getDynamicMoveType(pokemon, name, { format, field }),
           speciesForme,
+          altFormes,
           ability,
         }) || name;
 
@@ -283,7 +285,7 @@ export const buildMoveOptions = (
       .filter((n) => !!n && /^hiddenpower[a-z]*$/i.test(formatId(n)) && !filterMoves.includes(n));
 
     // using a Set makes sure we have no duplicate entries in the array
-    const hpMoves = Array.from(new Set(unsortedHpMoves)).sort(usageSorter);
+    const hpMoves = dedupeArray(unsortedHpMoves).sort(usageSorter);
 
     options.push({
       label: translateHeader('Hidden Power'),
@@ -298,6 +300,18 @@ export const buildMoveOptions = (
       }),
     });
   }
+
+  // it's everyday bro v_v
+  options.push({
+    label: translateHeader('Daily'),
+    options: [{
+      label: translate('Struggle' as MoveName),
+      rightLabel: findUsagePercent('Struggle' as MoveName),
+      value: 'Struggle' as MoveName,
+    }],
+  });
+
+  filterMoves.push('Struggle' as MoveName);
 
   // show all possible moves if the format is not legal-locked or no learnset is available
   if (showAllMoves || !learnset.length) {

@@ -16,7 +16,10 @@ export interface CalcdexMatchupParsedDescription {
   /**
    * Original, unparsed description directly returned from `result.desc()`.
    *
-   * @example '252 Atk Weavile Knock Off (97.5 BP) vs. 252 HP / 0 Def Heatran: 144-169 (37.3 - 43.7%) -- guaranteed 2HKO after Stealth Rock and 2 layers of Spikes'
+   * @example
+   * ```ts
+   * '252 Atk Weavile Knock Off (97.5 BP) vs. 252 HP / 0 Def Heatran: 144-169 (37.3 - 43.7%) -- guaranteed 2HKO after Stealth Rock and 2 layers of Spikes'
+   * ```
    * @since 1.0.2
    */
   raw?: string;
@@ -24,7 +27,11 @@ export interface CalcdexMatchupParsedDescription {
   /**
    * Description line referring to the attacking Pokemon.
    *
-   * @example '252 ATK Weavile Knock Off (97.5 BP)'
+   * @example
+   * ```ts
+   * '252 ATK Weavile Knock Off (97.5 BP)'
+   * ```
+   * @default null
    * @since 1.0.2
    */
   attacker?: string;
@@ -32,7 +39,11 @@ export interface CalcdexMatchupParsedDescription {
   /**
    * Description line referring to the defending Pokemon.
    *
-   * @example '252 HP / 0 DEF Heatran'
+   * @example
+   * ```ts
+   * '252 HP / 0 DEF Heatran'
+   * ```
+   * @default null
    * @since 1.0.2
    */
   defender?: string;
@@ -40,7 +51,11 @@ export interface CalcdexMatchupParsedDescription {
   /**
    * Description line referring to the damage range.
    *
-   * @example '144-169 (37.3 - 43.7%)'
+   * @example
+   * ```ts
+   * '144-169 (37.3 - 43.7%)'
+   * ```
+   * @default null
    * @since 1.0.2
    */
   damageRange?: string;
@@ -48,19 +63,85 @@ export interface CalcdexMatchupParsedDescription {
   /**
    * Possible damage amounts, already joined with commas (`,`).
    *
-   * @example '144, 145, 147, 148, 150, 151, 153, 154, 157, 159, 160, 162, 163, 165, 166, 169'
+   * @example
+   * ```ts
+   * '144, 145, 147, 148, 150, 151, 153, 154, 157, 159, 160, 162, 163, 165, 166, 169'
+   * ```
+   * @default null
    * @since 1.0.3
    */
   damageAmounts?: string;
 
   /**
+   * Recoil description directly returned from `result.recoil('%').text`.
+   *
+   * @example
+   * ```ts
+   * '50% recoil damage'
+   * ```
+   * @since 1.2.4
+   */
+  recoil?: string;
+
+  /**
+   * Recovery description directly returned from `result.recovery('%').text`.
+   *
+   * @example
+   * ```ts
+   * '8.7 - 10.2% recovered'
+   * ```
+   * @since 1.2.4
+   */
+  recovery?: string;
+
+  /**
    * Description line referring to KO chance, along with any secondary effects like stage hazards, if applicable.
    *
-   * @example 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes'
+   * @example
+   * ```ts
+   * 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes'
+   * ```
+   * @default null
    * @since 1.0.2
    */
   koChance?: string;
+
+  /**
+   * Translation lookup key for a reason explaining why using the move will fail, if applicable.
+   *
+   * * Typically used for gen 1, where there exists a plethora of battle glitches.
+   *   - Not all of them are currently implemented, but new ones should update this value.
+   * * These aren't provided by `@smogon/calc`, but currently being populated in the `parseMatchupDescription()` utility.
+   * * Key should be prefixed with `'calcdex:poke.moves.failureReasons.'` when performing an i18next `t()` lookup.
+   *
+   * @example
+   * ```ts
+   * 'rbyRecovery'
+   *
+   * // t('calcdex:poke.moves.failureReasons.rbyRecovery')
+   * // -> (en) 'Due to a glitch in gen 1, recovery moves will fail if the remainder of dividing the HP lost by 256 is 255.'
+   * ```
+   * @default null
+   * @since 1.2.4
+   */
+  failureKey?: string;
 }
+
+const trimSecondaryRange = (
+  desc: string,
+): string => {
+  if (!desc?.includes(' - ') || !desc.includes('% ')) {
+    return desc;
+  }
+
+  const [min, max] = desc.slice(0, desc.indexOf('% ')).split(' - ').map(parseFloat);
+
+  if (min !== max) {
+    return desc;
+  }
+
+  return desc.slice(desc.indexOf(' - ') + 3);
+};
 
 const l = logger('@showdex/utils/calc/parseMatchupDescription()');
 
@@ -72,26 +153,36 @@ const l = logger('@showdex/utils/calc/parseMatchupDescription()');
  *
  * @example
  * ```ts
- * > parseMatchupDescription(result);
+ * const result = calculate(...);
+ * parseMatchupDescription(result);
+ *
  * {
  *   raw: '252 Atk Weavile Knock Off (97.5 BP) vs. 252 HP / 0 Def Heatran: 144-169 (37.3 - 43.7%) -- guaranteed 2HKO after Stealth Rock and 2 layers of Spikes',
  *   attacker: '252 ATK Weavile Knock Off (97.5 BP)',
  *   defender: '252 HP / 0 DEF Heatran',
  *   damageRange: '144-169 (37.3 - 43.7%)',
  *   damageAmounts: '144, 145, 147, 148, 150, 151, 153, 154, 157, 159, 160, 162, 163, 165, 166, 169',
+ *   recoil: null,
+ *   recovery: null,
  *   koChance: 'guaranteed 2HKO after Stealth Rock & 2 layers of Spikes',
- * }
+ *   failureKey: null,
+ * } as CalcdexMatchupParsedDescription
  * ```
  * @since 1.0.2
  */
-export const parseMatchupDescription = (result: Result): CalcdexMatchupParsedDescription => {
+export const parseMatchupDescription = (
+  result: Result,
+): CalcdexMatchupParsedDescription => {
   const output: CalcdexMatchupParsedDescription = {
     raw: null,
     attacker: null,
     defender: null,
     damageRange: null,
     damageAmounts: null,
+    recoil: null,
+    recovery: null,
     koChance: null,
+    failureKey: null,
   };
 
   if (typeof result?.desc !== 'function') {
@@ -100,6 +191,8 @@ export const parseMatchupDescription = (result: Result): CalcdexMatchupParsedDes
 
   try {
     output.raw = result.desc();
+    output.recoil = result.recoil('%').text || null;
+    output.recovery = result.recovery('%').text || null;
   } catch (error) {
     if (__DEV__ && !(error as Error)?.message?.includes('=== 0')) {
       l.warn(
@@ -114,6 +207,15 @@ export const parseMatchupDescription = (result: Result): CalcdexMatchupParsedDes
 
   if (!output.raw) {
     return output;
+  }
+
+  // e.g., '50.1 - 50.1% recoil damage' -> '50.1% recoil damage'
+  if (output.recoil) {
+    output.recoil = trimSecondaryRange(output.recoil);
+  }
+
+  if (output.recovery) {
+    output.recovery = trimSecondaryRange(output.recovery);
   }
 
   let formatted = output.raw;
@@ -149,6 +251,16 @@ export const parseMatchupDescription = (result: Result): CalcdexMatchupParsedDes
 
   if (output.koChance) {
     output.koChance = output.koChance.replace(/(?<=\s+)and(?=\s+)/, '&');
+  }
+
+  // update (2024/07/21): patron priority request
+  // see: https://bulbapedia.bulbagarden.net/wiki/List_of_battle_glitches_in_Generation_I#HP_recovery_move_failure
+  const recoveryFailure = result.gen.num === 1
+    && result.move.named('Recover', 'Rest', 'Soft-Boiled')
+    && !((result.attacker.maxHP() - result.attacker.curHP() + 1) % 256);
+
+  if (recoveryFailure) {
+    output.failureKey = 'rbyRecovery';
   }
 
   return output;
