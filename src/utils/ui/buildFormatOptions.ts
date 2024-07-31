@@ -128,7 +128,7 @@ export const buildFormatOptions = (
 
   if (favoritedFormats.length) {
     sections.unshift({
-      label: 'Favorites',
+      label: translateHeader('Favorites'),
       options: favoritedFormats.map((format) => {
         const { base, label } = parseBattleFormat(format);
         const value = getGenfulFormat(gen, base);
@@ -168,7 +168,7 @@ export const buildFormatOptions = (
   }
 
   const otherFormats: CalcdexBattleFormatOption = {
-    label: 'Other',
+    label: translateHeader('Other'),
     options: [],
   };
 
@@ -199,7 +199,7 @@ export const buildFormatOptions = (
 
   if (currentFormatLabel && !filterFormatLabels.includes(currentFormatLabel)) {
     options.unshift({
-      label: 'Current',
+      label: translateHeader('Current'),
       options: [{
         label: currentFormatLabel,
         value: currentFormat,
