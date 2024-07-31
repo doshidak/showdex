@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-07-28T16:28:16.193Z"
+    "updated": "2024-07-31T15:31:45.950Z"
   },
 
   "contextMenu": {
@@ -104,7 +104,7 @@
         "importedBadge": "$t(common:labels.imported)",
         "importedMultiBadge": "$t(common:labels.imported) {{count}}",
         "exportMultiTooltip_one": "$t(common:labels.export) {{count}} set",
-        "exportMultiTooltip_other": "$t(common:label.export) {{count}} sets",
+        "exportMultiTooltip_other": "$t(common:labels.export) {{count}} sets",
         "exportedBadge": "$t(common:labels.copied)!",
         "exportedMultiBadge": "$t(common:labels.copied) {{count}}",
         "malformedBadge": "Bad Syntax",
