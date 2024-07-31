@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-30T19:57:32.955Z"
+    "updated": "2024-07-31T15:07:07.262Z"
   },
 
   "pane": {
@@ -301,9 +301,22 @@
       "tooltip": "Inclut tous les sets disponibles des formats de Other Metagames (OM), tels que Balanced Hackmons (BH) & Almost Any Ability (AAA), dans les formats verrouillés légalement comme OU & VGC {{year}}."
     },
 
-    "prioritizeUsageStats": {
-      "label": "Prioriser les Sets d'Usage",
-      "tooltip": "Donne la priorité à l'application de l'set <em>Showdown Usage</em>, s'il est disponible pour le format non-Randoms actuel, aux Pokémon de vos adversaires (ou des joueurs en spectateur).<br /><br />Sinon, le premier set du format correspondant le plus proche sera appliqué."
+    "prioritizePresetSource": {
+      "label": "Prioriser les Sets à Partir de",
+      "options": {
+        "smogon": {
+          "label": "Smogon",
+          "tooltip": "Donne la priorité à l'application de tous les sets groupés applicables + les sets Smogon officiels <strong>avant</strong> l'set <em>Showdown Usage</em> <rarr /> les équipes + boîtes Teambuilder."
+        },
+        "usage": {
+          "label": "Usage",
+          "tooltip": "Donne la priorité à l'application de l'set <em>Showdown Usage</em> <strong>avant</strong> toutes les sets groupés + Smogon <rarr /> les équipes + boîtes Teambuilder. Ne s'applique pas aux formats Randoms."
+        },
+        "storage": {
+          "label": "Teambuilder",
+          "tooltip": "Donne la priorité à l'application des équipes + boîtes Teambuilder <strong>avant</strong> les sets groupés + Smogon <rarr /> les sets <em>Showdown Usage</em>. Ne s'applique pas aux formats Randoms."
+        }
+      }
     },
 
     "autoImportTeamSheets": {
@@ -579,7 +592,7 @@
     },
 
     "expandFieldControls": {
-      "label": "Afficher tous les Contrôles de Terrain",
+      "label": "Afficher les Contrôles de Terrain Supplémentaires",
       "tooltip": "Affiche des contrôles de terrain supplémentaires, tels que <em>$t(pokedex:moves.stealthrock)</em> & <em>$t(pokedex:moves.spikes)</em>, normalement cachés pour les $t(common:products.calcdex_other) en cours de bataille."
     },
 

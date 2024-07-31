@@ -13,7 +13,7 @@ import { reverseObjectKv } from '@showdex/utils/core';
  * @since 1.2.0
  */
 export const DefaultShowdexSettings: ShowdexSettings = {
-  locale: null, // falling back to LanguageDetector
+  locale: 'en', // falling back to LanguageDetector -- update (2024/07/31): doesn't work properly, so this is fine for now
   colorScheme: null,
   forcedColorScheme: 'showdown',
   colorTheme: 'sic',
@@ -53,7 +53,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     downloadRandomsPresets: true,
     downloadUsageStats: true,
     maxPresetAge: 3,
-    prioritizeUsageStats: false,
+    prioritizePresetSource: 'smogon',
     includeTeambuilder: 'always',
     includeOtherMetaPresets: false,
     includePresetsBundles: [],
@@ -195,7 +195,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   downloadRandomsPresets: 'drp',
   downloadUsageStats: 'dus',
   maxPresetAge: 'mpa',
-  prioritizeUsageStats: 'pus',
+  prioritizePresetSource: 'pps',
   includeTeambuilder: 'itb',
   includeOtherMetaPresets: 'iom',
   includePresetsBundles: 'ipb',

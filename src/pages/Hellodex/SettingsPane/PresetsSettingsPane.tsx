@@ -43,6 +43,43 @@ export const PresetsSettingsPane = ({
       </div>
 
       <div className={styles.settingsGroupFields}>
+        <Field<ShowdexCalcdexSettings['prioritizePresetSource']>
+          name="calcdex.prioritizePresetSource"
+          component={Segmented}
+          className={cx(
+            styles.field,
+            !inBattle && styles.singleColumn,
+          )}
+          label={t('calcdex.prioritizePresetSource.label') as React.ReactNode}
+          labelPosition={inBattle ? 'top' : 'left'}
+          options={[
+            'smogon',
+            'usage',
+            'storage',
+          ].map((option) => ({
+            label: t(`calcdex.prioritizePresetSource.options.${option}.label`),
+            tooltip: (
+              <Trans
+                t={t}
+                i18nKey={`calcdex.prioritizePresetSource.options.${option}.tooltip`}
+                parent="div"
+                className={styles.tooltipContent}
+                components={{ rarr: <span>&rarr;</span> }}
+                shouldUnescape
+              />
+            ),
+            value: option,
+            disabled: (
+              option === 'smogon'
+                && !value?.calcdex?.downloadSmogonPresets
+                && !value?.calcdex?.downloadRandomsPresets
+                && !value?.calcdex?.includePresetsBundles?.length
+            )
+              || (option === 'usage' && !value?.calcdex?.downloadUsageStats)
+              || (option === 'storage' && (!value?.calcdex?.includeTeambuilder || value.calcdex.includeTeambuilder === 'never')),
+          }))}
+        />
+
         <Field<ShowdexCalcdexSettings['includeTeambuilder']>
           name="calcdex.includeTeambuilder"
           component={Segmented}

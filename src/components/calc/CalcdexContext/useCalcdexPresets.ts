@@ -325,8 +325,124 @@ export const useCalcdexPresets = (
           }
         }
 
+        // pre-select presets for each possible prioritizePresetSource value
+        // (note: key ordering of this object doesn't matter -- we'll construct an array of keys based on the user's setting after)
+        const preselections: Partial<Record<typeof settings.prioritizePresetSource, CalcdexPokemonPreset[]>> = {
+          smogon: [
+            ...selectPokemonPresets(pokemonPresets, pokemon, {
+              format: state.format,
+              formatOnly: true,
+              source: 'bundle',
+              select: 'one',
+            }),
+
+            ...selectPokemonPresets(pokemonPresets, pokemon, {
+              format: state.format,
+              formatOnly: true,
+              source: 'smogon',
+              select: 'one',
+              // filter: (p) => ['smogon', 'bundle'].includes(p?.source), // actually nvm, can't guarantee the order using this
+            }),
+          ],
+
+          ...(!randoms && {
+            usage: [usage],
+
+            storage: [
+              ...selectPokemonPresets(pokemonPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                source: 'storage',
+                select: 'one',
+              }),
+
+              ...selectPokemonPresets(pokemonPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                source: 'storage-box',
+                select: 'one',
+              }),
+            ],
+          }),
+        };
+
+        const preselectionOrder: (keyof typeof preselections)[] = [];
+
+        if (randoms) {
+          preselectionOrder.push('smogon');
+        } else {
+          // my brain tells me there's some nice 1 liner to this but my brain also tells me that I'm too tired to care lolol
+          switch (settings?.prioritizePresetSource) {
+            case 'storage': {
+              preselectionOrder.push('storage', 'smogon', 'usage');
+
+              break;
+            }
+
+            case 'usage': {
+              preselectionOrder.push('usage', 'smogon', 'storage');
+
+              break;
+            }
+
+            case 'smogon':
+            default: {
+              preselectionOrder.push('smogon', 'usage', 'storage');
+
+              break;
+            }
+          }
+        }
+
+        // now go thru each key one by one until we find a preset
+        for (const key of preselectionOrder) {
+          // note: we may have a 'Yours' set already applied here, even in Randoms!
+          if (preset?.calcdexId) {
+            break;
+          }
+
+          const preselectedPresets = preselections[key];
+
+          if (!preselectedPresets?.length) {
+            continue;
+          }
+
+          if (key === 'smogon') {
+            // for Randoms, if there's only 1 role, that's probably it, no?
+            const matchedPresets = randoms && preselectedPresets.length === 1
+              ? preselectedPresets
+              : guessMatchingPresets(preselectedPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                usages: pokemonUsages,
+              });
+
+            [preset] = matchedPresets;
+
+            l.debug(
+              '(Auto-Preset)', 'player', playerKey, 'pokemon', pokemon.ident || pokemon.speciesForme,
+              '\n', 'source', key,
+              '\n', 'preset', preset,
+              '\n', 'matchedPresets[]', matchedPresets,
+              '\n', 'preselectedPresets[]', preselectedPresets,
+              '\n', 'pokemonUsages[]', pokemonUsages,
+              '\n', 'pokemon', pokemon,
+            );
+
+            if (preset?.calcdexId) {
+              pokemon.autoPreset = matchedPresets.length !== 1;
+              pokemon.autoPresetId = (!pokemon.autoPreset && preset.calcdexId) || null;
+            }
+          }
+
+          if (!preset?.calcdexId) {
+            [preset] = preselectedPresets;
+          }
+        }
+
         // attempt to find a preset within the current format
         if (!preset?.calcdexId && pokemonPresets.length) {
+          /*
           const formatPresets = selectPokemonPresets(
             pokemonPresets,
             pokemon,
@@ -380,6 +496,7 @@ export const useCalcdexPresets = (
           if (shouldApplyUsage) {
             preset = usage;
           }
+          */
 
           // if we still haven't found one, then try finding one from any format
           if (!preset?.calcdexId) {

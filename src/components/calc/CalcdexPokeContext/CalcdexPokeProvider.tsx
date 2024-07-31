@@ -188,6 +188,7 @@ export const CalcdexPokeProvider = ({
     [format, formatLabelMap],
   );
 
+  /*
   const presets = React.useMemo(() => (playerPokemon?.speciesForme ? [
     ...(playerPokemon?.presets || []),
     ...pokemonSheets,
@@ -208,6 +209,70 @@ export const CalcdexPokeProvider = ({
     pokemonPresets,
     pokemonSheets,
     presetSorter,
+    teamPresets,
+    usages,
+  ]);
+  */
+
+  const presets = React.useMemo(() => {
+    if (!playerPokemon?.speciesForme) {
+      return [];
+    }
+
+    const output = [...(playerPokemon?.presets || []), ...pokemonSheets];
+    const smogonPresets = [...bundledPresets, ...pokemonPresets];
+
+    if (format?.includes('random')) {
+      output.push(...smogonPresets);
+      output.sort(presetSorter);
+
+      return output;
+    }
+
+    const teambuilderPresets = [...teamPresets, ...boxPresets];
+
+    /**
+     * @todo these are out of order af, so you actually don't get the orderings you'd expect below; probably because of
+     * the presetSorter() -- but tbh, might be better to just rewrite the preset logic to sort in format "buckets" first,
+     * then sort the buckets themselves, i.e., don't do both at the same time cause who cares about efficiency if it
+     * doesn't even display properly LOL
+     */
+    switch (settings?.prioritizePresetSource) {
+      case 'storage': {
+        output.push(...teambuilderPresets, ...smogonPresets, ...usages);
+
+        break;
+      }
+
+      case 'usage': {
+        output.push(...usages, ...smogonPresets, ...teambuilderPresets);
+
+        break;
+      }
+
+      case 'smogon':
+      default: {
+        // for instance, you'd expect smogon -> usages -> teambuilder, but what you actually get is: usages -> teambuilder -> smogon
+        // ...actually, you get'd this for any of the prioritizePresetSource values LOL
+        output.push(...smogonPresets, ...usages, ...teambuilderPresets);
+
+        break;
+      }
+    }
+
+    output.sort(presetSorter);
+
+    return output;
+  }, [
+    boxPresets,
+    bundledPresets,
+    format,
+    playerPokemon?.presets,
+    playerPokemon?.speciesForme,
+    pokemonPresets,
+    pokemonSheets,
+    presetSorter,
+    settings?.prioritizePresetSource,
     teamPresets,
     usages,
   ]);

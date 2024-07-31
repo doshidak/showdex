@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-07-30T19:55:04.980Z"
+    "updated": "2024-07-31T15:05:41.782Z"
   },
 
   "pane": {
@@ -302,9 +302,22 @@
       "tooltip": "Includes any available sets from Other Metagame (OM) formats, such as Balanced Hackmons (BH) &amp; Almost Any Ability (AAA), in legal-locked formats like OU &amp; VGC {{year}}."
     },
 
-    "prioritizeUsageStats": {
-      "label": "Apply Usage Sets First",
-      "tooltip": "Prioritizes applying the <em>Showdown Usage</em> set, if available for the current non-Randoms format, to your opponents' (or spectating players') Pokémon.<br /><br />Otherwise, the first set of the closest matching format will be applied."
+    "prioritizePresetSource": {
+      "label": "Apply Sets First From",
+      "options": {
+        "smogon": {
+          "label": "Smogon",
+          "tooltip": "Prioritizes applying any applicable bundled + official Smogon sets first <strong>before</strong> the <em>Showdown Usage</em> set <rarr /> Teambuilder teams + boxes."
+        },
+        "usage": {
+          "label": "Usage",
+          "tooltip": "Prioritizes applying the <em>Showdown Usage</em> set first <strong>before</strong> any bundled + Smogon sets <rarr /> Teambuilder teams + boxes. Does not apply to Randoms."
+        },
+        "storage": {
+          "label": "Teambuilder",
+          "tooltip": "Prioritizes applying Teambuilder teams + boxes first <strong>before</strong> any bundled + Smogon <rarr /> <em>Showdown Usage</em> sets. Does not apply to Randoms."
+        }
+      }
     },
 
     "autoImportTeamSheets": {
@@ -580,7 +593,7 @@
     },
 
     "expandFieldControls": {
-      "label": "Show All Field Controls",
+      "label": "Show Additional Field Controls",
       "tooltip": "Shows additional field controls, such as <em>Stealth Rock</em> & <em>Spikes</em>, normally hidden for in-battle $t(common:products.calcdex_other)."
     },
 

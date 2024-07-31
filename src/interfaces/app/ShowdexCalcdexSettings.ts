@@ -227,14 +227,26 @@ export interface ShowdexCalcdexSettings {
   maxPresetAge: number;
 
   /**
-   * Whether the first preset applied to the Pokemon should be from the Showdown usage stats.
+   * Which first available `source` of presets that should be applied to the Pokemon.
    *
-   * * Has no effect if `downloadUsageStats` is `false`.
+   * * Default priority order is `'smogon'`, `'usage'`, then `'storage'` / `'storage-box'`.
+   *   - `'smogon'` (default) will use the default priority order.
+   *     - Requires `downloadSmogonPresets` or `downloadRandomsPresets` to be `true`.
+   *   - `'usage'` will use `'usage'`, `'smogon'`, then `'storage'` / `'storage-box'`.
+   *     - Requires `downloadUsageStats` to be `true`.
+   *   - `'storage'` will use `'storage'` / `'storage-box'`, `'smogon'`, then `'usage'`.
+   *     - Requires `includeTeambuilder` to not be `'never'`.
+   * * This will also influence the sorting order of the options in the `PokeInfo` presets dropdown.
+   * * Successor to the removed `prioritizeUsageStats` setting post-v1.2.4.
+   * * Has no effect if all of the aforementioned settings don't have the required values.
    *
-   * @default false
-   * @since 1.0.3
+   * @default
+   * ```ts
+   * 'smogon'
+   * ```
+   * @since 1.2.4
    */
-  prioritizeUsageStats: boolean;
+  prioritizePresetSource: 'smogon' | 'usage' | 'storage';
 
   /**
    * Whether local Teambuilder presets should be included.
