@@ -18,6 +18,7 @@ export const FormatLabels: Record<string, string> = {
   almostanyability: 'AAA',
   alternatium: 'Alternatium',
   anythinggoes: 'AG',
+  babyrandombattle: 'Baby Randoms',
   balancedhackmons: 'BH',
   battlefactory: 'B-Factory',
   battlefestival: 'B-Fest',
@@ -50,6 +51,7 @@ export const FormatLabels: Record<string, string> = {
   cap: 'CAP', // CreateAPokemon (no cap, always factual)
   cap1v1: 'CAP 1v1',
   caplc: 'CAP LC',
+  caprandombattle: 'CAP Randoms',
   categoryswap: 'Category Swap',
   challengecup: 'Challenge Cup',
   challengecup1v1: 'Challenge Cup 1v1',
