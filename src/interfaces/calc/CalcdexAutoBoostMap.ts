@@ -88,14 +88,14 @@ export interface CalcdexAutoBoostEffect {
   reffectDict?: Extract<keyof Showdown.ModdedDex, 'abilities' | 'items' | 'moves'>;
 
   /**
-   * Turn number that the effect was successfully applied.
+   * Battle turn number when the effect was applied, if applicable.
    *
-   * * Non-`null`/`undefined` values also indicate that the `boosts` are client-reported, so they're expected to be
-   *   applied to the Pokemon's corresponding `boosts`.
-   *   - Any negative values like `-1` are also considered to be a `null`/`undefined` value.
+   * * Number values indicate that the `boosts` are Showdown client-reported, so they're expected to be already applied
+   *   to the Pokemon's corresponding `boosts` object during a sync.
+   *   - Any negative values like `-1` are also considered to be a nullish (i.e., `null` / `undefined`) value.
    *   - Positive values, including `0`, are valid.
-   * * If `null`/`undefined` (default), this indicates that the effect was applied from an action invoked by the user.
-   *   - `boosts`, in this case, would be expected to be in the Pokemon's `dirtyBoosts` instead.
+   * * If negative or nullish (default), this indicates that the effect was applied from an action invoked by the user.
+   *   - This effect's `boosts`, in this case, would be expected to be applied to the Pokemon's `dirtyBoosts` instead.
    *
    * @default null
    * @since 1.2.3
@@ -106,7 +106,7 @@ export interface CalcdexAutoBoostEffect {
    * Whether this effect applies only once per battle.
    *
    * * Typical in gen 9 for some abilities, such as *Intrepid Sword*.
-   * * Has no effect if `turn` is `null`/`undefined` (default).
+   * * Has no effect if `turn` is `null` / `undefined` (default).
    *
    * @default false
    * @since 1.2.3
@@ -114,10 +114,16 @@ export interface CalcdexAutoBoostEffect {
   once?: boolean;
 
   /**
-   * Whether the `boosts` currently being applied to the respective boosts object are dependent on the falsiness of `turn`.
+   * Whether this effect's `boosts` should be applied when tallying up all of the Pokemon's different boost sources.
    *
+   * * Boost sources include the Pokemon's Showdown client-reported `boosts`, user-modified `dirtyBoosts` & determined
+   *   `autoBoostMap` boosts.
    * * Typically used in conjunction with `turn` & `once` to determine if this effect should be used as an indicator
    *   to not auto-boost this effect again for the remainder of the battle.
+   *   - e.g., In a gen 9 battle where *Zamazenta* is sent out (say, `turn` is `5` — doesn't matter), the +1 DEF boost
+   *     from its *Dauntless Shield* ability, where `once` is `true`, won't be re-applied when this becomes `false` the
+   *     next time it's sent out.
+   * * Tallying occurs in the `calcStatAutoBoosts()` utility from `@showdex/utils/calc`.
    *
    * @default false
    * @since 1.2.3
