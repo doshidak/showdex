@@ -1,9 +1,10 @@
-import { ShowdexPresetsBundles } from '@showdex/consts/app/presets';
-import { HttpMethod } from '@showdex/consts/core';
+import { type BaseQueryApi } from '@reduxjs/toolkit/dist/query';
 import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { getResourceUrl, runtimeFetch } from '@showdex/utils/core';
+import { type RootState } from '@showdex/redux/store';
+import { nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
+import { readBundlesDb } from '@showdex/utils/storage';
 
 const l = logger('@showdex/redux/factories/buildBundleQuery()');
 
@@ -24,6 +25,7 @@ export const buildBundleQuery = (
   ) => CalcdexPokemonPreset[],
 ): (
   args: PkmnApiSmogonPresetRequest,
+  api: BaseQueryApi,
 ) => Promise<{
   data: CalcdexPokemonPreset[],
 }> => {
@@ -36,7 +38,7 @@ export const buildBundleQuery = (
     throw new Error('buildBundleQuery() was provided a bad transformer :o');
   }
 
-  return async (args) => {
+  return async (args, api) => {
     const endTimer = runtimer(l.scope, l);
 
     const {
@@ -49,7 +51,20 @@ export const buildBundleQuery = (
     if (!gen || !bundleIds?.length) {
       endTimer(
         '(empty req)', 'gen', gen,
-        '\n', 'bundleIds', bundleIds,
+        '\n', 'bundleIds[]', bundleIds,
+        '\n', 'args', args,
+      );
+
+      return { data: output };
+    }
+
+    const bundles = (api.getState() as RootState)?.showdex?.bundles;
+
+    if (!nonEmptyObject(bundles?.buns?.presets)) {
+      endTimer(
+        '(empty buns.presets)', 'gen', gen,
+        '\n', 'bundleIds[]', bundleIds,
+        '\n', 'bundles', bundles,
         '\n', 'args', args,
       );
 
@@ -57,10 +72,11 @@ export const buildBundleQuery = (
     }
 
     for (const id of bundleIds) {
-      const bundle = ShowdexPresetsBundles.find((b) => b?.id === id);
+      // const bundle = ShowdexPresetsBundles.find((b) => b?.id === id);
+      const bundle = bundles.buns.presets[id];
 
       const validBundle = !!bundle?.id
-        && bundle.tag === 'presets'
+        && bundle.ntt === 'presets'
         && !bundle.disabled
         && bundle.gen === gen;
 
@@ -68,6 +84,7 @@ export const buildBundleQuery = (
         continue;
       }
 
+      /*
       const url = getResourceUrl(`${bundle.id}${bundle.ext ? `.${bundle.ext}` : ''}`);
       const response = await runtimeFetch<PkmnApiSmogonFormatPresetResponse>(url, {
         method: HttpMethod.GET,
@@ -75,6 +92,11 @@ export const buildBundleQuery = (
       });
 
       const data = response.json();
+      */
+
+      const { presets: bundledPresets } = await readBundlesDb(['presets']);
+      const data = bundledPresets?.[bundle.id];
+
       const presets = transformer(data, null, {
         ...args,
         source: 'bundle',
@@ -99,7 +121,7 @@ export const buildBundleQuery = (
 
     endTimer(
       '(unpacked)', 'gen', gen,
-      '\n', 'bundleIds', bundleIds,
+      '\n', 'bundleIds[]', bundleIds,
       '\n', '#output', output.length,
     );
 

@@ -4,18 +4,17 @@ import {
   type CalcdexPokemonUsageAlt,
 } from '@showdex/interfaces/calc';
 import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
-import { calcPokemonSpreadStats } from '@showdex/utils/calc';
+import { calcPokemonSpreadStats, populateStatsTable } from '@showdex/utils/calc';
 import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,
   detectLegacyGen,
   determineDefaultLevel,
-  getDefaultSpreadValue,
   legalLockedFormat,
 } from '@showdex/utils/dex';
 import { detectCompletePreset } from './detectCompletePreset';
-import { detectUsageAlt } from './detectUsageAlt';
+import { detectUsageAlt, detectUsageAlts } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
 import { getPresetFormes } from './getPresetFormes';
 import { sortUsageAlts } from './sortUsageAlts';
@@ -37,11 +36,20 @@ import { usageAltPercentSorter } from './usageAltPercentSorter';
  * @since 0.1.3
  */
 export const applyPreset = (
-  format: string,
   pokemon: CalcdexPokemon,
   preset: CalcdexPokemonPreset,
-  usage?: CalcdexPokemonPreset,
+  config: {
+    format: string;
+    usage?: CalcdexPokemonPreset;
+    alwaysMergeMoves?: boolean;
+  },
 ): Partial<CalcdexPokemon> => {
+  const {
+    format,
+    usage,
+    alwaysMergeMoves,
+  } = { ...config };
+
   const gen = detectGenFromFormat(format);
   const legacy = detectLegacyGen(gen);
 
@@ -51,8 +59,6 @@ export const applyPreset = (
 
   const legal = legalLockedFormat(format);
   const defaultLevel = determineDefaultLevel(format);
-  const defaultIv = getDefaultSpreadValue('iv', format);
-  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // this will be our final return value
   const output: Partial<CalcdexPokemon> = {
@@ -64,35 +70,23 @@ export const applyPreset = (
 
     // update (2023/02/02): specifying empty arrays for the alt properties to clear them for
     // the new preset (don't want alts from a previous set to persist if none are defined)
-    level: preset.level || defaultLevel,
+    level: pokemon.level || preset.level || defaultLevel,
     altTeraTypes: [],
     altAbilities: [],
     dirtyAbility: preset.ability,
     nature: preset.nature,
     altItems: [],
     dirtyItem: preset.item,
-    altMoves: [],
     moves: preset.moves,
-
-    ivs: {
-      hp: preset?.ivs?.hp ?? defaultIv,
-      atk: preset?.ivs?.atk ?? defaultIv,
-      def: preset?.ivs?.def ?? defaultIv,
-      spa: preset?.ivs?.spa ?? defaultIv,
-      spd: preset?.ivs?.spd ?? defaultIv,
-      spe: preset?.ivs?.spe ?? defaultIv,
-    },
-
-    // not specifying the defaultEv's may cause any unspecified EVs to remain!
-    evs: {
-      hp: preset.evs?.hp ?? defaultEv,
-      atk: preset.evs?.atk ?? defaultEv,
-      def: preset.evs?.def ?? defaultEv,
-      spa: preset.evs?.spa ?? defaultEv,
-      spd: preset.evs?.spd ?? defaultEv,
-      spe: preset.evs?.spe ?? defaultEv,
-    },
+    altMoves: [],
+    usageMoves: [],
+    ivs: populateStatsTable(preset.ivs, { spread: 'iv', format }),
+    evs: populateStatsTable(preset.evs, { spread: 'ev', format }),
   };
+
+  if (usage?.calcdexId) {
+    output.usageId = usage.calcdexId;
+  }
 
   // update (2024/01/03): shouldn't apply the level if the `pokemon` isn't being `'user'`-handled, i.e., in a battle
   // (was causing server-sourced Pokemon to be level 100 vs. level 50 client-sourced ones in VGC LOL... oopsies)
@@ -101,7 +95,7 @@ export const applyPreset = (
   }
 
   const transformed = !!pokemon.transformedForme;
-  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format });
+  const speciesFormes = getPresetFormes(pokemon.speciesForme, { format, source: preset.source });
   const formeKey = transformed && !speciesFormes.includes(preset.speciesForme) ? 'transformedForme' : 'speciesForme';
   const currentForme = pokemon[formeKey];
 
@@ -113,21 +107,12 @@ export const applyPreset = (
   const completePreset = detectCompletePreset(preset);
 
   // update to the speciesForme (& update relevant info) if different
-  // const shouldUpdateSpecies = (transformed && pokemon.transformedForme !== preset.speciesForme)
-  //   || (!transformed && pokemon.speciesForme !== preset.speciesForme);
   const shouldUpdateSpecies = currentForme !== preset.speciesForme
-    // && !hasMegaForme(currentForme);
     && !speciesFormes.includes(currentForme);
 
   if (shouldUpdateSpecies) {
     output[formeKey] = preset.speciesForme;
   }
-
-  // update (2023/02/02): for Mega Pokemon, we may need to remove the dirtyItem set from the preset
-  // if the preset was for its non-Mega forme (since they could have different abilities)
-  // if (hasMegaForme(pokemon.speciesForme) && !hasMegaForme(preset.speciesForme)) {
-  //   delete output.dirtyAbility;
-  // }
 
   const didRevealTeraType = !!pokemon.teraType && pokemon.teraType !== '???';
   const altTeraTypes = preset.teraTypes?.filter((t) => !!t && flattenAlt(t) !== '???');
@@ -170,11 +155,12 @@ export const applyPreset = (
     output.altAbilities = [...preset.altAbilities].filter((a) => !!a && formatId(flattenAlt(a)) !== 'noability');
 
     // apply the top usage ability (if available)
-    const abilityUsageAvailable = usage?.altAbilities?.length > 1
+    const shouldApplyTopAbility = detectUsageAlts(usage?.altAbilities)
+      && usage.altAbilities.length > 1
       && output.altAbilities.length > 1
       && !clearDirtyAbility;
 
-    if (abilityUsageAvailable) {
+    if (shouldApplyTopAbility) {
       // update (2023/01/06): can't actually use sortedAbilitiesByUsage() since it may use usage from a prior set
       // (only a problem in Gen 9 Randoms since there are multiple "usages" due to the role system, so the sorters
       // will be referencing the current role's usage and not the one we're trying to switch to... if that makes sense lol)
@@ -196,11 +182,12 @@ export const applyPreset = (
     output.altItems = [...preset.altItems];
 
     // apply the top usage item (if available)
-    const itemUsageAvailable = usage?.altItems?.length > 1
+    const shouldApplyTopItem = detectUsageAlts(usage?.altItems)
+      && usage.altItems.length > 1
       && output.altItems?.length > 1
       && !clearDirtyItem;
 
-    if (itemUsageAvailable) {
+    if (shouldApplyTopItem) {
       const sorter = usageAltPercentSorter(usageAltPercentFinder(usage.altItems));
       const sortedItems = flattenAlts(output.altItems).sort(sorter);
       const [topItem] = sortedItems;
@@ -220,10 +207,11 @@ export const applyPreset = (
 
     // sort the moves by their usage stats (if available) and apply the top 4 moves
     // (otherwise, just apply the moves from the preset)
-    const moveUsageAvailable = usage?.altMoves?.length > 1
+    const shouldSortTopMoves = detectUsageAlts(usage?.altMoves)
+      && usage.altMoves.length > 1
       && output.altMoves?.length > 1;
 
-    if (moveUsageAvailable) {
+    if (shouldSortTopMoves) {
       const sorter = usageAltPercentSorter(usageAltPercentFinder(usage.altMoves));
       const sortedMoves = flattenAlts(output.altMoves).sort(sorter);
 
@@ -234,9 +222,12 @@ export const applyPreset = (
          * @todo Needs to be updated once we support more than 4 moves.
          */
         if (!revealingPreset) {
+          // note: output.moves[] will be overwritten again if shouldMergeMoves is determined to be true
           output.moves = sortedMoves.slice(0, 4);
         }
       }
+
+      output.usageMoves = usage.altMoves as typeof output.usageMoves;
     }
   }
 
@@ -293,10 +284,7 @@ export const applyPreset = (
     }
   }
 
-  const sanitized = sanitizePokemon({
-    ...pokemon,
-    ...output,
-  }, format);
+  const sanitized = sanitizePokemon({ ...pokemon, ...output }, format);
 
   if (currentForme !== output[formeKey]) {
     const {
@@ -325,9 +313,6 @@ export const applyPreset = (
     && ![...sanitized.abilities, ...sanitized.transformedAbilities].includes(output.dirtyAbility);
 
   if (shouldClearDirtyAbility) {
-    // [output.dirtyAbility] = sanitized.transformedAbilities.length
-    //   ? sanitized.transformedAbilities
-    //   : sanitized.abilities;
     delete output.dirtyAbility;
   }
 
@@ -335,8 +320,9 @@ export const applyPreset = (
     output.abilityToggled = sanitized.abilityToggled;
   }
 
-  // we probably have an OTS (Open Team Sheet) if revealing & not complete
-  const shouldMergeMoves = (revealingPreset && !completePreset)
+  const shouldMergeMoves = alwaysMergeMoves
+    || (pokemon.source === 'client' && !['import', 'server', 'sheet', 'user'].includes(preset.source))
+    || (revealingPreset && !completePreset) // probably an OTS (Open Team Sheet)
     || (transformed && !!pokemon.transformedMoves?.length);
 
   if (shouldMergeMoves) {
@@ -345,7 +331,7 @@ export const applyPreset = (
      */
     output.moves = transformed && pokemon.transformedMoves.length === 4
       ? [...pokemon.transformedMoves] // preserves the order
-      : mergeRevealedMoves({ ...pokemon, ...output });
+      : mergeRevealedMoves({ ...pokemon, ...output }, { format });
   }
 
   // in legacy gens, make sure SPA & SPD always equal (for SPC)
@@ -373,6 +359,7 @@ export const applyPreset = (
 
     if (revealingPreset) {
       output.autoPreset = false;
+      output.autoPresetId = preset.calcdexId;
     }
 
     return output;

@@ -23,6 +23,8 @@ export const createEnvParser = (
     defaultValue = '',
   ): T => (dict?.[constantCase(key)] || defaultValue) as T;
 
+  env.dict = (shallow?: boolean) => (shallow ? { ...dict } : dict);
+
   // env type parsers
   env.int = <T extends number = number>(
     key: string,

@@ -2,7 +2,7 @@ import * as React from 'react';
 import Svg from 'react-inlinesvg';
 import cx from 'classnames';
 import { type ShowdexSupporterTierMember } from '@showdex/interfaces/app';
-import { useColorScheme } from '@showdex/redux/store';
+import { useColorScheme, useShowdexBundles } from '@showdex/redux/store';
 import { findPlayerTitle } from '@showdex/utils/app';
 import { getResourceUrl } from '@showdex/utils/core';
 import { determineColorScheme } from '@showdex/utils/ui';
@@ -30,12 +30,12 @@ export const MemberIcon = ({
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
-  const {
-    name,
-    showdownUser,
-  } = member || {};
-
-  const memberTitle = findPlayerTitle(name, showdownUser);
+  const { name, showdownUser } = { ...member };
+  const bundles = useShowdexBundles();
+  const memberTitle = React.useMemo(
+    () => findPlayerTitle(name, { showdownUser, titles: bundles.titles, tiers: bundles.tiers }),
+    [bundles.titles, bundles.tiers, name, showdownUser],
+  );
 
   if (!memberTitle?.icon) {
     return defaultSrc ? (

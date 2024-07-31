@@ -1,9 +1,9 @@
 import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonRandomsPresetResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { calcPresetCalcdexId } from '@showdex/utils/calc';
+import { calcPresetCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { detectLegacyGen, getDefaultSpreadValue, getGenlessFormat } from '@showdex/utils/dex';
+import { detectLegacyGen, getGenlessFormat } from '@showdex/utils/dex';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsPresetResponse()');
 
@@ -28,12 +28,6 @@ export const transformRandomsPresetResponse = (
 
   const format = args.format || `gen${args.gen}randombattle`;
   const legacy = detectLegacyGen(args.gen);
-
-  // see notes for the `evs` property in `PkmnApiSmogonRandomPreset` in `@showdex/interfaces/api`
-  // for more info about why 84 EVs is the default value for each stat
-  // update (2023/09/27): apparently in the pokemon-showdown server source code, it's 85!
-  const defaultIv = getDefaultSpreadValue('iv', format);
-  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
@@ -85,23 +79,8 @@ export const transformRandomsPresetResponse = (
       moves: moves?.slice(0, 4),
       altMoves: moves,
 
-      ivs: {
-        hp: ivs?.hp ?? defaultIv,
-        atk: ivs?.atk ?? defaultIv,
-        def: ivs?.def ?? defaultIv,
-        spa: ivs?.spa ?? defaultIv,
-        spd: ivs?.spd ?? defaultIv,
-        spe: ivs?.spe ?? defaultIv,
-      },
-
-      evs: {
-        hp: evs?.hp ?? defaultEv,
-        atk: evs?.atk ?? defaultEv,
-        def: evs?.def ?? defaultEv,
-        spa: evs?.spa ?? defaultEv,
-        spd: evs?.spd ?? defaultEv,
-        spe: evs?.spe ?? defaultEv,
-      },
+      ivs: populateStatsTable(ivs, { spread: 'iv', format }),
+      evs: populateStatsTable(evs, { spread: 'ev', format }),
     };
 
     // note: either `preset` or `rolePreset` will be pushed to the `output` array!
@@ -155,25 +134,11 @@ export const transformRandomsPresetResponse = (
         // update (2023/01/28): adding support for role-specific EVs/IVs, but for also when Pre eventually
         // moves the EVs/IVs into each role instead of in the parent (only for Gen 9 Randoms btw)
         if (!legacy && nonEmptyObject(roleEvs)) {
-          rolePreset.evs = {
-            hp: roleEvs?.hp ?? defaultEv,
-            atk: roleEvs?.atk ?? defaultEv,
-            def: roleEvs?.def ?? defaultEv,
-            spa: roleEvs?.spa ?? defaultEv,
-            spd: roleEvs?.spd ?? defaultEv,
-            spe: roleEvs?.spe ?? defaultEv,
-          };
+          rolePreset.evs = populateStatsTable(roleEvs, { spread: 'ev', format });
         }
 
         if (nonEmptyObject(roleIvs)) {
-          rolePreset.ivs = {
-            hp: roleIvs?.hp ?? defaultIv,
-            atk: roleIvs?.atk ?? defaultIv,
-            def: roleIvs?.def ?? defaultIv,
-            spa: roleIvs?.spa ?? defaultIv,
-            spd: roleIvs?.spd ?? defaultIv,
-            spe: roleIvs?.spe ?? defaultIv,
-          };
+          rolePreset.ivs = populateStatsTable(roleIvs, { spread: 'iv', format });
         }
 
         rolePreset.calcdexId = calcPresetCalcdexId(rolePreset);

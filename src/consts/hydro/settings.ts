@@ -6,7 +6,6 @@ import {
   type ShowdexShowdownSettings,
 } from '@showdex/interfaces/app';
 import { reverseObjectKv } from '@showdex/utils/core';
-import { ShowdexPresetsBundles } from '@showdex/consts/app';
 
 /**
  * Default Showdex settings.
@@ -14,9 +13,10 @@ import { ShowdexPresetsBundles } from '@showdex/consts/app';
  * @since 1.2.0
  */
 export const DefaultShowdexSettings: ShowdexSettings = {
-  locale: null, // falling back to LanguageDetector
+  locale: 'en', // falling back to LanguageDetector -- update (2024/07/31): doesn't work properly, so this is fine for now
   colorScheme: null,
   forcedColorScheme: 'showdown',
+  colorTheme: 'sic',
   glassyTerrain: false,
   developerMode: __DEV__,
 
@@ -53,10 +53,10 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     downloadRandomsPresets: true,
     downloadUsageStats: true,
     maxPresetAge: 3,
-    prioritizeUsageStats: false,
+    prioritizePresetSource: 'smogon',
     includeTeambuilder: 'always',
     includeOtherMetaPresets: false,
-    includePresetsBundles: ShowdexPresetsBundles.map((b) => !b?.disabled && b.id).filter(Boolean),
+    includePresetsBundles: [],
     autoImportTeamSheets: true,
     autoExportOpponent: false,
 
@@ -87,6 +87,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
 
     allowIllegalSpreads: 'meta',
     showUiTooltips: true,
+    showPresetTooltip: true,
     showAbilityTooltip: true,
     showItemTooltip: true,
     showMoveTooltip: true,
@@ -96,6 +97,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     formatMatchupDamageAmounts: true,
     copyMatchupDescription: true,
     showFieldTooltips: true,
+    expandFieldControls: false,
 
     nhkoColors: [
       '#4CAF50',
@@ -135,6 +137,7 @@ export const DehydratedShowdexSettingsMap: Record<keyof ShowdexSettings, string>
   locale: 'lc',
   colorScheme: 'cs',
   forcedColorScheme: 'fc',
+  colorTheme: 'ct',
   glassyTerrain: 'gt',
   developerMode: 'dm',
   hellodex: 'hd',
@@ -192,7 +195,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   downloadRandomsPresets: 'drp',
   downloadUsageStats: 'dus',
   maxPresetAge: 'mpa',
-  prioritizeUsageStats: 'pus',
+  prioritizePresetSource: 'pps',
   includeTeambuilder: 'itb',
   includeOtherMetaPresets: 'iom',
   includePresetsBundles: 'ipb',
@@ -210,6 +213,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   lockGeneticsVisibility: 'lgv',
   allowIllegalSpreads: 'ais',
   showUiTooltips: 'sut',
+  showPresetTooltip: 'spt',
   showAbilityTooltip: 'sat',
   showItemTooltip: 'sit',
   showMoveTooltip: 'smv',
@@ -219,6 +223,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   formatMatchupDamageAmounts: 'fda',
   copyMatchupDescription: 'cmd',
   showFieldTooltips: 'sft',
+  expandFieldControls: 'fmc',
   nhkoColors: 'ncl',
   nhkoLabels: 'nlb',
 };

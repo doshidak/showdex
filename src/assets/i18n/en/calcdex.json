@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-07T16:00:56.179Z",
-    "updated": "2024-01-28T10:19:16.522Z"
+    "updated": "2024-07-31T15:31:45.950Z"
   },
 
   "contextMenu": {
@@ -99,9 +99,14 @@
         "autoLabel": "$t(common:labels.auto)",
         "importLabel": "$t(common:labels.import)",
         "exportLabel": "$t(common:labels.export)",
+        "exportMultiLabel": "$t(common:labels.all)",
         "importTooltip": "Import PokéPaste from Clipboard",
         "importedBadge": "$t(common:labels.imported)",
+        "importedMultiBadge": "$t(common:labels.imported) {{count}}",
+        "exportMultiTooltip_one": "$t(common:labels.export) {{count}} set",
+        "exportMultiTooltip_other": "$t(common:labels.export) {{count}} sets",
         "exportedBadge": "$t(common:labels.copied)!",
+        "exportedMultiBadge": "$t(common:labels.copied) {{count}}",
         "malformedBadge": "Bad Syntax",
         "mismatchedBadge": "Mismatch",
         "failedBadge": "$t(common:labels.failed)"
@@ -155,6 +160,7 @@
       "nhko": "KO %",
       "na": "$t(common:labels.na)",
       "immune": "IMMUNE",
+      "failure": "FAILURE",
       "copiedBadge": "$t(common:labels.copied)!",
 
       "tera": {
@@ -218,6 +224,7 @@
 
         "bp": {
           "aria": "{{move}} $t(pokedex:stats.bp.0) Override for {{pokemon}}",
+          "hitAria": "{{move}} Hit {{hit}} of {{hits}} $t(pokedex:stats.bp.0) Override for {{pokemon}}",
           "label": "{{ultimate}}$t(pokedex:stats.bp.1)"
         }
       },
@@ -232,6 +239,10 @@
         "aria": "Move Slot {{count}} for {{pokemon}}",
         "hint": "--",
         "empty": "$t(pokedex:moves.nomove_other)"
+      },
+
+      "failureReasons": {
+        "rbyRecovery": "Due to a glitch in gen 1, recovery moves will fail if the remainder of dividing the $t(pokedex:stats.hp.1) lost by 256 is 255."
       }
     },
 

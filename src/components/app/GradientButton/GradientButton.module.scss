@@ -23,16 +23,28 @@
 
   &.light {
     box-shadow: (
-      0 0 1px color.alpha(colors.$black, 0.3),
-      0 0 5px color.alpha(colors.$gray-dark, 0.3),
+      0 0 1px color.alpha(colors.$black, 0.4),
+      0 0 4px color.alpha(colors.$gray-dark, 0.24),
     );
+
+    &.mina {
+      box-shadow: (
+        0 0 1px color.alpha(#770629, 0.4),
+        0 0 4px color.alpha(#D76D8E, 0.24),
+      );
+    }
   }
 
   &.dark {
     box-shadow: (
-      0 0 1px color.alpha(colors.$white, 0.5),
-      0 0 10px color.alpha(colors.$black, 0.5),
+      0 0 1px color.alpha(colors.$white, 0.4),
+      0 0 12px color.alpha(colors.$black, 0.4),
     );
+  }
+
+  &.mina {
+    background: linear-gradient(65deg, #E94489 2%, #F8C8C5 98%) 0 0 / 100% 100%;
+    background-clip: text;
   }
 
   &::before {
@@ -43,6 +55,10 @@
     opacity: 0;
     @include transition.apply((background-position, 1.5s), opacity);
     z-index: -1;
+  }
+
+  &.mina::before {
+    background: linear-gradient(65deg, #E94489 2%, #F8C8C5 98%) 0 0 / 100% 100%;
   }
 
   @include aria.outline($radius: 100px);

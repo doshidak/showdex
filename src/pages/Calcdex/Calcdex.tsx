@@ -23,8 +23,10 @@ import { type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@show
 import {
   useCalcdexDuplicator,
   useColorScheme,
+  useColorTheme,
   useGlassyTerrain,
   useHonkdexSettings,
+  useShowdexBundles,
 } from '@showdex/redux/store';
 import { findPlayerTitle, getCalcdexRoomId } from '@showdex/utils/app';
 import { useMobileViewport, useRandomUuid } from '@showdex/utils/hooks';
@@ -48,7 +50,9 @@ export const Calcdex = ({
 
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
+  const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
+  const bundles = useShowdexBundles();
   const mobile = useMobileViewport();
 
   const { state, settings } = useCalcdexContext();
@@ -72,14 +76,11 @@ export const Calcdex = ({
 
   const playerOptions = React.useMemo<DropdownOption<CalcdexPlayerKey>[]>(() => (
     playerCount > 2 && AllPlayerKeys
-      // .filter((k) => state[k]?.active && (!authPlayerKey || k !== authPlayerKey))
       .filter((k) => state[k]?.active)
       .map((k) => {
         const { name: playerName } = state[k];
-        const playerTitle = findPlayerTitle(playerName, true);
-
+        const playerTitle = findPlayerTitle(playerName, { showdownUser: true, titles: bundles.titles, tiers: bundles.tiers });
         const labelColor = playerTitle?.color?.[colorScheme];
-        // const iconColor = playerTitle?.iconColor?.[colorScheme];
 
         return {
           labelClassName: styles.playerOption,
@@ -92,11 +93,13 @@ export const Calcdex = ({
 
               {/*
                 !!playerTitle?.icon &&
-                <Svg
+                <MemberIcon
                   className={styles.icon}
-                  style={iconColor ? { color: iconColor } : undefined}
-                  description={playerTitle.iconDescription}
-                  src={getResourceUrl(`${playerTitle.icon}.svg`)}
+                  member={{
+                    name: playerName,
+                    showdownUser: true,
+                    periods: null,
+                  }}
                 />
               */}
 
@@ -123,7 +126,8 @@ export const Calcdex = ({
         };
       })
   ) || null, [
-    // authPlayerKey,
+    bundles.tiers,
+    bundles.titles,
     colorScheme,
     playerCount,
     state,
@@ -159,11 +163,13 @@ export const Calcdex = ({
         className={cx(
           'showdex-module',
           styles.container,
-          containerSize === 'xs' && styles.verySmol,
-          containerWidth < 360 && styles.skinnyBoi,
           !!colorScheme && styles[colorScheme],
-          renderAsOverlay && styles.overlay,
+          !!colorTheme && styles[colorTheme],
           glassyTerrain && styles.glassy,
+          mobile && styles.mobile,
+          containerSize === 'xs' && styles.verySmol,
+          containerWidth < 380 && styles.skinnyBoi,
+          renderAsOverlay && styles.overlay,
         )}
         onContextMenu={(e) => showContextMenu({
           event: e,
@@ -207,7 +213,10 @@ export const Calcdex = ({
           </PiconRackSortableContext>
 
           <FieldCalc
-            className={styles.fieldCalc}
+            className={cx(
+              styles.fieldCalc,
+              (settings?.expandFieldControls || state?.gameType === 'Doubles') && styles.expanded,
+            )}
             playerKey={topKey}
             opponentKey={bottomKey}
           />

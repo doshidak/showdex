@@ -16,7 +16,6 @@ import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,
   detectLegacyGen,
-  // getDefaultSpreadValue,
   getGenDexForFormat,
   notFullyEvolved,
 } from '@showdex/utils/dex';
@@ -45,14 +44,11 @@ export const createSmogonPokemon = (
 ): SmogonPokemon => {
   const dex = getGenDexForFormat(format);
   const gen = detectGenFromFormat(format);
+  const legacy = detectLegacyGen(gen);
 
   if (!dex || gen < 1 || !gameType || !pokemon?.calcdexId || !pokemon.speciesForme) {
     return null;
   }
-
-  const legacy = detectLegacyGen(gen);
-  // const defaultIv = getDefaultSpreadValue('iv', format);
-  // const defaultEv = getDefaultSpreadValue('ev', format);
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
@@ -72,10 +68,6 @@ export const createSmogonPokemon = (
 
     return null;
   }
-
-  // const hasMegaItem = !!item
-  //   && /(?:ite|z$)/.test(formatId(item))
-  //   && formatId(item) !== 'eviolite'; // oh god
 
   // if applicable, convert the '???' status into an empty string
   // (don't apply the status if the Pokemon is fainted tho)
@@ -166,24 +158,6 @@ export const createSmogonPokemon = (
     // change anything in node_modules lol
     rawStats: { ...pokemon.spreadStats } as SmogonPokemonOptions['rawStats'],
 
-    // ivs: {
-    //   hp: pokemon.ivs?.hp ?? defaultIv,
-    //   atk: pokemon.ivs?.atk ?? defaultIv,
-    //   def: pokemon.ivs?.def ?? defaultIv,
-    //   spa: pokemon.ivs?.spa ?? defaultIv,
-    //   spd: pokemon.ivs?.spd ?? defaultIv,
-    //   spe: pokemon.ivs?.spe ?? defaultIv,
-    // },
-
-    // evs: {
-    //   hp: pokemon.evs?.hp ?? defaultEv,
-    //   atk: pokemon.evs?.atk ?? defaultEv,
-    //   def: pokemon.evs?.def ?? defaultEv,
-    //   spa: pokemon.evs?.spa ?? defaultEv,
-    //   spd: pokemon.evs?.spd ?? defaultEv,
-    //   spe: pokemon.evs?.spe ?? defaultEv,
-    // },
-
     // update (2024/01/24): by this point, the EVs & IVs should be fully populated, so no need to repeat this logic
     ivs: { ...pokemon.ivs },
     evs: { ...pokemon.evs },
@@ -193,14 +167,6 @@ export const createSmogonPokemon = (
     // update (2024/01/03): apparently 'auto' is an accepted value, which is ok to fallback on since this property is
     // only exclusively used for the aformentioned abilities LOL
     boostedStat: pokemon.dirtyBoostedStat || pokemon.boostedStat || 'auto',
-
-    // boosts: {
-    //   atk: pokemon.dirtyBoosts?.atk ?? pokemon.boosts?.atk ?? 0,
-    //   def: pokemon.dirtyBoosts?.def ?? pokemon.boosts?.def ?? 0,
-    //   spa: pokemon.dirtyBoosts?.spa ?? pokemon.boosts?.spa ?? 0,
-    //   spd: pokemon.dirtyBoosts?.spd ?? pokemon.boosts?.spd ?? 0,
-    //   spe: pokemon.dirtyBoosts?.spe ?? pokemon.boosts?.spe ?? 0,
-    // },
 
     boosts: PokemonBoostNames.reduce((prev, stat) => {
       const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
@@ -304,10 +270,13 @@ export const createSmogonPokemon = (
   // update (2023/07/27): TIL @smogon/calc doesn't implement 'Power Trick' at all LOL
   // (I'm assuming most people were probably manually switching ATK/DEF in the calc to workaround this)
   if (nonEmptyObject(pokemon.volatiles) && 'powertrick' in pokemon.volatiles) {
-    const { atk, def } = options.overrides.baseStats;
+    const { atk: rawAtk, def: rawDef } = options.rawStats;
+    const { atk: baseAtk, def: baseDef } = options.overrides.baseStats;
 
-    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.atk = def;
-    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.def = atk;
+    options.rawStats.atk = rawDef;
+    options.rawStats.def = rawAtk;
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.atk = baseDef;
+    (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.def = baseAtk;
   }
 
   const smogonPokemon = new SmogonPokemon(

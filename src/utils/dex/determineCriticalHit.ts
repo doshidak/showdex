@@ -25,6 +25,7 @@ export const determineCriticalHit = (
 
   const {
     speciesForme,
+    altFormes,
     ability: revealedAbility,
     dirtyAbility,
     item: revealedItem,
@@ -39,6 +40,6 @@ export const determineCriticalHit = (
   return (
     alwaysCriticalHits(moveName, format)
       && (!pokemon.useZ || !getZMove(moveName, { item }))
-      && (!pokemon.useMax || !getMaxMove(moveName, { speciesForme, ability }))
+      && (!pokemon.useMax || !getMaxMove(moveName, { speciesForme, altFormes, ability }))
   ) || pokemon.criticalHit;
 };

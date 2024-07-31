@@ -52,6 +52,7 @@ export const PokeGlance = ({
     active,
     name: pokemonName,
     speciesForme,
+    cosmeticForme,
     level,
     types: currentTypes,
     dirtyTypes,
@@ -153,7 +154,7 @@ export const PokeGlance = ({
 
           <Picon
             pokemon={{
-              speciesForme,
+              speciesForme: cosmeticForme || speciesForme,
               item: (!itemEffect && item) || null,
             }}
           />

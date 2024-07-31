@@ -3,7 +3,7 @@ import { type FieldRenderProps } from 'react-final-form';
 import cx from 'classnames';
 import { ToggleButton, Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';
-import { formatId } from '@showdex/utils/core';
+import { dedupeArray, formatId } from '@showdex/utils/core';
 import { type TextFieldValue } from '../TextField';
 import styles from './Segmented.module.scss';
 
@@ -143,7 +143,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
       values.push(value);
     }
 
-    input.onChange(unique ? Array.from(new Set(values)) : values);
+    input.onChange(unique ? dedupeArray(values) : values);
   };
 
   return (

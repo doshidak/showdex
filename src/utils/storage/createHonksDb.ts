@@ -27,6 +27,14 @@ export const createHonksDb = (
     return null;
   }
 
+  if (db.objectStoreNames.contains(honksName)) {
+    // l.silly(honksName, 'object store already exists; returning that one instead');
+    l.silly(honksName, 'object store already exists');
+
+    // return db.transaction(honksName).objectStore(honksName); // warning: bad idea
+    return null;
+  }
+
   const store = db.createObjectStore(honksName, {
     keyPath: 'battleId',
   });

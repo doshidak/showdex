@@ -9,10 +9,8 @@ import styles from './PatronagePane.module.scss';
 /**
  * Internally-used tier renderer factory.
  *
- * * Return value of the outer function matches the function signature of
- *   the `callbackFn` argument of `Array.prototype.map()`.
- *   - This means you can specify this factory as the first argument
- *     after you specify the `key` (see example).
+ * * Return value of the outer function matches the function signature of the `callbackFn()` argument of `Array.prototype.map()`.
+ *   - This means you can specify this factory as the first argument after you specify the `key` (see example).
  *
  * @example
  * ```tsx
@@ -24,27 +22,35 @@ import styles from './PatronagePane.module.scss';
  */
 export const PatronageTierRenderer = (
   key: string,
-  colorScheme: Showdown.ColorScheme = 'light',
-  showTitles?: boolean,
+  config?: {
+    colorScheme?: Showdown.ColorScheme;
+    showTitles?: boolean;
+  },
 ) => (
   tier: ShowdexSupporterTier,
   index?: number,
 ): JSX.Element => {
   const {
+    colorScheme = 'light',
+    showTitles,
+  } = { ...config };
+
+  const {
     title,
     term,
     // names,
     members,
-  } = tier || {};
+    __updated: updated,
+  } = { ...tier };
+
+  const containerKey = `PatronagePane:${key}:${formatId(title)}`;
+  const notFirstTier = index > 0;
+  const membersCount = members.length;
 
   // note: we're not checking if `members[]` is empty since we render an mdash if it is
   if (!title || !Array.isArray(members)) {
     return null;
   }
-
-  const containerKey = `PatronagePane:${key}:${formatId(title)}`;
-  const notFirstTier = index > 0;
-  const membersCount = members.length;
 
   return (
     <React.Fragment key={containerKey}>
@@ -78,6 +84,7 @@ export const PatronageTierRenderer = (
                 homie={member}
                 term={term}
                 showTitles={showTitles}
+                updated={updated}
               />
 
               {

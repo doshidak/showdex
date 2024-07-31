@@ -9,7 +9,7 @@ import { showdexedDb } from './openIndexedDb';
 
 const metaName = env('indexed-db-meta-store-name');
 const presetsName = env('indexed-db-presets-store-name');
-const l = logger('@showdex/utils/storage/writePresetsDb()');
+const l = logger('@showdex/utils/storage/readPresetsDb()');
 
 /**
  * Grabs the cached `CalcdexPokemonPreset[]`'s from Showdex's IndexedDB presets store.

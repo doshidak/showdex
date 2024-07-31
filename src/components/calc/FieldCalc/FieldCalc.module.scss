@@ -10,9 +10,13 @@
   grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
   column-gap: 10px;
 
-  &.doubles {
+  &.expanded {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 6px;
+
+    &.skinnyBoi {
+      @include spacing.padding($x: 12px);
+    }
   }
 }
 
@@ -41,15 +45,17 @@
 .dropdownLabel {
   @include flex.row-center;
 
-  .doubles & {
+  .expanded & {
     @include spacing.margin($bottom: 0);
 
     &.weatherLabel {
       grid-area: 1 / 1;
+      @include spacing.margin($left: 12px);
     }
 
     &.terrainLabel {
       grid-area: 1 / 2;
+      @include spacing.margin($right: 12px);
     }
   }
 
@@ -66,60 +72,38 @@
     @include spacing.margin($left: 4px);
   }
 
-  .doubles & {
+  .expanded & {
     grid-area: 3 / 1;
-    @include spacing.margin($top: 4px, $left: 10px);
+    @include spacing.margin($top: 4px, $bottom: 1px, $left: 10px);
   }
 }
 
 .leftFieldInput {
-  .doubles & {
+  .expanded & {
     grid-area: 4 / 1;
     @include spacing.margin($top: 1px);
   }
 }
 
-// .weatherLabel {
-//   .doubles & {
-//     grid-area: 1 / 1;
-//     @include spacing.margin($bottom: 0);
-//   }
-// }
-
 .weatherInput {
   align-self: flex-start;
-  max-width: 152px;
+  // max-width: 152px;
   @include spacing.margin($x: auto);
 
-  .doubles & {
+  .expanded & {
     grid-area: 2 / 1;
-    @include spacing.margin($top: 4px, $bottom: 10px);
-
-    // .verySmol & {
-    //   @include spacing.margin($x: 10px);
-    // }
+    @include spacing.margin($top: 4px, $right: 0, $bottom: 10px, $left: 12px);
   }
 }
 
-// .terrainLabel {
-//   .doubles & {
-//     grid-area: 1 / 2;
-//     @include spacing.margin($bottom: 0);
-//   }
-// }
-
 .terrainInput {
   align-self: flex-start;
-  max-width: 152px;
+  // max-width: 152px;
   @include spacing.margin($x: auto);
 
-  .doubles & {
+  .expanded & {
     grid-area: 2 / 2;
-    @include spacing.margin($top: 4px, $bottom: 10px);
-
-    // .verySmol & {
-    //   @include spacing.margin($x: 10px);
-    // }
+    @include spacing.margin($top: 4px, $right: 12px, $bottom: 10px, $left: 0);
   }
 }
 
@@ -130,14 +114,14 @@
     @include spacing.margin($right: 4px);
   }
 
-  .doubles & {
+  .expanded & {
     grid-area: 3 / 2;
-    @include spacing.margin($top: 4px, $right: 10px);
+    @include spacing.margin($top: 4px, $right: 10px, $bottom: 1px);
   }
 }
 
 .rightFieldInput {
-  .doubles & {
+  .expanded & {
     grid-area: 4 / 2;
     @include spacing.margin($top: 1px);
   }
@@ -149,10 +133,6 @@ button.toggleButton {
   @include spacing.padding($x: 4px);
   font-size: 10px;
   text-transform: none;
-
-  .doubles & {
-    min-width: 58px;
-  }
 }
 
 .tooltipContent {

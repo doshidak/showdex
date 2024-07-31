@@ -28,6 +28,8 @@ import { dehydrateStatsTable } from './dehydrateStatsTable';
  *
  * 'isSR=y/isReflect=y'
  * ```
+ * @deprecated Especially as of v1.2.4, this is severely out of date & should not be used.
+ *   Using the new error dump tech introduced in the aformentioned version.
  * @since 1.0.3
  */
 export const dehydratePlayerSide = (
@@ -145,6 +147,8 @@ export const dehydratePlayerSide = (
  *   |0/c,Oricorio,Oricorio-Sensu>?,M,88,n,Ghost/Flying>?~?,100~?/100/n,?~?/0/0/0/0~?,n,?/?~Dancer/n,?~?>?/?>?,Timid,75~?/70~?>?/70~?>?/98~?>?/70~?>?/93~?>?,31/31/31/31/31/31,85/85/85/85/85/85,?/?/?/?/?/?,0~?/0~?/0~?/0~?/0~?,275/155/173/223/173/235,,n/n/n/n,,,,;
  * f:?|?
  * ```
+ * @deprecated Especially as of v1.2.4, this is severely out of date & should not be used.
+ *   Using the new error dump tech introduced in the aformentioned version.
  * @since 1.0.3
  */
 export const dehydrateCalcdex = (

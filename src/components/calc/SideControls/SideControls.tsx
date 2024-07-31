@@ -11,7 +11,8 @@ import styles from './SideControls.module.scss';
 export interface SideControlsProps {
   className?: string;
   style?: React.CSSProperties;
-  playerKey: CalcdexPlayerKey
+  playerKey: CalcdexPlayerKey;
+  topPlayerKey?: CalcdexPlayerKey;
 }
 
 const l = logger('@showdex/components/calc/SideControls');
@@ -20,6 +21,7 @@ export const SideControls = ({
   className,
   style,
   playerKey,
+  topPlayerKey,
 }: SideControlsProps): JSX.Element => {
   const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
@@ -32,13 +34,9 @@ export const SideControls = ({
     activatePokemon,
   } = useCalcdexContext();
 
-  const {
-    pokemon: party,
-    activeIndices,
-    selectionIndex,
-  } = state?.[playerKey] || {};
-
+  const { pokemon: party, activeIndices, selectionIndex } = state?.[playerKey] || {};
   const selectedPokemon = party?.[selectionIndex];
+  const sideLetter = playerKey === (topPlayerKey || 'p1') ? 'A' : 'B';
 
   const toggleActive = () => {
     if (state?.gameType === 'Singles') {
@@ -70,7 +68,7 @@ export const SideControls = ({
           Side
         </div> */}
         <div className={styles.letter}>
-          {playerKey === 'p1' ? 'A' : 'B'}
+          {sideLetter}
         </div>
       </div>
 
@@ -108,8 +106,8 @@ export const SideControls = ({
             `${l.scope}:ToggleButton~Move:onPress()`,
           )}
         >
-          <i className={`fa fa-arrow-${playerKey === 'p1' ? 'down' : 'up'}`} />
-          <span>{playerKey === 'p1' ? 'B' : 'A'}</span>
+          <i className={`fa fa-arrow-${sideLetter === 'A' ? 'down' : 'up'}`} />
+          <span>{sideLetter === 'A' ? 'B' : 'A'}</span>
         </ToggleButton>
 
         <ToggleButton

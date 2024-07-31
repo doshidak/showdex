@@ -1,3 +1,4 @@
+import { type GenerationNum } from '@smogon/calc';
 import { PokemonPokePasteStatMap } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
@@ -68,38 +69,43 @@ const exportStatsTable = (
  * ```ts
  * // note: this object is not a complete CalcdexPokemon, obviously
  * exportPokePaste({
- *   name: 'Smogonbirb',
- *   speciesForme: 'Talonflame',
+ *   name: 'Smogonbirb', // Pokemon's optional nickname
+ *   speciesForme: 'Kingambit', // required
  *   gender: 'F',
- *   item: null,
- *   dirtyItem: 'Flyinium Z',
  *   shiny: false,
- *   ability: 'Gale Wings',
+ *   level: 99,
+ *   nature: 'Adamant',
+ *   teraType: null,
+ *   dirtyTeraType: 'Flying',
+ *   ability: 'Supreme Overlord' as AbilityName,
  *   dirtyAbility: null,
- *   level: 100,
- *   nature: 'Jolly',
- *   ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
+ *   item: null, // battle-reported
+ *   prevItem: 'Black Glasses' as ItemName, // battle-reported
+ *   dirtyItem: 'Air Balloon' as ItemName, // user-modified
+ *   ivs: { hp: 31, atk: 31, def: 31, spa: 0, spd: 31, spe: 31 },
  *   evs: { hp: 0, atk: 252, def: 4, spa: 0, spd: 0, spe: 252 },
- *   moves: ['Brave Bird', 'Flare Blitz', 'Swords Dance', 'Roost'],
- * });
+ *   moves: ['Swords Dance', 'Sucker Punch', 'Kowtow Cleave', 'Iron Head'] as MoveName[],
+ *   // ... //
+ * } as CalcdexPokemon, 'gen9ou');
  *
- * `
- * Smogonbirb (Talonflame) (F) @ Flyinium Z
- * Ability: Gale Wings
+ * `Smogonbirb (Kingambit) (F) @ Air Balloon
+ * Ability: Supreme Overlord
+ * Tera Type: Flying
+ * IVs: 0 SpA
  * EVs: 252 Atk / 4 Def / 252 Spe
- * Jolly Nature
- * - Brave Bird
- * - Flare Blitz
+ * Level: 99
+ * Adamant Nature
  * - Swords Dance
- * - Roost
- * `
+ * - Sucker Punch
+ * - Kowtow Cleave
+ * - Iron Head`
  * ```
  * @see https://pokepast.es/syntax.html
  * @since 1.0.3
  */
 export const exportPokePaste = (
-  pokemon: DeepPartial<CalcdexPokemon>,
-  format?: string,
+  pokemon: Omit<Partial<CalcdexPokemon>, 'source'>,
+  format?: string | GenerationNum,
 ): string => {
   if (!pokemon?.speciesForme) {
     return null;
@@ -184,7 +190,7 @@ export const exportPokePaste = (
   // (<teraType> shouldn't print when '???' or matches the default Tera type, i.e., the first type of the Pokemon)
   const teraType = dirtyTeraType || revealedTeraType;
 
-  if (teraType && teraType !== '???' && teraType !== types[0]) {
+  if (teraType && teraType !== '???' && teraType !== (types?.[0] || dexCurrentForme.types?.[0])) {
     output.push(`Tera Type: ${teraType}`);
   }
 

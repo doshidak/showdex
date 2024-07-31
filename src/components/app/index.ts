@@ -1,4 +1,5 @@
 export * from './BattleGenOptionTooltip';
+export * from './GradientButton';
 export * from './HomieButton';
 export * from './ItemIcon';
 export * from './MemberIcon';
@@ -10,6 +11,7 @@ export * from './PokeGlance';
 export * from './PokeHpBar';
 export * from './PokeItemOptionTooltip';
 export * from './PokeMoveOptionTooltip';
+export * from './PokePresetOptionTooltip';
 export * from './PokeStatus';
 export * from './PokeStatusTooltip';
 export * from './PokeType';

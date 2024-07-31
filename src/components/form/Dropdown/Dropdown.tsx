@@ -101,6 +101,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   optionTooltipDelay = 500,
   options,
   components,
+  inputMode = 'none',
   loadingMessage = 'Loading...',
   noOptionsMessage = 'No Options',
   filterOption,
@@ -300,6 +301,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
             ValueContainer: SelectValueContainer,
             ...components,
           }}
+          inputMode={inputMode}
           loadingMessage={() => loadingMessage}
           noOptionsMessage={() => noOptionsMessage}
           autoFocus={autoFocus}

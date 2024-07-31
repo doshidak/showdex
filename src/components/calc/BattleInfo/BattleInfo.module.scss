@@ -20,6 +20,13 @@
       0 0 1px color.alpha(colors.$black, 0.16),
       0 0 6px color.alpha(colors.$gray-dark, 0.16),
     );
+
+    &.mina {
+      box-shadow: (
+        0 0 1px color.alpha(#770629, 0.32),
+        0 0 16px color.alpha(#9F1641, 0.16),
+      );
+    }
   }
 
   &.dark {

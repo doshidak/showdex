@@ -1,4 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
+import escape from 'regexp.escape';
 import {
   HydroPresetsDefaultName,
   HydroPresetsDehydrationMap,
@@ -290,7 +291,7 @@ export const hydratePresets = (
   // e.g., format = 9 -> formatFilter = 'fmt~gen9'
   // format = 'gen9randombattle' -> formatFilter = 'fmt~gen9randombattle'
   const formatDeclaration = `${HydroPresetsDehydrationMap.format}${presetOpcodeDelimiter}`;
-  const randomsRegex = new RegExp(`${formatDeclaration}gen\\d.*random`, 'i');
+  const randomsRegex = new RegExp(`${escape(formatDeclaration)}gen\\d.*random`, 'i');
   const formatFilter = parsedFormat ? `${formatDeclaration}${parsedFormat}` : null;
   const sourceFilter = source ? `${HydroPresetsDehydrationMap.source}${presetOpcodeDelimiter}${source}` : null;
 

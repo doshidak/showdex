@@ -10,7 +10,7 @@
 
 button.usernameButton {
   justify-content: initial;
-  max-width: 90%;
+  max-width: 100%;
   @include font.apply(fonts.$primary, ( font-weight: 500 ));
 
   .light & {

@@ -3,7 +3,7 @@ import { type CalcdexAutoBoostMap } from './CalcdexAutoBoostMap';
 import { type CalcdexLeanPokemon } from './CalcdexLeanPokemon';
 import { type CalcdexMoveOverride } from './CalcdexMoveOverride';
 import { type CalcdexPlayerKey } from './CalcdexPlayerKey';
-import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
+import { type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from './CalcdexPokemonAlt';
 import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from './CalcdexPokemonPreset';
 
 /**
@@ -95,6 +95,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   gmaxable?: boolean;
 
   /**
+   * Cosmetic forme of the Pokemon.
+   *
+   * * Has no use in calculations; purely used cosmetically in rendered `Picons`.
+   *
+   * @example
+   * ```ts
+   * 'Minior-Green'
+   * ```
+   * @default null
+   * @since 1.2.4
+   */
+  cosmeticForme?: string;
+
+  /**
    * Alternative formes of the Pokemon.
    *
    * * Includes the original `speciesForme` for easier cycling in the `PokeInfo` UI.
@@ -140,6 +154,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.3
    */
   transformedForme?: string;
+
+  /**
+   * Transformed `cosmeticForme`, if applicable.
+   *
+   * * Has no use in calculations; purely used cosmetically in rendered `Picons`.
+   *
+   * @example
+   * ```ts
+   * 'Minior-Violet'
+   * ```
+   * @default null
+   * @since 1.2.4
+   */
+  transformedCosmeticForme?: string;
 
   /**
    * Current types of the Pokemon.
@@ -499,7 +527,7 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   transformedMoves?: MoveName[];
 
   /**
-   * Alternative moves from the currently applied `preset`.
+   * Alternative moves from the currently applied `presetId`.
    *
    * * Should be rendered within the moves dropdown, similar to the moves in the properties of `moveState`.
    * * For instance, there may be more than 4 moves from a random preset.
@@ -513,6 +541,22 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    * @since 0.1.0
    */
   altMoves?: CalcdexPokemonAlt<MoveName>[];
+
+  /**
+   * Usage `altMoves[]` from a relevant `'usage'`-sourced preset.
+   *
+   * * Primarily used by `mergeRevealedMoves()` to avoid replacing 100% guaranteed moves (typically in role-based Randoms).
+   * * Populated from the `config.usage` preset provided to the `applyPreset()` utility from `@showdex/utils/presets`.
+   * * Note that this isn't necessarily sourced from the currently applied `presetId`.
+   *   - Refer to the `usageId` to find the `'usage'`-sourced preset that this was originally derived from.
+   *
+   * @default
+   * ```ts
+   * []
+   * ```
+   * @since 1.2.4
+   */
+  usageMoves?: CalcdexPokemonUsageAlt<MoveName>[];
 
   /**
    * Last move used by the Pokemon.
@@ -938,6 +982,17 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyFaintCounter?: number;
 
   /**
+   * ID of the `'usage'`-sourced preset that the usage props (e.g., `usageMoves[]`) are derived from.
+   *
+   * * ID refers to the `calcdexId` of the preset.
+   * * Populated from the `config.usage` preset provided to the `applyPreset()` utility from `@showdex/utils/presets`.
+   *
+   * @default null
+   * @since 1.2.4
+   */
+  usageId?: string;
+
+  /**
    * ID of the preset that's currently applied to the Pokemon.
    *
    * * ID refers to the `calcdexId` of the preset.
@@ -963,13 +1018,12 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   presetSource?: CalcdexPokemonPresetSource;
 
   /**
-   * Available presets (i.e., sets) for the Pokemon.
+   * Available unique presets (i.e., sets) for the Pokemon.
    *
    * * These are typically presets derived from the battle, not downloaded from an external repository.
    *   - You'll find presets sourced from the `'server'`, `'storage'`/`'storage-box'` (from the Teambuilder),
    *     `'import'` (imported PokePastes), and `'sheets'` (open team sheets or `!showteam`).
-   * * As such, this is uniquely populated for each battle, if presets from any of the aforementioned sources
-   *   are available.
+   * * As such, this is uniquely populated for each battle, if presets from any of the aforementioned sources are available.
    *
    * @default
    * ```ts
@@ -980,10 +1034,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   presets?: CalcdexPokemonPreset[];
 
   /**
-   * Whether the preset should automatically update based on revealed moves (i.e., `moveState.revealed`).
+   * Whether the preset should automatically update based on revealed information (e.g., `revealedMoves[]`).
    *
    * @default true
    * @since 0.1.0
    */
   autoPreset?: boolean;
+
+  /**
+   * ID of the matched preset was found from the set of presets to be the most reflective of the revealed info.
+   *
+   * * Primarily used to "reset" the preset to the matched preset in `PokeInfo` once found.
+   *
+   * @default null
+   * @since 1.2.4
+   */
+  autoPresetId?: string;
 }

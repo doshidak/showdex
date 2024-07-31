@@ -1,9 +1,9 @@
 import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonRandomsStatsResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
-import { calcPresetCalcdexId } from '@showdex/utils/calc';
+import { calcPresetCalcdexId, populateStatsTable } from '@showdex/utils/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
-import { getDefaultSpreadValue, getGenlessFormat } from '@showdex/utils/dex';
+import { getGenlessFormat } from '@showdex/utils/dex';
 import { flattenAlts, processUsageAlts } from '@showdex/utils/presets';
 
 // const l = logger('@showdex/redux/transformers/transformRandomsStatsResponse()');
@@ -26,9 +26,6 @@ export const transformRandomsStatsResponse = (
   }
 
   const format = args.format || `gen${args.gen}randombattle`;
-
-  const defaultIv = getDefaultSpreadValue('iv', format);
-  const defaultEv = getDefaultSpreadValue('ev', format);
 
   // this will be our final return value
   const output: CalcdexPokemonPreset[] = [];
@@ -58,28 +55,11 @@ export const transformRandomsStatsResponse = (
       name: 'Showdown Usage',
       gen: args.gen,
       format: getGenlessFormat(format),
-
       speciesForme,
       level,
       nature: 'Hardy',
-
-      ivs: {
-        hp: ivs?.hp ?? defaultIv,
-        atk: ivs?.atk ?? defaultIv,
-        def: ivs?.def ?? defaultIv,
-        spa: ivs?.spa ?? defaultIv,
-        spd: ivs?.spd ?? defaultIv,
-        spe: ivs?.spe ?? defaultIv,
-      },
-
-      evs: {
-        hp: evs?.hp ?? defaultEv,
-        atk: evs?.atk ?? defaultEv,
-        def: evs?.def ?? defaultEv,
-        spa: evs?.spa ?? defaultEv,
-        spd: evs?.spd ?? defaultEv,
-        spe: evs?.spe ?? defaultEv,
-      },
+      ivs: populateStatsTable(ivs, { spread: 'iv', format }),
+      evs: populateStatsTable(evs, { spread: 'ev', format }),
     };
 
     const altAbilities = processUsageAlts(abilities, args.gen, 'abilities');

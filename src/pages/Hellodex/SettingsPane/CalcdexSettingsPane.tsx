@@ -174,24 +174,6 @@ export const CalcdexSettingsPane = ({
           disabled={value?.calcdex?.openAs === 'overlay'}
         />
 
-        <Field<ShowdexCalcdexSettings['prioritizeUsageStats']>
-          name="calcdex.prioritizeUsageStats"
-          component={Switch}
-          className={cx(styles.field, styles.switchField)}
-          label={t('calcdex.prioritizeUsageStats.label') as React.ReactNode}
-          tooltip={(
-            <Trans
-              t={t}
-              i18nKey="calcdex.prioritizeUsageStats.tooltip"
-              parent="div"
-              className={styles.tooltipContent}
-              shouldUnescape
-            />
-          )}
-          format={(v) => (!value?.calcdex?.downloadUsageStats ? false : v)}
-          disabled={!value?.calcdex?.downloadUsageStats}
-        />
-
         <Field<ShowdexCalcdexSettings['showSpreadsFirst']>
           name="calcdex.showSpreadsFirst"
           component={Switch}
@@ -383,6 +365,22 @@ export const CalcdexSettingsPane = ({
             <Trans
               t={t}
               i18nKey="calcdex.enableQuickEditor.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+        />
+
+        <Field<ShowdexCalcdexSettings['expandFieldControls']>
+          name="calcdex.expandFieldControls"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('calcdex.expandFieldControls.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="calcdex.expandFieldControls.tooltip"
               parent="div"
               className={styles.tooltipContent}
               shouldUnescape

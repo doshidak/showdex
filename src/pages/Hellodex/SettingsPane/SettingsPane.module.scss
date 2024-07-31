@@ -20,11 +20,19 @@ $close-icon-size: 28px;
   &.light {
     color: colors.$black;
     background-color: color.alpha(colors.$white, 0.94);
+
+    &.mina {
+      background-color: color.alpha(#F5DAE3, 0.88);
+    }
   }
 
   &.dark {
     color: colors.$white;
     background-color: color.alpha(colors.$gray-darkest, 0.94);
+
+    &.mina {
+      background-color: color.alpha(#2D0D1C, 0.94);
+    }
   }
 
   &.glassy {
@@ -32,10 +40,18 @@ $close-icon-size: 28px;
 
     &.light {
       background-color: color.alpha(colors.$white, 0.64);
+
+      &.mina {
+        background-color: color.alpha(#F5DAE3, 0.64);
+      }
     }
 
     &.dark {
       background-color: color.alpha(colors.$gray-darkest, 0.8);
+
+      &.mina {
+        background-color: color.alpha(#2D0D1C, 0.8);
+      }
     }
   }
 
@@ -55,7 +71,7 @@ $close-icon-size: 28px;
 
 .header {
   @include flex.row-between;
-  @include spacing.padding($x: 12px, $y: 6px);
+  @include spacing.padding($x: 12px, $top: 4px, $bottom: 6px);
   @include transition.apply(padding);
   user-select: none;
 
@@ -112,6 +128,10 @@ $close-icon-size: 28px;
         @include spacing.margin($right: 8px);
       }
 
+      .inBattle &:not(:last-of-type) {
+        @include spacing.margin($right: 2px);
+      }
+
       &:last-of-type {
         @include spacing.margin($right: 16px);
       }
@@ -131,6 +151,10 @@ $close-icon-size: 28px;
 
     .defaultsButton {
       @include spacing.margin($right: 16px);
+
+      .inBattle & {
+        @include spacing.margin($right: 8px);
+      }
     }
   }
 }
@@ -180,7 +204,7 @@ $close-icon-size: 28px;
 }
 
 .settingsGroup {
-  @include spacing.margin($all: 12px);
+  @include spacing.margin($y: 12px);
   @include spacing.padding($x: 12px, $top: 20px, $bottom: 24px);
   border-radius: 12px;
   @include transition.apply(background-color, box-shadow);
@@ -193,12 +217,24 @@ $close-icon-size: 28px;
     );
   }
 
+  .light.mina & {
+    background-color: color.alpha(#FFF7FA, 0.8);
+    box-shadow: (
+      0 0 1px color.alpha(#770629, 0.32),
+      0 0 16px color.alpha(#9F1641, 0.16),
+    );
+  }
+
   .dark & {
     background-color: color.alpha(colors.$gray-darkest, 0.8);
     box-shadow: (
       0 0 1px color.alpha(colors.$white, 0.32),
       0 0 8px color.alpha(colors.$gray-dark, 0.48),
     );
+  }
+
+  .dark.mina & {
+    background-color: color.alpha(#100206, 0.48);
   }
 
   .glassy & {
@@ -209,8 +245,16 @@ $close-icon-size: 28px;
     background-color: color.alpha(colors.$white, 0.24);
   }
 
+  .glassy.light.mina & {
+    background-color: color.alpha(#FFF7FA, 0.4);
+  }
+
   .glassy.dark & {
     background-color: color.alpha(colors.$black, 0.24);
+  }
+
+  .glassy.dark.mina & {
+    background-color: color.alpha(#100206, 0.24);
   }
 }
 

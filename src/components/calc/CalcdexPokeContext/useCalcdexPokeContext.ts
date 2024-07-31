@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { appliedPreset, applyPreset as applyPokemonPreset, flattenAlts } from '@showdex/utils/presets';
 import { useCalcdexContext } from '../CalcdexContext';
 import { type CalcdexPokeContextValue, CalcdexPokeContext } from './CalcdexPokeContext';
 
@@ -16,6 +15,19 @@ export interface CalcdexPokeContextConsumables extends CalcdexPokeContextValue {
     scope?: string,
   ) => void;
 
+  importPresets: (
+    presets: CalcdexPokemonPreset[], // alwaysAdd = true -> will always add as new; otherwise, will only apply to ctx player's pokemon[]
+    additionalMutations?: Record<string, Partial<CalcdexPokemon>>, // key = preset's calcdexId
+    alwaysAdd?: boolean,
+    scope?: string,
+  ) => number; // returns # of successfully imported presets
+
+  applyPreset: (
+    presetOrId: CalcdexPokemonPreset | string,
+    additionalMutations?: Partial<CalcdexPokemon>,
+    scope?: string,
+  ) => void;
+
   updatePokemon: (
     pokemon: Partial<CalcdexPokemon>,
     scope?: string,
@@ -24,12 +36,6 @@ export interface CalcdexPokeContextConsumables extends CalcdexPokeContextValue {
   removePokemon: (
     pokemonOrId: PickRequired<CalcdexPokemon, 'calcdexId'> | string,
     reselectLast?: boolean,
-    scope?: string,
-  ) => void;
-
-  applyPreset: (
-    presetOrId: CalcdexPokemonPreset | string,
-    additionalMutations?: Partial<CalcdexPokemon>,
     scope?: string,
   ) => void;
 
@@ -54,19 +60,11 @@ const s = (local: string, via?: string): string => `${l.scope}:${local}${via ? `
 
 export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
   const ctx = React.useContext(CalcdexPokeContext);
-
-  const {
-    state,
-    // settings,
-    playerKey,
-    playerPokemon,
-    presets,
-    usages,
-    usage,
-  } = ctx;
+  const { playerKey, playerPokemon, presets } = ctx;
 
   const {
     addPokemon: addPlayerPokemon,
+    importPresets: importPlayerPresets,
     updatePokemon: updatePlayerPokemon,
     removePokemon: removePlayerPokemon,
     activatePokemon,
@@ -83,6 +81,40 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
     null,
     s('addPokemon()', scopeFromArgs),
   );
+
+  const importPresets: CalcdexPokeContextConsumables['importPresets'] = (
+    importedPresets,
+    additionalMutations,
+    alwaysAdd,
+    scopeFromArgs,
+  ) => importPlayerPresets(
+    playerKey,
+    importedPresets,
+    additionalMutations,
+    alwaysAdd,
+    s('importPresets()', scopeFromArgs),
+  );
+
+  const applyPreset: CalcdexPokeContextConsumables['applyPreset'] = (
+    presetOrId,
+    additionalMutations,
+    scopeFromArgs,
+  ) => {
+    // used for debugging purposes only
+    const scope = s('applyPreset()', scopeFromArgs);
+    const endTimer = runtimer(scope, l);
+
+    const preset = typeof presetOrId === 'string'
+      ? presets.find((p) => p.calcdexId === presetOrId)
+      : presetOrId;
+
+    if (!preset?.calcdexId) {
+      return void endTimer('(invalid preset)');
+    }
+
+    importPresets([preset], { [preset.calcdexId]: additionalMutations }, false, scope);
+    endTimer('(delegated)');
+  };
 
   const updatePokemon: CalcdexPokeContextConsumables['updatePokemon'] = (
     pokemon,
@@ -107,71 +139,14 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
     s('removePokemon()', scopeFromArgs),
   );
 
-  const applyPreset: CalcdexPokeContextConsumables['applyPreset'] = (
-    presetOrId,
-    additionalMutations,
-    scopeFromArgs,
-  ) => {
-    // used for debugging purposes only
-    const scope = s('applyPreset()', scopeFromArgs);
-    const endTimer = runtimer(scope, l);
-
-    const preset = typeof presetOrId === 'string'
-      ? presets.find((p) => p.calcdexId === presetOrId)
-      : presetOrId;
-
-    if (!preset?.calcdexId) {
-      return void endTimer('(invalid preset)');
-    }
-
-    if (appliedPreset(state?.format, playerPokemon, preset)) {
-      if (playerPokemon.presetId !== preset.calcdexId) {
-        updatePokemon({
-          ...additionalMutations,
-          presetId: preset.calcdexId,
-          presetSource: preset.source,
-        }, scope);
-      }
-
-      return void endTimer('(no change)');
-    }
-
-    const presetMoves = preset.altMoves?.length ? flattenAlts(preset.altMoves) : preset.moves;
-    const presetUsage = (usages.length === 1 && usage)
-      || usages.find((u) => {
-        const movePool = flattenAlts(u.altMoves);
-
-        return presetMoves.every((m) => movePool.includes(m));
-      })
-      || usage;
-
-    const presetPayload = applyPokemonPreset(state.format, {
-      ...playerPokemon,
-      ...additionalMutations,
-    }, preset, presetUsage);
-
-    /**
-     * @todo update when more than 4 moves are supported
-     */
-    if (state.active && playerPokemon.source !== 'server' && playerPokemon.revealedMoves.length === 4) {
-      delete presetPayload.moves;
-    }
-
-    updatePokemon({
-      ...additionalMutations,
-      ...presetPayload,
-    }, scope);
-
-    endTimer('(update called)');
-  };
-
   return {
     ...ctx,
 
     addPokemon,
+    importPresets,
+    applyPreset,
     updatePokemon,
     removePokemon,
-    applyPreset,
     activatePokemon: (indices, scope) => activatePokemon(playerKey, indices, s('activatePokemon()', scope)),
     selectPokemon: (index, scope) => selectPokemon(playerKey, index, s('selectPokemon()', scope)),
     autoSelectPokemon: (enabled, scope) => autoSelectPokemon(playerKey, enabled, s('autoSelectPokemon()', scope)),

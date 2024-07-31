@@ -49,7 +49,7 @@ export const GeneralSettingsPane = ({
           )}
           label={t('showdex.locale.label') as React.ReactNode}
           labelPosition={inBattle ? 'top' : 'left'}
-          options={ShowdexLocaleBundles?.filter((b) => !!b?.id && b.tag === 'locale').map((bundle) => ({
+          options={ShowdexLocaleBundles?.filter((b) => !!b?.id && b.ntt === 'locale').map((bundle) => ({
             label: bundle.label || bundle.name,
             tooltip: (
               <div className={styles.tooltipContent}>
@@ -76,11 +76,11 @@ export const GeneralSettingsPane = ({
                 }
 
                 {
-                  !!bundle.description &&
+                  !!bundle.desc &&
                   <>
                     <br />
                     <br />
-                    {bundle.description === '(i18n)' ? (
+                    {bundle.desc === '(i18n)' ? (
                       <Trans
                         t={t}
                         i18nKey={`showdex.locale.options.${bundle.locale}.description`}
@@ -90,7 +90,7 @@ export const GeneralSettingsPane = ({
                           ndash: <span>&ndash;</span>,
                         }}
                       />
-                    ) : bundle.description}
+                    ) : bundle.desc}
                   </>
                 }
 
@@ -324,6 +324,31 @@ export const GeneralSettingsPane = ({
             <div className={styles.settingsGroupTitle}>
               {t('pane.sections.secondary.special')}
             </div>
+
+            <Field<ShowdexSettings['colorTheme']>
+              name="colorTheme"
+              component={Segmented}
+              className={styles.field}
+              label={t('showdex.colorTheme.label') as React.ReactNode}
+              labelPosition={inBattle ? 'top' : 'left'}
+              options={[
+                'sic',
+                'mina',
+              ].map((option) => ({
+                label: t(`showdex.colorTheme.options.${option}.label`),
+                tooltip: (
+                  <Trans
+                    t={t}
+                    i18nKey={`showdex.colorTheme.options.${option}.tooltip`}
+                    parent="div"
+                    className={styles.tooltipContent}
+                    shouldUnescape
+                    components={{ ndash: <span>&ndash;</span> }}
+                  />
+                ),
+                value: option,
+              }))}
+            />
 
             <Field<ShowdexSettings['glassyTerrain']>
               name="glassyTerrain"

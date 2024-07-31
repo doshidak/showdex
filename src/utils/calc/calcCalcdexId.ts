@@ -1,7 +1,7 @@
 import { NIL as NIL_UUID, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { type CalcdexPlayerKey, type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
-import { env, nonEmptyObject } from '@showdex/utils/core';
+import { dedupeArray, env, nonEmptyObject } from '@showdex/utils/core';
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -48,14 +48,11 @@ export const calcPresetCalcdexId = (
   speciesForme: preset?.speciesForme,
   level: String(preset?.level || 100),
   // shiny: String(!!preset?.shiny),
-  ability: preset?.ability,
-  // altAbilities: preset?.altAbilities?.join(','),
+  ability: dedupeArray([preset?.ability, ...(preset?.altAbilities || [])]).sort().join(','),
   nature: preset?.nature,
-  item: preset?.item,
-  // altItems: preset?.altItems?.join(','),
+  item: dedupeArray([preset?.item, ...(preset?.altItems || [])]).sort().join(','),
   // update (2023/10/11): HOLY FUCKKKKKKKKK the mystery of the sorting moves[] has been solved !!
-  moves: [...(preset?.moves || [])].sort().join(','), // sort moves in ABC order
-  // altMoves: preset?.moves?.join(','),
+  moves: dedupeArray([...(preset?.moves || []), ...(preset?.altMoves || [])]).sort().join(','),
   ivs: calcCalcdexId<Showdown.StatsTable>(preset?.ivs),
   evs: calcCalcdexId<Showdown.StatsTable>(preset?.evs),
   // happiness: String(preset?.happiness),
@@ -63,7 +60,7 @@ export const calcPresetCalcdexId = (
   // hiddenPowerType: preset?.hiddenPowerType,
   // dynamaxLevel: String(preset?.dynamaxLevel),
   // gigantamax: String(!!preset?.gigantamax),
-  // teraTypes: preset?.teraTypes?.join(','),
+  teraTypes: [...(preset?.teraTypes || [])].sort().join(','),
 });
 
 /* eslint-disable @typescript-eslint/indent */

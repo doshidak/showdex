@@ -24,6 +24,10 @@
     &::before {
       background-color: color.alpha(colors.$showdown-background-light, 0.8);
     }
+
+    &.mina::before {
+      background-color: color.alpha(#F5DAE3, 0.72);
+    }
   }
 
   &.dark {
@@ -31,6 +35,10 @@
 
     &::before {
       background-color: color.alpha(colors.$gray-darkest, 0.88);
+    }
+
+    &.mina::before {
+      background-color: color.alpha(#3A242E, 0.94);
     }
   }
 
@@ -43,8 +51,16 @@
       background-color: color.alpha(colors.$showdown-background-light, 0.56);
     }
 
+    &.light.mina::before {
+      background-color: color.alpha(#F5DAE3, 0.64);
+    }
+
     &.dark::before {
       background-color: color.alpha(colors.$gray-darkest, 0.8);
+    }
+
+    &.dark.mina::before {
+      background-color: color.alpha(#2D0D1C, 0.8);
     }
   }
 }
@@ -66,7 +82,7 @@
 }
 
 .fieldCalc {
-  max-width: 680px;
+  max-width: 400px;
   @include spacing.margin($x: auto, $top: 16px);
 }
 

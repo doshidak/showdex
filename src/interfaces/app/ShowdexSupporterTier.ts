@@ -150,4 +150,26 @@ export interface ShowdexSupporterTier {
    * @since 1.2.0
    */
   members: ShowdexSupporterTierMember[];
+
+  /**
+   * Associated `id` of this tier's parent `ShowdexAssetBundle`.
+   *
+   * * Not actually part of the API's response but populated post-`runtimeFetch()`, rather.
+   * * Populated in the `bakeBakedexBundles()` utility from `@showdex/utils/app`.
+   *
+   * @since 1.2.4
+   */
+  __bunId?: string;
+
+  /**
+   * Unix epoch timestamp of when this tier was last updated.
+   *
+   * * Not actually part of the API's response but populated post-`runtimeFetch()`, rather.
+   * * Derived from this tier's parent `ShowdexAssetBundle`'s `updated` value.
+   *   - (Also opting to leave this as a `number` so that you can easily `sort()` based on this prop if need be.)
+   * * Populated in the `bakeBakedexBundles()` utility from `@showdex/utils/app`.
+   *
+   * @since 1.2.4
+   */
+  __updated?: number;
 }

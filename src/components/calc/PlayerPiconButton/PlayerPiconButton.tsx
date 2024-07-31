@@ -12,7 +12,7 @@ export interface PlayerPiconButtonProps extends Pick<PiconButtonProps, 'nativePr
   className?: string;
   style?: React.CSSProperties;
   player: CalcdexPlayer;
-  pokemon: Partial<CalcdexPokemon> | string | number;
+  pokemon: Partial<CalcdexPokemon>;
   operatingMode?: CalcdexOperatingMode;
   format?: string;
   showNickname?: boolean;
@@ -61,8 +61,6 @@ export const PlayerPiconButton = React.forwardRef<ButtonElement, PlayerPiconButt
     || pokemon?.name
     || pokemonKey;
 
-  // don't show transformedForme here, as requested by camdawgboi
-  const speciesForme = pokemon?.speciesForme;
   const hp = calcPokemonCurrentHp(pokemon);
   const item = pokemon?.dirtyItem ?? pokemon?.item;
 
@@ -96,9 +94,9 @@ export const PlayerPiconButton = React.forwardRef<ButtonElement, PlayerPiconButt
       )}
       display="block"
       aria-label={t('player.party.aria', { pokemon: friendlyPokemonName })}
-      pokemon={speciesForme ? {
-        ...pokemon,
-        speciesForme: speciesForme?.replace(pokemon?.useMax ? '' : '-Gmax', ''),
+      pokemon={pokemon?.speciesForme ? {
+        // don't show transformedForme here, as requested by camdawgboi
+        speciesForme: (pokemon.cosmeticForme || pokemon.speciesForme)?.replace(pokemon.useMax ? '' : '-Gmax', ''),
         item,
       } : 'pokeball-none'}
       tooltip={pokemon?.speciesForme ? (

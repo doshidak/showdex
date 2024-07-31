@@ -189,6 +189,14 @@ export interface CalcdexBattleState extends Partial<Record<CalcdexPlayerKey, Cal
   active?: boolean;
 
   /**
+   * Whether the battle is currently paused / ended.
+   *
+   * @default false
+   * @since 1.2.4
+   */
+  paused?: boolean;
+
+  /**
    * Render mode of the Calcdex, determined from the settings during initialization.
    *
    * * Only used when the `operatingMode` is `'battle`'.

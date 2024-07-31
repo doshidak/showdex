@@ -4,9 +4,8 @@ import { Field } from 'react-final-form';
 import cx from 'classnames';
 import { format } from 'date-fns';
 import { Segmented, Switch } from '@showdex/components/form';
-import { ShowdexPresetsBundles } from '@showdex/consts/app';
 import { GenLabels } from '@showdex/consts/dex';
-import { type ShowdexCalcdexSettings, type ShowdexSettings } from '@showdex/interfaces/app';
+import { type ShowdexCalcdexSettings, type ShowdexPresetsBundle, type ShowdexSettings } from '@showdex/interfaces/app';
 import { getGenfulFormat, parseBattleFormat } from '@showdex/utils/dex';
 import styles from './SettingsPane.module.scss';
 
@@ -14,7 +13,9 @@ export interface PresetsSettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
   value?: ShowdexSettings;
+  presets?: ShowdexPresetsBundle[];
   inBattle?: boolean;
+  clearing?: boolean;
 }
 
 /**
@@ -26,7 +27,9 @@ export const PresetsSettingsPane = ({
   className,
   style,
   value,
+  presets,
   inBattle,
+  clearing,
 }: PresetsSettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
 
@@ -40,6 +43,43 @@ export const PresetsSettingsPane = ({
       </div>
 
       <div className={styles.settingsGroupFields}>
+        <Field<ShowdexCalcdexSettings['prioritizePresetSource']>
+          name="calcdex.prioritizePresetSource"
+          component={Segmented}
+          className={cx(
+            styles.field,
+            !inBattle && styles.singleColumn,
+          )}
+          label={t('calcdex.prioritizePresetSource.label') as React.ReactNode}
+          labelPosition={inBattle ? 'top' : 'left'}
+          options={[
+            'smogon',
+            'usage',
+            'storage',
+          ].map((option) => ({
+            label: t(`calcdex.prioritizePresetSource.options.${option}.label`),
+            tooltip: (
+              <Trans
+                t={t}
+                i18nKey={`calcdex.prioritizePresetSource.options.${option}.tooltip`}
+                parent="div"
+                className={styles.tooltipContent}
+                components={{ rarr: <span>&rarr;</span> }}
+                shouldUnescape
+              />
+            ),
+            value: option,
+            disabled: (
+              option === 'smogon'
+                && !value?.calcdex?.downloadSmogonPresets
+                && !value?.calcdex?.downloadRandomsPresets
+                && !value?.calcdex?.includePresetsBundles?.length
+            )
+              || (option === 'usage' && !value?.calcdex?.downloadUsageStats)
+              || (option === 'storage' && (!value?.calcdex?.includeTeambuilder || value.calcdex.includeTeambuilder === 'never')),
+          }))}
+        />
+
         <Field<ShowdexCalcdexSettings['includeTeambuilder']>
           name="calcdex.includeTeambuilder"
           component={Segmented}
@@ -101,7 +141,7 @@ export const PresetsSettingsPane = ({
             ),
             value: count,
           }))}
-          disabled={(
+          disabled={clearing || (
             !value?.calcdex?.downloadSmogonPresets
               && !value?.calcdex?.downloadRandomsPresets
               && !value?.calcdex?.downloadUsageStats
@@ -158,7 +198,7 @@ export const PresetsSettingsPane = ({
           )}
           label={t('calcdex.includePresetsBundles.label') as React.ReactNode}
           labelPosition={inBattle ? 'top' : 'left'}
-          options={ShowdexPresetsBundles?.filter((b) => !!b?.id && b.tag === 'presets').map((bundle) => ({
+          options={presets?.filter((b) => !!b?.id && b.ntt === 'presets').map((bundle) => ({
             label: bundle.label || bundle.name,
             tooltip: bundle.gen && bundle.format ? (
               <div className={styles.tooltipContent}>
@@ -178,16 +218,7 @@ export const PresetsSettingsPane = ({
                     />
                   </>
                 }
-
-                {
-                  !!bundle.description &&
-                  <>
-                    <br />
-                    <br />
-                    {bundle.description}
-                  </>
-                }
-
+                {!!bundle.desc && <><br /><br />{bundle.desc}</>}
                 {
                   !!bundle.updated &&
                   <>

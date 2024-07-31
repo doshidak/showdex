@@ -1,0 +1,57 @@
+{
+  "ok": true,
+  "status": [
+    200,
+    "OK"
+  ],
+  "ntt": "buns",
+  "payload": {
+    "players": {
+      "a913c71f-56e3-4e6e-8f3d-2c12f7de63e9": {
+        "id": "a913c71f-56e3-4e6e-8f3d-2c12f7de63e9",
+        "ntt": "titles",
+        "name": "Showdex Player Titles",
+        "ext": "json",
+        "created": "2022-10-28T15:25:31Z",
+        "updated": "2024-01-28T11:30:31.950Z",
+        "disabled": false
+      }
+    },
+    "presets": {
+      "d45db13d-567e-4b41-91d4-268cc83e1ce6": {
+        "id": "d45db13d-567e-4b41-91d4-268cc83e1ce6",
+        "ntt": "presets",
+        "name": "Nimbasa City Post VGC",
+        "label": "NCP VGC 2024",
+        "author": "nerd-of-now",
+        "ext": "json",
+        "gen": 9,
+        "format": "vgc2024",
+        "desc": "Curated VGC sets from the Nimbasa City Post VGC Damage Calculator, as of July 2024.",
+        "created": "2024-01-04T09:38:33Z",
+        "updated": "2024-07-23T07:47:50.573Z",
+        "disabled": false
+      }
+    },
+    "supporters": {
+      "9f2aa03b-34fc-4f68-8bf7-601b98de4c91": {
+        "id": "9f2aa03b-34fc-4f68-8bf7-601b98de4c91",
+        "ntt": "tiers",
+        "name": "Showdex Donors",
+        "ext": "json",
+        "created": "2023-02-07T04:23:37Z",
+        "updated": "2024-07-23T10:12:11.416Z",
+        "disabled": false
+      },
+      "ff737d5b-6d95-4b08-ae74-8a2e33fc1a5d": {
+        "id": "ff737d5b-6d95-4b08-ae74-8a2e33fc1a5d",
+        "ntt": "tiers",
+        "name": "Showdex Patrons",
+        "ext": "json",
+        "created": "2023-02-07T04:23:37Z",
+        "updated": "2024-07-23T10:12:11.416Z",
+        "disabled": false
+      }
+    }
+  }
+}

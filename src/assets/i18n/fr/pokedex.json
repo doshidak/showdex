@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "pokedex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T16:53:23.631Z",
-    "updated": "2024-01-17T19:10:31.077Z"
+    "updated": "2024-07-30T20:05:27.693Z"
   },
 
   "abilities": {
@@ -3406,15 +3406,20 @@
     "cap": "CAP",
     "caplc": "CAP LC",
     "capmoves": "Capacités CAP",
+    "challengeableoms": "OMs Contestables",
     "current": "$t(common:labels.current)",
+    "daily": "Quotidienne",
     "defense": "Défense",
     "dou": "Doubles OU",
     "dnu": "Doubles NU",
     "duber": "Doubles Ubers",
     "duu": "Doubles UU",
     "favorites": "Favoris",
+    "featuredoms": "OMs en Vedette",
     "field": "Terrain",
     "formes": "Formes",
+    "gendoubles": "Doubles $t(pokedex:gens.{{gen}}.label)",
+    "gensingles": "Singles $t(pokedex:gens.{{gen}}.label)",
     "hiddenability": "Talent Caché",
     "hiddenpower": "Puissance Cachée",
     "illegalresults": "Illégaux",
@@ -3452,6 +3457,7 @@
     "pretransform": "Pre-Transform",
     "pu": "PU",
     "publ": "PUBL",
+    "randomizedoms": "OMs Randomisés",
     "regular": "Standard",
     "restrictedlegendary": "Légendaires Restreints",
     "revealedmoves": "Révélées",

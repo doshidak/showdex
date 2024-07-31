@@ -26,8 +26,8 @@ export const createSmogonField = (
   const processedField: Partial<SmogonState.Field> = {
     ...field,
     gameType,
-    weather: (field.dirtyWeather ?? field.weather) || null,
-    terrain: (field.dirtyTerrain ?? field.terrain) || null,
+    weather: (field.dirtyWeather ?? (field.autoWeather || field.weather)) || null,
+    terrain: (field.dirtyTerrain ?? (field.autoTerrain || field.terrain)) || null,
     // attackerSide: structuredClone(player?.side || {}),
     // defenderSide: structuredClone(opponent?.side || {}),
     attackerSide: clonePlayerSide(player?.side),

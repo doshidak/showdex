@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "settings",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-01-28T05:16:41.939Z"
+    "updated": "2024-07-31T15:05:41.782Z"
   },
 
   "pane": {
@@ -104,6 +104,20 @@
       }
     },
 
+    "colorTheme": {
+      "label": "Color Theme",
+      "options": {
+        "sic": {
+          "label": "SIC",
+          "tooltip": "The <strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor theme."
+        },
+        "mina": {
+          "label": "Mina",
+          "tooltip": "\"where is my showdex???????<br />...also make it pink\" <ndash /><em>meanie</em>, 2023<br />ಠ╭╮ಠ"
+        }
+      }
+    },
+
     "glassyTerrain": {
       "label": "I'm Feeling Glassy",
       "tooltip": "Tastefully applies a slight background blur to all $t(common:products.showdex) panels, including $t(common:products.calcdex_other) in <strong>$t(calcdex.openAs.options.overlay.label)</strong> mode, if enabled.<br /><br />Note that this is a CPU-intensive graphics setting &amp; may cause unpleasant stuttering on lower-spec machines.<br /><br />Enable at your own risk!"
@@ -168,7 +182,7 @@
           "tooltip": "Opens as a panel tab on the right, if space permits. Otherwise, opening the tab will fill up the screen. Syncing will occur as long as the battle's tab is open.<br /><br />Recommended for <em>Left-Right Panel</em> users."
         },
         "overlay": {
-          "label": "Battle Overlay",
+          "label": "Chat Overlay",
           "tooltip": "Opens as an overlay over the battle's chat. Initially hidden until you click on <em>Open $t(common:products.calcdex_one)</em> in the battle controls.<br /><br />Once the battle is closed, the embedded $t(common:products.calcdex_one) will be cleared from memory, at which point it cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Recommended for <em>Single Panel</em> users or those who chill in chatrooms while they play."
         },
         "showdown": {
@@ -288,9 +302,22 @@
       "tooltip": "Includes any available sets from Other Metagame (OM) formats, such as Balanced Hackmons (BH) &amp; Almost Any Ability (AAA), in legal-locked formats like OU &amp; VGC {{year}}."
     },
 
-    "prioritizeUsageStats": {
-      "label": "Apply Usage Sets First",
-      "tooltip": "Prioritizes applying the <em>Showdown Usage</em> set, if available for the current non-Randoms format, to your opponents' (or spectating players') Pokémon.<br /><br />Otherwise, the first set of the closest matching format will be applied."
+    "prioritizePresetSource": {
+      "label": "Apply Sets First From",
+      "options": {
+        "smogon": {
+          "label": "Smogon",
+          "tooltip": "Prioritizes applying any applicable bundled + official Smogon sets first <strong>before</strong> the <em>Showdown Usage</em> set <rarr /> Teambuilder teams + boxes."
+        },
+        "usage": {
+          "label": "Usage",
+          "tooltip": "Prioritizes applying the <em>Showdown Usage</em> set first <strong>before</strong> any bundled + Smogon sets <rarr /> Teambuilder teams + boxes. Does not apply to Randoms."
+        },
+        "storage": {
+          "label": "Teambuilder",
+          "tooltip": "Prioritizes applying Teambuilder teams + boxes first <strong>before</strong> any bundled + Smogon <rarr /> <em>Showdown Usage</em> sets. Does not apply to Randoms."
+        }
+      }
     },
 
     "autoImportTeamSheets": {
@@ -397,8 +424,8 @@
     },
 
     "enableQuickEditor": {
-      "label": "Quick-Edit Move Hits",
-      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
+      "label": "Quick-Edit Move Effects",
+      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>, &amp; toggle the activation of <em>Power Trick</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
     },
 
     "showNonDamageRanges": {
@@ -412,6 +439,10 @@
         "ui": {
           "label": "$t(pane.sections.secondary.interface)",
           "tooltip": "Shows explainer tooltips (like this one) for buttons in the UI when hovered over.<br /><br />Disable this if you're a $t(common:products.calcdex_one) pro &amp; know what everything does already."
+        },
+        "preset": {
+          "label": "$t(calcdex:poke.info.preset.label)",
+          "tooltip": "Shows the PokéPaste of the hovered set in the dropdown list."
         },
         "ability": {
           "label": "$t(pokedex:headers.ability_one)",
@@ -532,7 +563,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Only enables $t(pokedex:stats.base_one.0) editing in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showBaseStats.options.always)</strong> option to learn more about $t(pokedex:stats.base_one.0) editing."
+          "tooltip": "Only enables $t(pokedex:stats.base_one.0) editing in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showBaseStats.options.always.label)</strong> option to learn more about $t(pokedex:stats.base_one.0) editing."
         },
         "never": {
           "label": "Never",
@@ -559,6 +590,11 @@
     "showAllOptions": {
       "label": "Show Illegal Abilities & Moves",
       "tooltip": "Allows you to select from all possible abilities &amp; moves in legal-locked formats like OU & Randoms."
+    },
+
+    "expandFieldControls": {
+      "label": "Show Additional Field Controls",
+      "tooltip": "Shows additional field controls, such as <em>Stealth Rock</em> & <em>Spikes</em>, normally hidden for in-battle $t(common:products.calcdex_other)."
     },
 
     "nhkoLabels": {

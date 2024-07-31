@@ -25,7 +25,7 @@ export const SelectInput = <
   value = '',
   isMulti,
   hasValue,
-  selectProps, // unused
+  selectProps,
   ...props
 }: SelectInputProps<Option, Multi, Group>): JSX.Element => {
   const {
@@ -54,7 +54,7 @@ export const SelectInput = <
           isHidden && styles.hidden,
           inputClassName,
         )}
-        inputMode="none" // don't show the virtual keyboard on mobile
+        inputMode={selectProps?.inputMode || 'none'} // don't show the virtual keyboard on mobile
         value={value}
         disabled={isDisabled}
         {...innerProps}

@@ -26,9 +26,12 @@ import {
   detectCompletePreset,
   flattenAlts,
   guessTeambuilderPreset,
+  guessMatchingPresets,
   selectPokemonPresets,
   sortPresetsByFormat,
+  sortPresetsByUsage,
   useBattlePresets,
+  findMatchingUsage,
 } from '@showdex/utils/presets';
 
 const l = logger('@showdex/components/calc/useCalcdexPresets()');
@@ -39,10 +42,11 @@ const playerAutoNonce = (
   operatingMode?: CalcdexOperatingMode,
 ): string => (
   player?.pokemon
-    ?.filter((p) => !p?.presetId)
+    ?.filter((p) => !!p?.calcdexId && (!p.presetId || p.autoPreset))
     .map((p) => [
-      p?.calcdexId,
-      operatingMode === 'standalone' && p?.speciesForme,
+      p.calcdexId,
+      operatingMode === 'standalone' && p.speciesForme,
+      p.autoPreset ? [p.ability || '?', p.item || '?', ...(p.revealedMoves || [])].join(',') : p.presetId,
     ].filter(Boolean).join('~'))
     .join(':')
 );
@@ -75,6 +79,21 @@ export const useCalcdexPresets = (
 
   // keep track of whether we applied Team Sheets yet (whether initially or later)
   const appliedSheets = React.useRef(false);
+
+  const p1AutoNonce = React.useMemo(() => playerAutoNonce(state?.p1, state?.operatingMode), [state?.operatingMode, state?.p1]);
+  const p2AutoNonce = React.useMemo(() => playerAutoNonce(state?.p2, state?.operatingMode), [state?.operatingMode, state?.p2]);
+  const p3AutoNonce = React.useMemo(() => playerAutoNonce(state?.p3, state?.operatingMode), [state?.operatingMode, state?.p3]);
+  const p4AutoNonce = React.useMemo(() => playerAutoNonce(state?.p4, state?.operatingMode), [state?.operatingMode, state?.p4]);
+
+  /*
+  l.debug(
+    'playerAutoNonce()',
+    '\n', 'p1', p1AutoNonce,
+    '\n', 'p2', p2AutoNonce,
+    '\n', 'p3', p3AutoNonce,
+    '\n', 'p4', p4AutoNonce,
+  );
+  */
 
   /* eslint-disable react-hooks/exhaustive-deps -- look at me, I'm the captain now */
 
@@ -109,7 +128,7 @@ export const useCalcdexPresets = (
       }
 
       const presetlessIndices = player.pokemon
-        .map((p, i) => (p?.presetId ? null : i))
+        .map((p, i) => (p?.presetId && !p.autoPreset ? null : i))
         .filter((v) => typeof v === 'number');
 
       if (!presetlessIndices.length) {
@@ -118,11 +137,13 @@ export const useCalcdexPresets = (
 
       const party = cloneAllPokemon(player.pokemon);
 
-      // l.debug(
-      //   '(Auto-Preset)', 'player', playerKey,
-      //   '\n', 'processing indices', presetlessIndices,
-      //   '\n', 'filtered', presetlessIndices.map((i) => party[i]),
-      // );
+      /*
+      l.debug(
+        '(Auto-Preset)', 'player', playerKey,
+        '\n', 'processing indices', presetlessIndices,
+        '\n', 'filtered', presetlessIndices.map((i) => party[i]),
+      );
+      */
 
       presetlessIndices.forEach((pokemonIndex) => {
         const pokemon = party[pokemonIndex];
@@ -148,6 +169,10 @@ export const useCalcdexPresets = (
             select: 'any',
           },
         );
+
+        if (pokemonUsages.length > 1) {
+          pokemonPresets.sort(sortPresetsByUsage(pokemonUsages));
+        }
 
         let preset: CalcdexPokemonPreset;
         let [usage] = pokemonUsages;
@@ -217,8 +242,6 @@ export const useCalcdexPresets = (
           }
 
           // "old reliable"
-          // note: ServerPokemon info may be of the transformed Pokemon's moves, not the pre-transformed ones!!
-          // (hence the `pokemon.transformedMoves` check)
           if (!preset?.calcdexId && !pokemon.transformedForme) {
             const guessedSpread = state.legacy
               ? guessServerLegacySpread(state.format, pokemon)
@@ -302,17 +325,166 @@ export const useCalcdexPresets = (
           }
         }
 
+        // pre-select presets for each possible prioritizePresetSource value
+        // (note: key ordering of this object doesn't matter -- we'll construct an array of keys based on the user's setting after)
+        const preselections: Partial<Record<typeof settings.prioritizePresetSource, CalcdexPokemonPreset[]>> = {
+          smogon: [
+            ...selectPokemonPresets(pokemonPresets, pokemon, {
+              format: state.format,
+              formatOnly: true,
+              source: 'bundle',
+              select: 'one',
+            }),
+
+            ...selectPokemonPresets(pokemonPresets, pokemon, {
+              format: state.format,
+              formatOnly: true,
+              source: 'smogon',
+              select: 'one',
+              // filter: (p) => ['smogon', 'bundle'].includes(p?.source), // actually nvm, can't guarantee the order using this
+            }),
+          ],
+
+          ...(!randoms && {
+            usage: [usage],
+
+            storage: [
+              ...selectPokemonPresets(pokemonPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                source: 'storage',
+                select: 'one',
+              }),
+
+              ...selectPokemonPresets(pokemonPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                source: 'storage-box',
+                select: 'one',
+              }),
+            ],
+          }),
+        };
+
+        const preselectionOrder: (keyof typeof preselections)[] = [];
+
+        if (randoms) {
+          preselectionOrder.push('smogon');
+        } else {
+          // my brain tells me there's some nice 1 liner to this but my brain also tells me that I'm too tired to care lolol
+          switch (settings?.prioritizePresetSource) {
+            case 'storage': {
+              preselectionOrder.push('storage', 'smogon', 'usage');
+
+              break;
+            }
+
+            case 'usage': {
+              preselectionOrder.push('usage', 'smogon', 'storage');
+
+              break;
+            }
+
+            case 'smogon':
+            default: {
+              preselectionOrder.push('smogon', 'usage', 'storage');
+
+              break;
+            }
+          }
+        }
+
+        // now go thru each key one by one until we find a preset
+        for (const key of preselectionOrder) {
+          // note: we may have a 'Yours' set already applied here, even in Randoms!
+          if (preset?.calcdexId) {
+            break;
+          }
+
+          const preselectedPresets = preselections[key];
+
+          if (!preselectedPresets?.length) {
+            continue;
+          }
+
+          if (key === 'smogon') {
+            // for Randoms, if there's only 1 role, that's probably it, no?
+            const matchedPresets = randoms && preselectedPresets.length === 1
+              ? preselectedPresets
+              : guessMatchingPresets(preselectedPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                usages: pokemonUsages,
+              });
+
+            [preset] = matchedPresets;
+
+            l.debug(
+              '(Auto-Preset)', 'player', playerKey, 'pokemon', pokemon.ident || pokemon.speciesForme,
+              '\n', 'source', key,
+              '\n', 'preset', preset,
+              '\n', 'matchedPresets[]', matchedPresets,
+              '\n', 'preselectedPresets[]', preselectedPresets,
+              '\n', 'pokemonUsages[]', pokemonUsages,
+              '\n', 'pokemon', pokemon,
+            );
+
+            if (preset?.calcdexId) {
+              pokemon.autoPreset = matchedPresets.length !== 1;
+              pokemon.autoPresetId = (!pokemon.autoPreset && preset.calcdexId) || null;
+            }
+          }
+
+          if (!preset?.calcdexId) {
+            [preset] = preselectedPresets;
+          }
+        }
+
         // attempt to find a preset within the current format
         if (!preset?.calcdexId && pokemonPresets.length) {
-          [preset] = selectPokemonPresets(
+          /*
+          const formatPresets = selectPokemonPresets(
             pokemonPresets,
             pokemon,
             {
               format: state.format,
               formatOnly: true,
+              source: randoms ? 'smogon' : null,
               select: 'one',
             },
           );
+
+          if (formatPresets.length) {
+            // for Randoms, if there's only 1 role, that's probably it, no? LOL
+            const matchedPresets = randoms && formatPresets.length === 1
+              ? formatPresets
+              : guessMatchingPresets(formatPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                usages: pokemonUsages,
+              });
+
+            [preset] = matchedPresets;
+
+            l.debug(
+              '(Auto-Preset)', 'player', playerKey, 'pokemon', pokemon.ident || pokemon.speciesForme,
+              '\n', 'preset', preset,
+              '\n', 'matchedPresets[]', matchedPresets,
+              '\n', 'formatPresets[]', formatPresets,
+              '\n', 'pokemonUsages[]', pokemonUsages,
+              '\n', 'pokemon', pokemon,
+            );
+
+            if (preset?.calcdexId) {
+              // note: turning autoPreset off when there's only 1 matched result (i.e., it's a pretty confident match)
+              pokemon.autoPreset = matchedPresets.length !== 1;
+              pokemon.autoPresetId = (!pokemon.autoPreset && preset.calcdexId) || null;
+            }
+          }
+
+          if (!preset?.calcdexId) {
+            [preset] = formatPresets;
+          }
 
           // "Showdown Usage" preset is only made available in non-Randoms formats
           const shouldApplyUsage = !randoms
@@ -324,10 +496,11 @@ export const useCalcdexPresets = (
           if (shouldApplyUsage) {
             preset = usage;
           }
+          */
 
           // if we still haven't found one, then try finding one from any format
           if (!preset?.calcdexId) {
-            [preset] = selectPokemonPresets(
+            const allFormatPresets = selectPokemonPresets(
               pokemonPresets,
               pokemon,
               {
@@ -335,19 +508,58 @@ export const useCalcdexPresets = (
                 select: 'one',
               },
             );
+
+            if (allFormatPresets.length) {
+              const matchedPresets = guessMatchingPresets(allFormatPresets, pokemon, {
+                format: state.format,
+                formatOnly: true,
+                usages: pokemonUsages,
+              });
+
+              [preset] = matchedPresets;
+
+              l.debug(
+                '(Auto-Preset)', 'player', playerKey, 'pokemon', pokemon.ident || pokemon.speciesForme,
+                '\n', 'preset', preset,
+                '\n', 'matchedPresets[]', matchedPresets,
+                '\n', 'allFormatPresets[]', allFormatPresets,
+                '\n', 'pokemonUsages[]', pokemonUsages,
+                '\n', 'pokemon', pokemon,
+              );
+
+              if (preset?.calcdexId) {
+                pokemon.autoPreset = matchedPresets.length !== 1;
+                pokemon.autoPresetId = (!pokemon.autoPreset && preset.calcdexId) || null;
+              }
+            }
+
+            if (!preset?.calcdexId) {
+              [preset] = allFormatPresets;
+            }
           }
         }
 
         // no smogon presets are available at this point, so apply the usage if we have it
         // (encountered many cases where Pokemon only have usage w/ no pokemonPresets[], particularly in Gen 9 National Dex)
-        if (!preset?.calcdexId && usage?.calcdexId) {
+        if (!randoms && !preset?.calcdexId && usage?.calcdexId) {
           preset = usage;
+
+          if (preset?.calcdexId) {
+            pokemon.autoPreset = false;
+            pokemon.autoPresetId = preset.calcdexId;
+          }
         }
 
         // if no preset is applied, forcibly open the Pokemon's stats to alert the user
         // (also more the case in 'standalone' mode, reset some fields in case they were from a prior Pokemon w/ a preset)
         if (!preset?.calcdexId) {
-          pokemon.level = state.defaultLevel;
+          // update (2024/07/19): apparently some peeps were experiencing level discrepancies still, so I'm guessing this
+          // might be the culprit since it looks like I added this part for the Honkdex & probs forgot about 'battle' modes LOL
+          // pokemon.level = state.defaultLevel;
+          if (!pokemon.level && state.defaultLevel) {
+            pokemon.level = state.defaultLevel;
+          }
+
           pokemon.nature = state.legacy ? 'Hardy' : 'Adamant';
           pokemon.ivs = populateStatsTable({}, { spread: 'iv', format: state.format });
           pokemon.evs = populateStatsTable({}, { spread: 'ev', format: state.format });
@@ -363,9 +575,11 @@ export const useCalcdexPresets = (
           }
 
           pokemon.showGenetics = true;
+          pokemon.autoPreset = false;
+          pokemon.autoPresetId = null;
 
           l.debug(
-            'Failed to find a preset for', pokemon.speciesForme, 'of player', playerKey,
+            'Failed to find a preset for', pokemon.ident || pokemon.speciesForme, 'of player', playerKey,
             '\n', 'pokemon', pokemon,
             '\n', 'preset', preset,
             '\n', 'presets', presets,
@@ -378,50 +592,66 @@ export const useCalcdexPresets = (
 
         // update (2023/01/06): may need to grab an updated usage for the preset we're trying to switch to
         // (normally only an issue in Gen 9 Randoms with their role system, which has multiple usage presets)
-        if (randoms && pokemonUsages.length > 1) {
-          const nameId = formatId(preset.name);
-          const roleUsage = pokemonUsages.find((p) => nameId.includes(formatId(p.name)));
+        if (pokemonUsages.length > 1) {
+          const roleUsage = findMatchingUsage(pokemonUsages, preset);
 
           if (roleUsage?.calcdexId) {
             usage = roleUsage;
           }
         }
 
-        const presetPayload = applyPreset(state.format, pokemon, preset, usage);
+        const presetPayload = {
+          ...(
+            pokemon.presetId !== preset.calcdexId
+              // && (!usage?.calcdexId || pokemon.usageId !== usage.calcdexId)
+              && applyPreset(pokemon, preset, { format: state.format, usage })
+          ),
+        };
+
+        if (state.operatingMode === 'standalone') {
+          presetPayload.autoPreset = false;
+          presetPayload.autoPresetId = null; // ignored in 'standalone' mode, but just for completeness lol c:
+        }
 
         /**
          * @todo update when more than 4 moves are supported
          */
-        if (presetPayload?.moves && pokemon?.source !== 'server' && pokemon?.revealedMoves?.length === 4) {
+        if ('moves' in presetPayload && pokemon.source !== 'server' && pokemon.revealedMoves?.length === 4) {
           delete presetPayload.moves;
         }
 
-        party[pokemonIndex] = {
-          ...pokemon,
-          ...presetPayload,
-        };
+        party[pokemonIndex] = { ...pokemon, ...presetPayload };
 
         if (pokemonIndex !== player.selectionIndex) {
           return;
         }
 
+        /**
+         * @todo this matches `applyAutoFieldConditions()` from `useCalcdexContext()` so refactor me plz
+         */
         const autoWeather = determineWeather(party[pokemonIndex], state.format);
         const autoTerrain = determineTerrain(party[pokemonIndex]);
 
+        // update (2024/07/28): as mentioned in the aforementioned local helper function in the aforementioned hook,
+        // we'll keep any user-specified weather & terrain in-tact (except when an empty string, i.e., `''` -- manually cleared)
         if (autoWeather) {
-          field.dirtyWeather = null;
           field.autoWeather = autoWeather;
+
+          if (state.field.dirtyWeather === '' as typeof field.dirtyWeather) {
+            field.dirtyWeather = null;
+          }
         }
 
         if (autoTerrain) {
-          field.dirtyTerrain = null;
           field.autoTerrain = autoTerrain;
+
+          if (state.field.dirtyTerrain === '' as typeof field.dirtyTerrain) {
+            field.dirtyTerrain = null;
+          }
         }
       });
 
-      playersPayload[playerKey] = {
-        pokemon: party,
-      };
+      playersPayload[playerKey] = { pokemon: party };
     });
 
     if (!nonEmptyObject(playersPayload)) {
@@ -439,10 +669,10 @@ export const useCalcdexPresets = (
 
     endTimer('(dispatched)');
   }, [
-    playerAutoNonce(state?.p1, state?.operatingMode),
-    playerAutoNonce(state?.p2, state?.operatingMode),
-    playerAutoNonce(state?.p3, state?.operatingMode),
-    playerAutoNonce(state?.p4, state?.operatingMode),
+    p1AutoNonce,
+    p2AutoNonce,
+    p3AutoNonce,
+    p4AutoNonce,
     presets.ready,
     state?.battleId,
     state?.format,
@@ -507,6 +737,7 @@ export const useCalcdexPresets = (
           pokemon,
           {
             format: state.format,
+            formatOnly: true,
             source: 'usage',
             select: 'one',
           },
@@ -523,7 +754,7 @@ export const useCalcdexPresets = (
 
         party[pokemonIndex] = {
           ...pokemon,
-          ...applyPreset(state.format, pokemon, sheet, usage),
+          ...applyPreset(pokemon, sheet, { format: state.format, usage }),
         };
 
         didUpdate = true;

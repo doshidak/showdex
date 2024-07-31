@@ -7,12 +7,15 @@ import { type ShowdexAssetBundle } from './ShowdexAssetBundle';
  * @since 1.2.1
  */
 export interface ShowdexPresetsBundle extends ShowdexAssetBundle {
-  tag: 'presets';
+  ntt: 'presets';
 
   /**
    * Gen number of these bundled presets.
    *
-   * @example 10
+   * @example
+   * ```ts
+   * 10
+   * ```
    * @since 1.2.1
    */
   gen: GenerationNum;
@@ -20,7 +23,10 @@ export interface ShowdexPresetsBundle extends ShowdexAssetBundle {
   /**
    * Genless format of these bundled presets.
    *
-   * @example 'vgc2026'
+   * @example
+   * ```ts
+   * 'vgc2026'
+   * ```
    * @since 1.2.1
    */
   format: string;

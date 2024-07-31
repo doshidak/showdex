@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "settings",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-01-28T05:16:48.404Z"
+    "updated": "2024-07-31T15:07:07.262Z"
   },
 
   "pane": {
@@ -103,6 +103,20 @@
       }
     },
 
+    "colorTheme": {
+      "label": "Thème de Couleur",
+      "options": {
+        "sic": {
+          "label": "SIC",
+          "tooltip": "Le thème de couleur standard<br />(\"<strong>(S)</strong>tandard <strong>(I)</strong>ssue <strong>(C)</strong>olor\")."
+        },
+        "mina": {
+          "label": "Mina",
+          "tooltip": "\"où est mon showdex???????<br />...fais-le aussi rose\" <ndash /><em>meanie</em>, 2023<br />ಠ╭╮ಠ"
+        }
+      }
+    },
+
     "glassyTerrain": {
       "label": "I'm Feeling Glassy",
       "tooltip": "Applique avec goût un léger flou d'arrière-plan à tous les panneaux $t(common:products.showdex), y compris $t(common:products.calcdex_other) en mode <strong>$t(calcdex.openAs.options.overlay.label)</strong>, si activé.<br /><br/>Notez que c'est un réglage graphique intensif pour le CPU et peut causer des saccades désagréables sur des machines moins performantes.<br /><br />Activez à vos risques et périls !"
@@ -167,7 +181,7 @@
           "tooltip": "S'ouvre comme un onglet de panneau à droite, si l'espace le permet. Sinon, l'ouverture de l'onglet remplira l'écran. La synchronisation se produira tant que l'onglet de la bataille est ouvert.<br /><br />Recommandé pour les utilisateurs de <em>Panneaux Gauche-Droite</em>."
         },
         "overlay": {
-          "label": "Superposition de Bataille",
+          "label": "Superposition de Chat",
           "tooltip": "S'ouvre comme une superposition sur le chat de la bataille. Initialement caché jusqu'à ce que vous cliquiez sur <em>Ouvrir $t(common:products.calcdex_one)</em> dans les commandes de la bataille.<br /><br />Une fois la bataille fermée, le $t(common:products.calcdex_one) intégré sera effacé de la mémoire, à ce moment il ne pourra pas être rouvert depuis le $t(common:products.hellodex_one).<br /><br />Recommandé pour les utilisateurs de <em>Panneau Unique</em> ou ceux qui se détendent dans les salons de discussion pendant qu'ils jouent."
         },
         "showdown": {
@@ -287,9 +301,22 @@
       "tooltip": "Inclut tous les sets disponibles des formats de Other Metagames (OM), tels que Balanced Hackmons (BH) & Almost Any Ability (AAA), dans les formats verrouillés légalement comme OU & VGC {{year}}."
     },
 
-    "prioritizeUsageStats": {
-      "label": "Prioriser les Sets d'Usage",
-      "tooltip": "Donne la priorité à l'application de l'set <em>Showdown Usage</em>, s'il est disponible pour le format non-Randoms actuel, aux Pokémon de vos adversaires (ou des joueurs en spectateur).<br /><br />Sinon, le premier set du format correspondant le plus proche sera appliqué."
+    "prioritizePresetSource": {
+      "label": "Prioriser les Sets à Partir de",
+      "options": {
+        "smogon": {
+          "label": "Smogon",
+          "tooltip": "Donne la priorité à l'application de tous les sets groupés applicables + les sets Smogon officiels <strong>avant</strong> l'set <em>Showdown Usage</em> <rarr /> les équipes + boîtes Teambuilder."
+        },
+        "usage": {
+          "label": "Usage",
+          "tooltip": "Donne la priorité à l'application de l'set <em>Showdown Usage</em> <strong>avant</strong> toutes les sets groupés + Smogon <rarr /> les équipes + boîtes Teambuilder. Ne s'applique pas aux formats Randoms."
+        },
+        "storage": {
+          "label": "Teambuilder",
+          "tooltip": "Donne la priorité à l'application des équipes + boîtes Teambuilder <strong>avant</strong> les sets groupés + Smogon <rarr /> les sets <em>Showdown Usage</em>. Ne s'applique pas aux formats Randoms."
+        }
+      }
     },
 
     "autoImportTeamSheets": {
@@ -396,8 +423,8 @@
     },
 
     "enableQuickEditor": {
-      "label": "Édition Rapide du Nombre de Coups",
-      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, telles que <em>$(pokedex:moves.iciclespear)</em>.<br /><br />Si <em>$t(calcdex.showMoveEditor.label)</em> est activé, vous pourrez également modifier cela dans l'éditeur de capacités."
+      "label": "Modifier Rapidement les Effets de Capacité",
+      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, tels que <em>$t(pokedex:moves.iciclespear)</em>, & d'activer l'activation de <em>$t(pokedex:moves.powertrick)</em>.<br /><br />Si <em>$t(calcdex.showMoveEditor.label)</em> est activé, vous pourrez également modifier cela dans l'éditeur de capacités."
     },
 
     "showNonDamageRanges": {
@@ -411,6 +438,10 @@
         "ui": {
           "label": "$t(pane.sections.secondary.interface)",
           "tooltip": "Affiche des infobulles explicatives (comme celle-ci) pour les boutons de l'interface utilisateur lorsqu'ils sont survolés.<br /><br />Désactivez ceci si vous êtes un pro de $t(common:products.calcdex_one) et que vous savez déjà à quoi tout sert."
+        },
+        "preset": {
+          "label": "$t(calcdex:poke.info.preset.label)",
+          "tooltip": "Affiche le PokéPaste du set survolé dans la liste déroulante."
         },
         "ability": {
           "label": "$t(pokedex:headers.ability_one)",
@@ -531,7 +562,7 @@
         },
         "meta": {
           "label": "OMs",
-          "tooltip": "Permet uniquement la modification des $t(pokedex:stats.base_one.0) dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showBaseStats.options.always)</strong> pour en savoir plus sur la modification des $t(pokedex:stats.base_one.0)."
+          "tooltip": "Permet uniquement la modification des $t(pokedex:stats.base_one.0) dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showBaseStats.options.always.label)</strong> pour en savoir plus sur la modification des $t(pokedex:stats.base_one.0)."
         },
         "never": {
           "label": "Jamais",
@@ -560,6 +591,11 @@
       "tooltip": "Vous permet de sélectionner parmi tous les talents & capacités possibles dans des formats verrouillés légalement comme OU & Randoms."
     },
 
+    "expandFieldControls": {
+      "label": "Afficher les Contrôles de Terrain Supplémentaires",
+      "tooltip": "Affiche des contrôles de terrain supplémentaires, tels que <em>$t(pokedex:moves.stealthrock)</em> & <em>$t(pokedex:moves.spikes)</em>, normalement cachés pour les $t(common:products.calcdex_other) en cours de bataille."
+    },
+
     "nhkoLabels": {
       "label": "Étiquettes Garanties de NHKO"
     },
@@ -572,7 +608,7 @@
   "honkdex": {
     "visuallyEnabled": {
       "label": "Activer le Honk",
-      "tooltip": "Active le <em>$t(common:products.honkdex_one)</em>, un $t(common:products.calcdex_one) hors combat. Vous pouvez voir & modifier les calculs précédemment sauvegardés (appelés <em>$t(common:products.honk_other)</em>) dans le $t(common:products.hellodex_one).<br /><br />La désactivation de cette fonctionnalité ne fera que cacher la fonctionnalité $t(common:products.honkdex_one) & tous les $t(common:products.honk_other) sauvegardés resteront dans le stockage de votre navigateur pour $t(common:products.showdown)."
+      "tooltip": "Active le <em>$t(common:products.honkdex_one)</em>, un $t(common:products.calcdex_one) hors bataille. Vous pouvez voir & modifier les calculs précédemment sauvegardés (appelés <em>$t(common:products.honk_other)</em>) dans le $t(common:products.hellodex_one).<br /><br />La désactivation de cette fonctionnalité ne fera que cacher la fonctionnalité $t(common:products.honkdex_one) & tous les $t(common:products.honk_other) sauvegardés resteront dans le stockage de votre navigateur pour $t(common:products.showdown)."
     },
 
     "showAllFormats": {

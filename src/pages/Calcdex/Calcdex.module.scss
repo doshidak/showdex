@@ -61,8 +61,16 @@
       background-color: color.alpha(colors.$showdown-background-light, 0.88);
     }
 
+    &.mina::before {
+      background-color: color.alpha(#F5DAE3, 0.72);
+    }
+
     &.overlay::before {
       background-color: colors.$showdown-background-light;
+    }
+
+    &.overlay.mina::before {
+      background-color: #FFF7FA;
     }
   }
 
@@ -71,8 +79,17 @@
       background-color: color.alpha(colors.$gray-darkest, 0.88);
     }
 
+    &.mina::before {
+      background-color: color.alpha(#3A242E, 0.94);
+    }
+
     &.overlay::before {
       background-color: colors.$gray-darkest;
+    }
+
+    &.overlay.mina::before {
+      // background-color: #100206;
+      background-color: #2D0D1C;
     }
   }
 
@@ -85,11 +102,19 @@
       &::before, &.overlay::before {
         background-color: color.alpha(colors.$showdown-background-light, 0.56);
       }
+
+      &.mina::before, &.overlay.mina::before {
+        background-color: color.alpha(#F5DAE3, 0.64);
+      }
     }
 
     &.dark {
       &::before, &.overlay::before {
         background-color: color.alpha(colors.$gray-darkest, 0.8);
+      }
+
+      &.mina::before, &.overlay.mina::before {
+        background-color: color.alpha(#2D0D1C, 0.8);
       }
     }
   }
@@ -107,9 +132,21 @@
   }
 }
 
+.playerCalc {
+  .overlay:not(.mobile) & {
+    @include spacing.margin($top: 16px);
+  }
+}
+
 .fieldCalc {
-  max-width: 496px;
+  max-width: 448px;
   @include spacing.margin($x: auto, $top: 16px);
+
+  /*
+  &.expanded {
+    max-width: 680px;
+  }
+  */
 
   .container:not(.skinnyBoi) & {
     @include spacing.padding($x: 24px);
@@ -179,24 +216,6 @@ div.mobileCloseButton {
 
   &.bottom {
     @include spacing.margin($top: 16px, $bottom: 8px);
-  }
-}
-
-/*
-.playerOption {
-  @include flex.row($align: center);
-
-  .label {
-    @include font.apply(fonts.$primary, ( font-weight: 500 ));
-  }
-
-  .icon {
-    width: 12px;
-    min-width: 12px;
-    height: 12px;
-    min-height: 12px;
-    @include spacing.margin($left: 1px);
-    color: inherit;
   }
 }
 */

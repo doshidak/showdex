@@ -1,4 +1,4 @@
-import { type CalcdexPlayerKey } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon, type CalcdexPlayerKey } from '@showdex/interfaces/calc';
 import { getAuthUsername } from '@showdex/utils/host';
 import { detectPokemonIdent } from './detectPokemonIdent';
 
@@ -16,6 +16,10 @@ export const detectPlayerKeyFromPokemon = <
 >(
   pokemon: TPokemon,
 ): CalcdexPlayerKey => {
+  if ((pokemon as CalcdexPokemon)?.playerKey) {
+    return (pokemon as CalcdexPokemon).playerKey;
+  }
+
   const ident = detectPokemonIdent(pokemon);
 
   if (!ident) {

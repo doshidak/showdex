@@ -738,7 +738,7 @@ export const PiconRackProvider = ({
             overlayPokemonIndex > -1 &&
             <PlayerPiconButton
               player={overlayPlayer}
-              pokemon={overlayPokemonIndex}
+              pokemon={overlayPlayer.pokemon[overlayPokemonIndex]}
               operatingMode={state?.operatingMode}
               format={state?.format}
               showNickname={settings?.showNicknames}

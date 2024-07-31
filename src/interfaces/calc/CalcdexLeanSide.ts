@@ -9,6 +9,7 @@ type OmittedShowdownSideKeys =
   | 'missedPokemon'
   | 'n'
   | 'pokemon'
+  | 'rating'
   | 'sideConditions'
   | 'wisher'
   | 'x'

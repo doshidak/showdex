@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "calcdex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T19:12:10.599Z",
-    "updated": "2024-01-28T10:19:06.819Z"
+    "updated": "2024-07-28T16:54:54.788Z"
   },
 
   "contextMenu": {
@@ -99,9 +99,14 @@
         "autoLabel": "$t(common:labels.auto)",
         "importLabel": "$t(common:labels.import)",
         "exportLabel": "$t(common:labels.export)",
+        "exportMultiLabel": "$t(common:labels.all)",
         "importTooltip": "Importer PokéPaste Depuis le Presse-papiers",
         "importedBadge": "$t(common:labels.imported)",
-        "exportedBadge": "$t(common:labels.copied)!",
+        "importedMultiBadge": "$t(common:labels.imported) {{count}}",
+        "exportMultiTooltip_one": "$t(common:labels.export) {{count}} set",
+        "exportMultiTooltip_other": "$t(common:labels.export) {{count}} sets",
+        "exportedBadge": "$t(common:labels.copied) !",
+        "exportedMultiBadge": "$t(common:labels.copied) {{count}}",
         "malformedBadge": "Mauvaise Syntaxe",
         "mismatchedBadge": "Décalage",
         "failedBadge": "$t(common:labels.failed)"
@@ -155,6 +160,7 @@
       "nhko": "KO %",
       "na": "$t(common:labels.na)",
       "immune": "IMMUNISÉ",
+      "failure": "ÉCHEC",
       "copiedBadge": "$t(common:labels.copied)!",
 
       "tera": {
@@ -218,6 +224,7 @@
 
         "bp": {
           "aria": "Remplacement du $t(pokedex:stats.bp.0) {{move}} pour {{pokemon}}",
+          "hitAria": "Remplacement du $t(pokedex:stats.bp.0) {{move}} pour le coup {{hit}} sur {{hits}} pour {{pokemon}}",
           "label": "{{ultimate}}$t(pokedex:stats.bp.1)"
         }
       },
@@ -232,6 +239,10 @@
         "aria": "Emplacement de Capacité {{count}} pour {{pokemon}}",
         "hint": "--",
         "empty": "$t(pokedex:moves.nomove_other)"
+      },
+
+      "failureReasons": {
+        "rbyRecovery": "En raison d'un bug dans la gén 1, les capacités de récupération échoueront si le reste de la division des $t(pokedex:stats.hp.1) perdus par 256 est de 255."
       }
     },
 

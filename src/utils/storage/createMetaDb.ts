@@ -31,6 +31,12 @@ export const createMetaDb = (
     return null;
   }
 
+  if (db.objectStoreNames.contains(metaName)) {
+    l.silly(metaName, 'object store already exists');
+
+    return null;
+  }
+
   const store = db.createObjectStore(metaName);
 
   l.verbose(

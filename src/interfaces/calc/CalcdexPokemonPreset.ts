@@ -7,6 +7,36 @@ import {
 import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
 
 /**
+ * All possible Calcdex Pokemon set (preset) sources.
+ *
+ * @example
+ * ```ts
+ * // serving suggestion:
+ * import {
+ *   type CalcdexPokemonPresetSource as PresetSource,
+ *   CalcdexPokemonPresetSources as ValidPresetSources,
+ * } from '@showdex/interfaces/calc';
+ *
+ * const source: PresetSource = 'smogon';
+ * ValidPresetSources.includes(source);
+ *
+ * true
+ * ```
+ * @since 1.2.4
+ */
+export const CalcdexPokemonPresetSources = [
+  'import',
+  'server',
+  'sheet',
+  'smogon',
+  'bundle',
+  'storage',
+  'storage-box',
+  'usage',
+  'user',
+] as const;
+
+/**
  * Source of the Calcdex Pokemon set (preset).
  *
  * * `'import'` refers to any preset imported from the user's clipboard.
@@ -22,16 +52,7 @@ import { type CalcdexPokemonAlt } from './CalcdexPokemonAlt';
  *
  * @since 1.0.7
  */
-export type CalcdexPokemonPresetSource =
-  | 'import'
-  | 'server'
-  | 'sheet'
-  | 'smogon'
-  | 'bundle'
-  | 'storage'
-  | 'storage-box'
-  | 'usage'
-  | 'user';
+export type CalcdexPokemonPresetSource = typeof CalcdexPokemonPresetSources[number];
 
 /**
  * Single Pokemon spread configuration.
@@ -234,6 +255,16 @@ export interface CalcdexPokemonPreset {
   evs?: Showdown.StatsTable;
   spreads?: CalcdexPokemonPresetSpread[];
   pokeball?: string;
+
+  /**
+   * Unix epoch timestamp of when this preset was imported, in milliseconds.
+   *
+   * * Primarily used for displaying the human-readable date & time in the presets dropdown.
+   * * Typically populated by `importPokePaste()` (& by extension, `importMultiPokePaste()`).
+   *
+   * @since 1.2.4
+   */
+  imported?: number;
 
   /**
    * Unix epoch timestamp of when this preset was last updated, in milliseconds.

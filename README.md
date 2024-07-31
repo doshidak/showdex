@@ -9,7 +9,7 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.2.3">v1.2.3</a>&nbsp;</th>
+      <th align="center">&nbsp;Current <a href="https://github.com/doshidak/showdex/releases/tag/v1.2.4">v1.2.4</a>&nbsp;</th>
       <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome</a> · <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
       <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://discord.gg/2PXVGGCkm2">Discord</a></th>
     </tr>
@@ -74,15 +74,15 @@ Officially supported on [**Chrome**](https://chrome.google.com/webstore/detail/d
   Developer Zone
 </h1>
 
-> **Warning**  
+> [!CAUTION]
 > You are about to get in the zone, the developer zone.  
-> If you do not wish to get in the zone, the developer zone, please visit the [**Smogon Forums post**](https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265/) instead.
+> If you do not wish to get in the zone, the developer zone, please visit the [**Smogon Forums post**](https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265) instead.
 
 <br>
 
 ## Developer SparkNotes™
 
-> **Note**  
+> [!NOTE]
 > This section is a work-in-progress.
 
 This extension is written in **TypeScript**, which is essentially [JavaScript on crack](https://github.com/doshidak/showdex/blob/fb08da8ec3352c0efbb506551979e2073358783a/src/redux/factories/buildPresetQuery.ts#L98-L120), using:
@@ -107,7 +107,7 @@ This extension is written in **TypeScript**, which is essentially [JavaScript on
 
   ---
 
-  > **Note**  
+  > [!NOTE]
   > More information coming soon!
 
   [uhhhhhhhhh](https://youtube.com/watch?v=GcSfbaac9eg&t=29s)
@@ -118,7 +118,7 @@ This extension is written in **TypeScript**, which is essentially [JavaScript on
 
 ### Requirements
 
-> **Warning**
+> [!IMPORTANT]
 > Due to the removal of `--experimental-specifier-resolution=node` starting in `node` v19, v18 is **required** (i.e., `^18.0.0`) to build this project. Use something like [`nvm`](https://github.com/nvm-sh/nvm) to install v18 (`nvm install lts/hydrogen`) alongside your current `node` installation.
 
 * **`node`** LTS Hydrogen v18
@@ -129,7 +129,7 @@ This extension is written in **TypeScript**, which is essentially [JavaScript on
 
 ## ①&nbsp;&nbsp;Setup
 
-> **Note**  
+> [!TIP]
 > If your browser is already configured for extension development, you can skip this part. If you're building for `'standalone'`, **don't** skip this part.
 
 When building this as an extension (i.e., the `BUILD_TARGET` env is either `'chrome'` or `'firefox'`), you'll need to apply some slight tweaks to your browser in order to directly install extensions from your local disk.
@@ -172,7 +172,7 @@ When building this as an extension (i.e., the `BUILD_TARGET` env is either `'chr
 
   ---
 
-  > **Note**  
+  > [!INFO]
   > More information coming soon!  
   > Though instructions aren't currently provided, this project supports [developing on **Firefox for Android Nightly**](https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android).
 
@@ -190,10 +190,10 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 
   ---
 
-  > **Note**  
+  > [!IMPORTANT]
   > *Standalone* builds remove all Web Extension API dependencies so that Showdex can be directly embedded into your [`pokemon-showdown-client`](https://github.com/smogon/pokemon-showdown-client). This includes the [`manifest.json`](./src/manifest.json), which will be omitted completely during the build process. That being said, you'll be **manually** doing what the [`content`](./src/content.ts) script would do to the [`index.html`](https://github.com/smogon/pokemon-showdown-client/blob/cd181c26946136a3118582b0176fd83c88726e33/play.pokemonshowdown.com/index.template.html) file in the following steps.
 
-  > **Warning**  
+  > [!CAUTION]
   > This is considered to be an **experimental** feature. In other words, it's untested beyond the build process as I don't have my own [`pokemon-showdown-client`](https://github.com/smogon/pokemon-showdown-client) to run this off of (surprising, I know), but in theory, it should work! Essentially Showdex only uses the Web Extension APIs to inject the transpiled [`main`](./src/main.ts) script & some Google Fonts into the client's [`index.html`](https://github.com/smogon/pokemon-showdown-client/blob/cd181c26946136a3118582b0176fd83c88726e33/play.pokemonshowdown.com/index.template.html), but other than that, everything else is good 'ol JavaScript.
 
   1. Figure out where you'll be storing the built files by setting the `STANDALONE_RESOURCE_PROTOCOL` & `STANDALONE_RESOURCE_PREFIX` environment variables accordingly.
@@ -217,8 +217,27 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
   <script src="data/aliases.js" async="async" onerror="loadRemoteData(this.src)"></script>
 
   <!-- plop this in AFTER all of the <script> tags !! -->
-  <!-- async, async="true", or async="async" ??? doesn't matter (all truthy), so the choice is yours c: -->
-  <script src="/showdex/main.js" async="true"></script>
+  <script src="/showdex/main.js"></script>
+  ```
+  - If you find `App` errors in your console (& ultimately no Hellodex appearing) when Showdex's `main.js` bundle tries to load, Showdex may have loaded before the Showdown client.
+  - Showdex will only attempt to inject itself into the Showdown client once whenever its bundle is loaded, based on the availability of the `window.app` global, i.e., the Showdown client runtime.
+  - Workaround (as proposed by [**StaraptorOP**](https://staraptorshowdown.com)) is to programmatically inject the `<script>` tag when the window loads:
+  ```html
+  <!-- use this instead of the <script src="/showdex/main.js"> one above -->
+  <script>
+    window.onload = () => {
+      // manually instantiate the Showdown client `App` in case it wasn't already
+      // (which we'll know based on whether the `app` window global exists)
+      if (!window.app) {
+        window.app = new App();
+      }
+
+      const script = document.createElement('script');
+
+      script.src = '/showdex/main.js';
+      document.body.appendChild(script);
+    };
+  </script>
   ```
 
   ---
@@ -228,7 +247,7 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 
 ## ②&nbsp;&nbsp;Installation
 
-> **Note**  
+> [!IMPORTANT]
 > These are instructions for installing the development environment for building Showdex locally from **source**.
 
 1. `cd` into your favorite directory.
@@ -278,10 +297,10 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 
 ## ③&nbsp;&nbsp;Development
 
-> **Note**  
+> [!TIP]
 > `yarn dev` is an alias of `yarn dev:chrome`.
 
-> **Warning**  
+> [!CAUTION]
 > While developing in `'standalone'` mode is possible, I don't recommend it as you'll need to manually move the built files to your webserver every time (& they can pile up between hot-reloads!). Skip this step if you're intending on just embedding a production build of Showdex into your Showdown client.
 
 1. `cd showdex`
@@ -289,7 +308,7 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 
 <br>
 
-> **Warning**  
+> [!IMPORTANT]
 > Although this project makes use of TypeScript & ESLint, they are only used *suggestively*. In other words, your code will still compile even if you have errors!
 
 Built contents will be dumped into a **`build` directory** in the project root (will be created if it doesn't exist).
@@ -335,7 +354,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
   ---
 
-  > **Note**  
+  > [!NOTE]
   > More information coming soon!  
   > Though instructions aren't currently provided, this project supports [developing on **Firefox for Android Nightly**](https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android).
 
@@ -359,7 +378,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
   ---
 
-  > **Warning**  
+  > [!WARNING]
   > Hot-reloading is a bit of a mess right now since it requires you to reload the extension and refresh Pokémon Showdown. Will figure out a better system in the future.
 
   While `yarn dev:chrome` or `yarn dev:firefox` is running, Webpack will trigger a re-compilation of the bundle when files are changed in the [`src`](./src) directory.
@@ -383,7 +402,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
   ---
 
-  > **Note**  
+  > [!NOTE]
   > More information coming soon!
 
   uhhhhhh for now, check the [`.env`](./.env)
@@ -395,7 +414,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
 ## ④&nbsp;&nbsp;Building
 
-> **Note**  
+> [!TIP]
 > `yarn build` is an alias of `yarn build:chrome && yarn build:firefox`.
 
 1. `cd showdex`
@@ -423,7 +442,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
 
 <br>
 
-> **Warning**  
+> [!IMPORTANT]
 > As mentioned in the [**Development**](#development) section, TypeScript & ESLint are configured to be *suggestive*, so your code will still compile even if you have errors!
 
 Built contents will be dumped into a **`dist` directory** in the project root (will be created if it doesn't exist).
@@ -449,7 +468,8 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
 
   * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
 
-  > **Pro-Tip:** Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `yarn build:fast`, `yarn build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
+  > [!TIP]
+  > Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `yarn build:fast`, `yarn build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
   ---
 </details>
 
@@ -480,10 +500,10 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
 > If possible, including the following would be **immensely** helpful!
 >
 > * **Device** (e.g., Custom PC, MacBook Pro 14" 2023, eMachines eTower 400i, Samsung Smart Fridge, etc.)
-> * **OS** & **Version** (e.g., Windows 11, macOS Sonoma 14.1, Ubuntu 22.04.3 LTS, Android 12, etc.)
+> * **OS** & **Version** (e.g., Windows 11, macOS Sonoma 14.5, Ubuntu 22.04.4 LTS, Android 14, etc.)
 > * **Browser** (e.g., Chrome, Firefox, Opera, Netscape Navigator, etc.)
-> * **Showdex Version** (e.g., v1.2.3)
-> * **Format**, if applicable (e.g., Gen 9 VGC 2024 Reg F Bo3)
+> * **Showdex Version** (e.g., v1.2.4)
+> * **Format**, if applicable (e.g., Gen 9 VGC 2024 Reg G Bo3)
 > * **Replay**, if applicable
 >
 > If you would like to be [credited for your contribution](#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
@@ -574,9 +594,11 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/dastardlydwarf"><strong>Dastardlydwarf</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/ahokgotit"><strong>Ah Ok Got It</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/swiftmochi"><strong>Swift Mochi</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/advsnuts"><strong>ADVs Nuts</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/swiftmochi"><strong>Swift Mochi</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/picachuleboss"><strong>Picachuleboss</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/zzodz"><strong>Zzodz</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
@@ -604,11 +626,20 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Christopher Y</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pokepastry"><strong>PokePastry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Kristen G</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/furrykrisp"><strong>FurryKrisp</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael K</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Wan L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/radiantshackles"><strong>RadiantShackles</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Trent L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/qizwn"><strong>qizwn</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/buyuuh"><strong>buyuuh</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/janaval"><strong>Janaval</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -620,17 +651,22 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
 <table>
   <tbody>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/texascloverleaf"><strong>Texas Cloverleaf</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/cpl593h"><strong>CPL593H</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Angie L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fubwubs"><strong>Fubwubs</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fubwubs"><strong>Fubwubs</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Timothy B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pastgenoufan"><strong>PastGenOUFan</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Luc H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Luc H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/snacky98"><strong>Snacky98</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Wesley L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>James G</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/joshtheking7"><strong>joshtheking7</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Michael L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
@@ -640,31 +676,47 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Thilo P</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Emile L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Nima R</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pinachi"><strong>Pinachi</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://smogon.com/forums/members/genone.306383"><strong>GenOne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jacek L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/lunarvania"><strong>Lunarvania</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Rodrigo S</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/lunarvania"><strong>Lunarvania</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Peter T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Peter T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sam P</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pokepastry"><strong>PokePastry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/doublecaret"><strong>DoubleCaret</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/doublecaret"><strong>DoubleCaret</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/jesskykhemically"><strong>JesskyKhemically</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/plaguevonkarma"><strong>Plague von Karma</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/mrmimikry"><strong>MrMimikry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Ethan D</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jonas H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Itamar M</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/sylvthesizer"><strong>sylvthesizer</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Joseph A</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/sylvee1"><strong>Sylvee1</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fr1e5"><strong>FR1E5</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goldengottago"><strong>GoldenGottaGo</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
