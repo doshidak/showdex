@@ -401,6 +401,15 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         field.dirtyTerrain = null;
       }
     }
+
+    /*
+    l.debug(
+      'applyAutoFieldConditions()', 'for', pokemon.ident || pokemon.speciesForme,
+      '\n', 'autoWeather', autoWeather,
+      '\n', 'autoTerrain', autoTerrain,
+      '\n', 'field', field,
+    );
+    */
   };
 
   const recountRuinAbilities = (
@@ -859,7 +868,9 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
         playerKey,
         source: 'user',
-        level: currentPokemon?.level || state.defaultLevel,
+        // update (2024/07/31): not specifying this (to let the applyPreset() util handle it), otherwise new mon will be
+        // lv 100 in, say, Randoms or somethin in the Honkdex
+        // level: currentPokemon?.level || state.defaultLevel,
         hp: 100, // maxhp will also be 1 as this will be a percentage as a decimal (not server-sourced here)
         maxhp: 100,
       }, state.format);
@@ -1677,6 +1688,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     const player = clonePlayer(state[playerKey]);
 
     const playerPayload: Partial<CalcdexPlayer> = {
+      active: player.active,
+      pokemon: player.pokemon,
       selectionIndex: Math.min(pokemonIndex, player.pokemon.length), // allowing + 1 to add
     };
 
@@ -1760,8 +1773,12 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
 
     // now we do a thing for auto-toggling Stakeout lmao
     // hmm... I feel kinda disgusted after writing this bit lol
+    const getPlayerSource = (
+      pkey: CalcdexPlayerKey,
+    ) => (pkey === playerKey ? playerPayload : state[pkey]);
+
     const pkeys = [state.playerKey, state.opponentKey].filter((pkey) => {
-      const playerSource = pkey === playerKey ? playerPayload : state[pkey];
+      const playerSource = getPlayerSource(pkey);
 
       return (state.operatingMode !== 'battle' || playerSource?.active) && !!playerSource.pokemon?.length;
     });
@@ -1777,7 +1794,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // autoWeather brought up by, say, Koraidon's Oricalcum Pulse will be set to null when the 'Electric' autoTerrain is
     // brought up by, say, Miraidon's Hadron Engine ... LOL
     pkeys.forEach((pkey) => {
-      const playerSource = pkey === playerKey ? playerPayload : state[pkey];
+      const playerSource = getPlayerSource(pkey);
       const pokemon = playerSource?.pokemon?.[playerSource?.selectionIndex];
 
       applyAutoFieldConditions(pokemon, field);
