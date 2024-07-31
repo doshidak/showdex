@@ -67,14 +67,6 @@ export const HomieButton = ({
     <>
       <span>{name}</span>
 
-      {/*
-        (showTitles && showdownUser && !!userTitle?.icon) &&
-        <MemberIcon
-          className={styles.usernameIcon}
-          member={homie}
-        />
-      */}
-
       {
         (showTitles && showdownUser && !!userTitle?.icon) &&
         <MemberIcon

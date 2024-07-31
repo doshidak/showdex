@@ -91,18 +91,6 @@ export const Calcdex = ({
                 {playerName || '--'}
               </div>
 
-              {/*
-                !!playerTitle?.icon &&
-                <MemberIcon
-                  className={styles.icon}
-                  member={{
-                    name: playerName,
-                    showdownUser: true,
-                    periods: null,
-                  }}
-                />
-              */}
-
               {
                 !!playerTitle?.icon &&
                 <MemberIcon

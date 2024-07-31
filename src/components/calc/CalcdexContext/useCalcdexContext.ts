@@ -9,7 +9,6 @@ import {
   PokemonRuinAbilities,
 } from '@showdex/consts/dex';
 import {
-  // type CalcdexAutoBoostEffect,
   type CalcdexBattleField,
   type CalcdexBattleState,
   type CalcdexPlayer,
@@ -679,10 +678,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     if (mutating('dirtyStatus') && (mutated.status || 'ok') === mutated.dirtyStatus) {
       mutated.dirtyStatus = null;
     }
-
-    // if (!mutating('dirtyStatus')) {
-    //   mutated.dirtyStatus = determineNonVolatile(mutated);
-    // }
 
     if (mutating('dirtyFaintCounter') && mutated.dirtyFaintCounter === mutated.faintCounter) {
       mutated.dirtyFaintCounter = null;
@@ -1774,11 +1769,6 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     // ;-;
     const playersPayload: Partial<Record<CalcdexPlayerKey, Partial<CalcdexPlayer>>> = {
       [playerKey]: playerPayload,
-    };
-
-    const field: Partial<CalcdexBattleField> = {
-      autoWeather: null,
-      autoTerrain: null,
     };
 
     // now we do a thing for auto-toggling Stakeout lmao

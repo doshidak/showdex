@@ -128,7 +128,7 @@ export const buildFormatOptions = (
 
   if (favoritedFormats.length) {
     sections.unshift({
-      label: translateHeader('Favorites'),
+      label: 'Favorites',
       options: favoritedFormats.map((format) => {
         const { base, label } = parseBattleFormat(format);
         const value = getGenfulFormat(gen, base);
@@ -168,7 +168,7 @@ export const buildFormatOptions = (
   }
 
   const otherFormats: CalcdexBattleFormatOption = {
-    label: translateHeader('Other'),
+    label: 'Other',
     options: [],
   };
 
