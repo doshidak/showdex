@@ -107,9 +107,9 @@
 }
 
 .minarexIcon {
-  @include position.absolute($right: -56px, $bottom: -12px, $left: unset);
+  @include position.absolute($right: -94px, $bottom: -12px, $left: unset);
   width: 296px;
-  animation: minarex-animation 4s ease-out infinite alternate;
+  animation: minarex-animation 4s ease-in infinite alternate;
   @include transition.apply(left, right, opacity);
 
   &:not(.shady) :global(#sunglasses) {
@@ -121,7 +121,7 @@
   }
 
   .verySmol & {
-    @include position.absolute($left: 60%);
+    @include position.absolute($left: 64%);
     width: 248px;
   }
 }
@@ -199,9 +199,16 @@
   }
 
   .mina & {
-    text-shadow: 0 0 16px color.alpha(#9F1641, 0.32);
     background: linear-gradient(65deg, #E94489 2%, #F8C8C5 98%) 0 0 / 100% 100%;
     background-clip: text;
+  }
+
+  .light.mina & {
+    text-shadow: 0 0 16px color.alpha(#FF3A78, 0.32);
+  }
+
+  .dark.mina & {
+    text-shadow: 0 0 16px color.alpha(#9F1641, 0.32);
   }
 }
 

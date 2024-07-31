@@ -43,8 +43,10 @@ export const FieldCalc = ({
     operatingMode,
     battleId,
     // containerSize,
+    containerWidth,
     gen,
     format,
+    legacy,
     authPlayerKey,
     field,
   } = state;
@@ -116,7 +118,7 @@ export const FieldCalc = ({
 
   const doubles = state?.gameType === 'Doubles';
   const natdexFormat = ['nationaldex', 'natdex'].some((f) => format?.includes(f));
-  const expandedFieldControls = settings?.expandFieldControls || operatingMode === 'standalone';
+  const expandedFieldControls = !legacy && (settings?.expandFieldControls || operatingMode === 'standalone');
 
   const playerToggleKeys = React.useMemo(() => {
     const output: (keyof CalcdexPlayerSide | 'isGravity')[] = [
@@ -247,9 +249,10 @@ export const FieldCalc = ({
     <TableGrid
       className={cx(
         styles.container,
-        (playerToggleKeys.length > 4 || expandedFieldControls || doubles) && styles.expanded,
-        // containerSize === 'xs' && styles.verySmol,
         !!colorScheme && styles[colorScheme],
+        // containerSize === 'xs' && styles.verySmol,
+        containerWidth < 380 && styles.skinnyBoi,
+        (playerToggleKeys.length > 4 || expandedFieldControls || doubles) && styles.expanded,
         className,
       )}
       style={style}
@@ -265,18 +268,18 @@ export const FieldCalc = ({
         header
       >
         {/* p1 screens header */}
-        {authPlayerKey ? (
-          t(
-            `field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`,
-            authPlayerKey === playerKey ? 'Yours' : 'Theirs',
-          )
+        {expandedFieldControls || doubles ? (
+          <>
+            &uarr;{' '}
+            {t('field.field', 'Field')}
+          </>
+        ) : authPlayerKey ? t(
+          `field.${authPlayerKey === playerKey ? 'yours' : 'theirs'}`,
+          authPlayerKey === playerKey ? 'Yours' : 'Theirs',
         ) : (
           <>
             &uarr;{' '}
-            {t(
-              `field.${expandedFieldControls || doubles ? 'field' : 'screens'}`,
-              expandedFieldControls || doubles ? 'Field' : 'Screens',
-            )}
+            {t('field.screens', 'Screens')}
           </>
         )}
       </TableGridItem>
@@ -360,12 +363,18 @@ export const FieldCalc = ({
         header
       >
         {/* p2 screens header */}
-        {authPlayerKey ? (
-          t(`field.${authPlayerKey === playerKey ? 'theirs' : 'yours'}`)
+        {expandedFieldControls || doubles ? (
+          <>
+            &darr;{' '}
+            {t('field.field', 'Field')}
+          </>
+        ) : authPlayerKey ? t(
+          `field.${authPlayerKey === playerKey ? 'theirs' : 'yours'}`,
+          authPlayerKey === playerKey ? 'Theirs' : 'Yours',
         ) : (
           <>
-            {t(`field.${expandedFieldControls || doubles ? 'field' : 'screens'}`)}
-            {' '}&darr;
+            &darr;{' '}
+            {t('field.screens', 'Screens')}
           </>
         )}
       </TableGridItem>

@@ -9,11 +9,12 @@ import styles from './BaseTextField.module.scss';
 export type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 export type TextFieldValue = string | number;
 
-export interface TextFieldAria<
+export type TextFieldAria<
   T extends TextFieldElement = HTMLInputElement,
-> extends Omit<TextFieldAriaInterface, 'inputProps'> {
-  inputProps: T extends HTMLInputElement ? React.InputHTMLAttributes<T> : React.TextareaHTMLAttributes<T>;
-}
+> = Modify<TextFieldAriaInterface, {
+  inputProps: Omit<React.DetailedHTMLProps<T extends HTMLInputElement ? React.InputHTMLAttributes<T> : React.TextareaHTMLAttributes<T>, T>, 'dangerouslySetInnerHTML'>;
+  labelProps: Omit<React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, 'dangerouslySetInnerHTML'>;
+}>;
 
 export interface CommonTextFieldProps<
   FieldValue extends TextFieldValue = string,

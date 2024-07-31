@@ -811,7 +811,7 @@ export const PokeInfo = ({
                   absoluteHover
                   disabled={(
                     presetsLoading
-                      || (operatingMode === 'battle' && !pokemon?.speciesForme)
+                      || (operatingMode !== 'standalone' && !pokemon?.speciesForme)
                       || typeof updatePokemon !== 'function'
                   )}
                   onPress={handlePokePasteImport}

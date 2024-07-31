@@ -156,7 +156,7 @@ export const Calcdex = ({
           glassyTerrain && styles.glassy,
           mobile && styles.mobile,
           containerSize === 'xs' && styles.verySmol,
-          containerWidth < 360 && styles.skinnyBoi,
+          containerWidth < 380 && styles.skinnyBoi,
           renderAsOverlay && styles.overlay,
         )}
         onContextMenu={(e) => showContextMenu({

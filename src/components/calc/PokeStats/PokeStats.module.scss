@@ -10,7 +10,7 @@
 .container {
   // grid-template-columns: minmax(36px, 1fr) repeat(6, minmax(48px, 1.25fr));
   // grid-template-columns: minmax(36px, min-content) repeat(6, minmax(50px, min-content));
-  grid-template-columns: repeat(7, 44px);
+  grid-template-columns: 36px repeat(6, 44px);
   column-gap: 8px;
   // row-gap: 3px;
   @include spacing.margin-xy($x: auto);
@@ -32,7 +32,7 @@
   &.legacySpc {
     // grid-template-columns: minmax(36px, 1fr) repeat(5, minmax(48px, 1.25fr));
     // grid-template-columns: minmax(36px, min-content) repeat(5, minmax(50px, min-content));
-    grid-template-columns: repeat(6, 44px);
+    grid-template-columns: 36px repeat(5, 44px);
 
     // &.verySmol {
     //   // grid-template-columns: minmax(0, 1fr) repeat(5, minmax(0, 1.25fr));

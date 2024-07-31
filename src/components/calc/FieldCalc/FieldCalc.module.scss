@@ -13,6 +13,10 @@
   &.expanded {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 6px;
+
+    &.skinnyBoi {
+      @include spacing.padding($x: 12px);
+    }
   }
 }
 
@@ -46,10 +50,12 @@
 
     &.weatherLabel {
       grid-area: 1 / 1;
+      @include spacing.margin($left: 12px);
     }
 
     &.terrainLabel {
       grid-area: 1 / 2;
+      @include spacing.margin($right: 12px);
     }
   }
 
@@ -79,47 +85,25 @@
   }
 }
 
-// .weatherLabel {
-//   .expanded & {
-//     grid-area: 1 / 1;
-//     @include spacing.margin($bottom: 0);
-//   }
-// }
-
 .weatherInput {
   align-self: flex-start;
-  max-width: 152px;
+  // max-width: 152px;
   @include spacing.margin($x: auto);
 
   .expanded & {
     grid-area: 2 / 1;
-    @include spacing.margin($top: 4px, $bottom: 10px);
-
-    // .verySmol & {
-    //   @include spacing.margin($x: 10px);
-    // }
+    @include spacing.margin($top: 4px, $right: 0, $bottom: 10px, $left: 12px);
   }
 }
 
-// .terrainLabel {
-//   .expanded & {
-//     grid-area: 1 / 2;
-//     @include spacing.margin($bottom: 0);
-//   }
-// }
-
 .terrainInput {
   align-self: flex-start;
-  max-width: 152px;
+  // max-width: 152px;
   @include spacing.margin($x: auto);
 
   .expanded & {
     grid-area: 2 / 2;
-    @include spacing.margin($top: 4px, $bottom: 10px);
-
-    // .verySmol & {
-    //   @include spacing.margin($x: 10px);
-    // }
+    @include spacing.margin($top: 4px, $right: 12px, $bottom: 10px, $left: 0);
   }
 }
 
@@ -149,10 +133,6 @@ button.toggleButton {
   @include spacing.padding($x: 4px);
   font-size: 10px;
   text-transform: none;
-
-  .expanded & {
-    min-width: 58px;
-  }
 }
 
 .tooltipContent {
