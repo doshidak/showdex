@@ -62,8 +62,11 @@ export const FieldCalc = ({
 
   // these are like dirtyItem, where the user can still clear them (unlike dirtyAbility)
   // (i.e., when manually "cleared," the actual value of the dirty properties is an empty string, not null/undefined)
-  const weather = (dirtyWeather ?? (autoWeather || currentWeather)) || null;
-  const terrain = (dirtyTerrain ?? (autoTerrain || currentTerrain)) || null;
+  // update (2024/09/25): bruh I must've been half asleep here LMAO wtf
+  // const weather = (dirtyWeather ?? (autoWeather || currentWeather)) || null;
+  // const terrain = (dirtyTerrain ?? (autoTerrain || currentTerrain)) || null;
+  const weather = (dirtyWeather ?? (currentWeather || autoWeather)) || null;
+  const terrain = (dirtyTerrain ?? (currentTerrain || autoTerrain)) || null;
 
   const showResetWeather = !!currentWeather
     && (!!dirtyWeather || typeof dirtyWeather === 'string') // i.e., '' (to forcibly clear) as opposed to null
