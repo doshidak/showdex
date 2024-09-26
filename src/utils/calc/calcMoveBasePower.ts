@@ -1,22 +1,10 @@
-import {
-  type AbilityName,
-  type GenerationNum,
-  type ItemName,
-  type MoveName,
-  type Weather,
-} from '@smogon/calc';
+import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
 import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
-import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
-import {
-  detectGenFromFormat,
-  detectGroundedness,
-  detectLegacyGen,
-  getDexForFormat,
-} from '@showdex/utils/dex';
+import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
 import { type SmogonMoveOverrides } from './createSmogonMove';
-// import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
 /**
  * Calculates the base power of the provided `moveName` based on conditions of the `pokemon`.
@@ -37,7 +25,7 @@ export const calcMoveBasePower = (
   moveName: MoveName,
   config?: {
     opponentPokemon?: CalcdexPokemon;
-    field?: CalcdexBattleField;
+    // field?: CalcdexBattleField;
     overrides?: SmogonMoveOverrides;
   },
 ): number => {
@@ -46,20 +34,20 @@ export const calcMoveBasePower = (
 
   const {
     opponentPokemon,
-    field,
+    // field,
     overrides,
   } = config || {};
 
   const {
     speciesForme,
     transformedForme,
-    teraType: revealedTeraType,
-    dirtyTeraType,
-    terastallized,
+    // teraType: revealedTeraType,
+    // dirtyTeraType,
+    // terastallized,
     ability: revealedAbility,
     dirtyAbility,
-    item: revealedItem,
-    dirtyItem,
+    // item: revealedItem,
+    // dirtyItem,
     baseStats,
     dirtyBaseStats,
     transformedBaseStats,
@@ -122,9 +110,9 @@ export const calcMoveBasePower = (
     || (typeof multihit === 'number' && multihit);
 
   const currentForme = transformedForme || speciesForme;
-  const teraType = dirtyTeraType || revealedTeraType;
+  // const teraType = dirtyTeraType || revealedTeraType;
   const ability = dirtyAbility || revealedAbility;
-  const item = dirtyItem ?? revealedItem;
+  // const item = dirtyItem ?? revealedItem;
   const hitCounter = clamp(0, currentHitCounter || 0);
   const faintCounter = clamp(0, dirtyFaintCounter ?? (currentFaintCounter || 0));
   const volatiles = Object.keys(volatileMap || {});
@@ -157,9 +145,12 @@ export const calcMoveBasePower = (
   }
 
   // Tera Blast becomes 100 BP when Terastallized to the Stellar type
+  // update (2024/09/24): removing this now that @smogon/calc natively handles this
+  /*
   if (move === 'Tera Blast' as MoveName && teraType === 'Stellar' && terastallized) {
     basePower = 100;
   }
+  */
 
   if (Object.keys(PokemonMoveSkinAbilities).includes(ability)) {
     // 4 of the 5 skinning abilities modify any Normal type moves, while the last one, Normalize, modifies all moves to
@@ -192,6 +183,8 @@ export const calcMoveBasePower = (
     }
   }
 
+  // update (2024/09/24): removing these to let @smogon/calc handle them
+  /*
   // according to the Bulbapedia (as of 2023/12/29):
   // "During any type of weather except strong winds, Weather Ball's power doubles to 100."
   if (move === 'Weather Ball' as MoveName) {
@@ -217,13 +210,19 @@ export const calcMoveBasePower = (
 
     basePowerMods.push(2); // e.g., w/ Mega Launcher = 150; w/o = 100
   }
+  */
 
   // note: had to manually disable the auto-boost in @smogon/calc (specifically in the gen56 & gen789 mechanics files),
   // which is included in this project's @smogon/calc patch
   // update (2023/11/06): this needs to be applied BEFORE the Tera STAB boost oops
+  // update (2024/09/25): @smogon/calc now correctly accounts for Booster Energy via its isQPActive() mechanics util,
+  // which was the reason for this patch since Roaring Moon wouldn't get this boost after consuming said item
+  // (since the pokemon.item is still truthy)
+  /*
   if (move === 'Acrobatics' as MoveName && (!item || item === 'Flying Gem' as ItemName)) {
     basePowerMods.push(2);
   }
+  */
 
   if ((['Electromorphosis', 'Wind Power'] as AbilityName[]).includes(ability) && 'charge' in (volatiles || {}) && moveType === 'Electric') {
     basePowerMods.push(2);

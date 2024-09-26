@@ -8,7 +8,7 @@ import {
   determineMoveTargets,
   getGenDexForFormat,
 } from '@showdex/utils/dex';
-import { calcMoveBasePower } from './calcMoveBasePower';
+// import { calcMoveBasePower } from './calcMoveBasePower';
 import { getMoveOverrideDefaults } from './getMoveOverrideDefaults';
 import { shouldBoostTeraStab } from './shouldBoostTeraStab';
 
@@ -112,13 +112,7 @@ export const createSmogonMove = (
 
   const overrodeBasePower = typeof basePowerOverride === 'number';
 
-  overrides.basePower = overrodeBasePower
-    ? clamp(0, basePowerOverride)
-    : calcMoveBasePower(format, pokemon, moveName, {
-      opponentPokemon,
-      field,
-      overrides,
-    });
+  overrides.basePower = clamp(0, overrodeBasePower ? basePowerOverride : (defaultOverrides?.basePower || 0));
 
   // update (2023/01/02): @smogon/calc added an alliesFainted property to their Pokemon class,
   // so no need to manually provide that functionality now; specified in createSmogonPokemon()

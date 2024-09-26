@@ -29,8 +29,10 @@ export interface MoveCategoryFieldProps extends FieldRenderProps<CalcdexMoveOver
   tabIndex?: number;
   ariaLabel?: string;
   labels?: MoveCategoryFieldLabel[];
+  overrideLabel?: string;
   tooltipPlacement?: TooltipProps['placement'];
   format?: string | GenerationNum;
+  nullable?: boolean;
   readOnly?: boolean;
   disabled?: boolean;
 }
@@ -41,9 +43,11 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
   tabIndex = 0,
   ariaLabel,
   labels = [],
+  overrideLabel,
   tooltipPlacement = 'top',
   input,
   readOnly,
+  nullable,
   format,
   disabled,
 }: MoveCategoryFieldProps, forwardedRef): JSX.Element => {
@@ -93,7 +97,7 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
               atk,
               def,
               presetLabel,
-            ]) => {
+            ], i) => {
               if (atk === 'status') {
                 return null;
               }
@@ -105,14 +109,14 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
                 <ToggleButton
                   key={`${key}:ToggleButton:StatPreset:${atk}:${def}:${formatId(presetLabel)}`}
                   className={styles.statPresetOption}
-                  label={t(`pokedex:categories.${formatId(presetLabel)}.1`, presetLabel)}
+                  label={t(`pokedex:categories.${formatId(presetLabel)}.1`, presetLabel || `preset.${i}`)}
                   primary
                   active={active}
                   activeScale={active ? 0.98 : undefined}
                   forceColorScheme={colorScheme === 'light' ? 'dark' : 'light'}
                   onPress={() => input?.onChange?.({
-                    offensiveStat: atk,
-                    defensiveStat: def,
+                    offensiveStat: active && nullable ? null : atk,
+                    defensiveStat: active && nullable ? null : def,
                   })}
                 />
               );
@@ -211,7 +215,7 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
         hoverScale={1}
         onPress={optionsVisible ? notifyOptionsClose : requestOptionsOpen}
       >
-        {t(`pokedex:categories.${formatId(label?.[2])}.1`, '') || (
+        {overrideLabel || t(`pokedex:categories.${formatId(label?.[2])}.1`, '') || (
           <>
             <div>
               {t('pokedex:stats.' + (

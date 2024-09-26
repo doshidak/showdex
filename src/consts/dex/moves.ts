@@ -296,3 +296,80 @@ export const PokemonDenormalizedMoves: MoveName[] = [
   'Weather Ball', // gens 5+
   // note: Z moves are supposed to be in this list, but I'm too lazy to programmatically construct it rn lmao
 ] as MoveName[];
+
+/**
+ * Moves that quite literally hit diff when their conditions are satisfied.
+ *
+ * * Essentially used as a `overrides.basePower` "depopulator" (i.e., fancy way of setting it to `null`) in the
+ *   `getMoveOverrideDefaults()` util, which in turn will show an "AUTO" placeholder in the move's BP field in the
+ *   `PokeMoves` editor.
+ *   - This is to imply to the user that specifying a BP override value will disable whatever "automatic" mechanic that
+ *     is normally applied under-the-hood to dynamically calculate the move's BP.
+ *   - (This, of course, is not actually "automatic" in the sense that it's just a bunch of hardcoded `switch` cases in
+ *     functions like `calculateBasePowerSMSSSV()` in the `gen789.ts` mechanics — but no one sees it that way obvi LOL)
+ *
+ * @see https://github.com/smogon/damage-calc/blob/60ee461014469b655db8ab0d294f1b4d70c798a0/calc/src/mechanics/gen789.ts#L736
+ * @since 1.2.5
+ */
+export const PokemonDynamicPowerMoves: MoveName[] = [
+  'Acrobatics',
+  'Assurance',
+  'Barb Barrage',
+  // 'Beat Up', // I'm commenting this out (so I don't add it in later) cause Showdex is **required** for this (via ShowdexCalcMods -> @smogon/calc)
+  'Bolt Beak',
+  'Crush Grip',
+  'Dragon Energy',
+  'Electro Ball',
+  'Eruption',
+  'Fishious Rend',
+  'Flail',
+  'Fling',
+  'Grass Knot',
+  'Gyro Ball',
+  'Hard Press',
+  'Heat Crash',
+  'Heavy Slam',
+  'Hex',
+  'Infernal Parade',
+  'Low Kick',
+  'Natural Gift',
+  'Nature Power',
+  'Payback',
+  'Power Trip',
+  'Psyblade',
+  'Punishment',
+  'Pursuit',
+  'Reversal',
+  'Rising Voltage',
+  'Smelling Salts',
+  'Stored Power',
+  'Tera Blast',
+  'Terrain Pulse',
+  // 'Triple Axel', // currently handled by Showdex in calcMoveBasePower()
+  // 'Triple Kick', // currently handled by Showdex in calcMoveBasePower() for legacy gens & calcMoveHitBasePowers() otherwise
+  'Wake-Up Slap',
+  // 'Water Shuriken', // currently handled by Showdex in calcMoveHitBasePowers()
+  'Water Spout',
+  'Weather Ball',
+  'Wring Out',
+] as MoveName[];
+
+/**
+ * Moves that change their category (between Physical & Special) depending on some condition, typically determined by
+ * the attacking Pokemon's higher ATK or SPA stat.
+ *
+ * * Basically serves as a bypass for the default `offensiveStat` & `defensiveStat` overrides supplied by the
+ *   `getMoveOverrideDefaults()` util when instantiating the `SmogonMove` in `createSmogonMove()`.
+ *   - This allows `@smogon/calc` to appropriately handle the aforementioned stats within its mechanics files when the
+ *     user hasn't specified their own category override.
+ *
+ * @see https://bulbapedia.bulbagarden.net/wiki/Category:Moves_that_can_change_damage_categories
+ * @since 1.2.5
+ */
+export const PokemonDynamicCategoryMoves: MoveName[] = [
+  'Light That Burns the Sky', // Z-Move
+  'Photon Geyser',
+  'Shell Side Arm',
+  'Tera Blast',
+  'Tera Starstorm',
+] as MoveName[];
