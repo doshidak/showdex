@@ -94,13 +94,23 @@
   font-size: 10px;
 }
 
-.errorStackContainer {
-  font-size: 9px;
-  border-radius: 10px;
+.errorStackButton {
+  position: relative;
+  border-radius: 12px;
   box-shadow: (
-    0 0 1px color.alpha(colors.$red, 0.56),
-    0 0 12px color.alpha(colors.$red, 0.4),
+    0 0 1px color.alpha(colors.$red, 0.64),
+    0 0 12px color.alpha(colors.$red, 0.32),
   );
+  touch-action: none;
+
+  .copiedBadge {
+    @include position.absolute($top: -8px, $left: 50%);
+  }
+}
+
+.errorStackContainer {
+  width: 100%;
+  font-size: 9px;
   overflow-y: hidden;
 
   &.reportContents {
@@ -142,8 +152,21 @@
   // min-height: 325px;
 }
 
-.downloadButton {
+button.downloadButton {
   font-weight: 500;
+  background: linear-gradient(65deg, colors.$red 2%, colors.$pink 98%) 0 0 / 100% 100%;
+  background-clip: text;
+
+  &.overrideShadow {
+    box-shadow: (
+      0 0 1px color.alpha(colors.$red, 0.8),
+      0 0 8px color.alpha(colors.$pink, 0.32),
+    );
+  }
+
+  &::before {
+    background: linear-gradient(65deg, colors.$red 2%, colors.$pink 98%) 0 0 / 100% 100%;
+  }
 
   span.verbLabel {
     display: inline-block;

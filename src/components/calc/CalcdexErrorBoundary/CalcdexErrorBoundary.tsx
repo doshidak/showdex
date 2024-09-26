@@ -6,10 +6,22 @@ import FileSaver from 'file-saver';
 import LzString from 'lz-string';
 import { GradientButton } from '@showdex/components/app';
 import { type ErrorBoundaryComponentProps, BuildInfo } from '@showdex/components/debug';
-import { Button, Scrollable } from '@showdex/components/ui';
+import {
+  type BadgeInstance,
+  Badge,
+  BaseButton,
+  Button,
+  Scrollable,
+  Tooltip,
+} from '@showdex/components/ui';
 import { useCalcdexBattleState } from '@showdex/redux/store';
-import { env, getResourceUrl, nonEmptyObject } from '@showdex/utils/core';
-import { sanitizeStackTrace } from '@showdex/utils/debug';
+import {
+  env,
+  getResourceUrl,
+  nonEmptyObject,
+  writeClipboardText,
+} from '@showdex/utils/core';
+import { logger, sanitizeStackTrace, wtf } from '@showdex/utils/debug';
 // import { dehydrateCalcdex } from '@showdex/utils/hydro';
 import styles from './CalcdexErrorBoundary.module.scss';
 
@@ -18,6 +30,8 @@ export interface CalcdexErrorBoundaryProps extends ErrorBoundaryComponentProps {
   style?: React.CSSProperties;
   battleId?: string;
 }
+
+const l = logger('@showdex/components/calc/CalcdexErrorBoundary');
 
 /**
  * Renders the error stack & dehydrated Calcdex state (as a QR Code) to the user.
@@ -44,29 +58,28 @@ export const CalcdexErrorBoundary = ({
       stack: sanitizedStack,
       name: error?.name,
       message: error?.message,
-      __typeof: typeof error,
-      __instanceof: error instanceof Error ? 'Error' : '???',
+      __wtf: wtf(error),
     },
+
     env: {
       dict: env.dict(),
-      navigator: {
-        userAgent: global.navigator?.userAgent || '???',
-        __typeof: typeof global.navigator,
-      },
+      navigator: { userAgent: global.navigator?.userAgent || '???', __wtf: wtf(global.navigator) },
       window: {
         // obvi if `global` isn't global, then we're not in Kansas uh I mean JS
-        location: { href: global.window?.location?.href, __typeof: typeof global.window?.location },
+        location: { href: global.window?.location?.href, __wtf: wtf(global.window?.location) },
         app: {
           fragment: global.window?.app?.fragment,
           initialFragment: global.window?.app?.initialFragment,
-          __typeof: typeof global.window?.app,
+          __wtf: wtf(global.window?.app),
         },
-        Dex: { gen: global.window?.Dex?.gen, __typeof: typeof global.window?.Dex },
-        __typeof: typeof global.window,
+        Dex: { gen: global.window?.Dex?.gen, __wtf: wtf(global.window?.Dex) },
+        __wtf: wtf(global.window),
         __SHOWDEX_INIT: global.window?.__SHOWDEX_INIT,
       },
     },
+
     state,
+    dumper: l.scope,
     created: new Date().toISOString(),
   })) || null, [
     error,
@@ -74,22 +87,26 @@ export const CalcdexErrorBoundary = ({
     sanitizedStack,
   ]);
 
+  const copiedBadgeRef = React.useRef<BadgeInstance>(null);
+  const copiedFailedBadgeRef = React.useRef<BadgeInstance>(null);
   const [showState, setShowState] = React.useState(false);
 
-  /*
-  const [compressed, setCompressed] = React.useState<string>(null);
+  const handlePayloadCopy = () => void (async () => {
+    try {
+      await writeClipboardText(JSON.stringify(payload));
+      copiedBadgeRef.current?.show();
+    } catch (err) {
+      if (__DEV__) {
+        l.error(
+          'Failed to write error payload to clipboard:',
+          '\n', err,
+          '\n', '(You will only see this error on development.)',
+        );
+      }
 
-  React.useEffect(() => {
-    if (compressed) {
-      return;
+      copiedFailedBadgeRef.current?.show();
     }
-
-    setCompressed(LzString.compressToBase64(JSON.stringify(payload)));
-  }, [
-    compressed,
-    payload,
-  ]);
-  */
+  })();
 
   const handlePayloadDownload = () => {
     const compressed = LzString.compressToUint8Array(JSON.stringify(payload));
@@ -171,11 +188,41 @@ export const CalcdexErrorBoundary = ({
             </div> */}
           </div>
 
-          <Scrollable className={styles.errorStackContainer}>
-            <div className={styles.errorStack}>
-              {sanitizedStack || error}
-            </div>
-          </Scrollable>
+          <Tooltip
+            content="Copy Error Report to Clipboard"
+            delay={[1000, 50]}
+            trigger="mouseenter"
+            touch={['hold', 500]}
+          >
+            <BaseButton
+              className={styles.errorStackButton}
+              display="block"
+              aria-label="Copy Error Report to Clipboard"
+              hoverScale={1}
+              activeScale={0.98}
+              onPress={handlePayloadCopy}
+            >
+              <Scrollable className={styles.errorStackContainer}>
+                <div className={styles.errorStack}>
+                  {sanitizedStack || error}
+                </div>
+              </Scrollable>
+
+              <Badge
+                ref={copiedBadgeRef}
+                className={styles.copiedBadge}
+                label="Copied!"
+                color="green"
+              />
+
+              <Badge
+                ref={copiedFailedBadgeRef}
+                className={styles.copiedBadge}
+                label="Failed"
+                color="red"
+              />
+            </BaseButton>
+          </Tooltip>
 
           {
             !!payload &&
@@ -192,17 +239,24 @@ export const CalcdexErrorBoundary = ({
               </div>
 
               <div className={styles.downloadContainer}>
-                <GradientButton
-                  className={styles.downloadButton}
-                  aria-label="Download Error Report"
-                  hoverScale={1}
-                  onPress={handlePayloadDownload}
+                <Tooltip
+                  content="Save Error Report to File"
+                  delay={[1000, 50]}
+                  trigger="mouseenter"
+                  touch={['hold', 500]}
                 >
-                  <span className={styles.verbLabel}>
-                    Download
-                  </span>
-                  Report
-                </GradientButton>
+                  <GradientButton
+                    className={cx(styles.downloadButton, styles.overrideShadow)}
+                    aria-label="Download Error Report"
+                    hoverScale={1}
+                    onPress={handlePayloadDownload}
+                  >
+                    <span className={styles.verbLabel}>
+                      Download
+                    </span>
+                    Report
+                  </GradientButton>
+                </Tooltip>
               </div>
 
               <div className={styles.description}>
