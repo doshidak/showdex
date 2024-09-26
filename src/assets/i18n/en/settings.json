@@ -425,7 +425,7 @@
 
     "enableQuickEditor": {
       "label": "Quick-Edit Move Effects",
-      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>, &amp; toggle the activation of <em>Power Trick</em>.<br /><br />If <em>$t(calcdex.showMoveEditor.label)</em> is enabled, you'll be able to edit this in the moves editor as well."
+      "tooltip": "Allows you to quickly edit the number of hits for multi-hitting moves, such as <em>Icicle Spear</em>, &amp; toggle the activation of <em>Power Trick</em>."
     },
 
     "showNonDamageRanges": {
@@ -518,24 +518,6 @@
       }
     },
 
-    "showMoveEditor": {
-      "label": "Edit Moves",
-      "options": {
-        "always": {
-          "label": "Always",
-          "tooltip": "Shows an <em>$t(common:labels.edit)</em> button in the Pokémon's moves table, which toggles the moves editor.<br /><br />You can edit the move's type, category (if damaging) &amp; BP, including separate BPs for Z &amp; Max moves when activated. Edits are unique to each move of each Pokémon."
-        },
-        "meta": {
-          "label": "OMs",
-          "tooltip": "Only shows an <em>$t(common:labels.edit)</em> button in nonstandard Other Metagame (OM) formats.<br /><br />Hover over the <strong>$t(calcdex.showMoveEditor.options.always.label)</strong> option to learn more about the moves editor."
-        },
-        "never": {
-          "label": "Never",
-          "tooltip": "What <em>$t(common:labels.edit)</em> button?"
-        }
-      }
-    },
-
     "allowIllegalSpreads": {
       "label": "Allow Illegal Spreads",
       "options": {
@@ -620,11 +602,6 @@
     "alwaysEditTypes": {
       "label": "Always Edit Types",
       "tooltip": "Allows Pokémon types to be edited in the $t(common:products.honkdex_one), regardless of the selected format.<br /><br />Disabling this will revert to the configured <em>$t(calcdex.editPokemonTypes.label)</em> $t(common:products.calcdex_one) setting."
-    },
-
-    "alwaysEditMoves": {
-      "label": "Always Edit Moves",
-      "tooltip": "Allows access to the moves editor, regardless of the format.<br /><br />Disabling this will revert to the configured <em>$t(calcdex.showMoveEditor.label)</em> $t(common:products.calcdex_one) setting. Refer to the aforementioned setting to learn more about the moves editor."
     },
 
     "alwaysShowGenetics": {

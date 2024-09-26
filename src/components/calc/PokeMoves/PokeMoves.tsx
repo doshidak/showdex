@@ -20,12 +20,7 @@ import {
 } from '@showdex/components/ui';
 import { PokemonDynamicCategoryMoves, PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import {
-  useColorScheme,
-  useColorTheme,
-  useGlassyTerrain,
-  useHonkdexSettings,
-} from '@showdex/redux/store';
+import { useColorScheme, useColorTheme, useGlassyTerrain } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { calcMoveHitBasePowers, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
@@ -36,7 +31,6 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
@@ -78,7 +72,6 @@ export const PokeMoves = ({
     field,
   } = state;
 
-  const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
@@ -142,12 +135,6 @@ export const PokeMoves = ({
     && (nationalDexFormat || (gen === 8 && !format?.includes('bdsp')));
 
   const disableMaxToggle = !pokemon?.speciesForme;
-
-  const showEditButton = !!pokemon?.speciesForme && (
-    (operatingMode === 'standalone' && honkdexSettings?.alwaysEditMoves)
-      || settings?.showMoveEditor === 'always'
-      || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
-  );
 
   // nice one me 10/10
   const showFaintCounter = !!pokemon?.speciesForme && (
@@ -431,7 +418,7 @@ export const PokeMoves = ({
         }
 
         {
-          showEditButton &&
+          !!pokemon?.speciesForme &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.editButton)}
             label={t(

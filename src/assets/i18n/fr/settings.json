@@ -424,7 +424,7 @@
 
     "enableQuickEditor": {
       "label": "Modifier Rapidement les Effets de Capacité",
-      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, tels que <em>$t(pokedex:moves.iciclespear)</em>, & d'activer l'activation de <em>$t(pokedex:moves.powertrick)</em>.<br /><br />Si <em>$t(calcdex.showMoveEditor.label)</em> est activé, vous pourrez également modifier cela dans l'éditeur de capacités."
+      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, tels que <em>$t(pokedex:moves.iciclespear)</em>, & d'activer l'activation de <em>$t(pokedex:moves.powertrick)</em>."
     },
 
     "showNonDamageRanges": {
@@ -517,24 +517,6 @@
       }
     },
 
-    "showMoveEditor": {
-      "label": "Modifier les Capacités",
-      "options": {
-        "always": {
-          "label": "Toujours",
-          "tooltip": "Affiche un bouton <em>$t(common:labels.edit)</em> dans le tableau des capacités du Pokémon, qui active l'éditeur de capacités.<br /><br />Vous pouvez modifier le type de la capacité, la catégorie (si elle inflige des dégâts) & les $t(pokedex:stats.bp.1), y compris des $t(pokedex:stats.bp.1) séparés pour les capacités $t(pokedex:ultimates.z.2) & $t(pokedex:ultimates.dmax.2) lorsqu'activées. Les modifications sont uniques à chaque capacité de chaque Pokémon."
-        },
-        "meta": {
-          "label": "OMs",
-          "tooltip": "Affiche uniquement un bouton <em>$t(common:labels.edit)</em> dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showMoveEditor.options.always.label)</strong> pour en savoir plus sur l'éditeur de capacités."
-        },
-        "never": {
-          "label": "Jamais",
-          "tooltip": "Quel bouton <em>$t(common:labels.edit)</em> ?"
-        }
-      }
-    },
-
     "allowIllegalSpreads": {
       "label": "Autoriser les Répartitions Illégales",
       "options": {
@@ -619,11 +601,6 @@
     "alwaysEditTypes": {
       "label": "Toujours Modifier les Types",
       "tooltip": "Permet de modifier les types de Pokémon dans le $t(common:products.honkdex_one), quel que soit le format sélectionné.<br /><br />La désactivation rétablira la configuration <em>$t(calcdex.editPokemonTypes.label)</em> du paramètre $t(common:products.calcdex_one)."
-    },
-
-    "alwaysEditMoves": {
-      "label": "Toujours Modifier les Capacités",
-      "tooltip": "Permet l'accès à l'éditeur de capacités, quel que soit le format.<br /><br />La désactivation rétablira la configuration <em>$t(calcdex.showMoveEditor.label)</em> du paramètre $t(common:products.calcdex_one). Référez-vous au paramètre mentionné pour en savoir plus sur l'éditeur de capacités."
     },
 
     "alwaysShowGenetics": {
