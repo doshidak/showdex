@@ -18,7 +18,10 @@ export interface CalcdexPokeContextConsumables extends CalcdexPokeContextValue {
   importPresets: (
     presets: CalcdexPokemonPreset[], // alwaysAdd = true -> will always add as new; otherwise, will only apply to ctx player's pokemon[]
     additionalMutations?: Record<string, Partial<CalcdexPokemon>>, // key = preset's calcdexId
-    alwaysAdd?: boolean,
+    config?: {
+      alwaysAdd?: boolean;
+      onlyForId?: string;
+    },
     scope?: string,
   ) => number; // returns # of successfully imported presets
 
@@ -85,13 +88,13 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
   const importPresets: CalcdexPokeContextConsumables['importPresets'] = (
     importedPresets,
     additionalMutations,
-    alwaysAdd,
+    config,
     scopeFromArgs,
   ) => importPlayerPresets(
     playerKey,
     importedPresets,
     additionalMutations,
-    alwaysAdd,
+    config,
     s('importPresets()', scopeFromArgs),
   );
 
@@ -112,8 +115,14 @@ export const useCalcdexPokeContext = (): CalcdexPokeContextConsumables => {
       return void endTimer('(invalid preset)');
     }
 
-    importPresets([preset], { [preset.calcdexId]: additionalMutations }, false, scope);
-    endTimer('(delegated)');
+    importPresets([preset], {
+      [preset.calcdexId]: additionalMutations,
+    }, {
+      alwaysAdd: false,
+      onlyForId: playerPokemon?.calcdexId,
+    }, scope);
+
+    endTimer('(delegated)', 'onlyForId', playerPokemon?.calcdexId);
   };
 
   const updatePokemon: CalcdexPokeContextConsumables['updatePokemon'] = (

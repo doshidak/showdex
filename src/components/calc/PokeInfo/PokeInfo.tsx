@@ -408,7 +408,7 @@ export const PokeInfo = ({
       const count = importPresets(
         imported,
         null, // additional mutation map (not needed here)
-        operatingMode === 'standalone', // alwaysAdd
+        { alwaysAdd: operatingMode === 'standalone' },
         `${l.scope}:handlePokePasteImport()`,
       );
 
