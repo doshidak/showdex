@@ -756,6 +756,15 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         terrain,
       });
     }
+
+    // check if we should turn off the autoPreset if the user changed anything meaningful (except in Randoms)
+    // (note: checking autoPreset's from both prev & mutated to make sure the user didn't just toggle it back on rn)
+    if (prev.autoPreset && mutated.autoPreset && !state.format.includes('random')) {
+      mutated.autoPreset = !mutating('dirtyAbility', 'dirtyItem', 'nature', 'presetId')
+        && (prev.speciesForme === mutated.speciesForme)
+        && (!mutated.transformedForme || prev.transformedForme === mutated.transformedForme)
+        && (!mutating('moves') || similarArrays(prev.moves, mutated.moves));
+    }
   };
 
   // note: don't bother memozing these; may do more harm than good! :o
