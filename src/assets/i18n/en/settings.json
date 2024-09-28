@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "settings",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "en",
     "created": "2024-01-07T00:59:01.639Z",
-    "updated": "2024-07-31T15:05:41.782Z"
+    "updated": "2024-09-28T22:20:41.390Z"
   },
 
   "pane": {
@@ -321,7 +321,7 @@
     },
 
     "autoImportTeamSheets": {
-      "label": "Auto-Import Team Sheets",
+      "label": "Import Team Sheets",
       "tooltip": "Imports &amp; applies sets derived from Open Team Sheets (OTS), typical of VGC formats, or the <code>!showteam</code> $t(common:products.showdown) chat command.<br /><br />Note that OTS's may omit the spreads, i.e., $t(pokedex:stats.ivs_other.1), $t(pokedex:stats.evs_other.1) &amp; nature. In those cases, OTS's won't be converted into sets, but used as revealed info in order to allow spreads from other sets to apply."
     },
 
@@ -344,7 +344,7 @@
     },
 
     "defaultAutoSelect": {
-      "label": "Auto-Swap Pokémon",
+      "label": "Swap Pokémon",
       "options": {
         "auth": {
           "label": "Mine",
@@ -418,8 +418,14 @@
       "tooltip": "Shows spreads (in place of natures) if any are available from the Pokémon's applied set or usage stats.<br /><br />When spreads are available, a toggle to switch between spreads & natures will be shown, regardless of this setting."
     },
 
+    "defaultAutoPreset": {
+      "label": "Guess Best Set",
+      "tooltip": "Determines &amp; switches to the most probable set based on the <strong>available sets</strong> of your opponents' (or spectating players') Pokémon &amp; revealed information in the battle.<br /><br />When the guesses narrow down to a single set, the <em>$t(common:labels.auto)</em> toggle in the sets dropdown will turn <green>{{color}}</green> (or the first color of your <strong>$t(calcdex.nhkoColors.label)</strong>). Otherwise, the toggle will remain <blue>blue</blue> &amp; when selected will disable auto-set selection, graying it out.<br /><br />This is a <strong>rudimentary</strong> implementation of this feature with only the first part: revealed information. Additionally, this can only use what's available, so guesses are only as good as the available sets. Therefore, it goes without saying: <strong>Player discretion is <em>highly</em> advised!!!</strong>",
+      "green": "green"
+    },
+
     "defaultAutoMoves": {
-      "label": "Auto-Fill Revealed Moves",
+      "label": "Fill Revealed Moves",
       "tooltip": "Fills in your opponents' (or spectating players') Pokémon's actual moves as they're revealed in the battle, replacing ones from the applied set."
     },
 
@@ -612,7 +618,7 @@
 
   "showdown": {
     "autoAcceptSheets": {
-      "label": "Auto-Accept Team Sheets",
+      "label": "Accept Team Sheets",
       "tooltip": "Immediately accepts requests for Open Team Sheets (OTS), typically in VGC formats."
     }
   }

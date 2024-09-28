@@ -613,6 +613,12 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         battleState.format,
       );
 
+      const settingsPlayerKey = battleState.authPlayerKey === playerKey && hasMyPokemon ? 'auth' : playerKey;
+
+      if (!matchedPokemon) {
+        basePokemon.autoPreset = settings?.defaultAutoPreset?.[settingsPlayerKey];
+      }
+
       // in case the volatiles aren't sanitized yet lol
       if ('transform' in basePokemon.volatiles && typeof basePokemon.volatiles.transform[1] !== 'string') {
         basePokemon.volatiles = sanitizeVolatiles(basePokemon);
@@ -638,7 +644,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // update (2023/02/03): defaultAutoMoves.auth is always false since we'd normally have myPokemon[],
           // but in cases of old replays, myPokemon[] won't be available, so we'd want to respect the user's setting
           // using the playerKey instead of 'auth'
-          && settings?.defaultAutoMoves[battleState.authPlayerKey === playerKey && hasMyPokemon ? 'auth' : playerKey],
+          && settings?.defaultAutoMoves?.[settingsPlayerKey],
       });
 
       // update (2023/10/18): not really using `slot` at all, so yolo ?

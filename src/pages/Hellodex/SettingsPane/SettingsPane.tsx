@@ -479,6 +479,7 @@ export const SettingsPane = ({
               />
 
               <AutoFeaturesSettingsPane
+                value={values}
                 inBattle={inBattle}
               />
 

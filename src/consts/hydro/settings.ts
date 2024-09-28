@@ -58,7 +58,14 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     includeOtherMetaPresets: false,
     includePresetsBundles: [],
     autoImportTeamSheets: true,
-    autoExportOpponent: false,
+
+    defaultAutoPreset: {
+      auth: false,
+      p1: true,
+      p2: true,
+      p3: true,
+      p4: true,
+    },
 
     defaultAutoMoves: {
       auth: false,
@@ -198,7 +205,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   includeOtherMetaPresets: 'iom',
   includePresetsBundles: 'ipb',
   autoImportTeamSheets: 'ats',
-  autoExportOpponent: 'aeo',
+  defaultAutoPreset: 'dap',
   defaultAutoMoves: 'dam',
   forceNonVolatile: 'fnv', // thought about alwaysShowStatus, but ya... LOL
   editPokemonTypes: 'ept',
