@@ -218,3 +218,22 @@ div.mobileCloseButton {
     @include spacing.margin($top: 16px, $bottom: 8px);
   }
 }
+
+// update (2024/09/28): why did I remove this? LMAO oopsies
+// (was the cause of the massive player title icons in the FFA player dropdowns HAHA)
+.playerOption {
+  @include flex.row($align: center);
+
+  .label {
+    @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  }
+
+  .icon {
+    width: 12px;
+    min-width: 12px;
+    height: 12px;
+    min-height: 12px;
+    @include spacing.margin($left: 1px);
+    color: inherit;
+  }
+}
