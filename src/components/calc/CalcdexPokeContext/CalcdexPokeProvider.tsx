@@ -188,32 +188,6 @@ export const CalcdexPokeProvider = ({
     [format, formatLabelMap],
   );
 
-  /*
-  const presets = React.useMemo(() => (playerPokemon?.speciesForme ? [
-    ...(playerPokemon?.presets || []),
-    ...pokemonSheets,
-    ...[
-      ...(format?.includes('random') ? [] : usages),
-      ...teamPresets,
-      ...boxPresets,
-      ...bundledPresets,
-      ...pokemonPresets,
-    ].sort(presetSorter),
-  ] : []), [
-    boxPresets,
-    bundledPresets,
-    format,
-    // formatLabelMap,
-    playerPokemon?.presets,
-    playerPokemon?.speciesForme,
-    pokemonPresets,
-    pokemonSheets,
-    presetSorter,
-    teamPresets,
-    usages,
-  ]);
-  */
-
   const presets = React.useMemo(() => {
     if (!playerPokemon?.speciesForme) {
       return [];
@@ -277,40 +251,13 @@ export const CalcdexPokeProvider = ({
     usages,
   ]);
 
-  const usage = React.useMemo(
-    () => findMatchingUsage(usages, playerPokemon),
-    [playerPokemon, usages],
-  );
-
-  const abilityUsageFinder = React.useMemo(
-    () => usageAltPercentFinder(usage?.altAbilities, true),
-    [usage?.altAbilities],
-  );
-
-  const abilityUsageSorter = React.useMemo(
-    () => usageAltPercentSorter(abilityUsageFinder),
-    [abilityUsageFinder],
-  );
-
-  const itemUsageFinder = React.useMemo(
-    () => usageAltPercentFinder(usage?.altItems, true),
-    [usage?.altItems],
-  );
-
-  const itemUsageSorter = React.useMemo(
-    () => usageAltPercentSorter(itemUsageFinder),
-    [itemUsageFinder],
-  );
-
-  const moveUsageFinder = React.useMemo(
-    () => usageAltPercentFinder(usage?.altMoves, true),
-    [usage?.altMoves],
-  );
-
-  const moveUsageSorter = React.useMemo(
-    () => usageAltPercentSorter(moveUsageFinder),
-    [moveUsageFinder],
-  );
+  const usage = React.useMemo(() => findMatchingUsage(usages, playerPokemon), [playerPokemon, usages]);
+  const abilityUsageFinder = React.useMemo(() => usageAltPercentFinder(usage?.altAbilities, true), [usage?.altAbilities]);
+  const abilityUsageSorter = React.useMemo(() => usageAltPercentSorter(abilityUsageFinder), [abilityUsageFinder]);
+  const itemUsageFinder = React.useMemo(() => usageAltPercentFinder(usage?.altItems, true), [usage?.altItems]);
+  const itemUsageSorter = React.useMemo(() => usageAltPercentSorter(itemUsageFinder), [itemUsageFinder]);
+  const moveUsageFinder = React.useMemo(() => usageAltPercentFinder(usage?.altMoves, true), [usage?.altMoves]);
+  const moveUsageSorter = React.useMemo(() => usageAltPercentSorter(moveUsageFinder), [moveUsageFinder]);
 
   // calculate the current matchup
   const calculateMatchup = useSmogonMatchup(

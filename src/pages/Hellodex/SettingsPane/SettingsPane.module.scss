@@ -398,3 +398,12 @@ $close-icon-size: 28px;
   white-space: normal;
   user-select: none;
 }
+
+// these are primarily used for the defaultAutoPreset Field in AutoFeaturesSettingsPane
+.strongText {
+  font-weight: 600;
+}
+
+.blueColor {
+  color: colors.$blue;
+}

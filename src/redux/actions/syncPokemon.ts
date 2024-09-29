@@ -36,7 +36,7 @@ import { capitalize } from '@showdex/utils/humanize';
 
 export const syncPokemon = (
   pokemon: CalcdexPokemon,
-  config?: {
+  config: {
     format: string;
     clientPokemon: Partial<Showdown.Pokemon>;
     serverPokemon?: Showdown.ServerPokemon;
@@ -63,6 +63,14 @@ export const syncPokemon = (
   if (!syncedPokemon.source && clientPokemon?.speciesForme) {
     syncedPokemon.source = 'client';
   }
+
+  // update (2024/09/27): in order to fix 'server'-sourced Zoroark's not syncing due to stuff like boosts being applied
+  // to their copied Pokemon's client data instead, we'll be passing in the "wrong" clientPokemon along with Zoroark's
+  // serverPokemon data; in these cases, we'll ignore syncing stuff like 'name' & 'speciesForme'
+  const clientIllusion = !!serverPokemon?.calcdexId
+    && !!clientPokemon?.calcdexId
+    && serverPokemon.calcdexId !== clientPokemon.calcdexId
+    && formatId(serverPokemon.ability || serverPokemon.baseAbility) === 'illusion';
 
   // you should not be looping through any special CalcdexPokemon-specific properties here!
   ([
@@ -97,7 +105,19 @@ export const syncPokemon = (
 
     // note: `return` to not set the `value` & go next, `break` to stop processing & move onto the `value` diff check to set it
     switch (key) {
+      case 'name': {
+        if (clientIllusion) {
+          return;
+        }
+
+        break;
+      }
+
       case 'speciesForme': {
+        if (clientIllusion) {
+          return;
+        }
+
         // e.g., 'Urshifu-*' -> 'Urshifu' (to fix forme switching, which is prevented due to the wildcard forme)
         value = (value as string).replace('-*', '');
 

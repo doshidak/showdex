@@ -1,10 +1,10 @@
 {
   "--meta": {
     "name": "settings",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "locale": "fr",
     "created": "2024-01-08T19:45:21.842Z",
-    "updated": "2024-07-31T15:07:07.262Z"
+    "updated": "2024-09-28T22:20:22.835Z"
   },
 
   "pane": {
@@ -320,7 +320,7 @@
     },
 
     "autoImportTeamSheets": {
-      "label": "Import Auto des Feuilles d'Équipe",
+      "label": "Import des Feuilles d'Équipe",
       "tooltip": "Importe & applique des sets dérivés des Open Team Sheets (OTS), typiques des formats VGC, ou de la commande de chat $t(common:products.showdown) <code>!showteam</code>.<br /><br />Notez que les OTS peuvent omettre les répartitions, c'est-à-dire, $t(pokedex:stats.ivs_other.1), $t(pokedex:stats.evs_other.1) & la nature. Dans ces cas, les OTS ne seront pas convertis en sets, mais utilisés comme informations révélées afin de permettre l'application de répartitions d'autres sets."
     },
 
@@ -343,7 +343,7 @@
     },
 
     "defaultAutoSelect": {
-      "label": "Changement Auto de Pokémon",
+      "label": "Changement de Pokémon",
       "options": {
         "auth": {
           "label": "Les Miens",
@@ -417,14 +417,20 @@
       "tooltip": "Affiche les répartitions (à la place des natures) si elles sont disponibles à partir de l'set appliqué ou des statistiques d'usage du Pokémon.<br /><br />Lorsque des répartitions sont disponibles, un bouton pour basculer entre les répartitions et les natures sera affiché, indépendamment de ce paramètre."
     },
 
+    "defaultAutoPreset": {
+      "label": "Deviner le Meilleur Set",
+      "tooltip": "Détermine et passe au set le plus probable basé sur les <strong>sets disponibles</strong> des Pokémon de vos adversaires (ou des joueurs spectateurs) et les informations révélées dans la bataille.<br /><br />Lorsque les suppositions se réduisent à un seul set, le basculement <em>$t(common:labels.auto)</em> dans le menu déroulant des sets deviendra <green>{{color}}</green> (ou la première couleur de votre <strong>$t(calcdex.nhkoColors.label)</strong>). Sinon, le basculement restera <blue>bleu</blue> et lorsqu'il est sélectionné, il désactivera la sélection automatique de set, le grisaille.<br /><br />Ceci est une implémentation <strong>rudimentaire</strong> de cette fonctionnalité avec seulement la première partie : informations révélées. De plus, cela ne peut utiliser que ce qui est disponible, donc les suppositions ne sont bonnes que dans la mesure des sets disponibles. Par conséquent, il va sans dire : <strong>La discrétion du joueur est <em>fortement</em> conseillée !!!</strong>",
+      "green": "vert"
+    },
+
     "defaultAutoMoves": {
-      "label": "Remplissage Auto des Révélées",
+      "label": "Remplissage des Révélées",
       "tooltip": "Remplit les capacités réelles des Pokémon de vos adversaires (ou des joueurs en spectateur) au fur et à mesure qu'elles sont révélées dans la bataille, en remplaçant celles de l'set appliqué."
     },
 
     "enableQuickEditor": {
       "label": "Modifier Rapidement les Effets de Capacité",
-      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, tels que <em>$t(pokedex:moves.iciclespear)</em>, & d'activer l'activation de <em>$t(pokedex:moves.powertrick)</em>.<br /><br />Si <em>$t(calcdex.showMoveEditor.label)</em> est activé, vous pourrez également modifier cela dans l'éditeur de capacités."
+      "tooltip": "Vous permet de modifier rapidement le nombre de coups pour les capacités à coups multiples, tels que <em>$t(pokedex:moves.iciclespear)</em>, & d'activer l'activation de <em>$t(pokedex:moves.powertrick)</em>."
     },
 
     "showNonDamageRanges": {
@@ -517,24 +523,6 @@
       }
     },
 
-    "showMoveEditor": {
-      "label": "Modifier les Capacités",
-      "options": {
-        "always": {
-          "label": "Toujours",
-          "tooltip": "Affiche un bouton <em>$t(common:labels.edit)</em> dans le tableau des capacités du Pokémon, qui active l'éditeur de capacités.<br /><br />Vous pouvez modifier le type de la capacité, la catégorie (si elle inflige des dégâts) & les $t(pokedex:stats.bp.1), y compris des $t(pokedex:stats.bp.1) séparés pour les capacités $t(pokedex:ultimates.z.2) & $t(pokedex:ultimates.dmax.2) lorsqu'activées. Les modifications sont uniques à chaque capacité de chaque Pokémon."
-        },
-        "meta": {
-          "label": "OMs",
-          "tooltip": "Affiche uniquement un bouton <em>$t(common:labels.edit)</em> dans les formats Other Metagames (OM) non standards.<br /><br />Survolez l'option <strong>$t(calcdex.showMoveEditor.options.always.label)</strong> pour en savoir plus sur l'éditeur de capacités."
-        },
-        "never": {
-          "label": "Jamais",
-          "tooltip": "Quel bouton <em>$t(common:labels.edit)</em> ?"
-        }
-      }
-    },
-
     "allowIllegalSpreads": {
       "label": "Autoriser les Répartitions Illégales",
       "options": {
@@ -621,11 +609,6 @@
       "tooltip": "Permet de modifier les types de Pokémon dans le $t(common:products.honkdex_one), quel que soit le format sélectionné.<br /><br />La désactivation rétablira la configuration <em>$t(calcdex.editPokemonTypes.label)</em> du paramètre $t(common:products.calcdex_one)."
     },
 
-    "alwaysEditMoves": {
-      "label": "Toujours Modifier les Capacités",
-      "tooltip": "Permet l'accès à l'éditeur de capacités, quel que soit le format.<br /><br />La désactivation rétablira la configuration <em>$t(calcdex.showMoveEditor.label)</em> du paramètre $t(common:products.calcdex_one). Référez-vous au paramètre mentionné pour en savoir plus sur l'éditeur de capacités."
-    },
-
     "alwaysShowGenetics": {
       "label": "Toujours Afficher les Stats",
       "tooltip": "Affiche toujours les $t(pokedex:stats.base_other.0), $t(pokedex:stats.ivs_other.1) & $t(pokedex:stats.evs_other.1) dans le tableau des stats du Pokémon. Les $t(pokedex:stats.evs_other.1) peuvent toujours être cachés dans les générations anciennes, à moins que le paramètre <em>$t(calcdex.showLegacyEvs.label)</em> de $t(common:products.calcdex_one) ne soit activé.<br /><br />La désactivation rétablira la configuration des paramètres <em>$t(calcdex.showAuthGenetics.label)</em> & <em>$t(calcdex.showPlayerGenetics.label)</em> de $t(common:products.calcdex_one)."
@@ -634,7 +617,7 @@
 
   "showdown": {
     "autoAcceptSheets": {
-      "label": "Acceptation Auto des Feuilles d'Équipe",
+      "label": "Acceptation des Feuilles d'Équipe",
       "tooltip": "Accepte immédiatement les demandes de Feuilles d'Équipe Ouvertes ou <em>Open Team Sheets</em> (OTS), typiquement dans les formats VGC."
     }
   }

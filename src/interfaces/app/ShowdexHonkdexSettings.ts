@@ -36,16 +36,6 @@ export interface ShowdexHonkdexSettings {
   alwaysEditTypes: boolean;
 
   /**
-   * Whether to always allow moves to be edited.
-   *
-   * * When disabled, the `showMoveEditor` Calcdex setting will be used.
-   *
-   * @default true
-   * @since 1.2.0
-   */
-  alwaysEditMoves: boolean;
-
-  /**
    * Whether to expand the stats table to show all stats.
    *
    * * When enabled (default), base stats, IVs & EVs will be shown.

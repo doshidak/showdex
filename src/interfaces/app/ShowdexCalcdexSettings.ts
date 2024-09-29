@@ -88,9 +88,9 @@ export interface ShowdexCalcdexSettings {
   /**
    * Default auto-select settings per side.
    *
-   * * `auth` pertains to whichever side the logged-in user is playing as.
-   *   - Will override the side's setting that `auth` pertains to with the value of `auth`.
-   * * Though `p3` and `p4` are defined, they currently aren't being used.
+   * * `auth` pertains to whichever side the logged-in user is playing on & will override that side's value.
+   *   - e.g., Say that the battle's `authPlayerKey` is `'p2'` & `auth` set to `false` but `p2` is `true`,
+   *     then the resolved value will be `false` (i.e., value of `auth`).
    *
    * @default
    * ```ts
@@ -100,7 +100,7 @@ export interface ShowdexCalcdexSettings {
    *   p2: true,
    *   p3: true,
    *   p4: true,
-   * }
+   * } as Record<'auth' | CalcdexPlayerKey, boolean>
    * ```
    * @since 1.0.3
    */
@@ -305,25 +305,15 @@ export interface ShowdexCalcdexSettings {
   autoImportTeamSheets: boolean;
 
   /**
-   * Whether to auto-export the opponent's team to the Teambuilder once the battle ends.
+   * Default auto-preset selection per side.
    *
-   * * If `true`, will be exported to its own Teambuilder folder called "Showdex".
-   *
-   * @deprecated As of v1.0.3, this currently does nothing.
-   * @default false
-   * @since 1.0.3
-   */
-  autoExportOpponent: boolean;
-
-  /**
-   * Default auto-move selection per side.
-   *
-   * * Despite the `autoMoves` setting pertaining to each Pokemon, the determined setting will be set for
-   *   every Pokemon in the side, functioning more as the initial value.
-   *   - User should be able to tweak the `autoMoves` setting for each individual Pokemon afterwards.
-   * * `auth` pertains to whichever side the logged-in user is playing as.
-   *   - Will override the side's setting that `auth` pertains to with the value of `auth`.
-   * * Though `p3` and `p4` are defined, they currently aren't being used.
+   * * Serves as the initial values of the `autoPreset` prop of newly added `CalcdexPokemon`'s during `syncBattle()`'s.
+   * * `auth` pertains to whichever side the logged-in user is playing on & will override that side's value.
+   *   - e.g., Say that the battle's `authPlayerKey` is `'p2'` & `auth` set to `false` but `p2` is `true`,
+   *     then the resolved value will be `false` (i.e., value of `auth`).
+   *   - Also, I realize how redundant `auth` is since we already know their Pokemon's exact presets, whether from the
+   *     Teambuilder or `guessServerSpread()` (aka. *old reliable*), but cause we're in the computing dimension & redundancy
+   *     is sometimes seen as a *good thing*, even touted as a feature or design strat for contingencies, it's there LOL
    *
    * @default
    * ```ts
@@ -333,7 +323,37 @@ export interface ShowdexCalcdexSettings {
    *   p2: true,
    *   p3: true,
    *   p4: true,
-   * }
+   * } as Record<'auth' | CalcdexPlayerKey, boolean>
+   * ```
+   * @since 1.2.5
+   */
+  defaultAutoPreset: Record<'auth' | CalcdexPlayerKey, boolean>;
+
+  /**
+   * Default auto-move selection per side.
+   *
+   * * ~~Despite the `autoMoves` setting pertaining to each Pokemon, the determined setting will be set for every Pokemon
+   *   in the side, functioning more as the initial value.~~
+   *   - ~~User should be able to tweak the `autoMoves` setting for each individual Pokemon afterwards.~~
+   * * Update (2024/09/14): while scrubbin thru these ye olde settings like this here feller, it appears that at
+   *   some point I forgot to mention that this " `autoMoves` " *setting* turned into a `config` param for `syncPokemon()`,
+   *   so it's not a per-Pokemon configurable setting like it used to be!
+   *   - This setting basically sets that `config.autoMoves` value to `syncPokemon()` in `syncBattle()` from `@showdex/redux/actions`.
+   *   - also don't think the user ever got to even configure that "setting" before it got yeeted from `CalcdexPokemon` lolol
+   *   - (not that that'd be useful, anyway!)
+   * * `auth` pertains to whichever side the logged-in user is playing on & will override that side's value.
+   *   - e.g., Say that the battle's `authPlayerKey` is `'p2'` & `auth` set to `false` but `p2` is `true`,
+   *     then the resolved value will be `false` (i.e., value of `auth`).
+   *
+   * @default
+   * ```ts
+   * {
+   *   auth: false,
+   *   p1: true,
+   *   p2: true,
+   *   p3: true,
+   *   p4: true,
+   * } as Record<'auth' | CalcdexPlayerKey, boolean>
    * ```
    * @since 1.0.3
    */
@@ -367,8 +387,8 @@ export interface ShowdexCalcdexSettings {
    * Whether to lock the *Tera* toggle button in the moves table once used by the player.
    *
    * * This may be useful for remembering if a player can Terastallize still.
-   *   - Note that this information will also be shown when hovering over the toggle button
-   *     while the battle is active, regardless of the value of `showUiTooltips`.
+   *   - Note that this information will also be shown when hovering over the toggle button while the battle is active,
+   *     regardless of the value of `showUiTooltips`.
    * * Once the battle ends, the toggle button will be re-enabled.
    * * This is off by default (i.e., `false`) to make this setting opt-in based on user feedback.
    * * Only applies to Gen 9, obviously.
@@ -379,26 +399,11 @@ export interface ShowdexCalcdexSettings {
   lockUsedTera: boolean;
 
   /**
-   * When to show the *Edit* button in the moves table.
-   *
-   * * `'always'` will always show the *Edit* button.
-   * * `'meta'` will only show the *Edit* button in nonstandard metagame formats.
-   *   - Essentially, this applies to any format that's not included in `LegalLockedFormats`.
-   * * `'never'` will never show the *Edit* button.
-   *
-   * @default 'meta'
-   * @since 1.0.6
-   */
-  showMoveEditor: 'always' | 'meta' | 'never';
-
-  /**
    * Whether to dynamically show quick editor fields in the moves table.
    *
    * * For now, this is only being used to allow quick setting of the `hits` property of a given `CalcdexMoveOverride`.
    *   - For example, when enabled, the move *Icicle Spear*, a multi-hitting move, will show a number input representing
    *     the number of hits, followed by the same 'ol damage range text.
-   *   - Additionally, the `hits` property can be edited within the moves editor, enabled via `showMoveEditor`.
-   *   - (If the move editor is disabled, then the quick editor fields are the only ways to change the values.)
    *
    * @default true
    * @since 1.2.0
@@ -421,15 +426,15 @@ export interface ShowdexCalcdexSettings {
   /**
    * Whether to show EVs in legacy gens.
    *
-   * * Note that while the EV system itself wasn't introduced until gen 3, some semblance of this system did technically exist
-   *   in the legacy gens of 1 & 2.
+   * * Note that while the EV system itself wasn't introduced until gen 3, some semblance of this system did technically
+   *   exist in the legacy gens of 1 & 2.
    *   - In those gens, the EV system is colloquially referred to as *stat experience*, which has a maximum value of 65535.
    *   - (Fun fact: Nintendo officially called them *base stats*, but you can see how that'd be *really* confusing!)
    *   - Each time your Pokemon defeats another, their base stats values are awarded to your Pokemon's *stat experience*,
    *     which is mechanically similar to the modern EV system, except for the amount of "EVs" awarded.
-   *   - Damage formula square roots the *stat experience* value when the Pokemon is level 100, which coincidentally, taking the
-   *     square root of 65535 is 255.99, which is rounded down & divided by 4 when calculating damage (of which the resulting
-   *     number is also rounded down).
+   *   - Damage formula square roots the *stat experience* value when the Pokemon is level 100, which coincidentally,
+   *     taking the square root of 65535 is 255.99, which is rounded down & divided by 4 when calculating damage
+   *     (of which the resulting number is also rounded down).
    *     - Final resulting number of 255 ÷ 4 is 63.75, which is rounded down to 63.
    *     - 63 also happens to be the maximum value that EVs introduced in gens 3+ can produce in the stat formula.
    *     - Since 252 EVs are the max, 252 ÷ 4 is 63, which redundantly (to prove a point) rounds down to 63.

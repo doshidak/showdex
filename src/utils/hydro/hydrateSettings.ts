@@ -188,6 +188,7 @@ export const hydrateSettings = (
             ? hydrateArray<Extract<ShowdexCalcdexSettings[typeof hydratedCalcdexKey], unknown[]>>(dehydratedCalcdexValue)
             : [
               DehydratedCalcdexSettingsMap.defaultAutoSelect,
+              DehydratedCalcdexSettingsMap.defaultAutoPreset,
               DehydratedCalcdexSettingsMap.defaultAutoMoves,
               // DehydratedCalcdexSettingsMap.defaultShowGenetics,
               DehydratedCalcdexSettingsMap.lockGeneticsVisibility,

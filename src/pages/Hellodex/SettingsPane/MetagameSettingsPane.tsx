@@ -52,35 +52,6 @@ export const MetagameSettingsPane = ({
           )}
         />
 
-        <Field<ShowdexCalcdexSettings['showMoveEditor']>
-          name="calcdex.showMoveEditor"
-          component={Segmented}
-          className={cx(
-            styles.field,
-            // !inBattle && styles.singleColumn,
-          )}
-          label={t('calcdex.showMoveEditor.label') as React.ReactNode}
-          labelPosition={inBattle ? 'top' : 'left'}
-          options={[
-            'always',
-            'meta',
-            'never',
-          ].map((option) => ({
-            labelStyle: option === 'meta' ? { textTransform: 'none' } : undefined,
-            label: t(`calcdex.showMoveEditor.options.${option}.label`),
-            tooltip: (
-              <Trans
-                t={t}
-                i18nKey={`calcdex.showMoveEditor.options.${option}.tooltip`}
-                parent="div"
-                className={styles.tooltipContent}
-                shouldUnescape
-              />
-            ),
-            value: option,
-          }))}
-        />
-
         <Field<ShowdexCalcdexSettings['editPokemonTypes']>
           name="calcdex.editPokemonTypes"
           component={Segmented}

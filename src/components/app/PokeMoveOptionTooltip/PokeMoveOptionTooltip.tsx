@@ -4,6 +4,7 @@ import cx from 'classnames';
 import { type MoveName } from '@smogon/calc';
 import { PokeType } from '@showdex/components/app';
 import { type SelectOptionTooltipProps, findCategoryLabel } from '@showdex/components/form';
+import { PokemonDynamicCategoryMoves } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
@@ -58,6 +59,7 @@ export const PokeMoveOptionTooltip = ({
       || dexMove.desc,
   );
 
+  const dynamicCategoryMove = PokemonDynamicCategoryMoves.includes(value);
   const hasOverrides = hasMoveOverrides(format, pokemon, value, opponentPokemon, field);
   const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, value, opponentPokemon, field) };
   const userOverrides = pokemon?.moveOverrides?.[value];
@@ -149,18 +151,22 @@ export const PokeMoveOptionTooltip = ({
 
         <div className={styles.property}>
           <div className={styles.propertyName}>
-            {t(`categories.${formatId(categoryLabel?.[2])}.1`, '') || (
-              <>
-                <div className={styles.statLabel}>
-                  {t(`stats.${formatId(moveOverrides.offensiveStat)}.1`, moveOverrides.offensiveStat)}
-                </div>
-                <div className={styles.statVsLabel}>
-                  vs
-                </div>
-                <div className={styles.statLabel}>
-                  {t(`stats.${formatId(moveOverrides.defensiveStat)}.1`, moveOverrides.defensiveStat)}
-                </div>
-              </>
+            {(
+              (dynamicCategoryMove && !hasOverrides && t('common:labels.auto', 'Auto'))
+                || t(`categories.${formatId(categoryLabel?.[2])}.1`, '')
+                || (
+                  <>
+                    <div className={styles.statLabel}>
+                      {t(`stats.${formatId(moveOverrides.offensiveStat)}.1`, moveOverrides.offensiveStat || '???')}
+                    </div>
+                    <div className={styles.statVsLabel}>
+                      vs
+                    </div>
+                    <div className={styles.statLabel}>
+                      {t(`stats.${formatId(moveOverrides.defensiveStat)}.1`, moveOverrides.defensiveStat || '???')}
+                    </div>
+                  </>
+                )
             )}
           </div>
 

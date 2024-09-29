@@ -98,7 +98,10 @@ export interface CalcdexContextConsumables extends CalcdexContextValue {
     playerKey: CalcdexPlayerKey,
     presets: CalcdexPokemonPreset[], // alwaysAdd = true -> always addPokemon(); otherwise, only apply to player's pokemon[]
     additionalMutations?: Record<string, Partial<CalcdexPokemon>>, // key = preset's calcdexId
-    alwaysAdd?: boolean,
+    config?: {
+      alwaysAdd?: boolean;
+      onlyForId?: string; // imports only for a specific Pokemon, referenced by its calcdexId; alwaysAdd must be false
+    },
     scope?: string,
   ) => number; // returns # of successfully imported presets
   updatePokemon: (playerKey: CalcdexPlayerKey, pokemon: Partial<CalcdexPokemon>, scope?: string) => void;
@@ -753,6 +756,15 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         terrain,
       });
     }
+
+    // check if we should turn off the autoPreset if the user changed anything meaningful (except in Randoms)
+    // (note: checking autoPreset's from both prev & mutated to make sure the user didn't just toggle it back on rn)
+    if (prev.autoPreset && mutated.autoPreset && !state.format.includes('random')) {
+      mutated.autoPreset = !mutating('dirtyAbility', 'dirtyItem', 'nature', 'presetId')
+        && (prev.speciesForme === mutated.speciesForme)
+        && (!mutated.transformedForme || prev.transformedForme === mutated.transformedForme)
+        && (!mutating('moves') || similarArrays(prev.moves, mutated.moves));
+    }
   };
 
   // note: don't bother memozing these; may do more harm than good! :o
@@ -958,12 +970,17 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     playerKey,
     presets,
     additionalMutations,
-    alwaysAdd,
+    config,
     scopeFromArgs,
   ) => {
     // used for debugging purposes only
     const scope = s('importPresets()', scopeFromArgs);
     const endTimer = runtimer(scope, l);
+
+    const {
+      alwaysAdd,
+      onlyForId,
+    } = { ...config };
 
     if (!state?.battleId || !state.format) {
       endTimer('(bad state)');
@@ -1037,7 +1054,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       }));
 
       addPokemon(playerKey, importPayload, null, scope);
-      endTimer('(delegated)');
+      endTimer('(delegated)', 'alwaysAdd', alwaysAdd);
 
       return importPayload.length;
     }
@@ -1057,7 +1074,7 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
         return;
       }
 
-      const pokemonIndex = player.pokemon.findIndex((p) => [
+      const pokemonIndex = player.pokemon.findIndex((p) => (!onlyForId || p?.calcdexId === onlyForId) && [
         p?.speciesForme,
         ...(p?.altFormes || []),
       ].filter(Boolean).some((f) => presetFormes.includes(f)));

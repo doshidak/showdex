@@ -1,5 +1,6 @@
 import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
 import { type CalcdexBattleField, type CalcdexPokemon, type CalcdexMoveOverride } from '@showdex/interfaces/calc';
+import { PokemonDynamicCategoryMoves, PokemonDynamicPowerMoves } from '@showdex/consts/dex';
 import { clamp } from '@showdex/utils/core';
 import {
   alwaysCriticalHits,
@@ -8,7 +9,7 @@ import {
   getDynamicMoveType,
   getMaxMove,
 } from '@showdex/utils/dex';
-import { calcBoostedStats } from './calcBoostedStats';
+// import { calcBoostedStats } from './calcBoostedStats';
 import { calcMoveBasePower } from './calcMoveBasePower';
 import { calcMoveHitBasePowers } from './calcMoveHitBasePowers';
 
@@ -18,8 +19,6 @@ import { calcMoveHitBasePowers } from './calcMoveHitBasePowers';
  * * `pokemon` argument is only used to pass into `determineMoveTargets()`.
  * * If any of the arguments are invalid, `null` will be returned.
  *
- * @todo Fix *Photon Geyser*, which requires reading from the Pokemon's final stats, which isn't available in `pokemon` atm.
- *   Definitely a thinky boi.
  * @since 1.0.6
  */
 export const getMoveOverrideDefaults = (
@@ -77,6 +76,9 @@ export const getMoveOverrideDefaults = (
   output.stellar = (stellarastallized && !stellarMoveMap?.[output.type]) || null;
 
   // only doing this for 1 move atm, so not making it into a function... yet o_O
+  // update (2024/09/24): removing this now that @smogon/calc natively handles it
+  // (& was the big bad bug of v1.2.4 since @smogon/calc swaps our swapped category back LOL... sorry y'all v_v)
+  /*
   if (moveName === 'Tera Blast' as MoveName && stellarastallized) {
     const { atk, spa } = calcBoostedStats(format, pokemon);
 
@@ -84,6 +86,7 @@ export const getMoveOverrideDefaults = (
       output.category = 'Physical';
     }
   }
+  */
 
   output.zBasePower = zMove?.basePower;
 
@@ -103,10 +106,11 @@ export const getMoveOverrideDefaults = (
       && dex.moves.get(gmaxMoveName)?.basePower
   ) || maxMove?.basePower;
 
-  output.basePower = calcMoveBasePower(format, pokemon, moveName, {
-    opponentPokemon,
-    field,
-  });
+  // update (2024/09/25): letting @smogon/calc handle all these PokemonDynamicPowerMoves now
+  // (also, existence of these props, even if nullish, is important for the `hasMoveOverrides()` to work properly!)
+  output.basePower = !PokemonDynamicPowerMoves.includes(moveName)
+    ? calcMoveBasePower(format, pokemon, moveName, { opponentPokemon })
+    : null;
 
   output.alwaysCriticalHits = alwaysCriticalHits(moveName, format);
   output.minHits = (typeof multihit === 'number' && multihit) || (Array.isArray(multihit) && multihit[0]) || null;
@@ -124,15 +128,18 @@ export const getMoveOverrideDefaults = (
     output.hitBasePowers = calcMoveHitBasePowers(format, moveName, output);
   }
 
-  output.defensiveStat = (
+  // update (2024/09/25): letting @smogon/calc handle these moves w/ dynamic categories now
+  const dynamicCategoryMove = PokemonDynamicCategoryMoves.includes(moveName);
+
+  output.defensiveStat = (!dynamicCategoryMove && (
     (output.category === 'Physical' && 'def')
       || (output.category === 'Special' && 'spd')
-  ) || null;
+  )) || null;
 
-  output.offensiveStat = (
+  output.offensiveStat = (!dynamicCategoryMove && (
     (output.category === 'Physical' && 'atk')
       || (output.category === 'Special' && 'spa')
-  ) || null;
+  )) || null;
 
   const {
     // ignoreDefensive,

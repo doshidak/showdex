@@ -3,8 +3,7 @@ import { eacute, times } from '@showdex/consts/core';
 /**
  * Kinda-standardized dictionary of genless format labels based on how Showdown formats them.
  *
- * * Used to be all abbreviations, but since v0.1.3, these are now spelled out for less-common formats, like `'AG'`
- *   (Anything Goes) & `'BH'` (Balanced Hackmons).
+ * * Used to be all abbreviations, but since v0.1.3, these are now spelled out for less-common formats.
  *
  * @since 0.1.0
  */
@@ -97,6 +96,7 @@ export const FormatLabels: Record<string, string> = {
   letsgoou: 'LGPE OU', // LetsGoPikachuEevee
   letsgorandombattle: 'LGPE Randoms',
   linked: 'Linked',
+  megasrevisited: 'Megas Revisited',
   metronomebattle: 'Metronome',
   mixandmega: 'Mix & Mega',
   moderngen1: 'Modern RBY',
@@ -164,6 +164,7 @@ export const FormatLabels: Record<string, string> = {
   pokebilities: `Pok${eacute}bilities`,
   pokebilitiesaaa: `Pok${eacute}bilities AAA`,
   pokecup: `Pok${eacute} Cup`,
+  pokemoves: 'Pokemoves',
   proteanpalace: 'Protean Palace',
   pu: 'PU', // PU (as in, "P-U, smells like ass"... I think)
   purehackmons: 'Pure Hackmons',
@@ -175,6 +176,7 @@ export const FormatLabels: Record<string, string> = {
   randomdex: 'Dex Randoms',
   randomdoublesbattle: 'Doubles Randoms',
   randomroulette: 'Randoms Roulette',
+  rbycap: 'RBY CAP',
   revelationmons: 'Revelationmons',
   ru: 'RU', // RarelyUsed
   sharedpower: 'Shared Power',
@@ -198,6 +200,7 @@ export const FormatLabels: Record<string, string> = {
   tradebacksou: 'Tradebacks OU',
   trademarked: 'Trademarked',
   trickmagic: 'Trick Magic',
+  triples: 'Triples',
   triplescustomgame: 'Triples Customs',
   typesplit: 'Type Split',
   ubers: 'Ubers',
@@ -222,6 +225,7 @@ export const FormatLabels: Record<string, string> = {
   vgc2022: 'VGC 2022',
   vgc2023: 'VGC 2023',
   vgc2024: 'VGC 2024',
+  vgc2025: 'VGC 2025', // update (2024/09/28): ambitious?
   voltturnmayhem: 'Volt Turn Mayhem',
   zu: 'ZU', // ZeroUsed
 };
@@ -361,12 +365,14 @@ export const SmogonDexFormatSlugs: Record<string, string> = {
   vgc2023series2: 'vgc23-series-2',
   vgc2023series3: 'vgc23-series-3',
   vgc2023series4: 'vgc23-series-4',
+  vgc2023regd: 'vgc23-regulation-d',
+  vgc2023rege: 'vgc24-regulation-e',
   vgc2023regulatione: 'vgc24-regulation-e',
   vgc2024: 'vgc24',
   vgc2024regf: 'vgc24-regulation-f',
-  vgc2024regulationf: 'vgc24-regulation-f',
   vgc2024regg: 'vgc24-regulation-g',
-  vgc2024regulationg: 'vgc24-regulation-g',
+  vgc2024regh: 'vgc24-regulation-h',
+  vgc2025: 'vgc25',
   zu: 'zu',
 };
 

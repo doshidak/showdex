@@ -33,7 +33,7 @@ export const hasMoveOverrides = (
   // just because a particular property wasn't overwritten
   return (Object.entries(defaults) as Entries<typeof defaults>).some(([key, value]) => (
     key in current
-      && typeof current[key] === typeof value
+      // && typeof current[key] === typeof value // update (2024/09/25): allowing `null` default values
       && (
         Array.isArray(current[key])
           ? (current[key] as unknown[]).some((v, i) => v !== value[i])

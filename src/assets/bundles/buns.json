@@ -13,7 +13,7 @@
         "name": "Showdex Player Titles",
         "ext": "json",
         "created": "2022-10-28T15:25:31Z",
-        "updated": "2024-01-28T11:30:31.950Z",
+        "updated": "2024-09-29T01:01:45.036Z",
         "disabled": false
       }
     },
@@ -40,7 +40,7 @@
         "name": "Showdex Donors",
         "ext": "json",
         "created": "2023-02-07T04:23:37Z",
-        "updated": "2024-07-23T10:12:11.416Z",
+        "updated": "2024-09-29T01:07:34.851Z",
         "disabled": false
       },
       "ff737d5b-6d95-4b08-ae74-8a2e33fc1a5d": {
@@ -49,7 +49,7 @@
         "name": "Showdex Patrons",
         "ext": "json",
         "created": "2023-02-07T04:23:37Z",
-        "updated": "2024-07-23T10:12:11.416Z",
+        "updated": "2024-09-29T01:28:41.911Z",
         "disabled": false
       }
     }

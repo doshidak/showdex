@@ -58,7 +58,14 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     includeOtherMetaPresets: false,
     includePresetsBundles: [],
     autoImportTeamSheets: true,
-    autoExportOpponent: false,
+
+    defaultAutoPreset: {
+      auth: false,
+      p1: true,
+      p2: true,
+      p3: true,
+      p4: true,
+    },
 
     defaultAutoMoves: {
       auth: false,
@@ -72,7 +79,6 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     lockUsedTera: false,
     resetDirtyBoosts: true,
     editPokemonTypes: 'always',
-    showMoveEditor: 'meta',
     enableQuickEditor: true,
     showBaseStats: 'meta',
     showLegacyEvs: false,
@@ -119,7 +125,6 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     visuallyEnabled: true,
     showAllFormats: false,
     alwaysEditTypes: true,
-    alwaysEditMoves: true,
     alwaysShowGenetics: true,
   },
 
@@ -200,13 +205,12 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   includeOtherMetaPresets: 'iom',
   includePresetsBundles: 'ipb',
   autoImportTeamSheets: 'ats',
-  autoExportOpponent: 'aeo',
+  defaultAutoPreset: 'dap',
   defaultAutoMoves: 'dam',
   forceNonVolatile: 'fnv', // thought about alwaysShowStatus, but ya... LOL
   editPokemonTypes: 'ept',
   lockUsedTera: 'lut',
   resetDirtyBoosts: 'rdb',
-  showMoveEditor: 'sme',
   enableQuickEditor: 'eqe',
   showBaseStats: 'sbs',
   showLegacyEvs: 'sle',
@@ -244,7 +248,6 @@ export const DehydratedHonkdexSettingsMap: Record<keyof ShowdexHonkdexSettings, 
   visuallyEnabled: 'ven',
   showAllFormats: 'saf',
   alwaysEditTypes: 'aet',
-  alwaysEditMoves: 'aem',
   alwaysShowGenetics: 'asg',
 };
 

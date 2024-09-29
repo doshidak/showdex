@@ -18,14 +18,9 @@ import {
   ToggleButton,
   Tooltip,
 } from '@showdex/components/ui';
-import { PokemonToggleMoves } from '@showdex/consts/dex';
+import { PokemonDynamicCategoryMoves, PokemonToggleMoves } from '@showdex/consts/dex';
 import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
-import {
-  useColorScheme,
-  useColorTheme,
-  useGlassyTerrain,
-  useHonkdexSettings,
-} from '@showdex/redux/store';
+import { useColorScheme, useColorTheme, useGlassyTerrain } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { calcMoveHitBasePowers, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
 import {
@@ -36,7 +31,6 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { buildMoveOptions, formatDamageAmounts } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
@@ -78,7 +72,6 @@ export const PokeMoves = ({
     field,
   } = state;
 
-  const honkdexSettings = useHonkdexSettings();
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();
@@ -142,12 +135,6 @@ export const PokeMoves = ({
     && (nationalDexFormat || (gen === 8 && !format?.includes('bdsp')));
 
   const disableMaxToggle = !pokemon?.speciesForme;
-
-  const showEditButton = !!pokemon?.speciesForme && (
-    (operatingMode === 'standalone' && honkdexSettings?.alwaysEditMoves)
-      || settings?.showMoveEditor === 'always'
-      || (settings?.showMoveEditor === 'meta' && !legalLockedFormat(format))
-  );
 
   // nice one me 10/10
   const showFaintCounter = !!pokemon?.speciesForme && (
@@ -431,7 +418,7 @@ export const PokeMoves = ({
         }
 
         {
-          showEditButton &&
+          !!pokemon?.speciesForme &&
           <ToggleButton
             className={cx(styles.toggleButton, styles.editButton)}
             label={t(
@@ -591,7 +578,8 @@ export const PokeMoves = ({
         const moveDefaults = { ...getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field) };
         const moveOverrides = { ...moveDefaults, ...pokemon?.moveOverrides?.[moveName] };
         const hitBasePowers = moveDefaults.hits > 1 ? calcMoveHitBasePowers(format, moveName, moveOverrides) : [];
-        const damagingMove = ['Physical', 'Special'].includes(moveOverrides.category);
+        const dynamicCategoryMove = PokemonDynamicCategoryMoves.includes(moveName);
+        const damagingMove = dynamicCategoryMove || ['Physical', 'Special'].includes(moveOverrides.category);
 
         const hasOverrides = pokemon?.showMoveOverrides
           && hasMoveOverrides(format, pokemon, moveName, opponentPokemon, field);
@@ -806,6 +794,7 @@ export const PokeMoves = ({
                       move: moveName,
                       pokemon: friendlyPokemonName,
                     }) as React.ReactNode}
+                    overrideLabel={(dynamicCategoryMove && !hasOverrides && t('common:labels.auto', 'Auto') as string) || null}
                     format={format}
                     input={{
                       name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Category`,
@@ -814,6 +803,7 @@ export const PokeMoves = ({
                         moveOverrides: { [moveName]: value },
                       }, `${l.scope}:MoveCategoryField:input.onChange()`),
                     }}
+                    nullable={dynamicCategoryMove}
                     readOnly={moveOverrides.category === 'Status'}
                   />
 
@@ -951,12 +941,13 @@ export const PokeMoves = ({
                       <>
                         <ValueField
                           className={styles.valueField}
+                          inputClassName={cx(!moveOverrides[basePowerKey] && styles.autoValueInput)}
                           label={t('poke.moves.editor.bp.aria', {
                             move: moveName,
                             pokemon: friendlyPokemonName,
                           }) as React.ReactNode}
                           hideLabel
-                          hint={moveOverrides[basePowerKey]?.toString() || 0}
+                          hint={String(moveOverrides[basePowerKey] || t('common:labels.auto', 'Auto')).toUpperCase()}
                           fallbackValue={fallbackBasePower}
                           min={0}
                           max={999} // hmm...

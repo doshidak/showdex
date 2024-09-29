@@ -74,6 +74,7 @@
         "trailingUnderscore": "allowSingleOrDouble"
       }
     ],
+    "@typescript-eslint/no-unnecessary-type-assertion": 0,
     "@typescript-eslint/no-unused-vars": 1,
     "camelcase": 0,
     "consistent-return": 0,

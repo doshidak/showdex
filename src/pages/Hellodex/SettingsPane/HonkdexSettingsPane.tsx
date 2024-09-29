@@ -75,22 +75,6 @@ export const HonkdexSettingsPane = ({
           )}
         />
 
-        <Field<ShowdexHonkdexSettings['alwaysEditMoves']>
-          name="honkdex.alwaysEditMoves"
-          component={Switch}
-          className={cx(styles.field, styles.switchField)}
-          label={t('honkdex.alwaysEditMoves.label') as React.ReactNode}
-          tooltip={(
-            <Trans
-              t={t}
-              i18nKey="honkdex.alwaysEditMoves.tooltip"
-              parent="div"
-              className={styles.tooltipContent}
-              shouldUnescape
-            />
-          )}
-        />
-
         <Field<ShowdexHonkdexSettings['alwaysShowGenetics']>
           name="honkdex.alwaysShowGenetics"
           component={Switch}

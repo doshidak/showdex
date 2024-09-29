@@ -308,6 +308,10 @@ button.damageButton {
     max-width: 22px;
     @include spacing.margin($right: 6px);
 
+    .autoValueInput::placeholder {
+      font-size: 8px;
+    }
+
     &::before {
       @include position.absolute($x: -3px, $y: 0); // remove "padding" from absoluteHover
     }

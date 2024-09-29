@@ -3,12 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Field } from 'react-final-form';
 import cx from 'classnames';
 import { Segmented, Switch } from '@showdex/components/form';
-import { type ShowdexCalcdexSettings, type ShowdexShowdownSettings } from '@showdex/interfaces/app';
+import { DefaultShowdexSettings } from '@showdex/consts/hydro';
+import { type ShowdexCalcdexSettings, type ShowdexSettings, type ShowdexShowdownSettings } from '@showdex/interfaces/app';
 import styles from './SettingsPane.module.scss';
 
 export interface AutoFeaturesSettingsPaneProps {
   className?: string;
   style?: React.CSSProperties;
+  value: ShowdexSettings;
   inBattle?: boolean;
 }
 
@@ -20,6 +22,7 @@ export interface AutoFeaturesSettingsPaneProps {
 export const AutoFeaturesSettingsPane = ({
   className,
   style,
+  value,
   inBattle,
 }: AutoFeaturesSettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
@@ -34,6 +37,45 @@ export const AutoFeaturesSettingsPane = ({
       </div>
 
       <div className={styles.settingsGroupFields}>
+        <Field<ShowdexCalcdexSettings['defaultAutoPreset'], HTMLInputElement, boolean>
+          name="calcdex.defaultAutoPreset"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('calcdex.defaultAutoPreset.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="calcdex.defaultAutoPreset.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+              values={{
+                color: !value?.calcdex?.nhkoColors?.[0]
+                  || value.calcdex.nhkoColors[0] === DefaultShowdexSettings.calcdex.nhkoColors[0]
+                  ? t('calcdex.defaultAutoPreset.green', 'green')
+                  : value.calcdex.nhkoColors[0],
+              }}
+              components={{
+                green: (
+                  <span
+                    className={styles.strongText}
+                    style={{ color: value?.calcdex?.nhkoColors[0] }}
+                  />
+                ),
+                blue: <span className={cx(styles.strongText, styles.blueColor)} />,
+              }}
+            />
+          )}
+          parse={(v) => ({
+            auth: false,
+            p1: v,
+            p2: v,
+            p3: v,
+            p4: v,
+          })}
+          format={(val) => Object.values(val || {}).some((v) => !!v)}
+        />
+
         <Field<ShowdexCalcdexSettings['resetDirtyBoosts']>
           name="calcdex.resetDirtyBoosts"
           component={Switch}
