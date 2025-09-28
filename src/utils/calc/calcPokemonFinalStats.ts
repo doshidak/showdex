@@ -15,6 +15,7 @@ import { calcBoostedStats } from './calcBoostedStats';
 import { calcPokemonHpPercentage } from './calcPokemonHp';
 import { findHighestStat } from './findHighestStat';
 import { type CalcdexStatModRecording, statModRecorder } from './statModRecorder';
+import { getFusionPartNames } from '../battle/infiniteFusion';
 
 const l = logger('@showdex/utils/calc/calcPokemonFinalStats()');
 
@@ -79,8 +80,12 @@ export const calcPokemonFinalStats = (
     ? pokemon.volatiles.formechange[1]
     : pokemon.speciesForme;
 
+  // Infinite Fusion
+  const fusionPartNames = getFusionPartNames(pokemon);
+  const isFusedPokemon = !!fusionPartNames;
+
   const species = dex.species.get(speciesForme);
-  const baseForme = id(species?.baseSpecies);
+  const baseForme = isFusedPokemon ? [id(fusionPartNames.headName), id(fusionPartNames.bodyName)] : [id(species?.baseSpecies)];
 
   const types = pokemon.terastallized && (pokemon.dirtyTeraType || pokemon.teraType)
     ? [pokemon.dirtyTeraType || pokemon.teraType]
@@ -173,7 +178,7 @@ export const calcPokemonFinalStats = (
 
   // apply gen 2-compatible item effects
   // (at this point, we should at least be gen 2)
-  if (baseForme === 'pikachu' && !ignoreItem && item === 'lightball') {
+  if (baseForme.includes('pikachu') && !ignoreItem && item === 'lightball') {
     if (gen > 4) {
       // 100% ATK boost if "Light Ball" is held by a Pikachu (gen 5+)
       record.apply('atk', 2, 'items', 'Light Ball');
@@ -183,12 +188,12 @@ export const calcPokemonFinalStats = (
     record.apply('spa', 2, 'items', 'Light Ball');
   }
 
-  if (['marowak', 'cubone'].includes(baseForme) && !ignoreItem && item === 'thickclub') {
+  if (['marowak', 'cubone'].find((name) => baseForme.includes(name)) && !ignoreItem && item === 'thickclub') {
     // 100% ATK boost if "Thick Club" is held by a Marowak/Cubone
     record.apply('atk', 2, 'items', 'Thick Club');
   }
 
-  if (baseForme === 'ditto' && !hasTransform && !ignoreItem) {
+  if (baseForme.includes('ditto') && !hasTransform && !ignoreItem) {
     if (item === 'quickpowder') {
       record.apply('spe', 2, 'items', 'Quick Powder');
     } else if (item === 'metalpowder') {
@@ -244,7 +249,7 @@ export const calcPokemonFinalStats = (
       record.apply('def', 2, 'items', 'Fur Coat');
     }
 
-    if (baseForme === 'clamperl') {
+    if (baseForme.includes('clamperl')) {
       if (item === 'deepseatooth') {
         // 100% SPA boost if "Deep Sea Tooth" is held by a Clamperl
         record.apply('spa', 2, 'items', 'Deep Sea Tooth');
@@ -254,7 +259,7 @@ export const calcPokemonFinalStats = (
       }
     }
 
-    if (item === 'souldew' && gen < 7 && ['latios', 'latias'].includes(baseForme)) {
+    if (item === 'souldew' && gen < 7 && ['latios', 'latias'].find((name) => baseForme.includes(name))) {
       // 50% SPA/SPD boost if "Soul Dew" is held by a Latios/Latias (gens 3-6)
       record.apply('spa', 1.5, 'items', 'Soul Dew');
       record.apply('spd', 1.5, 'items', 'Soul Dew');
@@ -375,7 +380,7 @@ export const calcPokemonFinalStats = (
          * @see https://github.com/smogon/pokemon-showdown-client/blob/master/src/battle-tooltips.ts#L1098-L1109
          */
         // 50% ATK/SPD boost if ability is "Flower Gift" and sunny/desolate
-        if (ability === 'flowergift' && (gen <= 4 || baseForme === 'cherrim')) {
+        if (ability === 'flowergift' && (gen <= 4 || baseForme.includes('cherrim'))) {
           record.apply('atk', 1.5, 'abilities', 'Flower Gift');
         }
       }
@@ -402,7 +407,9 @@ export const calcPokemonFinalStats = (
   }
 
   // apply NFE (not fully evolved) effects
-  const nfe = notFullyEvolved(species);
+  const nfe = isFusedPokemon ?
+    notFullyEvolved(fusionPartNames.headName) || notFullyEvolved(fusionPartNames.bodyName) :
+    notFullyEvolved(species);
 
   if (nfe) {
     // 50% DEF/SPD boost if "Eviolite" is held by an NFE Pokemon

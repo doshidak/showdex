@@ -21,7 +21,8 @@
   "permissions": [
     "*://play.pokemonshowdown.com/*",
     "*://*.psim.us/*",
-    "*://play.radicalred.net/*"
+    "*://play.radicalred.net/*",
+    "*://play.pokeathlon.com/*"
   ],
 
   "host_permissions": [

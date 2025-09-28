@@ -560,7 +560,9 @@ export const useCalcdexPresets = (
             pokemon.level = state.defaultLevel;
           }
 
-          pokemon.nature = state.legacy ? 'Hardy' : 'Adamant';
+          // Infinite Fusion randbat sets seem to use Hardy by default
+          const isInfiniteFusion = true;
+          pokemon.nature = state.legacy || isInfiniteFusion ? 'Hardy' : 'Adamant';
           pokemon.ivs = populateStatsTable({}, { spread: 'iv', format: state.format });
           pokemon.evs = populateStatsTable({}, { spread: 'ev', format: state.format });
           pokemon.altTeraTypes = [];

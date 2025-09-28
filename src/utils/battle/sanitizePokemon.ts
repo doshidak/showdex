@@ -17,6 +17,7 @@ import { detectSpeciesForme } from './detectSpeciesForme';
 import { detectToggledAbility } from './detectToggledAbility';
 import { sanitizeMoveTrack } from './sanitizeMoveTrack';
 import { sanitizeVolatiles } from './sanitizeVolatiles';
+import { getFusionPartNames, calculateFusedBaseStats, getFusedTypes } from './infiniteFusion';
 
 /* eslint-disable @typescript-eslint/indent */
 
@@ -243,8 +244,17 @@ export const sanitizePokemon = <
   // gen is important here; e.g., Crustle, who has 95 base ATK in Gen 5, but 105 in Gen 8
   const species = dex.species.get(sanitizedPokemon.speciesForme);
 
-  // don't really care if species is falsy here
-  sanitizedPokemon.baseStats = { ...species?.baseStats };
+  // If pokemon is a fusion then calculate fused base stats otherwise use normal base stats
+  const fusionPartNames = getFusionPartNames(sanitizedPokemon);
+  const isFusedPokemon = !!fusionPartNames;
+  if (isFusedPokemon) {
+    const fusedBaseStats = calculateFusedBaseStats(dex.species.get(fusionPartNames.headName), dex.species.get(fusionPartNames.bodyName));
+    sanitizedPokemon.baseStats = { ...fusedBaseStats };
+  } else {
+    // don't really care if species is falsy here
+    sanitizedPokemon.baseStats = { ...species?.baseStats };
+  }
+
   sanitizedPokemon.dmaxable = !species?.cannotDynamax;
 
   // grab the base species forme to obtain its other formes
@@ -362,7 +372,9 @@ export const sanitizePokemon = <
   // (checking against typeChanged since if true, should've been already updated above)
   const speciesTypes = (transformedSpecies || species)?.types;
 
-  if (!typeChanged && speciesTypes?.length) {
+  if (isFusedPokemon) {
+    sanitizedPokemon.types = getFusedTypes(dex.species.get(fusionPartNames.headName), dex.species.get(fusionPartNames.bodyName));
+  } else if (!typeChanged && speciesTypes?.length) {
     sanitizedPokemon.types = [...speciesTypes];
   }
 

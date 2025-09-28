@@ -18,7 +18,7 @@ export const Picon = ({
   pokemon,
   facingLeft,
 }: PiconProps): JSX.Element => {
-  const css = Dex?.getPokemonIcon(pokemon || 'pokeball-none', facingLeft).split(';')[0];
+  const css = Dex?.getPokemonIcon(pokemon || 'pokeball-none', facingLeft).split(';').find((s) => s.startsWith('background:'));
   const background = css?.replace(/^background:/, '');
 
   const item = (typeof pokemon !== 'string' && pokemon?.item as ItemName) || null;

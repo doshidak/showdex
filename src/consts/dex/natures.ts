@@ -7,7 +7,6 @@ export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.
   Careful: ['spd', 'spa'],
   Docile: [],
   Gentle: ['spd', 'def'],
-  Hardy: [],
   Hasty: ['spe', 'def'],
   Impish: ['def', 'spa'],
   Jolly: ['spe', 'spa'],
@@ -24,6 +23,7 @@ export const PokemonNatureBoosts: Record<Showdown.PokemonNature, [up?: Showdown.
   Sassy: ['spd', 'spe'],
   Serious: [],
   Timid: ['spe', 'atk'],
+  Hardy: [], // XXX: For some reason, Infinite Fusion will default to the last element in this object
 };
 
 export const PokemonNatures = Object.keys(PokemonNatureBoosts) as Showdown.PokemonNature[];

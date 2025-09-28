@@ -37,6 +37,7 @@ import {
   hasMegaForme,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
+import { getFusionPartNames, getFusedTypes } from '@showdex/utils/battle/infiniteFusion';
 
 // const l = logger('@showdex/redux/actions/syncPokemon()');
 
@@ -378,11 +379,18 @@ export const syncPokemon = (
           syncedPokemon.types = [...changedTypes];
         }
 
+        // Infinite Fusion uses typechange volatiles to set the fused type.
+        const fusionPartNames = getFusionPartNames(syncedPokemon);
+        const isFusedPokemon = !!fusionPartNames;
+        const origTypes = isFusedPokemon
+          ? getFusedTypes(dex.species.get(fusionPartNames.headName), dex.species.get(fusionPartNames.bodyName))
+          : dex.species.get(syncedPokemon.speciesForme)?.types;
+
         // check for type change resets
         const resetTypes = (
           'typechange' in syncedPokemon.volatiles
             && !changedTypes.length
-            && dex.species.get(syncedPokemon.speciesForme)?.types
+            && origTypes
         ) || [];
 
         if (resetTypes?.length) {
