@@ -37,6 +37,7 @@ import {
   hasMegaForme,
 } from '@showdex/utils/dex';
 import { capitalize } from '@showdex/utils/humanize';
+import { detectIllusion } from '@showdex/utils/battle';
 
 // const l = logger('@showdex/redux/actions/syncPokemon()');
 
@@ -61,6 +62,7 @@ export const syncPokemon = (
   const dex = getDexForFormat(format);
   const legacy = detectLegacyGen(format);
   const gen = detectGenFromFormat(format, env.int<GenerationNum>('calcdex-default-gen'));
+  const isRandomFormat = typeof format === 'string' && format.includes('random');
 
   // final synced Pokemon that will be returned at the end
   const syncedPokemon = clonePokemon(pokemon);
@@ -354,6 +356,38 @@ export const syncPokemon = (
         if (autoMoves) {
           syncedPokemon.moves = mergeRevealedMoves(syncedPokemon, { format });
         }
+
+        // Zoroark guessing: in Random formats, if a revealed move is illegal for this Pokemon
+        // but is a legal one for Zoroark, treat this Pokemon as Zoroark, idk if Pokemon is going to add
+        // more illusion-ers in gen 10, not that scalable of an approach but works for now.
+        const shouldCheckIllusion = isRandomFormat
+          && syncedPokemon.speciesForme
+          && syncedPokemon.revealedMoves?.length;
+
+        if (shouldCheckIllusion) {
+          const latestRevealed = (
+            syncedPokemon.transformedMoves?.length
+              ? syncedPokemon.transformedMoves[syncedPokemon.transformedMoves.length - 1]
+              : syncedPokemon.revealedMoves[syncedPokemon.revealedMoves.length - 1]
+          ) as MoveName;
+
+          const illusionSpecies = detectIllusion(
+            syncedPokemon.speciesForme,
+            latestRevealed,
+            gen,
+            format,
+          );
+
+          if (illusionSpecies) {
+            syncedPokemon.speciesForme = illusionSpecies;
+            syncedPokemon.transformedForme = null;
+            syncedPokemon.transformedMoves = [];
+            syncedPokemon.revealedMoves = [latestRevealed];
+            syncedPokemon.presetId = null;
+            syncedPokemon.presetSource = null;
+          }
+        }
+        //
 
         break;
       }
