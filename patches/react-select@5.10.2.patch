@@ -1,8 +1,8 @@
-diff --git a/node_modules/react-select/dist/Select-49a62830.esm.js b/node_modules/react-select/dist/Select-49a62830.esm.js
-index bed0849..c04fcb3 100644
---- a/node_modules/react-select/dist/Select-49a62830.esm.js
-+++ b/node_modules/react-select/dist/Select-49a62830.esm.js
-@@ -1760,6 +1760,9 @@ var Select = /*#__PURE__*/function (_Component) {
+diff --git a/dist/Select-ef7c0426.esm.js b/dist/Select-ef7c0426.esm.js
+index 1a01efb57d48e84665aca3117c9219d76525e654..9e22016e036daa07b68f80f6e22d0c5b6a016373 100644
+--- a/dist/Select-ef7c0426.esm.js
++++ b/dist/Select-ef7c0426.esm.js
+@@ -1768,6 +1768,9 @@ var Select = /*#__PURE__*/function (_Component) {
        // ensure focus is on the Input when the menu opens
        isFocused && menuIsOpen && !prevProps.menuIsOpen) {
          this.focusInput();
@@ -12,7 +12,7 @@ index bed0849..c04fcb3 100644
        }
        if (isFocused && isDisabled && !prevProps.isDisabled) {
          // ensure select state gets blurred in case Select is programmatically disabled while focused
-@@ -1777,7 +1780,7 @@ var Select = /*#__PURE__*/function (_Component) {
+@@ -1785,7 +1788,7 @@ var Select = /*#__PURE__*/function (_Component) {
  
        // scroll the focused option into view if necessary
        if (this.menuListRef && this.focusedOptionRef && this.scrollToFocusedOptionOnUpdate) {

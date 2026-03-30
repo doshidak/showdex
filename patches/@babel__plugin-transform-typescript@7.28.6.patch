@@ -1,0 +1,33 @@
+diff --git a/lib/index.js b/lib/index.js
+index 2ba14640bad598cd06bc7710a5660e3dec381f94..36792c2556baf651db893983fefc1f84cbc0b70b 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -59,6 +59,7 @@ var _default = exports.default = (0, _helperPluginUtils.declare)((api, opts) =>
+     jsxPragma = "React.createElement",
+     jsxPragmaFrag = "React.Fragment",
+     onlyRemoveTypeImports = false,
++    yeetEmptyImportElisions = false, // purposefully named terribly so that I remember I manually spliced this in lmao
+     optimizeConstEnums = false
+   } = opts;
+   var {
+@@ -190,6 +191,20 @@ var _default = exports.default = (0, _helperPluginUtils.declare)((api, opts) =>
+                 stmt.remove();
+                 continue;
+               }
++              // our super secret spicy spliced setting
++              const itsAllTypeSpecifiers = yeetEmptyImportElisions
++                // this check allows for `import {} from 'foo';` & `import 'foo';` (handled below)
++                && stmt.node.specifiers.length > 0
++                // looking for: `import { type Foo, type Bar } from 'foo';` where ALL specifiers are type-only,
++                // which without this would result in `import {} from 'foo';` still present in the output
++                && stmt.node.specifiers.every((specifier) => specifier.type === 'ImportSpecifier' && specifier.importKind === 'type');
++              if (itsAllTypeSpecifiers) {
++                for (const specifier of stmt.node.specifiers) {
++                  (0, _globalTypes.registerGlobalType)(programScope, specifier.local.name);
++                }
++                stmt.remove();
++                continue;
++              }
+               const importsToRemove = new Set();
+               const specifiersLength = stmt.node.specifiers.length;
+               const isAllSpecifiersElided = () => specifiersLength > 0 && specifiersLength === importsToRemove.size;
