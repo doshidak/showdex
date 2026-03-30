@@ -42,7 +42,7 @@
     "clean:prod:firefox": "rimraf ./dist/firefox ./dist/*.firefox.xpi ./dist/*.firefox.html",
     "clean:prod:standalone": "rimraf ./dist/standalone ./dist/*.standalone.html",
     "dev": "pnpm dev:chrome",
-    "dev:nc": "pnpm cache:purge && cross-env DEV_SWC_CACHE_ENABLED=false DEV_WEBPACK_CACHE_ENABLED=false pnpm dev",
+    "dev:nc": "pnpm cache:purge && cross-env DEV_WEBPACK_CACHE_ENABLED=false pnpm dev",
     "dev:sc": "cross-env DEV_SPRING_CLEANING=true pnpm dev",
     "dev:re": "pnpm cache:purge && pnpm dev",
     "dev:chrome": "pnpm clean:dev:chrome && cross-env NODE_ENV=development BUILD_TARGET=chrome node --conditions=development --trace-warnings ./scripts/dev",
