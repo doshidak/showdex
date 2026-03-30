@@ -54,8 +54,8 @@ export const MixinHonkdexBootstrappable = <
       const state = this.calcdexState;
 
       // Prioritize passed values, then state values. Otherwise, use the default.
-      this.gen = gen ?? state.gen ?? defaultGen;
-      const targetFormat = format ?? state.format ?? defaultFormat;
+      this.gen = gen ?? state?.gen ?? defaultGen;
+      const targetFormat = format ?? state?.format ?? defaultFormat;
       this.format = getGenfulFormat(this.gen, targetFormat);
 
       // Now perform the sanity check
