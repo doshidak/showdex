@@ -11,6 +11,7 @@ import ZipPlugin from 'zip-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import manifest from './src/manifest.json' with { type: 'json' };
+import pkg from './package.json' with { type: 'json' };
 
 // todo: turn this into ts (I miss you)
 
@@ -48,17 +49,16 @@ const finalEnv = {
   BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
   DEV_HOSTNAME: process.env.DEV_HOSTNAME || envFile.DEV_HOSTNAME,
   DEV_PORT: process.env.DEV_PORT || envFile.DEV_PORT,
-  DEV_SWC_CACHE_ENABLED: process.env.DEV_SWC_CACHE_ENABLED || envFile.DEV_SWC_CACHE_ENABLED,
   DEV_WEBPACK_CACHE_ENABLED: process.env.DEV_WEBPACK_CACHE_ENABLED || envFile.DEV_WEBPACK_CACHE_ENABLED,
   DEV_SPRING_CLEANING: process.env.DEV_SPRING_CLEANING || envFile.DEV_SPRING_CLEANING,
   PROD_ANALYZE_BUNDLES: process.env.PROD_ANALYZE_BUNDLES || envFile.PROD_ANALYZE_BUNDLES,
   NODE_ENV: mode,
-  PACKAGE_AUTHOR_EMAIL: process.env.npm_package_author_email,
-  PACKAGE_AUTHOR_NAME: process.env.npm_package_author_name,
-  PACKAGE_DESCRIPTION: process.env.npm_package_description,
-  PACKAGE_NAME: process.env.npm_package_name || 'showdex',
-  PACKAGE_URL: process.env.npm_package_homepage,
-  PACKAGE_VERSION: process.env.npm_package_version,
+  PACKAGE_AUTHOR_EMAIL: pkg.author?.split('<')[1]?.replace('>', '').trim(),
+  PACKAGE_AUTHOR_NAME: pkg.author?.split('<')[0]?.trim(),
+  PACKAGE_DESCRIPTION: pkg.description,
+  PACKAGE_NAME: pkg.name || 'showdex',
+  PACKAGE_URL: pkg.homepage,
+  PACKAGE_VERSION: pkg.version,
   PACKAGE_VERSION_SUFFIX: sanitizeEnv(process.env.PACKAGE_VERSION_SUFFIX),
 };
 
@@ -204,7 +204,6 @@ const moduleRules = [
                 refresh: false,
               },
             },
-            target: 'es2020',
             loose: false,
           },
           module: {
@@ -214,13 +213,6 @@ const moduleRules = [
             targets: 'defaults, > 1%, last 2 versions, last 3 iOS versions',
           },
           sourceMaps: true,
-          ...(
-            __DEV__ && finalEnv.DEV_SWC_CACHE_ENABLED === 'true' && {
-              experimental: {
-                cacheRoot: path.join(__dirname, 'node_modules', '.cache', 'swc'),
-              },
-            }
-          ),
         },
       },
       'source-map-loader',
