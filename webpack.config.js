@@ -10,9 +10,9 @@ import TerserPlugin from 'terser-webpack-plugin';
 import ZipPlugin from 'zip-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
-import manifest from './src/manifest' assert { type: 'json' };
+import manifest from './src/manifest.json' with { type: 'json' };
 
-// todo: import your dank node-babel-loader & turn this into ts (I miss you)
+// todo: turn this into ts (I miss you)
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
@@ -48,7 +48,7 @@ const finalEnv = {
   BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
   DEV_HOSTNAME: process.env.DEV_HOSTNAME || envFile.DEV_HOSTNAME,
   DEV_PORT: process.env.DEV_PORT || envFile.DEV_PORT,
-  DEV_BABEL_CACHE_ENABLED: process.env.DEV_BABEL_CACHE_ENABLED || envFile.DEV_BABEL_CACHE_ENABLED,
+  DEV_SWC_CACHE_ENABLED: process.env.DEV_SWC_CACHE_ENABLED || envFile.DEV_SWC_CACHE_ENABLED,
   DEV_WEBPACK_CACHE_ENABLED: process.env.DEV_WEBPACK_CACHE_ENABLED || envFile.DEV_WEBPACK_CACHE_ENABLED,
   DEV_SPRING_CLEANING: process.env.DEV_SPRING_CLEANING || envFile.DEV_SPRING_CLEANING,
   PROD_ANALYZE_BUNDLES: process.env.PROD_ANALYZE_BUNDLES || envFile.PROD_ANALYZE_BUNDLES,
@@ -186,12 +186,41 @@ const moduleRules = [
     test: /\.(?:jsx?|tsx?)$/i,
     use: [
       {
-        loader: 'babel-loader',
+        loader: 'swc-loader',
         options: {
-          cacheDirectory: __DEV__
-            && finalEnv.DEV_BABEL_CACHE_ENABLED === 'true'
-            && path.join(__dirname, 'node_modules', '.cache', 'babel'), // default: false
-          // cacheCompression: false, // default: true
+          sync: false,
+          parseMap: true,
+          jsc: {
+            parser: {
+              syntax: 'typescript',
+              tsx: true,
+              decorators: false,
+              dynamicImport: true,
+            },
+            transform: {
+              react: {
+                runtime: 'automatic',
+                development: __DEV__,
+                refresh: false,
+              },
+            },
+            target: 'es2020',
+            loose: false,
+          },
+          module: {
+            type: 'es6',
+          },
+          env: {
+            targets: 'defaults, > 1%, last 2 versions, last 3 iOS versions',
+          },
+          sourceMaps: true,
+          ...(
+            __DEV__ && finalEnv.DEV_SWC_CACHE_ENABLED === 'true' && {
+              experimental: {
+                cacheRoot: path.join(__dirname, 'node_modules', '.cache', 'swc'),
+              },
+            }
+          ),
         },
       },
       'source-map-loader',

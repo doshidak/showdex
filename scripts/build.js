@@ -6,8 +6,6 @@ if (!env.PACKAGE_VERSION) {
   process.exit(1);
 }
 
-// note: this doesn't apply to the webpack config since it's imported before
-process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';
 
 if (!buildTargets.includes(env.BUILD_TARGET)) {
