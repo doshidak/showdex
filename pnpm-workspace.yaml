@@ -1,5 +1,3 @@
 patchedDependencies:
-  '@babel/plugin-transform-typescript@7.28.6': patches/@babel__plugin-transform-typescript@7.28.6.patch
-  '@babel/preset-typescript@7.28.5': patches/@babel__preset-typescript@7.28.5.patch
   '@smogon/calc@0.11.0': patches/@smogon__calc@0.11.0.patch
   react-select@5.10.2: patches/react-select@5.10.2.patch

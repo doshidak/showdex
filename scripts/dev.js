@@ -8,7 +8,6 @@ if (!env.PACKAGE_VERSION) {
   process.exit(1);
 }
 
-process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 
 if (!buildTargets.includes(env.BUILD_TARGET)) {
