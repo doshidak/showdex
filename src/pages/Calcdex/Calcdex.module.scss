@@ -22,7 +22,7 @@
   @include position.abs($y: 0, $r: 0, $l: 640px + 1px);
   z-index: 15;
 
-  @include device.for-mobile {
+  @include device.for-tablet-lg {
     right: 0;
     left: 0;
   }
