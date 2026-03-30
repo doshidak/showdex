@@ -43,15 +43,22 @@ export const MixinHonkdexBootstrappable = <
 
     public constructor(
       instanceId = uuidv4(),
-      gen = defaultGen,
-      format = defaultFormat,
+      gen,
+      format,
     ) {
       super();
 
       this.instanceId = instanceId;
-      this.gen = gen;
-      this.format = getGenfulFormat(gen, format);
 
+      // Check if state exists for this ID
+      const state = this.calcdexState;
+
+      // Prioritize passed values, then state values. Otherwise, use the default.
+      this.gen = gen ?? state.gen ?? defaultGen;
+      const targetFormat = format ?? state.format ?? defaultFormat;
+      this.format = getGenfulFormat(this.gen, targetFormat);
+
+      // Now perform the sanity check
       if (this.calcdexState?.battleId && this.calcdexState.gen !== this.gen) {
         this.instanceId = uuidv4();
       }
