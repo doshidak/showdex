@@ -593,6 +593,17 @@ const envConfig = {
   }),
 };
 
+// silence Sass if() deprecation until CSS if() has broad browser support and we can safely migrate
+const ignoreWarnings = [
+  (warning) => {
+    const msg = String(warning.message || '');
+    const inner = String(warning.error?.message || '');
+    // filter the individual if() deprecation warnings AND their "N omitted" summary lines
+    return msg.includes('if() syntax') || inner.includes('if() syntax')
+      || msg.includes('repetitive deprecation warnings omitted');
+  },
+];
+
 export const config = {
   mode,
   entry,
@@ -600,6 +611,7 @@ export const config = {
   module: { rules: moduleRules },
   resolve,
   plugins,
+  ignoreWarnings,
   ...envConfig,
 };
 

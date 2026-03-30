@@ -19,7 +19,7 @@
     @return $color;
   }
 
-  @return mix(white, $color, $percentage);
+  @return color.mix(white, $color, $percentage);
 }
 
 ////
@@ -34,7 +34,7 @@
     @return $color;
   }
 
-  @return mix(black, $color, $percentage);
+  @return color.mix(black, $color, $percentage);
 }
 
 ////
@@ -49,7 +49,7 @@
     @return $color;
   }
 
-  @return transparentize($color, math.clamp(0, 1 - $alpha, 1));
+  @return color.change($color, $alpha: $alpha);
 }
 
 ////
@@ -64,14 +64,14 @@
   $s-amount: $saturation;
   $l-amount: $lightness;
 
-  @if not unitless($s-amount) and unit($s-amount) == '%' {
+  @if not math.is-unitless($s-amount) and math.unit($s-amount) == '%' {
     @if $s-amount < -100% or $s-amount > 100% {
       $s-sign: math.div($s-amount, $s-amount);
       $s-amount: $s-sign * 100%;
     }
   }
 
-  @if not unitless($l-amount) and unit($l-amount) == '%' {
+  @if not math.is-unitless($l-amount) and math.unit($l-amount) == '%' {
     @if $l-amount < -100% or $l-amount > 100% {
       $l-sign: math.div($l-amount, $l-amount);
       $l-amount: $l-sign * 100%;

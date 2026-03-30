@@ -1,5 +1,5 @@
 import * as React from 'react';
-import UaParser from 'ua-parser-js';
+import { UAParser as UaParser } from 'ua-parser-js';
 
 /**
  * Parses the client browser's User Agent via `ua-parser-js`.

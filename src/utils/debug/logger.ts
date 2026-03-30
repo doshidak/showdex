@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { format } from 'date-fns';
-import { paramCase } from 'change-case';
+import { kebabCase as paramCase } from 'change-case';
 import { type AnsiColor, HighIntensityAnsiColor, StandardAnsiColor } from '@showdex/consts/core';
 
 export type LoggerLevel =

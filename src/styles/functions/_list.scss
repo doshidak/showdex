@@ -4,6 +4,8 @@
 ////
 
 @use 'sass:list';
+@use 'sass:math';
+@use 'sass:meta';
 
 ////
 /// Reverses a list.
@@ -16,11 +18,11 @@
 @function reverse($list, $recursive: false) {
   $result: ();
 
-  @for $i from length($list) * -1 through -1 {
-    @if type-of(nth($list, abs($i))) == list and $recursive {
-      $result: append($result, reverse(nth($list, abs($i)), $recursive));
+  @for $i from list.length($list) * -1 through -1 {
+    @if meta.type-of(list.nth($list, math.abs($i))) == list and $recursive {
+      $result: list.append($result, reverse(list.nth($list, math.abs($i)), $recursive));
     } @else {
-      $result: append($result, nth($list, abs($i)));
+      $result: list.append($result, list.nth($list, math.abs($i)));
     }
   }
 
@@ -35,12 +37,12 @@
 /// @return {bool} Returns true if `$value` is a member of `$list`.
 ////
 @function includes($list, $value) {
-  @if not $list or type-of($list) != list or not $value {
+  @if not $list or meta.type-of($list) != list or not $value {
     @return false;
   }
 
   // NOTE: Sass indices are 1-indexed (i.e., starts with 1 instead of 0)
   $index: list.index($list, $value);
 
-  @return type-of($index) == number and $index > 0;
+  @return meta.type-of($index) == number and $index > 0;
 }
