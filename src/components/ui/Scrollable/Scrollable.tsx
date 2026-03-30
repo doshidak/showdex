@@ -122,11 +122,10 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
         visible: styles.visible,
         horizontal: styles.horizontal,
         vertical: styles.vertical,
-        hover: styles.hover,
         dragging: styles.dragging,
-        scrolling: styles.scrolling,
-        scrollable: styles.scrollable,
-        mouseEntered: styles.mouseEntered,
+        // note: hover/scrolling/scrollable/mouseEntered intentionally omitted — no custom CSS for them,
+        // so we let simplebar fall back to its own defaults ('simplebar-hover' etc.) instead of
+        // passing undefined (which would override the defaults via Object.assign and crash)
       },
 
       // note: not a good idea to make this into a prop
