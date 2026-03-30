@@ -105,23 +105,23 @@ export const ContextMenu = ({
           return null;
         }
 
-        const itemProps: ContextMenuItemProps & { key: string } = {
-          key: `${itemKeyPrefix || 'ContextMenu'}:Item:${item.entity}:${item.key}`,
+        const itemKey = `${itemKeyPrefix || 'ContextMenu'}:Item:${item.entity}:${item.key}`;
+        const itemProps: ContextMenuItemProps = {
           label: '???',
           ...item.props,
         };
 
         switch (item.entity) {
           case 'submenu': {
-            return <ContextSubmenu {...itemProps} />;
+            return <ContextSubmenu key={itemKey} {...itemProps} />;
           }
 
           case 'item': {
-            return <ContextMenuItem {...itemProps} />;
+            return <ContextMenuItem key={itemKey} {...itemProps} />;
           }
 
           case 'separator': {
-            return <ContextMenuSeparator {...itemProps} />;
+            return <ContextMenuSeparator key={itemKey} {...itemProps} />;
           }
 
           default: {
