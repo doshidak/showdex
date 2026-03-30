@@ -221,6 +221,11 @@
   }
 }
 
+// simplebar-core 1.3.2 added these 3 state classNames; no styles needed, just need the keys to exist
+.scrolling {}
+.scrollable {}
+.mouseEntered {}
+
 // used for rtl (hardcoded classname)
 :global(.hs-dummy-scrollbar-size) {
   position: fixed;

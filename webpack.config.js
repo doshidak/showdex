@@ -147,6 +147,7 @@ const moduleRules = [
             auto: true, // only files ending in .module.s?css will be treated as CSS modules
             localIdentName: '[name]-[local]--[hash:base64:5]', // e.g., 'Caldex-module-content--mvN2w'
             namedExport: false, // keep default-export object (v7 changed default to true)
+            exportLocalsConvention: 'as-is', // v7 + namedExport:false defaults to camel-case-only, breaking styles['top-right'] etc.
           },
         },
       },

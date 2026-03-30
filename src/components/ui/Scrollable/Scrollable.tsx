@@ -124,6 +124,9 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
         vertical: styles.vertical,
         hover: styles.hover,
         dragging: styles.dragging,
+        scrolling: styles.scrolling,
+        scrollable: styles.scrollable,
+        mouseEntered: styles.mouseEntered,
       },
 
       // note: not a good idea to make this into a prop
