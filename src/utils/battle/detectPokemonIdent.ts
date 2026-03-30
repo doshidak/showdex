@@ -6,8 +6,6 @@
 
 // import { type CalcdexPokemon } from '@showdex/redux/store';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Attempts to detect the player key from the `ident` of the passed-in `pokemon`.
  *
@@ -36,5 +34,3 @@ export const detectPokemonIdent = <
   || pokemon?.ident
   || pokemon?.searchid?.split?.('|')[0]
   || null;
-
-/* eslint-enable @typescript-eslint/indent */

@@ -18,8 +18,6 @@ export type NotedexBootstrappableLike =
 
 const l = logger('@showdex/pages/Notedex/NotedexBootstrappable');
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const MixinNotedexBootstrappable = <
   TBootstrappable extends typeof BootdexBootstrappable,
 >(
@@ -86,8 +84,6 @@ export const MixinNotedexBootstrappable = <
 
   return NotedexBootstrappableMixin;
 };
-
-/* eslint-enable @typescript-eslint/indent */
 
 export abstract class NotedexBootstrappable extends MixinNotedexBootstrappable(BootdexBootstrappable) {
   public static override readonly scope = l.scope;

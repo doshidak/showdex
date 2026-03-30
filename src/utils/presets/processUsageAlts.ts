@@ -4,8 +4,6 @@ import { formatId } from '@showdex/utils/core';
 import { getDexForFormat } from '@showdex/utils/dex';
 import { sortUsageAlts } from './sortUsageAlts';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Converts and sorts alternative abilities/items/moves for the usage stats of a single Pokemon.
  *
@@ -43,5 +41,3 @@ export const processUsageAlts = <
       : alt // i.e., nothing to do here; e.g., ['Dragon Dance', 1]
   ));
 };
-
-/* eslint-enable @typescript-eslint/indent */

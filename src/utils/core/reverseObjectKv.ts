@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Reverses the key and value of the passed-in `value` object,
  * such that the value becomes the key and the key becomes the value.
@@ -36,5 +34,3 @@ export const reverseObjectKv = <
 
     return prev;
   }, {} as Partial<Record<TValue, TKey>>);
-
-/* eslint-enable @typescript-eslint/indent */

@@ -47,8 +47,6 @@ const battleRecordReducerNameFor = (
     : 'recordLoss'
 );
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * putting the *java* in *java*script
  *
@@ -663,8 +661,6 @@ export const MixinCalcdexBootstrappable = <
 
   return CalcdexBootstrappableMixin;
 };
-
-/* eslint-enable @typescript-eslint/indent */
 
 export abstract class CalcdexBootstrappable extends MixinCalcdexBootstrappable(BootdexBootstrappable) {
   public static override readonly scope = l.scope;

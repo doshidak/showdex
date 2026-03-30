@@ -44,8 +44,6 @@ export interface PokeTypeFieldProps<
   disabled?: boolean;
 }
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>(<
   Multi extends boolean = false,
 >({
@@ -366,5 +364,3 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
     </Tooltip>
   );
 });
-
-/* eslint-enable @typescript-eslint/indent */

@@ -8,8 +8,6 @@ export type CalcdexPokemonUsageAltSorter<T extends string> = (
   b: T,
 ) => number;
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Factory that creates a comparison function that sorts items based on their usage percentages in *descending* order (i.e., most used to least).
  *
@@ -50,5 +48,3 @@ export const usageAltPercentSorter = <
 
   return 0;
 };
-
-/* eslint-enable @typescript-eslint/indent */

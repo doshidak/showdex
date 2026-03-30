@@ -40,8 +40,6 @@ export type ShowdexEventType =
  */
 export const getShowdexEventName = (type: ShowdexEventType): string => `showdex${type}`;
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Custom event factory used for throwing the craziest Showdex parties.
  *
@@ -91,5 +89,3 @@ export const createShowdexEvent = <T = string>(
     ? cloneInto(detail, window)
     : detail,
 });
-
-/* eslint-enable @typescript-eslint/indent */

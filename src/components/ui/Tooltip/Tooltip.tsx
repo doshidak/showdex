@@ -7,8 +7,6 @@ import { useColorScheme } from '@showdex/redux/store';
 // import { LazyTippy } from './LazyTippy';
 import styles from './Tooltip.module.scss';
 
-/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
-
 export type TooltipTippyProps = Partial<Omit<TippyProps,
   | 'children'
   | 'content'
@@ -16,8 +14,6 @@ export type TooltipTippyProps = Partial<Omit<TippyProps,
   | 'render'
   | 'singleton'
 >>;
-
-/* eslint-enable @typescript-eslint/indent */
 
 export type TooltipTippyTrigger =
   | 'click'

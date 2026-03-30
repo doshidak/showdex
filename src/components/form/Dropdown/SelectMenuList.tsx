@@ -15,8 +15,6 @@ export type SelectMenuListProps<
   selectProps?: SelectProps<Option, Multi, Group>;
 }>;
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectMenuList = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -64,5 +62,3 @@ export const SelectMenuList = <
     </Scrollable>
   );
 };
-
-/* eslint-enable @typescript-eslint/indent */

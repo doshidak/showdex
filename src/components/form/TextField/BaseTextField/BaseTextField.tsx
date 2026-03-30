@@ -40,7 +40,6 @@ export interface BaseTextFieldProps<
   hideLabel?: boolean;
 }
 
-/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
 /* eslint-disable react/prop-types -- this rule is tripping balls rn, probably because of all the generics lmao. */
 
 export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldProps>(<
@@ -125,4 +124,3 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
 });
 
 /* eslint-enable react/prop-types */
-/* eslint-enable @typescript-eslint/indent */

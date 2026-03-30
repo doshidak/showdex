@@ -75,8 +75,6 @@ export interface SegmentedProps<
   disabled?: boolean;
 }
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
   TValue extends TextFieldValue = string,
   Multi extends boolean = false,
@@ -264,5 +262,3 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
     </>
   );
 });
-
-/* eslint-enable @typescript-eslint/indent */

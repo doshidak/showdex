@@ -3,8 +3,6 @@ import { type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 import { usageAltPercentFinder } from './usageAltPercentFinder';
 import { type CalcdexPokemonUsageAltSorter, usageAltPercentSorter } from './usageAltPercentSorter';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Hook that memoizes the output function of the `usageAltPercentSorter()` factory.
  *
@@ -36,5 +34,3 @@ export const useUsageAltSorter = <
 
   return usageSorter;
 };
-
-/* eslint-enable @typescript-eslint/indent */

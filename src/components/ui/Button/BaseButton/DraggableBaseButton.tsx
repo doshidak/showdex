@@ -19,8 +19,6 @@ export interface DraggableBaseButtonProps<
   nativeProps?: Omit<React.HTMLAttributes<ButtonElement>, 'dangerouslySetInnerHTML'>;
 }
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const DraggableBaseButton = React.forwardRef<ButtonElement, DraggableBaseButtonProps>(<
   T extends ButtonElementType = 'button',
 >({
@@ -155,5 +153,3 @@ export const DraggableBaseButton = React.forwardRef<ButtonElement, DraggableBase
     </Component>
   );
 });
-
-/* eslint-enable @typescript-eslint/indent */

@@ -95,8 +95,6 @@ export type ThunkyReducerBindedActionatorMap<
 
 const l = logger('@showdex/utils/hooks/useThunkyReducer()');
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Everything you know and love about React's `useReducer()` hook,
  * but now with extra *t h u n k* in the *t r u n k* !
@@ -238,5 +236,3 @@ export const useThunkyBindedActionators = <
   () => <BindThunkyActionators<R, A>> bindThunkyActionators(actionators, dispatch),
   [actionators, dispatch],
 );
-
-/* eslint-enable @typescript-eslint/indent */

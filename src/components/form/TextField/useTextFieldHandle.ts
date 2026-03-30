@@ -2,8 +2,6 @@ import * as React from 'react';
 import { type FieldInputProps } from 'react-final-form';
 import { type TextFieldElement, type TextFieldValue } from './BaseTextField';
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const useTextFieldHandle = <
   FieldValue extends TextFieldValue = string,
   T extends TextFieldElement = HTMLInputElement,
@@ -36,5 +34,3 @@ export const useTextFieldHandle = <
   input?.value,
   ref,
 ]);
-
-/* eslint-enable @typescript-eslint/indent */

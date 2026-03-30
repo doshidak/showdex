@@ -1,8 +1,6 @@
 import { type MoveName } from '@smogon/calc';
 import { type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Replaces *Iron Head* in the provided `moves[]` with *Behemoth Blade* or *Behemoth Bash* depending on the `speciesForme`.
  *
@@ -63,5 +61,3 @@ export const replaceBehemothMoves = <
 
   return output;
 };
-
-/* eslint-enable @typescript-eslint/indent */

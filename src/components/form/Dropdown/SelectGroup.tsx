@@ -15,8 +15,6 @@ export type SelectGroupProps<
 }>;
 */
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectGroup = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -51,5 +49,3 @@ export const SelectGroup = <
     {children}
   </>
 );
-
-/* eslint-enable @typescript-eslint/indent */

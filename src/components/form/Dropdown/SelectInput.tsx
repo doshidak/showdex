@@ -14,8 +14,6 @@ export type SelectInputProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectInput = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -62,5 +60,3 @@ export const SelectInput = <
     </div>
   );
 };
-
-/* eslint-enable @typescript-eslint/indent */

@@ -29,8 +29,6 @@ const defaultFormat = env('honkdex-default-format');
 // hence it's also the initial value during state initialization
 const maxPokemon = env.int('honkdex-player-min-pokemon', 0);
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const MixinHonkdexBootstrappable = <
   TBootstrappable extends typeof BootdexBootstrappable,
 >(
@@ -149,8 +147,6 @@ export const MixinHonkdexBootstrappable = <
 
   return HonkdexBootstrappableMixin;
 };
-
-/* eslint-enable @typescript-eslint/indent */
 
 export abstract class HonkdexBootstrappable extends MixinHonkdexBootstrappable(BootdexBootstrappable) {
   public static override readonly scope = l.scope;

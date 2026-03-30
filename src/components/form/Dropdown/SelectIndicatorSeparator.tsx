@@ -4,8 +4,6 @@ import type { GroupBase, IndicatorSeparatorProps } from 'react-select';
 import type { DropdownOption } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectIndicatorSeparator = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -24,5 +22,3 @@ export const SelectIndicatorSeparator = <
     {...innerProps}
   />
 );
-
-/* eslint-enable @typescript-eslint/indent */

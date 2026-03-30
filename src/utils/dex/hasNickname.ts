@@ -1,7 +1,5 @@
 import { getDexForFormat } from './getDexForFormat';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Whether the passed-in `pokemon` has a nickname.
  *
@@ -26,5 +24,3 @@ export const hasNickname = <
     && pokemon.name !== dexSpecies.baseSpecies
     && pokemon.name !== pokemon.speciesForme.replace('-Tera', '');
 };
-
-/* eslint-enable @typescript-eslint/indent */

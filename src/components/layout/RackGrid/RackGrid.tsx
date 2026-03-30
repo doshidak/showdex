@@ -28,8 +28,6 @@ export interface RackGridProps<
 
 // const l = logger('@showdex/components/layout/RackGrid');
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const RackGrid = React.forwardRef<HTMLDivElement, RackGridProps<React.ReactNode>>(<
   TItem extends React.ReactNode,
 >({
@@ -94,5 +92,3 @@ export const RackGrid = React.forwardRef<HTMLDivElement, RackGridProps<React.Rea
     </SortableContext>
   );
 });
-
-/* eslint-enable @typescript-eslint/indent */

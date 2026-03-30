@@ -13,8 +13,6 @@ export type SelectSingleValueProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectSingleValue = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -40,5 +38,3 @@ export const SelectSingleValue = <
     {children || data?.label}
   </div>
 );
-
-/* eslint-disable @typescript-eslint/indent */

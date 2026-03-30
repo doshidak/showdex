@@ -15,8 +15,6 @@ export type SelectOptionProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectOption = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -193,5 +191,3 @@ export const SelectOption = <
     </>
   );
 };
-
-/* eslint-enable @typescript-eslint/indent */

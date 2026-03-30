@@ -1,7 +1,5 @@
 import { type CalcdexPokemonAlt, type CalcdexPokemonUsageAlt } from '@showdex/interfaces/calc';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Detects whether the provided `alt` contains usage percentages.
  *
@@ -31,5 +29,3 @@ export const detectUsageAlts = <
 ): alts is CalcdexPokemonUsageAlt<T>[] => Array.isArray(alts)
   && Array.isArray(alts[0])
   && detectUsageAlt(alts[0]);
-
-/* eslint-enable @typescript-eslint/indent */

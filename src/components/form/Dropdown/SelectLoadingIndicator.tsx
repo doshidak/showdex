@@ -4,8 +4,6 @@ import type { GroupBase, LoadingIndicatorProps } from 'react-select';
 import type { DropdownOption } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectLoadingIndicator = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -52,5 +50,3 @@ export const SelectLoadingIndicator = <
     />
   </div>
 );
-
-/* eslint-enable @typescript-eslint/indent */
