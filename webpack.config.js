@@ -165,7 +165,7 @@ const moduleRules = [
           sourceMap: true,
           sassOptions: {
             // allows for `@use 'mixins/flex';` instead of `@use '../../../styles/mixins/flex';`
-            includePaths: [path.join(__dirname, 'src', 'styles')],
+            loadPaths: [path.join(__dirname, 'src', 'styles')],
           },
         },
       },

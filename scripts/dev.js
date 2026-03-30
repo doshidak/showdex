@@ -32,7 +32,7 @@ const url = `${host}:${port}`;
 
     allowedHosts: 'all',
     client: false,
-    https: false,
+    server: 'http',
     hot: 'only', // default: true
     liveReload: false, // default: true
 

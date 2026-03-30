@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { type GroupBase, type OptionProps } from 'react-select';
-import useDebouncy from 'use-debouncy/lib/effect';
+import { useDebouncyEffect as useDebouncy } from 'use-debouncy';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { type DropdownOption } from './Dropdown';
