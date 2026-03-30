@@ -120,7 +120,7 @@ export const BattleInfo = ({
   ]);
 
   const formatOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true })),
+    () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true }) as Record<string, string>),
     [t],
   );
 

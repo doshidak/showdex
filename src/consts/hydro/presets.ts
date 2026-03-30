@@ -15,6 +15,13 @@ export type HydroPresetsDehydrationKeys = Exclude<keyof CalcdexPokemonPreset,
   | 'moves'
   | 'ivs'
   | 'evs'
+  | 'bundleId'
+  | 'bundleName'
+  | 'formatIndex'
+  | 'formeUsage'
+  | 'imported'
+  | 'updated'
+  | 'cached'
 >;
 
 /**

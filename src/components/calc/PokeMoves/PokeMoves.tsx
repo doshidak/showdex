@@ -114,7 +114,7 @@ export const PokeMoves = ({
   ]);
 
   const moveOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:moveAliases', { returnObjects: true })),
+    () => createAliasFilter(t('pokedex:moveAliases', { returnObjects: true }) as Record<string, string>),
     [t],
   );
 

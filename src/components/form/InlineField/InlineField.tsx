@@ -94,7 +94,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
     e?.preventDefault?.();
     e?.stopImmediatePropagation?.();
 
-    switch (handler.key) {
+    switch (handler.keys?.[0]) {
       // revert to the initial value
       case 'esc': {
         containerRef.current.innerText = initialValue.current;

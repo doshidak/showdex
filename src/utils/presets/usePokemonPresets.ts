@@ -1,5 +1,6 @@
 import * as React from 'react';
 // import LzString from 'lz-string';
+import { type Duration } from 'date-fns';
 import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import {
   usePokemonFormatPresetQuery,

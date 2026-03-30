@@ -110,7 +110,7 @@ export const CalcdexErrorBoundary = ({
 
   const handlePayloadDownload = () => {
     const compressed = LzString.compressToUint8Array(JSON.stringify(payload));
-    const blob = new Blob([compressed]);
+    const blob = new Blob([compressed as Uint8Array<ArrayBuffer>]);
 
     FileSaver.saveAs(blob, [
       env('build-name'),
@@ -204,7 +204,7 @@ export const CalcdexErrorBoundary = ({
             >
               <Scrollable className={styles.errorStackContainer}>
                 <div className={styles.errorStack}>
-                  {sanitizedStack || error}
+                  {sanitizedStack || error?.toString()}
                 </div>
               </Scrollable>
 

@@ -157,7 +157,7 @@ export const PokeInfo = ({
   ]);
 
   const abilityOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:abilityAliases', { returnObjects: true })),
+    () => createAliasFilter(t('pokedex:abilityAliases', { returnObjects: true }) as Record<string, string>),
     [t],
   );
 
@@ -275,7 +275,7 @@ export const PokeInfo = ({
   ]);
 
   const itemOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:itemAliases', { returnObjects: true })),
+    () => createAliasFilter(t('pokedex:itemAliases', { returnObjects: true }) as Record<string, string>),
     [t],
   );
 
@@ -338,7 +338,7 @@ export const PokeInfo = ({
 
   const formeOptionsFilter = React.useMemo(() => (
     operatingMode === 'standalone'
-      && createAliasFilter(t('pokedex:speciesAliases', { returnObjects: true }))
+      && createAliasFilter(t('pokedex:speciesAliases', { returnObjects: true }) as Record<string, string>)
   ) || null, [
     operatingMode,
     t,

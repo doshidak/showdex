@@ -41,8 +41,8 @@ export const MixinHonkdexBootstrappable = <
 
     public constructor(
       instanceId = uuidv4(),
-      gen,
-      format,
+      gen?: GenerationNum,
+      format?: string,
     ) {
       super();
 
