@@ -13,8 +13,6 @@ export type SelectValueContainerProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectValueContainer = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -51,5 +49,3 @@ export const SelectValueContainer = <
     </div>
   </div>
 );
-
-/* eslint-enable @typescript-eslint/indent */

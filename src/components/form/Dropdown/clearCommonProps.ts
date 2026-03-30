@@ -18,8 +18,6 @@ type RetVal<
   AdditionalProps,
 > = Omit<AdditionalProps, keyof CommonPropsAndClassName<Option, Multi, Group>>;
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const clearCommonProps = <
   Option extends DropdownOption,
   Multi extends boolean,

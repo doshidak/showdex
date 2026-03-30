@@ -236,11 +236,7 @@ export interface ModuleLayoutUtils {
   ) => boolean;
 }
 
-/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
-
 export type ModuleLayoutUtilsFactoryArgs = GridSpecs;
-
-/* eslint-enable @typescript-eslint/indent */
 
 export type ModuleLayoutUtilsFactory = (args: ModuleLayoutUtilsFactoryArgs) => ModuleLayoutUtils;
 

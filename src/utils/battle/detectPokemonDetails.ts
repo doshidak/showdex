@@ -1,8 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { getDexForFormat } from '@showdex/utils/dex';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Reconstructs the `details` property from the provided `pokemon`.
  *
@@ -90,5 +88,3 @@ export const detectPokemonDetails = <
 
   return output.join(delimiter);
 };
-
-/* eslint-enable @typescript-eslint/indent */

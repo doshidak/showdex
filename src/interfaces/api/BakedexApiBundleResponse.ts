@@ -3,8 +3,6 @@ import { type BakedexApiTiersResponse } from './BakedexApiTiersResponse';
 import { type BakedexApiTitlesResponse } from './BakedexApiTitlesResponse';
 import { type BakedexApiResponse, type BakedexApiResponseEntity } from './BakedexApiResponse';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * JSON response schema from the Bakedex Bundle API.
  *
@@ -22,5 +20,3 @@ export type BakedexApiBundleResponse<
       ? BakedexApiTitlesResponse['payload']
       : BakedexApiTiersResponse['payload']
 >;
-
-/* eslint-enable @typescript-eslint/indent */

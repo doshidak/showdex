@@ -41,8 +41,6 @@ export const hydrateNumber = (
   return Number(hydratedString.replace(/\,/g, ''));
 };
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Hydrates a string `value` into a determined primitive type.
  *
@@ -59,8 +57,6 @@ export const hydrateValue = <
       ? hydrateBoolean(value) as T extends boolean ? Extract<T, boolean> : never
       : hydrateString(value) as T extends string ? Extract<T, string> : never
 );
-
-/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Hydrates a string `value` into an array.

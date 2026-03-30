@@ -8,8 +8,6 @@ import { readBundlesDb } from '@showdex/utils/storage';
 
 const l = logger('@showdex/redux/factories/buildBundleQuery()');
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * RTK Query factory for fetching `CalcdexPokemonPreset[]`'s from a locally bundled `ShowdexPresetsBundle`.
  *
@@ -128,5 +126,3 @@ export const buildBundleQuery = (
     return { data: output };
   };
 };
-
-/* eslint-enable @typescript-eslint/indent */

@@ -1,8 +1,6 @@
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { reverseObjectKv } from '@showdex/utils/core';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * `CalcdexPokemonPreset` keys that are able to be dehydrated.
  *
@@ -18,8 +16,6 @@ export type HydroPresetsDehydrationKeys = Exclude<keyof CalcdexPokemonPreset,
   | 'ivs'
   | 'evs'
 >;
-
-/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Mapping of `CalcdexPokemonPreset` properties to their `string` opcodes.

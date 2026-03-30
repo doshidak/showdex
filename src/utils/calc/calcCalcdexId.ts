@@ -3,15 +3,11 @@ import { type CalcdexPlayerKey, type CalcdexPokemon, type CalcdexPokemonPreset }
 import { detectPlayerKeyFromPokemon } from '@showdex/utils/battle';
 import { dedupeArray, env, nonEmptyObject } from '@showdex/utils/core';
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const serializePayload = <T>(
   payload: T,
 ): string => Object.entries(payload || {})
   .map(([key, value]) => `${key}:${(typeof value === 'object' ? JSON.stringify(value) : String(value)) ?? '???'}`)
   .join('|');
-
-/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Calculatingly calculates the Calcdex ID from the calculated checksum of the calculated serialized payload.
@@ -63,8 +59,6 @@ export const calcPresetCalcdexId = (
   teraTypes: [...(preset?.teraTypes || [])].sort().join(','),
 });
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Generates a unique ID used by the Calcdex to track Pokemon.
  *
@@ -102,8 +96,6 @@ export const calcPokemonCalcdexId = <
   level: String(pokemon?.level ?? 100),
   gender: pokemon?.gender || 'N', // seems like 'N'-gendered Pokemon occasionally report back with an empty string
 });
-
-/* eslint-enable @typescript-eslint/indent */
 
 export const calcSideCalcdexId = (
   side: Partial<Showdown.Side>,

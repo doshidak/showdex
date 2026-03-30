@@ -2,8 +2,6 @@ import { type CalcdexPokemon, type CalcdexPlayerKey } from '@showdex/interfaces/
 import { getAuthUsername } from '@showdex/utils/host';
 import { detectPokemonIdent } from './detectPokemonIdent';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Attempts to detect the player key from the `ident` of the passed-in `pokemon`.
  *
@@ -26,8 +24,6 @@ export const detectPlayerKeyFromPokemon = <
 
   return /^(p\d)[a-z]?:/.exec(ident)?.[1] as CalcdexPlayerKey;
 };
-
-/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Attempts to detect the player key of the ~~logged-in~~ authenticated user from the passed-in `battle`.

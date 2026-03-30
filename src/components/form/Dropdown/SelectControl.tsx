@@ -4,8 +4,6 @@ import type { ControlProps, GroupBase } from 'react-select';
 import type { DropdownOption } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const SelectControl = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -35,5 +33,3 @@ export const SelectControl = <
     {children}
   </div>
 );
-
-/* eslint-enable @typescript-eslint/indent */

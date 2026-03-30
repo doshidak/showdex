@@ -17,8 +17,6 @@ export type TeamdexBootstrappableLike = BootdexBootstrappableLike;
 
 const l = logger('@showdex/pages/Teamdex/TeamdexBootstrappable');
 
-/* eslint-disable @typescript-eslint/indent */
-
 export const MixinTeamdexBootstrappable = <
   TBootstrappable extends typeof BootdexBootstrappable,
 >(
@@ -42,8 +40,6 @@ export const MixinTeamdexBootstrappable = <
 
   return TeamdexBootstrappableMixin;
 };
-
-/* eslint-enable @typescript-eslint/indent */
 
 export abstract class TeamdexBootstrappable extends MixinTeamdexBootstrappable(BootdexBootstrappable) {
   public static override readonly scope = l.scope;

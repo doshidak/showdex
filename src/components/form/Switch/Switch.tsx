@@ -25,16 +25,12 @@ import { SwitchHandle } from './SwitchHandle';
 import { SwitchTrack } from './SwitchTrack';
 import styles from './Switch.module.scss';
 
-/* eslint-disable @typescript-eslint/indent */
-
 export type SwitchAriaProps = Omit<AriaSwitchProps,
   | 'defaultSelected'
   | 'isDisabled'
   | 'isReadOnly'
   | 'isSelected'
 >;
-
-/* eslint-enable @typescript-eslint/indent */
 
 export interface CommonToggleFieldProps<
   FieldValue = boolean,

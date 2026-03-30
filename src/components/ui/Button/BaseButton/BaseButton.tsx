@@ -55,8 +55,6 @@ export interface CommonButtonProps<
   onContextMenu?: (event: React.MouseEvent<ButtonElement>) => void;
 }
 
-/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
-
 export interface BaseButtonProps<
   T extends ButtonElementType = 'button',
 > extends Omit<CommonButtonProps<T>, 'style'> {
@@ -168,4 +166,3 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
 });
 
 /* eslint-enable react/prop-types */
-/* eslint-enable @typescript-eslint/indent */
