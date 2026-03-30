@@ -1,8 +1,8 @@
 import webpack from 'webpack';
-import { buildTargets, config, env } from '../webpack.config';
+import { buildTargets, config, env } from '../webpack.config.js';
 
 if (!env.PACKAGE_VERSION) {
-  console.error('Please run this script through npm or yarn.');
+  console.error('Please run this script through pnpm.');
   process.exit(1);
 }
 
