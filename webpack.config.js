@@ -146,6 +146,7 @@ const moduleRules = [
           modules: {
             auto: true, // only files ending in .module.s?css will be treated as CSS modules
             localIdentName: '[name]-[local]--[hash:base64:5]', // e.g., 'Caldex-module-content--mvN2w'
+            namedExport: false, // keep default-export object (v7 changed default to true)
           },
         },
       },
@@ -165,7 +166,7 @@ const moduleRules = [
           sourceMap: true,
           sassOptions: {
             // allows for `@use 'mixins/flex';` instead of `@use '../../../styles/mixins/flex';`
-            includePaths: [path.join(__dirname, 'src', 'styles')],
+            loadPaths: [path.join(__dirname, 'src', 'styles')],
           },
         },
       },
@@ -593,6 +594,17 @@ const envConfig = {
   }),
 };
 
+// silence Sass if() deprecation until CSS if() has broad browser support and we can safely migrate
+const ignoreWarnings = [
+  (warning) => {
+    const msg = String(warning.message || '');
+    const inner = String(warning.error?.message || '');
+    // filter the individual if() deprecation warnings AND their "N omitted" summary lines
+    return msg.includes('if() syntax') || inner.includes('if() syntax')
+      || msg.includes('repetitive deprecation warnings omitted');
+  },
+];
+
 export const config = {
   mode,
   entry,
@@ -600,6 +612,7 @@ export const config = {
   module: { rules: moduleRules },
   resolve,
   plugins,
+  ignoreWarnings,
   ...envConfig,
 };
 

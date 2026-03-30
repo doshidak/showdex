@@ -2,7 +2,7 @@ import * as React from 'react';
 import Select, { type SelectInstance } from 'react-select';
 import Creatable from 'react-select/creatable';
 import { type FieldInputProps, type FieldRenderProps } from 'react-final-form';
-import useDebouncy from 'use-debouncy/lib/fn';
+import { useDebouncyFn as useDebouncy } from 'use-debouncy';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { useColorScheme } from '@showdex/redux/store';

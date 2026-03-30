@@ -5,6 +5,7 @@
 /// @since 0.1.0
 ////
 
+@use 'sass:math';
 @use 'sass:meta';
 @use 'functions/list';
 
@@ -367,11 +368,11 @@
   $translate-x: if($x, -$x, null);
   $translate-y: if($y, -$y, null);
 
-  @if $translate-x and unit($translate-x) != '%' { // e.g., px
+  @if $translate-x and math.unit($translate-x) != '%' { // e.g., px
     $translate-x: 0;
   }
 
-  @if $translate-y and unit($translate-y) != '%' {
+  @if $translate-y and math.unit($translate-y) != '%' {
     $translate-y: 0;
   }
 
@@ -481,11 +482,11 @@
   $translate-x: if($x, -$x, null);
   $translate-y: if($y, -$y, null);
 
-  @if $translate-x and unit($translate-x) != '%' {
+  @if $translate-x and math.unit($translate-x) != '%' {
     $translate-x: 0;
   }
 
-  @if $translate-y and unit($translate-y) != '%' {
+  @if $translate-y and math.unit($translate-y) != '%' {
     $translate-y: 0;
   }
 
