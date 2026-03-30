@@ -8,6 +8,9 @@
  * @since 0.1.0
  */
 
+/// <reference types="chrome" />
+/// <reference types="firefox-webext-browser" />
+
 /**
  * Convenient `isDevelopment` or `NODE_ENV === 'development'` global.
  *
@@ -23,6 +26,20 @@ declare const __DEV__: NodeJS.Global['__DEV__'];
 // Firefox-exclusive WebExtension content script globals
 declare const exportFunction: FirefoxBrowser.ExportFunction;
 declare const cloneInto: FirefoxBrowser.CloneInto;
+
+// jQuery global (from @types/jquery — with moduleResolution: "Bundler", the .mts export is used
+// which only exports named module exports; the global $ needs an explicit declare var here)
+declare var $: JQueryStatic;
+
+// Pokémon Showdown window globals (declared on Window via Showdown.HostGlobals, but TS6 requires
+// explicit declare var for bare access in module files — window.X doesn't auto-declare X)
+declare var Dex: Showdown.HostGlobals['Dex'];
+declare var BattleAbilities: Showdown.HostGlobals['BattleAbilities'];
+declare var BattleFormats: Showdown.HostGlobals['BattleFormats'];
+declare var BattleItems: Showdown.HostGlobals['BattleItems'];
+declare var BattleMovedex: Showdown.HostGlobals['BattleMovedex'];
+declare var BattleStatGuesser: Showdown.HostGlobals['BattleStatGuesser'];
+declare var BattleTeambuilderTable: Showdown.HostGlobals['BattleTeambuilderTable'];
 
 // DOM `window` globals
 declare interface Window extends Window, Showdown.HostGlobals {

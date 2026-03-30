@@ -134,7 +134,7 @@ export const useRoomNavigation = (): void => {
   ].join(',\x20'), (e, handler) => {
     // l.debug('handler.key', handler.key);
 
-    switch (handler.key) {
+    switch (handler.keys?.[0]) {
       case 'left': roomNav.focus.left(); break;
       case 'right': roomNav.focus.right(); break;
       case 'shift+left': roomNav.move.left(); break;

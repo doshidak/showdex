@@ -9,6 +9,7 @@ import cx from 'classnames';
 import {
   format,
   formatDuration,
+  type Duration,
   intervalToDuration,
   isValid,
 } from 'date-fns';

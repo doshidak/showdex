@@ -246,7 +246,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
 
     const currentValue = Number(input?.value ?? inputValue) || 0;
 
-    switch (handler.key) {
+    switch (handler.keys?.[0]) {
       case 'up': {
         handleChange(
           currentValue + Math.abs(step),
@@ -297,7 +297,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     }
   }, {
     enabled: !disabled,
-    enableOnTags: active ? ['INPUT'] : undefined,
+    enableOnFormTags: active ? ['INPUT'] : undefined,
   }, [
     active,
     input?.value,

@@ -97,7 +97,7 @@ export const createSmogonPokemon = (
 
   const pseudoToggled = pseudoToggleAbility && pokemon.abilityToggled;
 
-  const options: SmogonPokemonOptions = {
+  const options: SmogonPokemonOptions & { isSaltCure?: boolean } = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
     // of the class instance with curHP's value taking precedence over originalCurHP's value
     // (in other words, seems safe to specify either one, but if none, defaults to rawStats.hp)
