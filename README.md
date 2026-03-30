@@ -137,11 +137,8 @@ This extension is written in **TypeScript**, which is essentially [JavaScript on
 
 ### Requirements
 
-> [!IMPORTANT]
-> Due to the removal of `--experimental-specifier-resolution=node` starting in `node` v19, v18 is **required** (i.e., `^18.0.0`) to build this project. Use something like [`nvm`](https://github.com/nvm-sh/nvm) to install v18 (`nvm install lts/hydrogen`) alongside your current `node` installation.
-
-* **`node`** LTS Hydrogen v18
-* **`yarn`** Classic v1.22.0+
+* **`node`** LTS Jod v24
+* **`pnpm`** v10.0.0+
 * **`bash`** ([Windows WSL](https://docs.microsoft.com/en-us/windows/wsl/install), macOS, or Linux)
 
 <br>
@@ -275,7 +272,7 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 1. `cd` into your favorite directory.
 2. `git clone git@github.com:doshidak/showdex.git`
 3. `cd showdex`
-4. `yarn`
+4. `pnpm install`
 
 <details>
   <summary>
@@ -290,17 +287,17 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 
   ---
 
-  Each time you run `yarn` (including `yarn add` & `yarn remove`), the [**`postinstall`**](./package.json#L26) script will **automatically** run afterwards, which itself runs the following:
+  Each time you run `pnpm install` (including `pnpm add` & `pnpm remove`), the [**`postinstall`**](./package.json#L26) script will **automatically** run afterwards, which itself runs the following:
 
-  * **`yarn patch-ghooks`** → [**`./scripts/patch-ghooks.sh`**](./scripts/patch-ghooks.sh)
+  * **`pnpm patch-ghooks`** → [**`./scripts/patch-ghooks.sh`**](./scripts/patch-ghooks.sh)
 
   > This project is configured for **ES Modules** (ESM) (as opposed to ye olde **CommonJS** [CJS]), while also making use of [`cz-customizable`](https://github.com/leoforfree/cz-customizable), which requires [`cz-customizable-ghooks`](https://github.com/uglow/cz-customizable-ghooks), which requires [**`ghooks`**](https://github.com/ghooks-org/ghooks).
   >
-  > Node v18 doesn't allow you to run extensionless files (such as `.git/hooks/commit-msg`), which `ghooks` poops out, so [**`patch-ghooks`**](./scripts/patch-ghooks.sh) adds `.js` at the end of each pooped out file (e.g., `.git/hooks/commit-msg.js`).
+  > Node doesn't allow you to run extensionless files (such as `.git/hooks/commit-msg`), which `ghooks` poops out, so [**`patch-ghooks`**](./scripts/patch-ghooks.sh) adds `.js` at the end of each pooped out file (e.g., `.git/hooks/commit-msg.js`).
   >
   > Otherwise, Node will complain about running an extensionless file and critically fail when you attempt to make a `git commit`.
 
-  * **`yarn patch-package`**
+  * **`pnpm patch-package`**
 
   > This runs [**`patch-package`**](https://github.com/ds300/patch-package), which reads from the [**`patches`**](./patches) directory and applies the `diff` to the corresponding package in *your* `node_modules`.
   >
@@ -320,13 +317,13 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
 ## ③&nbsp;&nbsp;Development
 
 > [!TIP]
-> `yarn dev` is an alias of `yarn dev:chrome`.
+> `pnpm dev` is an alias of `pnpm dev:chrome`.
 
 > [!CAUTION]
 > While developing in `'standalone'` mode is possible, I don't recommend it as you'll need to manually move the built files to your webserver every time (& they can pile up between hot-reloads!). Skip this step if you're intending on just embedding a production build of Showdex into your Showdown client.
 
 1. `cd showdex`
-2. `yarn dev:chrome` or `yarn dev:firefox` or `yarn dev:standalone` (**not** recommended!)
+2. `pnpm dev:chrome` or `pnpm dev:firefox` or `pnpm dev:standalone` (**not** recommended!)
 
 <br>
 
@@ -403,7 +400,7 @@ Built contents will be dumped into a **`build` directory** in the project root (
   > [!WARNING]
   > Hot-reloading is a bit of a mess right now since it requires you to reload the extension and refresh Pokémon Showdown. Will figure out a better system in the future.
 
-  While `yarn dev:chrome` or `yarn dev:firefox` is running, Webpack will trigger a re-compilation of the bundle when files are changed in the [`src`](./src) directory.
+  While `pnpm dev:chrome` or `pnpm dev:firefox` is running, Webpack will trigger a re-compilation of the bundle when files are changed in the [`src`](./src) directory.
 
   * For **Chrome**, you'll need to select the **reload icon** button in the **Chrome extensions** page (`chrome://extensions`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
   * For **Firefox**, you'll need to **Reload** the extension in the **Debugging** page (`about:debugging`). Once reloaded, **refresh** Pokémon Showdown to see your changes.
@@ -437,10 +434,10 @@ Built contents will be dumped into a **`build` directory** in the project root (
 ## ④&nbsp;&nbsp;Building
 
 > [!TIP]
-> `yarn build` is an alias of `yarn build:chrome && yarn build:firefox`.
+> `pnpm build` is an alias of `pnpm build:chrome && pnpm build:firefox`.
 
 1. `cd showdex`
-2. `yarn build:chrome` or `yarn build:firefox` or `yarn build:standalone`
+2. `pnpm build:chrome` or `pnpm build:firefox` or `pnpm build:standalone`
 
 <details>
   <summary>
@@ -491,7 +488,7 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
   * Bundle size analysis is written to `showdex-...[BUILD_TARGET].html` in `dist`.
 
   > [!TIP]
-  > Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `yarn build:fast`, `yarn build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
+  > Don't want to wait the extra 30 seconds for the analysis during builds? You can run the `build:fast` script instead, e.g., `pnpm build:fast`, `pnpm build:chrome:fast`, etc. Note that the term "fast" used in the aforementioned scripts doesn't imply a more optimal build process as it's the same process minus the analysis & ironically takes longer to type the extra characters to run this build mode.
   ---
 </details>
 
