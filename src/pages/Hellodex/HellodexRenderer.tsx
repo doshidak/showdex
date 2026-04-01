@@ -18,7 +18,7 @@ export interface HellodexRendererProps extends HellodexProps {
 export const HellodexRenderer = ({
   store,
   ...props
-}: HellodexRendererProps): JSX.Element => (
+}: HellodexRendererProps): React.JSX.Element => (
   <ReduxProvider store={store}>
     <SandwichProvider>
       <Hellodex {...props} />

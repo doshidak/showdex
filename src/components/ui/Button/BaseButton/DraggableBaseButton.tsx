@@ -35,7 +35,7 @@ export const DraggableBaseButton = React.forwardRef<ButtonElement, DraggableBase
   onHover,
   onContextMenu,
   ...props
-}: DraggableBaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
+}: DraggableBaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
   const elementType = display === 'inline' ? 'button' : 'div';
   const ref = React.useRef<ButtonElement>(null);
 

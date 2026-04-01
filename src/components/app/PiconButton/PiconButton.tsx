@@ -53,7 +53,7 @@ export const PiconButton = React.forwardRef<ButtonElement, PiconButtonProps>(({
   disabled,
   children,
   ...props
-}: PiconButtonProps, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
+}: PiconButtonProps, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(

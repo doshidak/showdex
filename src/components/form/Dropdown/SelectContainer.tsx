@@ -17,7 +17,7 @@ export interface SelectCustomProps {
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   active?: boolean;
   scrollState?: [scrolling: boolean, setScrolling: React.Dispatch<React.SetStateAction<boolean>>];
-  optionTooltip?: (props: SelectOptionTooltipProps) => JSX.Element;
+  optionTooltip?: (props: SelectOptionTooltipProps) => React.JSX.Element;
   optionTooltipProps?: SelectOptionTooltipProps;
   optionTooltipDelay?: number;
 }
@@ -26,6 +26,7 @@ export interface SelectOptionTooltipProps<
   TValue extends DropdownSingleValue = DropdownSingleValue,
 > extends DropdownOption<TValue> {
   hidden?: boolean;
+  [key: string]: unknown;
 }
 
 export type SelectProps<
@@ -75,7 +76,7 @@ export const SelectContainer = <
     containerStyle,
   } = {},
   children,
-}: SelectContainerProps<Option, Multi, Group>): JSX.Element => (
+}: SelectContainerProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       containerClassName,

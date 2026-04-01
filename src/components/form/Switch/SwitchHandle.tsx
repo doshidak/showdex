@@ -39,7 +39,7 @@ export const SwitchHandle = ({
   disabled = false,
   onPress,
   ...props
-}: SwitchHandleProps): JSX.Element => {
+}: SwitchHandleProps): React.JSX.Element => {
   const ref = React.useRef<HTMLButtonElement>(null);
 
   const { buttonProps } = useButton({

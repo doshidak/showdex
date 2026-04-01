@@ -67,7 +67,7 @@ export const Composer = React.forwardRef<HTMLDivElement, ComposerProps>(({
   readOnly,
   disabled,
   ...props
-}, forwardedRef): JSX.Element => {
+}, forwardedRef): React.JSX.Element => {
   const initialConfig = React.useMemo<InitialConfigType>(() => ({
     namespace: input?.name || namespace,
     theme: ComposerTheme,

@@ -1,4 +1,4 @@
-import { type BaseQueryApi } from '@reduxjs/toolkit/dist/query';
+import { type BaseQueryApi } from '@reduxjs/toolkit/query';
 import { type PkmnApiSmogonPresetRequest, type PkmnApiSmogonFormatPresetResponse } from '@showdex/interfaces/api';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { type RootState } from '@showdex/redux/store';

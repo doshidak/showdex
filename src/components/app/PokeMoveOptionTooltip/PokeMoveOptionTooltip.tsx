@@ -32,7 +32,7 @@ export const PokeMoveOptionTooltip = ({
   label,
   value,
   hidden,
-}: PokeMoveOptionTooltipProps): JSX.Element => {
+}: PokeMoveOptionTooltipProps): React.JSX.Element => {
   const { t } = useTranslation('pokedex');
   const settings = useCalcdexSettings();
 

@@ -27,7 +27,7 @@ export const Badge = React.forwardRef<BadgeInstance, BadgeProps>(({
   label,
   color = 'default',
   duration = 1000,
-}: BadgeProps, forwardedRef): JSX.Element => {
+}: BadgeProps, forwardedRef): React.JSX.Element => {
   const visibleTimeout = React.useRef<NodeJS.Timeout>(null);
   const [visible, setVisible] = React.useState(false);
 

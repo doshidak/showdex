@@ -27,7 +27,7 @@ export const SelectValueContainer = <
     menuIsOpen,
   } = {},
   children,
-}: SelectValueContainerProps<Option, Multi, Group>): JSX.Element => (
+}: SelectValueContainerProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.valueContainer,

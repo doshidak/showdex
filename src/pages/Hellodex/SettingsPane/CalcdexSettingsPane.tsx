@@ -29,7 +29,7 @@ export const CalcdexSettingsPane = ({
   style,
   value,
   inBattle,
-}: CalcdexSettingsPaneProps): JSX.Element => {
+}: CalcdexSettingsPaneProps): React.JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

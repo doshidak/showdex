@@ -22,7 +22,7 @@ export const ToggleButton = React.forwardRef<ButtonElement, ToggleButtonProps>((
   hoverScale = 1,
   children,
   ...props
-}: ToggleButtonProps, forwardedRef): JSX.Element => {
+}: ToggleButtonProps, forwardedRef): React.JSX.Element => {
   const currentColorScheme = useColorScheme();
   const colorScheme = forceColorScheme || currentColorScheme;
 

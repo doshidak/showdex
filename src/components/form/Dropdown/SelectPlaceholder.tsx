@@ -23,7 +23,7 @@ export const SelectPlaceholder = <
   innerProps,
   // selectProps,
   children,
-}: SelectPlaceholderProps<Option, Multi, Group>): JSX.Element => (
+}: SelectPlaceholderProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.placeholder,

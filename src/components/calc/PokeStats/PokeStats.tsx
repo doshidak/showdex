@@ -37,7 +37,7 @@ const l = logger('@showdex/components/calc/PokeStats');
 export const PokeStats = ({
   className,
   style,
-}: PokeStatsProps): JSX.Element => {
+}: PokeStatsProps): React.JSX.Element => {
   const { t } = useTranslation('calcdex');
 
   const {
@@ -311,9 +311,9 @@ export const PokeStats = ({
                   label={t('poke.stats.base.aria', {
                     stat: statLabel,
                     pokemon: friendlyPokemonName,
-                  }) as React.ReactNode}
+                  }) as string}
                   hideLabel
-                  hint={baseStat?.toString() || 1}
+                  hint={baseStat?.toString() || '1'}
                   fallbackValue={1}
                   min={1}
                   max={999}
@@ -323,11 +323,15 @@ export const PokeStats = ({
                   loopStepsOnly
                   clearOnFocus
                   absoluteHover
+                  meta={{}}
                   input={{
+                    name: '',
                     value: baseStat,
                     onChange: (value: number) => updatePokemon({
                       dirtyBaseStats: { [stat]: value },
                     }, `${l.scope}:ValueField~Base-${statName}:input.onChange()`),
+                    onBlur: () => void 0,
+                    onFocus: () => void 0,
                   }}
                   disabled={disabled}
                 />
@@ -410,7 +414,7 @@ export const PokeStats = ({
                     stat: statLabel,
                     spread: `$t(pokedex:stats.${legacy ? 'dvs' : 'ivs'}_one.1)`,
                     pokemon: friendlyPokemonName,
-                  }) as React.ReactNode}
+                  }) as string}
                   hideLabel
                   hint={value.toString() || maxValue.toString()}
                   fallbackValue={maxValue}
@@ -422,12 +426,16 @@ export const PokeStats = ({
                   loopStepsOnly
                   clearOnFocus
                   absoluteHover
+                  meta={{}}
                   input={{
+                    name: '',
                     value,
                     onChange: (val: number) => updatePokemon({
                       // note: HP (for legacy gens) & SPD (for gen 2 only) handled in updatePokemon() of useCalcdexContext()
                       ivs: { [stat]: legacy ? convertLegacyDvToIv(val) : val },
                     }, `${l.scope}:ValueField~Iv-${statName}:input.onChange()`),
+                    onBlur: () => void 0,
+                    onFocus: () => void 0,
                   }}
                   disabled={disabled}
                 />
@@ -546,7 +554,7 @@ export const PokeStats = ({
                   label={t('poke.stats.evs.aria', {
                     stat: statLabel,
                     pokemon: friendlyPokemonName,
-                  }) as React.ReactNode}
+                  }) as string}
                   hideLabel
                   hint={ev.toString() || '252'}
                   fallbackValue={0}
@@ -558,11 +566,15 @@ export const PokeStats = ({
                   loopStepsOnly
                   clearOnFocus
                   absoluteHover
+                  meta={{}}
                   input={{
+                    name: '',
                     value: ev,
                     onChange: (value: number) => updatePokemon({
                       evs: { [stat]: value },
                     }, `${l.scope}:ValueField~Ev-${statName}:input.onChange()`),
+                    onBlur: () => void 0,
+                    onFocus: () => void 0,
                   }}
                   disabled={disabled}
                 />

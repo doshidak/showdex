@@ -25,7 +25,7 @@ export const SelectInput = <
   hasValue,
   selectProps,
   ...props
-}: SelectInputProps<Option, Multi, Group>): JSX.Element => {
+}: SelectInputProps<Option, Multi, Group>): React.JSX.Element => {
   const {
     innerRef,
     inputClassName,

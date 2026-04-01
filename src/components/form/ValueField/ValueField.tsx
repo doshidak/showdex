@@ -110,7 +110,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   disabled,
   onContextMenu,
   ...props
-}: ValueFieldProps, forwardedRef): JSX.Element => {
+}: ValueFieldProps, forwardedRef): React.JSX.Element => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useImperativeHandle(
@@ -355,6 +355,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
         )}
         input={{
           // type: 'number',
+          name: '',
           value: inputValue,
           onChange: handleChange,
           onFocus: handleFocus,

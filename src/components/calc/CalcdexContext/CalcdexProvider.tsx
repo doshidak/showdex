@@ -35,7 +35,7 @@ export interface CalcdexProviderProps {
 export const CalcdexProvider = ({
   battleId,
   children,
-}: CalcdexProviderProps): JSX.Element => {
+}: CalcdexProviderProps): React.JSX.Element => {
   const state = useCalcdexBattleState(battleId);
   const settings = useCalcdexSettings();
   const saving = React.useState(false);

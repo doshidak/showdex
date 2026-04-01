@@ -40,7 +40,7 @@ export const PokeGlance = ({
   showStatus,
   showBaseStats,
   reverseColorScheme,
-}: PokeGlanceProps): JSX.Element => {
+}: PokeGlanceProps): React.JSX.Element => {
   const { t } = useTranslation('calcdex');
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);

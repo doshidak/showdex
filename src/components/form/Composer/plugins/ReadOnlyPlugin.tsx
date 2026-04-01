@@ -13,7 +13,7 @@ export interface ReadOnlyPluginProps {
 
 export const ReadOnlyPlugin = ({
   readOnly,
-}: ReadOnlyPluginProps): JSX.Element => {
+}: ReadOnlyPluginProps): React.JSX.Element => {
   const [editor] = useLexicalComposerContext();
 
   React.useEffect(() => {

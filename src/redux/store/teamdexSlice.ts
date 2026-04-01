@@ -7,7 +7,6 @@
 import {
   type Draft,
   type PayloadAction,
-  type SliceCaseReducers,
   createSlice,
 } from '@reduxjs/toolkit';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
@@ -40,7 +39,7 @@ export interface TeamdexSliceState {
  *
  * @since 1.1.3
  */
-export interface TeamdexSliceReducers extends SliceCaseReducers<TeamdexSliceState> {
+export interface TeamdexSliceReducers {
   /**
    * Directly sets the internally stored `presets` with the provided value in `action`.
    *
@@ -54,7 +53,7 @@ export interface TeamdexSliceReducers extends SliceCaseReducers<TeamdexSliceStat
 
 const l = logger('@showdex/redux/store/teamdexSlice');
 
-export const teamdexSlice = createSlice<TeamdexSliceState, TeamdexSliceReducers, 'teamdex'>({
+export const teamdexSlice = createSlice({
   name: 'teamdex',
 
   initialState: {

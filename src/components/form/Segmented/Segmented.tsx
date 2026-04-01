@@ -94,7 +94,7 @@ export const Segmented = React.forwardRef<HTMLDivElement, SegmentedProps>(<
   unique,
   input,
   disabled,
-}: SegmentedProps<TValue, Multi>, forwardedRef: React.ForwardedRef<HTMLDivElement>): JSX.Element => {
+}: SegmentedProps<TValue, Multi>, forwardedRef: React.ForwardedRef<HTMLDivElement>): React.JSX.Element => {
   const colorScheme = useColorScheme();
   const containerRef = React.useRef<HTMLDivElement>(null);
 

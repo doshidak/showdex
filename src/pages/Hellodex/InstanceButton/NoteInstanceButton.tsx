@@ -28,7 +28,7 @@ export const NoteInstanceButton = React.forwardRef<NoteInstanceButtonRef, NoteIn
   onContextMenu,
   onRequestRemove,
   ...props
-}: NoteInstanceButtonProps, forwardedRef): JSX.Element => {
+}: NoteInstanceButtonProps, forwardedRef): React.JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
   const { t } = useTranslation('hellodex');
   const [removalQueued, setRemovalQueued] = React.useState(false);

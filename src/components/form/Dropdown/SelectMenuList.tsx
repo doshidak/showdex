@@ -11,7 +11,7 @@ export type SelectMenuListProps<
   Multi extends boolean,
   Group extends GroupBase<Option>,
 > = Modify<MenuListProps<Option, Multi, Group>, {
-  innerProps?: Omit<JSX.IntrinsicElements['div'], 'ref'>;
+  innerProps?: Omit<React.JSX.IntrinsicElements['div'], 'ref'>;
   selectProps?: SelectProps<Option, Multi, Group>;
 }>;
 
@@ -29,7 +29,7 @@ export const SelectMenuList = <
     scrollState,
   } = {},
   children,
-}: SelectMenuListProps<Option, Multi, Group>): JSX.Element => {
+}: SelectMenuListProps<Option, Multi, Group>): React.JSX.Element => {
   const frameRef = React.useRef<number>(null);
 
   const handleWheel = (

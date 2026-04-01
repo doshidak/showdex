@@ -24,7 +24,7 @@ export const SelectSingleValue = <
   innerProps,
   // selectProps,
   children,
-}: SelectSingleValueProps<Option, Multi, Group>): JSX.Element => (
+}: SelectSingleValueProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.singleValue,

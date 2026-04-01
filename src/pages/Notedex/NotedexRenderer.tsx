@@ -20,7 +20,7 @@ export const NotedexRenderer = ({
   store,
   instanceId,
   ...props
-}: NotedexRendererProps): JSX.Element => (
+}: NotedexRendererProps): React.JSX.Element => (
   <ReduxProvider store={store}>
     <SandwichProvider>
       <Notedex {...props} instanceId={instanceId} />

@@ -20,7 +20,7 @@ export interface HonkdexSettingsPaneProps {
 export const HonkdexSettingsPane = ({
   className,
   style,
-}: HonkdexSettingsPaneProps): JSX.Element => {
+}: HonkdexSettingsPaneProps): React.JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

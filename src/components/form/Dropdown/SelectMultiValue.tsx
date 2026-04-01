@@ -23,7 +23,7 @@ export const SelectMultiValue = <
   selectProps,
   innerProps,
   children,
-}: MultiValueProps<Option, Multi, Group>): JSX.Element => (
+}: MultiValueProps<Option, Multi, Group>): React.JSX.Element => (
   <Container
     innerProps={{
       className: cx(

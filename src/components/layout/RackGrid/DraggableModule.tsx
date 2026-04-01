@@ -60,7 +60,7 @@ export const DraggableModule = ({
   gridSpecs,
   children,
   ...props
-}: DraggableModuleProps): JSX.Element => {
+}: DraggableModuleProps): React.JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   // gesture-based spring animations (i.e., for hover, active)

@@ -14,7 +14,7 @@ export interface PokeCalcProps {
 export const PokeCalc = ({
   className,
   style,
-}: PokeCalcProps): JSX.Element => {
+}: PokeCalcProps): React.JSX.Element => {
   const { state } = useCalcdexContext();
   const { containerSize } = state;
 

@@ -98,7 +98,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
   onHover,
   onContextMenu,
   ...props
-}: BaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
+}: BaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
   const elementType = display === 'inline' ? 'button' : 'div';
   const ref = React.useRef<ButtonElement>(null);
 

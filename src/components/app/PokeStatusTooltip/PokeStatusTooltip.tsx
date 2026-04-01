@@ -37,7 +37,7 @@ export const PokeStatusTooltip = ({
   children,
   onPokemonChange,
   onRequestClose,
-}: PokeStatusTooltipProps): JSX.Element => {
+}: PokeStatusTooltipProps): React.JSX.Element => {
   const { t } = useTranslation('pokedex');
   const colorScheme = useColorScheme();
 
@@ -117,7 +117,7 @@ export const PokeStatusTooltip = ({
                 // inputClassName={styles.hpFieldInput}
                 label={`Current HP value of ${friendlyPokemonKey}`}
                 hideLabel
-                hint={hp}
+                hint={String(hp)}
                 min={0}
                 max={maxHp}
                 step={1}
@@ -126,11 +126,15 @@ export const PokeStatusTooltip = ({
                 clearOnFocus
                 absoluteHover
                 reverseColorScheme
+                meta={{}}
                 input={{
+                  name: '',
                   value: hp,
                   onChange: (value: number) => onPokemonChange?.({
                     dirtyHp: value,
                   }),
+                  onBlur: () => void 0,
+                  onFocus: () => void 0,
                 }}
               />
 
@@ -158,7 +162,7 @@ export const PokeStatusTooltip = ({
                 style={{ marginLeft: '0.64em' }}
                 label={`Current HP % of ${friendlyPokemonKey}`}
                 hideLabel
-                hint={hpPercentage}
+                hint={String(hpPercentage)}
                 min={0}
                 max={100}
                 step={1}
@@ -167,11 +171,15 @@ export const PokeStatusTooltip = ({
                 clearOnFocus
                 absoluteHover
                 reverseColorScheme
+                meta={{}}
                 input={{
+                  name: '',
                   value: hpPercentage,
                   onChange: (value: number) => onPokemonChange?.({
                     dirtyHp: Math.ceil((value / 100) * maxHp),
                   }),
+                  onBlur: () => void 0,
+                  onFocus: () => void 0,
                 }}
               />
 

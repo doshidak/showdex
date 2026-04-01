@@ -16,7 +16,7 @@ export const LazyTippy = React.forwardRef<Element, TippyProps>(({
   content,
   render,
   ...props
-}: TippyProps, forwardedRef): JSX.Element => {
+}: TippyProps, forwardedRef): React.JSX.Element => {
   const [mounted, setMounted] = React.useState(false);
 
   const lazyPlugin = {

@@ -22,7 +22,7 @@ export const CalcdexRenderer = ({
   store,
   battleId,
   ...props
-}: CalcdexRendererProps): JSX.Element => (
+}: CalcdexRendererProps): React.JSX.Element => (
   <ReduxProvider store={store}>
     <ErrorBoundary
       component={CalcdexErrorBoundary}
