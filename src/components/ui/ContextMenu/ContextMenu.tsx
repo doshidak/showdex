@@ -84,7 +84,7 @@ export const ContextMenu = ({
   disabled,
   children,
   ...props
-}: ContextMenuProps): JSX.Element => {
+}: ContextMenuProps): React.JSX.Element => {
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 

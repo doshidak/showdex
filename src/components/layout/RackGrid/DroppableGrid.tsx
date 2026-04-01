@@ -35,7 +35,7 @@ export const DroppableGrid = React.forwardRef<HTMLDivElement, DroppableGridProps
   children,
   renderItem,
   ...props
-}: DroppableGridProps, forwardedRef): JSX.Element => {
+}: DroppableGridProps, forwardedRef): React.JSX.Element => {
   // forward the ref n shit
   const gridRef = React.useRef<HTMLDivElement>(null);
 

@@ -48,7 +48,7 @@ export const CircularBar = React.forwardRef<SVGSVGElement, CircularBarProps>(({
   pathStrokeWidth,
   valueStrokeWidth,
   reverse,
-}: CircularBarProps, forwardedRef): JSX.Element => {
+}: CircularBarProps, forwardedRef): React.JSX.Element => {
   const boundedValue = clamp(min, value, max);
   const valuePercentage = (boundedValue - min) / (max - min);
 

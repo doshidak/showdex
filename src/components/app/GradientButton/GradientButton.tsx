@@ -8,7 +8,7 @@ export const GradientButton = React.forwardRef<ButtonElement, BaseButtonProps>((
   className,
   children,
   ...props
-}: BaseButtonProps, forwardedRef): JSX.Element => {
+}: BaseButtonProps, forwardedRef): React.JSX.Element => {
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
 

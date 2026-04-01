@@ -4,7 +4,7 @@ import { useDebouncyEffect as useDebouncy } from 'use-debouncy';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { type DropdownOption } from './Dropdown';
-import { type SelectProps } from './SelectContainer';
+import { type SelectOptionTooltipProps, type SelectProps } from './SelectContainer';
 import styles from './Dropdown.module.scss';
 
 export type SelectOptionProps<
@@ -36,7 +36,7 @@ export const SelectOption = <
     optionTooltipDelay,
   } = {},
   children,
-}: SelectOptionProps<Option, Multi, Group>): JSX.Element => {
+}: SelectOptionProps<Option, Multi, Group>): React.JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useImperativeHandle(
@@ -177,8 +177,7 @@ export const SelectOption = <
           reference={containerRef}
           content={(
             <OptionTooltip
-              {...optionTooltipProps}
-              {...data}
+              {...({ ...optionTooltipProps, ...data } as SelectOptionTooltipProps)}
             />
           )}
           placement="right"

@@ -13,7 +13,7 @@ export const SelectClearIndicator = <
   isFocused,
   innerProps,
   children,
-}: ClearIndicatorProps<Option, Multi, Group>): JSX.Element => (
+}: ClearIndicatorProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.indicator,

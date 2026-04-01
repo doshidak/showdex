@@ -12,7 +12,7 @@ export const SelectNotice = <
   className,
   innerProps,
   children,
-}: NoticeProps<Option, Multi, Group>): JSX.Element => (
+}: NoticeProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.notice,

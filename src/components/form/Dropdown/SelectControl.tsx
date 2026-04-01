@@ -17,7 +17,7 @@ export const SelectControl = <
   isDisabled,
   innerProps,
   children,
-}: ControlProps<Option, Multi, Group>): JSX.Element => (
+}: ControlProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     ref={innerRef}
     className={cx(

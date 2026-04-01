@@ -16,7 +16,7 @@ export const BattleGenOptionTooltip = ({
   style,
   value,
   hidden,
-}: BattleGenOptionTooltipProps): JSX.Element => {
+}: BattleGenOptionTooltipProps): React.JSX.Element => {
   if (!value || !GenLabels[value || 0]?.description || hidden) {
     return null;
   }

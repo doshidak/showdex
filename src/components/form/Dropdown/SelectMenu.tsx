@@ -14,7 +14,7 @@ export const SelectMenu = <
   placement,
   innerProps,
   children,
-}: MenuProps<Option, Multi, Group>): JSX.Element => (
+}: MenuProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     ref={innerRef}
     className={cx(

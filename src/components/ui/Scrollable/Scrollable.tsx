@@ -6,7 +6,7 @@ import { useColorScheme } from '@showdex/redux/store';
 // import { useUserAgent } from '@showdex/utils/hooks';
 import styles from './Scrollable.module.scss';
 
-export interface ScrollableProps extends Omit<JSX.IntrinsicElements['div'], 'ref'> {
+export interface ScrollableProps extends Omit<React.JSX.IntrinsicElements['div'], 'ref'> {
   /**
    * Refers to the scrollable container on Windows/Linux and the root `<div>` container on any other OS.
    *
@@ -79,7 +79,7 @@ export const Scrollable = React.forwardRef<HTMLDivElement, ScrollableProps>(({
   onScroll,
   onWheel,
   ...props
-}: ScrollableProps, forwardedRef): JSX.Element => {
+}: ScrollableProps, forwardedRef): React.JSX.Element => {
   const simpleBarRef = React.useRef<SimpleBar>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);

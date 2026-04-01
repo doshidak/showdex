@@ -28,7 +28,7 @@ export const SideControls = ({
   style,
   playerKey,
   topPlayerKey,
-}: SideControlsProps): JSX.Element => {
+}: SideControlsProps): React.JSX.Element => {
   const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
 

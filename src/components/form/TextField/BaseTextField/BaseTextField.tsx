@@ -63,7 +63,7 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
   meta,
   disabled = false,
   ...props
-}: BaseTextFieldProps<FieldValue>, forwardedRef: React.ForwardedRef<HTMLInputElement>): JSX.Element => {
+}: BaseTextFieldProps<FieldValue>, forwardedRef: React.ForwardedRef<HTMLInputElement>): React.JSX.Element => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const { labelProps, inputProps } = useTextField({

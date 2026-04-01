@@ -78,7 +78,7 @@ export const Grid = React.forwardRef<HTMLDivElement, GridProps>(({
   highlight,
   children,
   ...props
-}: GridProps, forwardedRef): JSX.Element => {
+}: GridProps, forwardedRef): React.JSX.Element => {
   const { toPixels } = createModuleLayoutUtils({
     gridSize,
     gridGap,

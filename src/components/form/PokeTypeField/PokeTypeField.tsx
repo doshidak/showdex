@@ -67,7 +67,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   input,
   readOnly,
   disabled,
-}: PokeTypeFieldProps<Multi>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
+}: PokeTypeFieldProps<Multi>, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(

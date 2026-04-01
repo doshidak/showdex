@@ -15,7 +15,7 @@ import {
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { syncBattle } from '@showdex/redux/actions';
-import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
+import { type RootDispatch, calcdexSlice, hellodexSlice } from '@showdex/redux/store';
 import {
   clonePlayerSideConditions,
   sanitizePlayerSide,
@@ -323,7 +323,7 @@ export const MixinCalcdexBootstrappable = <
 
       // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
       // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
-      void Adapter.store.dispatch(syncBattle({
+      void (Adapter.store.dispatch as RootDispatch)(syncBattle({
         battle: this.battle,
         request: this.battleRequest,
         onAcceptOts: (id) => void CalcdexBootstrappableMixin.acceptBattleOts(id),

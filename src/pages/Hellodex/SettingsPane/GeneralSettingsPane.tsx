@@ -27,7 +27,7 @@ export const GeneralSettingsPane = ({
   value,
   inBattle,
   special,
-}: GeneralSettingsPaneProps): JSX.Element => {
+}: GeneralSettingsPaneProps): React.JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

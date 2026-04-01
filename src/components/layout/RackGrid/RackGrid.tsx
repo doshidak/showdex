@@ -42,7 +42,7 @@ export const RackGrid = React.forwardRef<HTMLDivElement, RackGridProps<React.Rea
   children,
   renderItem,
   ...props
-}: RackGridProps<TItem>, forwardedRef: React.ForwardedRef<HTMLDivElement>): JSX.Element => {
+}: RackGridProps<TItem>, forwardedRef: React.ForwardedRef<HTMLDivElement>): React.JSX.Element => {
   // const snapToRackGrid = React.useMemo(
   //   () => createSnapModifier(gridSize + gridGap),
   //   [gridSize, gridGap],

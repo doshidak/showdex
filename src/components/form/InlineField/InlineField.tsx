@@ -45,7 +45,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
   meta,
   disabled,
   onContextMenu,
-}: InlineFieldProps, forwardedRef): JSX.Element => {
+}: InlineFieldProps, forwardedRef): React.JSX.Element => {
   const colorScheme = useColorScheme();
   const containerRef = React.useRef<HTMLSpanElement>(null);
 

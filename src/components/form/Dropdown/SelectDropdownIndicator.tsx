@@ -13,7 +13,7 @@ export const SelectDropdownIndicator = <
   isFocused,
   innerProps,
   children,
-}: DropdownIndicatorProps<Option, Multi, Group>): JSX.Element => (
+}: DropdownIndicatorProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.indicator,

@@ -26,7 +26,7 @@ export const PokePresetOptionTooltip = ({
   presets,
   value,
   hidden,
-}: PokePresetOptionTooltipProps): JSX.Element => {
+}: PokePresetOptionTooltipProps): React.JSX.Element => {
   const settings = useCalcdexSettings();
   const syntax = React.useMemo(() => (
     (settings?.presetDisplaySyntax !== 'auto' && settings?.presetDisplaySyntax)

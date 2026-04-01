@@ -12,7 +12,7 @@ export const TableGrid = ({
   className,
   style,
   children,
-}: TableGridProps): JSX.Element => (
+}: TableGridProps): React.JSX.Element => (
   <div
     className={cx(styles.container, className)}
     style={style}

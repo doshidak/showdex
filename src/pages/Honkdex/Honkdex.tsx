@@ -37,7 +37,7 @@ export const Honkdex = ({
   onRequestHellodex,
   onRequestHonkdex,
   onLeaveRoom,
-}: HonkdexProps): JSX.Element => {
+}: HonkdexProps): React.JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useCalcdexSize(containerRef);
@@ -96,12 +96,15 @@ export const Honkdex = ({
           <Composer
             hint={t('notedex:editor.hint', 'Type something...')}
             initialEditorState={notes?.pre?.editorState}
+            meta={{}}
             input={{
               name: `${l.scope}:${battleId}:Notes:Pre:EditorState`,
               value: notes?.pre?.editorState,
               onChange: (value: string) => void debouncyUpdateBattle({
                 notes: { pre: { editorState: value } },
               }, `${l.scope}:${battleId}:Notes:Pre:EditorState~Composer:input.onChange()`),
+              onBlur: () => void 0,
+              onFocus: () => void 0,
             }}
           />
         }
@@ -135,12 +138,15 @@ export const Honkdex = ({
           <Composer
             hint={t('notedex:editor.hint', 'Type something...')}
             initialEditorState={notes?.post?.editorState}
+            meta={{}}
             input={{
               name: `${l.scope}:${battleId}:Notes:Post:EditorState`,
               value: notes?.post?.editorState,
               onChange: (value: string) => void debouncyUpdateBattle({
                 notes: { post: { editorState: value } },
               }, `${l.scope}:${battleId}:Notes:Post:EditorState~Composer:input.onChange()`),
+              onBlur: () => void 0,
+              onFocus: () => void 0,
             }}
           />
         }

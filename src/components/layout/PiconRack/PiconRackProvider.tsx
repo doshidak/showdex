@@ -50,7 +50,7 @@ export const PiconRackProvider = ({
   dndMuxId = 'PiconRack:DndMux',
   itemKeyPrefix = 'picon',
   children,
-}: PiconRackProviderProps): JSX.Element => {
+}: PiconRackProviderProps): React.JSX.Element => {
   const {
     state,
     settings,

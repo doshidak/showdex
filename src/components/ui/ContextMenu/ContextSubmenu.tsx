@@ -59,7 +59,7 @@ export const ContextSubmenu = ({
   disabled,
   children,
   ...props
-}: ContextSubmenuProps): JSX.Element => (
+}: ContextSubmenuProps): React.JSX.Element => (
   <Submenu
     {...props}
     className={cx(

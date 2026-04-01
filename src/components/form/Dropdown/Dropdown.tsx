@@ -126,7 +126,7 @@ export const Dropdown = React.forwardRef<SelectInstance, DropdownProps>(({
   meta,
   disabled,
   onContextMenu,
-}: DropdownProps, forwardedRef): JSX.Element => {
+}: DropdownProps, forwardedRef): React.JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<SelectInstance>(null);
   const colorScheme = useColorScheme();

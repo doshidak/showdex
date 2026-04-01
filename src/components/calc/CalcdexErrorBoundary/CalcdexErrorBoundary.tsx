@@ -46,7 +46,7 @@ export const CalcdexErrorBoundary = ({
   style,
   error,
   battleId,
-}: CalcdexErrorBoundaryProps): JSX.Element => {
+}: CalcdexErrorBoundaryProps): React.JSX.Element => {
   // const colorScheme = useColorScheme();
 
   const state = useCalcdexBattleState(battleId);

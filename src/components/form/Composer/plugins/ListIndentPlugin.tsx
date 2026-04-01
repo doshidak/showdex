@@ -103,7 +103,7 @@ const indentAllowed = (
 
 export const ListIndentPlugin = ({
   maxDepth = 7,
-}: ListIndentPluginProps): JSX.Element => {
+}: ListIndentPluginProps): React.JSX.Element => {
   const [editor] = useLexicalComposerContext();
 
   React.useEffect(() => void editor.registerCommand(

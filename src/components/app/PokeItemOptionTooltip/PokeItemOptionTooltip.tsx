@@ -17,7 +17,7 @@ export const PokeItemOptionTooltip = ({
   format,
   value,
   hidden,
-}: PokeItemOptionTooltipProps): JSX.Element => {
+}: PokeItemOptionTooltipProps): React.JSX.Element => {
   if (!value || hidden) {
     return null;
   }

@@ -10,7 +10,7 @@ export const SelectMultiValueRemove = <
 >({
   innerProps,
   children,
-}: MultiValueRemoveProps<Option, Multi, Group>): JSX.Element => (
+}: MultiValueRemoveProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={styles.remove}
     {...innerProps}

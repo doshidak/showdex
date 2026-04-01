@@ -17,7 +17,7 @@ export const PokeAbilityOptionTooltip = ({
   format,
   value,
   hidden,
-}: PokeAbilityOptionTooltipProps): JSX.Element => {
+}: PokeAbilityOptionTooltipProps): React.JSX.Element => {
   if (!value || hidden) {
     return null;
   }

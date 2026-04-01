@@ -45,7 +45,7 @@ export const HomieButton = ({
   alwaysActive,
   updated,
   onUserPopup,
-}: HomieButtonProps): JSX.Element => {
+}: HomieButtonProps): React.JSX.Element => {
   const colorSchemeFromStore = useColorScheme();
   const colorScheme = colorSchemeFromProps || colorSchemeFromStore;
   const tooltipColorScheme = determineColorScheme(colorScheme, true);

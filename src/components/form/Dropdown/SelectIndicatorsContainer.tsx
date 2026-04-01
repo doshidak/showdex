@@ -13,7 +13,7 @@ export const SelectIndicatorsContainer = <
   innerProps,
   isMulti,
   children,
-}: IndicatorsContainerProps<Option, Multi, Group>): JSX.Element => (
+}: IndicatorsContainerProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.indicatorsContainer,

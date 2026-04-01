@@ -21,7 +21,7 @@ import 'prismjs/components/prism-tsx';
 // import 'prismjs/components/prism-xml-doc';
 import 'prismjs/components/prism-yaml';
 
-export const CodePlugin = (): JSX.Element => {
+export const CodePlugin = (): React.JSX.Element => {
   const [editor] = useLexicalComposerContext();
 
   React.useEffect(

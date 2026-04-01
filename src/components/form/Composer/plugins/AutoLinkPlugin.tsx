@@ -40,6 +40,6 @@ const matchers: LinkMatcher[] = [
   },
 ];
 
-export const AutoLinkPlugin = (): JSX.Element => (
+export const AutoLinkPlugin = (): React.JSX.Element => (
   <LexicalAutoLinkPlugin matchers={matchers} />
 );

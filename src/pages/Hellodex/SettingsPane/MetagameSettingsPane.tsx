@@ -23,7 +23,7 @@ export const MetagameSettingsPane = ({
   style,
   value,
   inBattle,
-}: MetagameSettingsPaneProps): JSX.Element => {
+}: MetagameSettingsPaneProps): React.JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

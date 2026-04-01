@@ -12,7 +12,7 @@ export const SelectGroupHeading = <
 >({
   className,
   ...props
-}: GroupHeadingProps<Option, Multi, Group>): JSX.Element => {
+}: GroupHeadingProps<Option, Multi, Group>): React.JSX.Element => {
   const {
     data, // unused
     ...innerProps

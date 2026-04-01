@@ -34,7 +34,7 @@ export const PokeType = ({
   reverseColorScheme,
   containerSize,
   teraTyping,
-}: PokeTypeProps): JSX.Element => {
+}: PokeTypeProps): React.JSX.Element => {
   const { t } = useTranslation('pokedex');
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);

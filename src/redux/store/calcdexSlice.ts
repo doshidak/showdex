@@ -8,7 +8,6 @@ import * as React from 'react';
 import {
   type Draft,
   type PayloadAction,
-  type SliceCaseReducers,
   createSlice,
   current,
 } from '@reduxjs/toolkit';
@@ -84,7 +83,7 @@ export type CalcdexSliceState = Record<string, CalcdexBattleState>;
  *
  * @since 1.0.2
  */
-export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceState> {
+export interface CalcdexSliceReducers {
   /**
    * Initializes an empty Calcdex state.
    *
@@ -178,10 +177,10 @@ export interface CalcdexSliceReducers extends SliceCaseReducers<CalcdexSliceStat
 const defaultMaxPokemon = env.int('calcdex-player-max-pokemon');
 const l = logger('@showdex/redux/store/calcdexSlice');
 
-export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers, 'calcdex'>({
+export const calcdexSlice = createSlice({
   name: 'calcdex',
 
-  initialState: {},
+  initialState: {} as CalcdexSliceState,
 
   reducers: {
     init: (state, action) => {
@@ -334,7 +333,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         state[battleId].defaultLevel = determineDefaultLevel(state[battleId].format);
       }
 
-      state[battleId].playerCount = countActivePlayers(state[battleId]);
+      state[battleId].playerCount = countActivePlayers(state[battleId] as unknown as CalcdexBattleState);
 
       endTimer('(done)', battleId);
 
@@ -400,7 +399,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
         return void endTimer('(bad battleId)', battleId, currentState);
       }
 
-      const updatedGen = typeof gen === 'number' && gen > 0 ? gen : currentState.gen;
+      const updatedGen = (typeof gen === 'number' && gen > 0 ? gen : currentState.gen) as GenerationNum;
       const legacy = detectLegacyGen(updatedGen);
 
       // note: `state` is actually a Proxy object via the WritableDraft from Immutable,
@@ -585,7 +584,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       );
     },
 
-    updatePokemon: (state, action) => {
+    updatePokemon: (state, action: PayloadAction<CalcdexSlicePokemonAction>) => {
       const endTimer = runtimer(`calcdexSlice.updatePokemon() via ${action.payload?.scope || '(anon)'}`, l);
 
       /* l.debug(
@@ -731,7 +730,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       }
 
       state[newId] = {
-        ...cloneBattleState(state[battleId]),
+        ...cloneBattleState(state[battleId] as unknown as CalcdexBattleState),
         ...additionalProperties,
         battleId: newId,
         operatingMode: 'standalone',
@@ -800,7 +799,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
             usedTera: false,
           };
 
-          state[newId][playerKey].maxPokemon = calcMaxPokemon(state[newId][playerKey]);
+          state[newId][playerKey].maxPokemon = calcMaxPokemon(state[newId][playerKey] as unknown as CalcdexPlayer);
         });
       }
 
@@ -827,7 +826,7 @@ export const calcdexSlice = createSlice<CalcdexSliceState, CalcdexSliceReducers,
       );
     },
 
-    restore: (state, action) => {
+    restore: (state, action: PayloadAction<CalcdexSliceState>) => {
       if (!nonEmptyObject(action.payload)) {
         return;
       }

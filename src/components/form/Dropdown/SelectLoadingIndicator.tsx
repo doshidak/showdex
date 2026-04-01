@@ -13,7 +13,7 @@ export const SelectLoadingIndicator = <
   isRtl,
   innerProps,
   size = 4,
-}: LoadingIndicatorProps<Option, Multi, Group>): JSX.Element => (
+}: LoadingIndicatorProps<Option, Multi, Group>): React.JSX.Element => (
   <div
     className={cx(
       styles.loadingIndicator,

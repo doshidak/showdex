@@ -7,7 +7,6 @@
 import {
   type Draft,
   type PayloadAction,
-  type SliceCaseReducers,
   createSlice,
   current,
 } from '@reduxjs/toolkit';
@@ -80,7 +79,7 @@ export interface HellodexSliceState {
  *
  * @since 1.0.6
  */
-export interface HellodexSliceReducers extends SliceCaseReducers<HellodexSliceState> {
+export interface HellodexSliceReducers {
   /**
    * Updates any part of the `HellodexSliceState`.
    *
@@ -133,7 +132,7 @@ export interface HellodexSliceReducers extends SliceCaseReducers<HellodexSliceSt
 
 const l = logger('@showdex/redux/store/hellodexSlice');
 
-export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReducers, 'hellodex'>({
+export const hellodexSlice = createSlice({
   name: 'hellodex',
 
   initialState: {
@@ -216,7 +215,7 @@ export const hellodexSlice = createSlice<HellodexSliceState, HellodexSliceReduce
       );
     },
 
-    resetRecord: (state, action) => {
+    resetRecord: (state, action: PayloadAction<void>) => {
       /* l.debug(
         'RECV', action.type,
         '\n', 'state', __DEV__ && current(state),

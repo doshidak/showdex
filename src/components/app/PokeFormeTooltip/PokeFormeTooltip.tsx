@@ -42,7 +42,7 @@ export const PokeFormeTooltip = ({
   onPokemonChange,
   onRequestClose,
   ...props
-}: PokeFormeTooltipProps): JSX.Element => {
+}: PokeFormeTooltipProps): React.JSX.Element => {
   const { t } = useTranslation('pokedex');
   const dex = React.useMemo(() => getDexForFormat(format), [format]);
   const colorScheme = useColorScheme();

@@ -58,7 +58,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   disabled,
   children,
   ...props
-}: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
+}: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
 
   const currentColorScheme = useColorScheme();

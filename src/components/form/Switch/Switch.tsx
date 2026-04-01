@@ -95,7 +95,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({
   readOnly,
   disabled,
   ...props
-}: SwitchProps, forwardedRef): JSX.Element => {
+}: SwitchProps, forwardedRef): React.JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<HTMLInputElement>(null);
 

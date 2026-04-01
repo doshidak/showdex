@@ -19,7 +19,7 @@ export const TableGridItem = React.forwardRef<HTMLDivElement, TableGridItemProps
   header,
   small,
   children,
-}: TableGridItemProps, forwardedRef): JSX.Element => {
+}: TableGridItemProps, forwardedRef): React.JSX.Element => {
   const colorScheme = useColorScheme();
 
   return (

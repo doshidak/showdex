@@ -18,7 +18,7 @@ export const DragOverlayModule = ({
   zIndex = 50,
   children,
   ...props
-}: DragOverlayModuleProps): JSX.Element => {
+}: DragOverlayModuleProps): React.JSX.Element => {
   const gridSize = gridSpecs?.gridSize || 0;
 
   const dragOverlay = (

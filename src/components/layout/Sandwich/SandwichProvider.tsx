@@ -7,7 +7,7 @@ export interface SandwichProviderProps {
 
 export const SandwichProvider = ({
   children,
-}: SandwichProviderProps): JSX.Element => {
+}: SandwichProviderProps): React.JSX.Element => {
   const [ids, setIds] = React.useState<string[]>([]);
   const [activeId, setActiveId] = React.useState<string>(null);
 

@@ -2,6 +2,10 @@ import * as React from 'react';
 // import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@showdex/utils/debug';
 
+// React 19 removed ReducerState/ReducerAction utility types — define local equivalents
+type ReducerState<R extends React.Reducer<unknown, unknown>> = R extends React.Reducer<infer S, unknown> ? S : never;
+type ReducerAction<R extends React.Reducer<unknown, unknown>> = R extends React.Reducer<unknown, infer A> ? A : never;
+
 export type BindThunkyActionators<
   R extends React.Reducer<unknown, unknown>,
   A extends ThunkyReducerActionator<R> | ThunkyReducerActionatorMap<R>,
@@ -14,24 +18,24 @@ export type BindThunkyActionators<
 
 export type ThunkyReducerAction<
   R extends React.Reducer<unknown, unknown>,
-  // A = React.ReducerAction<R>,
+  // A = ReducerAction<R>,
   // T = void,
   V extends void | Promise<void> = void,
 > = (
   // dispatch: ThunkyReducerDispatch<R, A, T>,
-  dispatch: React.Dispatch<React.ReducerAction<R>>,
-  getState: () => React.ReducerState<R>,
+  dispatch: React.Dispatch<ReducerAction<R>>,
+  getState: () => ReducerState<R>,
 ) => V;
 
 // export type ThunkyReducerDispatch<
 //   R extends React.Reducer<unknown, unknown>,
-//   A = React.ReducerAction<R> | ThunkyReducerAction<R>,
+//   A = ReducerAction<R> | ThunkyReducerAction<R>,
 //   T = void,
 // > = (action: A) => T;
 
 export type ThunkyReducerDispatch<
   R extends React.Reducer<unknown, unknown>,
-> = React.Dispatch<ThunkyReducerAction<R> | React.ReducerAction<R>>;
+> = React.Dispatch<ThunkyReducerAction<R> | ReducerAction<R>>;
 
 /**
  * *Actionator* is a portmanteau of *Action* and `Creator* (i.e., an action creator).
@@ -43,26 +47,26 @@ export type ThunkyReducerActionator<
 
 // export type ThunkyReducerActionator<
 //   R extends React.Reducer<unknown, unknown>,
-//   A = React.ReducerAction<R>,
+//   A = ReducerAction<R>,
 //   T = void,
 // > = (...args: unknown[]) => ThunkyReducerAction<R, A, T>;
 
 export type ThunkyReducerActionatorMap<
   R extends React.Reducer<unknown, unknown>,
   // P extends unknown[] = unknown[],
-  // A = React.ReducerAction<R>,
+  // A = ReducerAction<R>,
   // T = void,
 > = Partial<Record<string, ThunkyReducerActionator<R>>>;
 
 // export type ThunkyReducerBindedActionator<
 //   R extends React.Reducer<unknown, unknown> = React.Reducer<unknown, unknown>,
-//   A = React.ReducerAction<R>,
+//   A = ReducerAction<R>,
 //   T = void,
 // > = (...args: Parameters<ThunkyReducerActionator<R, A, T>>) => void | Promise<void>;
 
 // export type ThunkyReducerBindedActionatorMap<
 //   R extends React.Reducer<unknown, unknown> = React.Reducer<unknown, unknown>,
-//   A = React.ReducerAction<R>,
+//   A = ReducerAction<R>,
 //   T = void,
 // > = Record<string, ThunkyReducerBindedActionator<R, A, T>>;
 
@@ -112,12 +116,12 @@ export const useThunkyReducer = <
   R extends React.Reducer<unknown, unknown>,
 >(
   reducer: R,
-  initialState: React.ReducerState<R>,
+  initialState: ReducerState<R>,
 ): [
-  state: React.ReducerState<R>,
+  state: ReducerState<R>,
   dispatch: ThunkyReducerDispatch<R>,
 ] => {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [state, dispatch] = React.useReducer(reducer, initialState) as [ReducerState<R>, React.Dispatch<ReducerAction<R>>];
 
   const thunkyDispatch: ThunkyReducerDispatch<R> = (action) => {
     if (typeof action === 'function') {

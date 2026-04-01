@@ -69,6 +69,6 @@ const MarkdownTransformers: typeof TRANSFORMERS = [
   ...TRANSFORMERS.filter((t) => t !== CODE),
 ];
 
-export const MarkdownPlugin = (): JSX.Element => (
+export const MarkdownPlugin = (): React.JSX.Element => (
   <LexicalMarkdownShortcutPlugin transformers={MarkdownTransformers} />
 );

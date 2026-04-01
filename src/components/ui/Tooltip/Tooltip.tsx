@@ -2,6 +2,8 @@ import * as React from 'react';
 import { type TippyProps } from '@tippyjs/react';
 import Tippy from '@tippyjs/react/headless';
 import { animated, useSpring } from '@react-spring/web';
+
+const AnimatedDiv = animated.div;
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
 // import { LazyTippy } from './LazyTippy';
@@ -67,7 +69,7 @@ export const Tooltip = ({
   onHidden,
   children,
   ...props
-}: TooltipProps): JSX.Element => {
+}: TooltipProps): React.JSX.Element => {
   const colorScheme = useColorScheme();
 
   // animations (required for "headless" Tippy -- i.e., we're not using the default plug-n-play version)
@@ -126,7 +128,7 @@ export const Tooltip = ({
         attributes,
         renderContent,
       ) => (
-        <animated.div
+        <AnimatedDiv
           className={cx(
             styles.container,
             !!colorScheme && styles[colorScheme],
@@ -150,7 +152,7 @@ export const Tooltip = ({
             )}
             style={arrowStyle}
           />
-        </animated.div>
+        </AnimatedDiv>
       )}
       onMount={handleMount}
       onHide={handleHide}

@@ -14,9 +14,9 @@ import { logger } from '@showdex/utils/debug';
 
 interface ContentInjectable<T = unknown> {
   id: string;
-  component: keyof JSX.IntrinsicElements;
-  into: keyof JSX.IntrinsicElements;
-  props?: Partial<T extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[T] : T>;
+  component: keyof React.JSX.IntrinsicElements;
+  into: keyof React.JSX.IntrinsicElements;
+  props?: Partial<T extends keyof React.JSX.IntrinsicElements ? React.JSX.IntrinsicElements[T] : T>;
 }
 
 const l = logger('@showdex/content');

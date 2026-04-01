@@ -12,7 +12,7 @@ export const SelectIndicatorSeparator = <
   className,
   isDisabled,
   innerProps,
-}: IndicatorSeparatorProps<Option, Multi, Group>): JSX.Element => (
+}: IndicatorSeparatorProps<Option, Multi, Group>): React.JSX.Element => (
   <span
     className={cx(
       styles.indicatorSeparator,
