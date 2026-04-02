@@ -8,4 +8,5 @@ export * from './CalcdexPreactBattleSide';
 export * from './CalcdexPreactBattleTimerButton';
 export * from './CalcdexPreactBootstrapper';
 export * from './CalcdexPreactPanel';
+export * from './RandomBattleValidationPanel';
 export * from './CalcdexRenderer';
