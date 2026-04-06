@@ -242,6 +242,10 @@ export const calcMoveBasePower = (
     basePowerMods.push(2);
   }
 
+  if ('tarshot' in opponentPokemon?.volatiles && moveType === 'Fire') {
+    basePowerMods.push(2);
+  }
+
   if (basePowerMods.length) {
     basePower = basePowerMods.reduce((bp, mod) => Math.floor(bp * clamp(0, mod)), basePower);
   }
