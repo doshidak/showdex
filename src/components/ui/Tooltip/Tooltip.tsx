@@ -2,8 +2,6 @@ import * as React from 'react';
 import { type TippyProps } from '@tippyjs/react';
 import Tippy from '@tippyjs/react/headless';
 import { animated, useSpring } from '@react-spring/web';
-
-const AnimatedDiv = animated.div;
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
 // import { LazyTippy } from './LazyTippy';
@@ -53,6 +51,8 @@ const springProps: Record<string, React.CSSProperties> = {
   },
 };
 
+const AnimatedDiv = animated.div;
+
 export const Tooltip = ({
   className,
   style,
@@ -91,13 +91,11 @@ export const Tooltip = ({
     });
   };
 
-  const handleHide: TippyProps['onHide'] = ({ unmount }) => {
-    void springApi.start({
-      ...springProps.hide,
-      config: { ...springConfig, clamp: true },
-      onRest: unmount,
-    });
-  };
+  const handleHide: TippyProps['onHide'] = (instance) => void springApi.start({
+    ...springProps.hide,
+    config: { ...springConfig, clamp: true },
+    onRest: ({ cancelled }) => void (cancelled ? 0 : instance?.unmount()),
+  });
 
   const handleHidden: TippyProps['onHidden'] = (instance) => {
     setMounted(false);
