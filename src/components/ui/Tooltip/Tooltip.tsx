@@ -2,8 +2,6 @@ import * as React from 'react';
 import { type TippyProps } from '@tippyjs/react';
 import Tippy from '@tippyjs/react/headless';
 import { animated, useSpring } from '@react-spring/web';
-
-const AnimatedDiv = animated.div;
 import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
 // import { LazyTippy } from './LazyTippy';
@@ -53,6 +51,8 @@ const springProps: Record<string, React.CSSProperties> = {
   },
 };
 
+const AnimatedDiv = animated.div;
+
 export const Tooltip = ({
   className,
   style,
@@ -78,29 +78,24 @@ export const Tooltip = ({
     config: springConfig,
   }));
 
-  // keep track of the mounted state
-  const [mounted, setMounted] = React.useState(false);
-
   const handleMount: TippyProps['onMount'] = (instance) => {
-    setMounted(true);
     onMount?.(instance);
 
     void springApi.start({
       ...springProps.show,
       config: { ...springConfig, clamp: false },
+      onRest: () => {},
     });
   };
 
-  const handleHide: TippyProps['onHide'] = ({ unmount }) => {
-    void springApi.start({
-      ...springProps.hide,
-      config: { ...springConfig, clamp: true },
-      onRest: unmount,
-    });
-  };
+  const handleHide: TippyProps['onHide'] = (instance) => void springApi.start({
+    ...springProps.hide,
+    config: { ...springConfig, clamp: true },
+    onRest: ({ cancelled }) => void (cancelled ? 0 : instance?.unmount()),
+  });
 
   const handleHidden: TippyProps['onHidden'] = (instance) => {
-    setMounted(false);
+    springApi.set(springProps.hide);
     onHidden?.(instance);
   };
 
@@ -137,12 +132,12 @@ export const Tooltip = ({
           style={{
             ...style,
             ...animationStyles,
-            ...((!mounted || derender) && { display: 'none' }),
+            ...(derender && { display: 'none' }),
           }}
           tabIndex={-1}
           {...attributes}
         >
-          {mounted && (renderContent || content)}
+          {renderContent || content}
 
           <div
             ref={setArrow}

@@ -5,14 +5,11 @@ import { type TooltipProps, Tooltip } from '../Tooltip';
 import {
   type BaseButtonProps,
   type ButtonElement,
-  type ButtonElementType,
   BaseButton,
 } from './BaseButton';
 import styles from './Button.module.scss';
 
-export interface ButtonProps<
-  T extends ButtonElementType = 'button',
-> extends BaseButtonProps<T> {
+export interface ButtonProps extends BaseButtonProps {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
   forceColorScheme?: Showdown.ColorScheme;
@@ -32,11 +29,7 @@ export interface ButtonProps<
   childrenFirst?: boolean;
 }
 
-/* eslint-disable react/prop-types */
-
-export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
-  T extends ButtonElementType = 'button',
->({
+export const Button = React.forwardRef<ButtonElement, ButtonProps>(({
   className,
   labelClassName,
   labelStyle,
@@ -58,7 +51,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
   disabled,
   children,
   ...props
-}: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
+}: ButtonProps, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
 
   const currentColorScheme = useColorScheme();
@@ -93,12 +86,12 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
 
         {
           ((!!label || childrenLabel) && !hideLabel) &&
-          <label
+          <span
             className={cx(styles.label, labelClassName)}
             style={labelStyle}
           >
             {label || childrenLabel}
-          </label>
+          </span>
         }
 
         {suffix}
@@ -119,5 +112,3 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
     </>
   );
 });
-
-/* eslint-enable react/prop-types */
