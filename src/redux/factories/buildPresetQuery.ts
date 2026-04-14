@@ -77,6 +77,10 @@ const FormatReplacements: [test: RegExp, replace: RegExp, replacement: string][]
   // Randomized Format Spotlight as of 2024/01/10
   // e.g., 'gen6firstbloodrandombattle' -> 'gen6randombattle'
   [/firstblood/i, null, ''],
+  
+  // Random Battle Shared Power B12P6
+  // e.g., 'gen9randombattlesharedpowerb12p6' -> 'gen9randombattle'
+  [/randombattlesharedpowerb12p6/i, /randombattlesharedpowerb12p6/i, 'randombattle'],
 ];
 
 // 10/10 function name
