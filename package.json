@@ -1,6 +1,6 @@
 {
-  "name": "showdex",
-  "version": "1.3.0",
+  "name": "olrics-showdex",
+  "version": "1.0.2",
   "description": "Pokémon Showdown extension that harnesses the power of parabolic calculus to strategically extract your opponents' Elo.",
   "author": "Keith Choison <keith@tize.io>",
   "license": "AGPL-3.0",

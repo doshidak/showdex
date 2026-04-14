@@ -111,6 +111,210 @@
   @include spacing.mt(12px);
 }
 
+.validationPanel {
+  @include spacing.mt(12px);
+  @include spacing.p($a: 10px);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px color.alpha(colors.$black, 0.16);
+
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$white, 0.7);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$gray-darkest, 0.68);
+    box-shadow: 0 6px 18px color.alpha(colors.$black, 0.4);
+  }
+}
+
+.validationHeader {
+  @include flex.row($align: center, $justify: space-between);
+  @include spacing.mb(8px);
+}
+
+.validationTitle {
+  @include font.primary(600);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+
+  [data-showdex-scheme='dark'] & {
+    color: colors.$white;
+  }
+}
+
+.validationSummary {
+  @include font.primary(600);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$gray-light, 0.4);
+    color: colors.$gray-darkest;
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$gray-dark, 0.6);
+    color: colors.$white;
+  }
+
+  &.validationHasFails {
+    [data-showdex-scheme='light'] & {
+      background-color: color.alpha(colors.$red, 0.12);
+      color: colors.$red;
+    }
+
+    [data-showdex-scheme='dark'] & {
+      background-color: color.alpha(colors.$red, 0.2);
+      color: color.alpha(colors.$red, 0.95);
+    }
+  }
+}
+
+.validationBaseline {
+  @include flex.row($align: center);
+  gap: 4px;
+  @include spacing.mb(8px);
+}
+
+.validationBaselineItem {
+  width: 18px;
+  height: 18px;
+  @include flex.row-center;
+  border-radius: 3px;
+  font-size: 9px;
+
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$white, 0.8);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$gray-darker, 0.8);
+  }
+}
+
+.validationIcon {
+  font-size: 10px;
+}
+
+.validationTypeWindow {
+  & + & {
+    @include spacing.mt(8px);
+  }
+}
+
+.validationTypeWindowLabel {
+  @include font.primary(500);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  @include spacing.mb(4px);
+
+  [data-showdex-scheme='light'] & {
+    color: color.alpha(colors.$gray-darkest, 0.7);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    color: color.alpha(colors.$white, 0.6);
+  }
+}
+
+.validationTypeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.validationTypeIcon {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  @include flex.row-center;
+  border-radius: 6px;
+  overflow: hidden;
+
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$white, 0.7);
+    box-shadow: inset 0 0 0 1px color.alpha(colors.$gray-light, 0.4);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$gray-darker, 0.6);
+    box-shadow: inset 0 0 0 1px color.alpha(colors.$black, 0.3);
+  }
+
+  // highlight the type icon
+  :global(.container) {
+    width: 100%;
+    height: 100%;
+    @include flex.row-center;
+    opacity: 0.7;
+  }
+}
+
+.validationTypeCount {
+  position: absolute;
+  bottom: -2px;
+  right: 0;
+  @include font.primary(600);
+  font-size: 9px;
+  padding: 0 2px;
+  border-radius: 2px 0 4px 0;
+  min-width: 14px;
+  text-align: center;
+
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$gray-dark, 0.6);
+    color: colors.$white;
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$black, 0.5);
+    color: colors.$white;
+  }
+}
+
+.validationDouble {
+  &:hover .validationDoubleMarker {
+    opacity: 1;
+  }
+}
+
+.validationDoubleMarker {
+  position: absolute;
+  top: -1px;
+  left: 1px;
+  @include font.primary(600);
+  font-size: 8px;
+  color: colors.$red;
+  opacity: 0;
+  @include transition.apply(opacity);
+}
+
+.validationPass {
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$green, 0.12);
+    box-shadow: inset 0 0 0 1px color.alpha(colors.$green, 0.3);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$green, 0.15);
+    box-shadow: inset 0 0 0 1px color.alpha(colors.$green, 0.4);
+  }
+}
+
+.validationFail {
+  [data-showdex-scheme='light'] & {
+    background-color: color.alpha(colors.$red, 0.15);
+    box-shadow: inset 0 0 0 1px color.alpha(colors.$red, 0.4);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    background-color: color.alpha(colors.$red, 0.18);
+    box-shadow: inset 0 0 0 1px color.alpha(colors.$red, 0.4);
+  }
+}
+
 .overlayCloseButton {
   @include position.abs($t: 8px, $r: 8px);
   @include flex.row-center;

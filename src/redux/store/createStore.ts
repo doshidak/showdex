@@ -18,6 +18,7 @@ import { pkmnApi, showdownApi } from '@showdex/redux/services';
 import { type CalcdexSliceState, calcdexSlice } from './calcdexSlice';
 import { type HellodexSliceState, hellodexSlice } from './hellodexSlice';
 import { type NotedexSliceState, notedexSlice } from './notedexSlice';
+import { type RandBattlesValidatorSliceState, randBattlesValidatorSlice } from './randBattlesValidatorSlice';
 import { type ShowdexSliceState, showdexSlice } from './showdexSlice';
 import { type TeamdexSliceState, teamdexSlice } from './teamdexSlice';
 
@@ -31,6 +32,7 @@ export interface RootState extends ReturnType<RootStore['getState']> {
   [hellodexSlice.name]: HellodexSliceState;
   [notedexSlice.name]: NotedexSliceState;
   [calcdexSlice.name]: CalcdexSliceState;
+  [randBattlesValidatorSlice.name]: RandBattlesValidatorSliceState;
   [teamdexSlice.name]: TeamdexSliceState;
 }
 
@@ -77,6 +79,7 @@ export const createStore = (
       [hellodexSlice.name]: hellodexSlice.reducer,
       [notedexSlice.name]: notedexSlice.reducer,
       [calcdexSlice.name]: calcdexSlice.reducer,
+      [randBattlesValidatorSlice.name]: randBattlesValidatorSlice.reducer,
       [teamdexSlice.name]: teamdexSlice.reducer,
     },
 

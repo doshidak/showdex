@@ -30,6 +30,7 @@ import {
 import { findPlayerTitle } from '@showdex/utils/app';
 import { useMobileViewport, useRandomUuid } from '@showdex/utils/hooks';
 import styles from './Calcdex.module.scss';
+import { RandomBattleValidationPanel } from './RandomBattleValidationPanel';
 
 export interface CalcdexProps {
   onUserPopup?: (username?: string) => void;
@@ -196,6 +197,8 @@ export const Calcdex = ({
             onPress={onCloseOverlay}
           />
         }
+
+        <RandomBattleValidationPanel />
 
         <PiconRackSortableContext playerKey={topKey}>
           <PlayerCalc
