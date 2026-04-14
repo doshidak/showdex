@@ -78,16 +78,13 @@ export const Tooltip = ({
     config: springConfig,
   }));
 
-  // keep track of the mounted state
-  const [mounted, setMounted] = React.useState(false);
-
   const handleMount: TippyProps['onMount'] = (instance) => {
-    setMounted(true);
     onMount?.(instance);
 
     void springApi.start({
       ...springProps.show,
       config: { ...springConfig, clamp: false },
+      onRest: () => {},
     });
   };
 
@@ -98,7 +95,7 @@ export const Tooltip = ({
   });
 
   const handleHidden: TippyProps['onHidden'] = (instance) => {
-    setMounted(false);
+    springApi.set(springProps.hide);
     onHidden?.(instance);
   };
 
@@ -135,12 +132,12 @@ export const Tooltip = ({
           style={{
             ...style,
             ...animationStyles,
-            ...((!mounted || derender) && { display: 'none' }),
+            ...(derender && { display: 'none' }),
           }}
           tabIndex={-1}
           {...attributes}
         >
-          {mounted && (renderContent || content)}
+          {renderContent || content}
 
           <div
             ref={setArrow}
