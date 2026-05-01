@@ -77,7 +77,12 @@
     "@dnd-kit/modifiers": "^7.0.0",
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@lexical/code": "^0.42.0",
+    "@lexical/link": "^0.42.0",
+    "@lexical/list": "^0.42.0",
+    "@lexical/markdown": "^0.42.0",
     "@lexical/react": "^0.42.0",
+    "@lexical/rich-text": "^0.42.0",
     "@react-hook/size": "^2.1.2",
     "@react-spring/web": "^10.0.3",
     "@reduxjs/toolkit": "^2.11.2",
@@ -170,7 +175,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@swc/core"
+      "@parcel/watcher",
+      "@swc/core",
+      "ghooks"
     ],
     "overrides": {
       "webpack-visualizer-plugin2>react": "$react",
