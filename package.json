@@ -77,7 +77,12 @@
     "@dnd-kit/modifiers": "^7.0.0",
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@lexical/code": "^0.44.0",
+    "@lexical/link": "^0.44.0",
+    "@lexical/list": "^0.44.0",
+    "@lexical/markdown": "^0.44.0",
     "@lexical/react": "^0.42.0",
+    "@lexical/rich-text": "^0.44.0",
     "@react-hook/size": "^2.1.2",
     "@react-spring/web": "^10.0.3",
     "@reduxjs/toolkit": "^2.11.2",
@@ -116,6 +121,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@swc/core": "^1.15.21",
     "@types/base-64": "^1.0.0",
@@ -149,6 +155,7 @@
     "file-loader": "^6.2.0",
     "ghooks": "^2.0.4",
     "glob": "^13.0.6",
+    "globals": "^17.6.0",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.5.3",
     "postcss": "^8.4.26",

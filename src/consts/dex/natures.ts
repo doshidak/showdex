@@ -68,3 +68,18 @@ export const PokemonCommonNatures: Showdown.NatureName[] = [
   'Sassy',
   'Hardy',
 ];
+
+export const PokemonNatureLookup: Partial<Record<
+  `${Showdown.StatNameNoHp}:${Showdown.StatNameNoHp}`,
+  Showdown.NatureName
+>> = {};
+
+for (const nature of PokemonNatures) {
+  const [plus, minus] = PokemonNatureBoosts[nature];
+
+  if (!plus || !minus) {
+    continue;
+  }
+
+  PokemonNatureLookup[`${plus}:${minus}`] = nature;
+}
