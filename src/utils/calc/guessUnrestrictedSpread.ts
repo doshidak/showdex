@@ -207,7 +207,7 @@ export const guessUnrestrictedSpread = (
     spe: 0,
   };
 
-  const plusMaxes: Showdown.StatsTable = {
+  const plusMins: Showdown.StatsTable = {
     hp: 0,
     atk: 0,
     def: 0,
@@ -258,12 +258,12 @@ export const guessUnrestrictedSpread = (
       (n) => PokemonNatureBoosts[n][1] === stat,
     )!;
 
-    const plusMax = calcPokemonStat(
+    const plusMin = calcPokemonStat(
       gen,
       stat,
       baseStats[stat],
-      31,
-      252,
+      0,
+      0,
       pokemon.level,
       boostedNature,
     );
@@ -280,7 +280,7 @@ export const guessUnrestrictedSpread = (
 
     statMins[stat] = neutralMin;
     statMaxes[stat] = neutralMax;
-    plusMaxes[stat] = plusMax;
+    plusMins[stat] = plusMin;
     minusMaxes[stat] = minusMax;
 
     const observed = serverStats[stat];
@@ -296,7 +296,7 @@ export const guessUnrestrictedSpread = (
     }
 
     // allowed boosted
-    if (observed <= plusMax) {
+    if (observed >= plusMin) {
       allowedPlus.push(stat);
     }
 
