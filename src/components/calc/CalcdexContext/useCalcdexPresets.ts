@@ -15,6 +15,7 @@ import {
   calcPresetCalcdexId,
   guessServerLegacySpread,
   guessServerSpread,
+  guessUnrestrictedSpread,
   populateStatsTable,
 } from '@showdex/utils/calc';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
@@ -245,7 +246,7 @@ export const useCalcdexPresets = (
           if (!preset?.calcdexId && !pokemon.transformedForme) {
             const guessedSpread = state.legacy
               ? guessServerLegacySpread(state.format, pokemon)
-              : guessServerSpread(state.format, pokemon);
+              : guessUnrestrictedSpread(state.format, pokemon);
 
             if (nonEmptyObject(guessedSpread)) {
               preset = {

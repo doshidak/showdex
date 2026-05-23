@@ -23,6 +23,7 @@ export * from './getMatchupRange';
 export * from './getMoveOverrideDefaults';
 export * from './guessServerLegacySpread';
 export * from './guessServerSpread';
+export * from './guessUnrestrictedSpread';
 export * from './hasMoveOverrides';
 export * from './populateStatsTable';
 export * from './parseMatchupDescription';
