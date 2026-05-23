@@ -315,51 +315,29 @@ export const guessUnrestrictedSpread = (
 
   let chosenNature: Showdown.NatureName = 'Hardy';
 
-  if (plusStat && minusStat) {
-    const lookup = PokemonNatureLookup[`${plusStat}:${minusStat}`];
+  const candidateMinus = minusStat || allowedMinus
+    .filter((s) => s !== plusStat)
+    .sort((a, b) => serverStats[a] - serverStats[b])[0];
 
-    if (!lookup) {
-      return null;
-    }
+  const candidatePlus = plusStat || allowedPlus
+    .filter(
+      (s) => s !== minusStat &&
+        // Stat jumps for enhanced stats always skip 10 mod 11
+        (serverStats[s] + 1) % 11 !== 0,
+    )
+    .sort((a, b) => serverStats[b] - serverStats[a])[0];
 
-    chosenNature = lookup;
-  } else if (plusStat) {
-    const candidateMinus = allowedMinus
-      .filter((s) => s !== plusStat)
-      .sort((a, b) => serverStats[a] - serverStats[b])[0];
-
-    if (!candidateMinus) {
-      return null;
-    }
-
-    const lookup = PokemonNatureLookup[`${plusStat}:${candidateMinus}`];
-
-    if (!lookup) {
-      return null;
-    }
-
-    chosenNature = lookup;
-  } else if (minusStat) {
-    const candidatePlus = allowedPlus
-      .filter(
-        (s) => s !== minusStat &&
-          // Stat jumps for enhanced stats always skip 10 mod 11
-          (serverStats[s] + 1) % 11 !== 0,
-      )
-      .sort((a, b) => serverStats[b] - serverStats[a])[0];
-
-    if (!candidatePlus) {
-      return null;
-    }
-
-    const lookup = PokemonNatureLookup[`${candidatePlus}:${minusStat}`];
-
-    if (!lookup) {
-      return null;
-    }
-
-    chosenNature = lookup;
+  if (!candidatePlus || !candidateMinus) {
+    return null;
   }
+
+  const lookup = PokemonNatureLookup[`${candidatePlus}:${candidateMinus}`];
+
+  if (!lookup) {
+    return null;
+  }
+
+  chosenNature = lookup;
 
   guessedSpread.nature = chosenNature;
 
