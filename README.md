@@ -22,7 +22,7 @@
 
 <br>
 
-Officially supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (+ any native [**Chromium**](https://chromium.org/Home) browser, like **Arc**, **Edge** & **Brave**), [**Opera**](https://addons.opera.com/en/extensions/details/showdex) & **Firefox** (via manual install.
+Officially supported on [**Chrome**](https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai) (+ any native [**Chromium**](https://chromium.org/Home) browser, like **Arc**, **Edge** & **Brave**), [**Opera**](https://addons.opera.com/en/extensions/details/showdex) & **Firefox** (via manual install).
 
 <details>
   <summary>
