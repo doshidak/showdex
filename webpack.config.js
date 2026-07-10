@@ -44,7 +44,10 @@ const { parsed: envFile } = dotenv.config({
 const finalEnv = {
   ...envFile,
 
-  BUILD_DATE: Date.now().toString(16).toUpperCase(),
+  // note: overridable so a given release can be rebuilt byte-for-byte (e.g., AMO source review
+  // reproducing a shipped .xpi) -- BUILD_DATE otherwise bakes the wall clock into BUILD_NAME,
+  // main.js, content.js & the i18n bundles, which alone makes every build unique
+  BUILD_DATE: (process.env.BUILD_DATE || Date.now().toString(16)).replace(/[^a-f0-9]+/gi, '').toUpperCase(),
   BUILD_SUFFIX: sanitizeEnv(process.env.BUILD_SUFFIX),
   BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
   DEV_HOSTNAME: process.env.DEV_HOSTNAME || envFile.DEV_HOSTNAME,
@@ -80,6 +83,31 @@ finalEnv.UUID_NAMESPACE = (
 if (!finalEnv.UUID_NAMESPACE || finalEnv.UUID_NAMESPACE === NIL_UUID) {
   finalEnv.UUID_NAMESPACE = uuidv4();
 }
+
+// ms epoch that BUILD_DATE encodes; any timestamp baked into an asset must derive from this
+// (never from its own new Date()) or the build won't reproduce
+const buildTimestamp = parseInt(finalEnv.BUILD_DATE, 16) || Date.now();
+
+// ZipPlugin walks Object.keys(compilation.assets), whose insertion order depends on the order
+// CopyWebpackPlugin's parallel reads happen to finish -- so the archive's entries get shuffled
+// between otherwise identical runs. sorting them just before ZipPlugin's stage pins the layout.
+const sortAssetsPlugin = {
+  apply: (compiler) => {
+    compiler.hooks.thisCompilation.tap('SortAssets', (compilation) => {
+      compilation.hooks.processAssets.tap({
+        name: 'SortAssets',
+        stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER - 1,
+      }, (assets) => {
+        Object.keys(assets).sort().forEach((name) => {
+          const source = assets[name];
+
+          delete assets[name];
+          assets[name] = source;
+        });
+      });
+    });
+  },
+};
 
 finalEnv.BUILD_NAME = [
   finalEnv.PACKAGE_NAME,
@@ -309,7 +337,9 @@ const copyPatterns = [
         }
 
         if (key === 'common' && typeof parsed['--meta'] === 'object') {
-          parsed['--meta'].built = new Date().toISOString();
+          // note: BUILD_DATE is a hex ms epoch, so this ISO stamp follows it -- i.e., pinning
+          // BUILD_DATE pins the i18n bundles too (otherwise this is a second, unpinnable clock)
+          parsed['--meta'].built = new Date(buildTimestamp).toISOString();
         }
 
         // e.g., prev = { common: { ... }, pokedex: { ... }, ... }
@@ -522,6 +552,9 @@ const plugins = [
       }),
 
     (finalEnv.BUILD_TARGET !== 'standalone' && (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox'))
+      && sortAssetsPlugin,
+
+    (finalEnv.BUILD_TARGET !== 'standalone' && (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox'))
       && new ZipPlugin({
         // spit out the file in either `build` or `dist`
         path: '..',
@@ -529,6 +562,12 @@ const plugins = [
         // extension will be appended to the end of the filename
         filename: finalEnv.BUILD_NAME,
         extension: finalEnv.BUILD_TARGET === 'firefox' ? 'xpi' : 'zip',
+
+        // yazl stamps each zip entry with `new Date()` unless told otherwise, which would make
+        // the archive bytes unique per run even when its contents are identical
+        fileOptions: {
+          mtime: new Date(buildTimestamp),
+        },
       }),
 
     !__DEV__
