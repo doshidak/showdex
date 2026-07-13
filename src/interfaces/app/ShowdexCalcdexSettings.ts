@@ -33,8 +33,8 @@ export interface ShowdexCalcdexSettings {
    * How the Calcdex should open when opened.
    *
    * * `'showdown'` (default) will open the Calcdex based on the panel layout in Showdown's graphic settings.
-   *   - Left-right panels will use `'overlay'`.
-   *   - Single panel will use `'panel'`.
+   *   - Left-right panels will use `'panel'`.
+   *   - Single panel will use `'overlay'` (there's no room for a second panel, after all).
    *   - Similar functionality to `forcedColorScheme` in the `ShowdexSettings`.
    * * `'panel'` will open the Calcdex in its own panel.
    * * `'overlay'` will open the Calcdex as an overlay over the battle chat.

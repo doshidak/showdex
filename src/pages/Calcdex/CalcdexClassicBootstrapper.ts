@@ -821,8 +821,11 @@ export class CalcdexClassicBootstrapper extends MixinCalcdexBootstrappable(Bootd
     // battle.calcdexReactRoot for battle overlays (potentially could rename it to calcdexOverlayReactRoot... LOL)
     // let calcdexReactRoot: ReactDOM.Root;
 
+    // note: same inversion the preact CalcdexPreactBattle had -- 'showdown' is the *Auto* openAs, so it's the one
+    // that should defer to hasSinglePanel(); the guard has to exclude the explicit 'panel' instead. (see the note
+    // over there.) classic gets it too since both read the same setting & the same contract.
     this.battle.calcdexAsOverlay = this.calcdexSettings.openAs === 'overlay'
-      || (this.calcdexSettings.openAs !== 'showdown' && hasSinglePanel());
+      || (this.calcdexSettings.openAs !== 'panel' && hasSinglePanel());
 
     if (!this.battle.calcdexStateInit) {
       this.initCalcdexState();

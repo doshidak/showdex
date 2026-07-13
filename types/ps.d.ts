@@ -106,14 +106,20 @@ declare namespace Showdown {
      */
     public rightPanel?: PSRoom = null;
     /**
+     * Width of the left panel, which doubles as PS's canonical single-panel flag: it's falsy whenever only
+     * one panel is visible (see `PS.isVisiblePanel()`), which is what `hasSinglePanel()` keys off of.
+     *
      * * `0` = only one panel is visible.
-     * * `null` = `'vertical'` nav layout.
-     * * Note: PS will only update if the left room width changes.
-     *   - Resizes that don't change the left room width will not trigger an update.
+     *   - Set when the `onepanel` pref is on, or when there aren't both a left & right room to show.
+     * * `null` = `'vertical'` nav layout, or the viewport's `clientWidth` is under `800px`.
+     * * Any positive number = left-right panels (i.e., NOT single panel).
+     * * Note: PS will only update if the left panel width changes.
+     *   - Resizes that don't change the left panel width will not trigger an update.
+     * * Note: was called `leftRoomWidth` until PS renamed it in the preact client.
      *
      * @default 0
      */
-    public leftRoomWidth = 0;
+    public leftPanelWidth?: number = 0;
     public mainmenu: MainMenuRoom;
     /**
      * "The drag-and-drop API is incredibly dumb and doesn't let us know what's being dragged until the `drop` event,
