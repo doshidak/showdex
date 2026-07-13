@@ -6,6 +6,7 @@ import {
 } from '@smogon/calc';
 import {
   PokemonBoostNames,
+  PokemonBoosterAbilities,
   PokemonPseudoToggleAbilities,
   PokemonRuinAbilities,
   PokemonSturdyAbilities,
@@ -166,7 +167,17 @@ export const createSmogonPokemon = (
     // (populated in syncPokemon() via `volatiles`)
     // update (2024/01/03): apparently 'auto' is an accepted value, which is ok to fallback on since this property is
     // only exclusively used for the aformentioned abilities LOL
-    boostedStat: pokemon.dirtyBoostedStat || pokemon.boostedStat || 'auto',
+    // update (2026/07/13): ...except it ISN'T exclusive to them once it reaches @smogon/calc! its isQPActive() reads
+    // `boostedStat !== 'auto'` as a standalone "force the booster boost on" switch, independent of the ability:
+    //   (hasAbility('Protosynthesis') && ...) || (hasAbility('Quark Drive') && ...) || (boostedStat !== 'auto')
+    // so handing it a real stat for a mon that has neither ability silently grants it a phantom 1.3x on its highest
+    // stat -- & the calc then credits the boost to whatever ability the mon does have (desc.attackerAbility), e.g. a
+    // +2 Unburden Hawlucha calcing 1HKO instead of the 86% it actually did. gating on the abilities that can even
+    // *have* a boosted stat keeps that switch unreachable for everyone else.
+    boostedStat: (
+      PokemonBoosterAbilities.includes(ability)
+        && (pokemon.dirtyBoostedStat || pokemon.boostedStat)
+    ) || 'auto',
 
     boosts: PokemonBoostNames.reduce((prev, stat) => {
       const autoBoost = calcStatAutoBoosts(pokemon, stat) || 0;
