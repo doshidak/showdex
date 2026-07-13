@@ -16,8 +16,14 @@ export abstract class BootdexPreactBootstrappable extends BootdexBootstrappable 
   public static override readonly scope = l.scope;
   public static override readonly Adapter = BootdexPreactAdapter;
 
+  // note: the `onepanel` pref alone isn't enough -- PS also collapses to a single panel on its own when the
+  // viewport's clientWidth is under 800px (& when there aren't both a left & right room to show), neither of
+  // which touches the pref. PS.leftPanelWidth is the client's own single-panel flag & covers all three cases:
+  // 0 when one panel is visible, null in the 'vertical' layout / under 800px, & a positive width otherwise --
+  // i.e., falsy ==> single panel, which is exactly how PS.isVisiblePanel() reads it. it's recomputed by
+  // PS.updateLayout() on init, on every PS.update() & on resize, so it's always current.
   public static override hasSinglePanel: typeof BootdexBootstrappable.hasSinglePanel = () => detectPreactHost(window) && (
-    !!window.PS.prefs.onepanel // can also be 'vertical', which is still technically one panel, hence the bang bang
+    !window.PS.leftPanelWidth
   );
 
   public static override openUserPopup: typeof BootdexBootstrappable.openUserPopup = (username) => {

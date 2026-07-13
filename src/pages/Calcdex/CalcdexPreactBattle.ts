@@ -103,8 +103,13 @@ export class CalcdexPreactBattle extends Battle {
       return;
     }
 
+    // note: 'showdown' is the *Auto* openAs (i.e., "match Showdown's layout"), so it's the one that should defer
+    // to hasSinglePanel() -- the guard has to exclude 'panel' (an explicit "always a panel tab"), not 'showdown'.
+    // excluding 'showdown' inverted both: Auto never consulted hasSinglePanel() (so it always opened as a panel
+    // tab, even in single-panel mode) & an explicit 'panel' *did* (so it could open as an overlay against the
+    // user's wishes). only 'overlay' behaved. see calcdex.openAs.options.showdown.tooltip for the contract.
     this.calcdexAsOverlay = this.calcdexSettings?.openAs === 'overlay'
-      || (this.calcdexSettings?.openAs !== 'showdown' && hasSinglePanel());
+      || (this.calcdexSettings?.openAs !== 'panel' && hasSinglePanel());
 
     if (this.calcdexAsOverlay) {
       this.calcdexReactRef = preact.createRef<HTMLDivElement>();

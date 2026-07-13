@@ -13,7 +13,7 @@
         "name": "Showdex Player Titles",
         "ext": null,
         "created": "2022-10-28T15:25:31Z",
-        "updated": "2026-06-28T09:25:45.630Z",
+        "updated": "2026-07-13T07:23:02.504Z",
         "disabled": false
       }
     },
@@ -41,9 +41,9 @@
         "ext": null,
         "gen": 9,
         "format": "championsvgc2026",
-        "desc": "Curated Pokémon Champions sets from the Nimbasa City Post VGC Damage Calculator, as of June 2026.",
+        "desc": "Curated Pokémon Champions sets from the Nimbasa City Post VGC Damage Calculator, as of July 2026.",
         "created": "2026-06-28T04:41:56.443Z",
-        "updated": "2026-06-28T04:41:56.443Z",
+        "updated": "2026-07-10T21:27:39.911Z",
         "disabled": false
       },
       "b83b77be-2422-45c0-90a6-2b34952a2e77": {
@@ -57,7 +57,7 @@
         "format": "championsou",
         "desc": "Pokémon Champions OU usage stats from Smogon (https://smogon.com/stats).",
         "created": "2026-06-29T01:44:35.794Z",
-        "updated": "2026-06-29T01:50:56.723Z",
+        "updated": "2026-07-10T21:23:43.595Z",
         "disabled": false
       },
       "883e2004-f83d-4bfe-be3c-1dfd26883b89": {
@@ -71,7 +71,7 @@
         "format": "championsbss",
         "desc": "Pokémon Champions BSS (Reg. M-A) usage stats from Smogon (https://smogon.com/stats).",
         "created": "2026-06-29T01:44:35.794Z",
-        "updated": "2026-06-29T01:50:56.723Z",
+        "updated": "2026-07-10T21:23:43.595Z",
         "disabled": false
       },
       "a4fcb787-03a2-419a-a47d-5a29ada541c6": {
@@ -85,7 +85,7 @@
         "format": "championsvgc2026",
         "desc": "Pokémon Champions VGC 2026 (Reg. M-A) usage stats from Smogon (https://smogon.com/stats).",
         "created": "2026-06-29T01:44:35.794Z",
-        "updated": "2026-06-29T01:50:56.723Z",
+        "updated": "2026-07-10T21:23:43.595Z",
         "disabled": false
       }
     },

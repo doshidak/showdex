@@ -105,6 +105,13 @@ export const buildBundleQuery = (
         continue;
       }
 
+      // `'usage'`-sourced presets normally get their `updated` from the 'Last-Modified' response header (see
+      // transformFormatStatsResponse()), but bundles are read straight out of IndexedDB -- no response, no header.
+      // the bundle's own `updated` (from the buns catalog) is the equivalent stamp: when the usage data was last
+      // baked. without this, bundled usage presets render dateless in the sets dropdown, unlike their pkmn API
+      // counterparts. only `'usage'` presets get it -- `'bundle'`-sourced sets (e.g. NCP) show their bundleName.
+      const bundleUpdated = (bundle.updated && new Date(bundle.updated).valueOf()) || null;
+
       presets.forEach((preset) => {
         if (!preset?.calcdexId || output.some((o) => o.calcdexId === preset.calcdexId)) {
           return;
@@ -112,6 +119,10 @@ export const buildBundleQuery = (
 
         preset.bundleId = bundle.id;
         preset.bundleName = bundle.name;
+
+        if (preset.source === 'usage' && bundleUpdated) {
+          preset.updated = bundleUpdated;
+        }
 
         output.push(preset);
       });

@@ -10,7 +10,7 @@ overrides:
 
 patchedDependencies:
   '@smogon/calc@0.11.0':
-    hash: 0dece061076a58127e999094f7421990a7942c07cbcefc4cd83f933eb0f5e320
+    hash: fe8a35412966b2f1c52815bbe00337cb9d9bf2d4501190780ede222624c6f4dd
     path: patches/@smogon__calc@0.11.0.patch
   react-select@5.10.2:
     hash: b14e475136570b990ec7cc0641bb319ead87d9d1bf4fb127e28746c39066844e
@@ -64,7 +64,7 @@ importers:
         version: 2.11.2(react-redux@9.2.0(@types/react@19.2.14)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
       '@smogon/calc':
         specifier: ^0.11.0
-        version: 0.11.0(patch_hash=0dece061076a58127e999094f7421990a7942c07cbcefc4cd83f933eb0f5e320)
+        version: 0.11.0(patch_hash=fe8a35412966b2f1c52815bbe00337cb9d9bf2d4501190780ede222624c6f4dd)
       '@tippyjs/react':
         specifier: ^4.2.6
         version: 4.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -5402,7 +5402,7 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@smogon/calc@0.11.0(patch_hash=0dece061076a58127e999094f7421990a7942c07cbcefc4cd83f933eb0f5e320)':
+  '@smogon/calc@0.11.0(patch_hash=fe8a35412966b2f1c52815bbe00337cb9d9bf2d4501190780ede222624c6f4dd)':
     dependencies:
       '@types/node': 18.19.130
 

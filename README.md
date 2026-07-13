@@ -9,7 +9,7 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex/releases/tag/v1.3.0">v1.3.0</a>&nbsp;</th>
+      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex/releases/tag/v1.4.1">v1.4.1</a>&nbsp;</th>
       <th align="center">&nbsp;Install on <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Chrome</a> · <a href="https://chrome.google.com/webstore/detail/dabpnahpcemkfbgfbmegmncjllieilai">Opera</a> · <a href="https://addons.mozilla.org/en-US/firefox/addon/showdex">Firefox</a> · <a href="https://apps.apple.com/us/app/enhanced-tooltips-for-showdown/id1612964050">Safari</a>&nbsp;</th>
       <th align="center">&nbsp;Discuss on <a href="https://smogon.com/forums/threads/showdex-an-auto-updating-damage-calculator-built-into-showdown.3707265">Smogon</a> · <a href="https://discord.gg/2PXVGGCkm2">Discord</a></th>
     </tr>
@@ -304,7 +304,7 @@ When building in `'standalone'` mode (for embedding Showdex into your own [`poke
   >
   > [Patch for `@babel/plugin-transform-typescript`](./patches/@babel+plugin-transform-typescript+7.22.9.patch) adds a custom option called [`yeetEmptyImportElisions`](./babel.config.json#L7), which, during the transpilation process from TS/TSX to JS, will completely remove the `import` statement if there aren't any imported modules left after removing all `type` modules (e.g., `import { type SomeType } from 'some-package';` becomes `import {} from 'some-package';`, which will be removed if the aforementioned custom option is enabled; however, in the case of `import { type SomeType, SomeModule } from 'some-package';`, this import won't be removed as `SomeModule` remains after removing the `type`'s, i.e., `import { SomeModule } from 'some-package';`). This is to prevent *side-effects* resulting from simply importing the file, even when no exported module in that file is actually being imported. [Path for `@babel/preset-typescript`](./patches/@babel+preset-typescript+7.22.5.patch) simply passes `yeetEmptyImportElisions` to `@babel/plugin-transform-typescript`. (Also, the terrible name for the custom option was intentional to indicate that this was a custom option I put in LOL.)
   >
-  > [Patch for `@smogon/calc`](./patches/@smogon__calc@0.11.0.patch) incorporates all the changes up to the [`9f67278`](https://github.com/smogon/damage-calc/commit/9f672786bf4ecf679cc1984663cc96e2ed76b80f) commit. Additionally, some Showdex-specific modifications are included that better suit the damage calculator for operating in a real-time battle environment. For more details on these modifications, check out the [`showdex-calc`](https://github.com/doshidak/showdex-calc) fork of the [`@smogon/calc`](https://npmjs.com/package/@smogon/calc) package.
+  > [Patch for `@smogon/calc`](./patches/@smogon__calc@0.11.0.patch) incorporates all the changes up to the [`2681f36`](https://github.com/smogon/damage-calc/commit/2681f3624c43324d6b22e56c68d294632178304f) commit. Additionally, some Showdex-specific modifications are included that better suit the damage calculator for operating in a real-time battle environment. For more details on these modifications, check out the [`showdex-calc`](https://github.com/doshidak/showdex-calc) fork of the [`@smogon/calc`](https://npmjs.com/package/@smogon/calc) package.
   >
   > [Patch for `simplebar`](./patches/simplebar-core+1.2.4.patch) adds typings for the untyped `scrollableNode` and `contentNode` options, which is actually [used inside `SimpleBar` class](https://github.com/Grsmto/simplebar/blob/5507296404f7e8f393ec48898a900068afaff5e5/packages/simplebar/src/simplebar.js#L179-L184), but [not typed](https://github.com/Grsmto/simplebar/blob/5507296404f7e8f393ec48898a900068afaff5e5/packages/simplebar/simplebar.d.ts#L27-L36). These two options are required if the internal `<div>`s are provided outside of `SimpleBar` (by default, it will create its own `<div>`s inside the provided container element). For use with React, we must provide these internal `<div>`s ourselves, as React doesn't like it when a vanilla JS library adds and removes DOM elements that React isn't aware of.
 
@@ -521,8 +521,8 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
 > * **Device** (e.g., MacBook Pro 13" Mid 2019, Custom PC, eMachines eTower 400i, Samsung Smart Fridge, etc.)
 > * **OS** & **Version** (e.g., Windows 11 Pro 24H2, macOS 26 Tahoe, Ubuntu 24.04 Noble Numbat LTS, Android 15 Vanilla Ice Cream, etc.)
 > * **Browser** (e.g., Chrome, Firefox, Opera, Safari, Arc, Edge, Brave, Netscape Navigator, etc.)
-> * **Showdex Version** (e.g., v1.3.0)
-> * **Format**, if applicable (e.g., Gen 1 Random Battle, Gen 9 VGC 2025 Reg J, etc.)
+> * **Showdex Version** (e.g., v1.4.1)
+> * **Format**, if applicable (e.g., Gen 1 Random Battle, Gen 9 Champions VGC 2026 Reg M-B, etc.)
 > * **Replay**, if applicable
 >
 > If you would like to be [credited for your contribution](#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
