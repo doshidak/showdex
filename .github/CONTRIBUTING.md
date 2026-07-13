@@ -23,8 +23,8 @@ If possible, including the following would be **immensely** helpful!
 * **Device** (e.g., MacBook Pro 13" Mid 2019, Custom PC, eMachines eTower 400i, Samsung Smart Fridge, etc.)
 * **OS** & **Version** (e.g., Windows 11 Pro 24H2, macOS 26 Tahoe, Ubuntu 24.04 Noble Numbat LTS, Android 15 Vanilla Ice Cream, etc.)
 * **Browser** (e.g., Chrome, Firefox, Opera, Safari, Arc, Edge, Brave, Netscape Navigator, etc.)
-* **Showdex Version** (e.g., v1.3.0)
-* **Format**, if applicable (e.g., Gen 1 Random Battle, Gen 9 VGC 2025 Reg J, etc.)
+* **Showdex Version** (e.g., v1.4.1)
+* **Format**, if applicable (e.g., Gen 1 Random Battle, Gen 9 Champions VGC 2026 Reg M-B, etc.)
 * **Replay**, if applicable
 
 If you would like to be [credited for your contribution](../README.md#contributors), please also include your username on [**Smogon Forums**](https://smogon.com/forums) or [**Pokémon Showdown**](https://pokemonshowdown.com). Otherwise, your **GitHub** username will be used, unless you don't want to be credited.
