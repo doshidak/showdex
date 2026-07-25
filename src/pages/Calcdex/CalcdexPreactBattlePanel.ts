@@ -166,7 +166,7 @@ export class CalcdexPreactBattlePanel extends PSBattlePanel<CalcdexPreactBattleR
   public override componentWillUnmount() {
     if (this.battle?.calcdexInit && this.battle.calcdexAsOverlay) {
       this.lockMobileZoom(false);
-      this.battle.destroy(true);
+      this.battle.unmountCalcdexDom();
     }
 
     super.componentWillUnmount();
