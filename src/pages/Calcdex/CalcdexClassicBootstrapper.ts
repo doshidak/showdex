@@ -644,17 +644,27 @@ export class CalcdexClassicBootstrapper extends MixinCalcdexBootstrappable(Bootd
     }
   }
 
-  public close(): void {
+  public closeCalcdex(): void {
     if (!detectClassicHost(window) || !this.battleId || !nonEmptyObject(window.app?.rooms)) {
       return;
     }
 
-    const { Adapter, getCalcdexRoomId } = CalcdexClassicBootstrapper;
+    const { getCalcdexRoomId } = CalcdexClassicBootstrapper;
     const calcdexRoomId = getCalcdexRoomId(this.battleId);
 
     if (window.app.rooms[calcdexRoomId]) {
       window.app.leaveRoom(calcdexRoomId);
     }
+  }
+
+  public close(): void {
+    if (!detectClassicHost(window) || !this.battleId || !nonEmptyObject(window.app?.rooms)) {
+      return;
+    }
+
+    const { Adapter } = CalcdexClassicBootstrapper;
+
+    this.closeCalcdex();
 
     if (this.battleRoom?.id && !Adapter.rootState?.calcdex?.[this.battleId]?.active) {
       window.app.leaveRoom(this.battleId);

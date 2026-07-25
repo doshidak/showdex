@@ -206,6 +206,19 @@ export class CalcdexPreactBattle extends Battle {
   }
 
   /**
+   * Closes this battle's Calcdex without destroying the underlying battle.
+   */
+  public closeCalcdex() {
+    this.unmountCalcdexDom();
+    this.destroyCalcdexState(false);
+    this.calcdexDestroyed = !this.calcdexReactRoot && !this.calcdexStateInit;
+
+    if (this.calcdexDestroyed) {
+      this.calcdexReactRenderer = null;
+    }
+  }
+
+  /**
    * Destroys the Redux `CalcdexSliceState` of this battle's Calcdex.
    *
    * * Not `force`'ing will respect the user's `calcdexSettings`, specifically `destroyOnClose`,
