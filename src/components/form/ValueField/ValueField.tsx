@@ -296,8 +296,11 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
       }
     }
   }, {
-    enabled: !disabled,
-    enableOnFormTags: active ? ['INPUT'] : undefined,
+    // inputRef.current is null sometimes, so react-hotkeys-hook attaches to document,
+    // causing all keypresses everywhere to fail
+    // scoping it to `active` will at least prevent it from interfering when not focused
+    enabled: !disabled && active,
+    enableOnFormTags: ['INPUT'],
   }, [
     active,
     input?.value,
