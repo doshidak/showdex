@@ -42,7 +42,7 @@ declare namespace Showdown {
   class TeamDropdownPanel extends PSRoomPanel {
     public static readonly id = 'teamdropdown' as const;
     public static readonly routes = ['teamdropdown'] as const;
-    public static readonly location = 'semimodal-popup' as const;
+    public static readonly location = 'modal-popup' as const;
     public static readonly noURL = true as const;
 
     public gen = '' as ID;
@@ -199,7 +199,7 @@ declare namespace Showdown {
   class TeamStoragePanel extends PSRoomPanel {
     public static readonly id = 'teamstorage' as const;
     public static readonly routes = ['teamstorage-*'] as const;
-    public static readonly location = 'semimodal-popup' as const;
+    public static readonly location = 'modal-popup' as const;
     public static readonly noURL = true as const;
 
     public chooseOption: (event: MouseEvent) => void;

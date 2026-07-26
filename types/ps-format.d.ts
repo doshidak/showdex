@@ -28,7 +28,7 @@ declare namespace Showdown {
   class FormatDropdownPanel extends PSRoomPanel {
     public static readonly id = 'formatdropdown' as const;
     public static readonly routes = ['formatdropdown'] as const;
-    public static readonly location = 'semimodal-popup' as const;
+    public static readonly location = 'modal-popup' as const;
     public static readonly noURL = true as const;
 
     public gen = '' as ID;
