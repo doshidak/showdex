@@ -17,7 +17,6 @@ declare namespace Showdown {
     | 'right'
     | 'popup'
     | 'mini-window'
-    | 'modal-popup'
     | 'modal-popup';
 
   interface RoomOptions {

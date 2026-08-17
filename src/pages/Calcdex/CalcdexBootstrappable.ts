@@ -646,6 +646,8 @@ export const MixinCalcdexBootstrappable = <
 
     /**
      * Closes the Calcdex panel tab without closing its associated client battle room.
+     *
+     * @since 1.4.2
      */
     public abstract closeCalcdex(): void;
 

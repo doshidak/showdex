@@ -174,6 +174,12 @@ export class CalcdexPreactBattle extends Battle {
 
   /**
    * Unmounts & clears any references to DOM elements associated w/ rendering this battle's Calcdex.
+   *
+   * * Safe to call whenever the *view* goes away (e.g., a panel unmount), which the preact host does
+   *   constantly -- unlike `destroyCalcdexDom()`, this leaves the `calcdexReactRenderer` intact so the
+   *   Calcdex can rebuild its React root on the next render.
+   *
+   * @since 1.4.2
    */
   public unmountCalcdexDom() {
     if (!detectPreactHost(window)) {
@@ -207,6 +213,8 @@ export class CalcdexPreactBattle extends Battle {
 
   /**
    * Closes this battle's Calcdex without destroying the underlying battle.
+   *
+   * @since 1.4.2
    */
   public closeCalcdex() {
     this.unmountCalcdexDom();
