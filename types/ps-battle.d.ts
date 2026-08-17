@@ -139,7 +139,7 @@ declare namespace Showdown {
   class BattleOptionsPanel extends PSRoomPanel {
     public static readonly id = 'battleoptions';
     public static readonly routes = ['battleoptions'];
-    public static readonly location = 'semimodal-popup';
+    public static readonly location = 'modal-popup';
     public static readonly noURL = true;
 
     public handleHardcoreMode: (event: Event) => void;
@@ -156,7 +156,7 @@ declare namespace Showdown {
   class BattleForfeitPanel<TRoom extends PSRoom = PSRoom> extends PSRoomPanel<TRoom> {
     public static readonly id = 'forfeit';
     public static readonly routes = ['forfeitbattle'];
-    public static readonly location = 'semimodal-popup';
+    public static readonly location = 'modal-popup';
     public static readonly noURL = true;
 
     public override render(): Preact.VNode;

@@ -155,7 +155,7 @@ declare namespace Showdown {
   class TourPopOutPanel extends PSRoomPanel {
     public static readonly id = 'tourpopout' as const;
     public static readonly routes = ['tourpopout'] as const;
-    public static readonly location = 'semimodal-popup' as const;
+    public static readonly location = 'modal-popup' as const;
     public static readonly noURL = true as const;
   }
 }

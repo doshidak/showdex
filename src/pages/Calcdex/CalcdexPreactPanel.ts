@@ -8,7 +8,7 @@
 
 import * as ReactDOM from 'react-dom/client';
 import cx from 'classnames';
-// import { calcdexSlice } from '@showdex/redux/store';
+import { calcdexSlice } from '@showdex/redux/store';
 import { logger } from '@showdex/utils/debug';
 import { detectPreactHost } from '@showdex/utils/host';
 import {
@@ -48,16 +48,25 @@ export class CalcdexPreactRoom extends PSRoom {
     return this.battleRoom?.battle;
   }
 
-  /* public get calcdexSettings() { // eslint-disable-line class-methods-use-this
-    return BootdexPreactBootstrappable.Adapter.rootState?.showdex?.settings?.calcdex;
+  public get calcdexSettings() { // eslint-disable-line class-methods-use-this
+    return Bootstrappable.Adapter.rootState?.showdex?.settings?.calcdex;
   }
 
   public override destroy() {
-    // note: the `false` arg below signifies the Redux CalcdexSliceState for 'panel' renderMode's
-    // should only be destroyed depending on the user's calcdexSettings
-    this.battle?.destroy(false);
+    if (!detectPreactHost(window)) {
+      return void super.destroy();
+    }
+
+    const { battle } = this;
+
+    if (battle?.id) {
+      battle.closeCalcdex();
+    } else if (this.battleId && this.calcdexSettings?.destroyOnClose) {
+      Bootstrappable.Adapter.store.dispatch(calcdexSlice.actions.destroy(this.battleId));
+    }
+
     super.destroy();
-  } */
+  }
 
   public rewriteHistory(): void { // eslint-disable-line class-methods-use-this
     if (!detectPreactHost(window)) {
@@ -133,6 +142,11 @@ export class CalcdexPreactPanel extends PSRoomPanel<CalcdexPreactRoom> {
   public override focus(): void {
     super.focus();
     this.calcdexPanelRoom?.rewriteHistory();
+  }
+
+  public override componentWillUnmount() {
+    this.battle?.unmountCalcdexDom();
+    super.componentWillUnmount();
   }
 
   protected renderCalcdexPanel(): Showdown.Preact.VNode {

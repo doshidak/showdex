@@ -147,7 +147,7 @@ export class CalcdexPreactBootstrapper extends MixinCalcdexBootstrappable(Bootde
     }
   }
 
-  public close(): void {
+  public closeCalcdex(): void {
     if (!detectPreactHost(window) || !this.battleId || !nonEmptyObject(window.PS?.rooms)) {
       return;
     }
@@ -155,8 +155,15 @@ export class CalcdexPreactBootstrapper extends MixinCalcdexBootstrappable(Bootde
     if (this.calcdexRoom?.id) {
       window.PS.leave(this.roomId); // -> CalcdexPreactRoom:destroy()
     }
+  }
 
-    // if (this.battleRoom?.id && !this.battleState?.active) {
+  public close(): void {
+    if (!detectPreactHost(window) || !this.battleId || !nonEmptyObject(window.PS?.rooms)) {
+      return;
+    }
+
+    this.closeCalcdex();
+
     if (this.battleRoom?.id) {
       window.PS.leave(this.battleRoom.id); // -> CalcdexPreactBattleRoom:destroy() -> CalcdexPreactBattle:destroy()
     }

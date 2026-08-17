@@ -174,29 +174,48 @@ export class CalcdexPreactBattle extends Battle {
 
   /**
    * Unmounts & clears any references to DOM elements associated w/ rendering this battle's Calcdex.
-   *
-   * @since 1.3.0
    */
-  public destroyCalcdexDom() {
+  public unmountCalcdexDom() {
     if (!detectPreactHost(window)) {
       return;
     }
 
     l.debug(
-      'destroyCalcdexDom()', 'for the CalcdexPreactBattle', this.id,
+      'unmountCalcdexDom()', 'for the CalcdexPreactBattle', this.id,
       '\n', 'calcdexReactRoot', this.calcdexReactRoot,
       '\n', 'calcdexReactRef', this.calcdexReactRef,
       '\n', 'calcdexReactRenderer', '(typeof)', wtf(this.calcdexReactRenderer),
     );
 
-    if (typeof this.calcdexReactRoot?.unmount !== 'function') {
-      return;
+    if (typeof this.calcdexReactRoot?.unmount === 'function') {
+      this.calcdexReactRoot.unmount();
     }
 
-    this.calcdexReactRoot.unmount();
     this.calcdexReactRoot = null;
     this.calcdexReactRef = { current: null };
+  }
+
+  /**
+   * Unmounts the Calcdex DOM & clears its renderer when the underlying battle is actually being destroyed.
+   *
+   * @since 1.3.0
+   */
+  public destroyCalcdexDom() {
+    this.unmountCalcdexDom();
     this.calcdexReactRenderer = null;
+  }
+
+  /**
+   * Closes this battle's Calcdex without destroying the underlying battle.
+   */
+  public closeCalcdex() {
+    this.unmountCalcdexDom();
+    this.destroyCalcdexState(false);
+    this.calcdexDestroyed = !this.calcdexReactRoot && !this.calcdexStateInit;
+
+    if (this.calcdexDestroyed) {
+      this.calcdexReactRenderer = null;
+    }
   }
 
   /**

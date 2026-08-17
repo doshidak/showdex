@@ -18,7 +18,7 @@ const l = logger('@showdex/pages/Calcdex/CalcdexPreactBattleForfeitPanel');
 export class CalcdexPreactBattleForfeitRoom extends PSRoom {
   public static readonly scope = l.scope;
 
-  public override location = 'semimodal-popup' as const;
+  public override location = 'modal-popup' as const;
 
   protected get battleRoom() {
     return this.getParent() as CalcdexPreactBattleRoom;
