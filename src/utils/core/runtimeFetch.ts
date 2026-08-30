@@ -15,6 +15,15 @@ export interface RuntimeFetchMessageResponse {
   status: number;
   headers: Record<string, string>;
   value: string;
+  /**
+   * Populated by the background script when its `fetch()` threw.
+   *
+   * * `Error`s don't survive the structured clone that `chrome.runtime.sendMessage()` puts responses
+   *   through (they arrive as a bare `{}`), so the reason has to ride along as a plain `string`.
+   *
+   * @since 1.4.2
+   */
+  error?: string;
 }
 
 export interface RuntimeFetchResponse<T = unknown> extends Pick<RuntimeFetchMessageResponse, 'ok' | 'status' | 'headers'> {
@@ -57,6 +66,21 @@ const sendFetchMessage = async <T = unknown>(
 
         if (response instanceof Error) {
           return void reject(response);
+        }
+
+        // note: chrome.runtime.sendMessage() responses are structured-cloned, so the background's send(error)
+        // arrives here as a plain `{}` (never an Error), & a failure to reach the background at all (e.g., a
+        // cold service worker) invokes this callback w/ an undefined response & sets runtime.lastError.
+        // both used to blow right past the instanceof check above & resolve w/ an undefined `value`, whose
+        // json() is null -- which then exploded in whatever was awaiting us (RIP i18n)
+        const { lastError } = chrome.runtime;
+
+        if (lastError || !response || response.error || typeof response.ok !== 'boolean') {
+          return void reject(new Error(
+            lastError?.message
+              || response?.error
+              || `Couldn't runtimeFetch() ${typeof message?.url === 'string' ? message.url : '(that URL)'} for some reason o_O`,
+          ));
         }
 
         resolve({

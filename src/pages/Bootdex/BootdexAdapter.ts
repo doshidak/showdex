@@ -44,8 +44,14 @@ export abstract class BootdexAdapter {
 
     const settings = await readSettingsDb(this.db);
 
+    // note: deliberately isolated -- everything below (settings, teledex's developerMode, the honk/note
+    // restores) is unrelated to i18n, so a locale that couldn't load shouldn't nuke the user's settings too
     if (!this.i18next) {
-      this.i18next = await loadI18nextLocales(settings?.locale);
+      try {
+        this.i18next = await loadI18nextLocales(settings?.locale);
+      } catch (error) {
+        l.error('Couldn\'t loadI18nextLocales() cuz of', error);
+      }
     }
 
     if (nonEmptyObject(settings)) {
