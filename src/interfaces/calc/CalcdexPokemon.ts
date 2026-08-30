@@ -860,6 +860,13 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   criticalHit?: boolean;
 
   /**
+   * Volatile status conditions Pokemon has.
+   *
+   * * Currently only useful for Tar Shot damage calculation, but could be useful for other moves like it in the future, too.
+   */
+  volatileStatus?: Showdown.PokemonVolatile;
+
+  /**
    * User-modified non-volatile status condition.
    *
    * * In order to allow the user to *forcibly* specify **no** status (aka. "Healthy") when the Pokemon actually has one,
