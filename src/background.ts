@@ -51,7 +51,16 @@ const handleFetchMessage = (
             value,
           });
         } catch (error) {
-          send(error as Error);
+          // note: `Error`s don't survive the structured clone that sendMessage() puts responses through
+          // (they'd land in the page as a bare `{}`, which used to sail past runtimeFetch()'s
+          // `instanceof Error` check & resolve w/ an undefined value), so hand back a plain payload
+          send({
+            ok: false,
+            status: 0,
+            headers: {},
+            value: '',
+            error: (error as Error)?.message || String(error),
+          });
         }
       })();
 

@@ -45,14 +45,17 @@ export const getPokemonLearnset = (
   // find all the species (including previous evolutions) to lookup learnsets for
   // (e.g., Weavile's prevo is Sneasel, which includes moves that don't exist in Weavile's learnset like Icicle Crash)
   const speciesIdLookups: string[] = [];
+  const visitedSpeciesIds: string[] = []; // guards against a forme "tree" that loops back on itself
   let currentDexSpecies = dex.species.get(speciesForme);
 
-  while (currentDexSpecies?.exists) {
+  while (currentDexSpecies?.exists && !visitedSpeciesIds.includes(currentDexSpecies.id)) {
+    visitedSpeciesIds.push(currentDexSpecies.id);
+
     const {
       id,
       baseSpecies,
       battleOnly: battleOnlyFromDex,
-      changesFrom,
+      changesFrom: changesFromDex,
       prevo,
     } = currentDexSpecies;
 
@@ -61,6 +64,18 @@ export const getPokemonLearnset = (
     const battleOnly = typeof battleOnlyFromDex === 'string'
       ? battleOnlyFromDex
       : null;
+
+    // update (2026/08/29): changesFrom has that same string-or-array duality (the client's Species constructor
+    // copies it straight off battleOnly[] when there's no changesFrom), which used to reach dex.species.get()
+    // verbatim & nuke the Calcdex: its base Dex.species.get() early-outs on any non-string by returning the arg
+    // as-is, so the ModdedDex wrapper then read `.id` off an *array* (-> undefined) & threw on `id.endsWith()`.
+    // only 'Zygarde-Complete', 'Zygarde-Mega' & 'Necrozma-Ultra' are shaped like this, but each one crashed the
+    // whole Calcdex the moment it hit the battle (e.g., a Zygarde Power Construct'ing at half HP)
+    const changesFrom = (
+      Array.isArray(changesFromDex)
+        ? changesFromDex[0] // e.g., 'Zygarde-Complete' -> ['Zygarde', 'Zygarde-10%'] -> 'Zygarde'
+        : changesFromDex
+    ) || null;
 
     // only push to speciesIdLookups if the formatted id exists in learnsets
     if (id in learnsets) {
