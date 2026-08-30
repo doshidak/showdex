@@ -160,9 +160,17 @@ export const getPresetFormes = (
       output.push(...battleFormes);
     }
 
-    if (changesFrom) {
-      // e.g., name = 'Genesect-Douse' -> battleOnly = undefined, changesFrom = 'Genesect'
-      output.push(changesFrom);
+    // update (2026/08/29): changesFrom can be an array too (it's copied off battleOnly[] when the dex entry
+    // doesn't declare its own), which used to get push()'d into this string[] as-is -- harmless, but the
+    // resulting entry could never match a preset's speciesForme, so we'd silently drop those formes
+    const changesFromFormes = (
+      Array.isArray(changesFrom)
+        ? changesFrom // e.g., name = 'Necrozma-Ultra' -> ['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane']
+        : [changesFrom] // e.g., name = 'Genesect-Douse' -> battleOnly = undefined, changesFrom = 'Genesect'
+    ).filter((f) => !!f && !output.includes(f));
+
+    if (changesFromFormes.length) {
+      output.push(...changesFromFormes);
     }
   }
 
