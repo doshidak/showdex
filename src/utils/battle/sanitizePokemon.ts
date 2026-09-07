@@ -373,8 +373,12 @@ export const sanitizePokemon = <
   }
 
   // if no teraType in gen 9, default to the Pokemon's first type
-  if (gen > 8 && !sanitizedPokemon.teraType && !sanitizedPokemon.dirtyTeraType && sanitizedPokemon.types[0]) {
-    [sanitizedPokemon.dirtyTeraType] = sanitizedPokemon.types;
+  // update (2026/09/07): ...unless the dex says the forme only has one legal Tera type (`requiredTeraType`), which is
+  // true of exactly 11 formes -- every Ogerpon & every Terapagos. for the masked Ogerpons that's Water/Fire/Rock while
+  // types[0] is Grass, & for Terapagos it's Stellar while types[0] is Normal, so defaulting off types[0] handed all of
+  // them a Tera type they can't actually have (base Ogerpon only looked fine 'cause its requiredTeraType IS Grass)
+  if (gen > 8 && !sanitizedPokemon.teraType && !sanitizedPokemon.dirtyTeraType) {
+    sanitizedPokemon.dirtyTeraType = species?.requiredTeraType || sanitizedPokemon.types[0] || null;
   }
 
   // only update the abilities if the dex returned abilities (of the original, non-transformed Pokemon)
