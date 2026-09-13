@@ -3,6 +3,7 @@ import {
   type MoveName,
   type Specie,
   Pokemon as SmogonPokemon,
+  toID,
 } from '@smogon/calc';
 import {
   PokemonBoostNames,
@@ -276,6 +277,18 @@ export const createSmogonPokemon = (
       ...(transformedBaseStats as Required<Omit<Showdown.StatsTable, 'hp'>>),
       hp: baseStats.hp,
     };
+
+    // update (2026/09/12): Transform copies the target's weight too (Pokemon#transformInto() sets
+    // `this.weighthg = pokemon.weighthg`), but the calc derives weightkg from the species we construct it w/,
+    // i.e., the untransformed one -- so a Ditto that became a Gouging Fire still weighed 4kg & calc'd Heat Crash,
+    // Heavy Slam, Low Kick, Grass Knot, etc. off of that. this has to ride in on the overrides rather than being
+    // assigned to the SmogonPokemon afterwards: its clone() (which calculate() does to both sides) rebuilds from
+    // `overrides: this.species` & would quietly drop a directly-assigned weightkg
+    const transformedWeight = dex.species.get(toID(pokemon.transformedForme))?.weightkg;
+
+    if (transformedWeight > 0) {
+      (options.overrides as DeepWritable<SmogonPokemonOverrides>).weightkg = transformedWeight;
+    }
   }
 
   // update (2023/07/27): TIL @smogon/calc doesn't implement 'Power Trick' at all LOL
