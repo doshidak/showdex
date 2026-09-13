@@ -43,7 +43,11 @@ import {
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
-import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
+import {
+  calcCalcdexId,
+  calcPokemonCalcdexId,
+  calcPokemonSpreadStats,
+} from '@showdex/utils/calc';
 import {
   clamp,
   diffArrays,
@@ -716,6 +720,22 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
         if (targetPokemonPresets?.length) {
           syncedPokemon.presets.push(...targetPokemonPresets);
+        }
+
+        // Transform copies the target's actual stats (every stat but HP), which we already have in the target's
+        // spreadStats -- exact for a target on the authenticated player's side, since those are derived from the
+        // server-reported stats. syncPokemon() already calculated this Pokemon's spreadStats w/out them by now, so
+        // recalculate once they're in (calcPokemonSpreadStats() reads them from here on out, surviving user edits)
+        const targetPokemon = (
+          !!mutations.calcdexId
+            && battleState[targetPlayerKey]?.pokemon?.find((p) => p.calcdexId === mutations.calcdexId)
+        ) || null;
+
+        const { hp: _targetHp, ...targetSpreadStats } = targetPokemon?.spreadStats || {};
+
+        if (Object.values(targetSpreadStats).some((v) => (v || 0) > 0)) {
+          syncedPokemon.transformedSpreadStats = targetSpreadStats as Showdown.StatsTableNoHp;
+          syncedPokemon.spreadStats = calcPokemonSpreadStats(battleState.format, syncedPokemon);
         }
 
         // the `2` includes the initial calcdexId & ident properties earlier

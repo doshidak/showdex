@@ -810,6 +810,20 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   transformedBaseStats?: Showdown.StatsTableNoHp;
 
   /**
+   * Spread stats (sans `hp`) of the Pokemon this one transformed into.
+   *
+   * * *Transform* copies the target's actual stats outright (`storedStats` in the sim), not its base stats, so a
+   *   transformed Pokemon's own nature/IVs/EVs have no bearing on anything but its HP.
+   * * Populated from the target's `spreadStats` in `syncBattle()`, which for a target on the authenticated player's
+   *   side are derived from the exact server-reported stats.
+   * * Read by `calcPokemonSpreadStats()` in lieu of `transformedBaseStats` + this Pokemon's own spread whenever
+   *   `transformedForme` is truthy; stale values are ignored (& cleared on the next sync) once it isn't.
+   *
+   * @since 1.4.2
+   */
+  transformedSpreadStats?: Showdown.StatsTableNoHp;
+
+  /**
    * Server-reported stats of the Pokemon.
    *
    * * Only provided if the Pokemon belongs to the player.

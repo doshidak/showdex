@@ -421,6 +421,11 @@ export const syncPokemon = (
         syncedPokemon.transformedForme = transformedForme || null;
         syncedPokemon.transformedLevel = transformedPokemon?.level || null;
 
+        // note: the target's stats are filled in by syncBattle(), which is the one w/ access to the other side's Pokemon
+        if (!transformedForme) {
+          syncedPokemon.transformedSpreadStats = null;
+        }
+
         // check for (untransformed) forme changes
         const formeChange = ('formechange' in volatiles && volatiles.formechange?.[1]) || null;
         const dexForme = formeChange ? dex.species.get(formeChange) : null;

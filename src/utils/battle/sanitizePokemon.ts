@@ -165,6 +165,7 @@ export const sanitizePokemon = <
 
     autoBoostMap: { ...(pokemon as CalcdexPokemon)?.autoBoostMap },
     transformedBaseStats: (pokemon as CalcdexPokemon)?.transformedBaseStats || null,
+    transformedSpreadStats: (pokemon as CalcdexPokemon)?.transformedSpreadStats || null,
     serverStats: (pokemon as CalcdexPokemon)?.serverStats || null,
     dirtyBaseStats: PokemonStatNames.reduce((table, stat) => {
       table[stat] = (pokemon as CalcdexPokemon)?.dirtyBaseStats?.[stat] ?? null;
