@@ -1,4 +1,5 @@
 export * from './alwaysCriticalHits';
+export * from './detectAnyAbilityFormat';
 export * from './detectDoublesFormat';
 export * from './detectGenFromFormat';
 export * from './detectGroundedness';

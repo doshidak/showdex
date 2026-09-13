@@ -9,7 +9,12 @@ import {
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
-import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
+import {
+  detectAnyAbilityFormat,
+  detectGenFromFormat,
+  detectLegacyGen,
+  getDexForFormat,
+} from '@showdex/utils/dex';
 import { flattenAlts } from '@showdex/utils/presets';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
@@ -397,9 +402,14 @@ export const sanitizePokemon = <
     ? sanitizedPokemon.transformedAbilities
     : [...flattenAlts(sanitizedPokemon.altAbilities), ...sanitizedPokemon.abilities];
 
+  // update (2026/09/12): in formats where any ability is legal (Balanced Hackmons, AAA, etc.), an ability outside of
+  // the species' pool isn't invalid, so don't "correct" the user's pick back to the default on every sync
   const updateDirtyAbility = (
     (!sanitizedPokemon.ability || !!sanitizedPokemon.transformedForme)
-      && (!sanitizedPokemon.dirtyAbility || !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))
+      && (
+        !sanitizedPokemon.dirtyAbility
+          || (!detectAnyAbilityFormat(format) && !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))
+      )
   );
 
   if (updateDirtyAbility) {
