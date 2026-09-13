@@ -51,6 +51,13 @@ declare namespace Showdown {
     roomsFirstOpen: number;
     curRoom?: ClientRoom;
     curSideRoom?: ClientRoom;
+    /**
+     * Whether the client is currently in single-panel mode.
+     *
+     * * Set by the client when the window's too narrow for two panels (or the `onepanel` pref is on), in which case
+     *   `updateLayout()` shows the `curRoom` in full & hides any `curSideRoom`.
+     */
+    singlePanelMode?: boolean;
     sideRoomList: ClientRoom[];
     sideRoom?: ClientRoom;
     draggingSideRoom?: ClientRoom;

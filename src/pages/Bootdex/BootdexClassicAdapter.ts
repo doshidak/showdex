@@ -4,6 +4,8 @@
  * @since 1.3.0
  */
 
+import { determineFollowedCalcdexRoomId } from '@showdex/utils/app';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectClassicHost } from '@showdex/utils/host';
 import { BootdexAdapter } from './BootdexAdapter';
@@ -104,6 +106,8 @@ export class BootdexClassicAdapter extends BootdexAdapter {
       }
     };
 
+    this.hookFocusRoom();
+
     l.debug('Initializing MutationObserver for client colorScheme changes...');
 
     // create a MutationObserver to listen for class changes in the <html> tag
@@ -133,6 +137,64 @@ export class BootdexClassicAdapter extends BootdexAdapter {
       characterData: false,
     });
   };
+
+  /**
+   * Wraps `app.focusRoom()` so that switching battle tabs brings the matching Calcdex panel tab forward.
+   *
+   * * Only swaps when the right panel is already showing a *different* battle's Calcdex (see
+   *   `determineFollowedCalcdexRoomId()`), & respects the user's `followBattleTab` Calcdex setting.
+   *
+   * @since 1.4.2
+   */
+  protected static hookFocusRoom(): void {
+    if (!detectClassicHost(window) || typeof window.app.focusRoom !== 'function') {
+      return;
+    }
+
+    l.debug('Hooking into the client\'s app.focusRoom()...');
+
+    const focusRoom = window.app.focusRoom.bind(window.app) as Showdown.ClientApp['focusRoom'];
+    let following = false;
+
+    window.app.focusRoom = (id, focusTextbox) => {
+      const focused = focusRoom(id, focusTextbox);
+
+      // note: focusRoomRight() & the refocus below re-enter this very function, so don't follow along w/ ourselves
+      if (following) {
+        return focused;
+      }
+
+      const followedRoomId = determineFollowedCalcdexRoomId({
+        enabled: BootdexClassicAdapter.rootState?.showdex?.settings?.calcdex?.followBattleTab ?? true,
+        singlePanel: !!window.app.singlePanelMode,
+        focusedRoomId: id,
+        panelRoomIds: [window.app.curSideRoom?.id],
+        openRoomIds: Object.keys(window.app.rooms || {}),
+        // note: mirrors CalcdexClassicBootstrapper.getCalcdexRoomId(), which isn't imported here to avoid a circular import
+        toCalcdexRoomId: (battleId) => `view-calcdex-${formatId(battleId)}`,
+        isCalcdexRoomId: (roomId) => !!roomId?.startsWith('view-calcdex-'),
+      });
+
+      if (!followedRoomId) {
+        return focused;
+      }
+
+      following = true;
+
+      try {
+        window.app.focusRoomRight(followedRoomId);
+
+        // focusRoomRight() leaves the curRoom alone, but make sure the battle the user clicked on keeps the focus
+        if (window.app.curRoom?.id !== id) {
+          focusRoom(id, focusTextbox);
+        }
+      } finally {
+        following = false;
+      }
+
+      return focused;
+    };
+  }
 
   protected static override ready = (): void => {
     // process any buffered battle `data` first before releasing the shitty 'ok' mutex lock

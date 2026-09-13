@@ -228,6 +228,14 @@
       }
     },
 
+    "followBattleTab": {
+
+      "label": "Suivre les Onglets de Bataille",
+
+      "tooltip": "Lorsque vous changez d'onglet de bataille, remplace le $t(common:products.calcdex_one) de l'autre panneau par le $t(common:products.calcdex_one) de cette bataille.<br /><br />Ne remplace qu'un panneau affichant déjà un $t(common:products.calcdex_one), donc le $t(common:products.hellodex_one) et les salons de discussion ne sont pas touchés.<br /><br />N'affecte pas le $t(common:products.calcdex_other) qui <em>$t(calcdex.openAs.label)</em> un <strong>$t(calcdex.openAs.options.overlay.label)</strong>, ni le mode à panneau unique de Showdown."
+
+    },
+
     "destroyOnClose": {
       "label": "Effacer la Mémoire Après la Fermeture de l'Onglet",
       "tooltip": "Efface la mémoire utilisée par le $t(common:products.calcdex_one) après la fermeture de la bataille. Une fois effacé, le $t(common:products.calcdex_one) ne peut pas être rouvert depuis le $t(common:products.hellodex_one).<br /><br />Activer ceci peut améliorer les performances sur des machines moins performantes.<br /><br />N'affecte pas le $t(common:products.calcdex_other) qui <em>$t(calcdex.openAs.label)</em> un <strong>$t(calcdex.openAs.options.overlay.label)</strong> car leur mémoire est effacée dès que leurs batailles se ferment."

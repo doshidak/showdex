@@ -158,6 +158,24 @@ export const CalcdexSettingsPane = ({
           disabled={value?.calcdex?.openAs === 'overlay'}
         />
 
+        <Field<ShowdexCalcdexSettings['followBattleTab']>
+          name="calcdex.followBattleTab"
+          component={Switch}
+          className={cx(styles.field, styles.switchField)}
+          label={t('calcdex.followBattleTab.label') as React.ReactNode}
+          tooltip={(
+            <Trans
+              t={t}
+              i18nKey="calcdex.followBattleTab.tooltip"
+              parent="div"
+              className={styles.tooltipContent}
+              shouldUnescape
+            />
+          )}
+          format={(v) => (value?.calcdex?.openAs === 'overlay' ? false : v)}
+          disabled={value?.calcdex?.openAs === 'overlay'}
+        />
+
         <div className={styles.settingsGroupTitle}>
           {t('pane.sections.secondary.behavior', 'Behavior')}
         </div>

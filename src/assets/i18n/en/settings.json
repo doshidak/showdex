@@ -229,6 +229,14 @@
       }
     },
 
+    "followBattleTab": {
+
+      "label": "Follow Battle Tabs",
+
+      "tooltip": "When you switch battle tabs, swaps the other panel's $t(common:products.calcdex_one) over to that battle's $t(common:products.calcdex_one).<br /><br />Only replaces a panel that's already showing a $t(common:products.calcdex_one), so the $t(common:products.hellodex_one) & chat rooms are left alone.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong>, or Showdown's single-panel mode."
+
+    },
+
     "destroyOnClose": {
       "label": "Clear Memory After Tab Closes",
       "tooltip": "Clears memory used by the $t(common:products.calcdex_one) after the battle closes. Once cleared, the $t(common:products.calcdex_one) cannot be reopened from the $t(common:products.hellodex_one).<br /><br />Enabling this may improve performance on lower-spec machines.<br /><br />Doesn't affect $t(common:products.calcdex_other) that <em>$t(calcdex.openAs.label)</em> a <strong>$t(calcdex.openAs.options.overlay.label)</strong> as their memory is cleared as soon as their battles close."

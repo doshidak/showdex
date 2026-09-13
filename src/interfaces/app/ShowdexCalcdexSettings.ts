@@ -91,6 +91,20 @@ export interface ShowdexCalcdexSettings {
   closeOn: 'battle-end' | 'battle-tab' | 'never';
 
   /**
+   * Whether the Calcdex panel tab should follow along when switching between battle tabs.
+   *
+   * * When another panel is already showing a *different* battle's Calcdex, focusing a battle tab brings that battle's
+   *   own Calcdex panel tab forward in its place.
+   * * Never replaces a panel that isn't showing a Calcdex (e.g., the Hellodex or a chat room).
+   * * Has no effect in Showdown's single-panel mode, on battles without an open Calcdex panel tab, or if `openAs` is
+   *   `'overlay'`.
+   *
+   * @default true
+   * @since 1.4.2
+   */
+  followBattleTab: boolean;
+
+  /**
    * Whether the Calcdex should be destroyed from the Redux state when the panel tab is closed.
    *
    * * If `true`, Calcdex won't be able to be reopened once closed.
