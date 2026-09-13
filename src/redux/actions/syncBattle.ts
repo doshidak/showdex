@@ -1207,7 +1207,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     if (playerState.activeIndices.length) {
       // surprisingly encountered a race-condition with player.faintCounter not being the most up-to-date value,
       // so we'll just count it ourselves LOL
-      const faintCounter = playerState.pokemon.filter((p) => !p.hp).length;
+      // update (2026/09/12): ...except counting who's *currently* at 0 HP forgets any Pokemon that was revived, e.g., by
+      // Revival Blessing, whose faint still counts for Last Respects (the sim's side.totalFainted, mirrored by the
+      // client's side.faintCounter, only ever goes up). the race is real though: a '-damage|0 fnt' zeroes the HP a step
+      // before '|faint|' bumps the client's counter. so take whichever's ahead -- the live count mid-faint, the client's
+      // after a revival -- capped at 100 like the sim, not the team size, since revivals can push faints past it
+      const faintCounter = clamp(0, Math.max(
+        player?.faintCounter || 0,
+        playerState.pokemon.filter((p) => !p.hp).length,
+      ), 100);
 
       // update the faintCounter from the player side if not active on the field & not fainted
       // OR the Pokemon's current faintCounter is 0 when the battle is inactive (probably from a page reload)
@@ -1228,7 +1236,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // if the current `pokemon` is dedge & its faintCounter is 0, remove 1 to not include itself
           const reloadOffset = !pokemon.hp && !pokemon.faintCounter ? 1 : 0;
 
-          pokemon.faintCounter = clamp(0, faintCounter - reloadOffset, maxPokemon);
+          pokemon.faintCounter = clamp(0, faintCounter - reloadOffset, 100);
 
           // auto-clear the dirtyFaintCounter if the user previously set one
           if (typeof pokemon.dirtyFaintCounter === 'number') {
