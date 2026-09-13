@@ -31,6 +31,7 @@ import {
   detectPlayerKeyFromPokemon,
   detectPokemonDetails,
   detectToggledAbility,
+  detectUnpickedPokemon,
   mapAutoBoosts,
   mapStellarMoves,
   mergeRevealedMoves,
@@ -1091,6 +1092,44 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
 
     // keep track of which calcdexId's we've added so far (for myPokemon in Doubles)
     const processedIds: string[] = [];
+
+    // update (2026/09/12): in formats where a full team is picked out of a bigger Team Preview (e.g., Random Battle
+    // (Shared Power, B12P6)), the Calcdex kept every Pokemon shown at Team Preview for the whole battle -- the client
+    // never drops them & neither did we. once the picks are locked in, remove the ones that weren't picked: known
+    // right away for our own side from the request, & for the opponent's once enough different Pokemon have switched
+    // in. (formats like VGC's Bring 6 Pick 4 are deliberately left alone; see detectUnpickedPokemon().)
+    // note: pruned Pokemon won't get re-added on the next sync since the merge above stops adding at maxPokemon
+    const unpickedIds = detectUnpickedPokemon({
+      teamPreviewCount: battle?.teamPreviewCount,
+      previewCount: Math.max(player.pokemon?.length || 0, playerState.pokemon.length),
+      battleStarted: (battle?.turn || 0) > 0,
+      pickedPokemon: isMyPokemonSide && hasMyPokemon ? myPokemon : null,
+      // note: only the client's Pokemon get a searchid once they've switched in; Calcdex state reconstructs an ident
+      // for Team Preview Pokemon too, so it can't tell revealed from unrevealed
+      revealedIds: (player.pokemon || []).filter((p) => !!p?.searchid).map((p) => p.calcdexId).filter(Boolean),
+      pokemon: playerState.pokemon,
+      isSamePokemon: (a, b) => (!!a?.calcdexId && a.calcdexId === b?.calcdexId) || similarPokemon(
+        a as CalcdexPokemon,
+        b as CalcdexPokemon,
+        { format: battleState.format, normalizeFormes: 'fucked' },
+      ),
+    });
+
+    if (unpickedIds.length) {
+      playerState.pokemon = playerState.pokemon.filter((p) => !unpickedIds.includes(p?.calcdexId));
+      playerState.pokemonOrder = (playerState.pokemonOrder || []).filter((id) => !unpickedIds.includes(id));
+
+      if ((playerState.selectionIndex || 0) >= playerState.pokemon.length) {
+        playerState.selectionIndex = 0;
+      }
+
+      l.debug(
+        'Removed', unpickedIds.length, 'unpicked Team Preview Pokemon for player', playerKey,
+        '\n', 'unpickedIds[]', unpickedIds,
+        '\n', 'pokemon[]', '(state)', playerState.pokemon,
+        '\n', 'battle', battleId, battle,
+      );
+    }
 
     playerState.activeIndices = (player.active || []).map((activePokemon) => {
       // particularly in FFA, there may be a Pokemon belonging to another player in active[]
