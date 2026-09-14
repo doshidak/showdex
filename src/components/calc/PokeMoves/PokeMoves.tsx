@@ -29,7 +29,7 @@ import { type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfac
 import { useColorScheme, useColorTheme, useGlassyTerrain } from '@showdex/redux/store';
 import { detectToggledMove } from '@showdex/utils/battle';
 import { calcMoveHitBasePowers, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
-import { getDexForFormat, hasMegaForme, isMegaStone } from '@showdex/utils/dex';
+import { getDexForFormat, getMegaFormeForItem, hasMegaForme } from '@showdex/utils/dex';
 import {
   clamp,
   formatId,
@@ -149,16 +149,15 @@ export const PokeMoves = ({
   // megaForme doubles as the toggle TARGET: the Mega forme when off, or the base species when reverting.
   const megaActive = hasMegaForme(pokemon?.speciesForme);
   const megaItem = pokemon?.dirtyItem ?? pokemon?.item;
-  const megaStone = isMegaStone(megaItem);
   const megaFormes = (pokemon?.altFormes || []).filter(hasMegaForme);
-  // when not Mega'd: if holding a Mega stone, target the matching Mega forme -- X/Y disambiguated by the stone's
-  // suffix (e.g. Charizardite X -> Charizard-Mega-X), else the lone Mega forme. when Mega'd: revert to the base.
-  const stoneSuffix = megaStone ? (formatId(megaItem).match(/([xy])$/)?.[1] || null) : null;
+  // when not Mega'd: if holding a Mega stone, target the matching Mega forme -- X/Y/Z disambiguated by the stone's
+  // suffix (e.g. Charizardite X -> Charizard-Mega-X, Garchompite Z -> Garchomp-Mega-Z), else the unlettered Mega
+  // forme (e.g. Garchompite -> Garchomp-Mega). when Mega'd: revert to the base.
+  // update (2026/09/14): Legends Z-A's -Mega-Z formes (Absol, Garchomp, Lucario) weren't handled since this only
+  // knew about the X/Y suffixes, so a Z stone wasn't even detected as a Mega stone
   const megaForme = (megaActive
     ? getDexForFormat(format)?.species.get(pokemon.speciesForme)?.baseSpecies
-    : (megaStone && megaFormes.length
-      ? (megaFormes.find((f) => (f.match(/-Mega-([XY])$/i)?.[1]?.toLowerCase() || null) === stoneSuffix) || megaFormes[0])
-      : null)
+    : getMegaFormeForItem(megaItem, megaFormes)
   ) || null;
 
   const showMegaToggle = !!pokemon?.speciesForme && !!megaForme;
