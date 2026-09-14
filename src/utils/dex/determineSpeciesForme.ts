@@ -26,20 +26,26 @@ export const determineSpeciesForme = (
   const {
     speciesForme,
     transformedForme,
-    teraType: revealedTeraType,
-    dirtyTeraType,
     terastallized,
     item: revealedItem,
     dirtyItem,
   } = pokemon;
 
   const currentForme = (!ignoreTransformed && transformedForme) || speciesForme;
-  const teraType = dirtyTeraType || revealedTeraType;
   const item = dirtyItem ?? revealedItem;
 
   switch (currentForme) {
+    // update (2026/09/07): these used to additionally gate on a specific teraType (& the matching mask), which the
+    // sim doesn't do at all -- BattleActions#terastallize() forme-changes on `baseSpecies === 'Ogerpon'` alone, then
+    // appends 'tera' to whatever forme is already out (see sim/battle-actions.ts). teraType only decides whether the
+    // Terastallization happens *at all*: Ogerpon refuses to Tera into anything outside Fire/Grass/Rock/Water.
+    // so an Ogerpon-Wellspring Tera'd into Grass -- perfectly legal, & what the Tera type defaulted to before this
+    // was fixed alongside it -- silently kept Water Absorb instead of picking up Embody Aspect (Wellspring) & its
+    // boost. the mask check went too: it can't be removed (Wellspring Mask's onTakeItem() returns false for Ogerpon)
+    // & holding it `forcedForme`s the mon anyway, so the only thing it accomplished was breaking an opposing Ogerpon
+    // whose item we hadn't seen revealed yet
     case 'Ogerpon': {
-      if (teraType === 'Grass' && terastallized) {
+      if (terastallized) {
         return 'Ogerpon-Teal-Tera';
       }
 
@@ -47,7 +53,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Cornerstone': {
-      if (teraType === 'Rock' && terastallized && item === 'Cornerstone Mask' as ItemName) {
+      if (terastallized) {
         return 'Ogerpon-Cornerstone-Tera';
       }
 
@@ -55,7 +61,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Cornerstone-Tera': {
-      if (teraType !== 'Rock' || !terastallized) {
+      if (!terastallized) {
         return 'Ogerpon-Cornerstone';
       }
 
@@ -63,7 +69,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Hearthflame': {
-      if (teraType === 'Fire' && terastallized && item === 'Hearthflame Mask' as ItemName) {
+      if (terastallized) {
         return 'Ogerpon-Hearthflame-Tera';
       }
 
@@ -71,7 +77,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Hearthflame-Tera': {
-      if (teraType !== 'Fire' || !terastallized) {
+      if (!terastallized) {
         return 'Ogerpon-Hearthflame';
       }
 
@@ -79,7 +85,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Teal-Tera': {
-      if (teraType !== 'Grass' || !terastallized) {
+      if (!terastallized) {
         return 'Ogerpon';
       }
 
@@ -87,7 +93,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Wellspring': {
-      if (teraType === 'Water' && terastallized && item === 'Wellspring Mask' as ItemName) {
+      if (terastallized) {
         return 'Ogerpon-Wellspring-Tera';
       }
 
@@ -95,19 +101,22 @@ export const determineSpeciesForme = (
     }
 
     case 'Ogerpon-Wellspring-Tera': {
-      if (teraType !== 'Water' || !terastallized) {
+      if (!terastallized) {
         return 'Ogerpon-Wellspring';
       }
 
       break;
     }
 
+    // note: base Terapagos -> Terastal is *Tera Shift* on switch-in, not Terastallization; only the Terastal forme
+    // Tera's into Stellar (& like Ogerpon, the sim doesn't consult teraType to do it -- Terapagos is validated into
+    // `requiredTeraType: 'Stellar'` regardless)
     case 'Terapagos': {
       return terastallized ? 'Terapagos-Stellar' : 'Terapagos-Terastal';
     }
 
     case 'Terapagos-Stellar': {
-      if (teraType !== 'Stellar' || !terastallized) {
+      if (!terastallized) {
         return 'Terapagos-Terastal';
       }
 
@@ -115,7 +124,7 @@ export const determineSpeciesForme = (
     }
 
     case 'Terapagos-Terastal': {
-      if (teraType === 'Stellar' && terastallized) {
+      if (terastallized) {
         return 'Terapagos-Stellar';
       }
 

@@ -68,7 +68,15 @@ declare namespace Showdown {
     public readonly battleOnly?: string | string[];
     public readonly isNonstandard?: string;
     public readonly unreleasedHidden: boolean | 'Past';
-    public readonly changesFrom?: string;
+    /**
+     * Forme(s) this one changes from mid-battle.
+     *
+     * * Same string-or-array duality as `battleOnly` (which it's copied from when the dex entry doesn't
+     *   declare its own `changesFrom`), e.g., *Zygarde-Complete* & *Necrozma-Ultra* both report an array.
+     * * Beware: `Dex.species.get()` returns any non-`string` argument back verbatim, so handing it one of
+     *   these arrays yields an *array*, not a `Species` -- reading any prop off of it will explode.
+     */
+    public readonly changesFrom?: string | string[];
 
     public constructor(id: ID, name: string, data: unknown);
   }

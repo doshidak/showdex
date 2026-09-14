@@ -239,11 +239,18 @@ export const BattleInfo = ({
             onPress={saveHonk}
           />
 
+          {/*
+            note (2026/09/07): deliberately NOT disabled on saving[0] -- toggling a note queues an autosave, which
+            flips every button in here to disabled for the ~400ms the write takes & back again, reading as the whole
+            toolbar "flashing" on each press. nothing here races the save: saveHonkdex() snapshots the store at
+            dispatch (api.getState()) & a toggle mid-write just re-queues the debounced save. only the save button
+            itself still guards, so it can't double-dispatch
+          */}
           <ToggleButton
             className={styles.toggleButton}
             active={notes?.pre?.visible}
             absoluteHover
-            disabled={operatingMode !== 'standalone' || saving?.[0]}
+            disabled={operatingMode !== 'standalone'}
             onPress={() => void updateBattle({
               notes: { pre: { visible: !notes?.pre?.visible } },
             }, `${l.scope}:${battleId}:Notes:Pre:Visible~ToggleButton:onPress()`)}
@@ -256,7 +263,7 @@ export const BattleInfo = ({
             className={styles.toggleButton}
             active={notes?.post?.visible}
             absoluteHover
-            disabled={operatingMode !== 'standalone' || saving?.[0]}
+            disabled={operatingMode !== 'standalone'}
             onPress={() => void updateBattle({
               notes: { post: { visible: !notes?.post?.visible } },
             }, `${l.scope}:${battleId}:Notes:Post:Visible~ToggleButton:onPress()`)}
@@ -278,7 +285,7 @@ export const BattleInfo = ({
               />
             )}
             absoluteHover
-            disabled={operatingMode !== 'standalone' || saving?.[0]}
+            disabled={operatingMode !== 'standalone'}
             onPress={dupeHonk}
           />
 

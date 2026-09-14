@@ -214,6 +214,10 @@ export const clonePokemon = (
     output.transformedBaseStats = { ...output.transformedBaseStats };
   }
 
+  if (nonEmptyObject(output.transformedSpreadStats)) {
+    output.transformedSpreadStats = { ...output.transformedSpreadStats };
+  }
+
   if (nonEmptyObject(output.serverStats)) {
     output.serverStats = { ...output.serverStats };
   }

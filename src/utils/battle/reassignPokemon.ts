@@ -53,6 +53,7 @@ export const reassignPokemon = (
     output.transformedLevel = null;
     output.transformedAbilities = [];
     output.transformedBaseStats = null;
+    output.transformedSpreadStats = null;
     output.transformedMoves = [];
   }
 

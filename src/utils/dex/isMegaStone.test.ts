@@ -15,6 +15,12 @@ describe('isMegaStone()', () => {
     expect(isMegaStone('Mewtwonite Y')).toBe(true);
   });
 
+  it('detects the Z Mega stones (Absol, Garchomp, Lucario)', () => {
+    expect(isMegaStone('Absolite Z')).toBe(true);
+    expect(isMegaStone('Garchompite Z')).toBe(true);
+    expect(isMegaStone('Lucarionite Z')).toBe(true);
+  });
+
   it('excludes Eviolite (the -ite NFE trap)', () => {
     expect(isMegaStone('Eviolite')).toBe(false);
   });

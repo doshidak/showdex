@@ -31,6 +31,7 @@ import {
 } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
+  detectAnyAbilityFormat,
   detectGenFromFormat,
   detectLegacyGen,
   getDexForFormat,
@@ -158,11 +159,15 @@ export const syncPokemon = (
           ];
 
           // note: checking `ability` first instead of the usual `dirtyAbility` here
-          if (!syncedPokemon.abilities.includes(syncedPokemon.ability || syncedPokemon.dirtyAbility)) {
+          // (& in formats where any ability is legal, e.g., Balanced Hackmons, a pick outside the pool isn't invalid)
+          const anyAbility = detectAnyAbilityFormat(format);
+
+          if (!anyAbility && !syncedPokemon.abilities.includes(syncedPokemon.ability || syncedPokemon.dirtyAbility)) {
             [syncedPokemon.dirtyAbility] = syncedPokemon.abilities;
           }
 
-          const clearInvalidDirtyAbility = !!syncedPokemon.dirtyAbility
+          const clearInvalidDirtyAbility = !anyAbility
+            && !!syncedPokemon.dirtyAbility
             && syncedPokemon.abilities.includes(syncedPokemon.ability)
             && !syncedPokemon.abilities.includes(syncedPokemon.dirtyAbility);
 
@@ -420,6 +425,11 @@ export const syncPokemon = (
 
         syncedPokemon.transformedForme = transformedForme || null;
         syncedPokemon.transformedLevel = transformedPokemon?.level || null;
+
+        // note: the target's stats are filled in by syncBattle(), which is the one w/ access to the other side's Pokemon
+        if (!transformedForme) {
+          syncedPokemon.transformedSpreadStats = null;
+        }
 
         // check for (untransformed) forme changes
         const formeChange = ('formechange' in volatiles && volatiles.formechange?.[1]) || null;

@@ -44,7 +44,11 @@ export const calcPokemonFinalStats = (
 ): CalcdexStatModRecording => {
   const record = statModRecorder(pokemon);
 
-  if (!pokemon?.speciesForme || !opponentPokemon?.speciesForme) {
+  // note (2026/08/29): this used to bail on a missing opponentPokemon too, which returned a record w/ ZERO
+  // mods applied -- so a half-filled Honkdex (or any Calcdex slot w/out an active foe) silently showed raw
+  // spread stats: no stage boosts, no items, no Protosynthesis, nothing. the opponent is only needed for a
+  // couple of foe-ability lookups way below, which are perfectly happy to come back empty
+  if (!pokemon?.speciesForme) {
     return record.export();
   }
 
@@ -71,7 +75,7 @@ export const calcPokemonFinalStats = (
 
   const hpPercentage = calcPokemonHpPercentage(pokemon);
   const ability = id(pokemon.dirtyAbility || pokemon.ability);
-  const opponentAbility = id(opponentPokemon.dirtyAbility || opponentPokemon.ability);
+  const opponentAbility = id(opponentPokemon?.dirtyAbility || opponentPokemon?.ability);
 
   const hasTransform = 'transform' in pokemon.volatiles;
   const hasFormeChange = 'formechange' in pokemon.volatiles;
@@ -321,7 +325,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply weather effects
-  const weather = id(field.dirtyWeather ?? (field.autoWeather || field.weather));
+  const weather = id(field?.dirtyWeather ?? (field?.autoWeather || field?.weather));
 
   const ignoreWeather = [
     ability,
@@ -413,7 +417,7 @@ export const calcPokemonFinalStats = (
   }
 
   // apply terrain effects
-  const terrain = id(field.dirtyTerrain ?? (field.autoTerrain || field.terrain));
+  const terrain = id(field?.dirtyTerrain ?? (field?.autoTerrain || field?.terrain));
 
   // 50% DEF boost if ability is "Grass Pelt" w/ terrain of the grassy nature
   if (ability === 'grasspelt' && terrain === 'grassy') {

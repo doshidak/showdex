@@ -3,7 +3,7 @@ import slugify from 'slugify';
 import { GenLabels, SmogonDexFormatSlugs } from '@showdex/consts/dex';
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { getGenlessFormat } from '@showdex/utils/dex';
+import { getDexForFormat, getGenlessFormat } from '@showdex/utils/dex';
 
 export type SmogonDexCategory =
   | 'pokemon'
@@ -70,7 +70,10 @@ export const openSmogonDex = (
     return null;
   }
 
-  const { slug: genSlug } = GenLabels[gen] || {};
+  // update (2026/09/12): Champions formats run on gen 9, but live under their own `champions` gen on the Smogon Dex
+  // (e.g., https://www.smogon.com/dex/champions/pokemon/baxcalibur/), not `sv`
+  const champions = typeof format === 'string' && format.includes('champions');
+  const { slug: genSlug } = (champions && { slug: 'champions' }) || GenLabels[gen] || {};
 
   if (!genSlug || !name) {
     /*
@@ -87,7 +90,13 @@ export const openSmogonDex = (
     return null;
   }
 
-  const slugifiedName = slugify(name, {
+  // the Champions Dex puts a Mega on its base forme's page (under a "Mega" section) rather than giving it its own,
+  // so e.g. 'Baxcalibur-Mega' has to link to /baxcalibur/ ('baxcalibur-mega' doesn't exist)
+  const dexSpecies = champions && category === 'pokemon'
+    ? getDexForFormat(format)?.species.get(name)
+    : null;
+
+  const slugifiedName = slugify((dexSpecies?.isMega && dexSpecies.baseSpecies) || name, {
     lower: true,
     trim: true,
   });
@@ -103,7 +112,8 @@ export const openSmogonDex = (
     slugifiedName,
   ];
 
-  if (category === 'pokemon') {
+  // note: the Champions Dex has no per-format pages to suffix (& a fallback like 'doubles' would 404 there)
+  if (category === 'pokemon' && !champions) {
     // we need to do some special parsing for the format,
     // cause they're not consistent between Showdown and Smogon, unfortunately
     const genlessFormat = getGenlessFormat(format); // e.g., 'gen8bdspou' -> 'bdspou'

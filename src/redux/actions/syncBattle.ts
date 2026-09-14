@@ -31,6 +31,7 @@ import {
   detectPlayerKeyFromPokemon,
   detectPokemonDetails,
   detectToggledAbility,
+  detectUnpickedPokemon,
   mapAutoBoosts,
   mapStellarMoves,
   mergeRevealedMoves,
@@ -43,7 +44,11 @@ import {
   usedDynamax,
   usedTerastallization,
 } from '@showdex/utils/battle';
-import { calcCalcdexId, calcPokemonCalcdexId } from '@showdex/utils/calc';
+import {
+  calcCalcdexId,
+  calcPokemonCalcdexId,
+  calcPokemonSpreadStats,
+} from '@showdex/utils/calc';
 import {
   clamp,
   diffArrays,
@@ -718,6 +723,22 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           syncedPokemon.presets.push(...targetPokemonPresets);
         }
 
+        // Transform copies the target's actual stats (every stat but HP), which we already have in the target's
+        // spreadStats -- exact for a target on the authenticated player's side, since those are derived from the
+        // server-reported stats. syncPokemon() already calculated this Pokemon's spreadStats w/out them by now, so
+        // recalculate once they're in (calcPokemonSpreadStats() reads them from here on out, surviving user edits)
+        const targetPokemon = (
+          !!mutations.calcdexId
+            && battleState[targetPlayerKey]?.pokemon?.find((p) => p.calcdexId === mutations.calcdexId)
+        ) || null;
+
+        const { hp: _targetHp, ...targetSpreadStats } = targetPokemon?.spreadStats || {};
+
+        if (Object.values(targetSpreadStats).some((v) => (v || 0) > 0)) {
+          syncedPokemon.transformedSpreadStats = targetSpreadStats as Showdown.StatsTableNoHp;
+          syncedPokemon.spreadStats = calcPokemonSpreadStats(battleState.format, syncedPokemon);
+        }
+
         // the `2` includes the initial calcdexId & ident properties earlier
         // (so if we only have 2 still, then we know there aren't any mutations to add to futureMutations)
         if (Object.keys(mutations).length > 2) {
@@ -1072,6 +1093,44 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     // keep track of which calcdexId's we've added so far (for myPokemon in Doubles)
     const processedIds: string[] = [];
 
+    // update (2026/09/12): in formats where a full team is picked out of a bigger Team Preview (e.g., Random Battle
+    // (Shared Power, B12P6)), the Calcdex kept every Pokemon shown at Team Preview for the whole battle -- the client
+    // never drops them & neither did we. once the picks are locked in, remove the ones that weren't picked: known
+    // right away for our own side from the request, & for the opponent's once enough different Pokemon have switched
+    // in. (formats like VGC's Bring 6 Pick 4 are deliberately left alone; see detectUnpickedPokemon().)
+    // note: pruned Pokemon won't get re-added on the next sync since the merge above stops adding at maxPokemon
+    const unpickedIds = detectUnpickedPokemon({
+      teamPreviewCount: battle?.teamPreviewCount,
+      previewCount: Math.max(player.pokemon?.length || 0, playerState.pokemon.length),
+      battleStarted: (battle?.turn || 0) > 0,
+      pickedPokemon: isMyPokemonSide && hasMyPokemon ? myPokemon : null,
+      // note: only the client's Pokemon get a searchid once they've switched in; Calcdex state reconstructs an ident
+      // for Team Preview Pokemon too, so it can't tell revealed from unrevealed
+      revealedIds: (player.pokemon || []).filter((p) => !!p?.searchid).map((p) => p.calcdexId).filter(Boolean),
+      pokemon: playerState.pokemon,
+      isSamePokemon: (a, b) => (!!a?.calcdexId && a.calcdexId === b?.calcdexId) || similarPokemon(
+        a as CalcdexPokemon,
+        b as CalcdexPokemon,
+        { format: battleState.format, normalizeFormes: 'fucked' },
+      ),
+    });
+
+    if (unpickedIds.length) {
+      playerState.pokemon = playerState.pokemon.filter((p) => !unpickedIds.includes(p?.calcdexId));
+      playerState.pokemonOrder = (playerState.pokemonOrder || []).filter((id) => !unpickedIds.includes(id));
+
+      if ((playerState.selectionIndex || 0) >= playerState.pokemon.length) {
+        playerState.selectionIndex = 0;
+      }
+
+      l.debug(
+        'Removed', unpickedIds.length, 'unpicked Team Preview Pokemon for player', playerKey,
+        '\n', 'unpickedIds[]', unpickedIds,
+        '\n', 'pokemon[]', '(state)', playerState.pokemon,
+        '\n', 'battle', battleId, battle,
+      );
+    }
+
     playerState.activeIndices = (player.active || []).map((activePokemon) => {
       // particularly in FFA, there may be a Pokemon belonging to another player in active[]
       if (!activePokemon?.details || detectPlayerKeyFromPokemon(activePokemon) !== playerKey) {
@@ -1187,7 +1246,15 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
     if (playerState.activeIndices.length) {
       // surprisingly encountered a race-condition with player.faintCounter not being the most up-to-date value,
       // so we'll just count it ourselves LOL
-      const faintCounter = playerState.pokemon.filter((p) => !p.hp).length;
+      // update (2026/09/12): ...except counting who's *currently* at 0 HP forgets any Pokemon that was revived, e.g., by
+      // Revival Blessing, whose faint still counts for Last Respects (the sim's side.totalFainted, mirrored by the
+      // client's side.faintCounter, only ever goes up). the race is real though: a '-damage|0 fnt' zeroes the HP a step
+      // before '|faint|' bumps the client's counter. so take whichever's ahead -- the live count mid-faint, the client's
+      // after a revival -- capped at 100 like the sim, not the team size, since revivals can push faints past it
+      const faintCounter = clamp(0, Math.max(
+        player?.faintCounter || 0,
+        playerState.pokemon.filter((p) => !p.hp).length,
+      ), 100);
 
       // update the faintCounter from the player side if not active on the field & not fainted
       // OR the Pokemon's current faintCounter is 0 when the battle is inactive (probably from a page reload)
@@ -1208,7 +1275,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           // if the current `pokemon` is dedge & its faintCounter is 0, remove 1 to not include itself
           const reloadOffset = !pokemon.hp && !pokemon.faintCounter ? 1 : 0;
 
-          pokemon.faintCounter = clamp(0, faintCounter - reloadOffset, maxPokemon);
+          pokemon.faintCounter = clamp(0, faintCounter - reloadOffset, 100);
 
           // auto-clear the dirtyFaintCounter if the user previously set one
           if (typeof pokemon.dirtyFaintCounter === 'number') {

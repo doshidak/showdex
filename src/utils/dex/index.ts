@@ -1,4 +1,5 @@
 export * from './alwaysCriticalHits';
+export * from './detectAnyAbilityFormat';
 export * from './detectDoublesFormat';
 export * from './detectGenFromFormat';
 export * from './detectGroundedness';
@@ -19,6 +20,7 @@ export * from './getGenDexForFormat';
 export * from './getGenfulFormat';
 export * from './getGenlessFormat';
 export * from './getMaxMove';
+export * from './getMegaFormeForItem';
 export * from './getNatureForStats';
 export * from './getNaturesDex';
 export * from './getPokemonLearnset';

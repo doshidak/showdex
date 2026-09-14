@@ -32,6 +32,66 @@ export const tRef: Record<'value', TFunction> = {
 const l = logger('@showdex/utils/app/loadI18nextLocales()');
 
 /**
+ * How many times to try downloading a single locale bundle before giving up on it.
+ *
+ * @since 1.4.2
+ */
+const MaxLocaleFetchAttempts = 3;
+
+/**
+ * How long to wait between locale bundle download attempts, in milliseconds.
+ *
+ * * Multiplied by the attempt number, e.g., 250ms, then 500ms.
+ *
+ * @since 1.4.2
+ */
+const LocaleFetchRetryDelay = 250;
+
+/**
+ * Downloads a single locale bundle, retrying a couple times before giving up.
+ *
+ * * On Chrome, `runtimeFetch()` has to hop through the extension's (non-persistent!) background service
+ *   worker to read `i18n.<locale>.json`, since locale bundles aren't `web_accessible_resources`.
+ * * That hop is exactly the kind of thing that can whiff once on a cold start -- & whiffing once used to
+ *   cost the user every single translated string in the app, so it's worth asking twice.
+ *
+ * @since 1.4.2
+ */
+const fetchLocaleBundle = async (
+  url: string,
+): Promise<Record<string, unknown>> => {
+  let lastError: Error = null;
+
+  for (let attempt = 1; attempt <= MaxLocaleFetchAttempts; attempt++) {
+    try {
+      const response = await runtimeFetch<Record<string, unknown>>(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status || '???'}`);
+      }
+
+      const data = response.json();
+
+      if (!nonEmptyObject(data)) {
+        throw new Error('couldn\'t parse the downloaded bundle as JSON');
+      }
+
+      return data;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (attempt < MaxLocaleFetchAttempts) {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, LocaleFetchRetryDelay * attempt);
+        });
+      }
+    }
+  }
+
+  throw lastError;
+};
+
+/**
  * Loads each locale bundle into `i18n`.
  *
  * * App strings will be available via any `react-i18next` consumer, e.g., `useTranslation()`.
@@ -71,10 +131,26 @@ export const loadI18nextLocales = async (
     }
 
     const url = getResourceUrl(`i18n.${locale}${ext ? `.${ext}` : ''}`);
-    const response = await runtimeFetch<Record<string, unknown>>(url);
-    const data = response.json();
 
-    if (!nonEmptyObject(data.common?.['--meta'])) {
+    // note (2026/08/29): a locale bundle failing to download used to take the *entire* i18n init w/ it --
+    // runtimeFetch() could reject (or hand back an unparsable body, making json() null, whose `.common`
+    // access threw a TypeError), which propagated out of here & aborted BootdexAdapter's __init(), so
+    // i18n never initialized & every t() w/out an English default rendered its raw key in the UI.
+    // isolating each bundle means one bad download costs you that locale, not all of Showdex's strings
+    let data: Record<string, unknown>;
+
+    try {
+      data = await fetchLocaleBundle(url);
+    } catch (error) {
+      l.warn(
+        'couldn\'t download the', locale, 'locale cuz of', error,
+        '\n', 'url', url,
+      );
+
+      continue;
+    }
+
+    if (!nonEmptyObject(data?.common?.['--meta'])) {
       l.debug(
         'downloaded absolutely nothing for the', locale, 'locale!',
         '\n', 'url', url,

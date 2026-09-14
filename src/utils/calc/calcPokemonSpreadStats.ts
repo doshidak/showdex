@@ -33,6 +33,23 @@ export const calcPokemonSpreadStats = (
   const defaultEv = getDefaultSpreadValue('ev', format);
 
   return PokemonStatNames.reduce((prev, stat) => {
+    // update (2026/09/12): Transform copies the target's actual stats (Pokemon#transformInto() assigns the target's
+    // storedStats outright), so once syncBattle() knows them, a transformed Pokemon's own nature/IVs/EVs are
+    // irrelevant for everything but HP. deriving them from transformedBaseStats + this Pokemon's spread instead is
+    // how an opposing Ditto that copied your Gouging Fire -- whose exact stats the server hands you -- ended up
+    // showing its own (or some usage) spread laid over Gouging Fire's base stats (doshidak/showdex#236)
+    const transformedSpreadStat = (
+      !!pokemon.transformedForme
+        && stat !== 'hp'
+        && pokemon.transformedSpreadStats?.[stat]
+    ) || 0;
+
+    if (transformedSpreadStat > 0) {
+      prev[stat] = transformedSpreadStat;
+
+      return prev;
+    }
+
     // update (2023/02/07): cleaned up the baseStat fuckery that existed before
     const baseStat = pokemon.dirtyBaseStats?.[stat] ?? (
       pokemon.transformedForme && stat !== 'hp'

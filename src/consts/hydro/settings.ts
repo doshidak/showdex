@@ -38,6 +38,7 @@ export const DefaultShowdexSettings: ShowdexSettings = {
     openAs: 'showdown',
     openOnPanel: 'showdown',
     closeOn: 'battle-tab',
+    followBattleTab: true,
     destroyOnClose: true,
 
     defaultAutoSelect: {
@@ -198,6 +199,7 @@ export const DehydratedCalcdexSettingsMap: Record<keyof ShowdexCalcdexSettings, 
   openAs: 'oas',
   openOnPanel: 'oop',
   closeOn: 'con',
+  followBattleTab: 'fbt',
   destroyOnClose: 'doc',
   defaultAutoSelect: 'das',
   showPlayerRatings: 'spr',

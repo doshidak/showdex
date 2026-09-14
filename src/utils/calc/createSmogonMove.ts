@@ -1,4 +1,9 @@
-import { type AbilityName, type MoveName, Move as SmogonMove } from '@smogon/calc';
+import {
+  type AbilityName,
+  type MoveName,
+  Move as SmogonMove,
+  toID,
+} from '@smogon/calc';
 import { MOVES } from '@smogon/calc/dist/data/moves';
 import { type CalcdexBattleField, type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
@@ -59,7 +64,13 @@ export const createSmogonMove = (
   const item = dirtyItem ?? revealedItem;
 
   const options: ConstructorParameters<typeof SmogonMove>[2] = {
-    species: speciesForme,
+    // update (2026/09/12): @smogon/calc dropped the `species` option in favor of `overrideMove`, which takes the G-Max move
+    // (which only gets used when the move's type matches, otherwise it's the regular Max move)
+    overrideMove: (
+      useMax
+        && speciesForme?.endsWith('-Gmax')
+        && dex.species.get(toID(speciesForme.replace(/-Gmax$/, '')))?.canGigantamax
+    ) || undefined,
     ability,
     item,
 
