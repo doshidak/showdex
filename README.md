@@ -613,12 +613,12 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/dastardlydwarf"><strong>Dastardlydwarf</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/ahokgotit"><strong>Ah Ok Got It</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/advsnuts"><strong>ADVs Nuts</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/picachuleboss"><strong>Picachuleboss</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/advsnuts"><strong>ADVs Nuts</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/roy"><strong>Roy</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/swiftmochi"><strong>Swift Mochi</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/picachuleboss"><strong>Picachuleboss</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/zzodz"><strong>Zzodz</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
@@ -668,8 +668,8 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/cipriddu"><strong>Cipriddu</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/buyuuh"><strong>buyuuh</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/ayanayanami"><strong>ayanayanami</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/buyuuh"><strong>buyuuh</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/brilliance12345678"><strong>brilliance12345678</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>
@@ -722,53 +722,56 @@ big <strong>･ﾟ✧&nbsp;&nbsp;sparkly thank&nbsp;&nbsp;✧ﾟ･</strong> to 
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>James H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/anankaios"><strong>anankaios</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/genone"><strong>GenOne</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jacek L</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Rodrigo S</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Rodrigo S</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/lunarvania"><strong>Lunarvania</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Leman T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sunny B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Peter T</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Sam P</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pokepastry"><strong>PokePastry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/pokepastry"><strong>PokePastry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/doublecaret"><strong>DoubleCaret</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/jesskykhemically"><strong>JesskyKhemically</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/plaguevonkarma"><strong>Plague von Karma</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/plaguevonkarma"><strong>Plague von Karma</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/mrmimikry"><strong>MrMimikry</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Ethan D</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jonas H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Jonas H</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Itamar M</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/sylvthesizer"><strong>sylvthesizer</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Joseph A</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Joseph A</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/jevans2497"><strong>jevans2497</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Braeden G</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Armand V</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Armand V</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/laserrl"><strong>LaserRL</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/stuvnop"><strong>Stuvnop</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/momalaharris"><strong>momalaharris</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/sylvee1"><strong>Sylvee1</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanuj C</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
-      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/ben6464"><strong>Ben6464</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
     <tr>
+      <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/ben6464"><strong>Ben6464</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<strong>Tanner B</strong>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/fr1e5"><strong>FR1E5</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
+    </tr>
+    <tr>
       <td width="260px" align="center">&nbsp;･ﾟ✧&nbsp;&nbsp;<a href="https://pokemonshowdown.com/users/goldengottago"><strong>GoldenGottaGo</strong></a>&nbsp;&nbsp;✧ﾟ･&nbsp;</td>
     </tr>
   </tbody>

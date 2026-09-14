@@ -36,6 +36,16 @@
           ]
         },
         {
+          "name": "Picachuleboss",
+          "showdownUser": true,
+          "periods": [
+            [
+              "2024-07-05T21:56:50Z",
+              "2024-08-05T21:56:50Z"
+            ]
+          ]
+        },
+        {
           "name": "ADVs Nuts",
           "showdownUser": true,
           "periods": [
@@ -62,16 +72,6 @@
             [
               "2023-04-10T16:17:09Z",
               "2023-06-10T16:17:09Z"
-            ]
-          ]
-        },
-        {
-          "name": "Picachuleboss",
-          "showdownUser": true,
-          "periods": [
-            [
-              "2024-07-05T21:56:50Z",
-              "2024-08-05T21:56:50Z"
             ]
           ]
         },
@@ -274,21 +274,21 @@
           ]
         },
         {
+          "name": "ayanayanami",
+          "showdownUser": true,
+          "periods": [
+            [
+              "2026-06-14T15:14:40Z"
+            ]
+          ]
+        },
+        {
           "name": "buyuuh",
           "showdownUser": true,
           "periods": [
             [
               "2024-04-28T10:56:44Z",
               "2024-05-28T10:56:44Z"
-            ]
-          ]
-        },
-        {
-          "name": "ayanayanami",
-          "showdownUser": true,
-          "periods": [
-            [
-              "2026-06-14T15:14:40Z"
             ]
           ]
         },
