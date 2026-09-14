@@ -66,6 +66,25 @@
           "Heat Wave",
           "Weather Ball",
           "Solar Beam",
+          "Ancient Power"
+        ]
+      },
+      "Physically Bulky Mega Y": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 0,
+          "def": 32,
+          "spa": 1,
+          "spd": 0,
+          "spe": 1
+        },
+        "nature": "Modest",
+        "item": "Charizardite Y",
+        "moves": [
+          "Heat Wave",
+          "Weather Ball",
+          "Solar Beam",
           "Air Slash"
         ]
       },
@@ -91,7 +110,7 @@
       }
     },
     "Blastoise": {
-      "Mega Attacker under Tailwind": {
+      "Fast Mega Attacker": {
         "level": 50,
         "evs": {
           "hp": 2,
@@ -106,9 +125,71 @@
         "item": "Blastoisinite",
         "moves": [
           "Water Spout",
-          "Aura Sphere",
           "Dark Pulse",
+          "Aura Sphere",
           "Ice Beam"
+        ]
+      },
+      "Trick Room Mega Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 0,
+          "def": 0,
+          "spa": 32,
+          "spd": 2,
+          "spe": 0
+        },
+        "nature": "Quiet",
+        "ability": "Rain Dish",
+        "item": "Blastoisinite",
+        "moves": [
+          "Water Spout",
+          "Dark Pulse",
+          "Ice Beam",
+          "Fake Out"
+        ]
+      }
+    },
+    "Beedrill": {
+      "Adamant Coverage Mega": {
+        "level": 50,
+        "evs": {
+          "hp": 0,
+          "atk": 30,
+          "def": 5,
+          "spa": 0,
+          "spd": 0,
+          "spe": 31
+        },
+        "nature": "Adamant",
+        "item": "Beedrillite",
+        "moves": [
+          "Poison Jab",
+          "U-turn",
+          "Drill Run",
+          "Knock Off"
+        ]
+      }
+    },
+    "Pidgeot": {
+      "Offense Tailwind Mega": {
+        "level": 50,
+        "evs": {
+          "hp": 1,
+          "atk": 0,
+          "def": 0,
+          "spa": 32,
+          "spd": 1,
+          "spe": 32
+        },
+        "nature": "Timid",
+        "item": "Pidgeotite",
+        "moves": [
+          "Hurricane",
+          "Heat Wave",
+          "Hyper Beam",
+          "Tailwind"
         ]
       }
     },
@@ -291,23 +372,23 @@
           "Drain Punch"
         ]
       },
-      "Bulky Max Attack Mega": {
+      "Trick Room Max Attack Mega": {
         "level": 50,
         "evs": {
           "hp": 32,
           "atk": 32,
           "def": 0,
           "spa": 0,
-          "spd": 0,
-          "spe": 2
+          "spd": 2,
+          "spe": 0
         },
-        "nature": "Adamant",
+        "nature": "Brave",
         "item": "Kangaskhanite",
         "moves": [
           "Fake Out",
           "Double-Edge",
-          "Sucker Punch",
-          "Drain Punch"
+          "Hammer Arm",
+          "Ice Punch"
         ]
       }
     },
@@ -731,7 +812,7 @@
         "moves": [
           "Hyper Voice",
           "Psyshock",
-          "Psychic",
+          "Expanding Force",
           "Trick Room"
         ]
       },
@@ -839,6 +920,28 @@
         ]
       }
     },
+    "Absol": {
+      "Mega Z Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "ability": "Justified",
+        "item": "Absolite Z",
+        "moves": [
+          "Night Slash",
+          "Shadow Claw",
+          "Close Combat",
+          "Psycho Cut"
+        ]
+      }
+    },
     "Garchomp": {
       "Scarf Offense": {
         "level": 50,
@@ -876,6 +979,84 @@
           "Dragon Claw",
           "Rock Slide",
           "Stomping Tantrum"
+        ]
+      },
+      "cona's Worlds 2nd Max Speed Sitrus": {
+        "level": 50,
+        "evs": {
+          "hp": 21,
+          "atk": 7,
+          "def": 6,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "item": "Sitrus Berry",
+        "moves": [
+          "Earthquake",
+          "Dragon Claw",
+          "Rock Slide",
+          "Protect"
+        ]
+      },
+      "Mega for Both Offense and Bulk": {
+        "level": 50,
+        "evs": {
+          "hp": 22,
+          "atk": 21,
+          "def": 3,
+          "spa": 0,
+          "spd": 1,
+          "spe": 19
+        },
+        "nature": "Adamant",
+        "item": "Garchompite",
+        "moves": [
+          "Earthquake",
+          "Dragon Claw",
+          "Rock Slide",
+          "Stomping Tantrum"
+        ]
+      },
+      "Mega Z Draco + Pulse + Coverage": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 0,
+          "def": 0,
+          "spa": 32,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Modest",
+        "item": "Garchompite Z",
+        "moves": [
+          "Draco Meteor",
+          "Dragon Pulse",
+          "Flamethrower",
+          "Power Gem"
+        ]
+      }
+    },
+    "Lucario": {
+      "Mega Z Calm Mind Bulk": {
+        "level": 50,
+        "evs": {
+          "hp": 31,
+          "atk": 0,
+          "def": 2,
+          "spa": 8,
+          "spd": 6,
+          "spe": 19
+        },
+        "nature": "Timid",
+        "item": "Lucarionite Z",
+        "moves": [
+          "Dark Pulse",
+          "Aura Sphere",
+          "Flash Cannon",
+          "Calm Mind"
         ]
       }
     },
@@ -1170,6 +1351,46 @@
         ]
       }
     },
+    "Volcarona": {
+      "Grassy Seed Quiver Dance": {
+        "level": 50,
+        "evs": {
+          "hp": 19,
+          "atk": 0,
+          "def": 13,
+          "spa": 5,
+          "spd": 1,
+          "spe": 28
+        },
+        "nature": "Modest",
+        "item": "Grassy Seed",
+        "moves": [
+          "Heat Wave",
+          "Giga Drain",
+          "Fiery Dance",
+          "Quiver Dance"
+        ]
+      },
+      "Rocky Helmet Support": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 0,
+          "def": 32,
+          "spa": 0,
+          "spd": 2,
+          "spe": 0
+        },
+        "nature": "Bold",
+        "item": "Rocky Helmet",
+        "moves": [
+          "Overheat",
+          "Struggle Bug",
+          "Rage Powder",
+          "Tailwind"
+        ]
+      }
+    },
     "Delphox": {
       "Fast Offensive Mega": {
         "level": 50,
@@ -1412,6 +1633,25 @@
           "Fake Out",
           "Parting Shot"
         ]
+      },
+      "Trick Room Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 29,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 5,
+          "spe": 0
+        },
+        "nature": "Brave",
+        "item": "Life Orb",
+        "moves": [
+          "Flare Blitz",
+          "Darkest Lariat",
+          "Close Combat",
+          "Fake Out"
+        ]
       }
     },
     "Primarina": {
@@ -1516,7 +1756,7 @@
       }
     },
     "Hatterene": {
-      "Fairy Feather Trick Room": {
+      "Life Orb Trick Room": {
         "level": 50,
         "evs": {
           "hp": 32,
@@ -1527,11 +1767,11 @@
           "spe": 0
         },
         "nature": "Quiet",
-        "item": "Fairy Feather",
+        "item": "Life Orb",
         "moves": [
-          "Psychic",
+          "Psyshock",
           "Dazzling Gleam",
-          "Mystical Fire",
+          "Expanding Force",
           "Trick Room"
         ]
       }
@@ -1717,6 +1957,45 @@
           "Fake Out",
           "Rock Slide"
         ]
+      },
+      "Psychic Seed Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 0,
+          "atk": 27,
+          "def": 0,
+          "spa": 0,
+          "spd": 7,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "item": "Psychic Seed",
+        "moves": [
+          "Dire Claw",
+          "Close Combat",
+          "Throat Chop",
+          "Rock Slide"
+        ]
+      },
+      "Poison Touch Sash": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "ability": "Poison Touch",
+        "item": "Focus Sash",
+        "moves": [
+          "Close Combat",
+          "Poison Jab",
+          "Fake Out",
+          "Feint"
+        ]
       }
     },
     "Maushold": {
@@ -1739,6 +2018,25 @@
           "Follow Me",
           "Taunt"
         ]
+      },
+      "Technician Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "item": "Wide Lens",
+        "moves": [
+          "Population Bomb",
+          "Bite",
+          "Feint",
+          "Follow Me"
+        ]
       }
     },
     "Maushold-Four": {
@@ -1760,6 +2058,46 @@
           "Feint",
           "Follow Me",
           "Taunt"
+        ]
+      },
+      "Technician Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "item": "Wide Lens",
+        "moves": [
+          "Population Bomb",
+          "Bite",
+          "Feint",
+          "Follow Me"
+        ]
+      }
+    },
+    "Armarouge": {
+      "Psyspam Trick Room": {
+        "level": 50,
+        "evs": {
+          "hp": 29,
+          "atk": 0,
+          "def": 0,
+          "spa": 32,
+          "spd": 5,
+          "spe": 0
+        },
+        "nature": "Quiet",
+        "item": "Life Orb",
+        "moves": [
+          "Armor Cannon",
+          "Expanding Force",
+          "Heat Wave",
+          "Trick Room"
         ]
       }
     },
@@ -1960,6 +2298,25 @@
         },
         "nature": "Adamant",
         "item": "Focus Sash",
+        "moves": [
+          "Kowtow Cleave",
+          "Iron Head",
+          "Sucker Punch",
+          "Low Kick"
+        ]
+      },
+      "natsumewato's Worlds 1st Chople": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 15,
+          "def": 0,
+          "spa": 0,
+          "spd": 19,
+          "spe": 0
+        },
+        "nature": "Adamant",
+        "item": "Chople Berry",
         "moves": [
           "Kowtow Cleave",
           "Iron Head",
@@ -2516,6 +2873,210 @@
           "Shadow Ball",
           "Power Gem",
           "Steel Beam"
+        ]
+      }
+    },
+    "Salamence": {
+      "Mixed Offense Mega": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 0,
+          "def": 0,
+          "spa": 32,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Timid",
+        "item": "Salamencite",
+        "moves": [
+          "Double-Edge",
+          "Hyper Voice",
+          "Draco Meteor",
+          "Flamethrower"
+        ]
+      }
+    },
+    "Golisopod": {
+      "TR Offense Mega": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 2,
+          "spe": 0
+        },
+        "nature": "Brave",
+        "item": "Golisopite",
+        "moves": [
+          "Leech Life",
+          "Iron Head",
+          "First Impression",
+          "Sucker Punch"
+        ]
+      }
+    },
+    "Rillaboom": {
+      "Basic Miracle Seed": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 2,
+          "spe": 0
+        },
+        "nature": "Adamant",
+        "item": "Miracle Seed",
+        "moves": [
+          "Wood Hammer",
+          "Grassy Glide",
+          "High Horsepower",
+          "Fake Out"
+        ]
+      },
+      "Bulkier Sitrus Berry": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 15,
+          "def": 0,
+          "spa": 0,
+          "spd": 19,
+          "spe": 0
+        },
+        "nature": "Adamant",
+        "item": "Sitrus Berry",
+        "moves": [
+          "Wood Hammer",
+          "Grassy Glide",
+          "U-turn",
+          "Fake Out"
+        ]
+      }
+    },
+    "Indeedee": {
+      "Scarf Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 0,
+          "atk": 0,
+          "def": 2,
+          "spa": 32,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Modest",
+        "item": "Choice Scarf",
+        "moves": [
+          "Expanding Force",
+          "Dazzling Gleam",
+          "Mystical Fire",
+          "Trick"
+        ]
+      },
+      "Sash Imprison Trick Room": {
+        "level": 50,
+        "evs": {
+          "hp": 0,
+          "atk": 0,
+          "def": 2,
+          "spa": 32,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Modest",
+        "item": "Focus Sash",
+        "moves": [
+          "Expanding Force",
+          "Hyper Voice",
+          "Imprison",
+          "Trick Room"
+        ]
+      }
+    },
+    "Indeedee-F": {
+      "Psychic Seed Support": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 0,
+          "def": 32,
+          "spa": 0,
+          "spd": 2,
+          "spe": 0
+        },
+        "nature": "Relaxed",
+        "item": "Psychic Seed",
+        "moves": [
+          "Psychic",
+          "Terrain Pulse",
+          "Mystical Fire",
+          "Follow Me"
+        ]
+      }
+    },
+    "Pawmot": {
+      "Life Orb Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "item": "Life Orb",
+        "moves": [
+          "Double Shock",
+          "Close Combat",
+          "Ice Punch",
+          "Fake Out"
+        ]
+      },
+      "Sash Revival Blessing": {
+        "level": 50,
+        "evs": {
+          "hp": 2,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 32
+        },
+        "nature": "Jolly",
+        "item": "Focus Sash",
+        "moves": [
+          "Double Shock",
+          "Close Combat",
+          "Revival Blessing",
+          "Fake Out"
+        ]
+      }
+    },
+    "Baxcalibur": {
+      "Basic Mega Offense": {
+        "level": 50,
+        "evs": {
+          "hp": 32,
+          "atk": 32,
+          "def": 0,
+          "spa": 0,
+          "spd": 2,
+          "spe": 0
+        },
+        "nature": "Adamant",
+        "item": "Baxcalibrite",
+        "moves": [
+          "Glaive Rush",
+          "Icicle Crash",
+          "Ice Shard",
+          "High Horsepower"
         ]
       }
     }
