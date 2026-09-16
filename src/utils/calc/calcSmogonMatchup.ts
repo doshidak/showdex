@@ -196,6 +196,8 @@ export const calcSmogonMatchup = (
       || (operatingMode === 'standalone' && !settings?.honkdex?.includeHazardsDamage),
     excludeEotDamage: (operatingMode === 'battle' && !settings?.calcdex?.includeEotDamage)
       || (operatingMode === 'standalone' && !settings?.honkdex?.includeEotDamage),
+    isMudSport: !!field?.isMudSport,
+    isWaterSport: !!field?.isWaterSport,
   };
 
   const smogonField = createSmogonField(format, gameType, field, player, opponent, allPlayers);

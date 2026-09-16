@@ -1,4 +1,12 @@
-import { type CalcdexPlayerSide } from '@showdex/interfaces/calc';
+import { type CalcdexBattleField, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
+
+export type CalcdexFieldToggleKey = keyof Pick<CalcdexBattleField, 'isGravity' | 'isMudSport' | 'isWaterSport'>;
+
+export const CalcdexFieldToggleKeys: CalcdexFieldToggleKey[] = [
+  'isGravity',
+  'isMudSport',
+  'isWaterSport',
+];
 
 /**
  * Toggle button mappings of player-sided screens.
@@ -45,7 +53,7 @@ export const PlayerSideConditionsToggleMap: Record<string, keyof CalcdexPlayerSi
  *
  * @since 1.0.3
  */
-export const PlayerSideConditionsDexMap: Partial<Record<keyof CalcdexPlayerSide | 'isGravity', [dict: 'abilities' | 'moves', id: string]>> = {
+export const PlayerSideConditionsDexMap: Partial<Record<keyof CalcdexPlayerSide | CalcdexFieldToggleKey, [dict: 'abilities' | 'moves', id: string]>> = {
   isLightScreen: ['moves', 'lightscreen'],
   isReflect: ['moves', 'reflect'],
   isAuroraVeil: ['moves', 'auroraveil'],
@@ -59,4 +67,6 @@ export const PlayerSideConditionsDexMap: Partial<Record<keyof CalcdexPlayerSide 
   isSR: ['moves', 'stealthrock'],
   spikes: ['moves', 'spikes'],
   isGravity: ['moves', 'gravity'],
+  isMudSport: ['moves', 'mudsport'],
+  isWaterSport: ['moves', 'watersport'],
 };

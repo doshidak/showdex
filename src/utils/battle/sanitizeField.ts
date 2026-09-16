@@ -28,8 +28,10 @@ export const sanitizeField = (
   const {
     // gen: genFromBattle,
     // gameType,
-    // p1: battleP1,
-    // p2: battleP2,
+    p1: battleP1,
+    p2: battleP2,
+    p3: battleP3,
+    p4: battleP4,
     pseudoWeather,
     weather,
   } = battle || {};
@@ -52,6 +54,14 @@ export const sanitizeField = (
   // (but all others are already lowercased w/ no spaces, such as 'mistyterrain')
   const [pseudoWeatherName] = pseudoWeatherMoveNames;
 
+  // in gens 3-5, Mud Sport & Water Sport are volatiles on the Pokemon that used them (instead of a pseudo-weather),
+  // but they still weaken every Electric/Fire move on the field while that Pokemon is active
+  const activeVolatiles = [battleP1, battleP2, battleP3, battleP4]
+    .flatMap((side) => side?.active || [])
+    .flatMap((pokemon) => Object.keys(pokemon?.volatiles || {}));
+
+  const sportActive = (id: string) => pseudoWeatherMoveNames.includes(id) || activeVolatiles.includes(id);
+
   const sanitizedField: CalcdexBattleField = {
     // update (2023/10/10): now populated during the Calcdex bootstrap process, specifically in the init dispatch
     // gameType: gameType === 'doubles' ? 'Doubles' : 'Singles',
@@ -62,6 +72,8 @@ export const sanitizeField = (
     isMagicRoom: pseudoWeatherMoveNames.includes('magicroom'),
     isWonderRoom: pseudoWeatherMoveNames.includes('wonderroom'),
     isGravity: pseudoWeatherMoveNames.includes('gravity'),
+    isMudSport: sportActive('mudsport'),
+    isWaterSport: sportActive('watersport'),
 
     // attackerSide: !ignoreP1Side
     //   ? sanitizePlayerSide(gen, battleP1, stateP1)

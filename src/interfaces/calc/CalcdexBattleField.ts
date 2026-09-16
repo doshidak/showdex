@@ -73,6 +73,11 @@ export interface CalcdexBattleField extends Omit<SmogonState.Field, 'gameType'> 
    */
   dirtyTerrain?: Terrain;
 
+  /** In gens 3-5, this is a volatile on the user; in gens 6+, it's a 5-turn pseudo-weather. */
+  isMudSport?: boolean;
+
+  isWaterSport?: boolean;
+
   /**
    * Field conditions on the attacking player's side.
    *

@@ -6,7 +6,12 @@ import { type DropdownOption, Dropdown, SpikesField } from '@showdex/components/
 import { TableGrid, TableGridItem } from '@showdex/components/layout';
 import { ToggleButton } from '@showdex/components/ui';
 import { times } from '@showdex/consts/core';
-import { PlayerSideConditionsDexMap, TerrainNames } from '@showdex/consts/dex';
+import {
+  type CalcdexFieldToggleKey,
+  CalcdexFieldToggleKeys,
+  PlayerSideConditionsDexMap,
+  TerrainNames,
+} from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayerKey, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
 import { useColorScheme } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
@@ -124,7 +129,7 @@ export const FieldCalc = ({
   const expandedFieldControls = !legacy && (settings?.expandFieldControls || operatingMode === 'standalone');
 
   const playerToggleKeys = React.useMemo(() => {
-    const output: (keyof CalcdexPlayerSide | 'isGravity')[] = [
+    const output: (keyof CalcdexPlayerSide | CalcdexFieldToggleKey)[] = [
       'isLightScreen',
       'isReflect',
       'isAuroraVeil',
@@ -149,7 +154,7 @@ export const FieldCalc = ({
         output.push('isTailwind');
       }
 
-      output.push('isGravity', 'isSeeded', 'isSR', 'spikes');
+      output.push(...CalcdexFieldToggleKeys, 'isSeeded', 'isSR', 'spikes');
     }
 
     return output;
@@ -178,8 +183,17 @@ export const FieldCalc = ({
       return null;
     }
 
+    const fieldToggle = CalcdexFieldToggleKeys.includes(sideKey as CalcdexFieldToggleKey);
+
+    // e.g., Mud Sport & Water Sport were removed in gen 8, but are still usable in National Dex formats
+    if (fieldToggle && dexToggle.isNonstandard === 'Past' && !natdexFormat) {
+      return null;
+    }
+
     const currentSide = state[pkey]?.side;
-    const active = sideKey === 'isGravity' ? field?.isGravity : !!currentSide?.[sideKey];
+    const active = fieldToggle
+      ? !!field?.[sideKey as CalcdexFieldToggleKey]
+      : !!currentSide?.[sideKey as keyof CalcdexPlayerSide];
 
     const desc = settings?.showFieldTooltips ? formatDexDescription(
       (dexToggle?.shortDesc || dexToggle?.desc)
@@ -237,14 +251,14 @@ export const FieldCalc = ({
         onPress={() => {
           const scope = `${l.scope}:${pkey}:ToggleButton~${sideKey}:onPress()`;
 
-          if (sideKey === 'isGravity') {
+          if (fieldToggle) {
             return void updateField({
-              [sideKey]: !field?.[sideKey],
+              [sideKey]: !field?.[sideKey as CalcdexFieldToggleKey],
             }, scope);
           }
 
           updateSide(pkey, {
-            [sideKey]: !currentSide?.[sideKey],
+            [sideKey]: !currentSide?.[sideKey as keyof CalcdexPlayerSide],
           }, scope);
         }}
       />

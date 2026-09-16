@@ -21286,7 +21286,7 @@ index 5d5ffce5a11e64256d4a17d43a0444d710750cd7..1aab51537bc68a5c129370e72f97ce35
  export declare function calculateAttackADV(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, desc: RawDesc, isCritical?: boolean): number;
  export declare function calculateDefenseADV(gen: Generation, defender: Pokemon, move: Move, desc: RawDesc, isCritical?: boolean): number;
 diff --git a/dist/mechanics/gen3.js b/dist/mechanics/gen3.js
-index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7ce1ba305 100644
+index ea2a1345d3014e261e3bc950e922a454b2b7102e..a2ce3584b19a4fc51bb6d49a48e25d812bee4842 100644
 --- a/dist/mechanics/gen3.js
 +++ b/dist/mechanics/gen3.js
 @@ -1,36 +1,12 @@
@@ -21526,7 +21526,7 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
              bp = w >= 200 ? 120 : w >= 100 ? 100 : w >= 50 ? 80 : w >= 25 ? 60 : w >= 10 ? 40 : 20;
              desc.moveBP = bp;
              break;
-@@ -213,13 +200,18 @@ function calculateBasePowerADV(attacker, defender, move, desc, hit) {
+@@ -213,13 +200,21 @@ function calculateBasePowerADV(attacker, defender, move, desc, hit) {
              bp = 60;
              desc.moveName = 'Swift';
              break;
@@ -21545,11 +21545,14 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
 +        // note: intentionally falling back to move.bp (& not bp)
 +        bp = (_b = mods.hitBasePowers[hit - 1]) !== null && _b !== void 0 ? _b : move.bp;
 +    }
++    if (((mods === null || mods === void 0 ? void 0 : mods.isMudSport) && move.hasType('Electric')) || ((mods === null || mods === void 0 ? void 0 : mods.isWaterSport) && move.hasType('Fire'))) {
++        bp = Math.floor(bp / 2);
++    }
 +    desc.moveBP = bp;
      return bp;
  }
  exports.calculateBasePowerADV = calculateBasePowerADV;
-@@ -232,20 +224,21 @@ function calculateBPModsADV(attacker, move, desc, basePower) {
+@@ -232,20 +227,21 @@ function calculateBPModsADV(attacker, move, desc, basePower) {
          basePower = Math.floor(basePower * 1.5);
          desc.attackerAbility = attacker.ability;
      }
@@ -21577,7 +21580,7 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
          at = Math.floor(at * 1.1);
          desc.attackerItem = attacker.item;
      }
-@@ -274,7 +267,7 @@ function calculateAttackADV(gen, attacker, defender, move, desc, isCritical) {
+@@ -274,7 +270,7 @@ function calculateAttackADV(gen, attacker, defender, move, desc, isCritical) {
          at = Math.floor(at * 1.5);
          desc.attackerAbility = attacker.ability;
      }
@@ -21586,7 +21589,7 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
      if (attackBoost > 0 || (!isCritical && attackBoost < 0)) {
          at = (0, util_1.getModifiedStat)(at, attackBoost);
          desc.attackBoost = attackBoost;
-@@ -282,12 +275,11 @@ function calculateAttackADV(gen, attacker, defender, move, desc, isCritical) {
+@@ -282,12 +278,11 @@ function calculateAttackADV(gen, attacker, defender, move, desc, isCritical) {
      return at;
  }
  exports.calculateAttackADV = calculateAttackADV;
@@ -21603,7 +21606,7 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
      if (!isPhysical && defender.hasItem('Soul Dew') && defender.named('Latios', 'Latias')) {
          df = Math.floor(df * 1.5);
          desc.defenderItem = defender.item;
-@@ -304,7 +296,7 @@ function calculateDefenseADV(gen, defender, move, desc, isCritical) {
+@@ -304,7 +299,7 @@ function calculateDefenseADV(gen, defender, move, desc, isCritical) {
      if (move.named('Explosion', 'Self-Destruct')) {
          df = Math.floor(df / 2);
      }
@@ -21612,7 +21615,7 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
      if (defenseBoost < 0 || (!isCritical && defenseBoost > 0)) {
          df = (0, util_1.getModifiedStat)(df, defenseBoost);
          desc.defenseBoost = defenseBoost;
-@@ -312,15 +304,14 @@ function calculateDefenseADV(gen, defender, move, desc, isCritical) {
+@@ -312,15 +307,14 @@ function calculateDefenseADV(gen, defender, move, desc, isCritical) {
      return df;
  }
  exports.calculateDefenseADV = calculateDefenseADV;
@@ -21631,7 +21634,7 @@ index ea2a1345d3014e261e3bc950e922a454b2b7102e..20698803621b37980d9f5b267363d9e7
          if (isPhysical && field.defenderSide.isReflect) {
              baseDamage = Math.floor(baseDamage * screenMultiplier);
              desc.isReflect = true;
-@@ -361,11 +352,15 @@ function calculateFinalModsADV(baseDamage, attacker, move, field, desc, isCritic
+@@ -361,11 +355,15 @@ function calculateFinalModsADV(baseDamage, attacker, move, field, desc, isCritic
          baseDamage *= 2;
          desc.moveBP = move.bp * 2;
      }
@@ -21658,7 +21661,7 @@ index 71ffcab2770a369d4e4c38bd756cc4ef76255596..8529df3e6dfed49cb42f9027e01144b4
 +{"version":3,"file":"gen3.js","sourceRoot":"","sources":["../../src/mechanics/gen3.ts"],"names":[],"mappings":"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"}
 \ No newline at end of file
 diff --git a/dist/mechanics/gen4.d.ts b/dist/mechanics/gen4.d.ts
-index f795bbd65bb74b71d1f3e820888ab034e589a934..46d60dd0749ccddece1bf591d12855590ea3d908 100644
+index f795bbd65bb74b71d1f3e820888ab034e589a934..1af9c29e29287a5e49d56077d08cbb31f3c4e630 100644
 --- a/dist/mechanics/gen4.d.ts
 +++ b/dist/mechanics/gen4.d.ts
 @@ -1,11 +1,12 @@
@@ -21671,13 +21674,14 @@ index f795bbd65bb74b71d1f3e820888ab034e589a934..46d60dd0749ccddece1bf591d1285559
  import { Result } from '../result';
 -export declare function calculateDPP(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field): Result;
 -export declare function calculateBasePowerDPP(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, hit?: number): number;
+-export declare function calculateBPModsDPP(attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, basePower: number): number;
 +export declare function calculateDPP(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field, mods?: ShowdexCalcMods): Result;
 +export declare function calculateBasePowerDPP(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, hit?: number, mods?: ShowdexCalcMods): number;
- export declare function calculateBPModsDPP(attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, basePower: number): number;
++export declare function calculateBPModsDPP(attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, basePower: number, mods?: ShowdexCalcMods): number;
  export declare function calculateAttackDPP(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, isCritical?: boolean): number;
  export declare function calculateDefenseDPP(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, isCritical?: boolean): number;
 diff --git a/dist/mechanics/gen4.js b/dist/mechanics/gen4.js
-index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be1fc3aacc 100644
+index 47b4cac852f04f59c1156477687d0f036c6470ce..ba889f17c5af3c457a6906b6286c8aef093bddcf 100644
 --- a/dist/mechanics/gen4.js
 +++ b/dist/mechanics/gen4.js
 @@ -1,37 +1,13 @@
@@ -21850,10 +21854,11 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
      if (basePower === 0) {
          return result;
      }
-     basePower = calculateBPModsDPP(attacker, defender, move, field, desc, basePower);
+-    basePower = calculateBPModsDPP(attacker, defender, move, field, desc, basePower);
 -    var attack = calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritical);
 -    var defense = calculateDefenseDPP(gen, attacker, defender, move, field, desc, isCritical);
 -    var baseDamage = Math.floor(Math.floor((Math.floor((2 * attacker.level) / 5 + 2) * basePower * attack) / 50) / defense);
++    basePower = calculateBPModsDPP(attacker, defender, move, field, desc, basePower, mods);
 +    // #endregion
 +    // #region (Special) Attack
 +    const attack = calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritical);
@@ -21964,10 +21969,11 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
 +        for (let times = 1; times < numAttacks; times++) {
              usedItems = (0, util_1.checkMultihitBoost)(gen, attacker, defender, move, field, desc, usedItems[0], usedItems[1]);
 -            var newBasePower = calculateBasePowerDPP(gen, attacker, defender, move, field, desc);
-+            let newBasePower = calculateBasePowerDPP(gen, attacker, defender, move, field, desc, times + 1, mods);
-             newBasePower = calculateBPModsDPP(attacker, defender, move, field, desc, newBasePower);
+-            newBasePower = calculateBPModsDPP(attacker, defender, move, field, desc, newBasePower);
 -            var newAtk = calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritical);
 -            var baseDamage_1 = Math.floor(Math.floor((Math.floor((2 * attacker.level) / 5 + 2) * newBasePower * newAtk) / 50) / defense);
++            let newBasePower = calculateBasePowerDPP(gen, attacker, defender, move, field, desc, times + 1, mods);
++            newBasePower = calculateBPModsDPP(attacker, defender, move, field, desc, newBasePower, mods);
 +            const newAtk = calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritical);
 +            let baseDamage = Math.floor(Math.floor((Math.floor((2 * attacker.level) / 5 + 2) * newBasePower * newAtk) / 50) / defense);
              if (attacker.hasStatus('brn') && isPhysical && !attacker.hasAbility('Guts')) {
@@ -22062,7 +22068,7 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
          case 'Weather Ball':
              basePower = move.bp * (field.weather ? 2 : 1);
              desc.moveBP = basePower;
-@@ -359,6 +372,11 @@ function calculateBasePowerDPP(gen, attacker, defender, move, field, desc, hit)
+@@ -359,19 +372,31 @@ function calculateBasePowerDPP(gen, attacker, defender, move, field, desc, hit)
          default:
              basePower = move.bp;
      }
@@ -22074,13 +22080,18 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
      return basePower;
  }
  exports.calculateBasePowerDPP = calculateBasePowerDPP;
-@@ -367,11 +385,15 @@ function calculateBPModsDPP(attacker, defender, move, field, desc, basePower) {
+-function calculateBPModsDPP(attacker, defender, move, field, desc, basePower) {
++function calculateBPModsDPP(attacker, defender, move, field, desc, basePower, mods) {
+     if (field.attackerSide.isHelpingHand) {
          basePower = Math.floor(basePower * 1.5);
          desc.isHelpingHand = true;
      }
 +    if (field.attackerSide.isCharge && move.hasType('Electric')) {
 +        basePower = Math.floor(basePower * 2);
 +        desc.isCharge = true;
++    }
++    if (((mods === null || mods === void 0 ? void 0 : mods.isMudSport) && move.hasType('Electric')) || ((mods === null || mods === void 0 ? void 0 : mods.isWaterSport) && move.hasType('Fire'))) {
++        basePower = Math.floor(basePower * 0.5);
 +    }
      if (attacker.hasAbility('Technician') && basePower <= 60) {
          basePower = Math.floor(basePower * 1.5);
@@ -22091,7 +22102,7 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
      if ((attacker.hasItem('Muscle Band') && isPhysical) ||
          (attacker.hasItem('Wise Glasses') && !isPhysical)) {
          basePower = Math.floor(basePower * 1.1);
-@@ -386,7 +408,8 @@ function calculateBPModsDPP(attacker, defender, move, field, desc, basePower) {
+@@ -386,7 +411,8 @@ function calculateBPModsDPP(attacker, defender, move, field, desc, basePower) {
              move.hasType('Water', 'Dragon')) ||
          (attacker.hasItem('Griseous Orb') &&
              attacker.named('Giratina-Origin') &&
@@ -22101,7 +22112,7 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
          basePower = Math.floor(basePower * 1.2);
          desc.attackerItem = attacker.item;
      }
-@@ -423,20 +446,20 @@ function calculateBPModsDPP(attacker, defender, move, field, desc, basePower) {
+@@ -423,20 +449,20 @@ function calculateBPModsDPP(attacker, defender, move, field, desc, basePower) {
          }
          desc.attackerAbility = attacker.ability;
      }
@@ -22128,7 +22139,7 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
      if (defender.hasAbility('Unaware')) {
          desc.defenderAbility = defender.ability;
      }
-@@ -489,17 +512,16 @@ function calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritic
+@@ -489,17 +515,16 @@ function calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritic
      return attack;
  }
  exports.calculateAttackDPP = calculateAttackDPP;
@@ -22151,7 +22162,7 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
      if (attacker.hasAbility('Unaware')) {
          desc.attackerAbility = attacker.ability;
      }
-@@ -548,11 +570,10 @@ function calculateDefenseDPP(gen, attacker, defender, move, field, desc, isCriti
+@@ -548,11 +573,10 @@ function calculateDefenseDPP(gen, attacker, defender, move, field, desc, isCriti
      return defense;
  }
  exports.calculateDefenseDPP = calculateDefenseDPP;
@@ -22166,7 +22177,7 @@ index 47b4cac852f04f59c1156477687d0f036c6470ce..5e047c982e9af76b3b4f7717ee3da0be
          if (isPhysical && field.defenderSide.isReflect) {
              baseDamage = Math.floor(baseDamage * screenMultiplier);
              desc.isReflect = true;
-@@ -599,7 +620,7 @@ function calculateFinalModsDPP(baseDamage, attacker, move, field, desc, isCritic
+@@ -599,7 +623,7 @@ function calculateFinalModsDPP(baseDamage, attacker, move, field, desc, isCritic
      return baseDamage;
  }
  function getSimpleModifiedStat(stat, mod) {
@@ -22209,7 +22220,7 @@ index bd7382fdd4502ddb19dc6cebc5e6a592d6bbf4f1..3d56736a815aea9395c772c7abd5e8e9
 -export declare function calculateDfModsBWXY(gen: Generation, defender: Pokemon, field: Field, desc: RawDesc, hitsPhysical?: boolean): number[];
 +export declare function calculateDfModsBWXY(gen: Generation, defender: Pokemon, field: Field, desc: RawDesc, hitsPhysical?: boolean): any[];
 diff --git a/dist/mechanics/gen56.js b/dist/mechanics/gen56.js
-index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6f4e0c986 100644
+index 42d75466d1532cf117ef1873931d160010484956..c71e83c9300e04bd67843e63891fcc097d57a56b 100644
 --- a/dist/mechanics/gen56.js
 +++ b/dist/mechanics/gen56.js
 @@ -1,12 +1,14 @@
@@ -22335,14 +22346,15 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (fixedDamage) {
          if (attacker.hasAbility('Parental Bond')) {
              result.damage = [fixedDamage, fixedDamage];
-@@ -198,34 +200,44 @@ function calculateBWXY(gen, attacker, defender, move, field) {
+@@ -198,34 +200,45 @@ function calculateBWXY(gen, attacker, defender, move, field) {
      if (move.hits > 1) {
          desc.hits = move.hits;
      }
 -    var basePower = calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbilityTypeChange, desc);
 +    // #endregion
 +    // #region Base Power
-+    const basePower = calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbilityTypeChange, desc);
++    const basePower = calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbilityTypeChange, desc, undefined, // hits; defaults to 1
++    mods);
      if (basePower === 0) {
          return result;
      }
@@ -22394,7 +22406,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
          damage[i] =
              (0, util_2.getFinalDamage)(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod);
      }
-@@ -233,56 +245,70 @@ function calculateBWXY(gen, attacker, defender, move, field) {
+@@ -233,56 +246,70 @@ function calculateBWXY(gen, attacker, defender, move, field) {
      desc.attackBoost =
          move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
      if (move.timesUsed > 1 || move.hits > 1) {
@@ -22486,7 +22498,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
              basePower = move.bp * (switching ? 2 : 1);
              if (switching)
                  desc.isSwitching = 'out';
-@@ -291,7 +317,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -291,7 +318,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
          case 'Electro Ball':
              if (defender.stats.spe === 0)
                  defender.stats.spe = 1;
@@ -22495,7 +22507,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
              basePower = r >= 4 ? 150 : r >= 3 ? 120 : r >= 2 ? 80 : r >= 1 ? 60 : 40;
              desc.moveBP = basePower;
              break;
-@@ -307,7 +333,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -307,7 +334,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
              break;
          case 'Low Kick':
          case 'Grass Knot':
@@ -22504,7 +22516,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
              basePower = w >= 200 ? 120 : w >= 100 ? 100 : w >= 50 ? 80 : w >= 25 ? 60 : w >= 10 ? 40 : 20;
              desc.moveBP = basePower;
              break;
-@@ -317,7 +343,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -317,7 +344,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
              break;
          case 'Heavy Slam':
          case 'Heat Crash':
@@ -22513,7 +22525,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
                  (0, util_2.getWeight)(defender, desc, 'defender');
              basePower = wr >= 5 ? 120 : wr >= 4 ? 100 : wr >= 3 ? 80 : wr >= 2 ? 60 : 40;
              desc.moveBP = basePower;
-@@ -333,6 +359,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -333,6 +360,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
              break;
          case 'Assurance':
              basePower = move.bp * (defender.hasAbility('Parental Bond (Child)') ? 2 : 1);
@@ -22521,7 +22533,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
              break;
          case 'Wake-Up Slap':
              basePower = move.bp * (defender.hasStatus('slp') ? 2 : 1);
-@@ -358,7 +385,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -358,7 +386,7 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
              break;
          case 'Flail':
          case 'Reversal':
@@ -22530,7 +22542,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
              basePower = p <= 1 ? 200 : p <= 4 ? 150 : p <= 9 ? 100 : p <= 16 ? 80 : p <= 32 ? 40 : 20;
              desc.moveBP = basePower;
              break;
-@@ -391,10 +418,11 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -391,10 +419,11 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
                  }
              }
              break;
@@ -22546,7 +22558,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
          case 'Crush Grip':
          case 'Wring Out':
              basePower = 100 * Math.floor((defender.curHP() * 4096) / defender.maxHP());
-@@ -404,32 +432,40 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
+@@ -404,32 +433,43 @@ function calculateBasePowerBWXY(gen, attacker, defender, move, field, hasAteAbil
          default:
              basePower = move.bp;
      }
@@ -22558,6 +22570,9 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      }
 -    var bpMods = calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePower, hasAteAbilityTypeChange, turnOrder, hit);
 +    const bpMods = calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePower, hasAteAbilityTypeChange, turnOrder, hit);
++    if (((mods === null || mods === void 0 ? void 0 : mods.isMudSport) && move.hasType('Electric')) || ((mods === null || mods === void 0 ? void 0 : mods.isWaterSport) && move.hasType('Fire'))) {
++        bpMods.push(1352);
++    }
      basePower = (0, util_2.OF16)(Math.max(1, (0, util_2.pokeRound)((basePower * (0, util_2.chainMods)(bpMods, 41, 2097152)) / 4096)));
 +    desc.moveBP = basePower;
      return basePower;
@@ -22592,7 +22607,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if ((attacker.hasAbility('Technician') && basePower <= 60) ||
          (attacker.hasAbility('Flare Boost') &&
              attacker.hasStatus('brn') && move.category === 'Special') ||
-@@ -438,7 +474,7 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -438,7 +478,7 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
          bpMods.push(6144);
          desc.attackerAbility = attacker.ability;
      }
@@ -22601,7 +22616,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
          bpMods.push(5325);
          desc.attackerAbility = attacker.ability;
      }
-@@ -454,6 +490,10 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -454,6 +494,10 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
          bpMods.push(4915);
          desc.attackerAbility = attacker.ability;
      }
@@ -22612,7 +22627,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (defender.hasAbility('Heatproof') && move.hasType('Fire')) {
          bpMods.push(2048);
          desc.defenderAbility = defender.ability;
-@@ -498,7 +538,7 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -498,7 +542,7 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
          bpMods.push(4915);
          desc.attackerItem = attacker.item;
      }
@@ -22621,7 +22636,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
          bpMods.push(gen.num > 5 ? 5325 : 6144);
          desc.attackerItem = attacker.item;
      }
-@@ -522,7 +562,7 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -522,7 +566,7 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
          desc.isHelpingHand = true;
      }
      if (hasAteAbilityTypeChange) {
@@ -22630,7 +22645,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
          desc.attackerAbility = attacker.ability;
      }
      else if ((attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
-@@ -534,15 +574,15 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -534,15 +578,15 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
          bpMods.push(5325);
          desc.attackerAbility = attacker.ability;
      }
@@ -22655,7 +22670,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (auraActive) {
          if (auraBreak) {
              bpMods.push(3072);
-@@ -557,6 +597,8 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -557,6 +601,8 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
                  desc.defenderAbility = defender.ability;
          }
      }
@@ -22664,7 +22679,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if ((0, util_2.isGrounded)(attacker, field)) {
          if ((field.hasTerrain('Electric') && move.hasType('Electric')) ||
              (field.hasTerrain('Grassy') && move.hasType('Grass'))) {
-@@ -574,11 +616,10 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
+@@ -574,11 +620,10 @@ function calculateBPModsBWXY(gen, attacker, defender, move, field, desc, basePow
      return bpMods;
  }
  exports.calculateBPModsBWXY = calculateBPModsBWXY;
@@ -22680,7 +22695,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      desc.attackEVs =
          move.named('Foul Play')
              ? (0, util_2.getStatDescriptionText)(gen, defender, attackStat, field.defenderSide.isPowerTrick)
-@@ -598,17 +639,18 @@ function calculateAttackBWXY(gen, attacker, defender, move, field, desc, isCriti
+@@ -598,17 +643,18 @@ function calculateAttackBWXY(gen, attacker, defender, move, field, desc, isCriti
          attack = (0, util_2.getModifiedStat)(attackSource.rawStats[attackStat], attackSource.boosts[attackStat]);
          desc.attackBoost = attackSource.boosts[attackStat];
      }
@@ -22701,7 +22716,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (defender.hasAbility('Thick Fat') && move.hasType('Fire', 'Ice')) {
          atMods.push(2048);
          desc.defenderAbility = defender.ability;
-@@ -676,16 +718,15 @@ function calculateAtModsBWXY(attacker, defender, move, field, desc) {
+@@ -676,16 +722,15 @@ function calculateAtModsBWXY(attacker, defender, move, field, desc) {
      return atMods;
  }
  exports.calculateAtModsBWXY = calculateAtModsBWXY;
@@ -22723,7 +22738,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (boosts === 0 || (isCritical && boosts > 0) ||
          move.ignoreDefensive) {
          defense = defender.rawStats[defenseStat];
-@@ -698,19 +739,19 @@ function calculateDefenseBWXY(gen, attacker, defender, move, field, desc, isCrit
+@@ -698,19 +743,19 @@ function calculateDefenseBWXY(gen, attacker, defender, move, field, desc, isCrit
          defense = (0, util_2.getModifiedStat)(defender.rawStats[defenseStat], boosts);
          desc.defenseBoost = boosts;
      }
@@ -22747,7 +22762,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (defender.hasAbility('Marvel Scale') && defender.status && hitsPhysical) {
          dfMods.push(6144);
          desc.defenderAbility = defender.ability;
-@@ -753,10 +794,13 @@ function calculateDfModsBWXY(gen, defender, field, desc, hitsPhysical) {
+@@ -753,10 +798,13 @@ function calculateDfModsBWXY(gen, defender, field, desc, hitsPhysical) {
      return dfMods;
  }
  exports.calculateDfModsBWXY = calculateDfModsBWXY;
@@ -22765,7 +22780,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
          ['allAdjacent', 'allAdjacentFoes'].includes(move.target);
      if (isSpread) {
          baseDamage = (0, util_2.pokeRound)((0, util_2.OF32)(baseDamage * 3072) / 4096);
-@@ -780,10 +824,8 @@ function calculateBaseDamageBWXY(gen, attacker, basePower, attack, defense, move
+@@ -780,10 +828,8 @@ function calculateBaseDamageBWXY(gen, attacker, basePower, attack, defense, move
      }
      return baseDamage;
  }
@@ -22778,7 +22793,7 @@ index 42d75466d1532cf117ef1873931d160010484956..650731acebfc5e2eb24f2bc25b4d62a6
      if (field.defenderSide.isReflect && move.category === 'Physical' && !isCritical) {
          finalMods.push(field.gameType !== 'Singles' ? (gen.num > 5 ? 2732 : 2703) : 2048);
          desc.isReflect = true;
-@@ -816,7 +858,7 @@ function calculateFinalModsBWXY(gen, attacker, defender, move, field, desc, isCr
+@@ -816,7 +862,7 @@ function calculateFinalModsBWXY(gen, attacker, defender, move, field, desc, isCr
          desc.defenderAbility = defender.ability;
      }
      if (attacker.hasItem('Metronome') && move.timesUsedWithMetronome >= 1) {
@@ -22826,7 +22841,7 @@ index 41c1acbad2c2870c446a6c0c01a924f31dc9f38a..26fc5bbd7ee65a57bb56941078cfac05
 +export declare function calculateFinalModsSMSSSV(_gen: Generation, // unused as of commit 7eceb6b on 2025/08/04
 +attacker: Pokemon, defender: Pokemon, move: Move, field: Field, desc: RawDesc, isCritical: boolean, typeEffectiveness: number, hitCount?: number): any[];
 diff --git a/dist/mechanics/gen789.js b/dist/mechanics/gen789.js
-index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622bac4a487 100644
+index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..6a5c322bea706991249531097f6f0655df568527 100644
 --- a/dist/mechanics/gen789.js
 +++ b/dist/mechanics/gen789.js
 @@ -1,12 +1,14 @@
@@ -23456,7 +23471,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          case 'Crush Grip':
          case 'Wring Out':
              basePower = 100 * Math.floor((defender.curHP() * 4096) / defender.maxHP());
-@@ -694,13 +754,23 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
+@@ -694,13 +754,26 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
          default:
              basePower = move.bp;
      }
@@ -23469,8 +23484,6 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      }
 -    if (move.named('Breakneck Blitz', 'Bloom Doom', 'Inferno Overdrive', 'Hydro Vortex', 'Gigavolt Havoc', 'Subzero Slammer', 'Supersonic Skystrike', 'Savage Spin-Out', 'Acid Downpour', 'Tectonic Rage', 'Continental Crush', 'All-Out Pummeling', 'Shattered Psyche', 'Never-Ending Nightmare', 'Devastating Drake', 'Black Hole Eclipse', 'Corkscrew Crash', 'Twinkle Tackle') || move.isMax) {
 -        desc.moveBP = move.bp;
--    }
--    var bpMods = calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, basePower, hasAteAbilityTypeChange, turnOrder, hit);
 +    // if (move.named( // we'll always include the desc.moveBP in case something's awry, so we'll be able to see it on Showdex's end
 +    //   'Breakneck Blitz', 'Bloom Doom', 'Inferno Overdrive', 'Hydro Vortex', 'Gigavolt Havoc',
 +    //   'Subzero Slammer', 'Supersonic Skystrike', 'Savage Spin-Out', 'Acid Downpour', 'Tectonic Rage',
@@ -23481,10 +23494,14 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
 +    //   desc.moveBP = move.bp;
 +    // }
 +    const bpMods = calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, basePower, hasAteAbilityTypeChange, turnOrder, hit);
++    if (((mods === null || mods === void 0 ? void 0 : mods.isMudSport) && move.hasType('Electric')) || ((mods === null || mods === void 0 ? void 0 : mods.isWaterSport) && move.hasType('Fire'))) {
++        bpMods.push(1352);
+     }
+-    var bpMods = calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, basePower, hasAteAbilityTypeChange, turnOrder, hit);
      basePower = (0, util_2.OF16)(Math.max(1, (0, util_2.pokeRound)((basePower * (0, util_2.chainMods)(bpMods, 41, 2097152)) / 4096)));
      if (attacker.teraType &&
          ((move.type === attacker.teraType && attacker.hasType(attacker.teraType)) ||
-@@ -712,16 +782,19 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
+@@ -712,16 +785,19 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
          basePower = 60;
          desc.moveBP = 60;
      }
@@ -23507,7 +23524,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          (defender.name.includes('Giratina-Origin') && defenderItem.includes('Griseous')) ||
          (defender.name.includes('Arceus') && defenderItem.includes('Plate')) ||
          (defender.name.includes('Genesect') && defenderItem.includes('Drive')) ||
-@@ -735,11 +808,14 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -735,11 +811,14 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
          (defender.name.includes('Ogerpon-Hearthflame') && defenderItem === 'Hearthflame Mask') ||
          (defender.name.includes('Ogerpon-Wellspring') && defenderItem === 'Wellspring Mask') ||
          (defender.named('Venomicon-Epilogue') && defenderItem === 'Vile Vial');
@@ -23523,7 +23540,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (!resistedKnockOffDamage && hit > 1 && !defender.hasAbility('Sticky Hold')) {
          resistedKnockOffDamage = true;
      }
-@@ -768,13 +844,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -768,13 +847,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
          desc.weather = field.weather;
      }
      else if (move.named('Collision Course', 'Electro Drift')) {
@@ -23542,7 +23559,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          if (type1Effectiveness * type2Effectiveness >= 2) {
              bpMods.push(5461);
              desc.moveBP = basePower * (5461 / 4096);
-@@ -784,7 +860,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -784,7 +863,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
          bpMods.push(6144);
          desc.isHelpingHand = true;
      }
@@ -23552,7 +23569,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if ((0, util_2.isGrounded)(attacker, field)) {
          if ((field.hasTerrain('Electric') && move.hasType('Electric')) ||
              (field.hasTerrain('Grassy') && move.hasType('Grass')) ||
-@@ -800,6 +877,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -800,6 +880,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
              desc.terrain = field.terrain;
          }
      }
@@ -23561,7 +23578,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if ((attacker.hasAbility('Technician') && basePower <= 60) ||
          (attacker.hasAbility('Flare Boost') &&
              attacker.hasStatus('brn') && move.category === 'Special') ||
-@@ -812,15 +891,19 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -812,15 +894,19 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
          bpMods.push(6144);
          desc.attackerAbility = attacker.ability;
      }
@@ -23590,7 +23607,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (auraActive) {
          if (auraBreak) {
              bpMods.push(3072);
-@@ -835,12 +918,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -835,12 +921,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
                  desc.defenderAbility = defender.ability;
          }
      }
@@ -23605,7 +23622,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          (attacker.hasAbility('Tough Claws') && move.flags.contact) ||
          (attacker.hasAbility('Punk Rock') && move.flags.sound)) {
          bpMods.push(5325);
-@@ -865,6 +949,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -865,6 +952,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
          }
          desc.attackerAbility = attacker.ability;
      }
@@ -23614,7 +23631,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (!move.isMax && hasAteAbilityTypeChange) {
          bpMods.push(4915);
      }
-@@ -882,12 +968,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -882,12 +971,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
          desc.defenderAbility = defender.ability;
      }
      if (attacker.hasAbility('Supreme Overlord') && attacker.alliesFainted) {
@@ -23630,7 +23647,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          bpMods.push(5325);
          desc.attackerItem = attacker.item;
      }
-@@ -925,13 +1012,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
+@@ -925,13 +1015,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
      return bpMods;
  }
  exports.calculateBPModsSMSSSV = calculateBPModsSMSSSV;
@@ -23650,7 +23667,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      desc.attackEVs =
          move.named('Foul Play')
              ? (0, util_2.getStatDescriptionText)(gen, attackSource, attackStat, field.defenderSide.isPowerTrick)
-@@ -941,7 +1028,7 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
+@@ -941,7 +1031,7 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
              desc.isPowerTrickAttacker = true;
          }
      }
@@ -23659,7 +23676,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (boosts === 0 || (isCritical && boosts < 0)) {
          attack = attackSource.rawStats[attackStat];
      }
-@@ -953,17 +1040,19 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
+@@ -953,17 +1043,19 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
          attack = (0, util_2.getModifiedStat)(attackSource.rawStats[attackStat], boosts);
          desc.attackBoost = boosts;
      }
@@ -23681,7 +23698,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if ((attacker.hasAbility('Slow Start') && attacker.abilityOn &&
          (move.category === 'Physical' || (move.category === 'Special' && move.isZ))) ||
          (attacker.hasAbility('Defeatist') && attacker.curHP() <= attacker.maxHP() / 2)) {
-@@ -981,7 +1070,9 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
+@@ -981,7 +1073,9 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
          desc.attackerAbility = attacker.ability;
          desc.weather = field.weather;
      }
@@ -23692,7 +23709,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          !attacker.isDynamaxed)) {
          atMods.push(6144);
          desc.attackerAbility = attacker.ability;
-@@ -1002,7 +1093,8 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
+@@ -1002,7 +1096,8 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
      }
      else if ((attacker.hasAbility('Steelworker') && move.hasType('Steel')) ||
          (attacker.hasAbility('Dragon\'s Maw') && move.hasType('Dragon')) ||
@@ -23702,7 +23719,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          atMods.push(6144);
          desc.attackerAbility = attacker.ability;
      }
-@@ -1042,9 +1134,10 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
+@@ -1042,9 +1137,10 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
          atMods.push(2048);
          desc.defenderAbility = defender.ability;
      }
@@ -23715,7 +23732,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          !attacker.hasAbility('Vessel of Ruin');
      if ((isTabletsOfRuinActive && move.category === 'Physical') ||
          (isVesselOfRuinActive && move.category === 'Special')) {
-@@ -1079,6 +1172,7 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
+@@ -1079,6 +1175,7 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
          (attacker.hasItem('Light Ball') && attacker.name.includes('Pikachu') && !move.isZ)) {
          atMods.push(8192);
          desc.attackerItem = attacker.item;
@@ -23723,7 +23740,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      }
      else if (!move.isZ && !move.isMax &&
          ((attacker.hasItem('Choice Band') && move.category === 'Physical') ||
-@@ -1089,16 +1183,16 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
+@@ -1089,16 +1186,16 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
      return atMods;
  }
  exports.calculateAtModsSMSSSV = calculateAtModsSMSSSV;
@@ -23746,7 +23763,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (boosts === 0 ||
          (isCritical && boosts > 0) ||
          move.ignoreDefensive) {
-@@ -1112,6 +1206,7 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
+@@ -1112,6 +1209,7 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
          defense = (0, util_2.getModifiedStat)(defender.rawStats[defenseStat], boosts);
          desc.defenseBoost = boosts;
      }
@@ -23754,7 +23771,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (field.hasWeather('Sand') && defender.hasType('Rock') && !hitsPhysical) {
          defense = (0, util_2.pokeRound)((defense * 3) / 2);
          desc.weather = field.weather;
-@@ -1120,15 +1215,15 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
+@@ -1120,15 +1218,15 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
          defense = (0, util_2.pokeRound)((defense * 3) / 2);
          desc.weather = field.weather;
      }
@@ -23775,7 +23792,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
      if (defender.hasAbility('Marvel Scale') && defender.status && hitsPhysical) {
          dfMods.push(6144);
          desc.defenderAbility = defender.ability;
-@@ -1158,9 +1253,10 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
+@@ -1158,9 +1256,10 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
          dfMods.push(8192);
          desc.defenderAbility = defender.ability;
      }
@@ -23788,7 +23805,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          !defender.hasAbility('Beads of Ruin');
      if ((isSwordOfRuinActive && hitsPhysical) ||
          (isBeadsOfRuinActive && !hitsPhysical)) {
-@@ -1193,10 +1289,15 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
+@@ -1193,10 +1292,15 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
      return dfMods;
  }
  exports.calculateDfModsSMSSSV = calculateDfModsSMSSSV;
@@ -23808,7 +23825,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          ['allAdjacent', 'allAdjacentFoes'].includes(move.target);
      if (isSpread) {
          baseDamage = (0, util_2.pokeRound)((0, util_2.OF32)(baseDamage * 3072) / 4096);
-@@ -1204,20 +1305,23 @@ function calculateBaseDamageSMSSSV(gen, attacker, defender, basePower, attack, d
+@@ -1204,20 +1308,23 @@ function calculateBaseDamageSMSSSV(gen, attacker, defender, basePower, attack, d
      if (attacker.hasAbility('Parental Bond (Child)')) {
          baseDamage = (0, util_2.pokeRound)((0, util_2.OF32)(baseDamage * 1024) / 4096);
      }
@@ -23839,7 +23856,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          }
      }
      if (isCritical) {
-@@ -1226,17 +1330,18 @@ function calculateBaseDamageSMSSSV(gen, attacker, defender, basePower, attack, d
+@@ -1226,17 +1333,18 @@ function calculateBaseDamageSMSSSV(gen, attacker, defender, basePower, attack, d
      }
      return baseDamage;
  }
@@ -23862,7 +23879,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
          desc.isLightScreen = true;
      }
-@@ -1267,7 +1372,8 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
+@@ -1267,7 +1375,8 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
          finalMods.push(2048);
          desc.defenderAbility = defender.ability;
      }
@@ -23872,7 +23889,7 @@ index d2c9135ce9fea52c2047b3a9f7875d1468d771d5..113dea22ebc0f0e49879e9aaea476622
          finalMods.push(2048);
          desc.defenderAbility = defender.ability;
      }
-@@ -1297,7 +1403,7 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
+@@ -1297,7 +1406,7 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
          desc.attackerItem = attacker.item;
      }
      else if (attacker.hasItem('Metronome') && move.timesUsedWithMetronome >= 1) {
@@ -25580,10 +25597,10 @@ index c8fda2f2b3a67916842314a4c3d1e12171c898d6..58e2d05ee56992d5ed11565e47d92da4
 \ No newline at end of file
 diff --git a/dist/showdex.d.ts b/dist/showdex.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..af8cb9dc5f05b0af65f1ac3ae165df324be1133a
+index 0000000000000000000000000000000000000000..22b8c88e223f24ea6ab969638c92e9518a9c3630
 --- /dev/null
 +++ b/dist/showdex.d.ts
-@@ -0,0 +1,98 @@
+@@ -0,0 +1,101 @@
 +/**
 + * @file `showdex.ts` - Anything used to implement `@smogon/calc` mods for Showdex.
 + * @author Keith Choison <keith@tize.io>
@@ -25668,6 +25685,9 @@ index 0000000000000000000000000000000000000000..af8cb9dc5f05b0af65f1ac3ae165df32
 +     * @since 1.3.0
 +     */
 +    excludeEotDamage?: boolean;
++    /** Applied as a BP mod once the move's final type is known (e.g., after Weather Ball or Galvanize). */
++    isMudSport?: boolean;
++    isWaterSport?: boolean;
 +}
 +/**
 + * Drop-in replacement for the `getBaseDamage()` function used in each mechanics file.
@@ -40162,7 +40182,7 @@ index 77234ef760df9d23b4e526277cd7a3349cd62cfd..50f0fdd6faaae5ce9a8254cfc0781bf4
      if (gen.num === 2) { // in gen 2 damage is always rounded up to 1. TODO ADD TESTS
        damage[i - 217] = Math.max(1, Math.floor((baseDamage * i) / 255));
 diff --git a/src/mechanics/gen3.ts b/src/mechanics/gen3.ts
-index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321913dc67a 100644
+index 17522d1aff7f920b98e87e13cb01ac93a188053f..6d479c64b204406f37e3550ef56186b0a15c525b 100644
 --- a/src/mechanics/gen3.ts
 +++ b/src/mechanics/gen3.ts
 @@ -1,3 +1,4 @@
@@ -40268,7 +40288,7 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
  ) {
    let bp = move.bp;
    switch (move.name) {
-@@ -244,13 +258,18 @@ export function calculateBasePowerADV(
+@@ -244,13 +258,21 @@ export function calculateBasePowerADV(
      bp = 60;
      desc.moveName = 'Swift';
      break;
@@ -40287,11 +40307,14 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
 +    // note: intentionally falling back to move.bp (& not bp)
 +    bp = mods.hitBasePowers[hit - 1] ?? move.bp;
 +  }
++  if ((mods?.isMudSport && move.hasType('Electric')) || (mods?.isWaterSport && move.hasType('Fire'))) {
++    bp = Math.floor(bp / 2);
++  }
 +  desc.moveBP = bp;
    return bp;
  }
  
-@@ -269,6 +288,7 @@ export function calculateBPModsADV(
+@@ -269,6 +291,7 @@ export function calculateBPModsADV(
      basePower = Math.floor(basePower * 1.5);
      desc.attackerAbility = attacker.ability;
    }
@@ -40299,7 +40322,7 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
    return basePower;
  }
  
-@@ -281,7 +301,7 @@ export function calculateAttackADV(
+@@ -281,7 +304,7 @@ export function calculateAttackADV(
    isCritical = false
  ) {
    const isPhysical = move.category === 'Physical';
@@ -40308,7 +40331,7 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
    desc.attackEVs = getStatDescriptionText(gen, attacker, attackStat);
  
    let at = attacker.rawStats[attackStat];
-@@ -291,7 +311,8 @@ export function calculateAttackADV(
+@@ -291,7 +314,8 @@ export function calculateAttackADV(
      desc.attackerAbility = attacker.ability;
    }
  
@@ -40318,7 +40341,7 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
      at = Math.floor(at * 1.1);
      desc.attackerItem = attacker.item;
    } else if (attacker.hasItem('Sea Incense') && move.hasType('Water')) {
-@@ -341,7 +362,7 @@ export function calculateDefenseADV(
+@@ -341,7 +365,7 @@ export function calculateDefenseADV(
    isCritical = false
  ) {
    const isPhysical = move.category === 'Physical';
@@ -40327,7 +40350,7 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
    desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat);
  
    let df = defender.rawStats[defenseStat];
-@@ -437,6 +458,11 @@ function calculateFinalModsADV(
+@@ -437,6 +461,11 @@ function calculateFinalModsADV(
      desc.moveBP = move.bp * 2;
    }
  
@@ -40340,7 +40363,7 @@ index 17522d1aff7f920b98e87e13cb01ac93a188053f..66c79962e01129930a89e1a10fe2e321
      baseDamage = Math.floor(baseDamage * 1.5);
      desc.isHelpingHand = true;
 diff --git a/src/mechanics/gen4.ts b/src/mechanics/gen4.ts
-index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed27b79ff06 100644
+index 219c77602e4a0706af38db5b8116b175d1f72439..6e1272743333f5b0c47b4c4b20eaadc56da07893 100644
 --- a/src/mechanics/gen4.ts
 +++ b/src/mechanics/gen4.ts
 @@ -1,3 +1,4 @@
@@ -40370,7 +40393,7 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
      return result;
    }
  
-@@ -205,7 +207,7 @@ export function calculateDPP(
+@@ -205,11 +207,11 @@ export function calculateDPP(
    // #endregion
    // #region Base Power
  
@@ -40379,6 +40402,11 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
    if (basePower === 0) {
      return result;
    }
+-  basePower = calculateBPModsDPP(attacker, defender, move, field, desc, basePower);
++  basePower = calculateBPModsDPP(attacker, defender, move, field, desc, basePower, mods);
+ 
+   // #endregion
+   // #region (Special) Attack
 @@ -223,9 +225,14 @@ export function calculateDPP(
    // #endregion
    // #region Damage
@@ -40424,7 +40452,7 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
      damage[i] = Math.floor(damage[i] * tintedMod);
      damage[i] = Math.floor(damage[i] * berryMod);
      damage[i] = Math.max(1, damage[i]);
-@@ -294,11 +314,12 @@ export function calculateDPP(
+@@ -294,12 +314,13 @@ export function calculateDPP(
        numAttacks = move.hits;
      }
      let usedItems = [false, false];
@@ -40434,10 +40462,12 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
        usedItems = checkMultihitBoost(gen, attacker, defender, move,
          field, desc, usedItems[0], usedItems[1]);
 -      let newBasePower = calculateBasePowerDPP(gen, attacker, defender, move, field, desc);
+-      newBasePower = calculateBPModsDPP(attacker, defender, move, field, desc, newBasePower);
 +      let newBasePower = calculateBasePowerDPP(gen, attacker, defender, move, field, desc, times + 1, mods);
-       newBasePower = calculateBPModsDPP(attacker, defender, move, field, desc, newBasePower);
++      newBasePower = calculateBPModsDPP(attacker, defender, move, field, desc, newBasePower, mods);
        const newAtk = calculateAttackDPP(gen, attacker, defender, move, field, desc, isCritical);
        let baseDamage = Math.floor(
+         Math.floor(
 @@ -312,7 +333,7 @@ export function calculateDPP(
        }
        baseDamage = calculateFinalModsDPP(baseDamage, attacker, move, field, desc, isCritical);
@@ -40501,7 +40531,14 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
    return basePower;
  }
  
-@@ -447,6 +479,11 @@ export function calculateBPModsDPP(
+@@ -441,12 +473,22 @@ export function calculateBPModsDPP(
+   field: Field,
+   desc: RawDesc,
+   basePower: number,
++  mods?: ShowdexCalcMods,
+ ) {
+   if (field.attackerSide.isHelpingHand) {
+     basePower = Math.floor(basePower * 1.5);
      desc.isHelpingHand = true;
    }
  
@@ -40510,10 +40547,14 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
 +    desc.isCharge = true;
 +  }
 +
++  if ((mods?.isMudSport && move.hasType('Electric')) || (mods?.isWaterSport && move.hasType('Fire'))) {
++    basePower = Math.floor(basePower * 0.5);
++  }
++
    if (attacker.hasAbility('Technician') && basePower <= 60) {
      basePower = Math.floor(basePower * 1.5);
      desc.attackerAbility = attacker.ability;
-@@ -466,7 +503,8 @@ export function calculateBPModsDPP(
+@@ -466,7 +508,8 @@ export function calculateBPModsDPP(
       move.hasType('Water', 'Dragon')) ||
      (attacker.hasItem('Griseous Orb') &&
       attacker.named('Giratina-Origin') &&
@@ -40523,7 +40564,7 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
    ) {
      basePower = Math.floor(basePower * 1.2);
      desc.attackerItem = attacker.item;
-@@ -505,7 +543,7 @@ export function calculateBPModsDPP(
+@@ -505,7 +548,7 @@ export function calculateBPModsDPP(
      }
      desc.attackerAbility = attacker.ability;
    }
@@ -40532,7 +40573,7 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
    return basePower;
  }
  
-@@ -519,7 +557,7 @@ export function calculateAttackDPP(
+@@ -519,7 +562,7 @@ export function calculateAttackDPP(
    isCritical = false
  ) {
    const isPhysical = move.category === 'Physical';
@@ -40541,7 +40582,7 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
    desc.attackEVs =
      getStatDescriptionText(gen, attacker, attackStat, field.attackerSide.isPowerTrick);
    if (field.attackerSide.isPowerTrick && isPhysical) {
-@@ -592,7 +630,7 @@ export function calculateDefenseDPP(
+@@ -592,7 +635,7 @@ export function calculateDefenseDPP(
    isCritical = false
  ) {
    const isPhysical = move.category === 'Physical';
@@ -40551,7 +40592,7 @@ index 219c77602e4a0706af38db5b8116b175d1f72439..0b41aa91b5cda489493a4ac08aae1ed2
      getStatDescriptionText(gen, defender, defenseStat, field.defenderSide.isPowerTrick);
    let defense = defender.rawStats[defenseStat];
 diff --git a/src/mechanics/gen56.ts b/src/mechanics/gen56.ts
-index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d128308411 100644
+index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..e3334083d722bb6b931223491d847f067bce86fe 100644
 --- a/src/mechanics/gen56.ts
 +++ b/src/mechanics/gen56.ts
 @@ -1,3 +1,4 @@
@@ -40590,7 +40631,18 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
      return result;
    }
  
-@@ -324,7 +326,8 @@ export function calculateBWXY(
+@@ -294,7 +296,9 @@ export function calculateBWXY(
+     move,
+     field,
+     hasAteAbilityTypeChange,
+-    desc
++    desc,
++    undefined, // hits; defaults to 1
++    mods,
+   );
+   if (basePower === 0) {
+     return result;
+@@ -324,7 +328,8 @@ export function calculateBWXY(
      move,
      field,
      desc,
@@ -40600,7 +40652,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    );
  
    // the random factor is applied between the crit mod and the stab mod, so don't apply anything
-@@ -385,6 +388,7 @@ export function calculateBWXY(
+@@ -385,6 +390,7 @@ export function calculateBWXY(
        numAttacks = move.hits;
      }
      let usedItems = [false, false];
@@ -40608,7 +40660,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
      for (let times = 1; times < numAttacks; times++) {
        usedItems = checkMultihitBoost(gen, attacker, defender, move,
          field, desc, usedItems[0], usedItems[1]);
-@@ -407,9 +411,15 @@ export function calculateBWXY(
+@@ -407,9 +413,15 @@ export function calculateBWXY(
          move,
          field,
          hasAteAbilityTypeChange,
@@ -40626,7 +40678,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
        const newFinalMods = calculateFinalModsBWXY(
          gen,
          attacker,
-@@ -423,7 +433,7 @@ export function calculateBWXY(
+@@ -423,7 +435,7 @@ export function calculateBWXY(
        );
        const newFinalMod = chainMods(newFinalMods, 41, 131072);
  
@@ -40635,7 +40687,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
        for (let i = 0; i < 16; i++) {
          const newFinalDamage = getFinalDamage(
            newBaseDamage,
-@@ -436,8 +446,12 @@ export function calculateBWXY(
+@@ -436,8 +448,12 @@ export function calculateBWXY(
          damageArray[i] = newFinalDamage;
        }
        damageMatrix[times] = damageArray;
@@ -40648,7 +40700,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
      desc.defenseBoost = origDefBoost;
      desc.attackBoost = origAtkBoost;
    }
-@@ -456,6 +470,7 @@ export function calculateBasePowerBWXY(
+@@ -456,6 +472,7 @@ export function calculateBasePowerBWXY(
    hasAteAbilityTypeChange: boolean,
    desc: RawDesc,
    hit = 1,
@@ -40656,7 +40708,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
  ) {
    let basePower: number;
    const turnOrder = attacker.stats.spe > defender.stats.spe ? 'first' : 'last';
-@@ -574,10 +589,10 @@ export function calculateBasePowerBWXY(
+@@ -574,10 +591,10 @@ export function calculateBasePowerBWXY(
      }
      break;
    // Triple Kick's damage increases after each consecutive hit (10, 20, 30)
@@ -40671,7 +40723,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    case 'Crush Grip':
    case 'Wring Out':
      basePower = 100 * Math.floor((defender.curHP() * 4096) / defender.maxHP());
-@@ -587,7 +602,9 @@ export function calculateBasePowerBWXY(
+@@ -587,7 +604,9 @@ export function calculateBasePowerBWXY(
    default:
      basePower = move.bp;
    }
@@ -40682,15 +40734,20 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    if (basePower === 0) {
      return 0;
    }
-@@ -606,6 +623,7 @@ export function calculateBasePowerBWXY(
+@@ -604,8 +623,12 @@ export function calculateBasePowerBWXY(
+     turnOrder,
+     hit
    );
++  if ((mods?.isMudSport && move.hasType('Electric')) || (mods?.isWaterSport && move.hasType('Fire'))) {
++    bpMods.push(1352);
++  }
  
    basePower = OF16(Math.max(1, pokeRound((basePower * chainMods(bpMods, 41, 2097152)) / 4096)));
 +  desc.moveBP = basePower;
    return basePower;
  }
  
-@@ -646,7 +664,6 @@ export function calculateBPModsBWXY(
+@@ -646,7 +669,6 @@ export function calculateBPModsBWXY(
      resistedKnockOffDamage = true;
    }
  
@@ -40698,7 +40755,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    // Use BasePower after moves with custom BP to determine if Technician should boost
    if ((attacker.hasAbility('Technician') && basePower <= 60) ||
        (attacker.hasAbility('Flare Boost') &&
-@@ -656,7 +673,7 @@ export function calculateBPModsBWXY(
+@@ -656,7 +678,7 @@ export function calculateBPModsBWXY(
    ) {
      bpMods.push(6144);
      desc.attackerAbility = attacker.ability;
@@ -40707,7 +40764,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
      bpMods.push(5325);
      desc.attackerAbility = attacker.ability;
    } else if (
-@@ -675,6 +692,11 @@ export function calculateBPModsBWXY(
+@@ -675,6 +697,11 @@ export function calculateBPModsBWXY(
      desc.attackerAbility = attacker.ability;
    }
  
@@ -40719,7 +40776,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    if (defender.hasAbility('Heatproof') && move.hasType('Fire')) {
      bpMods.push(2048);
      desc.defenderAbility = defender.ability;
-@@ -746,7 +768,7 @@ export function calculateBPModsBWXY(
+@@ -746,7 +773,7 @@ export function calculateBPModsBWXY(
    }
  
    if (hasAteAbilityTypeChange) {
@@ -40728,7 +40785,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
      desc.attackerAbility = attacker.ability;
    } else if (
      (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
-@@ -813,7 +835,7 @@ export function calculateAttackBWXY(
+@@ -813,7 +840,7 @@ export function calculateAttackBWXY(
  ) {
    let attack: number;
    const attackSource = move.named('Foul Play') ? defender : attacker;
@@ -40737,7 +40794,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    desc.attackEVs =
      move.named('Foul Play')
        ? getStatDescriptionText(gen, defender, attackStat, field.defenderSide.isPowerTrick)
-@@ -935,7 +957,7 @@ export function calculateDefenseBWXY(
+@@ -935,7 +962,7 @@ export function calculateDefenseBWXY(
    isCritical = false
  ) {
    let defense: number;
@@ -40746,7 +40803,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    const hitsPhysical = defenseStat === 'def';
  
    desc.defenseEVs = getStatDescriptionText(
-@@ -1040,8 +1062,13 @@ function calculateBaseDamageBWXY(
+@@ -1040,8 +1067,13 @@ function calculateBaseDamageBWXY(
    field: Field,
    desc: RawDesc,
    isCritical = false,
@@ -40762,7 +40819,7 @@ index 10892b94f86f7c4c0382df7ae35fd9a84b6985b1..df0dbd807a8066dfc0b0618f912615d1
    const isSpread = field.gameType !== 'Singles' &&
      ['allAdjacent', 'allAdjacentFoes'].includes(move.target);
 diff --git a/src/mechanics/gen789.ts b/src/mechanics/gen789.ts
-index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263ccdc14043 100644
+index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..d6ed505ce99d92be3471a00958523c88c254f05d 100644
 --- a/src/mechanics/gen789.ts
 +++ b/src/mechanics/gen789.ts
 @@ -1,3 +1,4 @@
@@ -41144,7 +41201,17 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    const bpMods = calculateBPModsSMSSSV(
      gen,
      attacker,
-@@ -1014,6 +1047,7 @@ export function calculateBasePowerSMSSSV(
+@@ -1001,6 +1034,9 @@ export function calculateBasePowerSMSSSV(
+     turnOrder,
+     hit
+   );
++  if ((mods?.isMudSport && move.hasType('Electric')) || (mods?.isWaterSport && move.hasType('Fire'))) {
++    bpMods.push(1352);
++  }
+   basePower = OF16(Math.max(1, pokeRound((basePower * chainMods(bpMods, 41, 2097152)) / 4096)));
+   if (
+     attacker.teraType &&
+@@ -1014,6 +1050,7 @@ export function calculateBasePowerSMSSSV(
      basePower = 60;
      desc.moveBP = 60;
    }
@@ -41152,7 +41219,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    return basePower;
  }
  
-@@ -1163,6 +1197,11 @@ export function calculateBPModsSMSSSV(
+@@ -1163,6 +1200,11 @@ export function calculateBPModsSMSSSV(
      desc.attackerAbility = attacker.ability;
    }
  
@@ -41164,7 +41231,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    const aura = `${move.type} Aura`;
    const isAttackerAura = attacker.hasAbility(aura);
    const isDefenderAura = defender.hasAbility(aura);
-@@ -1191,7 +1230,7 @@ export function calculateBPModsSMSSSV(
+@@ -1191,7 +1233,7 @@ export function calculateBPModsSMSSSV(
      (attacker.hasAbility('Sand Force') &&
        field.hasWeather('Sand') && move.hasType('Rock', 'Ground', 'Steel')) ||
      (attacker.hasAbility('Analytic') &&
@@ -41173,7 +41240,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
      (attacker.hasAbility('Tough Claws') && move.flags.contact) ||
      (attacker.hasAbility('Punk Rock') && move.flags.sound)
    ) {
-@@ -1300,11 +1339,12 @@ export function calculateAttackSMSSSV(
+@@ -1300,11 +1342,12 @@ export function calculateAttackSMSSSV(
  ) {
    let attack: number;
    const attackSource = move.named('Foul Play') ? defender : attacker;
@@ -41189,7 +41256,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    desc.attackEVs =
      move.named('Foul Play')
        ? getStatDescriptionText(
-@@ -1390,7 +1430,8 @@ export function calculateAtModsSMSSSV(
+@@ -1390,7 +1433,8 @@ export function calculateAtModsSMSSSV(
    } else if (
      (attacker.hasAbility('Steelworker') && move.hasType('Steel')) ||
      (attacker.hasAbility('Dragon\'s Maw') && move.hasType('Dragon')) ||
@@ -41199,7 +41266,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    ) {
      atMods.push(6144);
      desc.attackerAbility = attacker.ability;
-@@ -1506,7 +1547,8 @@ export function calculateDefenseSMSSSV(
+@@ -1506,7 +1550,8 @@ export function calculateDefenseSMSSSV(
  ) {
    let defense: number;
    const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical';
@@ -41209,7 +41276,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    desc.defenseEVs = getStatDescriptionText(
      gen, defender, defenseStat, field.defenderSide.isPowerTrick, field.isWonderRoom
    );
-@@ -1555,10 +1597,10 @@ export function calculateDfModsSMSSSV(
+@@ -1555,10 +1600,10 @@ export function calculateDfModsSMSSSV(
    gen: Generation,
    attacker: Pokemon,
    defender: Pokemon,
@@ -41222,7 +41289,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    hitsPhysical = false
  ) {
    const dfMods = [];
-@@ -1635,7 +1677,7 @@ export function calculateDfModsSMSSSV(
+@@ -1635,7 +1680,7 @@ export function calculateDfModsSMSSSV(
  }
  
  function calculateBaseDamageSMSSSV(
@@ -41231,7 +41298,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    attacker: Pokemon,
    defender: Pokemon,
    basePower: number,
-@@ -1645,8 +1687,13 @@ function calculateBaseDamageSMSSSV(
+@@ -1645,8 +1690,13 @@ function calculateBaseDamageSMSSSV(
    field: Field,
    desc: RawDesc,
    isCritical = false,
@@ -41246,7 +41313,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    const isSpread = field.gameType !== 'Singles' &&
       ['allAdjacent', 'allAdjacentFoes'].includes(move.target);
    if (isSpread) {
-@@ -1657,24 +1704,27 @@ function calculateBaseDamageSMSSSV(
+@@ -1657,24 +1707,27 @@ function calculateBaseDamageSMSSSV(
      baseDamage = pokeRound(OF32(baseDamage * 1024) / 4096);
    }
  
@@ -41281,7 +41348,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
      }
    }
  
-@@ -1687,7 +1737,7 @@ function calculateBaseDamageSMSSSV(
+@@ -1687,7 +1740,7 @@ function calculateBaseDamageSMSSSV(
  }
  
  export function calculateFinalModsSMSSSV(
@@ -41290,7 +41357,7 @@ index 3b6a67601a4b88c5824a7b4bf2cfd43406fdd6ff..b2b5b87e01a3b267c93cfcadb2a2263c
    attacker: Pokemon,
    defender: Pokemon,
    move: Move,
-@@ -1742,7 +1792,8 @@ export function calculateFinalModsSMSSSV(
+@@ -1742,7 +1795,8 @@ export function calculateFinalModsSMSSSV(
      desc.defenderAbility = defender.ability;
    }
  
@@ -41779,10 +41846,10 @@ index 5dd545ec9df5e47bdf4af6251c14a15394a0d14d..f8491786f01b8da0d3ba7db39032f61c
  }
 diff --git a/src/showdex.ts b/src/showdex.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..ec9646f0204f1c5c6510e90049740fbda13af885
+index 0000000000000000000000000000000000000000..10849e4dde1c47ce7c6b42382dc1e0e1015596bd
 --- /dev/null
 +++ b/src/showdex.ts
-@@ -0,0 +1,171 @@
+@@ -0,0 +1,174 @@
 +/**
 + * @file `showdex.ts` - Anything used to implement `@smogon/calc` mods for Showdex.
 + * @author Keith Choison <keith@tize.io>
@@ -41889,6 +41956,9 @@ index 0000000000000000000000000000000000000000..ec9646f0204f1c5c6510e90049740fbd
 +   * @since 1.3.0
 +   */
 +  excludeEotDamage?: boolean;
++  /** Applied as a BP mod once the move's final type is known (e.g., after Weather Ball or Galvanize). */
++  isMudSport?: boolean;
++  isWaterSport?: boolean;
 +}
 +
 +/**
