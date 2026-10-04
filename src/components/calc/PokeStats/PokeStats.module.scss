@@ -56,6 +56,15 @@
 .statHeader {
   @include transition.apply(color);
 
+  &.interactive {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
   &.up {
     [data-showdex-scheme='light'] & {
       color: color.alpha(colors.$red, 0.8);

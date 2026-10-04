@@ -3,7 +3,7 @@ import cx from 'classnames';
 import { useColorScheme } from '@showdex/redux/store';
 import styles from './TableGrid.module.scss';
 
-export interface TableGridItemProps {
+export interface TableGridItemProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   style?: React.CSSProperties;
   align?: 'left' | 'center' | 'right';
@@ -19,6 +19,7 @@ export const TableGridItem = React.forwardRef<HTMLDivElement, TableGridItemProps
   header,
   small,
   children,
+  ...props
 }: TableGridItemProps, forwardedRef): React.JSX.Element => {
   const colorScheme = useColorScheme();
 
@@ -34,6 +35,7 @@ export const TableGridItem = React.forwardRef<HTMLDivElement, TableGridItemProps
         className,
       )}
       style={style}
+      {...props}
     >
       {children}
     </div>

@@ -89,6 +89,13 @@ export interface ValueFieldProps extends BaseTextFieldProps<number> {
    */
   reverseColorScheme?: boolean;
 
+  /**
+   * Callback invoked when a symbol key ('+' or '-') is pressed or entered into the field.
+   *
+   * @since 1.4.3
+   */
+  onSymbolKey?: (symbol: '+' | '-') => void;
+
   onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
@@ -106,6 +113,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
   clearOnFocus,
   absoluteHover,
   reverseColorScheme,
+  onSymbolKey,
   input,
   disabled,
   onContextMenu,
@@ -147,6 +155,16 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
       setInputValue('');
 
       return;
+    }
+
+    if (onSymbolKey && (strValue.includes('+') || strValue.includes('='))) {
+      onSymbolKey('+');
+      strValue = strValue.replace(/[+=]/g, '');
+    }
+
+    if (onSymbolKey && typeof min === 'number' && min >= 0 && strValue.includes('-')) {
+      onSymbolKey('-');
+      strValue = strValue.replace(/-/g, '');
     }
 
     // remove a manually entered-in minus if min is specified and non-negative
@@ -198,6 +216,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     loopStepsOnly,
     max,
     min,
+    onSymbolKey,
   ]);
 
   const handleFocus = React.useCallback((e?: React.FocusEvent<HTMLInputElement>) => {
@@ -333,6 +352,13 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
     inputValue,
   ]);
 
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (onSymbolKey && (e.key === '+' || e.key === '=' || e.key === '-')) {
+      e.preventDefault();
+      onSymbolKey(e.key === '-' ? '-' : '+');
+    }
+  }, [onSymbolKey]);
+
   return (
     <div
       className={cx(
@@ -352,6 +378,7 @@ export const ValueField = React.forwardRef<HTMLInputElement, ValueFieldProps>(({
       <BaseTextField
         ref={inputRef}
         {...props}
+        onKeyDown={handleKeyDown}
         inputClassName={cx(
           styles.input,
           inputClassName,
