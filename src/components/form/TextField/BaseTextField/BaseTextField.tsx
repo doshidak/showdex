@@ -16,6 +16,7 @@ export interface CommonTextFieldProps<
   autoFocus?: boolean;
   autoComplete?: string;
   disabled?: boolean;
+  onKeyDown?: React.KeyboardEventHandler<T>;
 }
 
 export interface BaseTextFieldProps<
@@ -52,6 +53,7 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
   input,
   meta: _meta,
   disabled = false,
+  onKeyDown,
 }: BaseTextFieldProps<FieldValue>, forwardedRef: React.ForwardedRef<HTMLInputElement>): React.JSX.Element => {
   const inputId = input?.name ? `field-${input.name}` : undefined;
 
@@ -82,6 +84,7 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
         onChange={(e) => input?.onChange?.(e.target.value as FieldValue & string)}
         onFocus={input?.onFocus}
         onBlur={input?.onBlur}
+        onKeyDown={onKeyDown}
         className={cx(
           styles.input,
           monospace && styles.monospace,

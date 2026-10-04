@@ -21,7 +21,7 @@ import {
 } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
+import { getDefaultSpreadValue, legalLockedFormat, toggleStatNature } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
 import { useCalcdexPokeContext } from '../CalcdexPokeContext';
@@ -173,6 +173,26 @@ export const PokeStats = ({
     ...statMods
   } = (statsRecord || {}) as typeof statsRecord;
 
+  const handleNatureToggle = React.useCallback((
+    stat: Showdown.StatName,
+    direction: '+' | '-',
+  ) => {
+    if (legacy || stat === 'hp' || !pokemon?.speciesForme) {
+      return;
+    }
+
+    const newNature = toggleStatNature(pokemon.nature, stat as Showdown.StatNameNoHp, direction);
+
+    updatePokemon({
+      nature: newNature,
+    }, `${l.scope}:PokeStats~Nature-${stat}-${direction}:handleNatureToggle()`);
+  }, [
+    legacy,
+    pokemon?.nature,
+    pokemon?.speciesForme,
+    updatePokemon,
+  ]);
+
   return (
     <TableGrid
       className={cx(
@@ -229,6 +249,7 @@ export const PokeStats = ({
         const boostDown = PokemonNatureBoosts[pokemon?.nature]?.[1] === stat;
 
         const statName = (gen === 1 && stat === 'spa' && 'spc') || stat;
+        const canToggleNature = !legacy && stat !== 'hp' && !!pokemon?.speciesForme;
 
         return (
           <TableGridItem
@@ -236,10 +257,27 @@ export const PokeStats = ({
             className={cx(
               styles.header,
               styles.statHeader,
+              canToggleNature && styles.interactive,
               boostUp && styles.up,
               boostDown && styles.down,
             )}
             header
+            role={canToggleNature ? 'button' : undefined}
+            tabIndex={canToggleNature ? 0 : undefined}
+            onClick={canToggleNature ? () => handleNatureToggle(stat, '+') : undefined}
+            onContextMenu={canToggleNature ? (e) => {
+              e.preventDefault();
+              handleNatureToggle(stat, '-');
+            } : undefined}
+            onKeyDown={canToggleNature ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                handleNatureToggle(stat, '+');
+              } else if (e.key === '-') {
+                e.preventDefault();
+                handleNatureToggle(stat, '-');
+              }
+            } : undefined}
           >
             {boostUp && '+'}
             {boostDown && '-'}
@@ -340,6 +378,7 @@ export const PokeStats = ({
                     onBlur: () => void 0,
                     onFocus: () => void 0,
                   }}
+                  onSymbolKey={!legacy && stat !== 'hp' && !disabled ? (symbol) => handleNatureToggle(stat, symbol) : undefined}
                   disabled={disabled}
                 />
               </TableGridItem>
@@ -444,6 +483,7 @@ export const PokeStats = ({
                     onBlur: () => void 0,
                     onFocus: () => void 0,
                   }}
+                  onSymbolKey={!legacy && stat !== 'hp' && !disabled ? (symbol) => handleNatureToggle(stat, symbol) : undefined}
                   disabled={disabled}
                 />
               </TableGridItem>
@@ -592,6 +632,7 @@ export const PokeStats = ({
                     onBlur: () => void 0,
                     onFocus: () => void 0,
                   }}
+                  onSymbolKey={!legacy && stat !== 'hp' && !disabled ? (symbol) => handleNatureToggle(stat, symbol) : undefined}
                   disabled={disabled}
                 />
               </TableGridItem>
