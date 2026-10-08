@@ -30,6 +30,7 @@
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "test": "vitest run",
     "test:watch": "vitest",
+    "verify:reproducible": "./scripts/verify-reproducible.sh",
     "update:bldb": "pnpm browserslist --update-db",
     "cache:purge": "pnpm cache:purge:swc; pnpm cache:purge:webpack",
     "cache:purge:swc": "rimraf ./node_modules/.cache/swc",
@@ -64,7 +65,8 @@
     "build:firefox:re": "pnpm cache:purge && pnpm build:firefox",
     "build:standalone": "pnpm clean:prod:standalone && cross-env NODE_ENV=production BUILD_TARGET=standalone node --conditions=production ./scripts/build",
     "build:standalone:fast": "cross-env PROD_ANALYZE_BUNDLES=false pnpm build:standalone",
-    "build:standalone:re": "pnpm cache:purge && pnpm build:standalone"
+    "build:standalone:re": "pnpm cache:purge && pnpm build:standalone",
+    "package:source": "node --conditions=production ./scripts/package-source.js"
   },
   "config": {
     "cz-customizable": {

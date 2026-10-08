@@ -494,6 +494,28 @@ There will be an un-zipped directory named after the `BUILD_TARGET` env (i.e., `
 
 <br>
 
+### Reproducible Builds
+
+Pin `BUILD_DATE` & you get the exact same `.xpi` back every time, on any machine.
+
+```bash
+BUILD_DATE=1A09EE25A87 pnpm build:firefox:fast
+```
+
+You never have to invent that value, it's already in every build's filename, e.g.
+`showdex-v1.4.2-b1A09EE25A87.firefox.xpi` came from `BUILD_DATE=1A09EE25A87`. So any release can be
+rebuilt straight from its own name. `pnpm verify:reproducible` builds twice under two different
+timezones & diffs the results, which is the only way to tell "reproducible" apart from "stable on my
+machine."
+
+Worth caring about because [AMO](https://addons.mozilla.org) makes a reviewer rebuild the submitted
+`.xpi` from the submitted source, and until now that only worked if the reviewer's machine happened
+to be set to the same timezone as the one that cut the release. Reproducing v1.4.2 as published
+still needs `TZ=America/Los_Angeles`. The reason, and the rest of what a reviewer needs, is in
+[**`AMO-REVIEW.md`**](./AMO-REVIEW.md); `pnpm package:source` builds the archive that ships with it.
+
+<br>
+
 <h1 align="center">
   Contributing
 </h1>

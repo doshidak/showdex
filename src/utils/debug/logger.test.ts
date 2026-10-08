@@ -3,7 +3,16 @@ import {
 } from 'vitest';
 
 const capture = vi.fn();
-vi.mock('./teledex', () => ({ teledex: { capture: (...a: unknown[]) => capture(...a) } }));
+
+// emit() checks shouldCapture() before it ever gets to capture(), & the whole thing sits inside a
+// try/catch that swallows everything, so a mock without shouldCapture doesn't fail loudly. it just
+// makes every assertion below see zero calls
+vi.mock('./teledex', () => ({
+  teledex: {
+    capture: (...a: unknown[]) => capture(...a),
+    shouldCapture: () => true,
+  },
+}));
 
 const { logger } = await import('./logger');
 

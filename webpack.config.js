@@ -15,6 +15,14 @@ import pkg from './package.json' with { type: 'json' };
 
 // todo: turn this into ts (I miss you)
 
+// do not remove this. ZIP keeps entry mtimes in DOS date/time, a 1980 format with no timezone
+// field whatsoever, & yazl (via ZipPlugin below) fills those fields from Date's *local* getters.
+// so one pinned BUILD_DATE still zips to different bytes on every machine set to a different zone,
+// with identical file contents inside. everything up to v1.4.2 shipped that way: it was cut in US
+// Pacific, so reproducing the published .xpi needs TZ=America/Los_Angeles & nothing said so.
+// byte-exact source review shouldn't depend on where the reviewer lives (see AMO-REVIEW.md).
+process.env.TZ = 'UTC';
+
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
 
@@ -120,7 +128,8 @@ finalEnv.BUILD_NAME = [
 ].filter(Boolean).join('');
 
 export const env = Object.entries(finalEnv)
-  .sort(([a], [b]) => a - b)
+  // these are strings, so `a - b` was NaN & this never actually sorted
+  .sort(([a], [b]) => a.localeCompare(b))
   .reduce((prev, [key, value]) => {
     if (key) {
       prev[key] = value;
@@ -322,7 +331,13 @@ const copyPatterns = [
     // },
     // toType: 'file',
     transformAll: (assets) => {
-      const merged = assets.reduce((prev, asset) => {
+      // `assets` shows up in whatever order CopyWebpackPlugin's parallel reads finished in, & each
+      // one becomes a key below, so that order is the key order JSON.stringify writes out. it lands
+      // alphabetically right now purely by luck. sorting it costs nothing & I'm not leaving another
+      // timezone-shaped surprise in here for someone to find the hard way
+      const merged = [...assets].sort((a, b) => (
+        a.sourceFilename.localeCompare(b.sourceFilename)
+      )).reduce((prev, asset) => {
         const {
           data, // Buffer
           sourceFilename, // string, e.g., 'src/assets/i18n/some/nesting/maybe/common.json'
@@ -410,7 +425,7 @@ const copyPatterns = [
       delete parsed.author;
 
       const {
-        applications,
+        browser_specific_settings: bss,
         permissions: matches = [],
         web_accessible_resources,
       } = parsed;
@@ -420,8 +435,8 @@ const copyPatterns = [
           // set to Manifest V3 (MV3) for Chrome
           parsed.manifest_version = 3;
 
-          // applications is not used on Chrome
-          delete parsed.applications;
+          // Chrome has no use for the Gecko block
+          delete parsed.browser_specific_settings;
 
           // remove MV2-specific background properties
           delete parsed.background.persistent;
@@ -469,10 +484,10 @@ const copyPatterns = [
           parsed.content_scripts[0].matches = [...matches];
 
           // set Firefox-specific permissions
-          const { permissions = [] } = applications.gecko;
+          const { permissions = [] } = bss.gecko;
 
           parsed.permissions.unshift(...permissions);
-          delete applications.gecko.permissions;
+          delete bss.gecko.permissions;
 
           // remove properties not used on Firefox
           delete parsed.background;

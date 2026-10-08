@@ -7,7 +7,7 @@
   "author": "<-- auto-filled; do not edit -->",
   "homepage_url": "<-- auto-filled; do not edit -->",
 
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "showdex@tize.io",
       "strict_min_version": "78.0",
