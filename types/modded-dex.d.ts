@@ -45,6 +45,21 @@ declare namespace Showdown {
       get: (name: string) => Type;
     };
 
+    /**
+     * Translated text lookups, which is where `desc` & `shortDesc` now live (sourced from `data/text/{lang}.js`).
+     *
+     * * Not available in older clients, which instead populate `desc` & `shortDesc` directly on the `Effect`.
+     * * Note that `get()` will throw if the global `BattleText` hasn't been loaded yet.
+     */
+    text?: {
+      getLanguage: () => string;
+      get: (effect: Ability | Item | Move, lang?: string) => {
+        name: string;
+        desc?: string;
+        shortDesc?: string;
+      };
+    };
+
     getPokeballs(): ModdedDex['pokeballs'];
   }
 }

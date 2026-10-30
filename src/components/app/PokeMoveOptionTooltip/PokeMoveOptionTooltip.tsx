@@ -9,7 +9,7 @@ import { type CalcdexBattleField, type CalcdexPokemon } from '@showdex/interface
 import { useCalcdexSettings } from '@showdex/redux/store';
 import { formatId } from '@showdex/utils/core';
 import { calcHiddenPower, getMoveOverrideDefaults, hasMoveOverrides } from '@showdex/utils/calc';
-import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
+import { formatDexDescription, getDexDescription, getDexForFormat } from '@showdex/utils/dex';
 import { type PokemonStatBoostDelta } from '@showdex/utils/ui';
 import styles from './PokeMoveOptionTooltip.module.scss';
 
@@ -53,10 +53,8 @@ export const PokeMoveOptionTooltip = ({
     : null;
 
   const description = formatDexDescription(
-    dexUltMove?.shortDesc
-      || dexUltMove?.desc
-      || dexMove.shortDesc
-      || dexMove.desc,
+    getDexDescription(dex, dexUltMove).shortDesc
+      || getDexDescription(dex, dexMove).shortDesc,
   );
 
   const dynamicCategoryMove = PokemonDynamicCategoryMoves.includes(value);
