@@ -14,6 +14,7 @@ export * from './determineTerrain';
 export * from './determineWeather';
 export * from './formatDexDescription';
 export * from './getDefaultSpreadValue';
+export * from './getDexDescription';
 export * from './getDexForFormat';
 export * from './getDynamicMoveType';
 export * from './getGenDexForFormat';

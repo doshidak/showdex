@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { type AbilityName } from '@smogon/calc';
 import { type SelectOptionTooltipProps } from '@showdex/components/form';
-import { formatDexDescription, getDexForFormat } from '@showdex/utils/dex';
+import { formatDexDescription, getDexDescription, getDexForFormat } from '@showdex/utils/dex';
 import styles from './PokeAbilityOptionTooltip.module.scss';
 
 export interface PokeAbilityOptionTooltipProps extends SelectOptionTooltipProps<AbilityName> {
@@ -24,7 +24,7 @@ export const PokeAbilityOptionTooltip = ({
 
   const dex = getDexForFormat(format);
   const dexAbility = dex?.abilities.get(value);
-  const description = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
+  const description = formatDexDescription(getDexDescription(dex, dexAbility).shortDesc);
 
   return (
     <div
