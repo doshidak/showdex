@@ -24,7 +24,10 @@ export const PokeAbilityOptionTooltip = ({
 
   const dex = getDexForFormat(format);
   const dexAbility = dex?.abilities.get(value);
-  const description = formatDexDescription(dexAbility?.shortDesc || dexAbility?.desc);
+  const dexText = dex?.text?.get?.(dexAbility) || {};
+  const description = formatDexDescription(
+    dexText.desc || dexText.shortDesc || dexAbility?.shortDesc || dexAbility?.desc,
+  );
 
   return (
     <div

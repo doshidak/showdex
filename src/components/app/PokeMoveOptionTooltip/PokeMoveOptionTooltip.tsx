@@ -52,8 +52,12 @@ export const PokeMoveOptionTooltip = ({
     ? dex?.moves.get(String(label))
     : null;
 
+  const dexText = dex?.text?.get?.(dexUltMove || dexMove) || {};
+
   const description = formatDexDescription(
-    dexUltMove?.shortDesc
+    dexText.desc
+      || dexText.shortDesc
+      || dexUltMove?.shortDesc
       || dexUltMove?.desc
       || dexMove.shortDesc
       || dexMove.desc,
