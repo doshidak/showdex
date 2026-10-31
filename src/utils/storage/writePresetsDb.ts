@@ -2,7 +2,7 @@ import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { env } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { pluralize } from '@showdex/utils/humanize';
-import { detectCompletePreset } from '@showdex/utils/presets';
+import { detectValidPreset } from '@showdex/utils/presets';
 import { showdexedDb } from './openIndexedDb';
 
 const presetsName = env('indexed-db-presets-store-name');
@@ -19,6 +19,9 @@ const l = logger('@showdex/utils/storage/writePresetsDb()');
  * * This Promise will always `resolve()` when the arguments are invalid, resulting in a no-op.
  *   - `IDBTransaction` errors will be bubbled up to the `IDBDatabase`'s `onerror()` handler.
  *   - Where is this exactly, you may ask? Well, in `openIndexedDb()`, of course!
+ * * Note that presets are only required to pass `detectValidPreset()` (not `detectCompletePreset()`):
+ *   EV-less presets (e.g., most `gen9championsrandombattle` roles) are still worth caching, since
+ *   they're fully usable for displaying moves, items, abilities & tera types.
  *
  * @since 1.2.0
  */
@@ -41,7 +44,7 @@ export const writePresetsDb = (
     return;
   }
 
-  const validPresets = presets.filter((p) => detectCompletePreset(p));
+  const validPresets = presets.filter((p) => detectValidPreset(p));
 
   if (!validPresets.length) {
     endTimer('(bad presets)');

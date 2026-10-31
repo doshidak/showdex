@@ -2,6 +2,28 @@ import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
 import { detectLegacyGen } from '@showdex/utils/dex';
 
 /**
+ * Checks if the provided `preset` has the minimum required fields to be considered usable
+ * (i.e., cacheable & matchable), regardless of whether its EVs are set.
+ *
+ * * EVs are intentionally NOT checked here: Randoms data sources (e.g., `gen9championsrandombattle`)
+ *   often omit `evs` entirely, yet the preset is still fully usable for displaying moves, items,
+ *   abilities & tera types. Damage calcs simply fall back to the default spreads when EVs are absent.
+ * * The following properties are **always** required for any valid `CalcdexPokemonPreset`:
+ *   - `calcdexId`
+ *   - `source`
+ *   - `speciesForme`
+ *   - `moves[]` (or `altMoves[]`) with at least 1 entry
+ *
+ * @since 1.2.1
+ */
+export const detectValidPreset = (
+  preset: CalcdexPokemonPreset,
+): boolean => !!preset?.calcdexId
+  && !!preset.source
+  && !!preset.speciesForme
+  && !!(preset.altMoves?.length || preset.moves?.length);
+
+/**
  * Checks if the provided `preset` is complete.
  *
  * * This is determined whether the `moves[]` (at least 1) & if in a non-legacy gen, `evs` are set.
@@ -51,12 +73,7 @@ import { detectLegacyGen } from '@showdex/utils/dex';
 export const detectCompletePreset = (
   preset: CalcdexPokemonPreset,
 ): boolean => {
-  const validPreset = !!preset?.calcdexId
-    && !!preset.source
-    && !!preset.speciesForme
-    && !!(preset.altMoves?.length || preset.moves?.length);
-
-  if (!validPreset) {
+  if (!detectValidPreset(preset)) {
     return false;
   }
 

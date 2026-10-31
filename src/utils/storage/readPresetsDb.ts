@@ -4,7 +4,7 @@ import { type CalcdexPokemonPreset, type CalcdexPokemonPresetSource } from '@sho
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { detectGenFromFormat, getGenlessFormat } from '@showdex/utils/dex';
 import { logger, runtimer } from '@showdex/utils/debug';
-import { detectCompletePreset } from '@showdex/utils/presets';
+import { detectValidPreset } from '@showdex/utils/presets';
 import { showdexedDb } from './openIndexedDb';
 
 const metaName = env('indexed-db-meta-store-name');
@@ -23,6 +23,9 @@ const l = logger('@showdex/utils/storage/readPresetsDb()');
  * * This Promise will always `resolve()` when the arguments are invalid, resulting in a no-op.
  *   - `IDBTransaction` errors will be bubbled up to the `IDBDatabase`'s `onerror()` handler.
  * * Guaranteed to return an empty array.
+ * * Note that presets are only required to pass `detectValidPreset()` (not `detectCompletePreset()`):
+ *   EV-less presets (e.g., most `gen9championsrandombattle` roles) are still returned from the cache,
+ *   so that cache hits behave like cache misses did (full movesets available for matching).
  *
  * @since 1.2.0
  */
@@ -116,7 +119,7 @@ export const readPresetsDb = (
 
       const preset = cursor.value as CalcdexPokemonPreset;
 
-      if (!detectCompletePreset(preset)) {
+      if (!detectValidPreset(preset)) {
         return void cursor.continue();
       }
 
