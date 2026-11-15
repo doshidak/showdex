@@ -11,10 +11,11 @@ describe('getDefaultSpreadValue()', () => {
     expect(getDefaultSpreadValue('ev', 'gen9ou')).toBe(0);
   });
 
-  it('does NOT treat Champions randbats as randoms (stat points default to 0, not 85)', () => {
-    // gen9championsrandombattle matches .includes('random') but uses Champions stat points,
-    // whose unallocated slots default to 0 -- a randoms 85 would wildly inflate them
-    expect(getDefaultSpreadValue('ev', 'gen9championsrandombattle')).toBe(0);
+  it('returns 11 stat points (not the randoms 85, not 0) for Champions randbats', () => {
+    // PS's Champions team generator starts every stat at 11 stat points & the pkmn randbats data omits stats
+    // at that default -- 85 would wildly inflate them & 0 underestimates every opposing stat
+    expect(getDefaultSpreadValue('ev', 'gen9championsrandombattle')).toBe(11);
+    expect(getDefaultSpreadValue('ev', 'gen9championsrandomdoublesbattle')).toBe(11);
   });
 
   it('returns 0 for non-random Champions formats too', () => {

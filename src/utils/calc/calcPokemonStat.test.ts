@@ -44,4 +44,22 @@ describe('calcPokemonStat() — Champions', () => {
     expect(calcPokemonStat(CHAMPS, 'atk', 100, 31, 10, 100, 'Hardy')).toBe(255); // (200+31+19)+5
     expect(calcPokemonStat(CHAMPS, 'atk', 100, 31, 10.5, 100, 'Hardy')).toBe(256); // (200+31+20)+5 — EV-80 equiv
   });
+
+  // max HPs as reported by the server in real gen9championsrandombattle replays (e.g. 2714477327, 2714494410),
+  // computed here w/ the stat points omitted (i.e. falling back to the Champions Randoms default of 11)
+  it.each([
+    ['Overqwil', 85, 50, 171],
+    ['Hippowdon', 108, 50, 194],
+    ['Milotic', 95, 51, 184],
+    ['Tauros-Paldea-Blaze', 75, 50, 161],
+    ['Hawlucha', 78, 49, 160],
+    ['Altaria', 75, 55, 176],
+    ['Thievul', 70, 56, 173],
+  ])('omitted stat points match the server HP of a randbats %s (base %i, L%i) = %i', (_name, base, level, expected) => {
+    expect(calcPokemonStat(CHAMPS, 'hp', base, undefined, undefined, level)).toBe(expected);
+  });
+
+  it('omitted stat points use the Champions Randoms default for Speed too (L50 Overqwil, base 77) = 108', () => {
+    expect(calcPokemonStat(CHAMPS, 'spe', 77, undefined, undefined, 50)).toBe(108);
+  });
 });
